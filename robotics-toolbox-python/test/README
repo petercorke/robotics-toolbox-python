@@ -1,0 +1,5 @@
+Test scripts:
+
+
+python primitives.py      test all transform/quaternion operations
+python arm.py             test arm kine/dyn functions

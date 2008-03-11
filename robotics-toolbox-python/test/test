@@ -1,0 +1,8 @@
+#! /bin/sh
+python transform.py
+python quaternion.py
+python trajectory.py
+python jacobian.py
+python arm.py
+python kinematics.py
+python dynamics.py
