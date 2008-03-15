@@ -49,12 +49,12 @@ from Robot import *
 
 print "in puma560"
 L = [];
-L.append( Link(alpha=pi/2, A=0, D=0) )
-L.append( Link(alpha=0, A=0.4318, D=0) )
+L.append( Link(alpha=pi/2,  A=0,      D=0) )
+L.append( Link(alpha=0,     A=0.4318, D=0) )
 L.append( Link(alpha=-pi/2, A=0.0203, D=0.15005) )
-L.append( Link(alpha=pi/2, A=0, D=0.4318) )
-L.append( Link(alpha=-pi/2, A=0, D=0) )
-L.append( Link(alpha=0, A=0, D=0) )
+L.append( Link(alpha=pi/2,  A=0,      D=0.4318) )
+L.append( Link(alpha=-pi/2, A=0,      D=0) )
+L.append( Link(alpha=0,     A=0,      D=0) )
 
 
 L[0].m = 0
