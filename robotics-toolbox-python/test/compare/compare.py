@@ -46,6 +46,6 @@ from robot.puma560akb import *
 
 tau = rne(p560m, path);
 
-diff = matlab_dh - tau;
-print diff
+diff = matlab_mdh - tau;
+#print diff
 print "RNE MDH, error norm =", linalg.norm(diff, 'fro')
