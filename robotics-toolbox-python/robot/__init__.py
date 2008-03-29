@@ -22,6 +22,8 @@ from utility import *
 # Import transformations section
 from transform import *
 
+from trplot import *
+
 from jacobian import *
 
 # import kinematics section
