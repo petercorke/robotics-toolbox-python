@@ -245,6 +245,7 @@ Constructor for quaternion objects:
 
             if q2.shape == (1,3) or q2.shape == (3,1):
                     qr = self * quaternion(q2) * self.inv()
+                    return qr.v;
             else:
                     raise ValueError;
 
