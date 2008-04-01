@@ -6,8 +6,10 @@
 #
 # $Revision: 1.2 $
 
-from robot import *;
+import robot.parsedemo as p;
+import sys
 
+print sys.modules
 
 if __name__ == '__main__':
 
@@ -54,4 +56,4 @@ pause % any key to continue
 # which are quite different.
 '''
 
-    parsedemo(s);
+    p.parsedemo(s);

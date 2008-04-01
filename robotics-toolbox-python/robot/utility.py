@@ -6,7 +6,8 @@ Python toolbox utility and helper functions.
 @copyright: Peter Corke
 """
 
-from numpy import *;
+from numpy import *
+
 
 def ishomog(tr):
     """
@@ -140,46 +141,6 @@ def arg2array(arg):
     raise ValueError;
         
 
-def parsedemo(s):
-    """
-    Helper to write demo files, based on minimum change from their Matlab format.
-    The string contains
-      - help text which is left justified and displayed directly to the screen
-      - indented text is interpretted as a comamnd, executed, and the output sent to
-        screen
-        
-    The argument is Matlab code as per the demo files rtXXdemo.
-    
-    @note: Requires some minor changes to the demo file.
-    @type s: string
-    @param s: Demo string.
-    """
-    
-    lines = s.split('\n');
-    
-    name = __file__;
-    print name;
-    print len(name)*'=';
-    
-    for line in lines:
-        if len(line) == 0:
-            print;
-        elif line[0] == '#':
-            print line[1:].lstrip();
-        else:
-            cmd = line.strip();
-            if cmd.startswith('pause'):
-                print "more?",;
-                raw_input();
-                continue;
-            print
-            print '>>>', cmd;
-            if '=' in cmd:
-                exec cmd;
-                print t
-            else:
-                result = eval(cmd);
-                print result;
 
 import traceback;
 
