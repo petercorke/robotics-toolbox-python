@@ -2,7 +2,6 @@
 import robot.parsedemo as p;
 import sys
 
-print sys.modules
 
 if __name__ == '__main__':
 
@@ -131,7 +130,7 @@ pause % any key to continue
 #
 # A number of scalar manipulability measures have been proposed.  One by
 # Yoshikawa
-    maniplty(p560, q, 'yoshikawa')
+    manipulability(p560, q, 'yoshikawa')
 #
 # is based purely on kinematic parameters of the manipulator.
 #
@@ -139,7 +138,7 @@ pause % any key to continue
 # affects the acceleration achievable in different directions.  This measure 
 # varies from 0 to 1, where 1 indicates uniformity of acceleration in all 
 # directions
-    maniplty(p560, q, 'asada')
+    manipulability(p560, q, 'asada')
 #
 # Both of these measures would indicate that this particular pose is not well
 # conditioned.
