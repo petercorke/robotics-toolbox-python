@@ -8,12 +8,12 @@ Robot manipulability operations.
 
 
 from numpy import *
-from jacob0 import *
-from numpy.linalg import inv,eig,det
-from inertia import *
-from numrows import *
+from robot.jacobian import jacob0
+from robot.dynamics import inertia
+from numpy.linalg import inv,eig,det,svd
+from robot.utility import *
 
-def maniplty(robot, q, which = 'yoshikawa'):
+def manipulability(robot, q, which = 'yoshikawa'):
     '''
     MANIPLTY Manipulability measure
 
@@ -47,19 +47,19 @@ def maniplty(robot, q, which = 'yoshikawa'):
     @see: inertia, jacob0
     '''        
     n = robot.n
-        q = mat(q)
-        w = array([])
-        if 'yoshikawa'.startswith(which):
-                if numrows(q)==1:
-                        return yoshi(robot,q)
-                for Q in q:
-                        w = concatenate((w,array([yoshi(robot,Q)])))
-        elif 'asada'.startswith(which):
-                if numrows(q)==1:
-                        return asada(robot,q)
-                for Q in q:
-                        w = concatenate((w,array([asada(robot,Q)])))
-        return mat(w)
+    q = mat(q)
+    w = array([])
+    if 'yoshikawa'.startswith(which):
+            if numrows(q)==1:
+                    return yoshi(robot,q)
+            for Q in q:
+                    w = concatenate((w,array([yoshi(robot,Q)])))
+    elif 'asada'.startswith(which):
+            if numrows(q)==1:
+                    return asada(robot,q)
+            for Q in q:
+                    w = concatenate((w,array([asada(robot,Q)])))
+    return mat(w)
 
 def yoshi(robot,q):
         J = jacob0(robot,q)
@@ -71,4 +71,5 @@ def asada(robot,q):
         M = inertia(robot,q)
         Mx = Ji.T*M*Ji
         e = eig(Mx)[0]
-        return e.min(0)/e.max(0)
+
+        return real( e.min(0)/e.max(0) )

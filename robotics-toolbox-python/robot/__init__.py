@@ -29,6 +29,8 @@ from jacobian import *
 # import kinematics section
 from kinematics import *
 
+from manipulability import *
+
 # import trajectories section
 from trajectory import *
 
