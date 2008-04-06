@@ -1,8 +1,12 @@
 """
 Robot kinematic operations.
 
-@author: Peter Corke
-@copyright: Peter Corke
+Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
+Based on original Robotics Toolbox for Matlab code by Peter Corke.
+Permission to use and copy is granted provided that acknowledgement of
+the authors is made.
+
+@author: Luis Fernando Lara Tobar and Peter Corke
 """
 
 from numpy import *

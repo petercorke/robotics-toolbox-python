@@ -1,29 +1,28 @@
-#PUMA560AKB Load kinematic and dynamic data for a Puma 560 manipulator
-#
-#	PUMA560AKB
-#
-# Defines the object 'p560m' in current workspace which describes the 
-# kinematic and dynamic characterstics of a Unimation Puma 560 manipulator 
-# modified DH conventions and using the data and conventions of:
-#
-#	Armstrong, Khatib and Burdick 1986.
-#	"The Explicit Dynamic Model and Inertial Parameters of the Puma 560 Arm"
-#
-# Also define the vector qz which corresponds to the zero joint
-# angle configuration, qr which is the vertical 'READY' configuration,
-# and qstretch in which the arm is stretched out in the X direction.
-#
-# See also: ROBOT, PUMA560, STANFORD, TWOLINK.
+'''
+PUMA560AKB Load kinematic and dynamic data for a Puma 560 manipulator
 
-# Copyright (C) 1993-2002, by Peter I. Corke
-# CHANGES:
-# 12/01	convert to object format
-# $Log: puma560akb.m,v $
-# Revision 1.3  2002/04/01 11:47:15  pic
-# General cleanup of code: help comments, see also, copyright, remnant dh/dyn
-# references, clarification of functions.
-#
-# $Revision: 1.3 $
+	from robot.puma560akb import *
+
+Defines the object 'p560m' in current workspace which describes the 
+kinematic and dynamic characterstics of a Unimation Puma 560 manipulator 
+modified DH conventions and using the data and conventions of:
+
+	Armstrong, Khatib and Burdick 1986.
+	"The Explicit Dynamic Model and Inertial Parameters of the Puma 560 Arm"
+
+Also define the vector qz which corresponds to the zero joint
+angle configuration, qr which is the vertical 'READY' configuration,
+and qstretch in which the arm is stretched out in the X direction.
+
+@see: robot, puma560, stanford, twolink
+
+Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
+Based on original Robotics Toolbox for Matlab code by Peter Corke.
+Permission to use and copy is granted provided that acknowledgement of
+the authors is made.
+
+@author: Luis Fernando Lara Tobar and Peter Corke
+'''
 
 from numpy import *
 from Link import *

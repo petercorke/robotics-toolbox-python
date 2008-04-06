@@ -1,16 +1,18 @@
 """
 Quaternion class.
 
-@author: Peter Corke
-@copyright: Peter Corke 1999-2008
+Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
+Based on original Robotics Toolbox for Matlab code by Peter Corke.
+Permission to use and copy is granted provided that acknowledgement of
+the authors is made.
+
+@author: Luis Fernando Lara Tobar and Peter Corke
 """
 
 from numpy import *
 from utility import *
 import transform as T
 import copy
-
-print "in Quaternion"
 
 # Copyright (C) 1999-2002, by Peter I. Corke
 

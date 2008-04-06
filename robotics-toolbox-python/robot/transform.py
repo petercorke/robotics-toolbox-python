@@ -1,16 +1,18 @@
 """
 Primitive operations for 3x3 orthonormal and 4x4 homogeneous matrices.
 
-@author: Peter Corke
-@copyright: Peter Corke
+Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
+Based on original Robotics Toolbox for Matlab code by Peter Corke.
+Permission to use and copy is granted provided that acknowledgement of
+the authors is made.
+
+@author: Luis Fernando Lara Tobar and Peter Corke
 """
 
 from numpy import *
 from robot.utility import *
 from numpy.linalg import norm
 import robot.Quaternion as Q
-
-print "in transform"
 
 def rotx(theta):
     """

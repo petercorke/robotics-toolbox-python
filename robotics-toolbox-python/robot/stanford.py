@@ -1,28 +1,31 @@
-#STANFORD Load kinematic and dynamic data for Stanford arm
-#
-# Defines the object 'stanford' in the current workspace which describes the 
-# kinematic and dynamic characterstics of the Stanford (Scheinman) arm.
-#
-# Kinematic data from "Modelling, Trajectory calculation and Servoing of 
-# a computer controlled arm".  Stanford AIM-177.  Figure 2.3
-# Dynamic data from "Robot manipulators: mathematics, programming and control"
-# Paul 1981, Tables 6.4, 6.6
-# 
-# Note: gear ratios not currently known, though reflected armature inertia 
-# is known, so gear ratios set to 1.
-#
-# Also define the vector qz which corresponds to the zero joint
-# angle configuration.
-#
-# See also: ROBOT, PUMA560, PUMA560AKB, TWOLINK.
+"""
+STANFORD Load kinematic and dynamic data for Stanford arm
 
-# $Log: stanford.m,v $
-# Revision 1.2  2002/04/01 11:47:18  pic
-# General cleanup of code: help comments, see also, copyright, remnant dh/dyn
-# references, clarification of functions.
-#
-# $Revision: 1.2 $
-# Copyright (C) 1990-2002, by Peter I. Corke
+    from robot.stanford import *
+
+Defines the object 'stanford' in the current workspace which describes the 
+kinematic and dynamic characterstics of the Stanford (Scheinman) arm.
+
+Kinematic data from "Modelling, Trajectory calculation and Servoing of 
+a computer controlled arm".  Stanford AIM-177.  Figure 2.3
+Dynamic data from "Robot manipulators: mathematics, programming and control"
+Paul 1981, Tables 6.4, 6.6
+
+@note: gear ratios not currently known, though reflected armature inertia 
+is known, so gear ratios set to 1.
+
+Also define the vector qz which corresponds to the zero joint
+angle configuration.
+
+@see: robot, puma560, puma560akb, twolink.
+
+Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
+Based on original Robotics Toolbox for Matlab code by Peter Corke.
+Permission to use and copy is granted provided that acknowledgement of
+the authors is made.
+
+@author: Luis Fernando Lara Tobar and Peter Corke
+"""
 
 from numpy import *
 from Link import *

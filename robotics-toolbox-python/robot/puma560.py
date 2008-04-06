@@ -1,46 +1,32 @@
-#PUMA560 Load kinematic and dynamic data for a Puma 560 manipulator
-#
-#	PUMA560
-#
-# Defines the object 'p560' in the current workspace which describes the 
-# kinematic and dynamic % characterstics of a Unimation Puma 560 manipulator
-# using standard DH conventions.
-# The model includes armature inertia and gear ratios.
-#
-# Also define the vector qz which corresponds to the zero joint
-# angle configuration, qr which is the vertical 'READY' configuration,
-# and qstretch in which the arm is stretched out in the X direction.
-#
-# See also: ROBOT, PUMA560AKB, STANFORD, TWOLINK.
+'''
+PUMA560 Load kinematic and dynamic data for a Puma 560 manipulator
 
-#
-# Notes:
-#    - the value of m1 is given as 0 here.  Armstrong found no value for it
-# and it does not appear in the equation for tau1 after the substituion
-# is made to inertia about link frame rather than COG frame.
-# updated:
-# 2/8/95  changed D3 to 150.05mm which is closer to data from Lee, AKB86 and Tarn
-#  fixed errors in COG for links 2 and 3
-# 29/1/91 to agree with data from Armstrong etal.  Due to their use
-#  of modified D&H params, some of the offsets Ai, Di are
-#  offset, and for links 3-5 swap Y and Z axes.
-# 14/2/91 to use Paul's value of link twist (alpha) to be consistant
-#  with ARCL.  This is the -ve of Lee's values, which means the
-#  zero angle position is a righty for Paul, and lefty for Lee.
-#  Note that gravity load torque is the motor torque necessary
-#  to keep the joint static, and is thus -ve of the gravity
-#  caused torque.
-#
-# 8/95 fix bugs in COG data for Puma 560. This led to signficant errors in
-#  inertia of joint 1. 
-# $Log: puma560.m,v $
-# Revision 1.3  2002/04/01 11:47:16  pic
-# General cleanup of code: help comments, see also, copyright, remnant dh/dyn
-# references, clarification of functions.
-#
-# $Revision: 1.3 $
+	from robot.puma560 import *
 
-# Copyright (C) 1993-2002, by Peter I. Corke
+Defines the object 'p560' in the current workspace which describes the 
+kinematic and dynamic % characterstics of a Unimation Puma 560 manipulator
+using standard DH conventions.
+The model includes armature inertia and gear ratios.
+
+Also define the vector qz which corresponds to the zero joint
+angle configuration, qr which is the vertical 'READY' configuration,
+and qstretch in which the arm is stretched out in the X direction.
+
+@see: robot, puma560akb, stanford, twolink
+
+@notes:
+   - the value of m1 is given as 0 here.  Armstrong found no value for it
+and it does not appear in the equation for tau1 after the substituion
+is made to inertia about link frame rather than COG frame.
+updated:
+
+Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
+Based on original Robotics Toolbox for Matlab code by Peter Corke.
+Permission to use and copy is granted provided that acknowledgement of
+the authors is made.
+
+@author: Luis Fernando Lara Tobar and Peter Corke
+'''
 
 from numpy import *
 from Link import *
