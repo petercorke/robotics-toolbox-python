@@ -1,6 +1,8 @@
 from numpy import *
 from robot import *
+from pylab import *
 import textwrap;
+import traceback;
 import sys;
 import re;
 
@@ -81,17 +83,22 @@ def parsedemo(s):
                 # if it involves an assignment then we use exec else use eval.
                 # we mimic the matlab behaviour in which a trailing semicolon inhibits
                 # display of the result
-                if cmd.startswith('from'):
-                    exec cmd;
-                elif '=' in cmd:
-                    e = cmd.split('=');
-                    exec rstrip.sub('', cmd);
-                    if cmd[-1] != ';':
-                        print eval(e[0]);
-                else:
-                    result = eval(cmd.rstrip(';'));
-                    if cmd[-1] != ';':
-                        print result;
+                try:
+                    if cmd.startswith('from'):
+                        exec cmd;
+                    elif '=' in cmd:
+                        e = cmd.split('=');
+                        exec rstrip.sub('', cmd);
+                        if cmd[-1] != ';':
+                            print eval(e[0]);
+                    else:
+                        result = eval(cmd.rstrip(';'));
+                        if cmd[-1] != ';':
+                            print result;
+                except:
+                    print "Error at line <%s>" % cmd
+                    traceback.print_exc();
+                    sys.exit(1);
 
     finally:
         if has_termios:

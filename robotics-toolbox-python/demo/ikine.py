@@ -1,25 +1,23 @@
 # Copyright (C) 1993-2002, by Peter I. Corke
 
-# $Log: rtikdemo.m,v $
-# Revision 1.3  2002/04/02 12:26:49  pic
-# Handle figures better, control echo at end of each script.
-# Fix bug in calling ctraj.
-#
-# Revision 1.2  2002/04/01 11:47:17  pic
-# General cleanup of code: help comments, see also, copyright, remnant dh/dyn
-# references, clarification of functions.
-#
-# $Revision: 1.3 $
-figure(2)
-echo on
-#
+
+import robot.parsedemo as p;
+import sys
+
+
+if __name__ == '__main__':
+
+    s = '''
+# First we will define a robot
+    from robot.puma560 import *
+
 # Inverse kinematics is the problem of finding the robot joint coordinates,
 # given a homogeneous transform representing the last link of the manipulator.
 # It is very useful when the path is planned in Cartesian space, for instance 
 # a straight line path as shown in the trajectory demonstration.
 #
 # First generate the transform corresponding to a particular joint coordinate,
-    q = [0 -pi/4 -pi/4 0 pi/8 0]
+    q = mat([0, -pi/4, -pi/4, 0, pi/8, 0])
     T = fkine(p560, q);
 #
 # Now the inverse kinematic procedure for any specific robot can be derived 
@@ -32,7 +30,7 @@ echo on
 # link. The starting point for the first point may be specified, or else it
 # defaults to zero (which is not a particularly good choice in this case)
     qi = ikine(p560, T);
-    qi'
+    qi.T
 #
 # Compared with the original value
     q
@@ -49,7 +47,7 @@ pause % any key to continue
 # aligned resulting in the loss of one degree of freedom.
     T = fkine(p560, qr);
     qi = ikine(p560, T);
-    qi'
+    qi.T
 #
 # which is not the same as the original joint angle
     qr
@@ -61,41 +59,42 @@ pause % any key to continue
     
 # Inverse kinematics may also be computed for a trajectory.
 # If we take a Cartesian straight line path
-    t = [0:.056:2]; 		% create a time vector
+    t = arange(0, 2, 0.056); 		% create a time vector
     T1 = transl(0.6, -0.5, 0.0) % define the start point
     T2 = transl(0.4, 0.5, 0.2)	% and destination
-    T = ctraj(T1, T2, length(t)); 	% compute a Cartesian path
+    T = ctraj(T1, T2, len(t)); 	% compute a Cartesian path
 
 #
 # now solve the inverse kinematics.  When solving for a trajectory, the 
 # starting joint coordinates for each point is taken as the result of the 
 # previous inverse solution.
 #
-    tic
     q = ikine(p560, T); 
-    toc
 #
 # Clearly this approach is slow, and not suitable for a real robot controller 
 # where an inverse kinematic solution would be required in a few milliseconds.
 #
 # Let's examine the joint space trajectory that results in straightline 
 # Cartesian motion
-    subplot(3,1,1)
-    plot(t,q(:,1))
+    subplot(3,1,1);
+    plot(t,q[:,1]);
     xlabel('Time (s)');
-    ylabel('Joint 1 (rad)')
-    subplot(3,1,2)
-    plot(t,q(:,2))
+    ylabel('Joint 1 (rad)');
+    subplot(3,1,2);
+    plot(t,q[:,2]);
     xlabel('Time (s)');
-    ylabel('Joint 2 (rad)')
-    subplot(3,1,3)
-    plot(t,q(:,3))
+    ylabel('Joint 2 (rad)');
+    subplot(3,1,3);
+    plot(t,q[:,3]);
     xlabel('Time (s)');
-    ylabel('Joint 3 (rad)')
-
+    ylabel('Joint 3 (rad)');
+    show();
 pause % hit any key to continue
     
 # This joint space trajectory can now be animated
-    plot(p560, q)
-pause % any key to continue
-echo off
+#    plot(p560, q)
+#    show()
+#pause % any key to continue
+'''
+
+    p.parsedemo(s);
