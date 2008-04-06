@@ -1,0 +1,23 @@
+Some tutorial/demos in increasing order of complexity.
+
+transform.py    transforms and quaternions
+trajectory.py   trajectories
+fkine.py        forward kinematics
+jacobian.py     Jacbians
+ikine.py        inverse dynamics, RNE etc
+idyn.py         inverse dynamics
+
+To run them
+
+  % python DEMO.py
+
+they often pause with a 'more' prompt, to stop the text scrolling off
+the screen.
+
+These are command line apps, but could probably be spiffed up with a
+wxPython interface.
+
+----
+fdyn.py         forward dynamics, not yet ported to Python
+animation.py    animations, not yet ported to Python
+
