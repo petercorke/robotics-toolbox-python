@@ -67,7 +67,7 @@ def fkine(robot, q):
 
 
 
-def ikine(robot, tr, q=None, m=None):
+def ikine(robot, tr, q0=None, m=None, **args):
     """
     Inverse manipulator kinematics.
     Computes the joint coordinates corresponding to the end-effector transform C{tr}.
@@ -130,17 +130,18 @@ def ikine(robot, tr, q=None, m=None):
     """
      
     #solution control parameters
+
+    print 'args', args
     
-    ilimit = 1000
-    stol = 1e-12
     n = robot.n
+
     
-    if q == None:
-        q = mat(zeros((n,1)))
+    if q0 == None:
+        q0 = mat(zeros((n,1)))
     else:
-        q = mat(q).flatten().T
+        q0 = mat(q0).flatten().T
         
-    if q != None and m != None:
+    if q0 != None and m != None:
         m = mat(m).flatten().T
         if len(m)!=6:
             error('Mask matrix should have 6 elements')
@@ -151,35 +152,33 @@ def ikine(robot, tr, q=None, m=None):
             print 'For a manipulator with fewer than 6DOF a mask matrix argument should be specified'
         m = mat(ones((6,1)))
 
+    def solve(robot, tr, q, mask, ilimit=1000, stol=1e-6, gamma=1):
+        print ilimit, stol, gamma
+        nm = inf;
+        count = 0
+        while nm > stol:
+            e = multiply( tr2diff(fkine(robot, q.T),tr), mask )
+            #dq = pinv(Jac.jacob0(robot, q.T)) * e
+            dq = Jac.jacob0(robot, q.T).T * e
+            q += gamma*dq;
+            nm = norm(e)
+            count += 1
+            if count > ilimit:
+                error("Solution wouldn't converge")
+        print count, 'iterations'
+        return q;
+
     if isinstance(tr, list):
         #trajectory case
         qt = mat(zeros((0,n)))
         for T in tr:
-            nm = 1
-            count = 0
-            while nm > stol:
-                e = multiply(tr2diff( fkine(robot, q.T), T), m)
-                dq = pinv(Jac.jacob0(robot,q.T))*e
-                q += dq
-                nm = norm(dq)
-                count += 1
-                if count > ilimit:
-                    print 'i=',i,'   nm=',nm
-                    error("Solution wouldn't converge")
+            q = solve(robot, T, q0, m, **args);
             qt = vstack( (qt, q.T) )
         return qt;
     elif ishomog(tr):
         #single xform case
-        nm = 1
-        count = 0
-        while nm > stol:
-            e = multiply( tr2diff(fkine(robot,q.T),tr), m )
-            dq = pinv(Jac.jacob0(robot, q.T)) * e
-            q += dq;
-            nm = norm(dq)
-            count += 1
-            if count > ilimit:
-                error("Solution wouldn't converge")
+        q = solve(robot, tr, q0, m, **args);
+        print q
         qt = q.T
         return qt
     else:
