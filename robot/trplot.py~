@@ -1,3 +1,4 @@
+#from mpl_toolkits.mplot3d import Axes3D
 from numpy import * # for outer and arange
 import matplotlib.pyplot as p# for figure
 from robot.Quaternion import *
