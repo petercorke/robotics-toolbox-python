@@ -3,8 +3,35 @@
 import numpy as np
 
 class ets(object):
+    """
+    The Elementary Transform Sequence
+    
+    A superclass which represents the kinematics of a serial-link manipulator
 
+    Attributes:
+    --------
+    n : int
+        The number of transforms in the ETS
+
+    See Also
+    --------
+    ropy.robot.SerialLink : A superclass for arm type robots
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+    ropy.robot.to_string : Creates a string representation of the ETS of a robot
+
+    References
+    --------
+    - Kinematic Derivatives using the Elementary Transform Sequence,
+      J. Haviland and P. Corke
+    """
+    
     def __init__(self, robot):
+
+        super(ets, self).__init__()  
 
         _ets = {}
         _ets_compact = {}
@@ -168,7 +195,38 @@ class ets(object):
         # The ETS of the robot
         self._ets = _ets
 
+
     
+    """
+    The elementary transform sequence (ETS) represents a robot's forward 
+    kinematics in terms of 6 elementary transfroms. This prints the ETS
+    of a robot.
+    
+    Parameters
+    ----------
+    deg : Return the ETS using degrees instead of radians
+
+    Returns
+    -------
+    s : String
+        The ETS of the robot
+
+    Examples
+    --------
+    >>> s = panda.ets
+    
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+
+    References
+    --------
+    - Kinematic Derivatives using the Elementary Transform Sequence,
+      J. Haviland and P. Corke
+    """
     def to_string(self, deg = False):
 
         s = ''
@@ -193,6 +251,38 @@ class ets(object):
         return s
 
     
+
+    '''
+    Evaluates the forward kinematics of a robot based on its ETS and 
+    joint angles q.
+    
+    Attributes:
+    --------
+        q : float np.ndarray(1,n)
+            The joint angles/configuration of the robot
+
+    Returns
+    -------
+    T : float np.ndarray(4,4)
+        The pose of the end-effector
+
+    Examples
+    --------
+    >>> T = panda.fkine(np.array([1,1,1,1,1,1,1]))
+    >>> T = panda.T
+
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+
+    References
+    --------
+    - Kinematic Derivatives using the Elementary Transform Sequence,
+      J. Haviland and P. Corke
+    '''
     def fkine(self, q):
 
         if not isinstance(q, np.ndarray):
@@ -218,6 +308,39 @@ class ets(object):
         return trans
 
     
+
+    """
+    The manipulator Jacobian matrix maps joint velocity to end-effector 
+    spatial velocity, expressed in the world-coordinate frame. This 
+    function calulcates this based on the ETS of the robot.
+    
+    Parameters
+    ----------
+    q : float np.ndarray(1,n)
+        The joint angles/configuration of the robot
+
+    Returns
+    -------
+    J : float np.ndarray(6,n)
+        The manipulator Jacobian in 0 frame
+
+    Examples
+    --------
+    >>> J = panda.jacob0(np.array([1,1,1,1,1,1,1]))
+    >>> J = panda.J0
+    
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+
+    References
+    --------
+    - Kinematic Derivatives using the Elementary Transform Sequence,
+      J. Haviland and P. Corke
+    """
     def jacob0(self, q):
 
         if not isinstance(q, np.ndarray):
@@ -243,6 +366,39 @@ class ets(object):
         return J
 
 
+
+    """
+    The manipulator Hessian tensor maps joint acceleration to end-effector 
+    spatial acceleration, expressed in the world-coordinate frame. This 
+    function calulcates this based on the ETS of the robot.
+    
+    Parameters
+    ----------
+    q : float np.ndarray(1,n)
+        The joint angles/configuration of the robot
+
+    Returns
+    -------
+    H : float np.ndarray(1,n,n)
+        The manipulator Hessian in 0 frame
+
+    Examples
+    --------
+    >>> H = panda.hessian0(np.array([1,1,1,1,1,1,1]))
+    >>> H = panda.H0
+    
+    See Also
+    --------
+    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+
+    References
+    --------
+    - Kinematic Derivatives using the Elementary Transform Sequence,
+      J. Haviland and P. Corke
+    """
     def hessian0(self, q):
 
         if not isinstance(q, np.ndarray):
@@ -272,12 +428,92 @@ class ets(object):
         return H
 
 
+
+    """
+    Calculates the manipulability index (scalar) robot at the joint 
+    configuration q. It indicates dexterity, that is, how isotropic the robot's
+    % motion is with respect to the 6 degrees of Cartesian motion. The measure
+    is high when the manipulator is capable of equal motion in all directions
+    and low when the manipulator is close to a singularity.
+    
+    Parameters
+    ----------
+    q : float np.ndarray(1,n)
+        The joint angles/configuration of the robot
+
+    Returns
+    -------
+    m : float
+        The manipulability index
+
+    Examples
+    --------
+    >>> m = panda.manip(np.array([1,1,1,1,1,1,1]))
+    >>> m = panda.m
+    
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+
+    References
+    --------
+    - Analysis and control of robot manipulators with redundancy,
+      T. Yoshikawa,
+      Robotics Research: The First International Symposium (M. Brady and R. Paul, eds.),
+      pp. 735-747, The MIT press, 1984.
+    """
     def m(self, q):
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
         J = self.jacob0(q)
 
         return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
-    def dot_m(self, q):
+
+
+    """
+    Calculates the manipulability Jacobian. This measure relates the rate of 
+    change of the manipulability to the joint velocities of the robot.
+    
+    Parameters
+    ----------
+    dq : float np.ndarray(1,n)
+        The joint velocities of the robot
+
+    Returns
+    -------
+    m : float
+        The manipulability index
+
+    Examples
+    --------
+    >>> Jm = panda.jacobm(np.array([1,1,1,1,1,1,1]))
+    >>> Jm = panda.Jm
+    
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+
+    References
+    --------
+    - Maximising Manipulability in Resolved-Rate Motion Control,
+      J. Haviland and P. Corke
+    """
+    def Jm(self, q):
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
         m = self.m(q)
         J = self.jacob0(q)
         H = self.hessian0(q)
@@ -292,6 +528,12 @@ class ets(object):
         return a
 
 
+
+
+
+    '''
+    Private functions
+    '''
 
     def _vex(self, T):
         if not isinstance(T, np.ndarray):
@@ -589,100 +831,3 @@ class ets(object):
 
     def _ddTz(self, q):
         return np.zeros(4)
-
-
-# def etss(robot, deg = False):
-#     """
-#     The elementary transform sequence (ETS) represents a robot's forward 
-#     kinematics in terms of 6 elementary transfroms. This method calculates
-#     a robot's ETS based on its DH or MDH parameters.
-    
-#     Parameters
-#     ----------
-#     robot : An object of SerialLink or subclass type
-#         The robot to calculate the fkine of
-#     deg : Return the ETS using degrees instead of radians
-
-#     Returns
-#     -------
-#     s : String
-#         The ETS of the robot
-
-#     Examples
-#     --------
-#     >>> s = ets(panda)
-    
-#     See Also
-#     --------
-#     robotics.tools.relative_yaw_to_trans : Returns the relative yaw to b, 
-#         from a
-#     """
-    
-#     if deg:
-#         conv = 180.0/np.pi
-#     else:
-#         conv = 1
-    
-#     s = ''
-            
-#     for j in range(robot.n):
-
-#         L = robot.links[j]
-        
-#         if robot.mdh:
-#             # Method for modified DH parameters
-            
-#             # Append Tx(a)
-#             if L.a != 0:
-#                     s = '{}Tx({})'.format(s, L.a)
-            
-#             # Append Rx(alpha)
-#             if L.alpha != 0:
-#                 s = '{}Rx({})'.format(s, L.alpha*conv)
-            
-#             if L.is_revolute:
-
-#                 # Append Tz(d)
-#                 if L.d != 0:
-#                     s = '{}Tz({})'.format(s, L.d)
-                
-#                 # Append Rz(q)
-#                 s = '{}Rz(q{})'.format(s, j+1)
-#             else:
-                
-#                 # Append Rz(theta)
-#                 if L.theta != 0:
-#                     s = '{}Rz({})'.format(s, L.alpha*conv)
-                
-#                 # Append Tz(q)
-#                 s = '{}Tz(q{})'.format(s, j+1)
-
-#         else:
-#             # Method for standard DH parameters
-            
-#             if L.is_revolute:
-
-#                 # Append Tz(d)
-#                 if L.d != 0:
-#                     s = '{}Tz({})'.format(s, L.d)
-                
-#                 # Append Rz(q)
-#                 s = '{}Rz(q{})'.format(s, j+1)
-#             else:
-                
-#                 # Append Rz(theta)
-#                 if L.theta != 0:
-#                     s = '{}Rz({})'.format(s, L.alpha*conv)
-                
-#                 # Append Tz(q)
-#                 s = '{}Tz(q{})'.format(s, j+1)
-
-#             # Append Tx(a)
-#             if L.a != 0:
-#                     s = '{}Tx({})'.format(s, L.a)
-            
-#             # Append Rx(alpha)
-#             if L.alpha != 0:
-#                 s = '{}Rx({})'.format(s, L.alpha*conv)
-
-#     return s

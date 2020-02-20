@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import numpy as np
-from robotics.robot.link import Revolute
-from robotics.robot.serial_link import SerialLink
-from robotics.tools.transform import transl, xyzrpy_to_trans
+from ropy.robot.link import Revolute
+from ropy.robot.serial_link import SerialLink
+from ropy.tools.transform import transl, xyzrpy_to_trans
 
 class LBR7(SerialLink):
     """

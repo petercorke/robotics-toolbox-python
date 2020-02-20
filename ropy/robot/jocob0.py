@@ -5,7 +5,7 @@ import numpy as np
 def jacob0(robot, q):
     """
     The manipulator Jacobian matrix maps joint velocity to end-effector 
-    spatial velocity V = J0*QD expressed in the world-coordinate frame.
+    spatial velocity, expressed in the world-coordinate frame.
     
     Parameters
     ----------

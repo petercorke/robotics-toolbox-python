@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from robotics.robot.link import Revolute
-from robotics.robot.serial_link import SerialLink
+from ropy.robot.link import Revolute
+from ropy.robot.serial_link import SerialLink
 
 class Mico:
 
