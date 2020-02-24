@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import numpy as np
+from multiprocessing import Pool, cpu_count
+import ctypes
+
 
 class ets(object):
     """
@@ -32,6 +35,8 @@ class ets(object):
     def __init__(self, robot):
 
         super(ets, self).__init__()  
+
+        self.pool = Pool(cpu_count())
 
         _ets = {}
         _ets_compact = {}
@@ -84,9 +89,9 @@ class ets(object):
                         _ets[i] = {}
                     
                     # Append Rz(q)
-                    _ets[i]['T']   = lambda q : self._R('Rz', q)
-                    _ets[i]['dT']  = lambda q : self._dR('Rz', q)
-                    _ets[i]['ddT'] = lambda q : self._ddR('Rz', q)
+                    _ets[i]['T']   = self._R
+                    _ets[i]['dT']  = self._dR
+                    _ets[i]['ddT'] = self._ddR
                     _ets[i]['type'] = 'sym'
                     _ets[i]['s'] = 'Rz'
                     self._q_idx.append(i)
@@ -105,9 +110,9 @@ class ets(object):
                         _ets[i] = {}
                     
                     # Append Tz(q)
-                    _ets[i]['T']   = lambda q : self._T('Tz', q)
-                    _ets[i]['dT']  = lambda q : self._dT('Tz', q)
-                    _ets[i]['ddT'] = lambda q : self._ddT('Tz', q)
+                    _ets[i]['T']   = self._T
+                    _ets[i]['dT']  = self._dT
+                    _ets[i]['ddT'] = self._ddT
                     _ets[i]['type'] = 'sym'
                     _ets[i]['s'] = 'Tz'
                     self._q_idx.append(i)
@@ -119,9 +124,9 @@ class ets(object):
                 if L.is_revolute:
 
                     # Append Rz(q)
-                    _ets[i]['T']   = lambda q : self._R('Rz', q)
-                    _ets[i]['dT']  = lambda q : self._dR('Rz', q)
-                    _ets[i]['ddT'] = lambda q : self._ddR('Rz', q)
+                    _ets[i]['T']   = self._R
+                    _ets[i]['dT']  = self._dR
+                    _ets[i]['ddT'] = self._ddR
                     _ets[i]['type'] = 'sym'
                     _ets[i]['s'] = 'Rz'
                     self._q_idx.append(i)
@@ -150,9 +155,9 @@ class ets(object):
                         _ets[i] = {}
                     
                     # Append Tz(q)
-                    _ets[i]['T']   = lambda q : self._T('Tz', q)
-                    _ets[i]['dT']  = lambda q : self._dT('Tz', q)
-                    _ets[i]['ddT'] = lambda q : self._ddT('Tz', q)
+                    _ets[i]['T']   = self._T
+                    _ets[i]['dT']  = self._dT
+                    _ets[i]['ddT'] = self._ddT
                     _ets[i]['type'] = 'sym'
                     _ets[i]['s'] = 'Tz'
                     self._q_idx.append(i)
@@ -297,7 +302,8 @@ class ets(object):
         for i in range(self.n):
 
             if self._ets[i]['type'] == 'sym':
-                T = self._ets[i]['T'](q[j])
+                s = self._ets[i]['s']
+                T = self._ets[i]['T'](s, q[j])
                 j += 1
 
             else:
@@ -414,8 +420,12 @@ class ets(object):
         dT = self._d_ets(q)
         ddT = self._dd_ets(q)
 
+        # t1 = time.time()
+
         for j in range(self._joints):
             for i in range(self._joints):
+
+                
 
                 # Linear velocity component of the Hessian
                 H[0:3,i,j] = ddT[i][j][0:3,3]
@@ -424,6 +434,13 @@ class ets(object):
                     dT[i][0:3,0:3] @ np.transpose(dT[j][0:3,0:3])
 
                 H[3:7,i,j] = np.squeeze(self._vex(sw))
+
+        # t2 = time.time()
+
+        # print(t2-t1)
+
+        # with Pool(self._joints) as p:
+        #     p.map(self._hessi, [dT, ddT, R, H, range(self._joints)])
 
         return H
 
@@ -571,10 +588,12 @@ class ets(object):
                 if self._ets[i]['type'] == 'sym':
                     if i == self._q_idx[k]:
                         #  Multiply by the partial differentiation
-                        dT[k] = dT[k] @ self._ets[i]['dT'](q[k])
+                        s = self._ets[i]['s']
+                        dT[k] = dT[k] @ self._ets[i]['dT'](s, q[k])
                         l += 1
                     else:
-                        dT[k] = dT[k] @ self._ets[i]['T'](q[l])
+                        s = self._ets[i]['s']
+                        dT[k] = dT[k] @ self._ets[i]['T'](s, q[l])
                         l += 1
                     
                 else:
@@ -582,6 +601,11 @@ class ets(object):
                     dT[k] = dT[k] @ self._ets[i]['T']
         
         return dT
+
+    def __getstate__(self):
+        self_dict = self.__dict__.copy()
+        del self_dict['pool']
+        return self_dict
 
 
     # Calculates the second partial derivative of an ETS wrt q
@@ -591,47 +615,56 @@ class ets(object):
         if q.shape != (self._joints,):
             raise ValueError('q must be a 1 dim (n,) array')
 
-        # The second partial derivative of the pose wrt each joint
-        ddT = []
-
-        # Precompute partial derivatives wrt each joint
+        ddT = np.zeros((self._joints, self._joints, 4, 4))
+        thr = []
         for k in range(self._joints):
-        # for k in range(1):
+            thr.append(self.pool.apply_async(self._dd_ets_inner, [k, q]))
 
-            ddT.append([])
-
-            for j in range(self._joints):
-
-                # Initialise each matrix
-                ddT[k].append(np.eye(4))
-                l = 0
-
-                # Double partial derivative
-                for i in range(self.n):
-
-                    if self._ets[i]['type'] == 'sym':
-
-                        if i == self._q_idx[k] and i == self._q_idx[j]:
-                            # Multiply by the double partial differentiation
-                            ddT[k][j] = ddT[k][j] @ self._ets[i]['ddT'](q[k])
-                            l += 1
-                        elif i == self._q_idx[k]: 
-                            #  Multiply by the partial differentiation
-                            ddT[k][j] = ddT[k][j] @ self._ets[i]['dT'](q[k])
-                            l += 1
-                        elif i == self._q_idx[j]:
-                            #  Multiply by the partial differentiation
-                            ddT[k][j] = ddT[k][j] @ self._ets[i]['dT'](q[j])
-                            l += 1
-                        else:
-                            ddT[k][j] = ddT[k][j] @ self._ets[i]['T'](q[l])
-                            l += 1
-                        
-                    else:
-                        # The current T is static
-                        ddT[k][j] = ddT[k][j] @ self._ets[i]['T']
+        for k in range(self._joints):
+            ddT[k,:,:,:] =  thr[k].get()                
 
         return ddT
+
+    
+    def _dd_ets_inner(self, k, q):
+        ddT = np.zeros((self._joints, 4, 4))
+
+        for j in range(self._joints):
+
+            # Initialise each matrix
+            ddT[j,:,:] = np.eye(4)
+            l = 0
+
+            # Double partial derivative
+            for i in range(self.n):
+
+                if self._ets[i]['type'] == 'sym':
+
+                    s = self._ets[i]['s']
+
+                    if i == self._q_idx[k] and i == self._q_idx[j]:
+                        # Multiply by the double partial differentiation
+                        ddT[j,:,:] = ddT[j,:,:] @ self._ets[i]['ddT'](s, q[k])
+                        l += 1
+                    elif i == self._q_idx[k]: 
+                        #  Multiply by the partial differentiation
+                        ddT[j,:,:] = ddT[j,:,:] @ self._ets[i]['dT'](s, q[k])
+                        l += 1
+                    elif i == self._q_idx[j]:
+                        #  Multiply by the partial differentiation
+                        ddT[j,:,:] = ddT[j,:,:] @ self._ets[i]['dT'](s, q[j])
+                        l += 1
+                    else:
+                        ddT[j,:,:] = ddT[j,:,:] @ self._ets[i]['T'](s, q[l])
+                        l += 1
+                    
+                else:
+                    # The current T is static
+                    ddT[j,:,:] = ddT[j,:,:] @ self._ets[i]['T']
+
+        return ddT
+
+
 
     # Helper functions
     def _R(self, axis, q):
