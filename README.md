@@ -4,7 +4,7 @@ A robotics library for Python
 **Used in**
 
 J. Haviland and P. Corke, "Maximising  manipulability  during  resolved-rate  motion control," _arXiv preprint arXiv:2002.11901_, 2020.
-[[arxiv](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc)]
+[[arxiv](https://arxiv.org/abs/2002.11901)] [[project website](https://jhavl.github.io/mmc)] [[video](https://youtu.be/zBGLPoPNZ10)]
 
 
 ## Installing
