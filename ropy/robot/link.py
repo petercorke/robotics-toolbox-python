@@ -177,6 +177,63 @@ class Revolute(Link):
             self.d = 0
 
         self.is_revolute = True
+        self.is_prismatic = False
         
         if self.theta != 0:
             raise ValueError('Theta cannot be specified for a revolute link')
+
+
+
+class Prismatic(Link):
+    """
+    A class for prismatic link types
+    
+    Attributes:
+    --------
+        theta : float
+            kinematic: joint coordinate
+        d : float
+            kinematic: link offset
+        alpha : float
+            kinematic: link twist
+        a : float
+            kinematic: link length
+        sigma : int
+            kinematic: 0 if revolute, 1 if prismatic
+        mdh : int
+            kinematic: 0 if standard D&H, else 1
+        offset : float
+            kinematic: joint variable offset
+        qlim : float np.ndarray(1,2)
+            kinematic: joint variable limits [min max]
+        flip : bool
+            joint moves in opposite direction
+
+    See Also
+    --------
+    ropy.robot.Revolute : A revolute link class
+    """
+
+    def __init__(
+            self, 
+            theta = 0, 
+            d = 0,
+            alpha = 0,
+            a = 0,
+            sigma = 1,
+            mdh = 0,
+            offset = 0,
+            qlim = 0,
+            flip = False
+            ):
+
+        super(Prismatic, self).__init__(theta, d, alpha, a, sigma, mdh, offset, qlim, flip)
+
+        if self.d is None:
+            self.d = 0
+
+        self.is_prismatic = True
+        self.is_revolute = False
+        
+        if self.d != 0:
+            raise ValueError('d cannot be specified for a prismatic link')

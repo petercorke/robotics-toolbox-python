@@ -3,6 +3,7 @@
 import numpy as np
 from multiprocessing import Pool, cpu_count
 import ctypes
+import time
 
 
 class ets(object):
@@ -98,17 +99,7 @@ class ets(object):
                     i += 1
                     _ets[i] = {}
                 else:
-                    
-                    # Append Rz(theta)
-                    if L.theta != 0:
-                        _ets[i]['T'] = self._Rz(L.alpha)
-                        _ets[i]['type'] = 'real'
-                        _ets[i]['s'] = 'Rz'
-                        _ets[i]['val'] = L.alpha
-                        _ets[i]['val_deg'] = L.alpha * conv
-                        i += 1
-                        _ets[i] = {}
-                    
+                                       
                     # Append Tz(q)
                     _ets[i]['T']   = self._T
                     _ets[i]['dT']  = self._dT
@@ -118,6 +109,17 @@ class ets(object):
                     self._q_idx.append(i)
                     i += 1
                     _ets[i] = {}
+
+                    # Append Rz(theta)
+                    if L.theta != 0:
+                        _ets[i]['T'] = self._Rz(L.alpha)
+                        _ets[i]['type'] = 'real'
+                        _ets[i]['s'] = 'Rz'
+                        _ets[i]['val'] = L.alpha
+                        _ets[i]['val_deg'] = L.alpha * conv
+                        i += 1
+                        _ets[i] = {}
+                        
             else:
                 # Method for modified DH parameters
                 
@@ -414,13 +416,15 @@ class ets(object):
 
         H = np.zeros((6,self._joints,self._joints))
 
+        t1 = time.time()
+
         T = self.fkine(q)
         R = T[0:3,0:3]
 
         dT = self._d_ets(q)
         ddT = self._dd_ets(q)
 
-        # t1 = time.time()
+
 
         for j in range(self._joints):
             for i in range(self._joints):
@@ -435,7 +439,7 @@ class ets(object):
 
                 H[3:7,i,j] = np.squeeze(self._vex(sw))
 
-        # t2 = time.time()
+        t2 = time.time()
 
         # print(t2-t1)
 
@@ -531,16 +535,35 @@ class ets(object):
         if q.shape != (self._joints,):
             raise ValueError('q must be a 1 dim (n,) array')
 
+        t0 = time.time()
+
         m = self.m(q)
+        t00 = time.time()
         J = self.jacob0(q)
-        H = self.hessian0(q)
+        # H = self.hessian0(q)
+        t1 = time.time()
+
+        H = self.hess(q)
+
+        t2 = time.time()
         b = np.linalg.inv(J @ np.transpose(J))
+        t3 = time.time()
 
         a = np.zeros((self._joints,1))
 
         for i in range(self._joints):
             c = J @ np.transpose(H[:,:,i])
             a[i,0] = m * np.transpose(c.flatten('F')) @ b.flatten('F')
+
+        t4 = time.time()
+
+        print(t00 - t0)
+        print(t1 - t00)
+        print(t2 - t1)
+        print(t3 - t2)
+        print(t4 - t3)
+
+        print('\n')
 
         return a
 
@@ -701,9 +724,9 @@ class ets(object):
         if axis == 'Tx':
             return self._Tx(q)
         elif axis == 'Ty':
-            return self._Ry(q)
+            return self._Ty(q)
         elif axis == 'Tz':
-            return self._Rz(q)
+            return self._Tz(q)
         else:
             raise ValueError('Not a valid axis, axis must be: "Tx", "Ty", or "Tz"')
 
@@ -864,3 +887,178 @@ class ets(object):
 
     def _ddTz(self, q):
         return np.zeros(4)
+
+
+
+    def jac(self, q):
+
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
+        Jt = np.zeros((3,self._joints))
+        
+        Jw = np.zeros((3,3,self._joints))
+
+        t0 = time.time()
+
+        T = self.fkine(q)
+        R = T[0:3,0:3]
+
+        t1 = time.time()
+
+        dT = self._d_ets(q)
+
+        t2 = time.time()
+
+        for i in range(self._joints):
+
+            # Linear velocity component of the Jacobian
+            Jt[:,i] = dT[i][0:3,3]
+
+            Jw[:,:,i] = dT[i][0:3,0:3] @ np.transpose(R)
+
+        t3 = time.time()
+
+        # print(t1-t0)
+        # print(t2-t1)
+        # print(t3-t2)
+
+        return Jt, Jw
+
+
+
+
+    def hess(self, q):
+
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
+        H = np.zeros((6,self._joints,self._joints))
+
+        Jt, Jw = self.jac(q)
+      
+        for j in range(self._joints):
+            for i in range(j, self._joints):
+
+                H[:3,i,j] = Jw[:,:,j] @ Jt[:3,i]
+
+                H[3:,i,j] = np.squeeze(self._vex(
+                    Jw[:,:,j] @ Jw[:,:,i] + Jw[:,:,i] @ -Jw[:,:,j]
+                ))
+                
+                if i != j:
+                    H[:3,j,i] = H[:3,i,j]
+
+        return H
+
+    def skew(self, a):
+
+        return np.array([
+            [ 0   , -a[2],  a[1]],
+            [ a[2],  0   , -a[0]],
+            [-a[1],  a[0],  0   ]
+        ])
+
+
+    def jac_fast(self, q):
+
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
+        J = np.zeros((6,self._joints))
+        Jt = np.zeros((3,self._joints))
+        Jw = np.zeros((3,3,self._joints))
+
+        T = self.fkine(q)
+        R = T[0:3,0:3]
+
+        dT = self._d_ets(q)
+
+        for i in range(self._joints):
+
+            # Linear velocity component of the Jacobian
+            Jt[:,i] = dT[i][0:3,3]
+            J[0:3,i] = dT[i][0:3,3]
+
+            temp = dT[i][0:3,0:3] @ np.transpose(R)
+            Jw[:,:,i] = temp
+            J[3:7,i] = np.squeeze(self._vex( temp ))
+
+        return J, Jt, Jw
+
+
+    def hess_fast(self, q, Jt, Jw):
+
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
+        H = np.zeros((6,self._joints,self._joints))
+      
+        for j in range(self._joints):
+            for i in range(j, self._joints):
+
+                H[:3,i,j] = Jw[:,:,j] @ Jt[:3,i]
+
+                H[3:,i,j] = np.squeeze(self._vex(
+                    Jw[:,:,j] @ Jw[:,:,i] + Jw[:,:,i] @ -Jw[:,:,j]
+                ))
+                
+                if i != j:
+                    H[:3,j,i] = H[:3,i,j]
+
+        return H
+
+
+    def m_fast(self, q, J):
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
+        return np.sqrt(np.linalg.det(J @ np.transpose(J)))
+
+
+    def Jm_fast(self, q):
+        if not isinstance(q, np.ndarray):
+            raise TypeError('q array must be a numpy ndarray.')
+        if q.shape != (self._joints,):
+            raise ValueError('q must be a 1 dim (n,) array')
+
+        t0 = time.time()
+        J, Jt, Jw = self.jac_fast(q)
+
+        t1 = time.time()
+        m = self.m_fast(q, J)
+
+        t2 = time.time()
+        H = self.hess_fast(q, Jt, Jw)
+
+        t3 = time.time()
+        b = np.linalg.inv(J @ np.transpose(J))
+
+        t4 = time.time()
+        a = np.zeros((self._joints,1))
+
+        for i in range(self._joints):
+            c = J @ np.transpose(H[:,:,i])
+            a[i,0] = m * np.transpose(c.flatten('F')) @ b.flatten('F')
+
+        t5 = time.time()
+
+        # print(t1 - t0)
+        # print(t2 - t1)
+        # print(t3 - t2)
+        # print(t4 - t3)
+        # print(t5 - t4)
+
+        # print('\n')
+
+        return a
