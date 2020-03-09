@@ -1,6 +1,12 @@
 # ropy
 A robotics library for Python
 
+**Used in**
+
+J. Haviland and P. Corke, "Maximising  manipulability  during  resolved-rate  motion control," _arXiv preprint arXiv:2002.11901_, 2020.
+[[arxiv](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc)]
+
+
 ## Installing
 
 Requires Python ≥ 3.2
