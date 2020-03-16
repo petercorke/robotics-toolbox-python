@@ -55,7 +55,7 @@ def jacobe(robot, q):
             # prismatic axis
             d = np.expand_dims(U[2,:3], axis=1)      # nz oz az
             delta = np.zeros((3,))
-        
+
         J[:,j] = np.squeeze(np.concatenate((d, delta)))
 
         if robot.mdh != 0:
