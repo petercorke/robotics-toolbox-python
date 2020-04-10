@@ -1,17 +1,16 @@
 # Author: Aditya Dua
 # 28 January, 2018
-from __future__ import print_function
-from .common import isvec
-from .common import ishomog
-from math import sqrt
-from numpy import trace
-from .transforms import *
-from ..tests.test_common import *
-from .graphics import *
+
+import numpy as np
+import math
+import transforms as tr
+import quat_np as quat
+from collections import UserList
+import argcheck
 
 
-class Quaternion:
-    def __init__(self, s=None, v=None):
+class Quaternion(UserList):
+    def __init__(self, a1=None, a2=None, check=True):
         """
         A quaternion is a compact method of representing a 3D rotation that has
         computational advantages including speed and numerical robustness.
@@ -24,21 +23,56 @@ class Quaternion:
         :param s: scalar
         :param v: vector
         """
-        if v is None:
-            self.v = np.matrix([[0, 0, 0]])
+        if a1 is None and a2 is None:
+            self.data = [ quat.qone() ]
+            
+        elif argcheck.isscalar(a1) and argcheck.isvector(a2,3):
+            self.data = [ a1, argcheck.getvector(a2) ]
+            
+        elif argcheck.isvector(a1,4):
+            self.data = [ argcheck.getvector(a1) ]
+            
+        elif type(a1) is list:
+            if check:
+                assert argcheck.isvectorlist(a1,4), 'list must comprise 4-vectors'
+            self.data = [ a1 ]
         else:
-            assert isvec(v, 3)
-            self.v = v
-        if s is None:
-            self.s = 0
+            raise ValueError('bad argument to Quaternion constructor')
+            
+    def append(self, x):
+        print('in append method')
+        if not type(self) == type(x):
+            raise ValueError("cant append different type of pose object")
+        if len(x) > 1:
+            raise ValueError("cant append a pose sequence - use extend")
+        super().append(x.A)
+        
+    @property
+    def A(self):
+        # get the underlying numpy array
+        if len(self.data) == 1:
+            return self.data[0]
         else:
-            assert type(s) is float or type(s) is int
-            self.s = s
+            return self.data
 
-    @classmethod
-    def qt(cls, arg_in):
-        assert type(arg_in) is Quaternion
-        return cls(s=arg_in.s, v=arg_in.v)
+    def __getitem__(self, i):
+        print('getitem', i)
+        #return self.__class__(self.data[i])
+        return self.__class__(self.data[i])
+
+
+    @property
+    def s(self):
+        return self.A[0]
+
+    @property
+    def v(self):
+        return self.A[1:4]
+    
+    @property
+    def vec(self):
+        return self.A
+    
 
     @classmethod
     def pure(cls, vec):
@@ -46,10 +80,9 @@ class Quaternion:
         return cls(s=0, v=vec)
 
     def conj(self):
-        return Quaternion(s=self.s, v=-self.v)
+        return Quaternion(quat.qconj(self.A))
 
-    def inv(self):
-        return Quaternion(s=self.s, v=-self.v)
+
 
     def tr(self):
         return t2r(self.r())
@@ -97,19 +130,10 @@ class Quaternion:
         y = self.v[0, 1]
         z = self.v[0, 2]
 
-        return np.matrix([[1 - 2 * (y ** 2 + z ** 2), 2 * (x * y - s * z), 2 * (x * z + s * y)],
-                          [2 * (x * y + s * z), 1 - 2 * (x ** 2 + z ** 2), 2 * (y * z - s * x)],
-                          [2 * (x * z - s * y), 2 * (y * z + s * x), 1 - 2 * (x ** 2 + y ** 2)]])
+        return self.__class__(q2r(self.A))
 
     def matrix(self):
-        s = self.s
-        x = self.v[0, 0]
-        y = self.v[0, 1]
-        z = self.v[0, 2]
-        return np.matrix([[s, -x, -y, -z],
-                          [x, s, -z, y],
-                          [y, z, s, -x],
-                          [z, -y, x, s]])
+        return qmatrix(self.A)
 
     def __mul__(self, other):
         assert isinstance(other, Quaternion) \
@@ -127,7 +151,7 @@ class Quaternion:
             qr.v = self.v * other
         return qr
 
-    def __pow__(self, power, modulo=None):
+    def __pow__(self, power):
         """
         Code retrieved from: https://github.com/petercorke/robotics-toolbox-python/blob/master/robot/Quaternion.py
         Original authors: Luis Fernando Lara Tobar and Peter Corke
@@ -135,16 +159,7 @@ class Quaternion:
         :param modulo:
         :return:
         """
-        assert type(power) is int, "Power must be an integer"
-        qr = Quaternion()
-        q = Quaternion.qt(self)
-        for i in range(0, abs(power)):
-            qr = qr * q
-
-        if power < 0:
-            qr = qr.inv()
-
-        return qr
+        return self.__class__([quat.qpow(q.A) for q in self])
 
     def __imul__(self, other):
         """
@@ -170,11 +185,11 @@ class Quaternion:
         return self
 
     def __add__(self, other):
-        assert isinstance(other, Quaternion), "Both objects should be of type: Quaternion"
+        assert type(self) == type(other), "Both objects should be of type: Quaternion"
         return Quaternion(s=self.s + other.s, v=self.v + other.v)
 
     def __sub__(self, other):
-        assert isinstance(other, Quaternion), "Both objects should be of type: Quaternion"
+        assert type(self) == type(other), "Both objects should be of type: Quaternion"
         return Quaternion(s=self.s - other.s, v=self.v - other.v)
 
     def __truediv__(self, other):
@@ -207,13 +222,14 @@ class Quaternion:
             return True
 
     def __repr__(self):
-        return "%f <%f, %f, %f>" % (self.s, self.v[0, 0], self.v[0, 1], self.v[0, 2])
+        return quat.qprint(self.A)
 
     def __str__(self):
         return self.__repr__()
 
 
 class UnitQuaternion(Quaternion):
+    
     def __init__(self, s=None, v=None):
         self.pipeline = None
         if s is None:
@@ -243,6 +259,9 @@ class UnitQuaternion(Quaternion):
     @classmethod
     def rpy(cls, arg_in, unit='rad'):
         return cls.rot(rpy2r(thetas=arg_in, unit=unit))
+    
+    def inv(self):
+        return Quaternion(s=self.s, v=-self.v)
 
     @classmethod
     def angvec(cls, theta, v, unit='rad'):
@@ -467,3 +486,6 @@ class UnitQuaternion(Quaternion):
     def __floordiv__(self, other):
         assert type(other) is UnitQuaternion
         return (self / other).unit()
+
+q = Quaternion([1,2,3,4])
+#print(q)
