@@ -229,13 +229,13 @@ class SuperPose(UserList, ABC):
 
     def __add__(self, other):
         # results is not in the group, return an array, not a class
-        assert type(self) == type(other), 'operands to * are of different types'
+        assert type(self) == type(other), 'operands to + are of different types'
         return self._op2(other, lambda x, y: x + y )
 
     def __sub__(self, other):
         # results is not in the group, return an array, not a class
         # TODO allow class +/- a conformant array
-        assert type(self) == type(other), 'operands to * are of different types'
+        assert type(self) == type(other), 'operands to - are of different types'
         return self._op2(other, lambda x, y: x - y )
     
 
