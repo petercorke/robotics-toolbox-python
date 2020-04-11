@@ -4,6 +4,8 @@
 import math
 import numpy as np
 from scipy.linalg import expm
+import sys
+
 try:
     import vtk
 except:
@@ -807,37 +809,38 @@ def tr2eul(tr, unit='rad', flip=False):
     - There is a singularity for the case where THETA=0 in which case PHI is arbitrarily set to zero and PSI is the sum (PHI+PSI).
     - Translation component is ignored.
     """
-    check_args.unit_check(unit)
-    check_args.tr2eul(tr=tr, unit=unit, flip=flip)
+    # check_args.unit_check(unit)
+    # check_args.tr2eul(tr=tr, unit=unit, flip=flip)
 
-    if tr.ndim > 2:
-        eul = np.zeros([tr.shape[2], 3])
-        for i in range(0, tr.shape[2]):
-            eul[i, :] = tr2eul(tr[i, :, :])
-        return eul
-    else:
-        eul = np.zeros((3,))
+    # if tr.ndim > 2:
+    #     eul = np.zeros([tr.shape[2], 3])
+    #     for i in range(0, tr.shape[2]):
+    #         eul[i, :] = tr2eul(tr[i, :, :])
+    #     return eul
+    # else:
+    #     eul = np.zeros((3,))
 
-    if abs(tr[0, 2]) < np.spacing([1])[0] and abs(tr[1, 2]) < np.spacing([1])[0]:
-        eul[0] = 0
-        sp = 0
-        cp = 0
-        eul[1] = math.atan2(cp * tr[0, 2] + sp * tr[1, 2], tr[2, 2])
-        eul[2] = math.atan2(-sp * tr[0, 0] + cp * tr[1, 0], -sp * tr[0, 1] + cp * tr[1, 1])
-    else:
-        if flip:
-            eul[0] = math.atan2(-tr[1, 2], -tr[0, 2])
-        else:
-            eul[0] = math.atan2(tr[1, 2], tr[0, 2])
-        sp = math.sin(eul[0])
-        cp = math.cos(eul[0])
-        eul[0] = math.atan2(cp * tr[0, 2] + sp * tr[1, 2], tr[2, 2])
-        eul[2] = math.atan2(-sp * tr[0, 0] + cp * tr[1, 0], -sp * tr[0, 1] + cp * tr[1, 1])
+    # if abs(tr[0, 2]) < np.spacing([1])[0] and abs(tr[1, 2]) < np.spacing([1])[0]:
+    #     eul[0] = 0
+    #     sp = 0
+    #     cp = 0
+    #     eul[1] = math.atan2(cp * tr[0, 2] + sp * tr[1, 2], tr[2, 2])
+    #     eul[2] = math.atan2(-sp * tr[0, 0] + cp * tr[1, 0], -sp * tr[0, 1] + cp * tr[1, 1])
+    # else:
+    #     if flip:
+    #         eul[0] = math.atan2(-tr[1, 2], -tr[0, 2])
+    #     else:
+    #         eul[0] = math.atan2(tr[1, 2], tr[0, 2])
+    #     sp = math.sin(eul[0])
+    #     cp = math.cos(eul[0])
+    #     eul[0] = math.atan2(cp * tr[0, 2] + sp * tr[1, 2], tr[2, 2])
+    #     eul[2] = math.atan2(-sp * tr[0, 0] + cp * tr[1, 0], -sp * tr[0, 1] + cp * tr[1, 1])
 
-    if unit == 'deg':
-        eul = eul * 180 / math.pi
+    # if unit == 'deg':
+    #     eul = eul * 180 / math.pi
 
-    return eul
+    # return eul
+    pass
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -860,66 +863,66 @@ def tr2rpy(tr, unit='rad', order='zyx', check=False):
     - Translation component is ignored.
     - Toolbox rel 8-9 has the reverse default angle sequence as default
     """
-    check_args.unit_check(unit)
-    check_args.tr2rpy(tr=tr, unit=unit, order=order)
+    # check_args.unit_check(unit)
+    # check_args.tr2rpy(tr=tr, unit=unit, order=order)
     
     
-    if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
-            raise ValueError('Invalid rotation matrix')
+    # if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
+    #         raise ValueError('Invalid rotation matrix')
 
-    if tr.ndim > 2:
-        rpy = np.zeros((tr.shape[2], 3))
-        for i in range(0, tr.shape[2]):
-            rpy[i, :] = tr2rpy(tr[i, :, :])
-        return rpy
-    else:
-        rpy = np.zeros((3,))
+    # if tr.ndim > 2:
+    #     rpy = np.zeros((tr.shape[2], 3))
+    #     for i in range(0, tr.shape[2]):
+    #         rpy[i, :] = tr2rpy(tr[i, :, :])
+    #     return rpy
+    # else:
+    #     rpy = np.zeros((3,))
 
-    if common.isrot(tr) or common.ishomog(tr, dim=[4, 4]):
-        if order == 'xyz' or order == 'arm':
-            if abs(abs(tr[0, 2]) - 1) < np.spacing([1])[0]:
-                rpy[0] = 0
-                rpy[1] = math.asin(tr[0, 2])
-                if tr[2] > 0:
-                    rpy[2] = math.atan2(tr[2, 1], tr[1, 1])
-                else:
-                    rpy[2] = -math.atan2(tr[1, 0], tr[2, 0])
-            else:
-                rpy[0] = -math.atan2(tr[0, 1], tr[0, 0])
-                rpy[1] = math.atan2(tr[0, 2] * math.cos(rpy[0, 0]), tr[0, 0])
-                rpy[2] = -math.atan2(tr[1, 2], tr[2, 2])
-        if order == 'zyx' or order == 'vehicle':
-            if abs(abs(tr[2, 0]) - 1) < np.spacing([1])[0]:
-                rpy[0] = 0
-                rpy[1] = -math.asin(tr[2, 0])
-                if tr[2, 0] < 0:
-                    rpy[2] = -math.atan2(tr[0, 1], tr[0, 2])
-                else:
-                    rpy[2] = math.atan2(-tr[0, 1], -tr[0, 2])
-            else:
-                rpy[0] = math.atan2(tr[2, 1], tr[2, 2])
-                rpy[1] = math.atan2(-tr[2, 0] * math.cos(rpy[0]), tr[2, 2])
-                rpy[2] = math.atan2(tr[1, 0], tr[0, 0])
-        if order == 'yxz' or order == 'camera':
-            if abs(abs(tr[1, 2]) - 1) < np.spacing([1])[0]:
-                rpy[0] = 0
-                rpy[1] = -math.asin(tr[1, 2])
-                if tr[1, 2] < 0:
-                    rpy[2] = -math.atan2(tr[2, 0], tr[0, 0])
-                else:
-                    rpy[2] = math.atan2(-tr[2, 0], -tr[2, 1])
-            else:
-                rpy[0] = math.atan2(tr[1, 0], tr[1, 1])
-                rpy[1] = math.atan2(-math.cos(rpy[0]) * tr[1, 2], tr[1, 1])
-                rpy[2] = math.atan2(tr[0, 2], tr[2, 2])
-    else:
-        raise TypeError('Argument must be a 3x3 or 4x4 matrix.')
+    # if common.isrot(tr) or common.ishomog(tr, dim=[4, 4]):
+    #     if order == 'xyz' or order == 'arm':
+    #         if abs(abs(tr[0, 2]) - 1) < np.spacing([1])[0]:
+    #             rpy[0] = 0
+    #             rpy[1] = math.asin(tr[0, 2])
+    #             if tr[2] > 0:
+    #                 rpy[2] = math.atan2(tr[2, 1], tr[1, 1])
+    #             else:
+    #                 rpy[2] = -math.atan2(tr[1, 0], tr[2, 0])
+    #         else:
+    #             rpy[0] = -math.atan2(tr[0, 1], tr[0, 0])
+    #             rpy[1] = math.atan2(tr[0, 2] * math.cos(rpy[0, 0]), tr[0, 0])
+    #             rpy[2] = -math.atan2(tr[1, 2], tr[2, 2])
+    #     if order == 'zyx' or order == 'vehicle':
+    #         if abs(abs(tr[2, 0]) - 1) < np.spacing([1])[0]:
+    #             rpy[0] = 0
+    #             rpy[1] = -math.asin(tr[2, 0])
+    #             if tr[2, 0] < 0:
+    #                 rpy[2] = -math.atan2(tr[0, 1], tr[0, 2])
+    #             else:
+    #                 rpy[2] = math.atan2(-tr[0, 1], -tr[0, 2])
+    #         else:
+    #             rpy[0] = math.atan2(tr[2, 1], tr[2, 2])
+    #             rpy[1] = math.atan2(-tr[2, 0] * math.cos(rpy[0]), tr[2, 2])
+    #             rpy[2] = math.atan2(tr[1, 0], tr[0, 0])
+    #     if order == 'yxz' or order == 'camera':
+    #         if abs(abs(tr[1, 2]) - 1) < np.spacing([1])[0]:
+    #             rpy[0] = 0
+    #             rpy[1] = -math.asin(tr[1, 2])
+    #             if tr[1, 2] < 0:
+    #                 rpy[2] = -math.atan2(tr[2, 0], tr[0, 0])
+    #             else:
+    #                 rpy[2] = math.atan2(-tr[2, 0], -tr[2, 1])
+    #         else:
+    #             rpy[0] = math.atan2(tr[1, 0], tr[1, 1])
+    #             rpy[1] = math.atan2(-math.cos(rpy[0]) * tr[1, 2], tr[1, 1])
+    #             rpy[2] = math.atan2(tr[0, 2], tr[2, 2])
+    # else:
+    #     raise TypeError('Argument must be a 3x3 or 4x4 matrix.')
 
-    if unit == 'deg':
-        rpy = rpy * 180 / math.pi
+    # if unit == 'deg':
+    #     rpy = rpy * 180 / math.pi
 
-    return rpy
-
+    # return rpy
+    pass
 
 # ---------------------------------------------------------------------------------------#
 def skew(v):
@@ -1254,15 +1257,148 @@ def trexp2(S, theta=None):
         return np.eye(2, 2) + np.sin(theta) * S + (1 - np.cos(theta)) * S ** 2
 
 
+def trprint(T, orient='rpy/zyx', label=None, file=sys.stdout, fmt='%8.2g', unit='deg'):
+    """
+TRPRINT Compact display of SE(3) homogeneous transformation
 
-# ---------------------------------------------------------------------------------------#
-def np2vtk(mat):
-    if mat.shape == (4, 4):
-        obj = vtk.vtkMatrix4x4()
-        for i in range(4):
-            for j in range(4):
-                obj.SetElement(i, j, mat[i, j])
-        return obj
+ TRPRINT(T, OPTIONS) displays the homogoneous transform (4x4) in a compact 
+ single-line format.  If T is a homogeneous transform sequence then each 
+ element is printed on a separate line.
+
+ TRPRINT(R, OPTIONS) as above but displays the SO(3) rotation matrix (3x3).
+
+ S = TRPRINT(T, OPTIONS) as above but returns the string.
+
+ TRPRINT T OPTIONS is the command line form of above.
 
 
+ Options::
+ 'rpy'        display with rotation in ZYX roll/pitch/yaw angles (default)
+ 'xyz'        change RPY angle sequence to XYZ
+ 'yxz'        change RPY angle sequence to YXZ
+ 'euler'      display with rotation in ZYZ Euler angles
+ 'angvec'     display with rotation in angle/vector format
+ 'radian'     display angle in radians (default is degrees)
+ 'fmt', f     use format string f for all numbers, (default #g)
+ 'label',l    display the text before the transform
+ 'fid',F      send text to the file with file identifier F
+
+ Examples::
+        >> trprint(T2)
+        t = (0,0,0), RPY/zyx = (-122.704,65.4084,-8.11266) deg
+
+        >> trprint(T1, 'label', 'A')
+               A:t = (0,0,0), RPY/zyx = (-0,0,-0) deg
+
+       >> trprint B euler
+       t = (0.629, 0.812, -0.746), EUL = (125, 71.5, 85.7) deg
+
+ Notes::
+ - If the 'rpy' option is selected, then the particular angle sequence can be
+   specified with the options 'xyz' or 'yxz' which are passed through to TR2RPY.
+  'zyx' is the default.
+
+ See also TR2EUL, TR2RPY, TR2ANGVEC.
+"""
+    
+
+    # orient rpy, rpy/xyz, rpy/zyx, rpy/yzx, eul
+    
+    s = ''
+    
+    if label is not None:
+        s += '{:<8s}: '.format(label)
+    
+    # print the translational part if it exists
+    if ishom(T):
+        s += 't = {};'.format(_vec2s(fmt, transl(T)))
+    
+    # print the angular part in various representations
+
+    a = orient.split('/')
+
+    
+    if a[0] == 'rpy':
+        if len(a) == 2:
+            seq = a[1]
+        else:
+            seq = None
+        angles = tr2rpy(t2r(T), order=seq, unit=unit)
+
+        s += ' {} = {} {}'.format(orient, _vec2s(fmt, angles), unit)
+        
+    elif a[0].startswith('eul'):
+        angles = tr2eul(t2r(T), unit)
+        s += ' eul = {:s} {:s}'.format(_vec2s(fmt, angles), unit)
+    
+    elif a[0] == 'angvec':
+        pass
+        # as a vector and angle
+#        [th,v] = tr2angvec(T, unit):
+#        if th == 0:
+#            s = strcat(s, sprintf(' R = nil') );
+#        elif opt.radian
+#                s = strcat(s, sprintf(' R = (%srad | %s)', ...
+#                    sprintf(opt.fmt, th), vec2s(opt.fmt, v)) );
+#            else
+#                s = strcat(s, sprintf(' R = (%sdeg | %s)', ...
+#                    sprintf(opt.fmt, th*180.0/pi), vec2s(opt.fmt,v)) );
+#            end
+    else:
+        raise ValueError('bad orientation format')
+       
+    if file:
+        print(s, file=file)
+    return s
+
+    
+
+
+
+def trprint2(T, label=None, file=sys.stdout, fmt='{:8.2g}', unit='deg'):
+    """
+TRPRINT2 Compact display of SE(2) homogeneous transformation
+
+ TRPRINT2(T, OPTIONS) displays the homogoneous transform (3x3) in a compact 
+ single-line format.  If T is a homogeneous transform sequence then each 
+ element is printed on a separate line.
+
+ TRPRINT2(R, OPTIONS) as above but displays the SO(2) rotation matrix (3x3).
+
+ S = TRPRINT2(T, OPTIONS) as above but returns the string.
+
+ TRPRINT2 T  is the command line form of above, and displays in RPY format.
+
+ Options::
+ 'radian'     display angle in radians (default is degrees)
+ 'fmt', f     use format string f for all numbers, (default #g)
+ 'label',l    display the text before the transform
+
+ Examples::
+        >> trprint2(T2)
+        t = (0,0), theta = -122.704 deg
+
+
+ See also TRPRINT.
+"""
+    
+    s = ''
+    
+    if label is not None:
+        s += '{:<8s}: '.format(label)
+    
+    # print the translational part if it exists
+    s += 't = {};'.format(_vec2s(fmt, transl2(T)))
+    
+    angle = math.atan2(T[1,0], T[0,0])
+    s += ' {} {}'.format(_vec2s(fmt, [angle]), unit)
+    
+    if file:
+        print(s, file=file)
+    return s
+    
+def _vec2s(fmt, v):
+        v = [x if np.abs(x) > 100*np.finfo(np.float64).eps else 0.0 for x in v ]
+        return ', '.join([fmt % x for x in v])
+    
 

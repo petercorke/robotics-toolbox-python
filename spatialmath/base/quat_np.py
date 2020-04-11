@@ -141,7 +141,7 @@ def qslerp(q1, q2, s, shortest=False):
 
 def qrand():
     u = np.random.uniform(low=0, high=1, size=3) # get 3 random numbers in [0,1]
-    return np.nr_[
+    return np.r_[
         math.sqrt(1-u[0])*math.sin(2*math.pi*u[1]),
         math.sqrt(1-u[0])*math.cos(2*math.pi*u[1]),
         math.sqrt(u[0])*math.sin(2*math.pi*u[2]),
