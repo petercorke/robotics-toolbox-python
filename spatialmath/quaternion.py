@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 import spatialmath.base.transforms as tr
-import spatialmath.base.quat_np as quat
+import spatialmath.base.quaternion as quat
 import spatialmath.base.argcheck as argcheck
 
 class Quaternion(UserList):
