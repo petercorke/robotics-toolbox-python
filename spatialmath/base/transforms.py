@@ -42,15 +42,16 @@ def _sin(theta):
 
 def rotx(theta, unit="rad"):
     """
-    ROTX gives rotation about X axis
+    ROTX SO(3) rotation about X-axis
 
     :param theta: angle for rotation matrix
     :param unit: unit of input passed. 'rad' or 'deg'
     :return: 3x3 rotation matrix
+    :rtype: numpy array
 
-    rotx(THETA) is an SO(3) rotation matrix (3x3) representing a rotation
-    of THETA radians about the x-axis
-    rotx(THETA, "deg") as above but THETA is in degrees
+    - ``rotx(THETA)`` is an SO(3) rotation matrix (3x3) representing a rotation
+      of THETA radians about the x-axis
+    - ``rotx(THETA, "deg")`` as above but THETA is in degrees
     """
 
     theta = argcheck.getunit(theta, unit)
@@ -68,15 +69,16 @@ def rotx(theta, unit="rad"):
 # ---------------------------------------------------------------------------------------#
 def roty(theta, unit="rad"):
     """
-    ROTY Rotation about Y axis
+    ROTY SO(3) rotation about Y-axis
 
     :param theta: angle for rotation matrix
     :param unit: unit of input passed. 'rad' or 'deg'
     :return: 3x3 rotation matrix
+    :rtype: numpy array
 
-    roty(THETA) is an SO(3) rotation matrix (3x3) representing a rotation
-    of THETA radians about the y-axis
-    roty(THETA, "deg") as above but THETA is in degrees
+    - ``roty(THETA)`` is an SO(3) rotation matrix (3x3) representing a rotation
+      of THETA radians about the y-axis
+    - ``roty(THETA, "deg")`` as above but THETA is in degrees
     """
 
     theta = argcheck.getunit(theta, unit)
@@ -94,15 +96,16 @@ def roty(theta, unit="rad"):
 # ---------------------------------------------------------------------------------------#
 def rotz(theta, unit="rad"):
     """
-    ROTZ Rotation about Z axis
+    ROTZ SO(3) rotation about Z-axis
 
     :param theta: angle for rotation matrix
     :param unit: unit of input passed. 'rad' or 'deg'
     :return: 3x3 rotation matrix
+    :rtype: numpy array
 
-    rotz(THETA) is an SO(3) rotation matrix (3x3) representing a rotation
-    of THETA radians about the z-axis
-    rotz(THETA, "deg") as above but THETA is in degrees
+    - ``rotz(THETA)`` is an SO(3) rotation matrix (3x3) representing a rotation
+      of THETA radians about the z-axis
+    - ``rotz(THETA, "deg")`` as above but THETA is in degrees
     """
     theta = argcheck.getunit(theta, unit)
     ct = _cos(theta)
@@ -119,17 +122,18 @@ def rotz(theta, unit="rad"):
 # ---------------------------------------------------------------------------------------#
 def trotx(theta, unit="rad", t=None):
     """
-    TROTX Rotation about X axis
+    TROTX SE(3) pure rotation about X-axis
 
     :param theta: rotation in radians or degrees
     :param unit: "rad" or "deg" to indicate unit being used
     :param t: the translation, defaults to [0,0,0]
     :return: 4x4 homogeneous transformation matrix
+    :rtype: numpy array
 
-    trotx(THETA) is a homogeneous transformation (4x4) representing a rotation
-    of THETA radians about the x-axis.
-    trotx(THETA, 'deg') as above but THETA is in degrees
-    trotx(THETA, 'rad', [x,y,z]) as above with translation of [x,y,z]
+    - ``trotx(THETA)`` is a homogeneous transformation (4x4) representing a rotation
+      of THETA radians about the x-axis.
+    - ``trotx(THETA, 'deg')`` as above but THETA is in degrees
+    - ``trotx(THETA, 'rad', t=[x,y,z])`` as above with translation of [x,y,z]
     """
     T  = np.pad( rotx(theta, unit), (0,1) )
     if t is not None:
@@ -141,17 +145,17 @@ def trotx(theta, unit="rad", t=None):
 # ---------------------------------------------------------------------------------------#
 def troty(theta, unit="rad", t=None):
     """
-    TROTY Rotation about Y axis
+    TROTY SE(3) pure rotation about Y-axis
 
     :param theta: rotation in radians or degrees
     :param unit: "rad" or "deg" to indicate unit being used
     :param t: the translation, defaults to [0,0,0]
-    :return: 4x4 homogeneous transformation matrix
+    :return: 4x4 homogeneous transformation matrix as a numpy array
 
-    troty(THETA) is a homogeneous transformation (4x4) representing a rotation
-    of THETA radians about the y-axis.
-    troty(THETA, 'deg') as above but THETA is in degrees
-    troty(THETA, 'rad', [x,y,z]) as above with translation of [x,y,z]
+    - ``troty(THETA)`` is a homogeneous transformation (4x4) representing a rotation
+      of THETA radians about the y-axis.
+    - ``troty(THETA, 'deg')`` as above but THETA is in degrees
+    - ``troty(THETA, 'rad', t=[x,y,z])`` as above with translation of [x,y,z]
     """
     T  = np.pad( roty(theta, unit), (0,1) )
     if t is not None:
@@ -163,17 +167,18 @@ def troty(theta, unit="rad", t=None):
 # ---------------------------------------------------------------------------------------#
 def trotz(theta, unit="rad", t=None):
     """
-    TROTZ Rotation about Z axis
+    TROTZ SE(3) pure rotation about Z-axis
 
     :param theta: rotation in radians or degrees
     :param unit: "rad" or "deg" to indicate unit being used
     :param t: the translation, defaults to [0,0,0]
     :return: 4x4 homogeneous transformation matrix
+    :rtype: numpy array
 
-    trotz(THETA) is a homogeneous transformation (4x4) representing a rotation
-    of THETA radians about the z-axis.
-    trotz(THETA, 'deg') as above but THETA is in degrees
-    trotz(THETA, 'rad', [x,y,z]) as above with translation of [x,y,z]
+    - ``trotz(THETA) is a homogeneous transformation (4x4) representing a rotation
+      of THETA radians about the z-axis.
+    - ``trotz(THETA, 'deg')`` as above but THETA is in degrees
+    - ``trotz(THETA, 'rad', t=[x,y,z])`` as above with translation of [x,y,z]
     """
     T  = np.pad( rotz(theta, unit), (0,1) )
     if t is not None:
@@ -184,32 +189,26 @@ def trotz(theta, unit="rad", t=None):
 # ---------------------------------------------------------------------------------------#
 def transl(x, y=None, z=None):
     """
-    TRANSL Create or unpack an SE(3) translational homogeneous transform
+    TRANSL SE(3) pure translation, or extract translation
 
-    :param t: translation vector
-    :return: 4x4 homogeneous transformation matrix with pure translation
+    :param x: translation along X-axis
+    :param y: translation along Y-axis
+    :param z: translation along Z-axis
+    :return: 4x4 homogeneous transformation matrix
+    :rtype: numpy array
 
-    Create a translational SE(3) matrix::
+    Create a translational SE(3) matrix:
 
-    T = transl( [X, Y, Z] ) is an SE(3) homogeneous transform (4x4) representing a
-    pure translation of X, Y and Z.
+    - ``T = transl( X, Y, Z )`` is an SE(3) homogeneous transform (4x4) representing a
+      pure translation of X, Y and Z.
+    - ``T = transl( V )`` as above but the translation is given by a 3-element
+      list, dict, or a numpy array, row or column vector.
 
-    t = transl(T) is an SE(3) homogeneous transform (4x4) representing a
-    translation of P=[X,Y,Z]. If P (Mx3) it represents a sequence and T (4x4xM)
-    is a sequence of homogeneous transforms such that T(:,:,i) corresponds to
-    the i'th row of P.
 
-    Extract the translational part of an SE(3) matrix::
+    Extract the translational part of an SE(3) matrix:
 
-    P = TRANSL(T) is the translational part of a homogeneous transform T as a
-    3-element column vector.  If T (4x4xM) is a homogeneous transform sequence
-    the rows of P (Mx3) are the translational component of the corresponding
-    transform in the sequence.
-
-    [X,Y,Z] = TRANSL(T) is the translational part of a homogeneous transform
-    T as three components.  If T (4x4xM) is a homogeneous transform sequence
-    then X,Y,Z (1xM) are the translational components of the corresponding
-    transform in the sequence.
+    - ``P = TRANSL(T)`` is the translational part of a homogeneous transform T as a
+      3-element numpy array.
    """
 
     if np.isscalar(x):
@@ -229,14 +228,15 @@ def transl(x, y=None, z=None):
 # ---------------------------------------------------------------------------------------#
 def rot2(theta, unit='rad'):
     """
-    ROT2 SO(2) Rotational Matrix
+    ROT2 SO(2) rotational Matrix
 
     :param theta: rotation in radians or degrees
     :param unit: "rad" or "deg" to indicate unit being used
     :return: 2x2 rotation matrix
+    :rtype: numpy array
 
-    ROT2(THETA) is an SO(2) rotation matrix (2x2) representing a rotation of THETA radians.
-    ROT2(THETA, 'deg') as above but THETA is in degrees.
+    - ``ROT2(THETA)`` is an SO(2) rotation matrix (2x2) representing a rotation of THETA radians.
+    - ``ROT2(THETA, 'deg')`` as above but THETA is in degrees.
     """
     theta = argcheck.getunit(theta, unit)
     ct = _cos(theta)
@@ -252,17 +252,19 @@ def rot2(theta, unit='rad'):
 # ---------------------------------------------------------------------------------------#
 def trot2(theta, unit='rad', t=None):
     """
-    TROT2 SE2 rotation matrix
+    TROT2 SE(2) pure rotation matrix
 
     :param theta: rotation in radians or degrees
     :param unit: "rad" or "deg" to indicate unit being used
     :param t: the translation, defaults to [0,0]
     :return: 3x3 homogeneous transformation matrix
+    :rtype: numpy array
 
-    TROT2(THETA) is a homogeneous transformation (3x3) representing a rotation of
-    THETA radians.
-    TROT2(THETA, 'deg') as above but THETA is in degrees.
-    Notes::
+    - ``TROT2(THETA)`` is a homogeneous transformation (3x3) representing a rotation of
+      THETA radians.
+    - ``TROT2(THETA, 'deg')`` as above but THETA is in degrees.
+    
+    Notes:
     - Translational component is zero.
     """
     T  = np.pad( rot2(theta, unit), (0,1) )
@@ -275,29 +277,24 @@ def trot2(theta, unit='rad', t=None):
 # ---------------------------------------------------------------------------------------#
 def transl2(x, y=None):
     """
-    TRANSL2 Create or unpack an SE(2) translational homogeneous transform
+    TRANSL2 SE(2) pure translation, or extract translation
 
     :param x: x translation, homogeneous transform or a list of translations
     :param y: y translation
-    :return: homogeneous transform matrix or the translation elements of a
-    homogeneous transform
+    :return: homogeneous transform matrix or the translation elements of a homogeneous transform
 
-    Create a translational SE(2) matrix::
+    Create a translational SE(2) matrix:
 
-    T = transl2([X, Y]) is an SE(2) homogeneous transform (3x3) representing a
-    pure translation.
+    - ``T = transl2([X, Y])`` is an SE(2) homogeneous transform (3x3) representing a
+      pure translation.
+    - ``T = transl2( V )`` as above but the translation is given by a 2-element
+      list, dict, or a numpy array, row or column vector.
 
-    t = transl2(T) is a homogeneous transform representing a translation or
-    point P=[X,Y]. If P (Mx2) it represents a sequence and T (3x3xM) is a
-    sequence of homogeneous transforms such that T(:,:,i) corresponds to the
-    i'th row of P.
 
-    Extract the translational part of an SE(2) matrix::
+    Extract the translational part of an SE(2) matrix:
 
     P = TRANSL2(T) is the translational part of a homogeneous transform as a
-    2-element column vector.  If T (3x3xM) is a homogeneous transform
-    sequence the rows of P (Mx2) are the translational component of the
-    corresponding transform in the sequence.
+    2-element numpy array.  
     """
 
     if np.isscalar(x):
@@ -318,12 +315,14 @@ def transl2(x, y=None):
 # ---------------------------------------------------------------------------------------#
 def unit(v):
     """
-    UNIT Unitize a vector
+    UNIT Return a unit vector
 
-    :param v: given unit vector
+    :param v: n-dimensional vector as a list, dict, or a numpy array, row or column vector
     :return: a unit-vector parallel to V.
+    :rtype: numpy ndarray
+    :raises ValueError: for zero length vector
+    
 
-    Reports error for the case where V is non-symbolic and norm(V) is zero
     """
     
     v = argcheck.getvector(v)
@@ -332,7 +331,7 @@ def unit(v):
     if n > 100*np.finfo(np.float64).eps: # if greater than eps
         return v / n
     else:
-        raise AttributeError("Vector has zero norm")
+        raise ValueError("Vector has zero norm")
         
 
 def isunit(v):
@@ -346,14 +345,14 @@ def r2t(R, check=False):
     :param R: rotation matrix
     :param check: check if rotation matrix is valid (default False, no check)
     :return: homogeneous transformation matrix
+    :rtype: numpy ndarray
 
-    R2T(rmat) is an SE(2) or SE(3) homogeneous transform equivalent to an
-    SO(2) or SO(3) orthonormal rotation matrix rmat with a zero translational
-    component. Works for T in either SE(2) or SE(3):
-    if rmat is 2x2 then return is 3x3, or
-    if rmat is 3x3 then return is 4x4.
-
-    Translational component is zero.
+    ``R2T(R)`` is an SE(2) or SE(3) homogeneous transform equivalent to an
+    SO(2) or SO(3) orthonormal rotation matrix ``R`` with a zero translational
+    component
+    
+    - if ``R`` is 2x2 then return is 3x3: SO(2) -> SE(2)
+    - if ``R`` is 3x3 then return is 4x4: SO(3) -> SE(3)
     """
     
     assert isinstance(R, np.ndarray)
@@ -377,11 +376,16 @@ def t2r(T, check=False):
     :param T: homogeneous transformation matrix
     :param check: check if rotation matrix is valid (default False, no check)
     :return: rotation matrix
+    :rtype: numpy ndarray
 
-    T2R(T) is the orthonormal rotation matrix component of homogeneous
-    transformation matrix tmat.  Works for T in SE(2) or SE(3)
-    if tmat is 3x3 then return is 2x2, or
-    if tmat is 4x4 then return is 3x3.
+
+    ``T2R(T)`` is the orthonormal rotation matrix component of homogeneous
+    transformation matrix ``T``
+    
+    - if ``T`` is 3x3 then return is 2x2: SE(2) -> SO(2)
+    - if ``T`` is 4x4 then return is 3x3: SE(3) -> SO(3)
+    
+    Any translational component of T is lost.
     """
     assert isinstance(T, np.ndarray)
     dim = T.shape
@@ -404,15 +408,59 @@ def isR(R):
     return np.linalg.norm( R@R.T - np.eye(R.shape[0]) ) < 100*np.finfo(np.float64).eps
 
 def ishom(T, check=False):
+    """ISHOM Test if matrix is an SE(3) homogeneous transformation
+    
+    :param T: matrix to test
+    :param check: check validity of rotation submatrix
+    :return: whether matrix belongs to SE(3)
+    :rtype: bool
+    
+    - ``ISHOM(T)`` is True if the argument ``T`` is of dimension 4x4
+    - ``ISHOM(T, check=True)`` as above, but also checks orthogonality of the rotation sub-matrix.
+    
+    :seealso: isrot, ishom2"""
     return T.shape == (4,4) and (not check or isR(T[:3,:3]))
 
 def ishom2(T, check=False):
+    """ISHOM2 Test if matrix is an SE(2) homogeneous transformation
+    
+    :param T: matrix to test
+    :param check: check validity of rotation submatrix
+    :return: whether matrix belongs to SE(2)
+    :rtype: bool
+    
+    - ``ISHOM2(T)`` is True if the argument ``T`` is of dimension 3x3
+    - ``ISHOM2(T, check=True)`` as above, but also checks orthogonality of the rotation sub-matrix.
+    
+    :seealso: isrot2, ishom, isvec"""
     return T.shape == (3,3) and (not check or isR(T[:2,:2]))
 
 def isrot(R, check=False):
+    """ISROT Test if matrix is an SO(3) rotation matrix
+    
+    :param R: matrix to test
+    :param check: check validity of rotation submatrix
+    :return: whether matrix belongs to SO(3)
+    :rtype: bool
+    
+    - ``ISROT(R)`` is True if the argument ``R`` is of dimension 3x3
+    - ``ISROT(R, check=True)`` as above, but also checks orthogonality of the rotation matrix.
+    
+    :seealso: isrot2, ishom"""
     return R.shape == (3,3) and (not check or isR(R))
 
 def isrot2(R, check=False):
+    """ISROT2 Test if matrix is an SO(2) rotation matrix
+    
+    :param R: matrix to test
+    :param check: check validity of rotation submatrix
+    :return: whether matrix belongs to SO(2)
+    :rtype: bool
+    
+    - ``ISROT(R)`` is True if the argument ``R`` is of dimension 2x2
+    - ``ISROT(R, check=True)`` as above, but also checks orthogonality of the rotation matrix.
+    
+    :seealso: ishom2, isrot"""
     return R.shape == (2,2) and (not check or isR(R))
 
 # ---------------------------------------------------------------------------------------#
@@ -847,21 +895,23 @@ def tr2eul(tr, unit='rad', flip=False):
 def tr2rpy(tr, unit='rad', order='zyx', check=False):
     """
     TR2RPY Convert a homogeneous transform to roll-pitch-yaw angles
+    
     :param tr: Homogeneous transformation
     :param unit: 'rad' or 'deg'
-    :param order: 'xyz', 'zyx' or 'yxz'
+    :param order: 'xyz', 'zyx' or 'yxz' [default 'zyx']
     :return: Roll-pitch-yaw angle
-    TR2RPY(T, options) are the roll-pitch-yaw angles (1x3) corresponding to the rotation part of a homogeneous transform T. The 3 angles RPY=[R,P,Y] correspond to sequential rotations about the Z, Y and X axes respectively.
-    TR2RPY(R, options) as above but the input is an orthonormal rotation matrix R (3x3).
-    If R (3x3xK) or T (4x4xK) represent a sequence then each row of RPY corresponds to a step of the sequence.
-    Options::
-    'deg'   Compute angles in degrees (radians default)
+    :rtype: numpy ndarray
+    
+    - ``TR2RPY(T, options)`` are the roll-pitch-yaw angles (1x3) corresponding to the rotation part of a homogeneous transform T. The 3 angles RPY=[R,P,Y] correspond to sequential rotations about the Z, Y and X axes respectively.
+    - ``TR2RPY(R, options)`` as above but the input is an orthonormal rotation matrix R (3x3).
+    
+ 
     'xyz'   Return solution for sequential rotations about X, Y, Z axes
     'yxz'   Return solution for sequential rotations about Y, X, Z axes
-    Notes::
+    
+    Notes:
     - There is a singularity for the case where P=pi/2 in which case R is arbitrarily set to zero and Y is the sum (R+Y).
     - Translation component is ignored.
-    - Toolbox rel 8-9 has the reverse default angle sequence as default
     """
     # check_args.unit_check(unit)
     # check_args.tr2rpy(tr=tr, unit=unit, order=order)
@@ -926,24 +976,24 @@ def tr2rpy(tr, unit='rad', order='zyx', check=False):
 
 # ---------------------------------------------------------------------------------------#
 def skew(v):
-    """
-    SKEW creates Skew-symmetric metrix from vector
+    r"""
+    SKEW Skew-symmetric metrix from vector
 
     :param v: 1 or 3 vector
-    :return: skew-symmetric matrix
-    SKEW(V) is a skew-symmetric matrix formed from V.
+    :return: skew-symmetric matrix in so(2) or so(3)
+    :rtype: numpy ndarray
+    
+    ``skew(V)`` is a skew-symmetric matrix formed from V.
 
-    If V (1x1) then S =
-            | 0  -v |
-            | v   0 |
+    If V (1x1) then S = :math:`\left[ \begin{array}{cc} 0 & -v \\ v & 0 \end{array} \right]`
+        
 
-    and if V (1x3) then S =
-           |  0  -vz   vy |
-           | vz    0  -vx |
-           |-vy   vx    0 |
+    and if V (1x3) then S = :math:`\left[ \begin{array}{ccc} 0 & -v_z & v_y \\ v_z & 0 & -v_x \\ -v_y & v_x & 0\end{array} \right]`
 
-    Notes::
-    - This is the inverse of the function VEX().
+
+    Notes:
+        
+    - This is the inverse of the function ``vex()``.
     - These are the generator matrices for the Lie algebras so(2) and so(3).
     """
     v = argcheck.getvector(v, None, 'sequence')
@@ -963,27 +1013,26 @@ def skew(v):
 
 # ---------------------------------------------------------------------------------------#
 def vex(s):
-    """
-    VEX Convert skew-symmetric matrix to vector
+    r"""
+    VEX Skew-symmetric matrix to vector
 
-    :param s:skew-symmetric matrix
-    :return: column vector
+    :param s: skew-symmetric matrix
+    :return: vector
+    :rtype: numpy ndarray
 
-    VEX(S) is the vector which has the corresponding skew-symmetric matrix S.
-    In the case that S (2x2) then V is 1x1
-           S = | 0  -v |
-               | v   0 |
-    In the case that S (3x3) then V is 3x1.
-               |  0  -vz   vy |
-           S = | vz    0  -vx |
-               |-vy   vx    0 |
-
-    Notes::
+    ``vex(S)`` is the vector which has the corresponding skew-symmetric matrix ``S``.
+    
+    For the so(2) case (2x2 matrix) where ``S`` (2x2) :math:`= \left[ \begin{array}{cc} 0 & -v \\ v & 0 \end{array} \right]` then ``V`` is 1x1
+    
+    For the so(3) case (3x3 matrix) where ``S`` (3x3) :math:`= \left[ \begin{array}{ccc} 0 & -v_z & v_y \\ v_z & 0 & -v_x \\ -v_y & v_x & 0\end{array} \right]` then ``V`` is 3x1.
+    
+    Notes:
+        
     - This is the inverse of the function SKEW().
     - Only rudimentary checking (zero diagonal) is done to ensure that the matrix
-    is actually skew-symmetric.
+      is actually skew-symmetric.
     - The function takes the mean of the two elements that correspond to each unique
-    element of the matrix.
+      element of the matrix.
     """
     if s.shape == (3,3):
         return 0.5 * np.array([s[2, 1] - s[1, 2], s[0, 2] - s[2, 0], s[1, 0] - s[0, 1]])
