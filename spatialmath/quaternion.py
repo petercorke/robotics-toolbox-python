@@ -1,13 +1,13 @@
 # Author: Aditya Dua
 # 28 January, 2018
 
-import numpy as np
-import math
-import transforms as tr
-import quat_np as quat
 from collections import UserList
-import argcheck
+import math
+import numpy as np
 
+import spatialmath.base.transforms as tr
+import spatialmath.base.quat_np as quat
+import spatialmath.base.argcheck as argcheck
 
 class Quaternion(UserList):
     
@@ -614,22 +614,22 @@ class UnitQuaternion(Quaternion):
         assert type(other) is UnitQuaternion
         return (self / other).unit()
 
-q = Quaternion([1,2,3,4])
-print(q)
-q.append(q)
-print(len(q))
-print(q)
-
-a = np.random.uniform(size=(6,4))
-q = Quaternion(a)
-q2 = Quaternion()
-
-u = UnitQuaternion()
-#print(u)
-len(u)
-a = u[0]
-
 if __name__ == '__main__':
+    q = Quaternion([1,2,3,4])
+    print(q)
+    q.append(q)
+    print(len(q))
+    print(q)
+
+    a = np.random.uniform(size=(6,4))
+    q = Quaternion(a)
+    q2 = Quaternion()
+
+    u = UnitQuaternion()
+    #print(u)
+    len(u)
+    a = u[0]
+
 
     import numpy.testing as nt
     import unittest

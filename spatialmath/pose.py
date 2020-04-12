@@ -6,13 +6,13 @@ Created on Sat Mar 21 15:48:52 2020
 @author: corkep
 """
 
-import transforms
-import numpy as np
 from collections import UserList
-import argcheck
+import numpy as np
 import math
-    
-import super_pose as sp
+
+from spatialmath.base import argcheck 
+from spatialmath.base import transforms
+from spatialmath import super_pose as sp
 
 class SO2(sp.SuperPose):
     
@@ -295,61 +295,63 @@ class SE3(SO3):
         return cls(transforms.angvec2tr(theta, v, unit=unit))
 
 
-a = SO2(0.2)
-b = SO2(a)
-print(a+a)
-print(a*a)
+if __name__ == '__main__':
 
-b = SO2(0.1)
-b.append(a)
-b.append(a)
-b.append(a)
-b.append(a)
-print(len(a))
-print(len(b))
-print(b)
+    a = SO2(0.2)
+    b = SO2(a)
+    print(a+a)
+    print(a*a)
 
-c = SO2(0.3)
-c.extend(a)
-c.extend(b)
-print(len(c))
+    b = SO2(0.1)
+    b.append(a)
+    b.append(a)
+    b.append(a)
+    b.append(a)
+    print(len(a))
+    print(len(b))
+    print(b)
 
-d = SO2(0.4)
-d.append(b)
-print(len(d))
-print(d)
+    c = SO2(0.3)
+    c.extend(a)
+    c.extend(b)
+    print(len(c))
+
+    d = SO2(0.4)
+    d.append(b)
+    print(len(d))
+    print(d)
 
 
-# if __name__ == '__main__':
+    # if __name__ == '__main__':
 
-#     import numpy.testing as nt
-        
-#     class Test_check(unittest.TestCase):
-        
-#         def test_unit(self):
+    #     import numpy.testing as nt
             
+    #     class Test_check(unittest.TestCase):
+            
+    #         def test_unit(self):
+                
 
-#print(a)
-#print(a*a)
-#c = SO2(0)
-#
-#b = a
-#print(len(b))
-#b.append(c)
-#b.append(c)
-#print(len(b))
-#print(b)
-#print(b)
-#print(b[0])
-#print(type(a))
-#print(type(b))
+    #print(a)
+    #print(a*a)
+    #c = SO2(0)
+    #
+    #b = a
+    #print(len(b))
+    #b.append(c)
+    #b.append(c)
+    #print(len(b))
+    #print(b)
+    #print(b)
+    #print(b[0])
+    #print(type(a))
+    #print(type(b))
 
-#arr = [SO2(0), SO2(0.1), SO2(0.2)]
-#print(arr)
-#b = np.array(arr)
-#print(b)
-#print('--')
-#print(arr[0])
-#print(b[1])
-#print(b*a)
-        
+    #arr = [SO2(0), SO2(0.1), SO2(0.2)]
+    #print(arr)
+    #b = np.array(arr)
+    #print(b)
+    #print('--')
+    #print(arr[0])
+    #print(b[1])
+    #print(b*a)
+            

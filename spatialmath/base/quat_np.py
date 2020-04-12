@@ -7,10 +7,11 @@ Created on Fri Apr 10 14:12:56 2020
 """
 
 import sys
-import numpy as np
 import math
-import argcheck as check
-import transforms as tr
+import numpy as np
+
+import spatialmath.base.argcheck as check
+import spatialmath.base.transforms as tr
 
 def qone():
     return np.r_[1, 0,0,0]
