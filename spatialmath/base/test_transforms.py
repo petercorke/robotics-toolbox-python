@@ -11,7 +11,7 @@ Created on Fri Apr 10 14:19:04 2020
 import numpy.testing as nt
 import unittest
 
-from transforms import *
+from spatialmath.base.transforms import *
         
 class Test2D(unittest.TestCase):
     def test_rot2(self):
