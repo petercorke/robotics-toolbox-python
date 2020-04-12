@@ -11,8 +11,8 @@ import timeit
 
 N = 1000000
 
-quat_setup = '''import quat_np as quat
-import quaternion as qq
+quat_setup = '''import spatialmath.base.quaternion as quat
+import spatialmath.quaternion as qq
 import numpy as np
 q1 = quat.qrand()
 q2 = quat.qrand()
@@ -20,9 +20,10 @@ v = np.r_[1,2,3]
 Q1 = qq.UnitQuaternion.Rx(0.2)
 Q2 = qq.UnitQuaternion.Ry(0.3)'''
 
+transforms_setup = '''import spatialmath.base.transforms as tr'''
 
 
-t = timeit.timeit(stmt='transforms.rotx(0.2)', setup='import transforms', number=N)
+t = timeit.timeit(stmt='tr.rotx(0.2)', setup=transforms_setup, number=N)
 print('transforms.rotx: ', t, ' us')
 
 
