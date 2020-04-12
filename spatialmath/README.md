@@ -1,6 +1,6 @@
-# Robotics Toolbox for Python
+# Spatial Maths for Python
 
-The aim is to replicate the functionality of the MATLAB&reg; version while achieving the conflicting high-level design aims of being:
+Spatial maths capability underpins all of robotics and robotic vision.  The aim of the `spatialmath` package is to replicate the functionality of the MATLAB&reg; Spatial Math Toolbox while achieving the conflicting high-level design aims of being:
 
 * as similar as possible to the MATLAB function names and semantics
 * as Pythonic as possible
@@ -14,7 +14,27 @@ More detailed design aims include:
 * By default all `np.ndarray` vectors have the shape `(N,)` but functions also accept row `(1,N)` and column `(N,1)` vectors.  This is a gnarly aspect of numpy.
 * Unlike RTB these functions do not support sequences, that functionality is supported by the pose classes `SO2`, `SE2`, `SO3`, `SE3`.
 
+Quick example:
+
+```
+import spatialmath as sm
+
+R = sm.SO3.Rx(30, 'deg')
+print(R)
+   1         0         0          
+   0         0.866025 -0.5        
+   0         0.5       0.866025   
+```
+which constructs a rotation about the x-axis by 30 degrees.
+
+
 ## Low-level spatial math
+
+First lets import the low-level transform functions
+
+```
+>>> from spatialmath.base.transforms import *
+```
 
 Let's start with a familiar and tangible example:
 
@@ -30,7 +50,7 @@ array([[ 1.       ,  0.       ,  0.       ],
        [ 0.       ,  0.8660254, -0.5      ],
        [ 0.       ,  0.5      ,  0.8660254]])
 ```
-Remember that these are `numpy` arrays so to perform matrix multiplicatin you need to use the `@` operator, for example
+Remember that these are `numpy` arrays so to perform matrix multiplication you need to use the `@` operator, for example
 
 ```
 rotx(0.3) @ roty(0.2)
@@ -53,7 +73,7 @@ array([[1., 0., 1.],
 * as a list or a tuple
 
 ```
-transl2([1,2])
+transl2( [1,2] )
 Out[443]: 
 array([[1., 0., 1.],
        [0., 1., 2.],
@@ -79,7 +99,28 @@ array([[1., 0., 1.],
 trplot example
 packages, animation
 
+There is a single module that deals with quaternions, unit or not, and the representation is a `numpy` array of four elements.  As above, functions can accept the `numpy` array, a list, dict or `numpy` row or column vectors.
+
+```
+>>> from spatialmath.base.quaternion import *
+>>> q = qqmul([1,2,3,4], [5,6,7,8])
+>>> q
+array([-60,  12,  30,  24])
+>>> qprint(q)
+-60.000000 < 12.000000, 30.000000, 24.000000 >
+>>> qnorm(q)
+72.24956747275377
+```
+
+
 ## High-level classes
+
+```
+>>> from spatialmath import *
+>>> SO2(.1)
+[[ 0.99500417 -0.09983342]
+ [ 0.09983342  0.99500417]]
+```
 
 These classes abstract the low-level numpy arrays into objects that obey the rules associated with the mathematical groups SO(2), SE(2), SO(3), SE(3) as well as twists and quaternions.  pose classes `SO2`, `SE2`, `SO3`, `SE3`.
 
