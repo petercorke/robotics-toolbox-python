@@ -1,4 +1,4 @@
-# Spatial Maths for Python
+# Introduction
 
 Spatial maths capability underpins all of robotics and robotic vision.  The aim of the `spatialmath` package is to replicate the functionality of the MATLAB&reg; Spatial Math Toolbox while achieving the conflicting high-level design aims of being:
 
@@ -29,6 +29,19 @@ which constructs a rotation about the x-axis by 30 degrees.
 
 
 ## Low-level spatial math
+
+These low-level functions:
+
+* represent the spatial-math object as a numpy.ndarray
+* inputs are either floats, lists, tuples or a numpy.ndarray
+
+For example an SE(2) pose is represented by a 3x3 numpy array, an ndarray with shape=(3,3). A unit quaternion is 
+represented by a 4-element numpy array, an ndarray with shape=(4,).
+
+These functions do not support sequences.  You can keep these pose primitives (numpy arrays) in high-order numpy arrays (ie. add an extra dimensions),
+or keep them in a list, tuple or any other python container.
+Sequence functionality is supported by the pose classes `SO2`, `SE2`, `SO3`, `SE3` described in the [high-level spatial math section](#high-level-classes).
+
 
 First lets import the low-level transform functions
 
@@ -115,6 +128,14 @@ array([-60,  12,  30,  24])
 
 ## High-level classes
 
+
+These classes abstract the low-level numpy arrays into objects of class `SO2`, `SE2`, `SO3`, `SE3`, `UnitQuaternion` that obey the rules associated with the mathematical groups SO(2), SE(2), SO(3), SE(3) and
+H.
+Using classes has several merits:
+
+* ensures type safety, for example it stops us mixing a 2D homogeneous transformation with a 3D rotation matrix -- both of which are 3x3 matrices.
+* ensure that an SO(2), SO(3) or unit-quaternion rotation is always valid because the constraints (eg. orthogonality, unit norm) are enforced when the object is constructed.
+
 ```
 >>> from spatialmath import *
 >>> SO2(.1)
@@ -122,26 +143,22 @@ array([-60,  12,  30,  24])
  [ 0.09983342  0.99500417]]
 ```
 
-These classes abstract the low-level numpy arrays into objects that obey the rules associated with the mathematical groups SO(2), SE(2), SO(3), SE(3) as well as twists and quaternions.  pose classes `SO2`, `SE2`, `SO3`, `SE3`.
-
-Using classes ensures type safety, for example it stops us mixing a 2D homogeneous transformation with a 3D rotation matrix -- both are 3x3 matrices.
-
-These classes are all derived from two parent classes:
-
-* `RTBPose` which provides common functionality for all
-* `UserList` which provdides the ability to act like a list 
-
-The latter is important because frequnetly in robotics we want a sequence, a trajectory, of rotation matrices or poses.  However a list of these items has the type `list` and the elements are not enforced to be homogeneous, ie. a list could contain a mixture of classes.
-
+Type safety and type validity are particularly important when we deal with a sequence of such objects.  In robotics we frequently deal with trajectories of poses or rotation to describe objects moving in the
+world.
+However a list of these items has the type `list` and the elements are not enforced to be homogeneous, ie. a list could contain a mixture of classes.
 Another option would be to create a `numpy` array of these objects, the upside being it could be a multi-dimensional array.  The downside is that again the array is not guaranteed to be homogeneous.
 
 
-The approach adopted here is to give these classes list superpowers.  Using the example of SE(3) but applicable to all
+The approach adopted here is to give these classes _list superpowers_ so that a single `SE3` object can contain a list of SE(3) poses.  The pose objects are a list subclass so we can index it or slice it as we
+would a list, but the result each time belongs to the class it was sliced from.  Here's a simple example of SE(3) but applicable to all the classes
+
 
 ```
 T = transl(1,2,3) # create a 4x4 np.array
 
 a = SE3(T)
+len(a)
+type(a)
 a.append(a)  # append a copy
 a.append(a)  # append a copy
 type(a)
@@ -150,6 +167,28 @@ a[1]  # extract one element of the list
 for x in a:
   # do a thing
 ```
+
+
+These classes are all derived from two parent classes:
+
+* `RTBPose` which provides common functionality for all
+* `UserList` which provdides the ability to act like a list 
+
+# Vectorization
+
+For most methods, if applied to an object that contains a sequence, the result will be on a sequence.
+
+For binary operations the results are vectorized.  For the case `X1 op X2` then the the following element-wise operations occur
+
+| len(X1) | len(X2)   |  len(X1 op X2)   | results                 |
+--------- | --------- | ---------------- | ----------------------- |
+| 1       |  1        |    1             | `X = X1 op X2`          |
+| 1       |  N        |    N             | `X[i] = X1 op X2[i]`    |
+| N       |  1        |    N             | `X[i] = X1[i] op X2`    |
+| N       |  N        |    N             | `X[i] = X1[i] op X2[i]` |
+| N       |  M        |    -             | `ValueError`            |
+
+
 
 ## Symbolic support
 
