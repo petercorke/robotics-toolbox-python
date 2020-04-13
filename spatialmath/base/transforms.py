@@ -322,6 +322,10 @@ def unit(v):
     :rtype: numpy ndarray
     :raises ValueError: for zero length vector
     
+    ``unit(v)`` returns a vector parallel to `v` of unit length.
+    
+    :seealso: norm
+    
     """
     
     v = argcheck.getvector(v)
@@ -331,7 +335,21 @@ def unit(v):
         return v / n
     else:
         raise ValueError("Vector has zero norm")
-        
+
+def norm(v):
+    """
+    Norm of vector
+
+    :param v: n-vector as a list, dict, or a numpy array, row or column vector
+    :return: norm of vector
+    :rtype: float
+    
+    ``norm(v)`` is the 2-norm (length, magnitude) of the vector ``v``.
+    
+    :seealso: unit
+    
+    """
+    return np.linalg.norm(v)
 
 def isunit(v):
     return abs(np.linalg.norm(v)-1) < 100*np.finfo(np.float64).eps
@@ -339,19 +357,21 @@ def isunit(v):
 # ---------------------------------------------------------------------------------------#
 def r2t(R, check=False):
     """
-    Convert rotation matrix to a homogeneous transform
+    Convert SO(n) to SE(n)
 
     :param R: rotation matrix
     :param check: check if rotation matrix is valid (default False, no check)
     :return: homogeneous transformation matrix
     :rtype: numpy ndarray
 
-    ``R2T(R)`` is an SE(2) or SE(3) homogeneous transform equivalent to an
+    ``r2t(R)`` is an SE(2) or SE(3) homogeneous transform equivalent to an
     SO(2) or SO(3) orthonormal rotation matrix ``R`` with a zero translational
     component
     
     - if ``R`` is 2x2 then return is 3x3: SO(2) -> SE(2)
     - if ``R`` is 3x3 then return is 4x4: SO(3) -> SE(3)
+    
+    :seealso: t2r, rt2tr
     """
     
     assert isinstance(R, np.ndarray)
@@ -370,7 +390,7 @@ def r2t(R, check=False):
 # ---------------------------------------------------------------------------------------#
 def t2r(T, check=False):
     """
-    Convert homogeneous transform to a rotation matrix
+    Convert SE(n) to SO(n)
 
     :param T: homogeneous transformation matrix
     :param check: check if rotation matrix is valid (default False, no check)
@@ -385,6 +405,8 @@ def t2r(T, check=False):
     - if ``T`` is 4x4 then return is 3x3: SE(3) -> SO(3)
     
     Any translational component of T is lost.
+    
+    :seealso: r2t, tr2rt
     """
     assert isinstance(T, np.ndarray)
     dim = T.shape
@@ -402,9 +424,82 @@ def t2r(T, check=False):
 
     return R
 
+# ---------------------------------------------------------------------------------------#
+def tr2rt(T, check=False):
+    """
+    Convert SE(3) to SO(3) and translation
+
+    :param T: homogeneous transform matrix
+    :param check: check if rotation matrix is valid (default False, no check)
+    :return: Rotation matrix and translation vector
+
+    (R,t) = tr2rt(T) splits a homogeneous transformation matrix (NxN) into an orthonormal
+    rotation matrix R (MxM) and a translation vector T (Mx1), where N=M+1.
+
+    Works for `T` in SE(2) or SE(3):
+        
+    - If TR is 4x4, then R is 3x3 and T is 3x1.
+    - If TR is 3x3, then R is 2x2 and T is 2x1.
+    
+    :seealso: rt2tr, tr2r
+    """
+    dim = T.shape
+    assert dim[0] == dim[1], 'Matrix must be square'
+    
+    if dim[0] == 3:
+        R = t2r(T, check)
+        t = T[:2,2]
+    elif dim[0] == 4:
+        R = t2r(T, check)
+        t = T[:3,3]
+    else:
+        raise ValueError('T must be an SE2 or SE3 homogeneous transformation matrix')
+    
+    return [R, t]
+
+# ---------------------------------------------------------------------------------------#
+def rt2tr(R, t, check=False):
+    """
+    Convert SO(3) and translation to SE(3)
+
+    :param R: rotation matrix
+    :param t: translation vector
+    :param check: check if rotation matrix is valid (default False, no check)
+    :return: homogeneous transform
+
+    RT2TR(R, t) is a homogeneous transformation matrix (N+1xN+1) formed from an
+    orthonormal rotation matrix R (NxN) and a translation vector t
+    (Nx1).  Works for `R` in SO(2) or SO(3):
+        
+    - If R is 2x2 and t is 2x1, then TR is 3x3
+    - If R is 3x3 and t is 3x1, then TR is 4x4
+    
+    :seealso: tr2rt, r2t
+    """
+    t = argcheck.getvector(t, dim=None, out='array')
+    if R.shape[0] != t.shape[0]:
+        raise ValueError("R and t must have the same number of rows")
+    if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
+            raise ValueError('Invalid rotation matrix')
+            
+    if R.shape == (2, 2):
+        T = np.eye(3)
+        T[:2,:2] = R
+        T[:2,2] = t
+    elif R.shape == (3, 3):
+        T = np.eye(4)
+        T[:3,:3] = R
+        T[:3,3] = t
+    else:
+        raise ValueError('R must be an SO2 or SO3 rotation matrix')
+    
+    return T
+
+#======================= predicates
+
 def isR(R):
     r"""
-    Test if matrix is a rotation matrix
+    Test if matrix is SO(n)
     
     :param R: matrix to test
     :return: whether matrix is a rotation matrix
@@ -481,71 +576,7 @@ def isrot2(R, check=False):
     """
     return R.shape == (2,2) and (not check or isR(R))
 
-# ---------------------------------------------------------------------------------------#
-def tr2rt(T, check=False):
-    """
-    TR2RT Convert homogeneous transform to rotation and translation
-
-    :param T: homogeneous transform matrix
-    :param check: check if rotation matrix is valid (default False, no check)
-    :return: Rotation matrix and translation vector
-
-    (R,t) = tr2rt(T) splits a homogeneous transformation matrix (NxN) into an orthonormal
-    rotation matrix R (MxM) and a translation vector T (Mx1), where N=M+1.
-
-    Works for TR in SE(2) or SE(3)
-    - If TR is 4x4, then R is 3x3 and T is 3x1.
-    - If TR is 3x3, then R is 2x2 and T is 2x1.
-    """
-    dim = T.shape
-    assert dim[0] == dim[1], 'Matrix must be square'
-    
-    if dim[0] == 3:
-        R = t2r(T, check)
-        t = T[:2,2]
-    elif dim[0] == 4:
-        R = t2r(T, check)
-        t = T[:3,3]
-    else:
-        raise ValueError('T must be an SE2 or SE3 homogeneous transformation matrix')
-    
-    return [R, t]
-
-# ---------------------------------------------------------------------------------------#
-def rt2tr(R, t, check=False):
-    """
-    RT2TR Convert rotation and translation to homogeneous transform
-
-    :param R: rotation matrix
-    :param t: translation vector
-    :param check: check if rotation matrix is valid (default False, no check)
-    :return: homogeneous transform
-
-    RT2TR(R, t) is a homogeneous transformation matrix (N+1xN+1) formed from an
-    orthonormal rotation matrix R (NxN) and a translation vector t
-    (Nx1).  Works for R in SO(2) or SO(3):
-    - If R is 2x2 and t is 2x1, then TR is 3x3
-    - If R is 3x3 and t is 3x1, then TR is 4x4
-    """
-    t = argcheck.getvector(t, dim=None, out='array')
-    if R.shape[0] != t.shape[0]:
-        raise ValueError("R and t must have the same number of rows")
-    if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
-            raise ValueError('Invalid rotation matrix')
-            
-    if R.shape == (2, 2):
-        T = np.eye(3)
-        T[:2,:2] = R
-        T[:2,2] = t
-    elif R.shape == (3, 3):
-        T = np.eye(4)
-        T[:3,:3] = R
-        T[:3,3] = t
-    else:
-        raise ValueError('R must be an SO2 or SO3 rotation matrix')
-    
-    return T
-
+#========================= angle sequences
 
 # ---------------------------------------------------------------------------------------#
 def rpy2r(roll, pitch=None, yaw=None, *, unit='rad', order='zyx'):
@@ -780,7 +811,7 @@ def oa2r(o, a=None):
     - The rotation submatrix is guaranteed to be orthonormal so long as O and A
       are not parallel.
     - The translational part is zero.
-    - The vectors O and A are parallel to the Y- and Z-axes of the coordinate frame.
+    - The vectors O and A are parallel to the Y- and Z-axes of the equivalent coordinate frame.
     """
     o = argcheck.getvector(o, 3, out='array')
     a = argcheck.getvector(a, 3, out='array')
@@ -811,7 +842,7 @@ def oa2tr(o, a=None):
     - The rotation submatrix is guaranteed to be orthonormal so long as O and A
       are not parallel.
     - The translational part is zero.
-    - The vectors O and A are parallel to the Y- and Z-axes of the coordinate frame.
+    - The vectors O and A are parallel to the Y- and Z-axes of the equivalent coordinate frame.
     """
     return r2t(oa2r(o, a))
 

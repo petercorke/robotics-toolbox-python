@@ -195,6 +195,7 @@ class Quaternion(UserList):
          1      N       N    ``prod[i] = left * right[i]``
          N      1       N    ``prod[i] = left[i] * right``
          N      N       N    ``prod[i] = left[i] * right[i]``
+         N      M       -    ``ValueError``
         ====   =====   ====  ================================
 
         A scalar of length N is a list, tuple or numpy array.
@@ -250,6 +251,7 @@ class Quaternion(UserList):
          1      N       N    ``prod[i] = left * right[i]``
          N      1       N    ``prod[i] = left[i] * right``
          N      N       N    ``prod[i] = left[i] * right[i]``
+         N      M       -    ``ValueError``
         ====   =====   ====  ================================
 
         A scalar of length N is a list, tuple or numpy array.
@@ -295,6 +297,7 @@ class Quaternion(UserList):
          1      N       N    ``prod[i] = left * right[i]``
          N      1       N    ``prod[i] = left[i] * right``
          N      N       N    ``prod[i] = left[i] * right[i]``
+         N      M       -    ``ValueError``
         ====   =====   ====  ================================
 
         A scalar of length N is a list, tuple or numpy array.
@@ -349,6 +352,7 @@ class Quaternion(UserList):
          1      N       N    ``prod[i] = left + right[i]``
          N      1       N    ``prod[i] = left[i] + right``
          N      N       N    ``prod[i] = left[i] + right[i]``
+         N      M       -    ``ValueError``
         ====   =====   ====  ================================
 
         A scalar of length N is a list, tuple or numpy array.
@@ -394,6 +398,7 @@ class Quaternion(UserList):
          1      N       N    ``prod[i] = left - right[i]``
          N      1       N    ``prod[i] = left[i] - right``
          N      N       N    ``prod[i] = left[i] - right[i]``
+         N      M       -    ``ValueError``
         ====   =====   ====  ================================
 
         A scalar of length N is a list, tuple or numpy array.
