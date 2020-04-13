@@ -56,3 +56,6 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 autodoc_mock_imports = ["numpy", "scipy"] 
+
+# extensions = ['rst2pdf.pdfbuilder']
+# pdf_documents = [('index', u'rst2pdf', u'Sample rst2pdf doc', u'Your Name'),]

@@ -3,21 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Spatial Maths package's documentation!
-=================================================
+Spatial Maths for Python
+========================
 
     
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   support
-   README
+   intro
    spatialmath
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   support
+   indices

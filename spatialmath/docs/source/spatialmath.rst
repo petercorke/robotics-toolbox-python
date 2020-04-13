@@ -1,9 +1,8 @@
-spatialmath package
-===================
+Spatial Math package
+====================
 
-Pose classes
-------------
-
+High-level classes
+------------------
 
 
 spatialmath.pose
@@ -13,6 +12,8 @@ spatialmath.pose
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
+   :special-members:
 
 
 spatialmath.quaternion
@@ -22,10 +23,12 @@ spatialmath.quaternion
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
+   :special-members: __mul__, __imul__, __rmul__, __floordiv__, __eq__, __ne__, __pow__, __add__, __sub__, __repr__, __str__, __len__, __init__
    
    
-Low-level functions: spatialmath.base
--------------------------------------
+Low-level (base) functions
+--------------------------
 
 spatialmath.base.transforms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -34,6 +37,8 @@ spatialmath.base.transforms
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
+   :special-members:
 
 spatialmath.base.quaternion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -42,3 +47,5 @@ spatialmath.base.quaternion
    :members:
    :undoc-members:
    :show-inheritance:
+   :inherited-members:
+   :special-members:
