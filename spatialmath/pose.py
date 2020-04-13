@@ -3,7 +3,7 @@
 """
 Created on Sat Mar 21 15:48:52 2020
 
-@author: corkep
+@author: Peter Corke
 """
 
 from collections import UserList

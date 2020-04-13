@@ -204,11 +204,69 @@ class SuperPose(UserList, ABC):
 
     #----------------------- arithmetic
 
-    def __mul__(self, other):
-        assert type(self) == type(other), 'operands to * are of different types'
-        return self._op2(other, lambda x, y: x @ y )
+    def __mul__(left, right):
+        """
+        multiply quaternion
+        
+        :arg left: left multiplicand
+        :arg right: right multiplicand
+        :return: product
+        :raises: ValueError
+        
+        ==============   ==============   ==============  ================
+                   Multiplicands                   Product
+        -------------------------------   --------------------------------
+            left             right            type           result
+        ==============   ==============   ==============  ================
+        Quaternion       Quaternion       Quaternion      Hamilton product
+        Quaternion       UnitQuaternion   Quaternion      Hamilton product
+        Quaternion       scalar           Quaternion      scalar product
+        UnitQuaternion   Quaternion       Quaternion      Hamilton product
+        UnitQuaternion   UnitQuaternion   UnitQuaternion  Hamilton product
+        UnitQuaternion   scalar           Quaternion      scalar product
+        UnitQuaternion   3-vector         3-vector        vector rotation
+        ==============   ==============   ==============  ================
+
+        Any other input combinations result in a ValueError.
+        
+        Note that self and other can have a length greater than 1 in which case
+        
+        ====   =====   ====  ================================
+        left   right   len     operation
+        ====   =====   ====  ================================
+         1      1       1    ``prod = left * right``
+         1      N       N    ``prod[i] = left * right[i]``
+         N      1       N    ``prod[i] = left[i] * right``
+         N      N       N    ``prod[i] = left[i] * right[i]``
+        ====   =====   ====  ================================
+
+        A scalar of length N is list, tuple or numpy array.
+        A 3-vector of length N is a 3xN numpy array, where each column is a 3-vector.
+        """
+        assert type(left) == type(right), 'operands to * are of different types'
+        return left._op2(right, lambda x, y: x @ y )
 
     def __rmul__(x, y):
+        """
+        
+
+        Parameters
+        ----------
+        x : TYPE
+            DESCRIPTION.
+        y : TYPE
+            DESCRIPTION.
+
+        Raises
+        ------
+        NotImplemented
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         raise NotImplemented()
         
     def __imul__(self, other):
