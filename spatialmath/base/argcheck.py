@@ -7,7 +7,8 @@ Created on Fri Mar 20 11:41:25 2020
 """
 import numpy as np
 import math
-import unittest
+
+print('loading base/argcheck.py')
 
 def matrix(m, shape):
     assert ismatrix(m, shape)
@@ -22,7 +23,7 @@ def getvector(v, dim=None, out='array'):
         v = [v]
         
     if isinstance(v, (list,tuple)):
-        if dim and v and len(v) != dim:
+        if dim is not None and v and len(v) != dim:
             raise ValueError("incorrect vector length")
         if out == 'sequence':
             return v
@@ -36,7 +37,7 @@ def getvector(v, dim=None, out='array'):
             raise ValueError("invalid output specifier")
     elif isinstance(v, np.ndarray):
         s = v.shape
-        if dim:
+        if dim is not None:
             if not ( s == (dim,) or s == (1,dim) or s == (dim,1) ):
                 raise ValueError("incorrect vector length")
 
@@ -97,6 +98,7 @@ def isvectorlist(l, n):
         
 if __name__ == '__main__':
 
+    import unittest
     import numpy.testing as nt
         
     class Test_check(unittest.TestCase):
