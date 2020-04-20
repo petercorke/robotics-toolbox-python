@@ -9,7 +9,7 @@ import sys
 import math
 import numpy as np
 from scipy.linalg import expm
-import spatialmath.base.argcheck as check
+import spatialmath.base.argcheck as argcheck
 
 try:
     import vtk
@@ -59,7 +59,7 @@ def rotx(theta, unit="rad"):
     - ``rotx(THETA, "deg")`` as above but THETA is in degrees
     """
 
-    theta = check.getunit(theta, unit)
+    theta = argcheck.getunit(theta, unit)
     ct = _cos(theta)
     st = _sin(theta)
     R = np.array([
@@ -88,7 +88,7 @@ def roty(theta, unit="rad"):
     - ``roty(THETA, "deg")`` as above but THETA is in degrees
     """
 
-    theta = check.getunit(theta, unit)
+    theta = argcheck.getunit(theta, unit)
     ct = _cos(theta)
     st = _sin(theta)
     R = np.array([
@@ -116,7 +116,7 @@ def rotz(theta, unit="rad"):
       of THETA radians about the z-axis
     - ``rotz(THETA, "deg")`` as above but THETA is in degrees
     """
-    theta = check.getunit(theta, unit)
+    theta = argcheck.getunit(theta, unit)
     ct = _cos(theta)
     st = _sin(theta)
     R = np.array([
@@ -148,7 +148,7 @@ def trotx(theta, unit="rad", t=None):
     """
     T  = np.pad( rotx(theta, unit), (0,1) )
     if t is not None:
-        T[:3,3] = check.getvector(t, 3, 'array')
+        T[:3,3] = argcheck.getvector(t, 3, 'array')
     T[3,3] = 1.0
     return T
 
@@ -173,7 +173,7 @@ def troty(theta, unit="rad", t=None):
     """
     T  = np.pad( roty(theta, unit), (0,1) )
     if t is not None:
-        T[:3,3] = check.getvector(t, 3, 'array')
+        T[:3,3] = argcheck.getvector(t, 3, 'array')
     T[3,3] = 1.0
     return T
 
@@ -198,7 +198,7 @@ def trotz(theta, unit="rad", t=None):
     """
     T  = np.pad( rotz(theta, unit), (0,1) )
     if t is not None:
-        T[:3,3] = check.getvector(t, 3, 'array')
+        T[:3,3] = argcheck.getvector(t, 3, 'array')
     T[3,3] = 1.0
     return T
 
@@ -234,11 +234,11 @@ def transl(x, y=None, z=None):
         T = np.identity(4)
         T[:3,3] = [x, y, z]
         return T
-    elif check.isvector(x, 3):
+    elif argcheck.isvector(x, 3):
         T = np.identity(4)
-        T[:3,3] = check.getvector(x, 3, out='array')
+        T[:3,3] = argcheck.getvector(x, 3, out='array')
         return T
-    elif check.ismatrix(x, (4,4)):
+    elif argcheck.ismatrix(x, (4,4)):
         return x[:3,3]
     else:
         ValueError('bad argument')
@@ -259,7 +259,7 @@ def rot2(theta, unit='rad'):
     - ``ROT2(THETA)`` is an SO(2) rotation matrix (2x2) representing a rotation of THETA radians.
     - ``ROT2(THETA, 'deg')`` as above but THETA is in degrees.
     """
-    theta = check.getunit(theta, unit)
+    theta = argcheck.getunit(theta, unit)
     ct = _cos(theta)
     st = _sin(theta)
     R = np.array([
@@ -292,7 +292,7 @@ def trot2(theta, unit='rad', t=None):
     """
     T  = np.pad( rot2(theta, unit), (0,1) )
     if t is not None:
-        T[:2,2] = check.getvector(t, 2, 'array')
+        T[:2,2] = argcheck.getvector(t, 2, 'array')
     T[2,2] = 1.0
     return T
 
@@ -327,11 +327,11 @@ def transl2(x, y=None):
         T = np.identity(3)
         T[:2,2] = [x, y]
         return T
-    elif check.isvector(x, 2):
+    elif argcheck.isvector(x, 2):
         T = np.identity(3)
-        T[:2,2] = check.getvector(x, 2)
+        T[:2,2] = argcheck.getvector(x, 2)
         return T
-    elif check.ismatrix(x, (3,3)):
+    elif argcheck.ismatrix(x, (3,3)):
         return x[:2,2]
     else:
         ValueError('bad argument')
@@ -354,7 +354,7 @@ def unit(v):
     
     """
     
-    v = check.getvector(v)
+    v = argcheck.getvector(v)
     n = np.linalg.norm(v)
     
     if n > 100*np.finfo(np.float64).eps: # if greater than eps
@@ -390,7 +390,23 @@ def isunitvec(v, tol=10):
         
     :seealso: unit, isunittwist
     """
-    return abs(np.linalg.norm(v)-1) < 100*np.finfo(np.float64).eps
+    return abs(np.linalg.norm(v)-1) < tol*np.finfo(np.float64).eps
+
+def iszerovec(v, tol=10):
+    """
+    Test if vector has zero length
+    
+    :param v: vector to test
+    :type v: numpy.ndarray
+    :param tol: tolerance in units of eps
+    :type tol: float
+    :return: whether vector has zero length
+    :rtype: bool
+        
+    :seealso: unit, isunittwist
+    """
+    return np.linalg.norm(v) < tol*np.finfo(np.float64).eps
+
 
 def isunittwist(v, tol=10):
     r"""
@@ -413,7 +429,7 @@ def isunittwist(v, tol=10):
         
     :seealso: unit, isunitvec
     """
-    v = check.getvector(v)
+    v = argcheck.getvector(v)
     
     if len(v) == 3:
         # test for SE(2) twist
@@ -546,7 +562,7 @@ def rt2tr(R, t, check=False):
     
     :seealso: tr2rt, r2t
     """
-    t = check.getvector(t, dim=None, out='array')
+    t = argcheck.getvector(t, dim=None, out='array')
     if R.shape[0] != t.shape[0]:
         raise ValueError("R and t must have the same number of rows")
     if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
@@ -697,6 +713,29 @@ def isskewa(S, tol = 10):
     """
     return np.linalg.norm(S[0:-1,0:-1] + S[0:-1,0:-1].T) < tol*np.finfo(np.float64).eps \
         and np.all(S[-1,:] == 0)
+
+def iseye(S, tol = 10):
+    """
+    Test if matrix is identity
+    
+    :param S: matrix to test
+    :type S: numpy.ndarray
+    :param tol: tolerance in units of eps
+    :type tol: float
+    :return: whether matrix is a proper skew-symmetric matrix
+    :rtype: bool
+    
+    Check if matrix is an identity matrix. We test that the trace tom row is zero
+    We check that the norm of the residual is less than ``tol * eps``.
+    
+    :seealso: isskew, isskewa
+    """
+    s = S.shape
+    if len(s) != 2 or s[0] != s[1]:
+        return False  # not a square matrix
+    return abs(S.trace() - s[0]) < tol * np.finfo(np.float64).eps
+        
+    
     
 #========================= angle sequences
 
@@ -740,9 +779,9 @@ def rpy2r(roll, pitch=None, yaw=None, unit='rad', order='zyx'):
     if np.isscalar(roll):
         angles = [roll, pitch, yaw]
     else:
-        angles = check.getvector(roll, 3)
+        angles = argcheck.getvector(roll, 3)
         
-    angles = check.getunit(angles, unit)
+    angles = argcheck.getunit(angles, unit)
     
     if order == 'xyz' or order == 'arm':
         R = rotx(angles[2]) @ roty(angles[1]) @ rotz(angles[0])
@@ -827,9 +866,9 @@ def eul2r(phi, theta=None, psi=None, unit='rad'):
     if np.isscalar(phi):
         angles = [phi, theta, psi]
     else:
-        angles = check.getvector(phi, 3)
+        angles = argcheck.getvector(phi, 3)
         
-    angles = check.getunit(angles, unit)
+    angles = argcheck.getunit(angles, unit)
         
     return rotz(angles[0]) @ roty(angles[1]) @ rotz(angles[2])
 
@@ -887,12 +926,12 @@ def angvec2r(theta, v, unit='rad'):
     - If ``THETA == 0`` then return identity matrix.
     - If ``THETA ~= 0`` then ``V`` must have a finite length.
     """
-    assert np.isscalar(theta) and check.isvector(v, 3), "Arguments must be theta and vector"
+    assert np.isscalar(theta) and argcheck.isvector(v, 3), "Arguments must be theta and vector"
     
     if np.linalg.norm(v) < 10*np.finfo(np.float64).eps:
             return np.eye(3)
         
-    theta = check.getunit(theta, unit)
+    theta = argcheck.getunit(theta, unit)
     
     # Rodrigue's equation
 
@@ -959,8 +998,8 @@ def oa2r(o, a=None):
     - O and A do not have to be orthogonal, so long as they are not parallel
     - The vectors O and A are parallel to the Y- and Z-axes of the equivalent coordinate frame.
     """
-    o = check.getvector(o, 3, out='array')
-    a = check.getvector(a, 3, out='array')
+    o = argcheck.getvector(o, 3, out='array')
+    a = argcheck.getvector(a, 3, out='array')
     n = np.cross(o, a)
     o = np.cross(a, n)
     R = np.stack( (transforms.unit(n), transforms.unit(o), transforms.unit(a)), axis=1)
@@ -1004,7 +1043,7 @@ def oa2tr(o, a=None):
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
-def tr2angvec(R, unit='rad', check=False):
+def tr2angvec(T, unit='rad', check=False):
     r"""
     Convert SO(3) or SE(3) to angle and rotation vector
     
@@ -1030,7 +1069,7 @@ def tr2angvec(R, unit='rad', check=False):
     
     """
 
-    if check.ismatrix(T, (4,4)):
+    if argcheck.ismatrix(T, (4,4)):
         R = t2r(T)
     else:
         R = T
@@ -1079,7 +1118,7 @@ def tr2eul(T, unit='rad', flip=False, check=False):
     :seealso: eul2r, eul2tr, tr2rpy, tr2angvec
     """
     
-    if check.ismatrix(T, (4,4)):
+    if argcheck.ismatrix(T, (4,4)):
         R = t2r(T)
     else:
         R = T
@@ -1089,7 +1128,7 @@ def tr2eul(T, unit='rad', flip=False, check=False):
     if abs(R[0,2]) < 10*np.finfo(np.float64).eps and abs(R[1,2]) < 10*np.finfo(np.float64).eps:
         eul[0] = 0
         sp = 0
-        cp = 0
+        cp = 1
         eul[1] = math.atan2(cp * R[0,2] + sp * R[1,2],R[2,2])
         eul[2] = math.atan2(-sp * R[0,0] + cp * R[1,0], -sp * R[0,1] + cp * R[1,1])
     else:
@@ -1099,8 +1138,8 @@ def tr2eul(T, unit='rad', flip=False, check=False):
             eul[0] = math.atan2(R[1,2],R[0,2])
         sp = math.sin(eul[0])
         cp = math.cos(eul[0])
-        eul[0] = math.atan2(cp * R[0,2] + sp * R[1,2],R[2,2])
-        eul[2] = math.atan2(-sp * R[0,0] + cp * R[1,0],-sp * R[0,1] + cp * R[1, 1])
+        eul[1] = math.atan2(cp * R[0,2] + sp * R[1,2], R[2,2])
+        eul[2] = math.atan2(-sp * R[0,0] + cp * R[1,0], -sp * R[0,1] + cp * R[1, 1])
 
     if unit == 'deg':
         eul *= 180 / math.pi
@@ -1143,7 +1182,7 @@ def tr2rpy(T, unit='rad', order='zyx', check=False):
     :seealso: rpy2r, rpy2tr, tr2eul, tr2angvec
     """
     
-    if check.ismatrix(T, (4,4)):
+    if argcheck.ismatrix(T, (4,4)):
         R = t2r(T)
     else:
         R = T
@@ -1151,41 +1190,80 @@ def tr2rpy(T, unit='rad', order='zyx', check=False):
     
     rpy = np.zeros((3,))
     if order == 'xyz' or order == 'arm':
-        if abs(abs(R[0,2]) - 1) < 10*np.finfo(np.float64).eps:
-            rpy[0] = 0
+
+        # XYZ order
+        if abs(abs(R[0,2]) - 1) < 10*np.finfo(np.float64).eps:  # when |R13| == 1
+            # singularity
+            rpy[0] = 0  # roll is zero
+            if R[0,2] > 0:
+                rpy[2] = math.atan2( R[2,1], R[1,1])   # R+Y
+            else:
+                rpy[2] = -math.atan2( R[1,0], R[2,0])   # R-Y
             rpy[1] = math.asin(R[0,2])
-            if R[2] > 0:
-                rpy[2] = math.atan2(R[2,1],R[1,1])
-            else:
-                rpy[2] = -math.atan2(R[1,0],R[2,0])
         else:
-            rpy[0] = -math.atan2(R[0,1],R[0,0])
-            rpy[1] = math.atan2(R[0,2] * math.cos(rpy[0,0]),R[0,0])
-            rpy[2] = -math.atan2(R[1,2],R[2,2])
+            rpy[0] = -math.atan2(R[0,1], R[0,0])
+            rpy[2] = -math.atan2(R[1,2], R[2,2])
+            
+            k = np.argmax(np.abs( [R[0,0], R[0,1], R[1,2], R[2,2]] ))
+            if k == 0:
+                rpy[1] =  math.atan(R[0,2]*math.cos(rpy[0])/R[0,0])
+            elif k == 1:
+                rpy[1] = -math.atan(R[0,2]*math.sin(rpy[0])/R[0,1])
+            elif k == 2:
+                rpy[1] = -math.atan(R[0,2]*math.sin(rpy[2])/R[1,2])
+            elif k == 3:
+                rpy[1] =  math.atan(R[0,2]*math.cos(rpy[2])/R[2,2])
+                                        
+
     elif order == 'zyx' or order == 'vehicle':
-        if abs(abs(R[2,0]) - 1) < 10*np.finfo(np.float64).eps:
-            rpy[0] = 0
-            rpy[1] = -math.asin(R[2,0])
+
+        # old ZYX order (as per Paul book)
+        if abs(abs(R[2,0]) - 1) < 10*np.finfo(np.float64).eps:  # when |R31| == 1
+            # singularity
+            rpy[0] = 0     # roll is zero
             if R[2,0] < 0:
-                rpy[2] = -math.atan2(R[0,1],R[0,2])
+                rpy[2] = -math.atan2(R[0,1], R[0,2])  # R-Y
             else:
-                rpy[2] = math.atan2(-R[0,1],-R[0,2])
+                rpy[2] = math.atan2(-R[0,1], -R[0,2])  # R+Y
+            rpy[1] = -math.asin(R[2,0])
         else:
-            rpy[0] = math.atan2(R[2,1],R[2,2])
-            rpy[1] = math.atan2(-R[2,0] * math.cos(rpy[0]),R[2,2])
-            rpy[2] = math.atan2(R[1,0],R[0,0])
+            rpy[0] = math.atan2(R[2,1], R[2,2])  # R
+            rpy[2] = math.atan2(R[1,0], R[0,0])  # Y
+                 
+            k = np.argmax(np.abs( [R[0,0], R[1,0], R[2,1], R[2,2]] ))
+            if k == 0:
+                rpy[1] = -math.atan(R[2,0]*math.cos(rpy[2])/R[0,0])
+            elif k == 1:
+                rpy[1] = -math.atan(R[2,0]*math.sin(rpy[2])/R[1,0])
+            elif k == 2:
+                rpy[1] = -math.atan(R[2,0]*math.sin(rpy[0])/R[2,1])
+            elif k == 3:
+                rpy[1] = -math.atan(R[2,0]*math.cos(rpy[0])/R[2,2])
+
     elif order == 'yxz' or order == 'camera':
-        if abs(abs(R[1,2]) - 1) < 10*np.finfo(np.float64).eps:
-            rpy[0] = 0
-            rpy[1] = -math.asin(R[1,2])
-            if R[1,2] < 0:
-                rpy[2] = -math.atan2(R[2,0],R[0,0])
+
+            if abs(abs(R[1,2]) - 1) < 10*np.finfo(np.float64).eps:  # when |R23| == 1
+                # singularity
+                rpy[0] = 0
+                if R[1,2] < 0:
+                    rpy[2] = -math.atan2(R[2,0], R[0,0])   # R-Y
+                else:
+                    rpy[2] = math.atan2(-R[2,0], -R[2,1])   # R+Y
+                rpy[1] = -math.asin(R[1,2])    # P
             else:
-                rpy[2] = math.atan2(-R[2,0],-R[2,1])
-        else:
-            rpy[0] = math.atan2(R[1,0],R[1,1])
-            rpy[1] = math.atan2(-math.cos(rpy[0]) * R[1,2],R[1,1])
-            rpy[2] = math.atan2(R[0,2],R[2,2])
+                rpy[0] = math.atan2(R[1,0], R[1,1])
+                rpy[2] = math.atan2(R[0,2], R[2,2])
+                
+                k = np.argmax(np.abs( [R[1,0], R[1,1], R[0,2], R[2,2]] ))
+                if k == 0:
+                    rpy[1] = -math.atan(R[1,2]*math.sin(rpy[0])/R[1,0])
+                elif k == 1:
+                    rpy[1] = -math.atan(R[1,2]*math.cos(rpy[0])/R[1,1])
+                elif k == 2:
+                    rpy[1] = -math.atan(R[1,2]*math.sin(rpy[2])/R[0,2])
+                elif k == 3:
+                    rpy[1] = -math.atan(R[1,2]*math.cos(rpy[2])/R[2,2])  
+
     else:
         raise ValueError('Invalid order')
 
@@ -1218,7 +1296,7 @@ def skew(v):
     
     :seealso: vex, skewa
     """
-    v = check.getvector(v, None, 'sequence')
+    v = argcheck.getvector(v, None, 'sequence')
     if len(v) == 1:
         s = np.array([
                 [0, -v[0]], 
@@ -1291,7 +1369,7 @@ def skewa(v):
     :seealso: vexa, skew
     """
     
-    v = check.getvector(v, None, 'sequence')
+    v = argcheck.getvector(v, None, 'sequence')
     if len(v) == 3:
         omega = np.zeros((3,3))
         omega[:2,:2] = skew(v[2])
@@ -1341,7 +1419,7 @@ def vexa(Omega):
 
 
 # ---------------------------------------------------------------------------------------#
-def trlog(T):
+def trlog(T, check=True):
     """
     Logarithm of SO(3) or SE(3) matrix
 
@@ -1363,28 +1441,28 @@ def trlog(T):
 
     :seealso: trexp, vex, vexa
     """
-    tr = T.trace()
     
-    if ishom(T):
+    if ishom(T, check=check):
         # SE(3) matrix
-        [R, t] = tr2rt(T)
 
-        if (T - 3) < 100 * np.finfo(np.float64).eps:
+
+        if iseye(T):
             # is identity matrix
             return np.zeros((4,4))
         else:
-            S = trlog(R)
-            w = vex(s)
+            [R,t] = tr2rt(T)
+            S = trlog(R, check=False)  # recurse
+            w = vex(S)
             theta = norm(w)
             skw = S / theta
             Ginv = np.eye(3) / theta - skw / 2 + (1 / theta - 1 / np.tan(theta / 2) / 2) * skw ** 2
             v = Ginv * t
             return rt2tr(skw, v)
         
-    elif isrot(T):
+    elif isrot(T, check=check):
         # deal with rotation matrix
         R = T
-        if np.abs(R[0,0] - 3) < 100 * np.finfo(np.float64).eps:
+        if iseye(R):
             # matrix is identity
             return np.zeros((3,3))
         elif abs(R[0,0] + 1) < 100 * np.finfo(np.float64).eps:
@@ -1449,47 +1527,60 @@ def trexp(S, theta=None):
      
      :seealso: trlog, trexp2
     """
-    if check.ismatrix(S, (4,4)) or check.isvector(S, 6):
+   
+    if argcheck.ismatrix(S, (4,4)) or argcheck.isvector(S, 6):
         # se(3) case
-        if check.isvector(S, 6):
-            S = skewa(S)
-        elif not isskewa(S):
-            raise ValueError('Argument is not in se(n)')
-            
-        # se(3) with a twist angle specified
-        [skw, v] = tr2rt(S)
-        
-        R = trexp(skw, theta)
-        t = (np.eye(3) + np.sin(theta) * skw + (1 - np.cos(theta)) * skw @ skw) @ v
-        return rt2tr(R, t)
-    
-    elif check.ismatrix(S, (3,3)) or check.isvector(S, 3):
-        # so(3) case
-        if check.ismatrix(S, (3,3)):
-            if isskew(S):
-                w = vex(S)
-            else:
-                raise ValueError('Argument is not in so(n)')
+        if argcheck.ismatrix(S, (4,4)):
+            # augmentented skew matrix
+            tw = vexa(S)
         else:
-            w = check.getvector(S, 3)
+            # 6 vector
+            tw = argcheck.getvector(S)
+
+        if theta is not None:
+                assert isunittwist(tw), 'If theta is specified S must be a unit twist'
+                
+        t = tw[0:3]
+        w = tw[3:6]
         
-        if np.linalg.norm(w) < 10 * np.finfo(np.float64).eps:
-            # for a zero so(3) return unit matrix, theta not relevant
-            return np.eye(3)
-        
+    elif argcheck.ismatrix(S, (3,3)) or argcheck.isvector(S, 3):
+        # so(3) case
+        if argcheck.ismatrix(S, (3,3)):
+            # skew symmetric matrix
+            w = vex(S)
+        else:
+            # 3 vector
+            w = argcheck.getvector(S)
+            
+        if theta is not None:
+            assert isunitvec(w), 'If theta is specified S must be a unit twist'
+        t = None
+    else:
+        raise ValueError(" First argument must be SO(3), 3-vector, SE(3) or 6-vector")
+    
+    
+    # do Rodrigues' formula for rotation
+    if iszerovec(w):
+        # for a zero so(3) return unit matrix, theta not relevant
+        R = np.eye(3)
+        V = np.eye(3)
+    else:
         if theta is None:
             #  theta is not given, extract it
             theta = norm(w)
             w = unit(w)
-        else:
-            assert isunitvec(np.linalg.norm(w)), 'S must be a unit twist'
 
-        S = skew(w)
-        return np.eye(3) + np.sin(theta) * S + (1 - np.cos(theta)) * S @ S
-
+        skw = skew(w)
+        R = np.eye(3) + math.sin(theta) * skw + (1.0 - math.cos(theta)) * skw @ skw
+        V = None
+    
+    if t is None:
+        # so(3) case
+        return R
     else:
-        raise ValueError(" First argument must be SO(3), 3-vector, SE(3) or 6-vector")
-
+        if V is None:
+            V = np.eye(3) + (1.0-math.cos(theta))*skw/theta + (theta-math.sin(theta))/theta*skw @ skw
+        return rt2tr(R, V@t)
 
 
 # ---------------------------------------------------------------------------------------#
@@ -1509,75 +1600,88 @@ def trexp2(S, theta=None):
     
     For so(2) the results is an SO(2) rotation matrix:
 
-    - ``trexp(S)`` is the matrix exponential of the so(3) element ``S`` which is a 2x2
+    - ``trexp2(S)`` is the matrix exponential of the so(3) element ``S`` which is a 2x2
       skew-symmetric matrix.
-    - ``trexp(S, THETA)`` as above but for an so(3) motion of S*THETA, where ``S`` is
+    - ``trexp2(S, THETA)`` as above but for an so(3) motion of S*THETA, where ``S`` is
       unit-norm skew-symmetric matrix representing a rotation axis and a rotation magnitude
       given by ``THETA``.
-    - ``trexp(W)`` is the matrix exponential of the so(2) element ``W`` expressed as
+    - ``trexp2(W)`` is the matrix exponential of the so(2) element ``W`` expressed as
       a 1-vector (list, tuple, numpy.ndarray).
-    - ``trexp(W, THETA)`` as above but for an so(3) motion of W*THETA where ``W`` is a
+    - ``trexp2(W, THETA)`` as above but for an so(3) motion of W*THETA where ``W`` is a
       unit-norm vector representing a rotation axis and a rotation magnitude
       given by ``THETA``. ``W`` is expressed as a 1-vector (list, tuple, numpy.ndarray).
 
 
     For se(2) the results is an SE(2) homogeneous transformation matrix:
 
-    - ``trexp(SIGMA)`` is the matrix exponential of the se(2) element ``SIGMA`` which is
+    - ``trexp2(SIGMA)`` is the matrix exponential of the se(2) element ``SIGMA`` which is
       a 3x3 augmented skew-symmetric matrix.
-    - ``trexp(SIGMA, THETA)`` as above but for an se(3) motion of SIGMA*THETA, where ``SIGMA``
+    - ``trexp2(SIGMA, THETA)`` as above but for an se(3) motion of SIGMA*THETA, where ``SIGMA``
       must represent a unit-twist, ie. the rotational component is a unit-norm skew-symmetric
       matrix.
-    - ``trexp(TW)`` is the matrix exponential of the se(3) element ``TW`` represented as
+    - ``trexp2(TW)`` is the matrix exponential of the se(3) element ``TW`` represented as
       a 3-vector which can be considered a screw motion.
-    - ``trexp(TW, THETA)`` as above but for an se(2) motion of TW*THETA, where ``TW``
+    - ``trexp2(TW, THETA)`` as above but for an se(2) motion of TW*THETA, where ``TW``
       must represent a unit-twist, ie. the rotational component is a unit-norm skew-symmetric
       matrix.
           
      :seealso: trlog, trexp2
     """
     
-    
-    if check.ismatrix(S, (3,3)) or check.isvector(S, 3):
+    if argcheck.ismatrix(S, (3,3)) or argcheck.isvector(S, 3):
         # se(2) case
-        if check.isvector(S, 3):
-            S = skewa(S)
-        elif not isskewa(S):
-            raise ValueError('Argument is not in se(n)')
-            
-        # se(2) with a twist angle specified
-        [skw, v] = tr2rt(S)
-        
-        R = trexp(skw, theta)
-        t = (np.eye(2) + np.sin(theta) * skw + (1 - np.cos(theta)) * skw @ skw) @ v
-        return rt2tr(R, t)
-    
-    elif check.ismatrix(S, (2,2)) or check.isvector(S, 1):
-        # so(2) case
-        if check.ismatrix(S, (2,2)):
-            if isskew(S):
-                w = vex(S)
-            else:
-                raise ValueError('Argument is not in so(n)')
+        if argcheck.ismatrix(S, (3,3)):
+            # augmentented skew matrix
+            tw = vexa(S)
         else:
-            w = check.getvector(S, 1)
+            # 3 vector
+            tw = argcheck.getvector(S)
+
+        if theta is not None:
+                assert isunittwist(tw), 'If theta is specified S must be a unit twist'
+                
+        t = tw[0:2]
+        w = tw[2]
         
-        if np.linalg.norm(w) < 10 * np.finfo(np.float64).eps:
-            # for a zero so(2) return unit matrix, theta not relevant
-            return np.eye(2)
-        
+    elif argcheck.ismatrix(S, (2,2)) or argcheck.isvector(S, 1):
+        # so(2) case
+        if argcheck.ismatrix(S, (2,2)):
+            # skew symmetric matrix
+            w = vex(S)
+        else:
+            # 1 vector
+            w = argcheck.getvector(S)
+            
+        if theta is not None:
+            assert isunitvec(w), 'If theta is specified S must be a unit twist'
+        t = None
+    else:
+        raise ValueError(" First argument must be SO(2), 1-vector, SE(2) or 3-vector")
+    
+    
+    # do Rodrigues' formula for rotation
+    if iszerovec(w):
+        # for a zero so(2) return unit matrix, theta not relevant
+        R = np.eye(2)
+        V = np.eye(2)
+    else:
         if theta is None:
             #  theta is not given, extract it
             theta = norm(w)
             w = unit(w)
-        else:
-            assert isunitvec(np.linalg.norm(w)), 'S must be a unit twist'
 
-        S = skew(w)
-        return np.eye(2) + np.sin(theta) * S + (1 - np.cos(theta)) * S @ S
-
+        skw = skew(w)
+        R = np.eye(2) + math.sin(theta) * skw + (1.0 - math.cos(theta)) * skw @ skw
+        V = None
+    
+    if t is None:
+        # so(2) case
+        return R
     else:
-        raise ValueError(" First argument must be SO(3), 3-vector, SE(3) or 6-vector")
+        # se(3) case
+        if V is None:
+            V = np.eye(3) + (1.0-math.cos(theta))*skw/theta + (theta-math.sin(theta))/theta*skw @ skw
+        return rt2tr(R, V@t)
 
 
 def trprint(T, orient='rpy/zyx', label=None, file=sys.stdout, fmt='{:8.2g}', unit='deg'):
