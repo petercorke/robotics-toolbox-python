@@ -3,6 +3,15 @@
 """ 
 This modules contains functions to create and transform rotation matrices
 and homogeneous tranformation matrices.
+
+Vector arguments are what numpy refers to as ``array_like`` and can be a list,
+tuple, numpy array, numpy row vector or numpy column vector.
+
+Versions: 
+    
+    1. Luis Fernando Lara Tobar and Peter Corke, 2008
+    2. Josh Carrigg Hodson, Aditya Dua, Chee Ho Chan, 2017
+    3. Peter Corke, 2020
 """
 
 import sys
@@ -24,7 +33,8 @@ try:
 except:
     def issymbol(x):
         return False
-
+    
+_eps = np.finfo(np.float64).eps
 
 def colvec(v):
     return np.array(v).reshape((len(v), 1))
@@ -137,8 +147,8 @@ def trotx(theta, unit="rad", t=None):
     :type theta: float
     :param unit: angular units: 'rad' [default], or 'deg'
     :type unit: str
-    :param t: the translation, defaults to [0,0,0]
-    :return: 4x4 homogeneous transformation matrix
+    :param t: translation 3-vector, defaults to [0,0,0]
+    :type t: array_like    :return: 4x4 homogeneous transformation matrix
     :rtype: numpy.ndarray, shape=(4,4)
 
     - ``trotx(THETA)`` is a homogeneous transformation (4x4) representing a rotation
@@ -162,7 +172,8 @@ def troty(theta, unit="rad", t=None):
     :type theta: float
     :param unit: angular units: 'rad' [default], or 'deg'
     :type unit: str
-    :param t: the translation, defaults to [0,0,0]
+    :param t: translation 3-vector, defaults to [0,0,0]
+    :type t: array_like
     :return: 4x4 homogeneous transformation matrix as a numpy array
     :rtype: numpy.ndarray, shape=(4,4)
 
@@ -187,7 +198,8 @@ def trotz(theta, unit="rad", t=None):
     :type theta: float
     :param unit: angular units: 'rad' [default], or 'deg'
     :type unit: str
-    :param t: the translation, defaults to [0,0,0]
+    :param t: translation 3-vector, defaults to [0,0,0]
+    :type t: array_like
     :return: 4x4 homogeneous transformation matrix
     :rtype: numpy.ndarray, shape=(4,4)
 
@@ -279,8 +291,8 @@ def trot2(theta, unit='rad', t=None):
     :type theta: float
     :param unit: angular units: 'rad' [default], or 'deg'
     :type unit: str
-    :param t: the translation, defaults to [0,0]
-    :return: 3x3 homogeneous transformation matrix
+    :param t: translation 2-vector, defaults to [0,0]
+    :type t: array_like    :return: 3x3 homogeneous transformation matrix
     :rtype: numpy.ndarray, shape=(3,3)
 
     - ``TROT2(THETA)`` is a homogeneous transformation (3x3) representing a rotation of
@@ -343,7 +355,8 @@ def unit(v):
     """
     Create a unit vector
 
-    :param v: n-dimensional vector as a list, dict, or a numpy array, row or column vector
+    :param v: n-dimensional vector
+    :type v: array_like
     :return: a unit-vector parallel to V.
     :rtype: numpy.ndarray
     :raises ValueError: for zero length vector
@@ -357,7 +370,7 @@ def unit(v):
     v = argcheck.getvector(v)
     n = np.linalg.norm(v)
     
-    if n > 100*np.finfo(np.float64).eps: # if greater than eps
+    if n > 100*_eps: # if greater than eps
         return v / n
     else:
         raise ValueError("Vector has zero norm")
@@ -390,7 +403,7 @@ def isunitvec(v, tol=10):
         
     :seealso: unit, isunittwist
     """
-    return abs(np.linalg.norm(v)-1) < tol*np.finfo(np.float64).eps
+    return abs(np.linalg.norm(v)-1) < tol*_eps
 
 def iszerovec(v, tol=10):
     """
@@ -405,7 +418,7 @@ def iszerovec(v, tol=10):
         
     :seealso: unit, isunittwist
     """
-    return np.linalg.norm(v) < tol*np.finfo(np.float64).eps
+    return np.linalg.norm(v) < tol*_eps
 
 
 def isunittwist(v, tol=10):
@@ -413,7 +426,7 @@ def isunittwist(v, tol=10):
     Test if vector represents a unit twist in SE(2) or SE(3)
     
     :param v: vector to test
-    :type v: list, tuple, or numpy.ndarray
+    :type v: array_like
     :param tol: tolerance in units of eps
     :type tol: float
     :return: whether vector has unit length
@@ -433,10 +446,10 @@ def isunittwist(v, tol=10):
     
     if len(v) == 3:
         # test for SE(2) twist
-        return isunitvec(v[2], tol=tol) or (np.abs(v[2]) < tol*np.finfo(np.float64).eps and isunitvec(v[0:2], tol=tol))
+        return isunitvec(v[2], tol=tol) or (np.abs(v[2]) < tol*_eps and isunitvec(v[0:2], tol=tol))
     elif len(v) == 6:
         # test for SE(3) twist
-        return isunitvec(v[3:6], tol=tol) or (np.linalg.norm(v[3:6]) < tol*np.finfo(np.float64).eps and isunitvec(v[0:3], tol=tol))
+        return isunitvec(v[3:6], tol=tol) or (np.linalg.norm(v[3:6]) < tol*_eps and isunitvec(v[0:3], tol=tol))
     else:
         raise ValueError
 
@@ -464,7 +477,7 @@ def r2t(R, check=False):
     dim = R.shape
     assert dim[0] == dim[1], 'Matrix must be square'
     
-    if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
+    if check and np.abs(np.linalg.det(R) - 1) < 100*_eps:
         raise ValueError('Invalid rotation matrix ')
     
     T  = np.pad( R, (0,1) )
@@ -565,7 +578,7 @@ def rt2tr(R, t, check=False):
     t = argcheck.getvector(t, dim=None, out='array')
     if R.shape[0] != t.shape[0]:
         raise ValueError("R and t must have the same number of rows")
-    if check and np.abs(np.linalg.det(R) - 1) < 100*np.finfo(np.float64).eps:
+    if check and np.abs(np.linalg.det(R) - 1) < 100*_eps:
             raise ValueError('Invalid rotation matrix')
             
     if R.shape == (2, 2):
@@ -599,7 +612,7 @@ def isR(R, tol = 10):
     
     :seealso: isrot2, isrot
     """
-    return np.linalg.norm( R@R.T - np.eye(R.shape[0]) ) < tol*np.finfo(np.float64).eps \
+    return np.linalg.norm( R@R.T - np.eye(R.shape[0]) ) < tol*_eps \
         and np.linalg.det( R@R.T ) > 0
 
 def ishom(T, check=False):
@@ -692,7 +705,7 @@ def isskew(S, tol = 10):
     
     :seealso: isskewa
     """
-    return np.linalg.norm(S + S.T) < tol*np.finfo(np.float64).eps
+    return np.linalg.norm(S + S.T) < tol*_eps
 
 def isskewa(S, tol = 10):
     r"""
@@ -711,7 +724,7 @@ def isskewa(S, tol = 10):
     
     :seealso: isskew
     """
-    return np.linalg.norm(S[0:-1,0:-1] + S[0:-1,0:-1].T) < tol*np.finfo(np.float64).eps \
+    return np.linalg.norm(S[0:-1,0:-1] + S[0:-1,0:-1].T) < tol*_eps \
         and np.all(S[-1,:] == 0)
 
 def iseye(S, tol = 10):
@@ -733,7 +746,7 @@ def iseye(S, tol = 10):
     s = S.shape
     if len(s) != 2 or s[0] != s[1]:
         return False  # not a square matrix
-    return abs(S.trace() - s[0]) < tol * np.finfo(np.float64).eps
+    return abs(S.trace() - s[0]) < tol * _eps
         
     
     
@@ -772,7 +785,7 @@ def rpy2r(roll, pitch=None, yaw=None, unit='rad', order='zyx'):
           to the optic axis and x-axis parallel to the pixel rows.
           
     - ``rpy2r(RPY)`` as above but the roll, pitch, yaw angles are taken
-      from ``RPY`` which is a 3-vector (list, tuple, numpy.ndarray) with values
+      from ``RPY`` which is a 3-vector (array_like) with values
       (ROLL, PITCH, YAW). 
     """
     
@@ -821,14 +834,14 @@ def rpy2tr(roll, pitch=None, yaw=None, unit='rad', order='zyx'):
           then by roll about the new x-axis.  Convention for a mobile robot with x-axis forward
           and y-axis sideways.
         - 'xyz', rotate by yaw about the x-axis, then by pitch about the new y-axis,
-          then by roll about the new z-axis. Covention for a robot gripper with z-axis forward
+          then by roll about the new z-axis. Convention for a robot gripper with z-axis forward
           and y-axis between the gripper fingers.
         - 'yxz', rotate by yaw about the y-axis, then by pitch about the new x-axis,
           then by roll about the new z-axis. Convention for a camera with z-axis parallel
           to the optic axis and x-axis parallel to the pixel rows.
           
     - ``rpy2tr(RPY)`` as above but the roll, pitch, yaw angles are taken
-      from ``RPY`` which is a 3-vector (list, tuple, numpy.ndarray) with values
+      from ``RPY`` which is a 3-vector (array_like) with values
       (ROLL, PITCH, YAW). 
     
     Notes:
@@ -859,7 +872,7 @@ def eul2r(phi, theta=None, psi=None, unit='rad'):
       matrix equivalent to the specified Euler angles.  These correspond
       to rotations about the Z, Y, Z axes respectively.
     - ``R = eul2r(EUL)`` as above but the Euler angles are taken from
-      ``EUL`` which is a 3-vector (list, tuple, numpy.ndarray) with values
+      ``EUL`` which is a 3-vector (array_like) with values
       (PHI THETA PSI). 
     """
     
@@ -893,7 +906,7 @@ def eul2tr(phi, theta=None, psi=None, unit='rad'):
       matrix equivalent to the specified Euler angles.  These correspond
       to rotations about the Z, Y, Z axes respectively.
     - ``R = eul2tr(EUL)`` as above but the Euler angles are taken from 
-      ``EUL`` which is a 3-vector (list, tuple, numpy.ndarray) with values
+      ``EUL`` which is a 3-vector (array_like) with values
       (PHI THETA PSI). 
     
     Notes:
@@ -913,8 +926,8 @@ def angvec2r(theta, v, unit='rad'):
     :type theta: float
     :param unit: angular units: 'rad' [default], or 'deg'
     :type unit: str
-    :param v: rotation axis
-    :type v: 3-vector: list, tuple, numpy.ndarray
+    :param v: rotation axis, 3-vector
+    :type v: array_like
     :return: 3x3 rotation matrix
     :rtype: numpdy.ndarray, shape=(3,3)
     
@@ -928,7 +941,7 @@ def angvec2r(theta, v, unit='rad'):
     """
     assert np.isscalar(theta) and argcheck.isvector(v, 3), "Arguments must be theta and vector"
     
-    if np.linalg.norm(v) < 10*np.finfo(np.float64).eps:
+    if np.linalg.norm(v) < 10*_eps:
             return np.eye(3)
         
     theta = argcheck.getunit(theta, unit)
@@ -949,8 +962,8 @@ def angvec2tr(theta, v, unit='rad'):
     :type theta: float
     :param unit: angular units: 'rad' [default], or 'deg'
     :type unit: str
-    :param v: rotation axis
-    :type v: 3-vector: list, tuple, numpy.ndarray
+    :param v: rotation axis, 3-vector
+    :type v: : array_like
     :return: 4x4 homogeneous transformation matrix
     :rtype: numpdy.ndarray, shape=(4,4)
     
@@ -972,9 +985,9 @@ def oa2r(o, a=None):
     Create SO(3) rotation matrix from two vectors
 
     :param o: 3-vector parallel to Y- axis
-    :type o: list, tuple, numpy.ndarray
+    :type o: array_like
     :param a: 3-vector parallel to the Z-axis
-    :type o: list, tuple, numpy.ndarray
+    :type o: array_like
     :return: 3x3 rotation matrix
     :rtype: numpy.ndarray, shape=(3,3)
 
@@ -1012,9 +1025,9 @@ def oa2tr(o, a=None):
     Create SE(3) pure rotation from two vectors
 
     :param o: 3-vector parallel to Y- axis
-    :type o: list, tuple, numpy.ndarray
+    :type o: array_like
     :param a: 3-vector parallel to the Z-axis
-    :type o: list, tuple, numpy.ndarray
+    :type o: array_like
     :return: 4x4 homogeneous transformation matrix
     :rtype: numpy.ndarray, shape=(4,4)
 
@@ -1125,7 +1138,7 @@ def tr2eul(T, unit='rad', flip=False, check=False):
     assert isrot(R, check=check)
     
     eul = np.zeros((3,))
-    if abs(R[0,2]) < 10*np.finfo(np.float64).eps and abs(R[1,2]) < 10*np.finfo(np.float64).eps:
+    if abs(R[0,2]) < 10*_eps and abs(R[1,2]) < 10*_eps:
         eul[0] = 0
         sp = 0
         cp = 1
@@ -1192,7 +1205,7 @@ def tr2rpy(T, unit='rad', order='zyx', check=False):
     if order == 'xyz' or order == 'arm':
 
         # XYZ order
-        if abs(abs(R[0,2]) - 1) < 10*np.finfo(np.float64).eps:  # when |R13| == 1
+        if abs(abs(R[0,2]) - 1) < 10*_eps:  # when |R13| == 1
             # singularity
             rpy[0] = 0  # roll is zero
             if R[0,2] > 0:
@@ -1218,7 +1231,7 @@ def tr2rpy(T, unit='rad', order='zyx', check=False):
     elif order == 'zyx' or order == 'vehicle':
 
         # old ZYX order (as per Paul book)
-        if abs(abs(R[2,0]) - 1) < 10*np.finfo(np.float64).eps:  # when |R31| == 1
+        if abs(abs(R[2,0]) - 1) < 10*_eps:  # when |R31| == 1
             # singularity
             rpy[0] = 0     # roll is zero
             if R[2,0] < 0:
@@ -1242,7 +1255,7 @@ def tr2rpy(T, unit='rad', order='zyx', check=False):
 
     elif order == 'yxz' or order == 'camera':
 
-            if abs(abs(R[1,2]) - 1) < 10*np.finfo(np.float64).eps:  # when |R23| == 1
+            if abs(abs(R[1,2]) - 1) < 10*_eps:  # when |R23| == 1
                 # singularity
                 rpy[0] = 0
                 if R[1,2] < 0:
@@ -1279,7 +1292,7 @@ def skew(v):
     Create skew-symmetric metrix from vector
 
     :param v: 1- or 3-vector
-    :type v: list, tuple or numpy.ndarray
+    :type v: array_like
     :return: skew-symmetric matrix in so(2) or so(3)
     :rtype: numpy.ndarray, shape=(2,2) or (3,3)
     :raises: ValueError
@@ -1350,7 +1363,7 @@ def skewa(v):
     Create augmented skew-symmetric metrix from vector
 
     :param v: 3- or 6-vector
-    :type v: list, tuple or numpy.ndarray
+    :type v: array_like
     :return: augmented skew-symmetric matrix in se(2) or se(3)
     :rtype: numpy.ndarray, shape=(3,3) or (4,4)
     :raises: ValueError
@@ -1465,7 +1478,7 @@ def trlog(T, check=True):
         if iseye(R):
             # matrix is identity
             return np.zeros((3,3))
-        elif abs(R[0,0] + 1) < 100 * np.finfo(np.float64).eps:
+        elif abs(R[0,0] + 1) < 100 * _eps:
             # tr R = -1
             # rotation by +/- pi, +/- 3pi etc.
             mx = R.diagonal().max()
@@ -1506,10 +1519,10 @@ def trexp(S, theta=None):
       unit-norm skew-symmetric matrix representing a rotation axis and a rotation magnitude
       given by ``THETA``.
     - ``trexp(W)`` is the matrix exponential of the so(3) element ``W`` expressed as
-      a 3-vector (list, tuple, numpy.ndarray).
+      a 3-vector (array_like).
     - ``trexp(W, THETA)`` as above but for an so(3) motion of W*THETA where ``W`` is a
       unit-norm vector representing a rotation axis and a rotation magnitude
-      given by ``THETA``. ``W`` is expressed as a 3-vector (list, tuple, numpy.ndarray).
+      given by ``THETA``. ``W`` is expressed as a 3-vector (array_like).
 
 
     For se(3) the results is an SE(3) homogeneous transformation matrix:
@@ -1589,7 +1602,7 @@ def trexp2(S, theta=None):
     Exponential of so(2) or se(2) matrix
 
     :param S: so(2), se(2) matrix or equivalent velctor
-    :type T: numpy.ndarray, shape=(2,2), (1,), (3,3), or (3,)
+    :type T: numpy.ndarray, shape=(2,2) or (3,3); array_like
     :param theta: motion
     :type theta: float
     :return: 2x2 or 3x3 matrix exponential in SO(2) or SE(2)
@@ -1606,10 +1619,10 @@ def trexp2(S, theta=None):
       unit-norm skew-symmetric matrix representing a rotation axis and a rotation magnitude
       given by ``THETA``.
     - ``trexp2(W)`` is the matrix exponential of the so(2) element ``W`` expressed as
-      a 1-vector (list, tuple, numpy.ndarray).
+      a 1-vector (array_like).
     - ``trexp2(W, THETA)`` as above but for an so(3) motion of W*THETA where ``W`` is a
       unit-norm vector representing a rotation axis and a rotation magnitude
-      given by ``THETA``. ``W`` is expressed as a 1-vector (list, tuple, numpy.ndarray).
+      given by ``THETA``. ``W`` is expressed as a 1-vector (array_like).
 
 
     For se(2) the results is an SE(2) homogeneous transformation matrix:
@@ -1839,14 +1852,13 @@ def trprint2(T, label=None, file=sys.stdout, fmt='{:8.2g}', unit='deg'):
         return s
     
 def _vec2s(fmt, v):
-        v = [x if np.abs(x) > 100*np.finfo(np.float64).eps else 0.0 for x in v ]
+        v = [x if np.abs(x) > 100*_eps else 0.0 for x in v ]
         return ', '.join([fmt.format(x) for x in v])
     
-if __name__ == "main":
-    a=transl2(1,2)@trot2(0.3)
-    trprint2(a, file=None, label='T')
+if __name__ == '__main__':
+    import pathlib
+    import os.path
     
-    T = transl(1,2,3) @ rpy2tr(10, 20, 30, 'deg')
-    trprint(T, file=None, label='T')
+    runfile(os.path.join(pathlib.Path(__file__).parent.absolute(), "test_transforms.py") )
 
 
