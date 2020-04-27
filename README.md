@@ -9,7 +9,7 @@ J. Haviland and P. Corke, "Maximising  manipulability  during  resolved-rate  mo
 
 ## Installing
 
-Requires Python ≥ 3.2
+Requires Python ≥ 3.2. See [ropy-2.7](https://github.com/jhavl/ropy/tree/ropy-2.7) branch for Python 2.7 support.
 
 ```shell script
 git clone https://github.com/jhavl/ropy.git
