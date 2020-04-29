@@ -43,7 +43,7 @@ class Panda(SerialLink):
         mm = 1e-3
         
         flange = (107)*mm
-        d7 = (58.4)*mm
+        d7 = (103)*mm
         
         L1 = Revolute(a =    0.0, d = 0.333, alpha =      0.0, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
         L2 = Revolute(a =    0.0, d =   0.0, alpha = -np.pi/2, qlim = np.array([-1.7628, 1.7628]), mdh = 1)
