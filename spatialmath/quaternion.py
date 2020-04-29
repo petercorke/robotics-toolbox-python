@@ -808,7 +808,6 @@ class UnitQuaternion(Quaternion):
         return SE3(so3=SO3.np(self.r()))
 
 
-
 if __name__ == '__main__':
     q = Quaternion([1,2,3,4])
     print(q)
@@ -824,3 +823,8 @@ if __name__ == '__main__':
     #print(u)
     len(u)
     a = u[0]
+    
+    # import pathlib
+    # import os.path
+    
+    # runfile(os.path.join(pathlib.Path(__file__).parent.absolute(), "test_quaternion.py") )

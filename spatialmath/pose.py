@@ -354,4 +354,10 @@ if __name__ == '__main__':
     #print(arr[0])
     #print(b[1])
     #print(b*a)
+    
+
+    # import pathlib
+    # import os.path
+    
+    # runfile(os.path.join(pathlib.Path(__file__).parent.absolute(), "test_transforms.py") )
             
