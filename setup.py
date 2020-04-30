@@ -8,9 +8,9 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='rtb',
+    name='roboticstoolbox-python',
 
-    version='0.1.1',
+    version='0.0.1',
 
     description='A Python library for robot control',
 
@@ -22,7 +22,7 @@ setup(
     # license='MIT',
 
     python_requires='>=3.2',
-    
+
     keywords='robotics vision arm kinematics ros',
 
     packages=find_packages(),

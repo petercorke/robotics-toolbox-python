@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from rtb.robot.ets import ets, et
+from roboticstoolbox.robot.ets import ets, et
 # from rtb.tools.transform import transl, xyzrpy_to_trans
 
 

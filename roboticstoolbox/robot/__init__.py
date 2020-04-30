@@ -1,12 +1,7 @@
-from rtb.robot.serial_link import SerialLink
-from rtb.robot.Link import Link, Revolute, Prismatic
-from rtb.robot.ets import ets
-
-
+from roboticstoolbox.robot.ets import ets, et
 
 __all__ = [
-    'SerialLink',
-    'Link',
+    'et',
     'ets'
 ]
 
