@@ -185,6 +185,133 @@ class ets(object):
 
         return trans
 
+    def jacob0(self, q):
+        """
+        The manipulator Jacobian matrix maps joint velocity to end-effector
+        spatial velocity, expressed in the world-coordinate frame.
+
+        :param q: The joint coordinates of the robot
+        :type q: float np.ndarray(n,)
+        :return: The manipulator Jacobian in 0 frame
+        :rtype: float np.ndarray(6,n)
+
+        References: Kinematic Derivatives using the Elementary Transform
+            Sequence, J. Haviland and P. Corke
+        """
+        T = self.fkine(q)
+        U = np.eye(4)
+        j = 0
+        J = np.zeros((6, self.n))
+
+        for i in range(self.M):
+
+            if i != self.q_idx[j]:
+                U = U @ self.ets[i].T()
+            else:
+                if self.ets[i].axis_func == et.TRz:
+                    U = U @ self.ets[i].T(q[j])
+                    Tu = np.linalg.inv(U) @ T
+
+                    n = U[:3, 0]
+                    o = U[:3, 1]
+                    a = U[:3, 2]
+                    y = Tu[1, 3]
+                    x = Tu[0, 3]
+
+                    J[:3, j] = (o * x) - (n * y)
+                    J[3:, j] = a
+
+                    j += 1
+
+        return J
+
+    def hessian0(self, q, J=None):
+        """
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the world-coordinate frame. This
+        function calulcates this based on the ETS of the robot.
+
+        :param q: The joint coordinates of the robot
+        :type q: float np.ndarray(n,)
+        :return: The manipulator Hessian in 0 frame
+        :rtype: float np.ndarray(6,n,n)
+
+        References: Kinematic Derivatives using the Elementary Transform
+            Sequence, J. Haviland and P. Corke
+        """
+        if J is None:
+            J = self.jacob0(q)
+
+        H = np.zeros((6, self.n, self.n))
+
+        for j in range(self.n):
+            for i in range(j, self.n):
+
+                H[:3, i, j] = np.cross(J[3:, j], J[:3, i])
+                H[3:, i, j] = np.cross(J[3:, i], J[3:, i])
+
+                if i != j:
+                    H[:3, j, i] = H[:3, i, j]
+
+        return H
+
+    def m(self, q, J=None):
+        """
+        Calculates the manipulability index (scalar) robot at the joint
+        configuration q. It indicates dexterity, that is, how isotropic the
+        robot's motion is with respect to the 6 degrees of Cartesian motion.
+        The measure is high when the manipulator is capable of equal motion
+        in all directions and low when the manipulator is close to a
+        singularity.
+
+        :param q: The joint coordinates of the robot
+        :type q: float np.ndarray(n,)
+        :return: The manipulability index
+        :rtype: float
+
+        References: Analysis and control of robot manipulators with redundancy,
+        T. Yoshikawa,
+        Robotics Research: The First International Symposium (M. Brady and
+        R. Paul, eds.), pp. 735-747, The MIT press, 1984.
+        """
+
+        if J is None:
+            J = self.jacob0(q)
+
+        return np.sqrt(np.linalg.det(J @ np.transpose(J)))
+
+    def Jm(self, q, J=None, H=None, m=None):
+        """
+        Calculates the manipulability Jacobian. This measure relates the rate
+        of change of the manipulability to the joint velocities of the robot.
+
+        :param q: The joint coordinates of the robot
+        :type q: float np.ndarray(n,)
+        :return: The manipulability Jacobian
+        :rtype: float np.ndarray(n,1)
+
+        References: Maximising Manipulability in Resolved-Rate Motion Control,
+            J. Haviland and P. Corke
+        """
+
+        if m is None:
+            m = self.m(q)
+
+        if J is None:
+            J = self.jacob0(q)
+
+        if H is None:
+            H = self.hessian0(q)
+
+        b = np.linalg.inv(J @ np.transpose(J))
+        Jm = np.zeros((self.n, 1))
+
+        for i in range(self.n):
+            c = J @ np.transpose(H[:, :, i])
+            Jm[i, 0] = m * np.transpose(c.flatten('F')) @ b.flatten('F')
+
+        return a
+
     def __str__(self):
         """
         Pretty prints the ETS Model of the robot. Will output angles in degrees
