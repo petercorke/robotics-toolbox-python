@@ -6,16 +6,18 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 import numpy as np
-# import time
 
 
 class ets(object):
     """
-    The Elementary Transform Sequence (ETS). A superclass which represents the kinematics of a serial-link manipulator
+    The Elementary Transform Sequence (ETS). A superclass which represents the
+    kinematics of a serial-link manipulator
 
-    :param et_list: List of elementary transforms which represent the robot kinematics
+    :param et_list: List of elementary transforms which represent the robot
+        kinematics
     :type et_list: list of etb.robot.et
-    :param q_idx: List of indexes within the ets_list which correspond to joints
+    :param q_idx: List of indexes within the ets_list which correspond to
+        joints
     :type q_idx: list of int
     :param name: Name of the robot
     :type name: str, optional
@@ -116,6 +118,29 @@ class ets(object):
             robot.manuf,
             robot.base,
             robot.tool)
+
+    def __str__(self):
+        """
+        Pretty prints the ETS Model of the robot. Will output angles in degrees
+
+        :return: Pretty print of the robot model
+        :rtype: str
+        """
+        axes = ''
+
+        for i in range(self._n):
+            axes += self._ets[self._q_idx[i]]._axis_s
+
+        model = '\n%s (%s): %d axis, %s, ETS\n'\
+            'Elementary Transform Sequence:\n'\
+            '%s\n'\
+            'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
+                self._name, self._manuf, self._n, axes,
+                self._ets,
+                self._tool[0, 3], self._tool[1, 3], self._tool[2, 3], 0, 0, 0
+            )
+
+        return model
 
 
 class et(object):
