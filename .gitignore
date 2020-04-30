@@ -134,6 +134,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+### VisualStudioCode ###
+.vscode/settings.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
 # pytype static type analyzer
 .pytype/
 
