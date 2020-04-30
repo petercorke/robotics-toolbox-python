@@ -65,7 +65,7 @@ class ets(object):
         ETS representation
 
         :param robot: The robot model to be converted
-        :type robot: SerialLink, required
+        :type robot: SerialLink
         :return: List of returned :class:`bluepy.btle.Characteristic` objects
         :rtype: ets class
         """
@@ -119,6 +119,72 @@ class ets(object):
             robot.base,
             robot.tool)
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def manuf(self):
+        return self._manuf
+
+    @property
+    def base(self):
+        return self._base
+
+    @property
+    def tool(self):
+        return self._tool
+
+    @property
+    def n(self):
+        return self._n
+
+    @property
+    def M(self):
+        return self._M
+
+    @property
+    def ets(self):
+        return self._ets
+
+    @property
+    def q_idx(self):
+        return self._q_idx
+
+    def fkine(self, q):
+        '''
+        Evaluates the forward kinematics of a robot based on its ETS and
+        joint angles q.
+
+        :param q: The joint coordinates of the robot
+        :type q: float np.ndarray(n,)
+        :return: The transformation matrix representing the pose of the
+            end-effector
+        :rtype: float np.ndarray(4,4)
+
+        References: Kinematic Derivatives using the Elementary Transform
+            Sequence, J. Haviland and P. Corke
+        '''
+
+        # if not isinstance(q, np.ndarray):
+        #     raise TypeError('q array must be a numpy ndarray.')
+        # if q.shape != (self._n,):
+        #     raise ValueError('q must be a 1 dim (n,) array')
+
+        j = 0
+        trans = np.eye(4)
+
+        for i in range(self.M):
+            if self._ets[i]._type == 1:
+                T = self._ets[i].T(q[j])
+                j += 1
+            else:
+                T = self._ets[i].T()
+
+            trans = trans @ T
+
+        return trans
+
     def __str__(self):
         """
         Pretty prints the ETS Model of the robot. Will output angles in degrees
@@ -129,15 +195,15 @@ class ets(object):
         axes = ''
 
         for i in range(self._n):
-            axes += self._ets[self._q_idx[i]]._axis_s
+            axes += self.ets[self.q_idx[i]].axis
 
         model = '\n%s (%s): %d axis, %s, ETS\n'\
             'Elementary Transform Sequence:\n'\
             '%s\n'\
             'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
-                self._name, self._manuf, self._n, axes,
-                self._ets,
-                self._tool[0, 3], self._tool[1, 3], self._tool[2, 3], 0, 0, 0
+                self.name, self.manuf, self.n, axes,
+                self.ets,
+                self.tool[0, 3], self.tool[1, 3], self.tool[2, 3], 0, 0, 0
             )
 
         return model
@@ -161,25 +227,49 @@ class et(object):
     References: Kinematic Derivatives using the Elementary Transform Sequence,
         J. Haviland and P. Corke
     """
-    def __init__(self, axis, axis_s, eta=None, i=None):
+    def __init__(self, axis_func, axis, eta=None, i=None):
 
         super(et, self).__init__()
         self.STATIC = 0
         self.VARIABLE = 1
 
         self._eta = eta
+        self._axis_func = axis_func
         self._axis = axis
-        self._axis_s = axis_s
 
-        if self._eta is not None:
+        if self.eta is not None:
             self._type = self.STATIC
-            self._T = axis(eta)
+            self._T = axis_func(eta)
         else:
             self._type = self.VARIABLE
             self._i = i
 
-        if self._type is self.STATIC and self._axis_s[0] == 'R':
-            self._eta_deg = self._eta * (180/np.pi)
+        if self._type is self.STATIC and self.axis[0] == 'R':
+            self._eta_deg = self.eta * (180/np.pi)
+
+    @property
+    def eta(self):
+        return self._eta
+
+    @property
+    def eta_deg(self):
+        return self._eta_deg
+
+    @property
+    def axis_func(self):
+        return self._eta
+
+    @property
+    def axis_func(self):
+        return self._axis_func
+
+    @property
+    def axis(self):
+        return self._axis
+
+    @property
+    def i(self):
+        return self._i
 
     def T(self, q=None):
         """
@@ -193,7 +283,7 @@ class et(object):
         if self._type is self.STATIC:
             return self._T
         else:
-            return self._axis(q)
+            return self.axis_func(q)
 
     def __str__(self):
         """
@@ -203,12 +293,12 @@ class et(object):
         :rtype: str
         """
         if self._type is self.STATIC:
-            if self._axis_s[0] == 'R':
-                return '%s(%g)' % (self._axis_s, self._eta_deg)
+            if self.axis[0] == 'R':
+                return '%s(%g)' % (self.axis, self.eta_deg)
             else:
-                return '%s(%g)' % (self._axis_s, self._eta)
+                return '%s(%g)' % (self.axis, self.eta)
         else:
-            return '%s(q%d)' % (self._axis_s, self._i)
+            return '%s(q%d)' % (self.axis, self.i)
 
     def __repr__(self):
         return str(self)
