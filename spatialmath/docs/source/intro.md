@@ -176,9 +176,11 @@ These classes are all derived from two parent classes:
 
 # Vectorization
 
-For most methods, if applied to an object that contains a sequence, the result will be on a sequence.
+For most methods, if applied to an object that contains a sequence of length N, the result will be the appropriate return object type but of length N.
 
-For binary operations the results are vectorized.  For the case `X1 op X2` then the the following element-wise operations occur
+show example for norm, isrot, 
+
+Most binary operations (`*`, `*=`, `**`, `+`, `+=`, `-`, `-=`, `==`, `!=`) are vectorized.  For the case `X1 op X2` then the the following element-wise operations occur
 
 | len(X1) | len(X2)   |  len(X1 op X2)   | results                 |
 --------- | --------- | ---------------- | ----------------------- |

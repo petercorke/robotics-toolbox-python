@@ -11,7 +11,9 @@ import math
 import numpy as np
 
 import spatialmath.base.transforms as tr
-import spatialmath.base.argcheck as check
+import spatialmath.base.argcheck as argcheck
+
+_eps = np.finfo(np.float64).eps
 
 def eye():
     """
@@ -30,8 +32,8 @@ def pure(v):
     """
     Create a pure quaternion
     
-    :arg v: vector
-    :type v: 3-vector: list, tuple, numpy.ndarray
+    :arg v: vector from a 3-vector
+    :type v: array_like
     :return: pure quaternion
     :rtype: numpy.ndarray, shape=(4,)
     
@@ -39,15 +41,15 @@ def pure(v):
     equal to the passed vector value.
 
     """
-    v = check.getvector(v,3)
+    v = argcheck.getvector(v,3)
     return np.r_[0, v]
 
 def norm(q):
     r"""
     Norm of a quaternion
     
-    :arg q: input quaternion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg q: input quaternion as a 4-vector
+    :type v: : array_like
     :return: norm of the quaternion
     :rtype: float
     
@@ -57,15 +59,15 @@ def norm(q):
     :seealso: unit
 
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     return np.linalg.norm(q)
     
 def unit(q, tol = 10):
     """
     Create a unit quaternion
     
-    :arg v: quaterion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg v: quaterion as a 4-vector
+    :type v: array_like
     :return: a pure quaternion
     :rtype: numpy.ndarray, shape=(4,)
     
@@ -73,17 +75,17 @@ def unit(q, tol = 10):
     
     .. seealso:: norm
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     nm = np.linalg.norm(q)
-    assert abs(nm) >  tol*np.finfo(np.float64).eps, 'cannot normalize (near) zero length quaternion'
+    assert abs(nm) >  tol*_eps, 'cannot normalize (near) zero length quaternion'
     return q / nm
 
 def isunit(q, tol = 10):
     """
     Test if quaternion has unit length
     
-    :param v: quaternion to test
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :param v: quaternion as a 4-vector
+    :type v: array_like
     :param tol: tolerance in units of eps
     :type tol: float
     :return: whether quaternion has unit length
@@ -91,14 +93,44 @@ def isunit(q, tol = 10):
         
     :seealso: unit
     """
-    return np.abs(norm(q) -1) < tol * np.finfo(np.float64).eps
+    return tr.iszerovec(q)
 
+
+def isequal(q1, q2, tol=100, unitq=False):
+    """
+    Test if quaternions are equal
+    
+    :param q1: quaternion as a 4-vector
+    :type q1: array_like
+    :param q2: quaternion as a 4-vector
+    :type q2: array_like
+    :param unitq: quaternions are unit quaternions
+    :type unitq: bool
+    :param tol: tolerance in units of eps
+    :type tol: float
+    :return: whether quaternion has unit length
+    :rtype: bool
+    
+    Tests if two quaternions are equal.  
+    
+    For unit-quaternions ``unitq=True`` the double mapping is taken into account,
+    that is ``q`` and ``-q`` represent the same orientation and ``isequal(q, -q, unitq=True)`` will
+    return ``True``.
+    """
+    q1 = argcheck.getvector(q1,4)
+    q2 = argcheck.getvector(q2,4)
+
+    if unit:
+        return (np.sum(np.abs(q1 - q2)) < tol*_eps) or (np.sum(np.abs(q1 + q2)) < tol*_eps)
+    else:
+        return (np.sum(np.abs(q1 - q2)) < tol*_eps)
+    
 def q2v(q):
     """
     Convert unit-quaternion to 3-vector 
     
-    :arg q: unit-quaternion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg q: unit-quaternion as a 4-vector
+    :type v: array_like
     :return: a unique 3-vector
     :rtype: numpy.ndarray, shape=(3,)
     
@@ -111,7 +143,7 @@ def q2v(q):
     .. seealso:: v2q
 
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     if q[0] >= 0:
         return q[1:4]
     else:
@@ -121,8 +153,8 @@ def v2q(v):
     r"""
     Convert 3-vector to unit-quaternion 
     
-    :arg v: vector part of unit quaternion
-    :type v: 3-vector: numpy.ndarray
+    :arg v: vector part of unit quaternion, a 3-vector
+    :type v: array_like
     :return: a unit quaternion
     :rtype: numpy.ndarray, shape=(4,)
 
@@ -131,7 +163,7 @@ def v2q(v):
     
     .. seealso:: q2v
     """
-    v = check.getvector(v,3)
+    v = argcheck.getvector(v,3)
     s = 1 - np.linalg.norm(v)
     return np.r_[s, v]
 
@@ -139,10 +171,10 @@ def qqmul(q1, q2):
     """
     Quaternion multiplication
     
-    :arg q0: left-hand quaternion
-    :type q0: 4-vector: list, tuple, numpy.ndarray
-    :arg q1: right-hand uquaternion
-    :type q1: 4-vector: list, tuple, numpy.ndarray
+    :arg q0: left-hand quaternion as a 4-vector
+    :type q0: : array_like
+    :arg q1: right-hand quaternion as a 4-vector
+    :type q1: array_like
     :return: quaternion product
     :rtype: numpy.ndarray, shape=(4,)
     
@@ -152,8 +184,8 @@ def qqmul(q1, q2):
     :seealso: qvmul
 
     """
-    q1 = check.getvector(q1,4)
-    q2 = check.getvector(q2,4)
+    q1 = argcheck.getvector(q1,4)
+    q2 = argcheck.getvector(q2,4)
     s1 = q1[0]; v1 = q1[1:4]
     s2 = q2[0]; v2 = q2[1:4]
     
@@ -163,8 +195,8 @@ def qvmul(q, v):
     """
     Vector rotation
     
-    :arg q: input unit-quaternion
-    :type q: 4-vector: list, tuple, numpy.ndarray
+    :arg q: unit-quaternion as a 4-vector
+    :type q: array_like
     :arg v: 3-vector to be rotated
     :type v: list, tuple, numpy.ndarray
     :return: rotated 3-vector
@@ -177,8 +209,8 @@ def qvmul(q, v):
 
     :seealso: qvmul
     """
-    q = check.getvector(q,4)
-    v = check.getvector(v,3)
+    q = argcheck.getvector(q,4)
+    v = argcheck.getvector(v,3)
     qv = qqmul(q, qqmul(pure(v), conj(q)))
     return qv[1:4]
 
@@ -187,8 +219,8 @@ def pow(q, power):
     """
     Raise quaternion to a power
     
-    :arg q: input quaternion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg q: quaternion as a 4-vector
+    :type v: array_like
     :arg power: exponent
     :type power: int
     :return: input quaternion raised to the specified power
@@ -202,7 +234,7 @@ def pow(q, power):
     - power can be negative, in which case the conjugate is taken
 
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     assert type(power) is int, "Power must be an integer"
     qr = eye()
     for i in range(0, abs(power)):
@@ -217,15 +249,15 @@ def conj(q):
     """
     Quaternion conjugate
     
-    :arg q: input quaternion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg q: quaternion as a 4-vector
+    :type v: array_like
     :return: conjugate of input quaternion 
     :rtype: numpy.ndarray, shape=(4,)
     
     Conjugate of quaternion, the vector part is negated.
     
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     return np.r_[q[0], -q[1:4]]
 
 
@@ -233,8 +265,8 @@ def q2r(q):
     """
     Convert unit-quaternion to SO(3) rotation matrix 
     
-    :arg q: input unit-quaternion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg q: unit-quaternion as a 4-vector
+    :type v: array_like
     :return: corresponding SO(3) rotation matrix
     :rtype: numpy.ndarray, shape=(3,3)
     
@@ -245,20 +277,20 @@ def q2r(q):
     :seealso: r2q
 
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     s = q[0]; x = q[1]; y = q[2]; z = q[3]
     return np.array([[1 - 2 * (y ** 2 + z ** 2), 2 * (x * y - s * z), 2 * (x * z + s * y)],
                           [2 * (x * y + s * z), 1 - 2 * (x ** 2 + z ** 2), 2 * (y * z - s * x)],
                           [2 * (x * z - s * y), 2 * (y * z + s * x), 1 - 2 * (x ** 2 + y ** 2)]])
 
 
-def r2q(R):
+def r2q(R, check=True):
     """
     Convert SO(3) rotation matrix to unit-quaternion
     
-    :arg R: input unit-quaternion
+    :arg R: rotation matrix
     :type R: numpy.ndarray, shape=(3,3)
-    :return: correspondng unit-quaternion
+    :return: unit-quaternion
     :rtype: numpy.ndarray, shape=(3,)
     
     Returns a unit-quaternion corresponding to the input SO(3) rotation matrix.
@@ -268,7 +300,7 @@ def r2q(R):
     :seealso: q2r
 
     """
-    assert tr.isrot(R, check=True), "Argument must be 3x3 rotation matrix"
+    assert tr.isrot(R, check=check), "Argument must be 3x3 rotation matrix"
     qs = math.sqrt(np.trace(R) + 1) / 2.0
     kx = R[2,1] - R[1,2]  # Oz - Ay
     ky = R[0,2] - R[2,0]  # Ax - Nz
@@ -301,7 +333,7 @@ def r2q(R):
 
     kv = np.r_[kx, ky, kz]
     nm = np.linalg.norm(kv)
-    if abs(nm) <  100*np.finfo(np.float64).eps:
+    if abs(nm) <  100*_eps:
         return qone()
     else:
         return np.r_[qs, (math.sqrt(1.0 - qs ** 2) / nm) * kv]
@@ -310,10 +342,10 @@ def slerp(q0, q1, s, shortest=False):
     """
     Quaternion conjugate
     
-    :arg q0: initial unit quaternion
-    :type q0: 4-vector: list, tuple, numpy.ndarray
-    :arg q1: final unit quaternion
-    :type q1: 4-vector: list, tuple, numpy.ndarray
+    :arg q0: initial unit quaternion as a 4-vector
+    :type q0: array_like
+    :arg q1: final unit quaternion as a 4-vector
+    :type q1: array_like
     :arg s: interpolation coefficient in the range [0,1]
     :type s: float
     :arg shortest: choose shortest distance [default False]
@@ -334,8 +366,8 @@ def slerp(q0, q1, s, shortest=False):
 
     """
     assert 0 <= s <= 1, 's must be in the interval [0,1]'
-    q0 = check.getvector(q0,4)
-    q1 = check.getvector(q1,4)
+    q0 = argcheck.getvector(q0,4)
+    q1 = argcheck.getvector(q1,4)
 
     dot = np.dot(q0,q1)
 
@@ -375,8 +407,8 @@ def matrix(q):
     """
     Convert to 4x4 matrix equivalent
     
-    :arg q: input quaternion
-    :type v: 4-vector: list, tuple, numpy.ndarray
+    :arg q: quaternion as a 4-vector
+    :type v: array_like
     :return: equivalent matrix 
     :rtype: numpy.ndarray, shape=(4,4)
     
@@ -387,27 +419,22 @@ def matrix(q):
     :seealso: qqmul
     
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     s = q[0]; x = q[1]; y = q[2]; z = q[3]
     return np.array([[s, -x, -y, -z],
                   [x, s, -z, y],
                   [y, z, s, -x],
                   [z, -y, x, s]])
 
-def isequal(q1, q2, tol=100):
-    q1 = check.getvector(q1,4)
-    q2 = check.getvector(q2,4)
-    tol *= 100*np.finfo(np.float64).eps
-    return (np.sum(np.abs(q1 - q2)) < tol) or (np.sum(np.abs(q1 + q2)) < tol)
     
 def dot(q, w):
     """
     Rate of change of unit-quaternion
     
-    :arg q0: unit-quaternion
-    :type q0: 4-vector: list, tuple, numpy.ndarray
-    :arg w: angular velocity in world frame
-    :type w: 3-vector: list, tuple, numpy.ndarray
+    :arg q0: unit-quaternion as a 4-vector
+    :type q0: array_like
+    :arg w: angular velocity in world frame as a 3-vector
+    :type w: array_like
     :return: rate of change of unit quaternion
     :rtype: numpy.ndarray, shape=(4,)
     
@@ -418,8 +445,8 @@ def dot(q, w):
     .. warning:: There is no check that the passed values are unit-quaternions.
 
     """
-    q = check.getvector(q,4)
-    w = check.getvector(w,3)
+    q = argcheck.getvector(q,4)
+    w = argcheck.getvector(w,3)
     E = q[0] * (np.eye(3, 3)) - tr.skew(q[1:4])
     return 0.5 * np.r_[-np.dot(q[1:4], w), E@w]
 
@@ -427,10 +454,10 @@ def dotb(q, w):
     """
     Rate of change of unit-quaternion
     
-    :arg q0: unit-quaternion
-    :type q0: 4-vector: list, tuple, numpy.ndarray
-    :arg w: angular velocity in body frame
-    :type w: 3-vector: list, tuple, numpy.ndarray
+    :arg q0: unit-quaternion as a 4-vector
+    :type q0: array_like
+    :arg w: angular velocity in body frame as a 3-vector
+    :type w: array_like
     :return: rate of change of unit quaternion
     :rtype: numpy.ndarray, shape=(4,)
     
@@ -441,8 +468,8 @@ def dotb(q, w):
     .. warning:: There is no check that the passed values are unit-quaternions.
 
     """
-    q = check.getvector(q,4)
-    w = check.getvector(w,3)
+    q = argcheck.getvector(q,4)
+    w = argcheck.getvector(w,3)
     E = q[0] * (np.eye(3, 3)) + tr.skew(q[1:4])
     return 0.5 * np.r_[-np.dot(q[1:4], w), E@w]
 
@@ -450,10 +477,10 @@ def angle(q1, q2):
     """
     Angle between two unit-quaternions
     
-    :arg q0: input unit-quaternion
-    :type q0: 4-vector: list, tuple, numpy.ndarray
-    :arg q1: input unit-quaternion
-    :type q1: 4-vector: list, tuple, numpy.ndarray
+    :arg q0: unit-quaternion as a 4-vector
+    :type q0: array_like
+    :arg q1: unit-quaternion as a 4-vector
+    :type q1: array_like
     :return: angle between the rotations [radians]
     :rtype: float
     
@@ -469,8 +496,8 @@ def angle(q1, q2):
     """
     # TODO different methods
     
-    q1 = check.getvector(q1,4)
-    q2 = check.getvector(q2,4)
+    q1 = argcheck.getvector(q1,4)
+    q2 = argcheck.getvector(q2,4)
     return 2.0*math.atan2( norm(q1-q2), norm(q1+q2))
             
             
@@ -478,8 +505,8 @@ def print(q, delim=('<', '>'), fmt='%f', file=sys.stdout):
     """
     Format a quaternion
     
-    :arg q: input unit-quaternion
-    :type q: list, tuple, numpy.ndarray
+    :arg q: unit-quaternion as a 4-vector
+    :type q: array_like
     :arg delim: 2-list of delimeters [default ('<', '>')]
     :type delim: list or tuple of strings
     :arg fmt: printf-style format soecifier [default '%f']
@@ -501,7 +528,7 @@ def print(q, delim=('<', '>'), fmt='%f', file=sys.stdout):
     If `file=None` then a string is returned.
 
     """
-    q = check.getvector(q,4)
+    q = argcheck.getvector(q,4)
     template = "# %s #, #, # %s".replace('#', fmt)
     s = template % (q[0], delim[0], q[1], q[2], q[3], delim[1])
     if file:
@@ -509,5 +536,8 @@ def print(q, delim=('<', '>'), fmt='%f', file=sys.stdout):
     else:
         return s
     
-if __name__ == "main":
-    runfile("test_transforms.py")
+if __name__ == '__main__':
+    import pathlib
+    import os.path
+    
+    runfile(os.path.join(pathlib.Path(__file__).parent.absolute(), "test_quaternion.py") )
