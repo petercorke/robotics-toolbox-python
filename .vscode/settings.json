@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "C:\\Users\\havil\\miniconda3\\envs\\rtb\\python.exe",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pycodestyleEnabled": false
+}

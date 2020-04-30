@@ -1,2 +1,5 @@
 __pycache__
 spatialmath/docs/build
+*.egg
+*.egg-info
+*.egg-info/*
