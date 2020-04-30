@@ -58,6 +58,9 @@ class ets(object):
         # Number of joints in the robot
         self._n = len(self._q_idx)
 
+        # Current joint angles of the robot
+        self._q = np.zeros((self._n,))
+
     @classmethod
     def dh_to_ets(cls, robot):
         """
@@ -118,6 +121,10 @@ class ets(object):
             robot.manuf,
             robot.base,
             robot.tool)
+
+    @property
+    def q(self):
+        return self._q
 
     @property
     def name(self):
