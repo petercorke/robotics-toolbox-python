@@ -81,34 +81,34 @@ class ets(object):
 
                 # Append Tx(a)
                 if L.a != 0:
-                    ets.append(et(et.Ttx, 'tx', L.a))
+                    ets.append(et(et.Ttx, L.a))
                     M += 1
 
                 # Append Rx(alpha)
                 if L.alpha != 0:
-                    ets.append(et(et.TRx, 'Rx', L.alpha))
+                    ets.append(et(et.TRx, L.alpha))
                     M += 1
 
                 if L.is_revolute:
                     # Append Tz(d)
                     if L.d != 0:
-                        ets.append(et(et.Ttz, 'tz', L.d))
+                        ets.append(et(et.Ttz, L.d))
                         M += 1
 
                     # Append Rz(q)
-                    ets.append(et(et.TRz, 'Rz', i=j+1))
+                    ets.append(et(et.TRz, i=j+1))
                     q_idx.append(M)
                     M += 1
 
                 else:
                     # Append Tz(q)
-                    ets.append(et(et.Ttz, 'tz', i=j+1))
+                    ets.append(et(et.Ttz, i=j+1))
                     q_idx.append(M)
                     M += 1
 
                     # Append Rz(theta)
                     if L.theta != 0:
-                        ets.append(et(et.TRz, 'Rz', L.alpha))
+                        ets.append(et(et.TRz, L.alpha))
                         M += 1
 
         return cls(
@@ -212,22 +212,22 @@ class ets(object):
 class et(object):
     """This class implements a single elementary transform (ET)
 
-    :param axis: The function which calculated the values of the ET.
-    :type axis: function
-    :param axis_s: The axis in which the ET is oriented. One of 'Rx', 'Ry',
-        'Rz', 'tx', 'ty', 'tz'.
-    :type axis_s: str
+    :param axis_func: The function which calculated the values of the ET.
+    :type axis_func: static et.T__ function
     :param eta: The coordinate of the ET. If not supplied the ET corresponds
         to a variable ET which is a joint
     :type eta: float, optional
     :param i: If this ET corresponds to a joint, i corresponds to the joint
         number within the robot
     :type i: int, optional
+    :param axis: The axis in which the ET is oriented. One of 'Rx', 'Ry',
+    'Rz', 'tx', 'ty', 'tz'.
+    :type axis_s: str
 
     References: Kinematic Derivatives using the Elementary Transform Sequence,
         J. Haviland and P. Corke
     """
-    def __init__(self, axis_func, axis, eta=None, i=None):
+    def __init__(self, axis_func, eta=None, i=None):
 
         super(et, self).__init__()
         self.STATIC = 0
@@ -235,7 +235,23 @@ class et(object):
 
         self._eta = eta
         self._axis_func = axis_func
-        self._axis = axis
+
+        if axis_func == et.TRx:
+            self._axis = 'Rx'
+        elif axis_func == et.TRy:
+            self._axis = 'Ry'
+        elif axis_func == et.TRz:
+            self._axis = 'Rz'
+        elif axis_func == et.Ttx:
+            self._axis = 'tx'
+        elif axis_func == et.Tty:
+            self._axis = 'ty'
+        elif axis_func == et.Ttz:
+            self._axis = 'tz'
+        else:
+            raise TypeError(
+                'axis_func array must be an ET function, one of: et.TRx, '
+                'et.TRy, et.TRz, et.Ttx, et.Tty, or et.Ttz.')
 
         if self.eta is not None:
             self._type = self.STATIC

@@ -1,66 +1,84 @@
 #!/usr/bin/env python
 
 import numpy as np
-from rtb.robot.Link import Revolute
-from rtb.robot.serial_link import SerialLink
+from rtb.robot.ets import ets, et
 # from rtb.tools.transform import transl, xyzrpy_to_trans
 
-class Panda(SerialLink):
+
+class Panda(ets):
     """
-    A class representing the Franka Emika Panda robot arm.
+    A class representing the Franka Emika Panda robot arm. ETS taken from [1]
+    based on https://frankaemika.github.io/docs/control_parameters.html
 
-    DH Parameters taken from https://frankaemika.github.io/docs/control_parameters.html
-    
-    Attributes:
-    --------
-        name : string
-            Name of the robot
-        manufacturer : string
-            Manufacturer of the robot
-        links : List[n]
-            Series of links which define the robot
-        base : float np.ndarray(4,4)
-            Locaation of the base
-        tool : float np.ndarray(4,4)
-            Location of the tool
-        mdh : int
-            1: Pnada is modified D&H
-        n : int
-            Number of joints in the robot
+    :param et_list: List of elementary transforms which represent the robot
+        kinematics
+    :type et_list: list of etb.robot.et
+    :param q_idx: List of indexes within the ets_list which correspond to
+        joints
+    :type q_idx: list of int
+    :param name: Name of the robot
+    :type name: str, optional
+    :param manufacturer: Manufacturer of the robot
+    :type manufacturer: str, optional
+    :param base: Location of the base is the world frame
+    :type base: float np.ndarray(4,4), optional
+    :param tool: Offset of the flange of the robot to the end-effector
+    :type tool: float np.ndarray(4,4), optional
+    :param qz: The zero joint angle configuration of the robot
+    :type qz: float np.ndarray(7,)
+    :param qr: The ready state joint angle configuration of the robot
+    :type qr: float np.ndarray(7,)
 
-    Examples
-    --------
-    >>> panda = Panda()
-
-    See Also
-    --------
-    ropy.robot.SerialLink : A superclass for arm type robots
+    References: [1] Kinematic Derivatives using the Elementary Transform
+        Sequence, J. Haviland and P. Corke
     """
-
     def __init__(self):
 
         deg = np.pi/180
         mm = 1e-3
-        
-        flange = (107)*mm
         d7 = (58.4)*mm
-        
-        L1 = Revolute(a =    0.0, d = 0.333, alpha =      0.0, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
-        L2 = Revolute(a =    0.0, d =   0.0, alpha = -np.pi/2, qlim = np.array([-1.7628, 1.7628]), mdh = 1)
-        L3 = Revolute(a =    0.0, d = 0.316, alpha =  np.pi/2, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
-        L4 = Revolute(a = 0.0825, d =   0.0, alpha =  np.pi/2, qlim = np.array([-3.0718, -0.0698]), mdh = 1)
-        L5 = Revolute(a =-0.0825, d = 0.384, alpha = -np.pi/2, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
-        L6 = Revolute(a =    0.0, d =   0.0, alpha =  np.pi/2, qlim = np.array([-0.0175, 3.7525]), mdh = 1)
-        L7 = Revolute(a =  0.088, d =flange, alpha =  np.pi/2, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
 
-        L = [L1, L2, L3, L4, L5, L6, L7]
+        et_list = [
+            et(et.Ttz, 0.333),
+            et(et.TRz, i=1),
+            et(et.TRx, -90*deg),
+            et(et.TRz, i=2),
+            et(et.TRx, 90*deg),
+            et(et.Ttz, 0.316),
+            et(et.TRz, i=3),
+            et(et.Ttx, 0.0825),
+            et(et.TRx, 90*deg),
+            et(et.TRz, i=4),
+            et(et.Ttx, -0.0825),
+            et(et.TRx, -90*deg),
+            et(et.Ttz, 0.384),
+            et(et.TRz, i=5),
+            et(et.TRx, 90*deg),
+            et(et.TRz, i=6),
+            et(et.Ttx, 0.088),
+            et(et.TRx, 90*deg),
+            et(et.Ttz, 0.107),
+            et(et.TRz, i=7),
+        ]
 
-        # super(Panda, self).__init__(L, name = 'Panda', manufacturer = 'Franka Emika', tool = transl(0, 0, d7))
+        q_idx = [1, 3, 6, 9, 13, 15, 19]
 
-        super(Panda, self).__init__(L, name = 'Panda', manufacturer = 'Franka Emika', tool=np.eye(4))
+        super(Panda, self).__init__(
+            et_list,
+            q_idx,
+            name='Panda',
+            manufacturer='Franka Emika',
+            tool=np.eye(4))
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 
-        self.qz = np.array([0, 0, 0, 0, 0, 0, 0])
-        self.qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
+        self._qz = np.array([0, 0, 0, 0, 0, 0, 0])
+        self._qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
 
+    @property
+    def qz(self):
+        return self._qz
+
+    @property
+    def qr(self):
+        return self._qr
