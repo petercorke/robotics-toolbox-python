@@ -1,8 +1,9 @@
-from roboticstoolbox.robot.ets import ets, et
+from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ET import ET
 
 __all__ = [
-    'et',
-    'ets'
+    'ET',
+    'ETS'
 ]
 
 

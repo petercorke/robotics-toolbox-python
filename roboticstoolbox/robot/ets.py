@@ -6,9 +6,11 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 import numpy as np
+import spatialmath.base as sp
+from roboticstoolbox.robot.ET import ET
 
 
-class ets(object):
+class ETS(object):
     """
     The Elementary Transform Sequence (ETS). A superclass which represents the
     kinematics of a serial-link manipulator
@@ -50,7 +52,7 @@ class ets(object):
         self._tool = tool
         self._T = np.eye(4)
 
-        super(ets, self).__init__()
+        super(ETS, self).__init__()
 
         # Number of transforms in the ETS
         self._M = len(self._ets)
@@ -190,6 +192,8 @@ class ets(object):
 
             trans = trans @ T
 
+        trans = trans @ self.tool
+
         return trans
 
     def jacob0(self, q):
@@ -215,7 +219,7 @@ class ets(object):
             if i != self.q_idx[j]:
                 U = U @ self.ets[i].T()
             else:
-                if self.ets[i].axis_func == et.TRz:
+                if self.ets[i].axis_func == ET.TRz:
                     U = U @ self.ets[i].T(q[j])
                     Tu = np.linalg.inv(U) @ T
 
@@ -255,14 +259,14 @@ class ets(object):
             for i in range(j, self.n):
 
                 H[:3, i, j] = np.cross(J[3:, j], J[:3, i])
-                H[3:, i, j] = np.cross(J[3:, i], J[3:, i])
+                H[3:, i, j] = np.cross(J[3:, j], J[3:, i])
 
                 if i != j:
                     H[:3, j, i] = H[:3, i, j]
 
         return H
 
-    def m(self, q, J=None):
+    def manipulability(self, q, J=None):
         """
         Calculates the manipulability index (scalar) robot at the joint
         configuration q. It indicates dexterity, that is, how isotropic the
@@ -287,7 +291,7 @@ class ets(object):
 
         return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
-    def Jm(self, q, J=None, H=None, m=None):
+    def jacobm(self, q, J=None, H=None, manipulability=None):
         """
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
@@ -301,8 +305,8 @@ class ets(object):
             J. Haviland and P. Corke
         """
 
-        if m is None:
-            m = self.m(q)
+        if manipulability is None:
+            manipulability = self.manipulability(q)
 
         if J is None:
             J = self.jacob0(q)
@@ -315,9 +319,10 @@ class ets(object):
 
         for i in range(self.n):
             c = J @ np.transpose(H[:, :, i])
-            Jm[i, 0] = m * np.transpose(c.flatten('F')) @ b.flatten('F')
+            Jm[i, 0] = manipulability * \
+                np.transpose(c.flatten('F')) @ b.flatten('F')
 
-        return a
+        return Jm
 
     def __str__(self):
         """
@@ -331,226 +336,25 @@ class ets(object):
         for i in range(self._n):
             axes += self.ets[self.q_idx[i]].axis
 
+        rpy = sp.tr2rpy(self.tool, unit='deg')
+
+        if rpy[0] == 0:
+            rpy[0] = 0
+
+        if rpy[1] == 0:
+            rpy[1] = 0
+
+        if rpy[2] == 0:
+            rpy[2] = 0
+
         model = '\n%s (%s): %d axis, %s, ETS\n'\
             'Elementary Transform Sequence:\n'\
             '%s\n'\
             'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
                 self.name, self.manuf, self.n, axes,
                 self.ets,
-                self.tool[0, 3], self.tool[1, 3], self.tool[2, 3], 0, 0, 0
+                self.tool[0, 3], self.tool[1, 3],
+                self.tool[2, 3], rpy[0], rpy[1], rpy[2]
             )
 
         return model
-
-
-class et(object):
-    """This class implements a single elementary transform (ET)
-
-    :param axis_func: The function which calculated the values of the ET.
-    :type axis_func: static et.T__ function
-    :param eta: The coordinate of the ET. If not supplied the ET corresponds
-        to a variable ET which is a joint
-    :type eta: float, optional
-    :param i: If this ET corresponds to a joint, i corresponds to the joint
-        number within the robot
-    :type i: int, optional
-    :param axis: The axis in which the ET is oriented. One of 'Rx', 'Ry',
-    'Rz', 'tx', 'ty', 'tz'.
-    :type axis_s: str
-
-    References: Kinematic Derivatives using the Elementary Transform Sequence,
-        J. Haviland and P. Corke
-    """
-    def __init__(self, axis_func, eta=None, i=None):
-
-        super(et, self).__init__()
-        self.STATIC = 0
-        self.VARIABLE = 1
-
-        self._eta = eta
-        self._axis_func = axis_func
-
-        if axis_func == et.TRx:
-            self._axis = 'Rx'
-        elif axis_func == et.TRy:
-            self._axis = 'Ry'
-        elif axis_func == et.TRz:
-            self._axis = 'Rz'
-        elif axis_func == et.Ttx:
-            self._axis = 'tx'
-        elif axis_func == et.Tty:
-            self._axis = 'ty'
-        elif axis_func == et.Ttz:
-            self._axis = 'tz'
-        else:
-            raise TypeError(
-                'axis_func array must be an ET function, one of: et.TRx, '
-                'et.TRy, et.TRz, et.Ttx, et.Tty, or et.Ttz.')
-
-        if self.eta is not None:
-            self._type = self.STATIC
-            self._T = axis_func(eta)
-        else:
-            self._type = self.VARIABLE
-            self._i = i
-
-        if self._type is self.STATIC and self.axis[0] == 'R':
-            self._eta_deg = self.eta * (180/np.pi)
-
-    @property
-    def eta(self):
-        return self._eta
-
-    @property
-    def eta_deg(self):
-        return self._eta_deg
-
-    @property
-    def axis_func(self):
-        return self._eta
-
-    @property
-    def axis_func(self):
-        return self._axis_func
-
-    @property
-    def axis(self):
-        return self._axis
-
-    @property
-    def i(self):
-        return self._i
-
-    def T(self, q=None):
-        """
-        Calculates the transformation matrix of the ET
-
-        :param q: Is used if this ET is variable (a joint)
-        :type q: float (radians), required for variable ET's
-        :return: The transformation matrix of the ET
-        :rtype: float np.ndarray(4,4)
-        """
-        if self._type is self.STATIC:
-            return self._T
-        else:
-            return self.axis_func(q)
-
-    def __str__(self):
-        """
-        Pretty prints the ET. Will output angles in degrees
-
-        :return: The transformation matrix of the ET
-        :rtype: str
-        """
-        if self._type is self.STATIC:
-            if self.axis[0] == 'R':
-                return '%s(%g)' % (self.axis, self.eta_deg)
-            else:
-                return '%s(%g)' % (self.axis, self.eta)
-        else:
-            return '%s(q%d)' % (self.axis, self.i)
-
-    def __repr__(self):
-        return str(self)
-
-    @staticmethod
-    def TRx(q):
-        """
-        An elementary transform (ET). A pure rotation of q about the x-axis
-
-        :param q: The amount of rotation about the x-axis
-        :type q: float (radians)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
-        """
-        return np.array([
-            [1, 0,          0,         0],
-            [0, np.cos(q), -np.sin(q), 0],
-            [0, np.sin(q),  np.cos(q), 0],
-            [0, 0,          0,         1]
-        ])
-
-    @staticmethod
-    def TRy(q):
-        """
-        An elementary transform (ET). A pure rotation of q about the y-axis
-
-        :param q: The amount of rotation about the y-axis
-        :type q: float (radians)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
-        """
-        return np.array([
-            [np.cos(q),  0, np.sin(q), 0],
-            [0,          1, 0,         0],
-            [-np.sin(q), 0, np.cos(q), 0],
-            [0,          0, 0,         1]
-        ])
-
-    @staticmethod
-    def TRz(q):
-        """
-        An elementary transform (ET). A pure rotation of q about the z-axis
-
-        :param q: The amount of rotation about the z-axis
-        :type q: float (radians)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
-        """
-        return np.array([
-            [np.cos(q), -np.sin(q), 0, 0],
-            [np.sin(q),  np.cos(q), 0, 0],
-            [0,          0,         1, 0],
-            [0,          0,         0, 1]
-        ])
-
-    @staticmethod
-    def Ttx(q):
-        """
-        An elementary transform (ET). A pure translation of q along the x-axis
-
-        :param q: The amount of translation along the x-axis
-        :type q: float (metres)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
-        """
-        return np.array([
-            [1, 0, 0, q],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
-
-    @staticmethod
-    def Tty(q):
-        """
-        An elementary transform (ET). A pure translation of q along the x-axis
-
-        :param q: The amount of translation along the x-axis
-        :type q: float (metres)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
-        """
-        return np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, q],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
-
-    @staticmethod
-    def Ttz(q):
-        """
-        An elementary transform (ET). A pure translation of q along the x-axis
-
-        :param q: The amount of translation along the x-axis
-        :type q: float (metres)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
-        """
-        return np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, q],
-            [0, 0, 0, 1]
-        ])
