@@ -7,6 +7,7 @@ Created on Tue Apr 24 15:48:52 2020
 
 import numpy as np
 import spatialmath.base as sp
+from spatialmath.base.argcheck import getvector, ismatrix
 from roboticstoolbox.robot.ET import ET
 
 
@@ -175,10 +176,7 @@ class ETS(object):
             Sequence, J. Haviland and P. Corke
         '''
 
-        # if not isinstance(q, np.ndarray):
-        #     raise TypeError('q array must be a numpy ndarray.')
-        # if q.shape != (self._n,):
-        #     raise ValueError('q must be a 1 dim (n,) array')
+        q = getvector(q, self.n)
 
         j = 0
         trans = np.eye(4)
@@ -209,6 +207,9 @@ class ETS(object):
         References: Kinematic Derivatives using the Elementary Transform
             Sequence, J. Haviland and P. Corke
         """
+
+        q = getvector(q, self.n)
+
         T = self.fkine(q)
         U = np.eye(4)
         j = 0
@@ -236,47 +237,59 @@ class ETS(object):
 
         return J
 
-    def hessian0(self, q, J=None):
+    def hessian0(self, q=None, J0=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
-        function calulcates this based on the ETS of the robot.
+        function calulcates this based on the ETS of the robot. One of J0 or q
+        is required. Supply J0 if already calculated to save computation time
 
         :param q: The joint coordinates of the robot
         :type q: float np.ndarray(n,)
+        :param J0: The manipulator Jacobian in the 0 frame
+        :type J0: float np.ndarray(6,n)
         :return: The manipulator Hessian in 0 frame
         :rtype: float np.ndarray(6,n,n)
 
         References: Kinematic Derivatives using the Elementary Transform
             Sequence, J. Haviland and P. Corke
         """
-        if J is None:
-            J = self.jacob0(q)
+
+        if J0 is None:
+            if q is not None:
+                q = getvector(q, self.n)
+                J0 = self.jacob0(q)
+            else:
+                raise ValueError('One of q or J0 must be supplied')
+        # TODO: Check J
 
         H = np.zeros((6, self.n, self.n))
 
         for j in range(self.n):
             for i in range(j, self.n):
 
-                H[:3, i, j] = np.cross(J[3:, j], J[:3, i])
-                H[3:, i, j] = np.cross(J[3:, j], J[3:, i])
+                H[:3, i, j] = np.cross(J0[3:, j], J0[:3, i])
+                H[3:, i, j] = np.cross(J0[3:, j], J0[3:, i])
 
                 if i != j:
                     H[:3, j, i] = H[:3, i, j]
 
         return H
 
-    def manipulability(self, q, J=None):
+    def manipulability(self, q=None, J=None):
         """
         Calculates the manipulability index (scalar) robot at the joint
         configuration q. It indicates dexterity, that is, how isotropic the
         robot's motion is with respect to the 6 degrees of Cartesian motion.
         The measure is high when the manipulator is capable of equal motion
         in all directions and low when the manipulator is close to a
-        singularity.
+        singularity. One of J or q is required. Supply J if already
+        calculated to save computation time
 
         :param q: The joint coordinates of the robot
         :type q: float np.ndarray(n,)
+        :param J: The manipulator Jacobian in any frame
+        :type J: float np.ndarray(6,n)
         :return: The manipulability index
         :rtype: float
 
@@ -287,17 +300,28 @@ class ETS(object):
         """
 
         if J is None:
-            J = self.jacob0(q)
+            if q is not None:
+                q = getvector(q, self.n)
+                J = self.jacob0(q)
+            else:
+                raise ValueError('One of q or J must be supplied')
+        # TODO: Check J
 
         return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
-    def jacobm(self, q, J=None, H=None, manipulability=None):
+    def jacobm(self, q=None, J=None, H=None):
         """
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
+        One of J or q is required. Supply J and H if already calculated to
+        save computation time
 
         :param q: The joint coordinates of the robot
         :type q: float np.ndarray(n,)
+        :param J: The manipulator Jacobian in any frame
+        :type J: float np.ndarray(6,n)
+        :param H: The manipulator Hessian in any frame
+        :type H: float np.ndarray(6,n,n)
         :return: The manipulability Jacobian
         :rtype: float np.ndarray(n,1)
 
@@ -305,15 +329,19 @@ class ETS(object):
             J. Haviland and P. Corke
         """
 
-        if manipulability is None:
-            manipulability = self.manipulability(q)
-
         if J is None:
-            J = self.jacob0(q)
+            if q is not None:
+                q = getvector(q, self.n)
+                J = self.jacob0(q)
+            else:
+                raise ValueError('One of q or J must be supplied')
+        # TODO: Check J
 
         if H is None:
-            H = self.hessian0(q)
+            H = self.hessian0(J0=J)
+        # TODO: Check H
 
+        manipulability = self.manipulability(J=J)
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((self.n, 1))
 
