@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='roboticstoolbox-python',
+    name='robotics-toolbox-python',
 
     version='0.0.1',
 
@@ -27,6 +27,6 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['numpy']
+    install_requires=['numpy', 'spatialmath-python']
 
 )
