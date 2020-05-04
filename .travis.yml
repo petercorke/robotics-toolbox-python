@@ -1,20 +1,11 @@
 language: python
-python:
-    - "3.7"
-before_install: 
-    # Install Latest version of Miniconda
-    - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - source "$HOME/miniconda/etc/profile.d/conda.sh"
-    - hash -r
-    - conda config --set always_yes yes --set changeps1 no
-    - conda update -q conda
-    # Useful for debugging any issues with conda
-    - conda info -a
-install:
-    - conda config --add channels conda-forge
-    - conda create --yes -n rtbtestenv python=$TRAVIS_PYTHON_VERSION --yes --file requirements.txt
-    - conda activate rtbtestenv
-script:
-    # your test script goes here
 
+jobs:
+  include:
+    - python: 3.7
+
+before_install:
+  - ./tools/travis-before-install.sh
+
+script:
+  - ./tools/travis-test.sh
