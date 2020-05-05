@@ -3,4 +3,4 @@ numpy
 sympy
 scipy
 notebook
-opencv
+opencv-python
