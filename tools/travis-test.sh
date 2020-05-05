@@ -16,6 +16,7 @@ setup_base()
 run_test()
 {
   export PYTHONWARNINGS="ignore::DeprecationWarning:virtualenv"
+  pytest
 }
 
 setup_base
