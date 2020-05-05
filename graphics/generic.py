@@ -14,6 +14,24 @@ from vpython import *
 
 
 def init_canvas(height=500, width=500, title='', caption='', grid=False):
+    """
+    Set up the scene with initial conditions.
+        - White background
+        - Width, height
+        - Title, caption
+        - Axes drawn (if applicable)
+
+    ~Other if available later~
+    """
+    scene.background = color.white
+    scene.width = width
+    scene.height = height
+    if title != '':
+        scene.title = title
+    if caption != '':
+        scene.caption = caption
+    if grid:
+        draw_grid()
     return
 
 
