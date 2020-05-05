@@ -26,7 +26,7 @@ popd
 
 pip install --upgrade pip
 
-pip install setuptools wheel
+pip install setuptools wheel `grep ./tools/test_requirements.txt`
 
 
 
