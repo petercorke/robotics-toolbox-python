@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ets import ets, et
-# from rtb.tools.transform import transl, xyzrpy_to_trans
+from spatialmath.base import trotz, transl
+from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ET import ET
 
 
-class Panda(ets):
+class Panda(ETS):
     """
     A class representing the Franka Emika Panda robot arm. ETS taken from [1]
     based on https://frankaemika.github.io/docs/control_parameters.html
@@ -36,41 +37,41 @@ class Panda(ets):
 
         deg = np.pi/180
         mm = 1e-3
-        d7 = (58.4)*mm
+        tool_offset = (103)*mm
 
         et_list = [
-            et(et.Ttz, 0.333),
-            et(et.TRz, i=1),
-            et(et.TRx, -90*deg),
-            et(et.TRz, i=2),
-            et(et.TRx, 90*deg),
-            et(et.Ttz, 0.316),
-            et(et.TRz, i=3),
-            et(et.Ttx, 0.0825),
-            et(et.TRx, 90*deg),
-            et(et.TRz, i=4),
-            et(et.Ttx, -0.0825),
-            et(et.TRx, -90*deg),
-            et(et.Ttz, 0.384),
-            et(et.TRz, i=5),
-            et(et.TRx, 90*deg),
-            et(et.TRz, i=6),
-            et(et.Ttx, 0.088),
-            et(et.TRx, 90*deg),
-            et(et.Ttz, 0.107),
-            et(et.TRz, i=7),
+            ET(ET.Ttz, 0.333),
+            ET(ET.TRz, i=1),
+            ET(ET.TRx, -90*deg),
+            ET(ET.TRz, i=2),
+            ET(ET.TRx, 90*deg),
+            ET(ET.Ttz, 0.316),
+            ET(ET.TRz, i=3),
+            ET(ET.Ttx, 0.0825),
+            ET(ET.TRx, 90*deg),
+            ET(ET.TRz, i=4),
+            ET(ET.Ttx, -0.0825),
+            ET(ET.TRx, -90*deg),
+            ET(ET.Ttz, 0.384),
+            ET(ET.TRz, i=5),
+            ET(ET.TRx, 90*deg),
+            ET(ET.TRz, i=6),
+            ET(ET.Ttx, 0.088),
+            ET(ET.TRx, 90*deg),
+            ET(ET.Ttz, 0.107),
+            ET(ET.TRz, i=7),
         ]
 
         q_idx = [1, 3, 6, 9, 13, 15, 19]
+
+        tool = transl(0, 0, tool_offset) @  trotz(-np.pi/4)
 
         super(Panda, self).__init__(
             et_list,
             q_idx,
             name='Panda',
             manufacturer='Franka Emika',
-            tool=np.eye(4))
-
-        # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
+            tool=tool)
 
         self._qz = np.array([0, 0, 0, 0, 0, 0, 0])
         self._qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
