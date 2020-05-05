@@ -17,3 +17,6 @@ run_test()
 {
   export PYTHONWARNINGS="ignore::DeprecationWarning:virtualenv"
 }
+
+setup_base
+run_test
