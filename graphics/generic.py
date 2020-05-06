@@ -77,12 +77,13 @@ def draw_reference_frame_axes():
 
 def create_grid():
     """
-    Draw a grid along a plane
+    Draw a grid along each 3D plane
     """
-    # TODO: create an update_grid() that updates grid min/max relative to camera position
-    # TODO: ^^ ensure grid walls are at the end of visible range (relative to camera axis)
+    # TODO: create an update_grid() that updates grid min/max relative to camera position. Ensure grid walls
+    #  are at the end of visible range (relative to camera axis (find a relative origin to draw from)).
+    #  May have to be in this one function?? Can't uncompound objects?
 
-    # TODO: Reference sphere, remove later
+    # TODO: Reference spheres, remove later
     sphere(pos=vector(1, 0, 0), radius=0.25, color=color.red)
     sphere(pos=vector(0, 1, 0), radius=0.25, color=color.green)
     sphere(pos=vector(0, 0, 1), radius=0.25, color=color.blue)
@@ -99,9 +100,18 @@ def create_grid():
         lines.append(create_line([min_coord, 0, start_point], [max_coord, 0, start_point]))  # z-axis
 
     # Compound the lines together into one object
-    grid = compound(
-        lines
-    )
+    xz_plane = compound(lines)
+
+    # Clone the current grid for the other two axis
+    xy_plane = xz_plane.clone()
+    yz_plane = xz_plane.clone()
+
+    # Rotate them to align with their corresponding grid
+    xy_plane.rotate(angle=radians(90), axis=vector(1, 0, 0), origin=vector(0, 0, 0))
+    yz_plane.rotate(angle=radians(90), axis=vector(0, 0, 1), origin=vector(0, 0, 0))
+
+    # Combine all into one object
+    grid = compound([xy_plane, xz_plane, yz_plane])
 
     return grid
 
@@ -114,7 +124,8 @@ def create_line(pos1, pos2):
     @type pos2: int array
     @param pos2: 3D position of the other end of the line
     """
-    # TODO: insert checks to ensure 3D points given (e.g. index out of bounds error if given 2D points)
+    # TODO: Insert checks to ensure 3D points given (e.g. index out of bounds error if given 2D points)
+    # TODO: Maybe add a colour input??
 
     # Length of the line using trigonometry
     line_len = sqrt(
