@@ -42,21 +42,18 @@ def init_canvas(height=500, width=500, title='', caption='', grid=False):
     if caption != '':
         scene.caption = caption
     if grid:
-        draw_grid()
+        plot_grid = draw_grid()
+        reference_frame = draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), 0)
+        test_frame = draw_reference_frame_axes(vector(1, 1, 1), vector(0, 0, 1), radians(90))
+        test2_frame = draw_reference_frame_axes(vector(1, 1, -1), vector(1, 1, 1), radians(90))
 
 
 def draw_grid():
     """
     Display grids along the x, y, z axes.
-
-    The grid must be relative to the camera so that as the camera translates,
-    all axes are still visible.
-    Current zoom setting to show axis 5 units away.
     """
-    # TODO: update a changeable zoom setting.
-
-    create_grid()
-    return
+    the_grid = create_grid()
+    return the_grid
 
 
 def draw_label():
@@ -66,11 +63,38 @@ def draw_label():
     return
 
 
-def draw_reference_frame_axes():
+def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     """
     Draw x, y, z axes from the given point.
     Each axis is represented in the objects reference frame.
     """
+
+    # TODO: Remove once verified
+    # Place a box to verify 90 deg angles
+    L = 0.3
+    new_box = box(pos=origin, axis=x_axis_vector, length=L, width=L, height=L)
+
+    # TODO: Ensure parameter input is sufficient
+
+    # Create Basic Frame
+    # Draw X Axis
+    x_arrow = arrow(pos=origin, axis=x_axis_vector, length=1, color=color.red)  # In direction of tooltip/object
+
+    # Draw Y Axis
+    y_arrow = x_arrow.clone()
+    y_arrow.color = color.green
+    y_arrow.rotate(angle=radians(90), axis=vector(0, 0, 1))  # Rotate around the z axis to get into +y direction
+
+    # Draw Z Axis
+    z_arrow = y_arrow.clone()
+    z_arrow.color = color.blue
+    z_arrow.rotate(angle=radians(90), axis=vector(1, 0, 0))  # Rotate around the x axis to get into +z direction
+
+    # Combine all to manipulate together
+    frame = compound([x_arrow, y_arrow, z_arrow])
+
+    # Rotate frame around x, y, z axes as required
+    # TODO
 
     return
 
@@ -79,15 +103,13 @@ def create_grid():
     """
     Draw a grid along each 3D plane
     """
-    # TODO: create an update_grid() that updates grid min/max relative to camera position. Ensure grid walls
-    #  are at the end of visible range (relative to camera axis (find a relative origin to draw from)).
-    #  May have to be in this one function?? Can't uncompound objects?
+    # TODO: create an update_grid() that updates grid min/max relative to camera position(/rotation?).
+    #  And/or ensure grid walls are at the end of visible range (relative to camera axis (find a relative origin to
+    #  draw from)). May have to be in this one function?? Can't uncompound objects?
+    #  Another option is to have grid in constant position relative to camera, except the numbers on the grid change
+    #  relative to position (place grids against walls (like MATLAB 3D plots))
 
-    # TODO: Reference spheres, remove later
-    sphere(pos=vector(1, 0, 0), radius=0.25, color=color.red)
-    sphere(pos=vector(0, 1, 0), radius=0.25, color=color.green)
-    sphere(pos=vector(0, 0, 1), radius=0.25, color=color.blue)
-    sphere(pos=vector(0, 0, 0), radius=0.25, color=color.black)
+    # TODO: Change array input to create_line to vector inputs. Vector has functions to utilise (mag, etc)
 
     # Initial conditions
     lines = []
