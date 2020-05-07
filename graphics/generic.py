@@ -39,6 +39,7 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=False):
         scene.caption = caption
     if grid:
         plot_grid = draw_grid()
+        draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), radians(0))
 
 
 def draw_grid():
@@ -80,7 +81,7 @@ def draw_label(label_text, label_position):
 
 
 def draw_text():
-    # TODO
+    # TODO (use label, but remove box/lines/etc. 3D text is over complex and expensive)
     return
 
 
@@ -131,29 +132,49 @@ def create_grid():
 
     # TODO: Change array input to create_line to vector inputs. Vector has functions to utilise (mag, etc)
 
-    # TODO: NB. Do similar practice to axes. Change grid to show +ve numbers, set origin to 0.
-    #  That way the numbers can be set as need be, and can be moved, rotated, etc with ease
+    # TODO: Have two grid options:
+    #  1. Basic/normal static
+    #  2. Camera relative: have camera focus (centre) focused in the middle of the axes (e.g. <5, 5, 5>)
+
+    # TODO: Using scene.camera.axis, work out whether each plane should be +ve or -ve numbers
+    #   AXIS | GRID
+    #  -,-,- | +,+,+
+    #  -,-,+ | +,+,-
+    #  -,+,- | +,-,+
+    #  -,+,+ | +,-,-
+    #  +,-,- | -,+,+
+    #  +,-,+ | -,+,-
+    #  +,+,- | -,-,+
+    #  +,+,+ | -,-,-
 
     # Initial conditions
-    lines = []
-    min_coord = -5
-    max_coord = 5
+    xz_lines = []
+    xy_lines = []
+    yz_lines = []
+    min_coord = 0
+    max_coord = 10
 
     # XZ plane
     for start_point in range(min_coord, max_coord+1):
-        lines.append(create_line([start_point, 0, min_coord], [start_point, 0, max_coord]))  # x-axis
-        lines.append(create_line([min_coord, 0, start_point], [max_coord, 0, start_point]))  # z-axis
+        xz_lines.append(create_line([start_point, 0, min_coord], [start_point, 0, max_coord]))  # x-axis
+        xz_lines.append(create_line([min_coord, 0, start_point], [max_coord, 0, start_point]))  # z-axis
+
+    # XY plane
+    for start_point in range(min_coord, max_coord + 1):
+        pass
+        xy_lines.append(create_line([start_point, min_coord, 0], [start_point, max_coord, 0]))  # x-axis
+        xy_lines.append(create_line([min_coord, start_point, 0], [max_coord, start_point, 0]))  # y-axis
+
+    # YZ plane
+    for start_point in range(min_coord, max_coord + 1):
+        pass
+        yz_lines.append(create_line([0, start_point, min_coord], [0, start_point, max_coord]))  # y-axis
+        yz_lines.append(create_line([0, min_coord, start_point], [0, max_coord, start_point]))  # z-axis
 
     # Compound the lines together into one object
-    xz_plane = compound(lines)
-
-    # Clone the current grid for the other two axis
-    xy_plane = xz_plane.clone()
-    yz_plane = xz_plane.clone()
-
-    # Rotate them to align with their corresponding grid
-    xy_plane.rotate(angle=radians(90), axis=vector(1, 0, 0), origin=vector(0, 0, 0))
-    yz_plane.rotate(angle=radians(90), axis=vector(0, 0, 1), origin=vector(0, 0, 0))
+    xz_plane = compound(xz_lines)
+    xy_plane = compound(xy_lines)
+    yz_plane = compound(yz_lines)
 
     # Combine all into one object
     grid = compound([xy_plane, xz_plane, yz_plane])
