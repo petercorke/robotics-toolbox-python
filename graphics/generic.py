@@ -14,7 +14,7 @@ from math import sqrt
 '''
 
 
-def init_canvas(height=500, width=500, title='', caption='', grid=False):
+def init_canvas(height=500, width=1000, title='', caption='', grid=False):
     """
     Set up the scene with initial conditions.
         - White background
@@ -43,9 +43,50 @@ def init_canvas(height=500, width=500, title='', caption='', grid=False):
         scene.caption = caption
     if grid:
         plot_grid = draw_grid()
-        reference_frame = draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), 0)
-        test_frame = draw_reference_frame_axes(vector(1, 1, 1), vector(0, 0, 1), radians(90))
-        test2_frame = draw_reference_frame_axes(vector(1, 1, -1), vector(1, 1, 1), radians(90))
+
+        le = 0.8
+
+        # Test 1 | Position (0, 0, 0), Axis (1, 0, 0), No Rotation
+        # Drawn
+        draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), radians(0))
+        # Actual
+        arrow(pos=vector(0, 0, 0), axis=vector(1, 0, 0), length=le, color=color.purple)
+
+        # Test 2 | Position (1, 1, 1), Axis (0, 0, 1), No Rotation
+        # Drawn
+        draw_reference_frame_axes(vector(1, 1, 1), vector(0, 0, 1), radians(0))
+        # Actual
+        arrow(pos=vector(1, 1, 1), axis=vector(0, 0, 1), length=le, color=color.purple)
+
+        # Test 3 | Position (2, 2, 2), Axis (1, 0, 0), 30 deg rot
+        # Drawn
+        draw_reference_frame_axes(vector(2, 2, 2), vector(1, 0, 0), radians(30))
+        # Actual
+        arrow(pos=vector(2, 2, 2), axis=vector(1, 0, 0), length=le, color=color.purple).rotate(radians(30))
+
+        # Test 4 | Position (3, 3, 3), Axis (1, 1, 1), No Rotation
+        # Drawn
+        draw_reference_frame_axes(vector(3, 3, 3), vector(1, 1, 1), radians(0))
+        # Actual
+        arrow(pos=vector(3, 3, 3), axis=vector(1, 1, 1), length=le, color=color.purple)
+
+        # Test 5 | Position (4, 4, 4), Axis (1, 1, 1), 30 deg rot
+        # Drawn
+        draw_reference_frame_axes(vector(4, 4, 4), vector(1, 1, 1), radians(30))
+        # Actual
+        arrow(pos=vector(4, 4, 4), axis=vector(1, 1, 1), length=le, color=color.purple).rotate(radians(30))
+
+        # Test 6 | Position (5, 5, 5), Axis (2, -1, 4), No Rotation
+        # Drawn
+        draw_reference_frame_axes(vector(5, 5, 5), vector(2, -1, 4), radians(0))
+        # Actual
+        arrow(pos=vector(5, 5, 5), axis=vector(2, -1, 4), length=le, color=color.purple)
+
+        # Test 7 | Position (6, 6, 6), Axis (2, -1, 4), 30 deg rot
+        # Drawn
+        draw_reference_frame_axes(vector(6, 6, 6), vector(2, -1, 4), radians(30))
+        # Actual
+        arrow(pos=vector(6, 6, 6), axis=vector(2, -1, 4), length=le, color=color.purple).rotate(radians(30))
 
 
 def draw_grid():
@@ -72,29 +113,28 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     # TODO: Remove once verified
     # Place a box to verify 90 deg angles
     L = 0.3
-    new_box = box(pos=origin, axis=x_axis_vector, length=L, width=L, height=L)
+    new_box = box(pos=origin, axis=x_axis_vector, length=L, width=L, height=L).rotate(x_axis_rotation)
 
     # TODO: Ensure parameter input is sufficient
 
     # Create Basic Frame
     # Draw X Axis
-    x_arrow = arrow(pos=origin, axis=x_axis_vector, length=1, color=color.red)  # In direction of tooltip/object
+    x_arrow = arrow(pos=origin, axis=vector(1, 0, 0), length=1, color=color.red)  # In direction of tooltip/object
 
     # Draw Y Axis
-    y_arrow = x_arrow.clone()
-    y_arrow.color = color.green
-    y_arrow.rotate(angle=radians(90), axis=vector(0, 0, 1))  # Rotate around the z axis to get into +y direction
+    y_arrow = arrow(pos=origin, axis=vector(0, 1, 0), length=1, color=color.green)
 
     # Draw Z Axis
-    z_arrow = y_arrow.clone()
-    z_arrow.color = color.blue
-    z_arrow.rotate(angle=radians(90), axis=vector(1, 0, 0))  # Rotate around the x axis to get into +z direction
+    z_arrow = arrow(pos=origin, axis=vector(0, 0, 1), length=1, color=color.blue)
 
     # Combine all to manipulate together
-    frame = compound([x_arrow, y_arrow, z_arrow])
+    # Set origin to where axis converge (instead of the middle of the resulting object bounding box)
+    frame_ref = compound([x_arrow, y_arrow, z_arrow], origin=origin)
 
     # Rotate frame around x, y, z axes as required
-    # TODO
+    # Set x-axis along required vector, and rotate around the x-axis to corresponding angle to align last two axes
+    frame_ref.axis = x_axis_vector
+    frame_ref.rotate(angle=x_axis_rotation)
 
     return
 
