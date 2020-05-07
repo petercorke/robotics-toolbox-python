@@ -6,12 +6,8 @@ Generic Drawing Functions
 from vpython import *
 from math import sqrt
 
-'''
-1. init conditions of scene
-2. draw axes
-3. draw labels
-4. draw reference frames
-'''
+# TODO: Possible additions (possibly new files to put these in):
+#  1. Keyboard input to maneuver around 3D map
 
 
 def init_canvas(height=500, width=1000, title='', caption='', grid=False):
@@ -44,63 +40,47 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=False):
     if grid:
         plot_grid = draw_grid()
 
-        le = 0.8
-
-        # Test 1 | Position (0, 0, 0), Axis (1, 0, 0), No Rotation
-        # Drawn
-        draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), radians(0))
-        # Actual
-        arrow(pos=vector(0, 0, 0), axis=vector(1, 0, 0), length=le, color=color.purple)
-
-        # Test 2 | Position (1, 1, 1), Axis (0, 0, 1), No Rotation
-        # Drawn
-        draw_reference_frame_axes(vector(1, 1, 1), vector(0, 0, 1), radians(0))
-        # Actual
-        arrow(pos=vector(1, 1, 1), axis=vector(0, 0, 1), length=le, color=color.purple)
-
-        # Test 3 | Position (2, 2, 2), Axis (1, 0, 0), 30 deg rot
-        # Drawn
-        draw_reference_frame_axes(vector(2, 2, 2), vector(1, 0, 0), radians(30))
-        # Actual
-        arrow(pos=vector(2, 2, 2), axis=vector(1, 0, 0), length=le, color=color.purple).rotate(radians(30))
-
-        # Test 4 | Position (3, 3, 3), Axis (1, 1, 1), No Rotation
-        # Drawn
-        draw_reference_frame_axes(vector(3, 3, 3), vector(1, 1, 1), radians(0))
-        # Actual
-        arrow(pos=vector(3, 3, 3), axis=vector(1, 1, 1), length=le, color=color.purple)
-
-        # Test 5 | Position (4, 4, 4), Axis (1, 1, 1), 30 deg rot
-        # Drawn
-        draw_reference_frame_axes(vector(4, 4, 4), vector(1, 1, 1), radians(30))
-        # Actual
-        arrow(pos=vector(4, 4, 4), axis=vector(1, 1, 1), length=le, color=color.purple).rotate(radians(30))
-
-        # Test 6 | Position (5, 5, 5), Axis (2, -1, 4), No Rotation
-        # Drawn
-        draw_reference_frame_axes(vector(5, 5, 5), vector(2, -1, 4), radians(0))
-        # Actual
-        arrow(pos=vector(5, 5, 5), axis=vector(2, -1, 4), length=le, color=color.purple)
-
-        # Test 7 | Position (6, 6, 6), Axis (2, -1, 4), 30 deg rot
-        # Drawn
-        draw_reference_frame_axes(vector(6, 6, 6), vector(2, -1, 4), radians(30))
-        # Actual
-        arrow(pos=vector(6, 6, 6), axis=vector(2, -1, 4), length=le, color=color.purple).rotate(radians(30))
-
 
 def draw_grid():
     """
     Display grids along the x, y, z axes.
     """
     the_grid = create_grid()
+    # TODO: put update grid here, for labels, etc
     return the_grid
 
 
-def draw_label():
+def draw_label(label_text, label_position):
     """
     Display a label at a given position
     """
+    # TODO: Sanity check param input
+
+    label_height = 10
+    label_xoffset = 0
+    label_yoffset = 50
+    label_space = 20
+    label_font = 'serif'
+    label_text_colour = color.black
+    label_line_color = color.black
+
+    the_label = label(
+        pos=label_position,
+        text=label_text,
+        height=label_height,
+        xoffset=label_xoffset,
+        yoffset=label_yoffset,
+        space=label_space,
+        font=label_font,
+        color=label_text_colour,
+        linecolor=label_line_color
+    )
+
+    return the_label
+
+
+def draw_text():
+    # TODO
     return
 
 
@@ -150,6 +130,9 @@ def create_grid():
     #  relative to position (place grids against walls (like MATLAB 3D plots))
 
     # TODO: Change array input to create_line to vector inputs. Vector has functions to utilise (mag, etc)
+
+    # TODO: NB. Do similar practice to axes. Change grid to show +ve numbers, set origin to 0.
+    #  That way the numbers can be set as need be, and can be moved, rotated, etc with ease
 
     # Initial conditions
     lines = []
@@ -214,6 +197,51 @@ def create_line(pos1, pos2):
     thickness = 0.01
     return box(pos=position, axis=axis_dir, length=line_len, width=thickness, height=thickness, color=color.black)
 
+
+def testing_axes():
+    le = 0.8
+
+    # Test 1 | Position (0, 0, 0), Axis (1, 0, 0), No Rotation
+    # Drawn
+    draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), radians(0))
+    # Actual
+    arrow(pos=vector(0, 0, 0), axis=vector(1, 0, 0), length=le, color=color.purple)
+
+    # Test 2 | Position (1, 1, 1), Axis (0, 0, 1), No Rotation
+    # Drawn
+    draw_reference_frame_axes(vector(1, 1, 1), vector(0, 0, 1), radians(0))
+    # Actual
+    arrow(pos=vector(1, 1, 1), axis=vector(0, 0, 1), length=le, color=color.purple)
+
+    # Test 3 | Position (2, 2, 2), Axis (1, 0, 0), 30 deg rot
+    # Drawn
+    draw_reference_frame_axes(vector(2, 2, 2), vector(1, 0, 0), radians(30))
+    # Actual
+    arrow(pos=vector(2, 2, 2), axis=vector(1, 0, 0), length=le, color=color.purple).rotate(radians(30))
+
+    # Test 4 | Position (3, 3, 3), Axis (1, 1, 1), No Rotation
+    # Drawn
+    draw_reference_frame_axes(vector(3, 3, 3), vector(1, 1, 1), radians(0))
+    # Actual
+    arrow(pos=vector(3, 3, 3), axis=vector(1, 1, 1), length=le, color=color.purple)
+
+    # Test 5 | Position (4, 4, 4), Axis (1, 1, 1), 30 deg rot
+    # Drawn
+    draw_reference_frame_axes(vector(4, 4, 4), vector(1, 1, 1), radians(30))
+    # Actual
+    arrow(pos=vector(4, 4, 4), axis=vector(1, 1, 1), length=le, color=color.purple).rotate(radians(30))
+
+    # Test 6 | Position (5, 5, 5), Axis (2, -1, 4), No Rotation
+    # Drawn
+    draw_reference_frame_axes(vector(5, 5, 5), vector(2, -1, 4), radians(0))
+    # Actual
+    arrow(pos=vector(5, 5, 5), axis=vector(2, -1, 4), length=le, color=color.purple)
+
+    # Test 7 | Position (6, 6, 6), Axis (2, -1, 4), 30 deg rot
+    # Drawn
+    draw_reference_frame_axes(vector(6, 6, 6), vector(2, -1, 4), radians(30))
+    # Actual
+    arrow(pos=vector(6, 6, 6), axis=vector(2, -1, 4), length=le, color=color.purple).rotate(radians(30))
 
 # TODO: Remove after testing
 if __name__ == "__main__":
