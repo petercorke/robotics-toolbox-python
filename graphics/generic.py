@@ -53,7 +53,7 @@ def draw_grid():
     """
     Display grids along the x, y, z axes.
     """
-    the_grid = create_grid()
+    the_grid = create_grid(True)
     # TODO: put update grid here, for labels, etc
     #  Only update as required
     return the_grid
@@ -128,7 +128,7 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     return
 
 
-def create_grid():
+def create_grid(bool_camera_relative):
     """
     Draw a grid along each 3D plane
     """
@@ -159,38 +159,41 @@ def create_grid():
     xz_lines = []
     xy_lines = []
     yz_lines = []
-    default_num = 0
+    if bool_camera_relative:
+        x_origin, y_origin, z_origin = round(scene.center.x), round(scene.center.y), round(scene.center.z)
+    else:
+        x_origin, y_origin, z_origin = 0, 0, 0
     num_squares = 10
     camera_axes = scene.camera.axis
 
     # min = -num_squares or 0 around default position
     # max = +num_squares or 0 around default position
-    min_x_coord = default_num + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
-    max_x_coord = default_num + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+    min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+    max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
 
-    min_y_coord = default_num + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
-    max_y_coord = default_num + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+    min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+    max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
 
-    min_z_coord = default_num + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
-    max_z_coord = default_num + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+    min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+    max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
 
     # XZ plane
     for x_point in range(min_x_coord, max_x_coord + 1):
-        xz_lines.append(create_line([x_point, 0, min_z_coord], [x_point, 0, max_z_coord]))  # x-axis
+        xz_lines.append(create_line([x_point, y_origin, min_z_coord], [x_point, y_origin, max_z_coord]))  # x-axis
     for z_point in range(min_z_coord, max_z_coord + 1):
-        xz_lines.append(create_line([min_x_coord, 0, z_point], [max_x_coord, 0, z_point]))  # z-axis
+        xz_lines.append(create_line([min_x_coord, y_origin, z_point], [max_x_coord, y_origin, z_point]))  # z-axis
 
     # XY plane
     for x_point in range(min_x_coord, max_x_coord + 1):
-        xy_lines.append(create_line([x_point, min_y_coord, 0], [x_point, max_y_coord, 0]))  # x-axis
+        xy_lines.append(create_line([x_point, min_y_coord, z_origin], [x_point, max_y_coord, z_origin]))  # x-axis
     for y_point in range(min_y_coord, max_y_coord + 1):
-        xy_lines.append(create_line([min_x_coord, y_point, 0], [max_x_coord, y_point, 0]))  # y-axis
+        xy_lines.append(create_line([min_x_coord, y_point, z_origin], [max_x_coord, y_point, z_origin]))  # y-axis
 
     # YZ plane
     for y_point in range(min_y_coord, max_y_coord + 1):
-        yz_lines.append(create_line([0, y_point, min_z_coord], [0, y_point, max_z_coord]))  # y-axis
+        yz_lines.append(create_line([x_origin, y_point, min_z_coord], [x_origin, y_point, max_z_coord]))  # y-axis
     for z_point in range(min_z_coord, max_z_coord + 1):
-        yz_lines.append(create_line([0, min_y_coord, z_point], [0, max_y_coord, z_point]))  # z-axis
+        yz_lines.append(create_line([x_origin, min_y_coord, z_point], [x_origin, max_y_coord, z_point]))  # z-axis
 
     # Compound the lines together into one object
     xz_plane = compound(xz_lines)
