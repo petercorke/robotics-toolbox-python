@@ -8,7 +8,7 @@ from numpy import sign
 from math import sqrt
 
 
-# TODO: Possible additions (possibly new files to put these in):
+# TODO: Additions:
 #  1. Keyboard input to maneuver around 3D map
 #  2. Webpage buttons that:
 #       a. Hide/Show labels
@@ -58,9 +58,13 @@ def draw_grid():
     Display grids along the x, y, z axes.
     """
     # TODO: Only update if camera has moved/zoomed/rotated
-    the_grid = create_grid(True)
-    the_numbers = create_grid_numbers()
-    return compound([the_grid, the_numbers])
+    num_squares = 10
+    relative_cam = True
+
+    the_grid = create_grid(relative_cam, num_squares)
+    the_numbers = create_grid_numbers(relative_cam, num_squares)
+
+    return [the_grid, the_numbers]
 
 
 def draw_label(label_text, label_position):
@@ -165,7 +169,7 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     return
 
 
-def create_grid(bool_camera_relative):
+def create_grid(bool_camera_relative, num_squares):
     """
     Draw a grid along each 3D plane
     """
@@ -196,7 +200,6 @@ def create_grid(bool_camera_relative):
         x_origin, y_origin, z_origin = round(scene.center.x), round(scene.center.y), round(scene.center.z)
     else:
         x_origin, y_origin, z_origin = 0, 0, 0
-    num_squares = 10
     camera_axes = scene.camera.axis
 
     # min = -num_squares or 0 around default position
@@ -239,9 +242,53 @@ def create_grid(bool_camera_relative):
     return grid
 
 
-def create_grid_numbers():
-    numbers = 0
-    return numbers
+def create_grid_numbers(bool_camera_relative, num_squares):
+    padding = 0.25
+    camera_axes = scene.camera.axis
+
+    if bool_camera_relative:
+        x_origin, y_origin, z_origin = round(scene.center.x), round(scene.center.y), round(scene.center.z)
+    else:
+        x_origin, y_origin, z_origin = 0, 0, 0
+
+    # min = -num_squares or 0 around default position
+    # max = +num_squares or 0 around default position
+    min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+    max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+
+    min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+    max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+
+    min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+    max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+
+    nums = []
+
+    # X plane
+    for x_pos in range(min_x_coord, max_x_coord + 1):
+        nums.append(draw_text(str(x_pos), vector(x_pos + padding, y_origin + padding, z_origin)))
+    if (sign(camera_axes.x) * -1) > 0:
+        nums.append(draw_text("X", vector(max_x_coord + 1, y_origin, z_origin)))
+    else:
+        nums.append(draw_text("X", vector(min_x_coord - 1, y_origin, z_origin)))
+
+    # Y plane
+    for y_pos in range(min_y_coord, max_y_coord + 1):
+        nums.append(draw_text(str(y_pos), vector(x_origin + padding, y_pos + padding, z_origin)))
+    if (sign(camera_axes.y) * -1) > 0:
+        nums.append(draw_text("Y", vector(x_origin, max_y_coord + 1, z_origin)))
+    else:
+        nums.append(draw_text("Y", vector(x_origin, min_y_coord - 1, z_origin)))
+
+    # Z plane
+    for z_pos in range(min_z_coord, max_z_coord + 1):
+        nums.append(draw_text(str(z_pos), vector(x_origin, y_origin + padding, z_pos + padding)))
+    if (sign(camera_axes.z) * -1) > 0:
+        nums.append(draw_text("Z", vector(x_origin, y_origin, max_z_coord + 1)))
+    else:
+        nums.append(draw_text("Z", vector(x_origin, y_origin, min_z_coord - 1)))
+        
+    return nums
 
 
 def create_line(pos1, pos2):
@@ -330,12 +377,11 @@ def testing_references():
 # TODO: Remove after testing
 if __name__ == "__main__":
     print("Graphics Test")
-    global_grid = init_canvas(title="Testing (TITLE)", caption="Test Environment (CAPTION)", grid=True)
-    #testing_references()
-    lab = draw_text("1", vector(1, 0, 0))
+    globalvar_grid = init_canvas(title="Testing (TITLE)", caption="Test Environment (CAPTION)", grid=True)
+    # testing_references()
     while True:
         sleep(1)
-        lab.visible = False
-        lab = draw_text("1", vector(1.25, 0.25, 0))
-    #    global_grid.visible = False
-    #    global_grid = draw_grid()
+        globalvar_grid[0].visible = False
+        for num in globalvar_grid[1]:
+            num.visible = False
+        globalvar_grid = draw_grid()
