@@ -4,7 +4,9 @@ Generic Drawing Functions
 """
 
 from vpython import *
+from numpy import sign
 from math import sqrt
+
 
 # TODO: Possible additions (possibly new files to put these in):
 #  1. Keyboard input to maneuver around 3D map
@@ -33,6 +35,7 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=False):
     scene.background = color.white
     scene.width = width
     scene.height = height
+    scene.autoscale = False
     if title != '':
         scene.title = title
     if caption != '':
@@ -40,6 +43,10 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=False):
     if grid:
         plot_grid = draw_grid()
         draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), radians(0))
+    else:
+        plot_grid = box().visible = False
+
+    return plot_grid
 
 
 def draw_grid():
@@ -48,6 +55,7 @@ def draw_grid():
     """
     the_grid = create_grid()
     # TODO: put update grid here, for labels, etc
+    #  Only update as required
     return the_grid
 
 
@@ -137,39 +145,52 @@ def create_grid():
     #  2. Camera relative: have camera focus (centre) focused in the middle of the axes (e.g. <5, 5, 5>)
 
     # TODO: Using scene.camera.axis, work out whether each plane should be +ve or -ve numbers
-    #   AXIS | GRID
-    #  -,-,- | +,+,+
-    #  -,-,+ | +,+,-
-    #  -,+,- | +,-,+
-    #  -,+,+ | +,-,-
-    #  +,-,- | -,+,+
-    #  +,-,+ | -,+,-
-    #  +,+,- | -,-,+
-    #  +,+,+ | -,-,-
+    #   AXIS |  GRID | XZ | XY | YZ
+    #  -,-,- | +,+,+ | ++ | ++ | ++
+    #  -,-,+ | +,+,- | +- | ++ | +-
+    #  -,+,- | +,-,+ | ++ | +- | -+
+    #  -,+,+ | +,-,- | +- | +- | --
+    #  +,-,- | -,+,+ | -+ | -+ | ++
+    #  +,-,+ | -,+,- | -- | -+ | +-
+    #  +,+,- | -,-,+ | -+ | -- | -+
+    #  +,+,+ | -,-,- | -- | -- | --
 
     # Initial conditions
     xz_lines = []
     xy_lines = []
     yz_lines = []
-    min_coord = 0
-    max_coord = 10
+    default_num = 0
+    num_squares = 10
+    camera_axes = scene.camera.axis
+
+    # min = -num_squares or 0 around default position
+    # max = +num_squares or 0 around default position
+    min_x_coord = default_num + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+    max_x_coord = default_num + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+
+    min_y_coord = default_num + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+    max_y_coord = default_num + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+
+    min_z_coord = default_num + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+    max_z_coord = default_num + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
 
     # XZ plane
-    for start_point in range(min_coord, max_coord+1):
-        xz_lines.append(create_line([start_point, 0, min_coord], [start_point, 0, max_coord]))  # x-axis
-        xz_lines.append(create_line([min_coord, 0, start_point], [max_coord, 0, start_point]))  # z-axis
+    for x_point in range(min_x_coord, max_x_coord + 1):
+        xz_lines.append(create_line([x_point, 0, min_z_coord], [x_point, 0, max_z_coord]))  # x-axis
+    for z_point in range(min_z_coord, max_z_coord + 1):
+        xz_lines.append(create_line([min_x_coord, 0, z_point], [max_x_coord, 0, z_point]))  # z-axis
 
     # XY plane
-    for start_point in range(min_coord, max_coord + 1):
-        pass
-        xy_lines.append(create_line([start_point, min_coord, 0], [start_point, max_coord, 0]))  # x-axis
-        xy_lines.append(create_line([min_coord, start_point, 0], [max_coord, start_point, 0]))  # y-axis
+    for x_point in range(min_x_coord, max_x_coord + 1):
+        xy_lines.append(create_line([x_point, min_y_coord, 0], [x_point, max_y_coord, 0]))  # x-axis
+    for y_point in range(min_y_coord, max_y_coord + 1):
+        xy_lines.append(create_line([min_x_coord, y_point, 0], [max_x_coord, y_point, 0]))  # y-axis
 
     # YZ plane
-    for start_point in range(min_coord, max_coord + 1):
-        pass
-        yz_lines.append(create_line([0, start_point, min_coord], [0, start_point, max_coord]))  # y-axis
-        yz_lines.append(create_line([0, min_coord, start_point], [0, max_coord, start_point]))  # z-axis
+    for y_point in range(min_y_coord, max_y_coord + 1):
+        yz_lines.append(create_line([0, y_point, min_z_coord], [0, y_point, max_z_coord]))  # y-axis
+    for z_point in range(min_z_coord, max_z_coord + 1):
+        yz_lines.append(create_line([0, min_y_coord, z_point], [0, max_y_coord, z_point]))  # z-axis
 
     # Compound the lines together into one object
     xz_plane = compound(xz_lines)
@@ -264,7 +285,13 @@ def testing_axes():
     # Actual
     arrow(pos=vector(6, 6, 6), axis=vector(2, -1, 4), length=le, color=color.purple).rotate(radians(30))
 
+
 # TODO: Remove after testing
 if __name__ == "__main__":
     print("Graphics Test")
-    init_canvas(grid=True)
+    global_grid = init_canvas(grid=True)
+    #testing_axes()
+    while True:
+        sleep(1)
+        global_grid.visible = False
+        global_grid = draw_grid()
