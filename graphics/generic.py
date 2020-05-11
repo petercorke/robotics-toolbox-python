@@ -10,9 +10,13 @@ from math import sqrt
 
 # TODO: Possible additions (possibly new files to put these in):
 #  1. Keyboard input to maneuver around 3D map
+#  2. Webpage buttons that:
+#       a. Hide/Show labels
+#       b. Toggle between relative/static grid
+#       c. Reset camera settings
 
 
-def init_canvas(height=500, width=1000, title='', caption='', grid=False):
+def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     """
     Set up the scene with initial conditions.
         - White background
@@ -53,10 +57,10 @@ def draw_grid():
     """
     Display grids along the x, y, z axes.
     """
+    # TODO: Only update if camera has moved/zoomed/rotated
     the_grid = create_grid(True)
-    # TODO: put update grid here, for labels, etc
-    #  Only update as required
-    return the_grid
+    the_numbers = create_grid_numbers()
+    return compound([the_grid, the_numbers])
 
 
 def draw_label(label_text, label_position):
@@ -88,9 +92,42 @@ def draw_label(label_text, label_position):
     return the_label
 
 
-def draw_text():
-    # TODO (use label, but remove box/lines/etc. 3D text is over complex and expensive)
-    return
+def draw_text(label_text, label_position):
+    """
+    Display a label at a given position
+    """
+    # TODO: Sanity check param input
+
+    distance_from_center = mag(scene.center - scene.camera.pos)
+
+    # Far away = smaller, closer = larger (up to a min (20) and max (40))
+    # Typically 5->20 units away
+    label_height = -1.3333 * distance_from_center + 46.6667  # Calculate label height
+    label_height = max(min(label_height, 40), 20)  # Limit to 20->40
+    label_xoffset = 0
+    label_yoffset = 0
+    label_space = 0
+    label_font = 'serif'
+    label_text_colour = color.black
+    label_line_color = color.white
+    label_bg_opacity = 0
+    label_linewidth = 0.1
+
+    the_label = label(
+        pos=label_position,
+        text=label_text,
+        height=label_height,
+        xoffset=label_xoffset,
+        yoffset=label_yoffset,
+        space=label_space,
+        font=label_font,
+        color=label_text_colour,
+        linecolor=label_line_color,
+        opacity=label_bg_opacity,
+        linewidth=label_linewidth
+    )
+
+    return the_label
 
 
 def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
@@ -139,10 +176,6 @@ def create_grid(bool_camera_relative):
     #  relative to position (place grids against walls (like MATLAB 3D plots))
 
     # TODO: Change array input to create_line to vector inputs. Vector has functions to utilise (mag, etc)
-
-    # TODO: Have two grid options:
-    #  1. Basic/normal static
-    #  2. Camera relative: have camera focus (centre) focused in the middle of the axes (e.g. <5, 5, 5>)
 
     # TODO: Using scene.camera.axis, work out whether each plane should be +ve or -ve numbers
     #   AXIS |  GRID | XZ | XY | YZ
@@ -206,6 +239,11 @@ def create_grid(bool_camera_relative):
     return grid
 
 
+def create_grid_numbers():
+    numbers = 0
+    return numbers
+
+
 def create_line(pos1, pos2):
     """
     Create a line from position 1 to position 2
@@ -243,7 +281,7 @@ def create_line(pos1, pos2):
     return box(pos=position, axis=axis_dir, length=line_len, width=thickness, height=thickness, color=color.black)
 
 
-def testing_axes():
+def testing_references():
     le = 0.8
 
     # Test 1 | Position (0, 0, 0), Axis (1, 0, 0), No Rotation
@@ -292,9 +330,12 @@ def testing_axes():
 # TODO: Remove after testing
 if __name__ == "__main__":
     print("Graphics Test")
-    global_grid = init_canvas(grid=True)
-    #testing_axes()
+    global_grid = init_canvas(title="Testing (TITLE)", caption="Test Environment (CAPTION)", grid=True)
+    #testing_references()
+    lab = draw_text("1", vector(1, 0, 0))
     while True:
         sleep(1)
-        global_grid.visible = False
-        global_grid = draw_grid()
+        lab.visible = False
+        lab = draw_text("1", vector(1.25, 0.25, 0))
+    #    global_grid.visible = False
+    #    global_grid = draw_grid()
