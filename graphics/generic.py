@@ -106,8 +106,9 @@ def draw_text(label_text, label_position):
 
     # Far away = smaller, closer = larger (up to a min (20) and max (40))
     # Typically 5->20 units away
-    label_height = -1.3333 * distance_from_center + 46.6667  # Calculate label height
-    label_height = max(min(label_height, 40), 20)  # Limit to 20->40
+    # (eqn and limits modified to suit display) = -1.3333 * distance_from_center + 46.6667
+    label_height = -1.3333 * distance_from_center + 36.6667  # Calculate label height
+    label_height = max(min(label_height, 35), 10)  # Limit to 10->35
     label_xoffset = 0
     label_yoffset = 0
     label_space = 0
@@ -265,7 +266,7 @@ def create_grid_numbers(bool_camera_relative, num_squares):
     nums = []
 
     # X plane
-    for x_pos in range(min_x_coord, max_x_coord + 1):
+    for x_pos in range(min_x_coord, max_x_coord + sign(max_x_coord)):
         nums.append(draw_text(str(x_pos), vector(x_pos + padding, y_origin + padding, z_origin)))
     if (sign(camera_axes.x) * -1) > 0:
         nums.append(draw_text("X", vector(max_x_coord + 1, y_origin, z_origin)))
@@ -273,21 +274,21 @@ def create_grid_numbers(bool_camera_relative, num_squares):
         nums.append(draw_text("X", vector(min_x_coord - 1, y_origin, z_origin)))
 
     # Y plane
-    for y_pos in range(min_y_coord, max_y_coord + 1):
-        nums.append(draw_text(str(y_pos), vector(x_origin + padding, y_pos + padding, z_origin)))
+    for y_pos in range(min_y_coord, max_y_coord + sign(max_y_coord)):
+        nums.append(draw_text(str(y_pos), vector(x_origin, y_pos + padding, z_origin + padding)))
     if (sign(camera_axes.y) * -1) > 0:
         nums.append(draw_text("Y", vector(x_origin, max_y_coord + 1, z_origin)))
     else:
         nums.append(draw_text("Y", vector(x_origin, min_y_coord - 1, z_origin)))
 
     # Z plane
-    for z_pos in range(min_z_coord, max_z_coord + 1):
-        nums.append(draw_text(str(z_pos), vector(x_origin, y_origin + padding, z_pos + padding)))
+    for z_pos in range(min_z_coord, max_z_coord + sign(max_z_coord)):
+        nums.append(draw_text(str(z_pos), vector(x_origin, y_origin - padding, z_pos + padding)))
     if (sign(camera_axes.z) * -1) > 0:
         nums.append(draw_text("Z", vector(x_origin, y_origin, max_z_coord + 1)))
     else:
         nums.append(draw_text("Z", vector(x_origin, y_origin, min_z_coord - 1)))
-        
+
     return nums
 
 
