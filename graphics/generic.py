@@ -8,7 +8,7 @@ from numpy import sign
 from math import sqrt
 
 # TODO (NEXT TIME OPENING)
-#  1. Comments
+#  1. DONE - Comments
 #  2. Read other TODOs
 #  3. Split into diff files
 #  4. Push to github
@@ -16,9 +16,9 @@ from math import sqrt
 # TODO: Additions:
 #  1. Keyboard input to maneuver around 3D map
 #  2. Webpage buttons that:
-#       a. Hide/Show labels
-#       b. Toggle between relative/static grid
-#       c. Reset camera settings
+#       a. Hide/Show labels?
+#       b. Toggle between relative/static grid? if plausible
+#       c. Reset camera settings?
 
 
 def init_canvas(height=500, width=1000, title='', caption='', grid=True):
@@ -259,26 +259,26 @@ def create_grid(bool_camera_relative, num_squares):
     # XZ plane
     for x_point in range(min_x_coord, max_x_coord + 1):
         # Draw a line across for each x coord, along the same y-axis, from min to max z coord
-        xz_lines.append(create_line([x_point, y_origin, min_z_coord], [x_point, y_origin, max_z_coord]))  # x-axis
+        xz_lines.append(create_line(vector(x_point, y_origin, min_z_coord), vector(x_point, y_origin, max_z_coord)))
     for z_point in range(min_z_coord, max_z_coord + 1):
         # Draw a line across each z coord, along the same y-axis, from min to max z coord
-        xz_lines.append(create_line([min_x_coord, y_origin, z_point], [max_x_coord, y_origin, z_point]))  # z-axis
+        xz_lines.append(create_line(vector(min_x_coord, y_origin, z_point), vector(max_x_coord, y_origin, z_point)))
 
     # XY plane
     for x_point in range(min_x_coord, max_x_coord + 1):
         # Draw a line across each x coord, along the same z-axis, from min to max y coord
-        xy_lines.append(create_line([x_point, min_y_coord, z_origin], [x_point, max_y_coord, z_origin]))  # x-axis
+        xy_lines.append(create_line(vector(x_point, min_y_coord, z_origin), vector(x_point, max_y_coord, z_origin)))
     for y_point in range(min_y_coord, max_y_coord + 1):
         # Draw a line across each y coord, along the same z-axis, from min to max x coord
-        xy_lines.append(create_line([min_x_coord, y_point, z_origin], [max_x_coord, y_point, z_origin]))  # y-axis
+        xy_lines.append(create_line(vector(min_x_coord, y_point, z_origin), vector(max_x_coord, y_point, z_origin)))
 
     # YZ plane
     for y_point in range(min_y_coord, max_y_coord + 1):
         # Draw a line across each y coord, along the same x-axis, from min to max z coord
-        yz_lines.append(create_line([x_origin, y_point, min_z_coord], [x_origin, y_point, max_z_coord]))  # y-axis
+        yz_lines.append(create_line(vector(x_origin, y_point, min_z_coord), vector(x_origin, y_point, max_z_coord)))
     for z_point in range(min_z_coord, max_z_coord + 1):
         # Draw a line across each z coord, along the same x-axis, from min to max y coord
-        yz_lines.append(create_line([x_origin, min_y_coord, z_point], [x_origin, max_y_coord, z_point]))  # z-axis
+        yz_lines.append(create_line(vector(x_origin, min_y_coord, z_point), vector(x_origin, max_y_coord, z_point)))
 
     # Compound the lines together into respective objects
     xz_plane = compound(xz_lines)
@@ -375,37 +375,28 @@ def create_line(pos1, pos2):
     Create a line from position 1 to position 2.
 
     :param pos1: 3D position of one end of the line.
-    :type pos1: int array
+    :type pos1: vpython.vector
     :param pos2: 3D position of the other end of the line.
-    :type pos2: int array
+    :type pos2: vpython.vector
     """
-    # TODO: Insert checks to ensure 3D points given (e.g. index out of bounds error if given 2D points)
-    # TODO: Change array input to create_line() to vector inputs. Vector has functions to utilise (mag, etc)
 
     # Length of the line using trigonometry
     line_len = sqrt(
-        (pos2[0] - pos1[0]) ** 2 +
-        (pos2[1] - pos1[1]) ** 2 +
-        (pos2[2] - pos1[2]) ** 2
+        (pos2.x - pos1.x) ** 2 +
+        (pos2.y - pos1.y) ** 2 +
+        (pos2.z - pos1.z) ** 2
     )
 
     # Position of the line is the midpoint (centre) between the ends
-    position = vector(
-        (pos1[0] + pos2[0]) / 2,
-        (pos1[1] + pos2[1]) / 2,
-        (pos1[2] + pos2[2]) / 2,
-    )
+    position = (pos1 + pos2) / 2
 
-    # Axis direction of the line (to align the box (line) to intersect the two points
-    axis_dir = vector(
-        (pos2[0] - pos1[0]),
-        (pos2[1] - pos1[1]),
-        (pos2[2] - pos1[2])
-    )
+    # Axis direction of the line (to align the box (line) to intersect the two points)
+    axis_dir = pos2 - pos1
 
     # Return a box of thin width and height to resemble a line
     thickness = 0.01
     return box(pos=position, axis=axis_dir, length=line_len, width=thickness, height=thickness, color=color.black)
+
 
 # TODO: Remove/Move to new file
 def testing_references():
