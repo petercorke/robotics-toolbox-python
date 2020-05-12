@@ -9,7 +9,7 @@ from math import sqrt
 
 # TODO (NEXT TIME OPENING)
 #  1. DONE - Comments
-#  2. Read other TODOs
+#  2. DONE - Read other TODOs
 #  3. Split into diff files
 #  4. Push to github
 
@@ -65,6 +65,43 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     return plot_grid
 
 
+def update_grid(input_grid):
+    """
+    Update the grid axes and numbers if the camera position/rotation has changed.
+
+    :param input_grid: The current grid being displayed
+    :type input_grid: Array: [compound_object, array_of_labels]
+    :return: Returns an array of the grid and the numbers displayed along the grid.
+    :rtype: Array: [compound_object, array_of_labels]
+    """
+
+    # Obtain the new camera settings
+    new_camera_pos = scene.camera.pos
+    new_camera_axes = scene.camera.axis
+
+    # TODO: Put these funcs in a class to have camera data saved
+    old_camera_pos = vector(0, 0, 0)
+    old_camera_axes = vector(0, 0, 0)
+
+    # If camera is different to previous: update
+    if (not new_camera_axes.equals(old_camera_axes)) or (not new_camera_pos.equals(old_camera_pos)):
+        # Update old positions
+        old_camera_pos = new_camera_pos
+        old_camera_axes = new_camera_axes
+
+        # Delete old grid
+        input_grid[0].visible = False
+        for number in input_grid[1]:
+            number.visible = False
+        del input_grid
+
+        # Return new grid
+        return draw_grid()
+    # Else return current grid
+    else:
+        return input_grid
+
+
 def draw_grid():
     """
     Display grids along the x, y, z axes.
@@ -72,7 +109,7 @@ def draw_grid():
     :return: Returns an array of the grid and the numbers displayed along the grid.
     :rtype: Array: [compound_object, array_of_labels]
     """
-    # TODO: Only update if camera has moved/zoomed/rotated
+
     num_squares = 10  # Length of the grid in each direction (in units)
     relative_cam = True  # Whether the grid follows the camera rotation and movement
 
@@ -93,7 +130,6 @@ def draw_label(label_text, label_position):
     :return: The created label object.
     :rtype: vpython.label
     """
-    # TODO: Sanity check param input
 
     # Custom settings for the label
     label_height = 10
@@ -130,7 +166,6 @@ def draw_text(label_text, label_position):
     :return: The created label object.
     :rtype: vpython.label
     """
-    # TODO: Sanity check param input
 
     # Distance of camera from focus point to determine text size
     distance_from_center = mag(scene.center - scene.camera.pos)
@@ -180,13 +215,6 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     :return: Compound object of the 3 axis arrows.
     :rtype: vpython.compound
     """
-
-    # TODO: Remove once verified
-    # Place a box to verify 90 deg angles
-    L = 0.3
-    new_box = box(pos=origin, axis=x_axis_vector, length=L, width=L, height=L).rotate(x_axis_rotation)
-
-    # TODO: Ensure parameter input is sufficient
 
     # Create Basic Frame
     # Draw X Axis
@@ -448,11 +476,8 @@ def testing_references():
 # TODO: Remove after testing
 if __name__ == "__main__":
     print("Graphics Test")
-    globalvar_grid = init_canvas(title="Testing (TITLE)", caption="Test Environment (CAPTION)", grid=True)
     # testing_references()
+    main_grid = init_canvas()
     while True:
         sleep(1)
-        globalvar_grid[0].visible = False
-        for num in globalvar_grid[1]:
-            num.visible = False
-        globalvar_grid = draw_grid()
+        main_grid = update_grid(main_grid)
