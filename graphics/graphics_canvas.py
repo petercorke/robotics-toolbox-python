@@ -19,8 +19,8 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     :type caption: str, optional
     :param grid: Whether a grid should be displayed in the plot, defaults to True.
     :type grid: bool, optional
-    :return: Returns an array of the grid and the numbers displayed along the grid.
-    :rtype: Array of vpython objects: [compound object, array of labels]
+    :return:
+    :rtype:
     """
 
     # Apply the settings
@@ -35,14 +35,12 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     if caption != '':
         scene.caption = caption
 
-    plot_grid = draw_grid()
+    graphics_grid = GraphicsGrid()
+    graphics_grid.draw_grid()
     if not grid:
-        # If no grid, turn the objects invisible
-        plot_grid[0].visible = False
-        for number in plot_grid[1]:
-            number.visible = False
+        graphics_grid.set_visibility(False)
 
-    return plot_grid
+    return graphics_grid
 
 
 def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
