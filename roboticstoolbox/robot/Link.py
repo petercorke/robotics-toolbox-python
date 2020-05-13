@@ -129,25 +129,25 @@ class Link:
 
     def display(self):
 
-        print self;
+        print(self)
         print
 
         if self.m != None:
-            print "m:", self.m
+            print("m:", self.m)
         if self.r != None:
-            print "r:", self.r
+            print("r:", self.r)
         if self.I != None:
-            print "I:\n", self.I
+            print("I:\n", self.I)
         if self.Jm != None:
-            print "Jm:", self.Jm
+            print("Jm:", self.Jm)
         if self.B != None:
-            print "B:", self.B
+            print("B:", self.B)
         if self.Tc != None:
-            print "Tc:", self.Tc
+            print("Tc:", self.Tc)
         if self.G != None:
-            print "G:", self.G
+            print("G:", self.G)
         if self.qlim != None:
-            print "qlim:\n", self.qlim
+            print("qlim:\n", self.qlim)
 
     def copy(self):
         """
@@ -239,15 +239,15 @@ class Link:
         if name in self.fields:
             # scalar parameter
             if isinstance(value, (ndarray,matrix)) and value.shape != (1,1):
-                raise ValueError, "Scalar required"
+                raise(ValueError, "Scalar required")
             if not isinstance(value, (int,float,int32,float64)):
-                raise ValueError;
+                raise(ValueError)
             self.__dict__[name] = value
 
         elif name == "r":
             r = arg2array(value);
             if len(r) != 3:
-                raise ValueError, "matrix required"
+                raise (ValueError, "matrix required")
 
             self.__dict__[name] = mat(r)
             
@@ -264,7 +264,7 @@ class Link:
                         [v[3],v[1],v[4]],
                         [v[5],v[4],v[2]]])
                 else:
-                    raise ValueError, "matrix required";
+                    raise(ValueError, "matrix required")
 
         elif name == "Tc":
             v = arg2array(value)
@@ -283,7 +283,7 @@ class Link:
             else:
                 raise ValueError
         else:
-            raise NameError, "Unknown attribute <%s> of link" % name
+            raise(NameError, "Unknown attribute <%s> of link" % name)
 
 
 #   LINK.islimit(q) return if limit is exceeded: -1, 0, +1

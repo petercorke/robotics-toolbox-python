@@ -32,8 +32,8 @@ def parsedemo(s):
     lines = s.split('\n');
     
     name = __file__;
-    print name;
-    print len(name)*'=';
+    print(name)
+    print(len(name)*'=')
     if has_termios:
         fd = sys.stdin.fileno()
         old = termios.tcgetattr(fd)
@@ -53,7 +53,7 @@ def parsedemo(s):
                 
                 # a blank line means paragraph break
                 if len(line) == 1 and text:
-                    print textwrap.fill(text, fix_sentence_endings=True);
+                    print(textwrap.fill(text, fix_sentence_endings=True))
                     text = '';
                     print  
             else:
@@ -61,8 +61,8 @@ def parsedemo(s):
                 
                 # flush the remaining help text
                 if text:
-                    print textwrap.fill(text, fix_sentence_endings=True);
-                    text = '';
+                    print(textwrap.fill(text, fix_sentence_endings=True))
+                    text = ''
                 
                 cmd = line.strip();
                 
@@ -78,25 +78,25 @@ def parsedemo(s):
                 print
                 
                 # show the command we are about to execute
-                print '>>>', cmd;
+                print('>>>', cmd)
                 
                 # if it involves an assignment then we use exec else use eval.
                 # we mimic the matlab behaviour in which a trailing semicolon inhibits
                 # display of the result
                 try:
                     if cmd.startswith('from'):
-                        exec cmd;
+                        exec(cmd)
                     elif '=' in cmd:
                         e = cmd.split('=');
-                        exec rstrip.sub('', cmd);
+                        exec(rstrip.sub('', cmd))
                         if cmd[-1] != ';':
-                            print eval(e[0]);
+                            print(eval(e[0]))
                     else:
                         result = eval(cmd.rstrip(';'));
                         if cmd[-1] != ';':
-                            print result;
+                            print(result)
                 except:
-                    print "Error at line <%s>" % cmd
+                    print("Error at line <%s>" % cmd)
                     traceback.print_exc();
                     sys.exit(1);
 

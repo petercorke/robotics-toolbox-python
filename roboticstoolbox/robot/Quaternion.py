@@ -117,7 +117,7 @@ Constructor for quaternion objects:
             self.v = mat(args[1:4])
 
         else:
-                print "error"
+                print("error")
                 return None
 
     def __repr__(self):

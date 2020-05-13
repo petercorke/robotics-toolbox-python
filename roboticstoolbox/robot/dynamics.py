@@ -222,11 +222,11 @@ def ospace(robot, q, qd):
     g = gravload(robot, q)
     J = jacob0(robot, q)
     Ji = inv(J)
-    print 'Ji\n',Ji,'\n\n'
-    print 'J\n',J,'\n\n'
-    print 'M\n',M,'\n\n'
-    print 'C\n',C,'\n\n'
-    print 'g\n',g,'\n\n'
+    print('Ji\n',Ji,'\n\n')
+    print('J\n',J,'\n\n')
+    print('M\n',M,'\n\n')
+    print('C\n',C,'\n\n')
+    print('g\n',g,'\n\n')
     Lambda = Ji.T*M*Ji
     mu = J.T*C - Lamba*H*qd
     p = J.T*g
@@ -361,10 +361,10 @@ def _rne_dh(robot, Q, Qd, Qdd, grav, fext, debug=0):
             alpha = link.alpha
             pstarm.append(mat([[link.A],[D*sin(alpha)],[D*cos(alpha)]]))
             if debug > 1:
-                print 'Rm:'
-                print Rm[j]
-                print 'pstarm:'
-                print pstarm[j].T
+                print('Rm:')
+                print(Rm[j])
+                print('pstarm:')
+                print(pstarm[j].T)
         
         #
         # the forward recursion
@@ -400,10 +400,10 @@ def _rne_dh(robot, Q, Qd, Qdd, grav, fext, debug=0):
 
             if debug:
                 print
-                print "w:\t%f\t%f\t%f"%(w[0,0], w[1,0], w[2,0])
-                print "wd:\t%f\t%f\t%f"%(wd[0,0], wd[1,0], wd[2,0])
-                print "vd:\t%f\t%f\t%f"%(vd[0,0], vd[1,0], vd[2,0])
-                print "vdbar:\t%f\t%f\t%f"%(vhat[0,0], vhat[1,0], vhat[2,0])
+                print("w:\t%f\t%f\t%f"%(w[0,0], w[1,0], w[2,0]))
+                print("wd:\t%f\t%f\t%f"%(wd[0,0], wd[1,0], wd[2,0]))
+                print("vd:\t%f\t%f\t%f"%(vd[0,0], vd[1,0], vd[2,0]))
+                print("vdbar:\t%f\t%f\t%f"%(vhat[0,0], vhat[1,0], vhat[2,0]))
                 print
 
         #
@@ -433,8 +433,8 @@ def _rne_dh(robot, Q, Qd, Qdd, grav, fext, debug=0):
             f = R*f + Fm[j]
             if debug:
                 print
-                print "f:\t%f\t%f\t%f"%(f[0,0],f[1,0],f[2,0])
-                print "nn:\t%f\t%f\t%f"%(nn[0,0],nn[1,0],nn[2,0])
+                print("f:\t%f\t%f\t%f"%(f[0,0],f[1,0],f[2,0]))
+                print("nn:\t%f\t%f\t%f"%(nn[0,0],nn[1,0],nn[2,0]))
                 print
 
             R = Rm[j]
@@ -482,10 +482,10 @@ def _rne_mdh(robot, Q, Qd, Qdd, grav, fext, debug=0):
             alpha = link.alpha
             Pm.append(mat([[link.A],[-D*sin(alpha)],[D*cos(alpha)]])) # (i-1) P i
             if debug > 1:
-                print 'Rm:'
-                print Rm[j]
-                print 'Pm:'
-                print Pm[j].T
+                print('Rm:')
+                print(Rm[j])
+                print('Pm:')
+                print(Pm[j].T)
 
         #
         # the forward recursion
@@ -527,10 +527,10 @@ def _rne_mdh(robot, Q, Qd, Qdd, grav, fext, debug=0):
 
             if debug:
                 print
-                print "w:\t%f\t%f\t%f"%(w[0,0], w[1,0], w[2,0])
-                print "wd:\t%f\t%f\t%f"%(wd[0,0], wd[1,0], wd[2,0])
-                print "vd:\t%f\t%f\t%f"%(vd[0,0], vd[1,0], vd[2,0])
-                print "vdbar:\t%f\t%f\t%f"%(vdC[0,0], vdC[1,0], vdC[2,0])
+                print("w:\t%f\t%f\t%f"%(w[0,0], w[1,0], w[2,0]))
+                print("wd:\t%f\t%f\t%f"%(wd[0,0], wd[1,0], wd[2,0]))
+                print("vd:\t%f\t%f\t%f"%(vd[0,0], vd[1,0], vd[2,0]))
+                print("vdbar:\t%f\t%f\t%f"%(vdC[0,0], vdC[1,0], vdC[2,0]))
                 print
 
         #
@@ -562,8 +562,8 @@ def _rne_mdh(robot, Q, Qd, Qdd, grav, fext, debug=0):
             nn = nn_
             if debug:
                 print
-                print "f:\t%f\t%f\t%f"%(f[0,0],f[1,0],f[2,0])
-                print "nn:\t%f\t%f\t%f"%(nn[0,0],nn[1,0],nn[2,0])
+                print("f:\t%f\t%f\t%f"%(f[0,0],f[1,0],f[2,0]))
+                print("nn:\t%f\t%f\t%f"%(nn[0,0],nn[1,0],nn[2,0]))
                 print
             
             if link.sigma == 0:

@@ -153,19 +153,19 @@ def error(s):
     Common error handler.  Display the error string, execute a traceback then raise
     an execption to return to the interactive prompt.
     """
-    print 'Robotics toolbox error:', s
+    print('Robotics toolbox error:', s)
 
     #traceback.print_exc();
     raise ValueError
     
     
 if __name__ == "__main__":
-    print arg2array(1)
-    print arg2array(1.0); 
-    print arg2array( mat([1,2,3,4]) )
-    print arg2array( mat([1,2,3,4]).T )
-    print arg2array( array([1,2,3]) );
-    print arg2array( array([1,2,3]).T );
-    print arg2array( [1,2,3]);
+    print(arg2array(1))
+    print(arg2array(1.0))
+    print(arg2array( mat([1,2,3,4])))
+    print(arg2array( mat([1,2,3,4]).T))
+    print(arg2array( array([1,2,3]) ))
+    print(arg2array( array([1,2,3]).T ))
+    print(arg2array( [1,2,3]))
 
     

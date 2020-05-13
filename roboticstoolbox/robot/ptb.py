@@ -86,4 +86,4 @@ class ptb:
 #
 #   $Revision: 1.2 $
 '''
-    pass;
+    pass

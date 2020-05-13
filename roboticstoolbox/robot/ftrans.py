@@ -27,12 +27,12 @@ def ftrans(T,F):
     k = crossp(f,transl(T)) + m
     
 
-function Ft = ftrans(T, F)
+# function Ft = ftrans(T, F)
 
-	f = F(1:3); m = F(4:6);
-	k = cross(f, transl(T) ) + m;
+# 	f = F(1:3); m = F(4:6);
+# 	k = cross(f, transl(T) ) + m;
 
-	mt = rot(T)' * k;
-	ft = rot(T)' * F(1:3);
+# 	mt = rot(T)' * k;
+# 	ft = rot(T)' * F(1:3);
 
-	Ft = [ft; mt];
+# 	Ft = [ft; mt];

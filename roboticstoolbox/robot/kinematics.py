@@ -131,7 +131,7 @@ def ikine(robot, tr, q0=None, m=None, **args):
      
     #solution control parameters
 
-    print 'args', args
+    print('args', args)
     
     n = robot.n
 
@@ -149,11 +149,11 @@ def ikine(robot, tr, q0=None, m=None, **args):
             error('Mask matrix must have same number of 1s as robot DOF')
     else:
         if n<6:
-            print 'For a manipulator with fewer than 6DOF a mask matrix argument should be specified'
+            print('For a manipulator with fewer than 6DOF a mask matrix argument should be specified')
         m = mat(ones((6,1)))
 
     def solve(robot, tr, q, mask, ilimit=1000, stol=1e-6, gamma=1):
-        print ilimit, stol, gamma
+        print(ilimit, stol, gamma)
         nm = inf;
         count = 0
         while nm > stol:
@@ -165,7 +165,7 @@ def ikine(robot, tr, q0=None, m=None, **args):
             count += 1
             if count > ilimit:
                 error("Solution wouldn't converge")
-        print count, 'iterations'
+        print(count, 'iterations')
         return q;
 
     if isinstance(tr, list):
@@ -178,7 +178,7 @@ def ikine(robot, tr, q0=None, m=None, **args):
     elif ishomog(tr):
         #single xform case
         q = solve(robot, tr, q0, m, **args);
-        print q
+        print(q)
         qt = q.T
         return qt
     else:
