@@ -7,7 +7,7 @@ Created on Tue Apr 24 15:48:52 2020
 
 import numpy as np
 import spatialmath.base as sp
-from spatialmath.base.argcheck import getvector, ismatrix
+from spatialmath.base.argcheck import getvector, verifymatrix
 from roboticstoolbox.robot.ET import ET
 
 
@@ -64,6 +64,8 @@ class ETS(object):
         # Current joint angles of the robot
         self._q = np.zeros((self._n,))
 
+    # pandaETS = ETS.dh_to_ets(pandaMDH)
+
     @classmethod
     def dh_to_ets(cls, robot):
         """
@@ -87,34 +89,34 @@ class ETS(object):
 
                 # Append Tx(a)
                 if L.a != 0:
-                    ets.append(et(et.Ttx, L.a))
+                    ets.append(ET.Ttx(L.a))
                     M += 1
 
                 # Append Rx(alpha)
                 if L.alpha != 0:
-                    ets.append(et(et.TRx, L.alpha))
+                    ets.append(ET.TRx(L.alpha))
                     M += 1
 
                 if L.is_revolute:
                     # Append Tz(d)
                     if L.d != 0:
-                        ets.append(et(et.Ttz, L.d))
+                        ets.append(ET.Ttz(L.d))
                         M += 1
 
                     # Append Rz(q)
-                    ets.append(et(et.TRz, i=j+1))
+                    ets.append(ET.TRz(joint=j+1))
                     q_idx.append(M)
                     M += 1
 
                 else:
                     # Append Tz(q)
-                    ets.append(et(et.Ttz, i=j+1))
+                    ets.append(ET.Ttz(joint=j+1))
                     q_idx.append(M)
                     M += 1
 
                     # Append Rz(theta)
                     if L.theta != 0:
-                        ets.append(et(et.TRz, L.alpha))
+                        ets.append(ET.TRz(L.alpha))
                         M += 1
 
         return cls(
@@ -220,7 +222,7 @@ class ETS(object):
             if i != self.q_idx[j]:
                 U = U @ self.ets[i].T()
             else:
-                if self.ets[i].axis_func == ET.TRz:
+                if self.ets[i]._axis == 'Rz':
                     U = U @ self.ets[i].T(q[j])
                     Tu = np.linalg.inv(U) @ T
 
@@ -261,7 +263,8 @@ class ETS(object):
                 J0 = self.jacob0(q)
             else:
                 raise ValueError('One of q or J0 must be supplied')
-        # TODO: Check J
+        else:
+            verifymatrix(J0, (6, self.n))
 
         H = np.zeros((6, self.n, self.n))
 
@@ -305,7 +308,8 @@ class ETS(object):
                 J = self.jacob0(q)
             else:
                 raise ValueError('One of q or J must be supplied')
-        # TODO: Check J
+        else:
+            verifymatrix(J, (6, self.n))
 
         return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
@@ -335,11 +339,13 @@ class ETS(object):
                 J = self.jacob0(q)
             else:
                 raise ValueError('One of q or J must be supplied')
-        # TODO: Check J
+        else:
+            verifymatrix(J, (6, self.n))
 
         if H is None:
             H = self.hessian0(J0=J)
-        # TODO: Check H
+        else:
+            verifymatrix(H, (6, self.n, self.n))
 
         manipulability = self.manipulability(J=J)
         b = np.linalg.inv(J @ np.transpose(J))
@@ -386,3 +392,6 @@ class ETS(object):
             )
 
         return model
+
+
+
