@@ -1,4 +1,5 @@
 from graphics.graphics_canvas import *
+from graphics.graphics_robot import *
 
 
 def test_grid():
@@ -56,7 +57,14 @@ def test_reference_frames():
 
 
 def test_import_stl():
-    pass
+    canvas_grid = init_canvas()
+    robot = import_object_from_stl('STLbot')
+    robot_height = robot.height
+    wanted_height = 2.0
+    scale = wanted_height / robot_height
+    robot.size *= scale
+    robot.pos = vector(1, 0, 1)
+    print("Robot height ", robot_height, " | Scale ", scale, " | New Size ", robot.size)
 
 
 def test_place_joint():
