@@ -9,9 +9,9 @@ def draw_label(label_text, label_position):
     :param label_text: String of text to be written on the label.
     :type label_text: str
     :param label_position: 3D vector position to draw the label at.
-    :type label_position: vpython.vector
+    :type label_position: class:`vpython.vector`
     :return: The created label object.
-    :rtype: vpython.label
+    :rtype: class:`vpython.label`
     """
 
     # Custom settings for the label
@@ -45,9 +45,9 @@ def draw_text(label_text, label_position):
     :param label_text: String of text to be written on the label.
     :type label_text: str
     :param label_position: 3D vector position to draw the label at.
-    :type label_position: vpython.vector
+    :type label_position: class:`vpython.vector`
     :return: The created label object.
-    :rtype: vpython.label
+    :rtype: class:`vpython.label`
     """
 
     # Distance of camera from focus point to determine text size
@@ -93,7 +93,7 @@ def create_grid_numbers(bool_camera_relative, num_squares):
     :param num_squares: How many unit squares to draw along the axis.
     :type num_squares: int
     :return: An array of labels
-    :rtype: vpython.label array
+    :rtype: class:`vpython.label` array
     """
 
     # Initial conditions

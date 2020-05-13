@@ -2,10 +2,14 @@ from graphics.graphics_text import *
 
 
 class GraphicsGrid:
-
+    """
+    This class holds the current grid displayed in the canvas
+    """
     def __init__(self):
+        # Save the current camera settings
         self.camera_pos = scene.camera.pos
         self.camera_axes = scene.camera.axis
+        # Initialise a grid object
         self.grid_object = None
 
     def draw_grid(self):
@@ -31,7 +35,7 @@ class GraphicsGrid:
         :param num_squares: How many unit squares to draw along the axis.
         :type num_squares: int
         :return: Vpython compound object of the three drawn axes.
-        :rtype: vpython.compound
+        :rtype: class:`vpython.compound`
         """
 
         # Initial conditions
@@ -152,10 +156,16 @@ class GraphicsGrid:
             pass
 
     def set_visibility(self, is_visible):
+        """
+        Set the visibility of the grid
+
+        :param is_visible: Boolean of whether to display the grid
+        :type is_visible: bool
+        """
         # If no grid, turn the objects invisible
-        self.grid_object[0].visible = False
+        self.grid_object[0].visible = is_visible
         for number in self.grid_object[1]:
-            number.visible = False
+            number.visible = is_visible
 
 
 def create_line(pos1, pos2):
@@ -163,9 +173,9 @@ def create_line(pos1, pos2):
     Create a line from position 1 to position 2.
 
     :param pos1: 3D position of one end of the line.
-    :type pos1: vpython.vector
+    :type pos1: class:`vpython.vector`
     :param pos2: 3D position of the other end of the line.
-    :type pos2: vpython.vector
+    :type pos2: class:`vpython.vector`
     """
 
     # Length of the line using trigonometry

@@ -17,10 +17,10 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     :type title: str, optional
     :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
     :type caption: str, optional
-    :param grid: Whether a grid should be displayed in the plot, defaults to True.
+    :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
     :type grid: bool, optional
-    :return:
-    :rtype:
+    :return: The graphics grid object for use outside canvas creation
+    :rtype: class:`GraphicsGrid`
     """
 
     # Apply the settings
@@ -49,13 +49,13 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     Each axis is represented in the objects reference frame.
 
     :param origin: 3D vector representing the point to draw the reference from at.
-    :type origin: vpython.vector
+    :type origin: class:`vpython.vector`
     :param x_axis_vector: 3D vector representing the direction of the positive x axis.
-    :type x_axis_vector: vpython.vector
+    :type x_axis_vector: class:`vpython.vector`
     :param x_axis_rotation: Angle in radians to rotate the frame around the x-axis.
     :type x_axis_rotation: float
     :return: Compound object of the 3 axis arrows.
-    :rtype: vpython.compound
+    :rtype: class:`vpython.compound`
     """
 
     # Create Basic Frame
