@@ -58,13 +58,19 @@ def test_reference_frames():
 
 def test_import_stl():
     canvas_grid = init_canvas()
-    robot = import_object_from_stl('STLbot')
-    robot_height = robot.height
-    wanted_height = 2.0
-    scale = wanted_height / robot_height
-    robot.size *= scale
-    robot.pos = vector(1, 0, 1)
-    print("Robot height ", robot_height, " | Scale ", scale, " | New Size ", robot.size)
+    robot0 = import_object_from_stl('link0').color = color.white
+    robot1 = import_object_from_stl('link1').color = color.red
+    robot2 = import_object_from_stl('link2').color = color.green
+    robot3 = import_object_from_stl('link3').color = color.blue
+    robot4 = import_object_from_stl('link4').color = color.magenta
+    robot5 = import_object_from_stl('link5').color = color.cyan
+    robot6 = import_object_from_stl('link6').color = color.black
+    # robot_height = robot.height
+    # wanted_height = 2.0
+    # scale = wanted_height / robot_height
+    # robot.size *= scale
+    # robot.pos = vector(1, 0, 1)
+    # print("Robot height ", robot_height, " | Scale ", scale, " | New Size ", robot.size)
 
 
 def test_place_joint():
