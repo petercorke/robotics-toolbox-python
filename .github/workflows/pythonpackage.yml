@@ -53,11 +53,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov
+        pip install pytest coverage
     - name: Run coverage
       run: |
         pip install .
-        pytest --cov=roboticstoolbox
+        coverage run --source=roboticstoolbox -m pytest
         coverage report
     - name: upload coverage to Codecov
       uses: codecov/codecov-action@v1
