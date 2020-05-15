@@ -59,6 +59,7 @@ jobs:
         pip install .
         coverage run --source=roboticstoolbox -m pytest
         coverage report
+        cat .coverage
     - name: upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
