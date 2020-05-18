@@ -40,7 +40,26 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     if not grid:
         graphics_grid.set_visibility(False)
 
+    convert_grid_to_z_up()
+
     return graphics_grid
+
+
+def convert_grid_to_z_up():
+    """
+    Rotate the camera so that +z is up
+    (Default vpython scene is +y up)
+    """
+    # Place camera at center to aid rotations
+    scene.camera.pos = vector(0, 0, 0)
+    # Rotate about y then x axis
+    # (Camera defaults looking in -z direction -> (0, 0, -1))
+    scene.camera.rotate(radians(90), axis=vector(0, 1, 0))
+    scene.camera.rotate(radians(90), axis=vector(1, 0, 0))
+    # Place the camera in the + axes
+    scene.camera.pos = vector(10, 10, 10)
+    scene.camera.axis = -scene.camera.pos
+    return
 
 
 def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
