@@ -1,10 +1,44 @@
 from vpython import *
 
 
+# TODO:
+#  1. Create a link class (for each joint type (rotate/translate) that contains:
+#       a. Visual object
+#           - Will contain link pos, vector, rotation, etc
+#       b. Positional variables (where it connects from, and to, reference frame local, etc)
+#       c. Update position methods
+#           - World axis are different to that of regulation (x=forward, z=up). Need to adjust for this
+#  2. Create a robot class that contains:
+#       a. Collection of links
+#       b. Update position methods
+#  3. Texture import
+
+
+class Joint:
+    def __init__(self):
+        self.position = None
+        self.vector = None
+        self.rotation = None
+        self.connectFrom = None
+        self.connectTo = None
+        self.toolpoint = None
+
+    def update_position(self, new_pos):
+        pass
+
+    def update_orientation(self, new_direction, new_angle):
+        pass
+
+
+class Robot:
+    def __init__(self, joints):
+        pass
+
+
 def import_object_from_stl(filename):
     """
     Import an stl object and convert it into a usable vpython object.
-    Function not directly par tof the vpython package, but can by found as part of vpython git repo.
+    Function not directly part of the vpython package, but can by found as part of vpython git repo.
     Code was based on it.
     https://github.com/vpython/vpython-jupyter/blob/master/convert_stl.zip
 
@@ -56,3 +90,18 @@ def import_object_from_stl(filename):
                 vertices = []
 
     return compound(triangles)
+
+
+def set_stl_origin(stl_obj, object_origin, required_obj_origin):
+    # Z axis movement
+    required_obj_z_origin = required_obj_origin.z
+    current_obj_z_origin = object_origin.z
+    z_movement = required_obj_z_origin - current_obj_z_origin
+
+    stl_obj.pos.z += z_movement
+
+    return
+
+
+def import_puma_560():
+    pass

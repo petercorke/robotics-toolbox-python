@@ -1,5 +1,6 @@
 from graphics.graphics_canvas import *
 from graphics.graphics_robot import *
+from numpy import sign
 
 
 def test_grid():
@@ -58,19 +59,45 @@ def test_reference_frames():
 
 def test_import_stl():
     canvas_grid = init_canvas()
-    robot0 = import_object_from_stl('link0').color = color.white
-    robot1 = import_object_from_stl('link1').color = color.red
-    robot2 = import_object_from_stl('link2').color = color.green
-    robot3 = import_object_from_stl('link3').color = color.blue
-    robot4 = import_object_from_stl('link4').color = color.magenta
-    robot5 = import_object_from_stl('link5').color = color.cyan
-    robot6 = import_object_from_stl('link6').color = color.black
-    # robot_height = robot.height
-    # wanted_height = 2.0
-    # scale = wanted_height / robot_height
-    # robot.size *= scale
-    # robot.pos = vector(1, 0, 1)
-    # print("Robot height ", robot_height, " | Scale ", scale, " | New Size ", robot.size)
+
+    robot0 = import_object_from_stl(filename='link0')
+
+    robot0_required_origin_location = vector(robot0.pos.x, robot0.pos.y, 0)
+    z_pos_sign = sign(robot0.pos.z)
+    z_gap_between_border_and_required = robot0.pos.z + (z_pos_sign*-1)*robot0.width/2
+    if z_pos_sign > 0:
+        z_diff = z_gap_between_border_and_required
+    else:
+        z_diff = z_gap_between_border_and_required - robot0.width
+    robot0_current_origin_location = vector(robot0.pos.x, robot0.pos.y, z_diff)
+
+    set_stl_origin(robot0, robot0_current_origin_location, robot0_required_origin_location)
+    robot0.color = color.blue
+
+    if 0:
+        robot1 = import_object_from_stl('link1')
+        robot1.color = color.green
+        robot1.pos += vector(1, 0, 0)
+
+        robot2 = import_object_from_stl('link2')
+        robot2.color = color.red
+        robot2.pos += vector(2, 0, 0)
+
+        robot3 = import_object_from_stl('link3')
+        robot3.color = color.cyan
+        robot3.pos += vector(3, 0, 0)
+
+        robot4 = import_object_from_stl('link4')
+        robot4.color = color.magenta
+        robot4.pos += vector(4, 0, 0)
+
+        robot5 = import_object_from_stl('link5')
+        robot5.color = color.yellow
+        robot5.pos += vector(5, 0, 0)
+
+        robot6 = import_object_from_stl('link6')
+        robot6.color = color.black
+        robot6.pos += vector(6, 0, 0)
 
 
 def test_place_joint():
