@@ -3,7 +3,7 @@
 [![Coverage](https://codecov.io/gh/petercorke/spatialmath-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/petercorke/robotics-toolbox-python/graphs/commit-activity)
-[![GitHub stars](https://img.shields.io/github/stars/petercorke/robotics-toolbox-python.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/petercorke/spatialmath-python/stargazers/)
+[![GitHub stars](https://img.shields.io/github/stars/petercorke/robotics-toolbox-python.svg?style=social&label=Star)](https://GitHub.com/petercorke/spatialmath-python/stargazers/)
 
 # A Robotics Toolbox for Python
 
