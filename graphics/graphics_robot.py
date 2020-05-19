@@ -14,20 +14,58 @@ from vpython import *
 #  3. Texture import
 
 
-class Joint:
-    def __init__(self):
-        self.position = None
-        self.vector = None
-        self.rotation = None
-        self.connectFrom = None
-        self.connectTo = None
-        self.toolpoint = None
+class DefaultJoint:
+    """
+    This class forms a base for all the different types of joints
+    - Rotational
+    - Translational
+    - Static
+    - Gripper
+
+    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
+    :type connection_from_prev_seg: class:`vpython.vector`
+    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
+    :type connection_to_next_seg: class:`vpython.vector`
+    :param direction_vector: Vector direction from the connection_from to the connection_to, defaults to +z (up)
+    :type direction_vector: class:`vpython.vector`, optional
+    """
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
+        # Set connection points
+        self.connectFrom = connection_from_prev_seg
+        self.connectTo = connection_to_next_seg
+        # Calculate the length of the link
+        self.length = mag(self.connectTo - self.connectFrom)
+        # Change the directional vector magnitude to match the length
+        self.vector = direction_vector
+        self.vector.mag = self.length
 
     def update_position(self, new_pos):
-        pass
+        """
+        Move the position of the link to the specified location
 
-    def update_orientation(self, new_direction, new_angle):
-        pass
+        :param new_pos: 3D vector representing the new location for the origin (connection_from) of the link
+        :type new_pos: class:`vpython.vector`
+        """
+        # Calculate translational movement amount
+        axes_movement = self.connectFrom + new_pos
+        # Update each position
+        self.connectFrom += axes_movement
+        self.connectTo += axes_movement
+        return
+
+    def update_orientation(self, new_direction):
+        """
+        Orient the link to face the direction of the given vector (respective from the link origin (connect_from))
+
+        :param new_direction: vector representation of the direction the link now represents
+        :type new_direction: class:`vpython.vector`
+        """
+        # Set magnitude to reflect link length
+        new_direction.mag = self.length
+        # Set the new direction and connection end point (tool tip)
+        self.vector = new_direction
+        self.connectTo = self.connectFrom + new_direction
+        return
 
 
 class Robot:
@@ -93,12 +131,9 @@ def import_object_from_stl(filename):
 
 
 def set_stl_origin(stl_obj, object_origin, required_obj_origin):
-    # Z axis movement
-    required_obj_z_origin = required_obj_origin.z
-    current_obj_z_origin = object_origin.z
-    z_movement = required_obj_z_origin - current_obj_z_origin
 
-    stl_obj.pos.z += z_movement
+    movement = required_obj_origin - object_origin
+    stl_obj.pos += movement
 
     return
 
