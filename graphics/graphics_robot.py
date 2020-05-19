@@ -27,9 +27,9 @@ class DefaultJoint:
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
     :param direction_vector: Vector direction from the connection_from to the connection_to, defaults to +z (up)
-    :type direction_vector: class:`vpython.vector`, optional
+    :type direction_vector: class:`vpython.vector`
     """
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector):
         # Set connection points
         self.connectFrom = connection_from_prev_seg
         self.connectTo = connection_to_next_seg
@@ -51,7 +51,6 @@ class DefaultJoint:
         # Update each position
         self.connectFrom += axes_movement
         self.connectTo += axes_movement
-        return
 
     def update_orientation(self, new_direction):
         """
@@ -65,7 +64,30 @@ class DefaultJoint:
         # Set the new direction and connection end point (tool tip)
         self.vector = new_direction
         self.connectTo = self.connectFrom + new_direction
-        return
+
+
+class RotationalJoint(DefaultJoint):
+    # TODO
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+
+
+class TranslationalJoint(DefaultJoint):
+    # TODO
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+
+
+class StaticJoint(DefaultJoint):
+    # TODO
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+
+
+class Gripper(DefaultJoint):
+    # TODO
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
 
 
 class Robot:
@@ -86,6 +108,8 @@ def import_object_from_stl(filename):
     :rtype: class:`vpython.compound`
     """
     # TODO: put error handling in case binary stl file used instead of ascii
+
+    # TODO: put error handling in case of bad file
 
     # Open the file
     filepath = './graphics/models/' + filename + '.stl'
