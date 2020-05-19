@@ -57,10 +57,11 @@ jobs:
     - name: Run coverage
       run: |
         pip install .
-        coverage run --source=roboticstoolbox -m pytest
+        # coverage run --source=roboticstoolbox -m pytest
+        pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
         coverage report
         cat .coverage
     - name: upload coverage to Codecov
       uses: codecov/codecov-action@master
       with:
-        file: ./.coverage
+        file: ./coverage.xml
