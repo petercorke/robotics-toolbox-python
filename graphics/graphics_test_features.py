@@ -1,5 +1,4 @@
 from graphics.graphics_robot import *
-from numpy import sign
 
 
 def test_grid():
