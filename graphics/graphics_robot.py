@@ -1,5 +1,5 @@
 from vpython import *
-
+from numpy import sign
 
 # TODO:
 #  1. Create a link class (for each joint type (rotate/translate) that contains:
@@ -154,12 +154,28 @@ def import_object_from_stl(filename):
     return compound(triangles)
 
 
-def set_stl_origin(stl_obj, object_origin, required_obj_origin):
-
-    movement = required_obj_origin - object_origin
+def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
+    """
+    Move the object so the required origin is at (0, 0, 0). Then set the origin for the generated stl object.
+    Origin can't be changed, so creating a compound of itself allows setting an origin location
+    :param stl_obj: The generated stl object.
+    :type stl_obj: class:`vpython.compound`
+    :param current_obj_origin: Current coordinates of the origin of the model
+    :type current_obj_origin: class:`vpython.vector`
+    :param required_obj_origin: Required coordinates to place the origin at (0, 0, 0)
+    :type required_obj_origin: class:`vpython.vector`
+    :return: Compound object of itself, with origin set respective to the joint
+    :rtype: class:`vpython.compound`
+    """
+    # Move the object to put the origin at 0, 0, 0
+    movement = required_obj_origin - current_obj_origin
     stl_obj.pos += movement
 
-    return
+    # Set invisible to return an overwritten copy
+    stl_obj.visible = False
+
+    # Return a compound of itself with the origin at (0, 0, 0)
+    return compound([stl_obj], origin=vector(0, 0, 0))
 
 
 def import_puma_560():

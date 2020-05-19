@@ -62,16 +62,10 @@ def test_import_stl():
 
     robot0 = import_object_from_stl(filename='link0')
 
+    robot0_z_origin = robot0.pos.z - robot0.width/2
+    robot0_current_origin_location = vector(robot0.pos.x, robot0.pos.y, robot0_z_origin)
     robot0_required_origin_location = vector(robot0.pos.x, robot0.pos.y, 0)
-    z_pos_sign = sign(robot0.pos.z)
-    z_gap_between_border_and_required = robot0.pos.z + (z_pos_sign*-1)*robot0.width/2
-    if z_pos_sign > 0:
-        z_diff = z_gap_between_border_and_required
-    else:
-        z_diff = z_gap_between_border_and_required - robot0.width
-    robot0_current_origin_location = vector(robot0.pos.x, robot0.pos.y, z_diff)
-
-    set_stl_origin(robot0, robot0_current_origin_location, robot0_required_origin_location)
+    robot0 = set_stl_origin(robot0, robot0_current_origin_location, robot0_required_origin_location)
     robot0.color = color.blue
 
     if 0:
