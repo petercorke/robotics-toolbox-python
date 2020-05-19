@@ -134,7 +134,6 @@ class GraphicsGrid:
         new_camera_pos = scene.camera.pos
         new_camera_axes = scene.camera.axis
 
-        # TODO: Put these funcs in a class to have camera data saved
         old_camera_pos = self.camera_pos
         old_camera_axes = self.camera_axes
 
@@ -178,12 +177,8 @@ def create_line(pos1, pos2):
     :type pos2: class:`vpython.vector`
     """
 
-    # Length of the line using trigonometry
-    line_len = sqrt(
-        (pos2.x - pos1.x) ** 2 +
-        (pos2.y - pos1.y) ** 2 +
-        (pos2.z - pos1.z) ** 2
-    )
+    # Length of the line using the magnitude
+    line_len = mag(pos2-pos1)
 
     # Position of the line is the midpoint (centre) between the ends
     position = (pos1 + pos2) / 2

@@ -1,17 +1,4 @@
 from vpython import *
-from numpy import sign
-
-# TODO:
-#  1. Create a link class (for each joint type (rotate/translate) that contains:
-#       a. Visual object
-#           - Will contain link pos, vector, rotation, etc
-#       b. Positional variables (where it connects from, and to, reference frame local, etc)
-#       c. Update position methods
-#           - World axis are different to that of regulation (x=forward, z=up). Need to adjust for this
-#  2. Create a robot class that contains:
-#       a. Collection of links
-#       b. Update position methods
-#  3. Texture import
 
 
 class DefaultJoint:
@@ -38,6 +25,9 @@ class DefaultJoint:
         # Change the directional vector magnitude to match the length
         self.vector = direction_vector
         self.vector.mag = self.length
+        # TODO
+        #  self.graphic_obj = None
+        #  self.graphic_ref = None
 
     def update_position(self, new_pos):
         """
@@ -65,6 +55,24 @@ class DefaultJoint:
         self.vector = new_direction
         self.connectTo = self.connectFrom + new_direction
 
+    def rotate(self, axis_of_rotation, angle_of_rotation):
+        # TODO
+        #  (Rotate around a given axis, by a given angle,
+        #  in case stl has loaded sideways for example)
+        pass
+
+    def draw_reference_frame(self, is_visible):
+        # TODO
+        pass
+
+    def __set_graphic(self):
+        # TODO: STL or Line/Box
+        pass
+
+    def __import_texture(self):
+        # TODO (much later)
+        pass
+
 
 class RotationalJoint(DefaultJoint):
     # TODO
@@ -76,6 +84,11 @@ class TranslationalJoint(DefaultJoint):
     # TODO
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+        self.min_translation = None
+        self.max_translation = None
+
+    def translate_joint(self, new_translation):
+        pass
 
 
 class StaticJoint(DefaultJoint):
@@ -91,6 +104,9 @@ class Gripper(DefaultJoint):
 
 
 class Robot:
+    # TODO:
+    #  Have functions to update links,
+    #  take in rotation, translation, etc, params
     def __init__(self, joints):
         pass
 
@@ -179,4 +195,5 @@ def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
 
 
 def import_puma_560():
+    # TODO
     pass
