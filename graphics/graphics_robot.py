@@ -1,5 +1,5 @@
 from vpython import *
-
+from graphics.graphics_canvas import *
 
 class DefaultJoint:
     """
@@ -18,16 +18,17 @@ class DefaultJoint:
     """
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector):
         # Set connection points
-        self.connectFrom = connection_from_prev_seg
-        self.connectTo = connection_to_next_seg
+        self.connect_from = connection_from_prev_seg
+        self.connect_to = connection_to_next_seg
         # Calculate the length of the link
-        self.length = mag(self.connectTo - self.connectFrom)
+        self.length = mag(self.connect_to - self.connect_from)
         # Change the directional vector magnitude to match the length
         self.vector = direction_vector
         self.vector.mag = self.length
         # TODO
+        #  self.x_rotation = None
         #  self.graphic_obj = None
-        #  self.graphic_ref = None
+        self.graphic_ref = None
 
     def update_position(self, new_pos):
         """
@@ -37,10 +38,10 @@ class DefaultJoint:
         :type new_pos: class:`vpython.vector`
         """
         # Calculate translational movement amount
-        axes_movement = self.connectFrom + new_pos
+        axes_movement = self.connect_from + new_pos
         # Update each position
-        self.connectFrom += axes_movement
-        self.connectTo += axes_movement
+        self.connect_from += axes_movement
+        self.connect_to += axes_movement
 
     def update_orientation(self, new_direction):
         """
@@ -53,16 +54,36 @@ class DefaultJoint:
         new_direction.mag = self.length
         # Set the new direction and connection end point (tool tip)
         self.vector = new_direction
-        self.connectTo = self.connectFrom + new_direction
+        self.connect_to = self.connect_from + new_direction
 
-    def rotate(self, axis_of_rotation, angle_of_rotation):
+    def draw_reference_frame(self, is_visible):
+        """
+        Draw a reference frame at the tool point position
+        :param is_visible: Whether the reference frame should be drawn or not
+        :type is_visible: bool
+        """
+        # If not visible, turn off
+        if not is_visible:
+            # If a reference frame exists
+            if self.graphic_ref is not None:
+                self.graphic_ref.visible = False
+        # Else: draw
+        else:
+            # If graphic does not currently exist
+            if self.graphic_ref is None:
+                # Create one
+                self.graphic_ref = draw_reference_frame_axes(self.connect_to, self.vector, radians(0))
+            # Else graphic does exist
+            else:
+                # Set previous to invisible
+                self.graphic_ref.visible = False
+                # Rewrite over it
+                self.graphic_ref = draw_reference_frame_axes(self.connect_to, self.vector, radians(0))
+
+    def __rotate(self, axis_of_rotation, angle_of_rotation):
         # TODO
         #  (Rotate around a given axis, by a given angle,
         #  in case stl has loaded sideways for example)
-        pass
-
-    def draw_reference_frame(self, is_visible):
-        # TODO
         pass
 
     def __set_graphic(self):
@@ -79,6 +100,10 @@ class RotationalJoint(DefaultJoint):
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
 
+    def rotate_joint(self, new_angle):
+        # TODO calculate vector representation of new angle. call update orientation
+        pass
+
 
 class TranslationalJoint(DefaultJoint):
     # TODO
@@ -88,6 +113,8 @@ class TranslationalJoint(DefaultJoint):
         self.max_translation = None
 
     def translate_joint(self, new_translation):
+        # TODO calculate new connectTo point, update relevant super() params
+        # TODO Update graphic
         pass
 
 
@@ -136,6 +163,7 @@ def import_object_from_stl(filename):
     # Initial Conditions
     triangles = []
     vertices = []
+    normal = None
 
     # For every line in the file
     for line in stl_text:
@@ -145,7 +173,7 @@ def import_object_from_stl(filename):
             pass
         # If a face
         elif file_line[0] == b'facet':
-            N = vec(
+            normal = vec(
                 float(file_line[2]),
                 float(file_line[3]),
                 float(file_line[4])
@@ -159,7 +187,7 @@ def import_object_from_stl(filename):
                         float(file_line[2]),
                         float(file_line[3])
                     ),
-                    normal=N,
+                    normal=normal,
                     color=color.white
                 )
             )

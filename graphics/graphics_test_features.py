@@ -1,4 +1,3 @@
-from graphics.graphics_canvas import *
 from graphics.graphics_robot import *
 from numpy import sign
 
