@@ -6,9 +6,9 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 import numpy as np
-import spatialmath.base as sp
+import spatialmath as sp
 from spatialmath.base.argcheck import getvector, verifymatrix
-from roboticstoolbox.robot.ET import ET
+# from roboticstoolbox.robot.ET import ET
 
 
 class ETS(object):
@@ -64,68 +64,66 @@ class ETS(object):
         # Current joint angles of the robot
         self._q = np.zeros((self._n,))
 
-    # pandaETS = ETS.dh_to_ets(pandaMDH)
+    # @classmethod
+    # def dh_to_ets(cls, robot):
+    #     """
+    #     Converts a robot modelled with standard or modified DH parameters to an
+    #     ETS representation
 
-    @classmethod
-    def dh_to_ets(cls, robot):
-        """
-        Converts a robot modelled with standard or modified DH parameters to an
-        ETS representation
+    #     :param robot: The robot model to be converted
+    #     :type robot: SerialLink
+    #     :return: List of returned :class:`bluepy.btle.Characteristic` objects
+    #     :rtype: ets class
+    #     """
+    #     ets = []
+    #     q_idx = []
+    #     M = 0
 
-        :param robot: The robot model to be converted
-        :type robot: SerialLink
-        :return: List of returned :class:`bluepy.btle.Characteristic` objects
-        :rtype: ets class
-        """
-        ets = []
-        q_idx = []
-        M = 0
+    #     for j in range(robot.n):
+    #         L = robot.links[j]
 
-        for j in range(robot.n):
-            L = robot.links[j]
+    #         # Method for modified DH parameters
+    #         if robot.mdh:
 
-            # Method for modified DH parameters
-            if robot.mdh:
+    #             # Append Tx(a)
+    #             if L.a != 0:
+    #                 ets.append(ET.Ttx(L.a))
+    #                 M += 1
 
-                # Append Tx(a)
-                if L.a != 0:
-                    ets.append(ET.Ttx(L.a))
-                    M += 1
+    #             # Append Rx(alpha)
+    #             if L.alpha != 0:
+    #                 ets.append(ET.TRx(L.alpha))
+    #                 M += 1
 
-                # Append Rx(alpha)
-                if L.alpha != 0:
-                    ets.append(ET.TRx(L.alpha))
-                    M += 1
+    #             if L.is_revolute:
+    #                 # Append Tz(d)
+    #                 if L.d != 0:
+    #                     ets.append(ET.Ttz(L.d))
+    #                     M += 1
 
-                if L.is_revolute:
-                    # Append Tz(d)
-                    if L.d != 0:
-                        ets.append(ET.Ttz(L.d))
-                        M += 1
+    #                 # Append Rz(q)
+    #                 ets.append(ET.TRz(joint=j+1))
+    #                 q_idx.append(M)
+    #                 M += 1
 
-                    # Append Rz(q)
-                    ets.append(ET.TRz(joint=j+1))
-                    q_idx.append(M)
-                    M += 1
+    #             else:
+    #                 # Append Tz(q)
+    #                 ets.append(ET.Ttz(joint=j+1))
+    #                 q_idx.append(M)
+    #                 M += 1
 
-                else:
-                    # Append Tz(q)
-                    ets.append(ET.Ttz(joint=j+1))
-                    q_idx.append(M)
-                    M += 1
+    #                 # Append Rz(theta)
+    #                 if L.theta != 0:
+    #                     ets.append(ET.TRz(L.alpha))
+    #                     M += 1
 
-                    # Append Rz(theta)
-                    if L.theta != 0:
-                        ets.append(ET.TRz(L.alpha))
-                        M += 1
-
-        return cls(
-            ets,
-            q_idx,
-            robot.name,
-            robot.manuf,
-            robot.base,
-            robot.tool)
+    #     return cls(
+    #         ets,
+    #         q_idx,
+    #         robot.name,
+    #         robot.manuf,
+    #         robot.base,
+    #         robot.tool)
 
     @property
     def q(self):
@@ -162,6 +160,19 @@ class ETS(object):
     @property
     def q_idx(self):
         return self._q_idx
+
+    @q.setter
+    def q(self, q_new):
+        q_new = getvector(q_new, self.n)
+        self._q = q_new
+
+    @base.setter
+    def base(self, base_new):
+        if isinstance(base_new, sp.SE3):
+            self._base = base_new.A
+        else:
+            verifymatrix(base_new, (4, 4))
+            self._base = base_new
 
     def fkine(self, q):
         '''
@@ -370,16 +381,11 @@ class ETS(object):
         for i in range(self._n):
             axes += self.ets[self.q_idx[i]].axis
 
-        rpy = sp.tr2rpy(self.tool, unit='deg')
+        rpy = sp.base.tr2rpy(self.tool, unit='deg')
 
-        if rpy[0] == 0:
-            rpy[0] = 0
-
-        if rpy[1] == 0:
-            rpy[1] = 0
-
-        if rpy[2] == 0:
-            rpy[2] = 0
+        for i in range(3):
+            if rpy[i] == 0:
+                rpy[i] = 0
 
         model = '\n%s (%s): %d axis, %s, ETS\n'\
             'Elementary Transform Sequence:\n'\
@@ -392,6 +398,3 @@ class ETS(object):
             )
 
         return model
-
-
-
