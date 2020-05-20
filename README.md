@@ -5,6 +5,32 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/petercorke/robotics-toolbox-python/graphs/commit-activity)
 [![GitHub stars](https://img.shields.io/github/stars/petercorke/robotics-toolbox-python.svg?style=social&label=Star)](https://GitHub.com/petercorke/spatialmath-python/stargazers/)
 
-# A Robotics Toolbox for Python
+# Robotics Toolbox for Python
 
-This is an attempt at creating an open Python version of the venerable Robotics Toolbox for MATLAB. Significant work in progress.
+## Work in progress
+
+This is a Python implementation of the [Robotics Toolbox for MATLAB<sup>&reg;</sup>](https://github.com/petercorke/robotics-toolbox-matlab).
+
+* GitHub repository [https://github.com/petercorke/robotics-toolbox-python](https://github.com/petercorke/robotics-toolbox-python)      
+* Documentation [https://petercorke.github.io/robotics-toolbox-python](https://petercorke.github.io/robotics-toolbox-python)
+* Dependencies: `spatialmath-python`, `numpy`
+
+# Getting going
+
+## Using pip
+
+Install a snapshot from PyPI
+
+```
+% # Coming soon
+```
+
+## From GitHub
+
+Install the current code base from GitHub and pip install a link to that cloned copy
+
+```
+% git clone https://github.com/petercorke/robotics-toolbox-python.git
+% cd robotics-toolbox-python
+% pip install -e .
+
