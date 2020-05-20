@@ -92,6 +92,16 @@ def test_import_stl():
         robot6.pos += vector(6, 0, 0)
 
 
+def test_rotational_link():
+    canvas_grid = init_canvas()
+    rot_link = RotationalJoint(vector(0, 0, 0), vector(1, 0, 1))
+    rot_link.draw_reference_frame(True)
+
+    for angle in range(0, 360):
+        sleep(0.05)
+        rot_link.rotate_joint(radians(1))
+
+
 def test_place_joint():
     pass
 
@@ -102,3 +112,24 @@ def test_animate_joints():
 
 def test_import_textures():
     pass
+
+
+def temp_test_angles():
+    canvas_grid = init_canvas()
+    display_ground(vector(1, 1, 1), color.red)
+    display_ground(vector(1, -1, 1), color.green)
+    display_ground(vector(-1, 1, 1), color.blue)
+    display_ground(vector(-1, -1, 1), color.magenta)
+
+    v1 = vector(1, 1, 1)
+    ref_frame = draw_reference_frame_axes(origin=vector(2, 2, 2), x_axis_vector=v1, x_axis_rotation=0)
+
+    a1 = arrow(pos=vector(2, 2, 2), axis=v1, shaftwidth=0.05, color=color.red)
+    a2 = arrow(pos=vector(2, 2, 2), axis=ref_frame.up*2, shaftwidth=0.05, color=color.green)
+    a3 = arrow(pos=vector(2, 2, 2), axis=v1.cross(ref_frame.up), shaftwidth=0.05, color=color.blue)
+
+
+def display_ground(vect, colour):
+    groundv = vector(vect.x, vect.y, 0)
+    arrow(pos=vector(0, 0, 0), axis=vect, shaftwidth=0.1, color=colour)
+    arrow(pos=vector(0, 0, 0), axis=groundv, shaftwidth=0.05, color=colour)

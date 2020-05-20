@@ -14,22 +14,31 @@ class DefaultJoint:
     :type connection_from_prev_seg: class:`vpython.vector`
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
-    :param direction_vector: Vector direction from the connection_from to the connection_to, defaults to +z (up)
-    :type direction_vector: class:`vpython.vector`
     """
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector):
+
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
         # Set connection points
-        self.connect_from = connection_from_prev_seg
-        self.connect_to = connection_to_next_seg
+        self.__connect_from = connection_from_prev_seg
+        self.__connect_to = connection_to_next_seg
         # Calculate the length of the link
-        self.length = mag(self.connect_to - self.connect_from)
+        self.__length = mag(self.__connect_to - self.__connect_from)
         # Change the directional vector magnitude to match the length
-        self.vector = direction_vector
-        self.vector.mag = self.length
-        # TODO
-        #  self.x_rotation = None
-        #  self.graphic_obj = None
-        self.graphic_ref = None
+        self.x_vector = self.__connect_to - self.__connect_from
+        self.x_vector.mag = self.__length
+        # Set the other reference frame vectors
+        self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, radians(0))
+        self.y_vector = self.__graphic_ref.up
+        self.y_vector.mag = self.__length
+        self.z_vector = self.x_vector.cross(self.y_vector)
+        self.z_vector.mag = self.__length
+        # TODO self.x_rotation = None
+        # TODO using default box for now
+        box_midpoint = vector(
+            (self.__connect_from.x + self.__connect_to.x) / 2,
+            (self.__connect_from.y + self.__connect_to.y) / 2,
+            (self.__connect_from.z + self.__connect_to.z) / 2
+        )
+        self.__graphic_obj = box(pos=box_midpoint, axis=self.x_vector, size=vector(self.__length, 0.1, 0.1))
 
     def update_position(self, new_pos):
         """
@@ -39,12 +48,15 @@ class DefaultJoint:
         :type new_pos: class:`vpython.vector`
         """
         # Calculate translational movement amount
-        axes_movement = self.connect_from + new_pos
+        axes_movement = self.__connect_from + new_pos
         # Update each position
-        self.connect_from += axes_movement
-        self.connect_to += axes_movement
-        # If the reference frame is drawn, redraw it
-        self.draw_reference_frame(self.graphic_ref.visible)
+        self.__connect_from += axes_movement
+        self.__connect_to += axes_movement
+        # If the reference frame exists, redraw it
+        if self.__graphic_ref is not None:
+            self.draw_reference_frame(self.__graphic_ref.visible)
+            self.__update_reference_frame()
+        self.__draw_graphic()
 
     def update_orientation(self, new_direction):
         """
@@ -54,12 +66,23 @@ class DefaultJoint:
         :type new_direction: class:`vpython.vector`
         """
         # Set magnitude to reflect link length
-        new_direction.mag = self.length
+        new_direction.mag = self.__length
         # Set the new direction and connection end point (tool tip)
-        self.vector = new_direction
-        self.connect_to = self.connect_from + new_direction
-        # If the reference frame is drawn, redraw it
-        self.draw_reference_frame(self.graphic_ref.visible)
+        self.x_vector = new_direction
+        self.__connect_to = self.__connect_from + new_direction
+        # If the reference frame exists, redraw it
+        if self.__graphic_ref is not None:
+            self.draw_reference_frame(self.__graphic_ref.visible)
+            self.__update_reference_frame()
+        self.__draw_graphic()
+
+    def __update_reference_frame(self):
+        self.x_vector = self.__connect_to - self.__connect_from
+        self.x_vector.mag = self.__length
+        self.y_vector = self.__graphic_ref.up
+        self.y_vector.mag = self.__length
+        self.z_vector = self.x_vector.cross(self.y_vector)
+        self.z_vector.mag = self.__length
 
     def draw_reference_frame(self, is_visible):
         """
@@ -67,27 +90,34 @@ class DefaultJoint:
         :param is_visible: Whether the reference frame should be drawn or not
         :type is_visible: bool
         """
+        # TODO
+        #  Instead of replacing the object, move and rotate it and set visibility on
         # If not visible, turn off
         if not is_visible:
             # If a reference frame exists
-            if self.graphic_ref is not None:
-                self.graphic_ref.visible = False
+            if self.__graphic_ref is not None:
+                self.__graphic_ref.visible = False
         # Else: draw
         else:
             # If graphic does not currently exist
-            if self.graphic_ref is None:
+            if self.__graphic_ref is None:
                 # Create one
-                self.graphic_ref = draw_reference_frame_axes(self.connect_to, self.vector, radians(0))
+                self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, radians(0))
             # Else graphic does exist
             else:
-                # Set previous to invisible
-                self.graphic_ref.visible = False
-                # Rewrite over it
-                self.graphic_ref = draw_reference_frame_axes(self.connect_to, self.vector, radians(0))
+                self.__graphic_ref.pos = self.__connect_to
+                self.__graphic_ref.axis = self.x_vector
+                self.__graphic_ref.rotate(angle=radians(0))
 
     def __draw_graphic(self):
-        # TODO
-        pass
+        box_midpoint = vector(
+            (self.__connect_from.x + self.__connect_to.x) / 2,
+            (self.__connect_from.y + self.__connect_to.y) / 2,
+            (self.__connect_from.z + self.__connect_to.z) / 2
+        )
+        self.__graphic_obj.pos = box_midpoint
+        self.__graphic_obj.axis = self.x_vector
+        self.__graphic_obj.size = vector(self.__length, 0.1, 0.1)
 
     # TODO MAY NOT BE NEEDED
     def __rotate(self, axis_of_rotation, angle_of_rotation):
@@ -107,13 +137,15 @@ class DefaultJoint:
 
 class RotationalJoint(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg)
 
-    def rotate_joint(self, new_angle):
-        # TODO calculate vector representation of new angle. call update orientation
+    def rotate_joint(self, angle_amount):
+        new_vector = self.x_vector.rotate(angle=angle_amount, axis=self.y_vector)
+        self.update_orientation(new_vector)
+        """
         # Find angle relative to ground plane
-        ground_reference_vector = self.vector - vector(0, 0, self.vector.z)
+        ground_reference_vector = vector(self.vector.x, self.vector.y, 0)
         # If vector is pointing negatively in the z-axis, subtract from 360deg
         if self.vector.z < 0:
             current_angle = radians(360) - ground_reference_vector.diff_angle(self.vector)
@@ -122,16 +154,17 @@ class RotationalJoint(DefaultJoint):
         # Find difference in angles to rotate by that amount
         required_rotation = new_angle - current_angle
         # Rotate the vector
-        rotation_axis = self.vector.cross(ground_reference_vector)
+        rotation_axis = ground_reference_vector.cross(self.vector)
         new_vector = self.vector.rotate(angle=required_rotation, axis=rotation_axis)
         # Update graphics
         self.update_orientation(new_vector)
+        """
 
 
 class TranslationalJoint(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg)
         self.min_translation = None
         self.max_translation = None
 
@@ -143,14 +176,14 @@ class TranslationalJoint(DefaultJoint):
 
 class StaticJoint(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg)
 
 
 class Gripper(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, direction_vector=vector(0, 0, 1)):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, direction_vector)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg)
 
 
 class Robot:
