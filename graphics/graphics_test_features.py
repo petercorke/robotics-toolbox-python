@@ -60,7 +60,7 @@ def test_import_stl():
 
     robot0 = import_object_from_stl(filename='link0')
 
-    robot0_z_origin = robot0.pos.z - robot0.width/2
+    robot0_z_origin = robot0.pos.z - robot0.width / 2
     robot0_current_origin_location = vector(robot0.pos.x, robot0.pos.y, robot0_z_origin)
     robot0_required_origin_location = vector(robot0.pos.x, robot0.pos.y, 0)
     robot0 = set_stl_origin(robot0, robot0_current_origin_location, robot0_required_origin_location)
@@ -94,12 +94,8 @@ def test_import_stl():
 
 def test_rotational_link():
     canvas_grid = init_canvas()
-    rot_link = RotationalJoint(vector(0, 0, 0), vector(1, 0, 1))
+    rot_link = RotationalJoint(vector(-1, 2, -2.3), vector(5, -2.1, 0.4))
     rot_link.draw_reference_frame(True)
-
-    for angle in range(0, 360):
-        sleep(0.05)
-        rot_link.rotate_joint(radians(1))
 
 
 def test_place_joint():
@@ -116,20 +112,27 @@ def test_import_textures():
 
 def temp_test_angles():
     canvas_grid = init_canvas()
-    display_ground(vector(1, 1, 1), color.red)
-    display_ground(vector(1, -1, 1), color.green)
-    display_ground(vector(-1, 1, 1), color.blue)
-    display_ground(vector(-1, -1, 1), color.magenta)
+    rot_link = RotationalJoint(vector(-1, 2, -2.3), vector(5, -2.1, 0.4))
+    rot_link.draw_reference_frame(True)
 
-    v1 = vector(1, 1, 1)
-    ref_frame = draw_reference_frame_axes(origin=vector(2, 2, 2), x_axis_vector=v1, x_axis_rotation=0)
+    for angle in range(0, 360):
+        sleep(0.05)
+        rot_link.rotate_joint(radians(1))
+        xy_plane_angle = asin(rot_link.x_vector.z / (sqrt(1) * rot_link.x_vector.mag))
+        xy_plane_sign = sign(xy_plane_angle) == 1
+        ref_z_sign = sign(rot_link.z_vector.z) == 1
+        # X-Y | Z | ans
+        #  +  | + | ans
+        #  +  | - | 180-ans
+        #  -  | + | ans
+        #  -  | - | -(180+ans)
+        if xy_plane_sign and ref_z_sign:
+            xy_plane_angle += 0
+        elif xy_plane_sign and not ref_z_sign:
+            xy_plane_angle = radians(180) - xy_plane_angle
+        elif not xy_plane_sign and ref_z_sign:
+            xy_plane_angle += 0
+        elif not xy_plane_sign and not ref_z_sign:
+            xy_plane_angle = -(radians(180) + xy_plane_angle)
 
-    a1 = arrow(pos=vector(2, 2, 2), axis=v1, shaftwidth=0.05, color=color.red)
-    a2 = arrow(pos=vector(2, 2, 2), axis=ref_frame.up*2, shaftwidth=0.05, color=color.green)
-    a3 = arrow(pos=vector(2, 2, 2), axis=v1.cross(ref_frame.up), shaftwidth=0.05, color=color.blue)
-
-
-def display_ground(vect, colour):
-    groundv = vector(vect.x, vect.y, 0)
-    arrow(pos=vector(0, 0, 0), axis=vect, shaftwidth=0.1, color=colour)
-    arrow(pos=vector(0, 0, 0), axis=groundv, shaftwidth=0.05, color=colour)
+        print(xy_plane_sign, ref_z_sign, degrees(xy_plane_angle))
