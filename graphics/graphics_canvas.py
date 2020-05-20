@@ -93,6 +93,8 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
 
     # Rotate frame around x, y, z axes as required
     # Set x-axis along required vector, and rotate around the x-axis to corresponding angle to align last two axes
+    # NB: Set XY axis first, as vpython is +y up bias, objects rotate respective to this bias when setting axis
+    frame_ref.axis = vector(x_axis_vector.x, x_axis_vector.y, 0)
     frame_ref.axis = x_axis_vector
     frame_ref.rotate(angle=x_axis_rotation)
 
