@@ -43,6 +43,8 @@ class DefaultJoint:
         # Update each position
         self.connect_from += axes_movement
         self.connect_to += axes_movement
+        # If the reference frame is drawn, redraw it
+        self.draw_reference_frame(self.graphic_ref.visible)
 
     def update_orientation(self, new_direction):
         """
@@ -56,6 +58,8 @@ class DefaultJoint:
         # Set the new direction and connection end point (tool tip)
         self.vector = new_direction
         self.connect_to = self.connect_from + new_direction
+        # If the reference frame is drawn, redraw it
+        self.draw_reference_frame(self.graphic_ref.visible)
 
     def draw_reference_frame(self, is_visible):
         """
@@ -81,6 +85,10 @@ class DefaultJoint:
                 # Rewrite over it
                 self.graphic_ref = draw_reference_frame_axes(self.connect_to, self.vector, radians(0))
 
+    def __draw_graphic(self):
+        # TODO
+        pass
+
     # TODO MAY NOT BE NEEDED
     def __rotate(self, axis_of_rotation, angle_of_rotation):
         # TODO
@@ -104,7 +112,20 @@ class RotationalJoint(DefaultJoint):
 
     def rotate_joint(self, new_angle):
         # TODO calculate vector representation of new angle. call update orientation
-        pass
+        # Find angle relative to ground plane
+        ground_reference_vector = self.vector - vector(0, 0, self.vector.z)
+        # If vector is pointing negatively in the z-axis, subtract from 360deg
+        if self.vector.z < 0:
+            current_angle = radians(360) - ground_reference_vector.diff_angle(self.vector)
+        else:
+            current_angle = ground_reference_vector.diff_angle(self.vector)
+        # Find difference in angles to rotate by that amount
+        required_rotation = new_angle - current_angle
+        # Rotate the vector
+        rotation_axis = self.vector.cross(ground_reference_vector)
+        new_vector = self.vector.rotate(angle=required_rotation, axis=rotation_axis)
+        # Update graphics
+        self.update_orientation(new_vector)
 
 
 class TranslationalJoint(DefaultJoint):
