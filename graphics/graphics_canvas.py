@@ -79,13 +79,13 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
 
     # Create Basic Frame
     # Draw X Axis
-    x_arrow = arrow(pos=origin, axis=vector(1, 0, 0), length=1, color=color.red)
+    x_arrow = arrow(pos=origin, axis=vector(1, 0, 0), length=0.25, color=color.red)
 
     # Draw Y Axis
-    y_arrow = arrow(pos=origin, axis=vector(0, 1, 0), length=1, color=color.green)
+    y_arrow = arrow(pos=origin, axis=vector(0, 1, 0), length=0.25, color=color.green)
 
     # Draw Z Axis
-    z_arrow = arrow(pos=origin, axis=vector(0, 0, 1), length=1, color=color.blue)
+    z_arrow = arrow(pos=origin, axis=vector(0, 0, 1), length=0.25, color=color.blue)
 
     # Combine all to manipulate together
     # Set origin to where axis converge (instead of the middle of the resulting object bounding box)
