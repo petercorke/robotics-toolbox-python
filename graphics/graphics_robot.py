@@ -27,10 +27,7 @@ class DefaultJoint:
         self.x_vector.mag = self.__length
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, radians(0))
-        self.y_vector = self.__graphic_ref.up
-        self.y_vector.mag = self.__length
-        self.z_vector = self.x_vector.cross(self.y_vector)
-        self.z_vector.mag = self.__length
+        self.__update_reference_frame()
         self.arm_angle = self.calculate_arm_angle()
         # TODO self.x_rotation = None
         # TODO using default box for now
@@ -77,12 +74,12 @@ class DefaultJoint:
         # Set the new direction and connection end point (tool tip)
         self.x_vector = new_direction
         self.__connect_to = self.__connect_from + new_direction
-        self.arm_angle = self.calculate_arm_angle()
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
             self.__update_reference_frame()
         self.__draw_graphic()
+        self.arm_angle = self.calculate_arm_angle()
 
     def __update_reference_frame(self):
         self.x_vector = self.__connect_to - self.__connect_from
@@ -105,6 +102,9 @@ class DefaultJoint:
             # If a reference frame exists
             if self.__graphic_ref is not None:
                 self.__graphic_ref.visible = False
+                self.__graphic_ref.pos = self.__connect_to
+                self.__graphic_ref.axis = self.x_vector
+                self.__graphic_ref.rotate(angle=radians(0))
         # Else: draw
         else:
             # If graphic does not currently exist
@@ -128,9 +128,15 @@ class DefaultJoint:
         self.__graphic_obj.size = vector(self.__length, 0.1, 0.1)
 
     def calculate_arm_angle(self):
+        # TODO
+        #  Do checks for x-axis rotation (will affect Z ref direction)
         xy_plane_angle = asin(self.x_vector.z / (sqrt(1) * self.x_vector.mag))
         xy_plane_sign = sign(xy_plane_angle) == 1
-        ref_z_sign = sign(self.z_vector.z) == 1
+        if abs(self.z_vector.z) < 0.0001:
+            ref_z_sign = not xy_plane_sign
+        else:
+            ref_z_sign = sign(self.z_vector.z) == 1
+
         # X-Y | Z | ans
         #  +  | + | ans
         #  +  | - | 180-ans
@@ -167,10 +173,19 @@ class RotationalJoint(DefaultJoint):
     def __init__(self, connection_from_prev_seg, connection_to_next_seg):
         super().__init__(connection_from_prev_seg, connection_to_next_seg)
 
-    def rotate_joint(self, angle_amount):
-        new_vector = self.x_vector.rotate(angle=angle_amount, axis=self.y_vector)
+    def rotate_joint(self, new_angle):
+        # TODO if new_angle not in range [-180 180] fix it
+        current_angle = self.arm_angle
+        # TODO check for negatives
+        angle_diff = current_angle - new_angle
+        if angle_diff > radians(180):
+            angle_diff -= radians(360)
+        elif angle_diff < radians(-180):
+            angle_diff += radians(360)
+        print("Current:", round(degrees(current_angle)), "New:",
+              round(degrees(new_angle)), "Diff:", round(degrees(angle_diff)))
+        new_vector = self.x_vector.rotate(angle=angle_diff, axis=self.y_vector)
         self.update_orientation(new_vector)
-        # TODO
 
 
 class TranslationalJoint(DefaultJoint):

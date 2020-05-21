@@ -94,8 +94,12 @@ def test_import_stl():
 
 def test_rotational_link():
     canvas_grid = init_canvas()
-    rot_link = RotationalJoint(vector(-1, 2, -2.3), vector(5, -2.1, 0.4))
+    rot_link = RotationalJoint(vector(1, 1, 1), vector(0.3, 3, 3))
     rot_link.draw_reference_frame(True)
+
+    for angle in [0, 45, 90, 135, 180., -135, -90, -45, 33., -66., -125., 162]:
+        sleep(5)
+        rot_link.rotate_joint(radians(angle))
 
 
 def test_place_joint():
@@ -112,12 +116,15 @@ def test_import_textures():
 
 def temp_test_angles():
     canvas_grid = init_canvas()
-    rot_link = RotationalJoint(vector(-1, 2, -2.3), vector(5, -2.1, 0.4))
+    # rot_link = RotationalJoint(vector(-1, 2, -2.3), vector(5, -2.1, 0.4))
+    rot_link = RotationalJoint(vector(1, 1, 1), vector(0.3, 3, 3))
     rot_link.draw_reference_frame(True)
 
-    for angle in range(0, 360):
+    print("\n")
+    for angle in range(-180, 180):
         sleep(0.05)
-        rot_link.rotate_joint(radians(1))
+        rot_link.rotate_joint(radians(angle))
+        """
         xy_plane_angle = asin(rot_link.x_vector.z / (sqrt(1) * rot_link.x_vector.mag))
         xy_plane_sign = sign(xy_plane_angle) == 1
         ref_z_sign = sign(rot_link.z_vector.z) == 1
@@ -136,3 +143,4 @@ def temp_test_angles():
             xy_plane_angle = -(radians(180) + xy_plane_angle)
 
         print(xy_plane_sign, ref_z_sign, degrees(xy_plane_angle))
+        """
