@@ -1,5 +1,6 @@
 from graphics.graphics_canvas import *
 from graphics.graphics_stl import *
+from graphics.common_functions import wrap_to_pi
 
 
 class DefaultJoint:
@@ -15,21 +16,27 @@ class DefaultJoint:
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
     """
-
     def __init__(self, connection_from_prev_seg, connection_to_next_seg):
         # Set connection points
         self.__connect_from = connection_from_prev_seg
         self.__connect_to = connection_to_next_seg
+
         # Calculate the length of the link
         self.__length = mag(self.__connect_to - self.__connect_from)
+
         # Change the directional vector magnitude to match the length
         self.x_vector = self.__connect_to - self.__connect_from
         self.x_vector.mag = self.__length
+
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, radians(0))
         self.__update_reference_frame()
+
+        # Calculate the arm angle
         self.arm_angle = self.calculate_arm_angle()
         # TODO self.x_rotation = None
+
+        # Set the graphic
         # TODO using default box for now
         box_midpoint = vector(
             (self.__connect_from.x + self.__connect_to.x) / 2,
@@ -79,13 +86,20 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
             self.__update_reference_frame()
         self.__draw_graphic()
+        # Calculate the updated arm angle
         self.arm_angle = self.calculate_arm_angle()
 
     def __update_reference_frame(self):
+        """
+        Update the reference frame axis vectors
+        """
+        # X vector is through the tooltip
         self.x_vector = self.__connect_to - self.__connect_from
         self.x_vector.mag = self.__length
+        # Y vector is in the 'up' direction of the object
         self.y_vector = self.__graphic_ref.up
         self.y_vector.mag = self.__length
+        # Z vector is the cross product of the two
         self.z_vector = self.x_vector.cross(self.y_vector)
         self.z_vector.mag = self.__length
 
@@ -95,12 +109,12 @@ class DefaultJoint:
         :param is_visible: Whether the reference frame should be drawn or not
         :type is_visible: bool
         """
-        # TODO
-        #  Instead of replacing the object, move and rotate it and set visibility on
+        # TODO update with 'rotate'
         # If not visible, turn off
         if not is_visible:
             # If a reference frame exists
             if self.__graphic_ref is not None:
+                # Set invisible, and also update its orientations
                 self.__graphic_ref.visible = False
                 self.__graphic_ref.pos = self.__connect_to
                 self.__graphic_ref.axis = self.x_vector
@@ -118,6 +132,10 @@ class DefaultJoint:
                 self.__graphic_ref.rotate(angle=radians(0))
 
     def __draw_graphic(self):
+        """
+        Draw the objects graphic on screen
+        """
+        # Midpoint of the box is it's origin/position
         box_midpoint = vector(
             (self.__connect_from.x + self.__connect_to.x) / 2,
             (self.__connect_from.y + self.__connect_to.y) / 2,
@@ -128,15 +146,28 @@ class DefaultJoint:
         self.__graphic_obj.size = vector(self.__length, 0.1, 0.1)
 
     def calculate_arm_angle(self):
+        """
+        Calculate the arm angle respective to the XY (ground) plane
+
+        :return: Angle of the arm from the XY (ground) plane
+        :rtype: float (radians)
+        """
         # TODO
         #  Do checks for x-axis rotation (will affect Z ref direction)
+
+        # Angle between arm and XY plane
         xy_plane_angle = asin(self.x_vector.z / (sqrt(1) * self.x_vector.mag))
+        # Is the arm angled above or below the horizontal plane
         xy_plane_sign = sign(xy_plane_angle) == 1
+        # If the arm is facing up or down
         if abs(self.z_vector.z) < 0.0001:
+            # Reference frame Z axis is opposite to the XY plane angle
             ref_z_sign = not xy_plane_sign
         else:
+            # Arm is facing in the direction of the reference frame Z axis
             ref_z_sign = sign(self.z_vector.z) == 1
 
+        # Quadrant modifications to the angle between the arm and XY plane
         # X-Y | Z | ans
         #  +  | + | ans
         #  +  | - | 180-ans
@@ -150,6 +181,7 @@ class DefaultJoint:
             xy_plane_angle += 0
         elif not xy_plane_sign and not ref_z_sign:
             xy_plane_angle = -(radians(180) + xy_plane_angle)
+
         return xy_plane_angle
 
     # TODO MAY NOT BE NEEDED
@@ -169,22 +201,37 @@ class DefaultJoint:
 
 
 class RotationalJoint(DefaultJoint):
+    """
+    A rotational joint based off the default joint class
+
+    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
+    :type connection_from_prev_seg: class:`vpython.vector`
+    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
+    :type connection_to_next_seg: class:`vpython.vector`
+    """
     # TODO
+    #  1. Add input parameters to determine the rotation axis
+    #  2. Update functions to rotate around the correct axis
+
     def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+        # Call super init function
         super().__init__(connection_from_prev_seg, connection_to_next_seg)
 
     def rotate_joint(self, new_angle):
-        # TODO if new_angle not in range [-180 180] fix it
+        """
+        Rotate the joint to a given angle in range [-pi pi] (radians)
+
+        :param new_angle: The new angle in range [-pi pi] that the link is to be rotated to.
+        :type new_angle: float (radians)
+        """
+        # Wrap given angle to -pi to pi
+        new_angle = wrap_to_pi(new_angle)
         current_angle = self.arm_angle
-        # TODO check for negatives
-        angle_diff = current_angle - new_angle
-        if angle_diff > radians(180):
-            angle_diff -= radians(360)
-        elif angle_diff < radians(-180):
-            angle_diff += radians(360)
-        print("Current:", round(degrees(current_angle)), "New:",
-              round(degrees(new_angle)), "Diff:", round(degrees(angle_diff)))
+        # Calculate amount to rotate the link
+        angle_diff = wrap_to_pi(current_angle - new_angle)
+        # Calculate the new vector representation the link will be at for the new angle
         new_vector = self.x_vector.rotate(angle=angle_diff, axis=self.y_vector)
+        # Update the link
         self.update_orientation(new_vector)
 
 
