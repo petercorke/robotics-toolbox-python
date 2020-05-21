@@ -57,28 +57,37 @@ def test_reference_frames():
 
 def test_import_stl():
     canvas_grid = init_canvas()
-
+    """
     robot0 = import_object_from_stl(filename='link0')
-
     robot0_z_origin = robot0.pos.z - robot0.width / 2
     robot0_current_origin_location = vector(robot0.pos.x, robot0.pos.y, robot0_z_origin)
     robot0_required_origin_location = vector(robot0.pos.x, robot0.pos.y, 0)
     robot0 = set_stl_origin(robot0, robot0_current_origin_location, robot0_required_origin_location)
     robot0.color = color.blue
+    robot0.visible = False
 
+    robot1 = import_object_from_stl(filename='link1')
+    robot1.rotate(angle=radians(90), axis=vector(0, 1, 0), origin=vector(0, 0, 0))
+    robot1.rotate(angle=radians(90), axis=vector(1, 0, 0), origin=vector(0, 0, 0))
+    robot1_z_origin = -robot1.height/2
+    robot1_current_origin_location = vector(robot1.pos.x, robot1.pos.y, robot1_z_origin)
+    robot1_required_origin_location = vector(robot1.pos.x, robot1.pos.y, 0)
+    robot1 = set_stl_origin(robot1, robot1_current_origin_location, robot1_required_origin_location)
+    robot1.color = color.green
+    robot1.visible = False
+    
+    robot2 = import_object_from_stl('link2')
+    robot2.rotate(angle=radians(-90), axis=vector(1, 0, 0), origin=vector(0, 0, 0))
+    robot2_x_origin = -0.437
+    robot2_y_origin = 0.15
+    robot2_current_origin_location = vector(robot2_x_origin, robot2_y_origin, robot2.pos.z)
+    robot2_required_origin_location = vector(0, 0, robot2.pos.z)
+    robot2 = set_stl_origin(robot2, robot2_current_origin_location, robot2_required_origin_location)
+    robot2.color = color.red
+    """
+    #robot3 = import_object_from_stl('link3')
+    #robot3.color = color.cyan
     if 0:
-        robot1 = import_object_from_stl('link1')
-        robot1.color = color.green
-        robot1.pos += vector(1, 0, 0)
-
-        robot2 = import_object_from_stl('link2')
-        robot2.color = color.red
-        robot2.pos += vector(2, 0, 0)
-
-        robot3 = import_object_from_stl('link3')
-        robot3.color = color.cyan
-        robot3.pos += vector(3, 0, 0)
-
         robot4 = import_object_from_stl('link4')
         robot4.color = color.magenta
         robot4.pos += vector(4, 0, 0)
@@ -97,7 +106,7 @@ def test_rotational_link():
     rot_link = RotationalJoint(vector(1, 1, 1), vector(0.3, 3, 3))
     rot_link.draw_reference_frame(True)
 
-    for angle in [0, 45, 90, 135, 180., -135, -90, -45, 33., -66., -125., 162]:
+    for angle in [0, 45, 90, 135, 180, -135, -90, -45, 33, -66, -125, 162]:
         sleep(5)
         rot_link.rotate_joint(radians(angle))
 
@@ -112,35 +121,3 @@ def test_animate_joints():
 
 def test_import_textures():
     pass
-
-
-def temp_test_angles():
-    canvas_grid = init_canvas()
-    # rot_link = RotationalJoint(vector(-1, 2, -2.3), vector(5, -2.1, 0.4))
-    rot_link = RotationalJoint(vector(1, 1, 1), vector(0.3, 3, 3))
-    rot_link.draw_reference_frame(True)
-
-    print("\n")
-    for angle in range(-180, 180):
-        sleep(0.05)
-        rot_link.rotate_joint(radians(angle))
-        """
-        xy_plane_angle = asin(rot_link.x_vector.z / (sqrt(1) * rot_link.x_vector.mag))
-        xy_plane_sign = sign(xy_plane_angle) == 1
-        ref_z_sign = sign(rot_link.z_vector.z) == 1
-        # X-Y | Z | ans
-        #  +  | + | ans
-        #  +  | - | 180-ans
-        #  -  | + | ans
-        #  -  | - | -(180+ans)
-        if xy_plane_sign and ref_z_sign:
-            xy_plane_angle += 0
-        elif xy_plane_sign and not ref_z_sign:
-            xy_plane_angle = radians(180) - xy_plane_angle
-        elif not xy_plane_sign and ref_z_sign:
-            xy_plane_angle += 0
-        elif not xy_plane_sign and not ref_z_sign:
-            xy_plane_angle = -(radians(180) + xy_plane_angle)
-
-        print(xy_plane_sign, ref_z_sign, degrees(xy_plane_angle))
-        """
