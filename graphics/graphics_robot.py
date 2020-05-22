@@ -1,5 +1,4 @@
 from graphics.graphics_canvas import *
-from graphics.graphics_stl import *
 from graphics.common_functions import wrap_to_pi
 
 
@@ -15,18 +14,29 @@ class DefaultJoint:
     :type connection_from_prev_seg: class:`vpython.vector`
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
+    :param axis: Vector representation of the joints +x axis.
+    :type axis: class:`vpython.vector`
+    :param graphic_object: Graphical object for which the joint will use. If none given, auto generates an object,
+    defaults to `None`
+    :type graphic_object: class:`vpython.compound`
     """
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_object=None):
         # Set connection points
         self.__connect_from = connection_from_prev_seg
         self.__connect_to = connection_to_next_seg
+        # Set an arrow to track position and direction for easy updates
+        self.__connect_dir = arrow(pos=self.__connect_from,
+                                   axis=(self.__connect_to - self.__connect_from),
+                                   visible=False)
+        # Set the x vector direction
+        self.x_vector = axis
 
-        # Calculate the length of the link
-        self.__length = mag(self.__connect_to - self.__connect_from)
+        # Set the graphic
+        self.__graphic_obj = self.__set_graphic(graphic_object)
 
-        # Change the directional vector magnitude to match the length
-        self.x_vector = self.__connect_to - self.__connect_from
-        self.x_vector.mag = self.__length
+        # Calculate the length of the link (Generally longest side is the length)
+        self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, radians(0))
@@ -36,21 +46,6 @@ class DefaultJoint:
         self.arm_angle = self.calculate_arm_angle()
         # TODO self.x_rotation = None
 
-        # Set the graphic
-        # TODO using default box for now
-        box_midpoint = vector(
-            (self.__connect_from.x + self.__connect_to.x) / 2,
-            (self.__connect_from.y + self.__connect_to.y) / 2,
-            (self.__connect_from.z + self.__connect_to.z) / 2
-        )
-        # NB: Set XY axis first, as vpython is +y up bias, objects rotate respective to this bias when setting axis
-        self.__graphic_obj = box(pos=vector(box_midpoint.x, box_midpoint.y, 0),
-                                 axis=vector(self.x_vector.x, self.x_vector.y, 0),
-                                 size=vector(self.__length, 0.1, 0.1), up=vector(0, 0, 1))
-        self.__graphic_obj.axis = self.x_vector
-        self.__graphic_obj.pos = box_midpoint
-        self.__graphic_obj.rotate(radians(0))
-
     def update_position(self, new_pos):
         """
         Move the position of the link to the specified location
@@ -59,45 +54,49 @@ class DefaultJoint:
         :type new_pos: class:`vpython.vector`
         """
         # Calculate translational movement amount
-        axes_movement = self.__connect_from + new_pos
+        axes_movement = new_pos - self.__connect_from
         # Update each position
         self.__connect_from += axes_movement
         self.__connect_to += axes_movement
+        self.__connect_dir.pos += axes_movement
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
             self.__update_reference_frame()
         self.__draw_graphic()
 
-    def update_orientation(self, new_direction):
+    def update_orientation(self, angle_diff):
         """
         Orient the link to face the direction of the given vector (respective from the link origin (connect_from))
 
-        :param new_direction: vector representation of the direction the link now represents
-        :type new_direction: class:`vpython.vector`
+        :param angle_diff: New angle (radians) for the joint to aim at.
+        :type angle_diff: float (radians)
         """
-        # Set magnitude to reflect link length
-        new_direction.mag = self.__length
-        # Set the new direction and connection end point (tool tip)
+        # Calculate the new vector representation the link will be at for the new angle
+        new_direction = self.x_vector.rotate(angle=angle_diff, axis=self.y_vector)
+        # Update the vectors and reference frames
         self.x_vector = new_direction
-        self.__connect_to = self.__connect_from + new_direction
+        self.__update_reference_frame()
+        # Calculate the updated arm angle
+        self.arm_angle = self.calculate_arm_angle()
+        # Calculate the updated toolpoint location
+        self.__connect_dir.rotate(angle=angle_diff, axis=self.y_vector)
+        self.__connect_to = self.__connect_dir.pos + self.__connect_dir.axis
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
-            self.__update_reference_frame()
+            # Update object graphic
         self.__draw_graphic()
-        # Calculate the updated arm angle
-        self.arm_angle = self.calculate_arm_angle()
 
     def __update_reference_frame(self):
         """
         Update the reference frame axis vectors
         """
         # X vector is through the tooltip
-        self.x_vector = self.__connect_to - self.__connect_from
+        # X vector direction already set
         self.x_vector.mag = self.__length
         # Y vector is in the 'up' direction of the object
-        self.y_vector = self.__graphic_ref.up
+        self.y_vector = self.__graphic_obj.up
         self.y_vector.mag = self.__length
         # Z vector is the cross product of the two
         self.z_vector = self.x_vector.cross(self.y_vector)
@@ -135,15 +134,10 @@ class DefaultJoint:
         """
         Draw the objects graphic on screen
         """
-        # Midpoint of the box is it's origin/position
-        box_midpoint = vector(
-            (self.__connect_from.x + self.__connect_to.x) / 2,
-            (self.__connect_from.y + self.__connect_to.y) / 2,
-            (self.__connect_from.z + self.__connect_to.z) / 2
-        )
-        self.__graphic_obj.pos = box_midpoint
+        self.__graphic_obj.pos = self.__connect_from
         self.__graphic_obj.axis = self.x_vector
-        self.__graphic_obj.size = vector(self.__length, 0.1, 0.1)
+        # TODO
+        self.__graphic_obj.rotate(angle=radians(0))
 
     def calculate_arm_angle(self):
         """
@@ -154,6 +148,7 @@ class DefaultJoint:
         """
         # TODO
         #  Do checks for x-axis rotation (will affect Z ref direction)
+        #  (If adding rotating arms that do this)
 
         # Angle between arm and XY plane
         xy_plane_angle = asin(self.x_vector.z / (sqrt(1) * self.x_vector.mag))
@@ -191,9 +186,34 @@ class DefaultJoint:
         #  in case stl has loaded sideways for example)
         pass
 
-    def __set_graphic(self):
-        # TODO: STL or Line/Box
-        pass
+    def __set_graphic(self, given_obj):
+        """
+        Set the graphic object depending on if one was given. If no object was given, create a box and return it
+
+        :param given_obj: Graphical object for the joint
+        :type given_obj: class:`vpython.compound`
+        :return: New graphical object for the joint
+        :rtype: class:`vpython.compound`
+        """
+        # If stl_filename is None, use a box
+        if given_obj is None:
+            box_midpoint = vector(
+                (self.__connect_from.x + self.__connect_to.x) / 2,
+                (self.__connect_from.y + self.__connect_to.y) / 2,
+                (self.__connect_from.z + self.__connect_to.z) / 2
+            )
+            # NB: Set XY axis first, as vpython is +y up bias, objects rotate respective to this bias when setting axis
+            graphic_obj = box(pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
+                              axis=vector(self.x_vector.x, self.x_vector.y, self.x_vector.z),
+                              size=vector((self.__connect_to - self.__connect_from), 0.1, 0.1),
+                              up=vector(0, 0, 1))
+            graphic_obj.axis = self.x_vector
+            graphic_obj.pos = box_midpoint
+            graphic_obj.rotate(radians(0))
+            return graphic_obj
+        else:
+            # TODO When texture application available, put it here
+            return given_obj
 
     def __import_texture(self):
         # TODO (much later)
@@ -208,14 +228,20 @@ class RotationalJoint(DefaultJoint):
     :type connection_from_prev_seg: class:`vpython.vector`
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
+    :type axis: class:`vpython.vector`
+    :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
+    defaults to `None`
+    :type graphic_obj: class:`vpython.compound`
     """
+
     # TODO
     #  1. Add input parameters to determine the rotation axis
     #  2. Update functions to rotate around the correct axis
+    #      a. When doing this, make sure reference frame is correct too (i.e. for base)
 
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
         # Call super init function
-        super().__init__(connection_from_prev_seg, connection_to_next_seg)
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
 
     def rotate_joint(self, new_angle):
         """
@@ -229,16 +255,14 @@ class RotationalJoint(DefaultJoint):
         current_angle = self.arm_angle
         # Calculate amount to rotate the link
         angle_diff = wrap_to_pi(current_angle - new_angle)
-        # Calculate the new vector representation the link will be at for the new angle
-        new_vector = self.x_vector.rotate(angle=angle_diff, axis=self.y_vector)
         # Update the link
-        self.update_orientation(new_vector)
+        self.update_orientation(angle_diff)
 
 
 class TranslationalJoint(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
         self.min_translation = None
         self.max_translation = None
 
@@ -250,14 +274,14 @@ class TranslationalJoint(DefaultJoint):
 
 class StaticJoint(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
 
 
 class Gripper(DefaultJoint):
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg)
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
+        super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
 
 
 class Robot:
