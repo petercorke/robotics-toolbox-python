@@ -82,4 +82,5 @@ def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
     stl_obj.visible = False
 
     # Return a compound of itself with the origin at (0, 0, 0)
-    return compound([stl_obj], origin=vector(0, 0, 0))
+    # TODO add axis in here (1, 0, 0). Then update calculate_arm_angle with correct params for XY plane angle
+    return compound([stl_obj], origin=vector(0, 0, 0), vector=(1, 0, 0))
