@@ -6,7 +6,7 @@ class DefaultJoint:
     """
     This class forms a base for all the different types of joints
     - Rotational
-    - Translational
+    - Prismatic
     - Static
     - Gripper
 
@@ -72,6 +72,7 @@ class DefaultJoint:
         :param angle_diff: New angle (radians) for the joint to aim at.
         :type angle_diff: float (radians)
         """
+        # TODO will require updating when other axis rotation enabled
         # Calculate the new vector representation the link will be at for the new angle
         new_direction = self.x_vector.rotate(angle=angle_diff, axis=self.y_vector)
         # Update the vectors and reference frames
@@ -259,7 +260,7 @@ class RotationalJoint(DefaultJoint):
         self.update_orientation(angle_diff)
 
 
-class TranslationalJoint(DefaultJoint):
+class PrismaticJoint(DefaultJoint):
     # TODO
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
