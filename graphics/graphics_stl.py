@@ -65,6 +65,7 @@ def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
     """
     Move the object so the required origin is at (0, 0, 0). Then set the origin for the generated stl object.
     Origin can't be changed, so creating a compound of itself allows setting an origin location
+    
     :param stl_obj: The generated stl object.
     :type stl_obj: class:`vpython.compound`
     :param current_obj_origin: Current coordinates of the origin of the model
@@ -82,5 +83,4 @@ def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
     stl_obj.visible = False
 
     # Return a compound of itself with the origin at (0, 0, 0)
-    # TODO add axis in here (1, 0, 0). Then update calculate_arm_angle with correct params for XY plane angle
     return compound([stl_obj], origin=vector(0, 0, 0), vector=(1, 0, 0))
