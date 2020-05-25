@@ -36,7 +36,11 @@ def create_link_0():
     # Create the robot link
     connection_from = vector(0, 0, 0)
     connection_to = vector(0, 0, stl_obj.width)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = RotationalJoint(connection_from,
+                           connection_to,
+                           x_axis=vector(1, 0, 0),
+                           rotation_axis=vector(0, 0, 1),
+                           graphic_obj=stl_obj)
     return link
 
 
@@ -59,7 +63,10 @@ def create_link_1():
     connection_from = vector(0, 0, 0)
     # Numbers come from previous adjustments, plus extra observed in meshlab
     connection_to = vector(0, 0.184, stl_obj.width / 2)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = StaticJoint(connection_from,
+                       connection_to,
+                       x_axis=vector(1, 0, 0),
+                       graphic_obj=stl_obj)
     return link
 
 
@@ -81,7 +88,11 @@ def create_link_2():
     connection_from = vector(0, 0, 0)
     # Numbers come from previous adjustments, plus extra observed in meshlab
     connection_to = vector(0.437, 0.0338, 0)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = RotationalJoint(connection_from,
+                           connection_to,
+                           x_axis=vector(1, 0, 0),
+                           rotation_axis=vector(0, 1, 0),
+                           graphic_obj=stl_obj)
     return link
 
 
@@ -103,7 +114,11 @@ def create_link_3():
     connection_from = vector(0, 0, 0)
     # Numbers come from previous adjustments, plus extra observed in meshlab
     connection_to = vector(0.36 + 0.05, -stl_obj.height / 2, 0)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = RotationalJoint(connection_from,
+                           connection_to,
+                           x_axis=vector(1, 0, 0),
+                           rotation_axis=vector(0, 1, 0),
+                           graphic_obj=stl_obj)
     return link
 
 
@@ -124,7 +139,11 @@ def create_link_4():
     connection_from = vector(0, 0, 0)
     # Numbers come from previous adjustments, plus extra observed in meshlab
     connection_to = vector(0.071, 0, 0)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = RotationalJoint(connection_from,
+                           connection_to,
+                           x_axis=vector(1, 0, 0),
+                           rotation_axis=vector(1, 0, 0),
+                           graphic_obj=stl_obj)
     return link
 
 
@@ -145,7 +164,11 @@ def create_link_5():
     connection_from = vector(0, 0, 0)
     # Numbers come from previous adjustments, plus extra observed in meshlab
     connection_to = vector(0.046, 0, 0)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = RotationalJoint(connection_from,
+                           connection_to,
+                           x_axis=vector(1, 0, 0),
+                           rotation_axis=vector(0, 0, 1),
+                           graphic_obj=stl_obj)
     return link
 
 
@@ -166,5 +189,8 @@ def create_link_6():
     connection_from = vector(0, 0, 0)
     # Numbers come from previous adjustments, plus extra observed in meshlab
     connection_to = vector(stl_obj.length, 0, 0)
-    link = RotationalJoint(connection_from, connection_to, vector(1, 0, 0), stl_obj)
+    link = Gripper(connection_from,
+                   connection_to,
+                   x_axis=vector(1, 0, 0),
+                   graphic_obj=stl_obj)
     return link
