@@ -14,14 +14,14 @@ class DefaultJoint:
     :type connection_from_prev_seg: class:`vpython.vector`
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
-    :param axis: Vector representation of the joints +x axis.
+    :param axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
     :type axis: class:`vpython.vector`
     :param graphic_object: Graphical object for which the joint will use. If none given, auto generates an object,
     defaults to `None`
     :type graphic_object: class:`vpython.compound`
     """
 
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_object=None):
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis=vector(1, 0, 0), graphic_object=None):
         # Set connection points
         self.__connect_from = connection_from_prev_seg
         self.__connect_to = connection_to_next_seg
@@ -34,6 +34,7 @@ class DefaultJoint:
 
         # Set the graphic
         self.__graphic_obj = self.__set_graphic(graphic_object)
+        self.visible = True
 
         # Calculate the length of the link (Generally longest side is the length)
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
@@ -62,7 +63,6 @@ class DefaultJoint:
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
-            self.__update_reference_frame()
         self.__draw_graphic()
 
     def update_orientation(self, angle_diff):
@@ -138,7 +138,13 @@ class DefaultJoint:
         self.__graphic_obj.pos = self.__connect_from
         self.__graphic_obj.axis = self.x_vector
         # TODO
-        self.__graphic_obj.rotate(angle=radians(0))
+        #  self.__graphic_obj.rotate(angle=radians(0))
+
+    def set_joint_visibility(self, is_visible):
+        if is_visible is not self.visible:
+            self.__graphic_obj.visible = is_visible
+            self.__graphic_ref.visible = is_visible
+            self.visible = is_visible
 
     def calculate_arm_angle(self):
         """
@@ -181,11 +187,24 @@ class DefaultJoint:
         return xy_plane_angle
 
     # TODO MAY NOT BE NEEDED
-    def __rotate(self, axis_of_rotation, angle_of_rotation):
+    def rotatej(self, axis_of_rotation, angle_of_rotation):
         # TODO
-        #  (Rotate around a given axis, by a given angle,
-        #  in case stl has loaded sideways for example)
-        pass
+        #  Merge with update_orientation when diff axis allowed
+        # Calculate the new vector representation the link will be at for the new angle
+        new_direction = self.x_vector.rotate(angle=angle_of_rotation, axis=axis_of_rotation)
+        # Update the vectors and reference frames
+        self.x_vector = new_direction
+        self.__update_reference_frame()
+        # Calculate the updated arm angle
+        self.arm_angle = self.calculate_arm_angle()
+        # Calculate the updated toolpoint location
+        self.__connect_dir.rotate(angle=angle_of_rotation, axis=axis_of_rotation)
+        self.__connect_to = self.__connect_dir.pos + self.__connect_dir.axis
+        # If the reference frame exists, redraw it
+        if self.__graphic_ref is not None:
+            self.draw_reference_frame(self.__graphic_ref.visible)
+            # Update object graphic
+        self.__draw_graphic()
 
     def __set_graphic(self, given_obj):
         """
@@ -220,6 +239,9 @@ class DefaultJoint:
         # TODO (much later)
         pass
 
+    def get_connection_to_pos(self):
+        return self.__connect_to
+
 
 class RotationalJoint(DefaultJoint):
     """
@@ -229,6 +251,7 @@ class RotationalJoint(DefaultJoint):
     :type connection_from_prev_seg: class:`vpython.vector`
     :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
     :type connection_to_next_seg: class:`vpython.vector`
+    :param axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
     :type axis: class:`vpython.vector`
     :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
     defaults to `None`
@@ -240,7 +263,7 @@ class RotationalJoint(DefaultJoint):
     #  2. Update functions to rotate around the correct axis
     #      a. When doing this, make sure reference frame is correct too (i.e. for base)
 
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
+    def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis=vector(1, 0, 0), graphic_obj=None):
         # Call super init function
         super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
 
@@ -272,11 +295,17 @@ class PrismaticJoint(DefaultJoint):
         # TODO Update graphic
         pass
 
+    def rotate_joint(self, new_angle):
+        pass
+
 
 class StaticJoint(DefaultJoint):
     # TODO
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
+
+    def rotate_joint(self, new_angle):
+        pass
 
 
 class Gripper(DefaultJoint):
@@ -284,10 +313,33 @@ class Gripper(DefaultJoint):
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, axis, graphic_obj)
 
+    def rotate_joint(self, new_angle):
+        pass
+
 
 class Robot:
     # TODO:
     #  Have functions to update links,
     #  take in rotation, translation, etc, params
     def __init__(self, joints):
-        pass
+        self.joints = joints
+        self.num_joints = len(joints)
+        self.is_shown = True
+        self.create_robot()
+
+    def create_robot(self, ):
+        self.position_joints()
+
+    def position_joints(self):
+        for joint_num in range(1, self.num_joints):
+            self.joints[joint_num].update_position(self.joints[joint_num-1].get_connection_to_pos())
+
+    def set_robot_visibility(self, is_visible):
+        if is_visible is not self.is_shown:
+            for joint in self.joints:
+                joint.set_joint_visibility(is_visible)
+                self.is_shown = is_visible
+
+    def set_reference_visibility(self, is_visible):
+        for joint in self.joints:
+            joint.draw_reference_frame(is_visible)
