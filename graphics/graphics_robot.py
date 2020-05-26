@@ -287,21 +287,41 @@ class PrismaticJoint(DefaultJoint):
         # TODO Update graphic
         pass
 
-    def rotate_joint(self, new_angle):
-        pass
-
 
 class StaticJoint(DefaultJoint):
-    # TODO
+    """
+    This class represents a static joint (one that doesn't translate or rotate on it's own).
+    It has no extra functions to utilise.
+
+    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
+    :type connection_from_prev_seg: class:`vpython.vector`
+    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
+    :type connection_to_next_seg: class:`vpython.vector`
+    :param x_axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
+    :type x_axis: class:`vpython.vector`
+    :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
+    defaults to `None`
+    :type graphic_obj: class:`vpython.compound`
+    """
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
 
-    def rotate_joint(self, new_angle):
-        pass
-
 
 class Gripper(DefaultJoint):
-    # TODO
+    """
+    This class represents a gripper joint with a moving gripper (To Be Implemented).
+    Usually the end joint of a robot.
+
+    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
+    :type connection_from_prev_seg: class:`vpython.vector`
+    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
+    :type connection_to_next_seg: class:`vpython.vector`
+    :param x_axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
+    :type x_axis: class:`vpython.vector`
+    :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
+    defaults to `None`
+    :type graphic_obj: class:`vpython.compound`
+    """
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
 
