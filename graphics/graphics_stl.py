@@ -1,5 +1,5 @@
 from vpython import *
-
+from graphics.common_functions import *
 
 def import_object_from_stl(filename):
     """
@@ -83,4 +83,4 @@ def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
     stl_obj.visible = False
 
     # Return a compound of itself with the origin at (0, 0, 0)
-    return compound([stl_obj], origin=vector(0, 0, 0), vector=(1, 0, 0))
+    return compound([stl_obj], origin=vector(0, 0, 0), vector=x_axis_vector)

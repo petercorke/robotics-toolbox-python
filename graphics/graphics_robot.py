@@ -1,5 +1,5 @@
 from graphics.graphics_canvas import *
-from graphics.common_functions import wrap_to_pi
+from graphics.common_functions import *
 
 
 class DefaultJoint:
@@ -24,7 +24,7 @@ class DefaultJoint:
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
-                 axis=vector(1, 0, 0),
+                 axis=x_axis_vector,
                  graphic_object=None):
 
         # Set connection points
@@ -81,13 +81,13 @@ class DefaultJoint:
         """
         # Determine the axis of rotation based on the given joint axis direction
         # Then add the rotation amount to the axis counter
-        if axis_of_rotation.equals(vector(1, 0, 0)):
+        if axis_of_rotation.equals(x_axis_vector):
             rotation_axis = self.x_vector
             self.x_rotation = wrap_to_pi(self.x_rotation + angle_of_rotation)
-        elif axis_of_rotation.equals(vector(0, 1, 0)):
+        elif axis_of_rotation.equals(y_axis_vector):
             rotation_axis = self.y_vector
             self.y_rotation = wrap_to_pi(self.y_rotation + angle_of_rotation)
-        elif axis_of_rotation.equals(vector(0, 0, 1)):
+        elif axis_of_rotation.equals(z_axis_vector):
             rotation_axis = self.z_vector
             self.z_rotation = wrap_to_pi(self.z_rotation + angle_of_rotation)
         else:
@@ -189,11 +189,11 @@ class DefaultJoint:
             )
             # Create a box along the +x axis, with the origin (point of rotation) at (0, 0, 0)
             graphic_obj = box(pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
-                              axis=vector(1, 0, 0),
+                              axis=x_axis_vector,
                               size=vector((self.__connect_to - self.__connect_from).mag, 0.1, 0.1),
-                              up=vector(0, 0, 1))
+                              up=z_axis_vector)
             # Set the boxes new origin
-            graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=vector(1, 0, 0))
+            graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=x_axis_vector)
             return graphic_obj
         else:
             # TODO When texture application available, put it here
@@ -219,11 +219,11 @@ class DefaultJoint:
         :param axis: Specified joint axis to get the angle of rotation of
         :type axis: class:`vpython.vector`
         """
-        if axis.equals(vector(1, 0, 0)):
+        if axis.equals(x_axis_vector):
             return self.x_rotation
-        elif axis.equals(vector(0, 1, 0)):
+        elif axis.equals(y_axis_vector):
             return self.y_rotation
-        elif axis.equals(vector(0, 0, 1)):
+        elif axis.equals(z_axis_vector):
             return self.z_rotation
         else:
             return self.y_rotation
@@ -248,14 +248,15 @@ class RotationalJoint(DefaultJoint):
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
-                 x_axis=vector(1, 0, 0),
-                 rotation_axis=vector(0, 1, 0),
+                 x_axis=x_axis_vector,
+                 rotation_axis=y_axis_vector,
                  graphic_obj=None):
         # Call super init function
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
         # TODO
         #  sanity check input
         self.rotation_axis = rotation_axis
+        self.rotation_angle = radians(0)
 
     def rotate_joint(self, new_angle):
         """
@@ -266,11 +267,12 @@ class RotationalJoint(DefaultJoint):
         """
         # Wrap given angle to -pi to pi
         new_angle = wrap_to_pi(new_angle)
-        current_angle = self.get_rotation_angle(self.rotation_axis)
+        current_angle = self.rotation_angle
         # Calculate amount to rotate the link
         angle_diff = wrap_to_pi(new_angle - current_angle)
         # Update the link
         self.update_orientation(angle_diff, self.rotation_axis)
+        self.rotation_angle = new_angle
 
 
 class PrismaticJoint(DefaultJoint):

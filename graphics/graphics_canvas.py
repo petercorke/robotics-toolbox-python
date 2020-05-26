@@ -1,4 +1,5 @@
 from graphics.graphics_grid import *
+from graphics.common_functions import *
 
 
 def init_canvas(height=500, width=1000, title='', caption='', grid=True):
@@ -54,23 +55,23 @@ def convert_grid_to_z_up():
     scene.camera.pos = vector(0, 0, 0)
     # Rotate about y then x axis
     # (Camera defaults looking in -z direction -> (0, 0, -1))
-    scene.camera.rotate(radians(90), axis=vector(0, 1, 0))
-    scene.camera.rotate(radians(90), axis=vector(1, 0, 0))
+    scene.camera.rotate(radians(90), axis=y_axis_vector)
+    scene.camera.rotate(radians(90), axis=x_axis_vector)
     # Place the camera in the + axes
     scene.camera.pos = vector(10, 10, 10)
     scene.camera.axis = -scene.camera.pos
     return
 
 
-def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
+def draw_reference_frame_axes(origin, x_axis_vector_dir, x_axis_rotation):
     """
     Draw x, y, z axes from the given point.
     Each axis is represented in the objects reference frame.
 
     :param origin: 3D vector representing the point to draw the reference from at.
     :type origin: class:`vpython.vector`
-    :param x_axis_vector: 3D vector representing the direction of the positive x axis.
-    :type x_axis_vector: class:`vpython.vector`
+    :param x_axis_vector_dir: 3D vector representing the direction of the positive x axis.
+    :type x_axis_vector_dir: class:`vpython.vector`
     :param x_axis_rotation: Angle in radians to rotate the frame around the x-axis.
     :type x_axis_rotation: float
     :return: Compound object of the 3 axis arrows.
@@ -79,13 +80,13 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
 
     # Create Basic Frame
     # Draw X Axis
-    x_arrow = arrow(pos=origin, axis=vector(1, 0, 0), length=0.25, color=color.red)
+    x_arrow = arrow(pos=origin, axis=x_axis_vector, length=0.25, color=color.red)
 
     # Draw Y Axis
-    y_arrow = arrow(pos=origin, axis=vector(0, 1, 0), length=0.25, color=color.green)
+    y_arrow = arrow(pos=origin, axis=y_axis_vector, length=0.25, color=color.green)
 
     # Draw Z Axis
-    z_arrow = arrow(pos=origin, axis=vector(0, 0, 1), length=0.25, color=color.blue)
+    z_arrow = arrow(pos=origin, axis=z_axis_vector, length=0.25, color=color.blue)
 
     # Combine all to manipulate together
     # Set origin to where axis converge (instead of the middle of the resulting object bounding box)
@@ -94,8 +95,8 @@ def draw_reference_frame_axes(origin, x_axis_vector, x_axis_rotation):
     # Rotate frame around x, y, z axes as required
     # Set x-axis along required vector, and rotate around the x-axis to corresponding angle to align last two axes
     # NB: Set XY axis first, as vpython is +y up bias, objects rotate respective to this bias when setting axis
-    frame_ref.axis = vector(x_axis_vector.x, x_axis_vector.y, 0)
-    frame_ref.axis = x_axis_vector
+    frame_ref.axis = vector(x_axis_vector_dir.x, x_axis_vector_dir.y, 0)
+    frame_ref.axis = x_axis_vector_dir
     frame_ref.rotate(angle=x_axis_rotation)
 
     return frame_ref

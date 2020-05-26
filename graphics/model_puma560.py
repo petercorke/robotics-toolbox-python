@@ -38,8 +38,8 @@ def create_link_0():
     connection_to = vector(0, 0, stl_obj.width)
     link = RotationalJoint(connection_from,
                            connection_to,
-                           x_axis=vector(1, 0, 0),
-                           rotation_axis=vector(0, 0, 1),
+                           x_axis=x_axis_vector,
+                           rotation_axis=z_axis_vector,
                            graphic_obj=stl_obj)
     return link
 
@@ -49,9 +49,9 @@ def create_link_1():
     stl_obj = import_object_from_stl(filename='link1')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=vector(0, 1, 0), origin=vector(0, 0, 0))
-    stl_obj.rotate(angle=radians(90), axis=vector(0, 0, 1), origin=vector(0, 0, 0))
-    stl_obj.rotate(angle=radians(90), axis=vector(0, 1, 0), origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=z_axis_vector, origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
     stl_obj_z_origin = -stl_obj.height / 2
     stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, stl_obj_z_origin)
     stl_obj_required_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, 0)
@@ -65,7 +65,7 @@ def create_link_1():
     connection_to = vector(0, 0.184, stl_obj.width / 2)
     link = StaticJoint(connection_from,
                        connection_to,
-                       x_axis=vector(1, 0, 0),
+                       x_axis=x_axis_vector,
                        graphic_obj=stl_obj)
     return link
 
@@ -75,7 +75,7 @@ def create_link_2():
     stl_obj = import_object_from_stl('link2')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(-90), axis=vector(1, 0, 0), origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(-90), axis=x_axis_vector, origin=vector(0, 0, 0))
     stl_obj_x_origin = -0.437
     stl_obj_y_origin = 0.15
     stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj_y_origin, stl_obj.pos.z)
@@ -90,8 +90,8 @@ def create_link_2():
     connection_to = vector(0.437, 0.0338, 0)
     link = RotationalJoint(connection_from,
                            connection_to,
-                           x_axis=vector(1, 0, 0),
-                           rotation_axis=vector(0, 1, 0),
+                           x_axis=x_axis_vector,
+                           rotation_axis=y_axis_vector,
                            graphic_obj=stl_obj)
     return link
 
@@ -101,7 +101,7 @@ def create_link_3():
     stl_obj = import_object_from_stl('link3')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=vector(0, 1, 0), origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
     stl_obj_y_origin = stl_obj.height / 2
     stl_obj_x_origin = -0.05
     stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj_y_origin, stl_obj.pos.z)
@@ -116,8 +116,8 @@ def create_link_3():
     connection_to = vector(0.36 + 0.05, -stl_obj.height / 2, 0)
     link = RotationalJoint(connection_from,
                            connection_to,
-                           x_axis=vector(1, 0, 0),
-                           rotation_axis=vector(0, 1, 0),
+                           x_axis=x_axis_vector,
+                           rotation_axis=y_axis_vector,
                            graphic_obj=stl_obj)
     return link
 
@@ -127,7 +127,7 @@ def create_link_4():
     stl_obj = import_object_from_stl('link4')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(-90), axis=vector(0, 0, 1), origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(-90), axis=z_axis_vector, origin=vector(0, 0, 0))
     stl_obj_x_origin = -0.071
     stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj.pos.y, stl_obj.pos.z)
     stl_obj_required_origin_location = vector(0, stl_obj.pos.y, stl_obj.pos.z)
@@ -141,8 +141,8 @@ def create_link_4():
     connection_to = vector(0.071, 0, 0)
     link = RotationalJoint(connection_from,
                            connection_to,
-                           x_axis=vector(1, 0, 0),
-                           rotation_axis=vector(1, 0, 0),
+                           x_axis=x_axis_vector,
+                           rotation_axis=x_axis_vector,
                            graphic_obj=stl_obj)
     return link
 
@@ -152,8 +152,8 @@ def create_link_5():
     stl_obj = import_object_from_stl('link5')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=vector(1, 0, 0), origin=vector(0, 0, 0))
-    stl_obj.rotate(angle=radians(90), axis=vector(0, 0, 1), origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=x_axis_vector, origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=z_axis_vector, origin=vector(0, 0, 0))
     stl_obj_current_origin_location = vector(0, 0, 0)
     stl_obj_required_origin_location = vector(0, 0, 0)
     stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
@@ -166,8 +166,8 @@ def create_link_5():
     connection_to = vector(0.046, 0, 0)
     link = RotationalJoint(connection_from,
                            connection_to,
-                           x_axis=vector(1, 0, 0),
-                           rotation_axis=vector(0, 0, 1),
+                           x_axis=x_axis_vector,
+                           rotation_axis=z_axis_vector,
                            graphic_obj=stl_obj)
     return link
 
@@ -177,7 +177,7 @@ def create_link_6():
     stl_obj = import_object_from_stl('link6')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=vector(0, 1, 0), origin=vector(0, 0, 0))
+    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
     stl_obj_x_origin = 0.043
     stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj.pos.y, stl_obj.pos.z)
     stl_obj_required_origin_location = vector(0, stl_obj.pos.y, stl_obj.pos.z)
@@ -191,6 +191,6 @@ def create_link_6():
     connection_to = vector(stl_obj.length, 0, 0)
     link = Gripper(connection_from,
                    connection_to,
-                   x_axis=vector(1, 0, 0),
+                   x_axis=x_axis_vector,
                    graphic_obj=stl_obj)
     return link
