@@ -3,7 +3,12 @@ from graphics.graphics_stl import *
 
 
 def import_puma_560():
+    """
+    Create a Robot class object based on the puma560 robot
 
+    :return: Puma560 robot
+    :rtype: class:`graphics.graphics_robot.Robot`
+    """
     puma560 = Robot(
         [
             create_link_0(),
@@ -15,13 +20,16 @@ def import_puma_560():
             create_link_6()
         ]
     )
-
-    puma560.set_reference_visibility(False)
-
     return puma560
 
 
 def create_link_0():
+    """
+    Create the specific joint link and return it as a Joint object
+
+    :return: Rotational joint representing joint 0
+    :rtype: class:`graphics.graphics_robot.RotationalJoint
+    """
     # Load the STL file into an object
     stl_obj = import_object_from_stl(filename='link0')
     # Orient the object so that it's origin and toolpoint in known locations
@@ -45,6 +53,12 @@ def create_link_0():
 
 
 def create_link_1():
+    """
+        Create the specific joint link and return it as a Joint object
+
+        :return: Rotational joint representing joint 1
+        :rtype: class:`graphics.graphics_robot.StaticJoint
+        """
     # Load the STL file into an object
     stl_obj = import_object_from_stl(filename='link1')
     # Orient the object so that it's origin and toolpoint in known locations
@@ -71,6 +85,12 @@ def create_link_1():
 
 
 def create_link_2():
+    """
+        Create the specific joint link and return it as a Joint object
+
+        :return: Rotational joint representing joint 2
+        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        """
     # Load the STL file into an object
     stl_obj = import_object_from_stl('link2')
     # Orient the object so that it's origin and toolpoint in known locations
@@ -97,6 +117,12 @@ def create_link_2():
 
 
 def create_link_3():
+    """
+        Create the specific joint link and return it as a Joint object
+
+        :return: Rotational joint representing joint 3
+        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        """
     # Load the STL file into an object
     stl_obj = import_object_from_stl('link3')
     # Orient the object so that it's origin and toolpoint in known locations
@@ -123,6 +149,12 @@ def create_link_3():
 
 
 def create_link_4():
+    """
+        Create the specific joint link and return it as a Joint object
+
+        :return: Rotational joint representing joint 4
+        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        """
     # Load the STL file into an object
     stl_obj = import_object_from_stl('link4')
     # Orient the object so that it's origin and toolpoint in known locations
@@ -148,6 +180,12 @@ def create_link_4():
 
 
 def create_link_5():
+    """
+        Create the specific joint link and return it as a Joint object
+
+        :return: Rotational joint representing joint 5
+        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        """
     # Load the STL file into an object
     stl_obj = import_object_from_stl('link5')
     # Orient the object so that it's origin and toolpoint in known locations
@@ -173,6 +211,12 @@ def create_link_5():
 
 
 def create_link_6():
+    """
+        Create the specific joint link and return it as a Joint object
+
+        :return: Rotational joint representing joint 6
+        :rtype: class:`graphics.graphics_robot.Gripper
+        """
     # Load the STL file into an object
     stl_obj = import_object_from_stl('link6')
     # Orient the object so that it's origin and toolpoint in known locations
