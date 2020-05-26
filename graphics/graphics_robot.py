@@ -26,15 +26,18 @@ class DefaultJoint:
                  connection_to_next_seg,
                  axis=vector(1, 0, 0),
                  graphic_object=None):
+
         # Set connection points
         self.__connect_from = connection_from_prev_seg
         self.__connect_to = connection_to_next_seg
-        # Set an arrow to track position and direction for easy updates
+        # Set an arrow to track position and direction for easy updates (auto applies transforms)
         self.__connect_dir = arrow(pos=self.__connect_from,
                                    axis=(self.__connect_to - self.__connect_from),
                                    visible=False)
         # Set the x vector direction
         self.x_vector = axis
+
+        # Set the rotation angles
         self.x_rotation = radians(0)
         self.y_rotation = radians(0)
         self.z_rotation = radians(0)
@@ -49,9 +52,6 @@ class DefaultJoint:
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, self.x_rotation)
         self.__update_reference_frame()
-
-        # Calculate the arm angle
-        # self.arm_angle = self.calculate_arm_angle()
 
     def update_position(self, new_pos):
         """
@@ -69,10 +69,18 @@ class DefaultJoint:
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
-        self.__draw_graphic()
 
     def update_orientation(self, angle_of_rotation, axis_of_rotation):
-        #
+        """
+        Rotate the joint by a specific amount around one of the joints xyz axes
+
+        :param angle_of_rotation: +/- angle of rotation to apply
+        :type angle_of_rotation: float (radians)
+        :param axis_of_rotation: X, Y, or Z axis to apply around the objects specific X, Y, or Z axes
+        :type axis_of_rotation: class:`vpython.vector`
+        """
+        # Determine the axis of rotation based on the given joint axis direction
+        # Then add the rotation amount to the axis counter
         if axis_of_rotation.equals(vector(1, 0, 0)):
             rotation_axis = self.x_vector
             self.x_rotation = wrap_to_pi(self.x_rotation + angle_of_rotation)
@@ -83,15 +91,11 @@ class DefaultJoint:
             rotation_axis = self.z_vector
             self.z_rotation = wrap_to_pi(self.z_rotation + angle_of_rotation)
         else:
+            # Default to the y-axis
             rotation_axis = self.y_vector
             self.y_rotation = wrap_to_pi(self.y_rotation + angle_of_rotation)
 
-        # TODO
-        #  Get rotation working for all axis
-
-        # Calculate the new vector representation the link will be at for the new angle
-        #new_direction = self.x_vector.rotate(angle=angle_of_rotation, axis=rotation_axis)
-        #if axis_of_rotation.equals(vector(1, 0, 0)):
+        # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
         self.__graphic_obj.rotate(angle=angle_of_rotation, axis=rotation_axis, origin=self.__connect_from)
         # Update the vectors and reference frames
         self.__update_reference_frame()
@@ -101,8 +105,6 @@ class DefaultJoint:
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
-        # Update object graphic
-        self.__draw_graphic()
 
     def __update_reference_frame(self):
         """
@@ -120,7 +122,8 @@ class DefaultJoint:
 
     def draw_reference_frame(self, is_visible):
         """
-        Draw a reference frame at the tool point position
+        Draw a reference frame at the tool point position.
+
         :param is_visible: Whether the reference frame should be drawn or not
         :type is_visible: bool
         """
@@ -145,6 +148,7 @@ class DefaultJoint:
                 self.__graphic_ref.axis = self.x_vector
                 self.__graphic_ref.up = self.y_vector
 
+    # TODO work out if still needed
     def __draw_graphic(self):
         """
         Draw the objects graphic on screen
@@ -154,7 +158,15 @@ class DefaultJoint:
         self.__graphic_obj.up = self.y_vector
 
     def set_joint_visibility(self, is_visible):
+        """
+        Choose whether or not the joint is displayed in the canvas.
+
+        :param is_visible: Whether the joint should be drawn or not
+        :type is_visible: bool
+        """
+        # If the option is different to current setting
         if is_visible is not self.visible:
+            # Update
             self.__graphic_obj.visible = is_visible
             self.__graphic_ref.visible = is_visible
             self.visible = is_visible
@@ -175,14 +187,12 @@ class DefaultJoint:
                 0,
                 0
             )
-            # NB: Set XY axis first, as vpython is +y up bias, objects rotate respective to this bias when setting axis
+            # Create a box along the +x axis, with the origin (point of rotation) at (0, 0, 0)
             graphic_obj = box(pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
                               axis=vector(1, 0, 0),
                               size=vector((self.__connect_to - self.__connect_from).mag, 0.1, 0.1),
                               up=vector(0, 0, 1))
-            #graphic_obj.axis = self.x_vector
-            #graphic_obj.pos = box_midpoint
-            #graphic_obj.rotate(self.x_rotation)
+            # Set the boxes new origin
             graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=vector(1, 0, 0))
             return graphic_obj
         else:
@@ -194,9 +204,21 @@ class DefaultJoint:
         pass
 
     def get_connection_to_pos(self):
+        """
+        Return the private variable containing the connection position (toolpoint)
+
+        :return: Connect_to (toolpoint) position
+        :rtype: class:`vpython.vector`
+        """
         return self.__connect_to
 
     def get_rotation_angle(self, axis):
+        """
+        Get the current angle of rotation around a specified X, Y, or Z axis
+
+        :param axis: Specified joint axis to get the angle of rotation of
+        :type axis: class:`vpython.vector`
+        """
         if axis.equals(vector(1, 0, 0)):
             return self.x_rotation
         elif axis.equals(vector(0, 1, 0)):
@@ -205,6 +227,7 @@ class DefaultJoint:
             return self.z_rotation
         else:
             return self.y_rotation
+
 
 class RotationalJoint(DefaultJoint):
     """
@@ -216,17 +239,12 @@ class RotationalJoint(DefaultJoint):
     :type connection_to_next_seg: class:`vpython.vector`
     :param x_axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
     :type x_axis: class:`vpython.vector`
-    TODO rotation_axis
+    :param rotation_axis: Vector representation of the joint axis that it rotates around, defaults to +y axis (0, 1, 0)
+    :type rotation_axis: class:`vpython.vector`
     :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
     defaults to `None`
     :type graphic_obj: class:`vpython.compound`
     """
-
-    # TODO
-    #  1. Add input parameters to determine the rotation axis
-    #  2. Update functions to rotate around the correct axis
-    #      a. When doing this, make sure reference frame is correct too (i.e. for base)
-
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
