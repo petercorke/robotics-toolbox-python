@@ -69,6 +69,7 @@ class DefaultJoint:
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
+        self.__draw_graphic()
 
     def update_orientation(self, angle_of_rotation, axis_of_rotation):
         """
@@ -105,6 +106,7 @@ class DefaultJoint:
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
+        self.__draw_graphic()
 
     def __update_reference_frame(self):
         """
@@ -112,13 +114,13 @@ class DefaultJoint:
         """
         # X vector is through the tooltip
         self.x_vector = self.__graphic_obj.axis
-        self.x_vector.mag = self.__length
+        # self.x_vector.mag = self.__length
         # Y vector is in the 'up' direction of the object
         self.y_vector = self.__graphic_obj.up
-        self.y_vector.mag = self.__length
+        # self.y_vector.mag = self.__length
         # Z vector is the cross product of the two
         self.z_vector = self.x_vector.cross(self.y_vector)
-        self.z_vector.mag = self.__length
+        # self.z_vector.mag = self.__length
 
     def draw_reference_frame(self, is_visible):
         """
@@ -148,7 +150,6 @@ class DefaultJoint:
                 self.__graphic_ref.axis = self.x_vector
                 self.__graphic_ref.up = self.y_vector
 
-    # TODO work out if still needed
     def __draw_graphic(self):
         """
         Draw the objects graphic on screen
@@ -218,6 +219,8 @@ class DefaultJoint:
 
         :param axis: Specified joint axis to get the angle of rotation of
         :type axis: class:`vpython.vector`
+        :return: Current angle of rotation with respect to world (includes rotation from previous joints)
+        :rtype: float (radians)
         """
         if axis.equals(x_axis_vector):
             return self.x_rotation
