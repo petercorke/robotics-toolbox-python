@@ -71,7 +71,7 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
 
-    def update_orientation(self, angle_of_rotation, axis_of_rotation):
+    def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
         """
         Rotate the joint by a specific amount around one of the joints xyz axes
 
@@ -102,6 +102,31 @@ class DefaultJoint:
         self.__update_reference_frame()
         # Calculate the updated toolpoint location
         self.__connect_dir.rotate(angle=angle_of_rotation, axis=rotation_axis)
+        self.__connect_to = self.__connect_dir.pos + self.__connect_dir.axis
+        # If the reference frame exists, redraw it
+        if self.__graphic_ref is not None:
+            self.draw_reference_frame(self.__graphic_ref.visible)
+        self.__draw_graphic()
+
+    def rotate_around_vector(self, angle_of_rotation, axis_of_rotation):
+        """
+        Rotate the object around a particular vector. Is utilised when rotating a different joint,
+        and updating the subsequent joints.
+
+        :param angle_of_rotation: +/- angle of rotation to apply
+        :type angle_of_rotation: float (radians)
+        :param axis_of_rotation: X, Y, or Z axis to apply around the objects specific X, Y, or Z axes
+        :type axis_of_rotation: class:`vpython.vector`
+        """
+        # TODO
+        #  calculate amount to update x,y,z angles by based on vectors and angle
+
+        # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
+        self.__graphic_obj.rotate(angle=angle_of_rotation, axis=axis_of_rotation, origin=self.__connect_from)
+        # Update the vectors and reference frames
+        self.__update_reference_frame()
+        # Calculate the updated toolpoint location
+        self.__connect_dir.rotate(angle=angle_of_rotation, axis=axis_of_rotation)
         self.__connect_to = self.__connect_dir.pos + self.__connect_dir.axis
         # If the reference frame exists, redraw it
         if self.__graphic_ref is not None:
@@ -231,6 +256,24 @@ class DefaultJoint:
         else:
             return self.y_rotation
 
+    def get_axis_vector(self, axis):
+        """
+        Get the current vector of a specified X, Y, or Z axis
+
+        :param axis: Specified joint axis to get the angle of rotation of
+        :type axis: class:`vpython.vector`
+        :return: Current vector representation of the joints X, Y, or Z axis
+        :rtype: class:`vpython.vector`
+        """
+        if axis.equals(x_axis_vector):
+            return self.x_vector
+        elif axis.equals(y_axis_vector):
+            return self.y_vector
+        elif axis.equals(z_axis_vector):
+            return self.z_vector
+        else:
+            return self.y_vector
+
 
 class RotationalJoint(DefaultJoint):
     """
@@ -274,7 +317,7 @@ class RotationalJoint(DefaultJoint):
         # Calculate amount to rotate the link
         angle_diff = wrap_to_pi(new_angle - current_angle)
         # Update the link
-        self.update_orientation(angle_diff, self.rotation_axis)
+        self.rotate_around_joint_axis(angle_diff, self.rotation_axis)
         self.rotation_angle = new_angle
 
 
@@ -358,3 +401,37 @@ class Robot:
     def set_reference_visibility(self, is_visible):
         for joint in self.joints:
             joint.draw_reference_frame(is_visible)
+
+    def set_joint_angles(self, new_angles):
+        # TODO out of bounds (check new_angles length)
+        for i in range(0, self.num_joints):
+            if isinstance(self.joints[i], RotationalJoint):
+                if self.joints[i].rotation_angle == new_angles[i]:
+                    continue
+                self.joints[i].rotate_joint(new_angles[i])
+                rot_axis = self.joints[i].get_axis_vector(self.joints[i].rotation_axis)
+                for j in range(i+1, self.num_joints):
+                    self.joints[j].rotate_around_vector(new_angles[i], rot_axis)
+        self.__position_joints()
+
+    def move_base(self, position):
+        self.joints[0].update_position(position)
+        self.__position_joints()
+
+    def print_joint_angles(self, is_degrees=False):
+        # TODO degrees conversion
+        for i in range(0, self.num_joints):
+            if isinstance(self.joints[i], RotationalJoint):
+                print("Joint", i,
+                      "\n\tLocal angle =", self.joints[i].rotation_angle,
+                      "\n\tWorld angles (x,y,z)= (",
+                      self.joints[i].get_rotation_angle(x_axis_vector), ",",
+                      self.joints[i].get_rotation_angle(y_axis_vector), ",",
+                      self.joints[i].get_rotation_angle(z_axis_vector), ")",)
+            else:
+                print("Joint", i,
+                      "\n\tLocal angle = <Not a rotating joint>",
+                      "\n\tWorld angles (x,y,z)= (",
+                      self.joints[i].get_rotation_angle(x_axis_vector), ",",
+                      self.joints[i].get_rotation_angle(y_axis_vector), ",",
+                      self.joints[i].get_rotation_angle(z_axis_vector), ")", )
