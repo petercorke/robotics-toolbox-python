@@ -20,7 +20,7 @@ class DefaultJoint:
     defaults to `None`
     :type graphic_object: class:`vpython.compound`
     """
-
+    # TODO make variables private with getter functions (axis/rotations)
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
@@ -371,8 +371,7 @@ class Gripper(DefaultJoint):
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
 
-    def rotate_joint(self, new_angle):
-        pass
+    # TODO close/open gripper
 
 
 class Robot:
@@ -402,7 +401,17 @@ class Robot:
         for joint in self.joints:
             joint.draw_reference_frame(is_visible)
 
-    def set_joint_angles(self, new_angles):
+    def set_joint_angle(self, link_num, new_angle):
+        if isinstance(self.joints[link_num], RotationalJoint):
+            if self.joints[link_num].rotation_angle == new_angle:
+                return
+            self.joints[link_num].rotate_joint(new_angle)
+            rot_axis = self.joints[link_num].get_axis_vector(self.joints[link_num].rotation_axis)
+            for j in range(link_num + 1, self.num_joints):
+                self.joints[j].rotate_around_vector(new_angle, rot_axis)
+            self.__position_joints()
+
+    def set_all_joint_angles(self, new_angles):
         # TODO out of bounds (check new_angles length)
         for i in range(0, self.num_joints):
             if isinstance(self.joints[i], RotationalJoint):
@@ -424,14 +433,14 @@ class Robot:
             if isinstance(self.joints[i], RotationalJoint):
                 print("Joint", i,
                       "\n\tLocal angle =", self.joints[i].rotation_angle,
-                      "\n\tWorld angles (x,y,z)= (",
+                      "\n\tTotal angles (x,y,z)= (",
                       self.joints[i].get_rotation_angle(x_axis_vector), ",",
                       self.joints[i].get_rotation_angle(y_axis_vector), ",",
                       self.joints[i].get_rotation_angle(z_axis_vector), ")",)
             else:
                 print("Joint", i,
                       "\n\tLocal angle = <Not a rotating joint>",
-                      "\n\tWorld angles (x,y,z)= (",
+                      "\n\tTotal angles (x,y,z)= (",
                       self.joints[i].get_rotation_angle(x_axis_vector), ",",
                       self.joints[i].get_rotation_angle(y_axis_vector), ",",
                       self.joints[i].get_rotation_angle(z_axis_vector), ")", )
