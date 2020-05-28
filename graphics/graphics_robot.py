@@ -274,6 +274,9 @@ class DefaultJoint:
         else:
             return self.y_vector
 
+    def get_joint_type(self):
+        return ""
+
 
 class RotationalJoint(DefaultJoint):
     """
@@ -320,6 +323,9 @@ class RotationalJoint(DefaultJoint):
         self.rotate_around_joint_axis(angle_diff, self.rotation_axis)
         self.rotation_angle = new_angle
 
+    def get_joint_type(self):
+        return "R"
+
 
 class PrismaticJoint(DefaultJoint):
     # TODO
@@ -332,6 +338,9 @@ class PrismaticJoint(DefaultJoint):
         # TODO calculate new connectTo point, update relevant super() params
         # TODO Update graphic
         pass
+
+    def get_joint_type(self):
+        return "P"
 
 
 class StaticJoint(DefaultJoint):
@@ -351,6 +360,9 @@ class StaticJoint(DefaultJoint):
     """
     def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
+
+    def get_joint_type(self):
+        return "S"
 
 
 class Gripper(DefaultJoint):
@@ -372,6 +384,9 @@ class Gripper(DefaultJoint):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
 
     # TODO close/open gripper
+
+    def get_joint_type(self):
+        return "G"
 
 
 class Robot:
@@ -402,7 +417,7 @@ class Robot:
             joint.draw_reference_frame(is_visible)
 
     def set_joint_angle(self, link_num, new_angle):
-        if isinstance(self.joints[link_num], RotationalJoint):
+        if self.joints[link_num].get_type() == "R":
             if self.joints[link_num].rotation_angle == new_angle:
                 return
             self.joints[link_num].rotate_joint(new_angle)
@@ -414,7 +429,7 @@ class Robot:
     def set_all_joint_angles(self, new_angles):
         # TODO out of bounds (check new_angles length)
         for i in range(0, self.num_joints):
-            if isinstance(self.joints[i], RotationalJoint):
+            if self.joints[i].get_type() == "R":
                 if self.joints[i].rotation_angle == new_angles[i]:
                     continue
                 self.joints[i].rotate_joint(new_angles[i])
@@ -430,7 +445,7 @@ class Robot:
     def print_joint_angles(self, is_degrees=False):
         # TODO degrees conversion
         for i in range(0, self.num_joints):
-            if isinstance(self.joints[i], RotationalJoint):
+            if self.joints[i].get_type() == "R":
                 print("Joint", i,
                       "\n\tLocal angle =", self.joints[i].rotation_angle,
                       "\n\tTotal angles (x,y,z)= (",
