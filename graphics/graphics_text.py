@@ -92,8 +92,8 @@ def create_grid_numbers(bool_camera_relative, num_squares):
     :type bool_camera_relative: bool
     :param num_squares: How many unit squares to draw along the axis.
     :type num_squares: int
-    :return: An array of labels
-    :rtype: class:`vpython.label` array
+    :return: A list of labels
+    :rtype: class:`vpython.label` list
     """
 
     # Initial conditions

@@ -20,7 +20,6 @@ class DefaultJoint:
     defaults to `None`
     :type graphic_object: class:`vpython.compound`
     """
-    # TODO make variables private with getter functions (axis/rotations)
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
@@ -275,6 +274,12 @@ class DefaultJoint:
             return self.__y_vector
 
     def get_joint_type(self):
+        """
+        Return the type of joint (To Be Overridden by Child classes)
+
+        :return: String representation of the joint type.
+        :rtype: `str`
+        """
         return ""
 
 
@@ -324,6 +329,12 @@ class RotationalJoint(DefaultJoint):
         self.rotation_angle = new_angle
 
     def get_joint_type(self):
+        """
+        Return the type of joint (R for Rotational)
+
+        :return: String representation of the joint type.
+        :rtype: `str`
+        """
         return "R"
 
 
@@ -340,6 +351,12 @@ class PrismaticJoint(DefaultJoint):
         pass
 
     def get_joint_type(self):
+        """
+        Return the type of joint (P for Prismatic)
+
+        :return: String representation of the joint type.
+        :rtype: `str`
+        """
         return "P"
 
 
@@ -362,6 +379,12 @@ class StaticJoint(DefaultJoint):
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
 
     def get_joint_type(self):
+        """
+        Return the type of joint (S for Static)
+
+        :return: String representation of the joint type.
+        :rtype: `str`
+        """
         return "S"
 
 
@@ -386,6 +409,12 @@ class Gripper(DefaultJoint):
     # TODO close/open gripper
 
     def get_joint_type(self):
+        """
+        Return the type of joint (G for Gripper)
+
+        :return: String representation of the joint type.
+        :rtype: `str`
+        """
         return "G"
 
 
@@ -393,69 +422,143 @@ class Robot:
     # TODO:
     #  Have functions to update links,
     #  take in rotation, translation, etc, params
+    """
+    The Robot class encapsulates all of the different joint types to easily control the robot arm.
+
+    :param joints: A list of the joints in order from base (0) to gripper (end), or other types.
+    :type joints: list
+    """
     def __init__(self, joints):
+        # TODO sanity check input
         self.joints = joints
         self.num_joints = len(joints)
         self.is_shown = True
         self.__create_robot()
 
-    def __create_robot(self, ):
+    def __create_robot(self):
+        """
+        Upon creation of the robot, orient all objects correctly.
+        """
         self.__position_joints()
 
     def __position_joints(self):
+        """
+        Position all joints based upon each respective connect_from and connect_to points.
+        """
+        # For each joint in the robot (exclude base)
         for joint_num in range(1, self.num_joints):
+            # Place the joint connect_from (origin) to the previous segments connect_to
             self.joints[joint_num].update_position(self.joints[joint_num - 1].get_connection_to_pos())
 
     def set_robot_visibility(self, is_visible):
+        """
+        Set the entire robots visibility inside the canvas.
+
+        :param is_visible: Whether the robot should be visible or not.
+        :type is_visible: bool
+        """
         if is_visible is not self.is_shown:
             for joint in self.joints:
                 joint.set_joint_visibility(is_visible)
                 self.is_shown = is_visible
 
     def set_reference_visibility(self, is_visible):
+        """
+        Set the visibility of the reference frame for all joints.
+
+        :param is_visible: Whether the reference frames should be visible or not.
+        :type is_visible: bool
+        """
         for joint in self.joints:
             joint.draw_reference_frame(is_visible)
 
     def set_joint_angle(self, link_num, new_angle):
+        """
+        Set the angle (radians) for a specific joint in the robot.
+
+        :param link_num: Index of the joint in the robot arm (Base = 0, Gripper = end)
+        :type link_num: int
+        :param new_angle: The required angle to set the arm rotated towards
+        :type new_angle: float (radians)
+        """
+        # If the joint is a revolute
         if self.joints[link_num].get_type() == "R":
+            # If the angle already is as required, return
             if self.joints[link_num].rotation_angle == new_angle:
                 return
+            # Rotate
             self.joints[link_num].rotate_joint(new_angle)
+            # Calculate the vector representation of the axis rotated around
             rot_axis = self.joints[link_num].get_axis_vector(self.joints[link_num].rotation_axis)
-            for j in range(link_num + 1, self.num_joints):
-                self.joints[j].rotate_around_vector(new_angle, rot_axis)
+            # For each next joint, apply the same rotation
+            for affected_joint in range(link_num + 1, self.num_joints):
+                self.joints[affected_joint].rotate_around_vector(new_angle, rot_axis)
+            # Reposition joints to connect back to each other
             self.__position_joints()
+        else:
+            # TODO error handling
+            pass
 
     def set_all_joint_angles(self, new_angles):
-        # TODO out of bounds (check new_angles length)
-        for i in range(0, self.num_joints):
-            if self.joints[i].get_type() == "R":
-                if self.joints[i].rotation_angle == new_angles[i]:
+        """
+        Set all of the angles for each joint in the robot.
+
+        :param new_angles: List of new angles (radians) to set each joint to. Must have the same length as number of joints in
+        robot arm, even if the joints aren't revolute
+        :type new_angles: float list (radians)
+        """
+        # TODO error handling (Out of bounds, not revolute)
+        # For each joint
+        for joint_num in range(0, self.num_joints):
+            # If joint is a revolute
+            if self.joints[joint_num].get_type() == "R":
+                # If the angle is the already the same, return
+                if self.joints[joint_num].rotation_angle == new_angles[joint_num]:
                     continue
-                self.joints[i].rotate_joint(new_angles[i])
-                rot_axis = self.joints[i].get_axis_vector(self.joints[i].rotation_axis)
-                for j in range(i+1, self.num_joints):
-                    self.joints[j].rotate_around_vector(new_angles[i], rot_axis)
+                # Rotate
+                self.joints[joint_num].rotate_joint(new_angles[joint_num])
+                # Calculate the vector representation of the axis that was rotated around
+                rot_axis = self.joints[joint_num].get_axis_vector(self.joints[joint_num].rotation_axis)
+                # For each successive joint, rotate it the same
+                for affected_joint in range(joint_num+1, self.num_joints):
+                    self.joints[affected_joint].rotate_around_vector(new_angles[joint_num], rot_axis)
+            else:
+                pass
+        # Reposition all joints to connect to the previous segment
         self.__position_joints()
 
     def move_base(self, position):
+        """
+        Move the base around to a particular position.
+
+        :param position: 3D position to move the base's origin to
+        :type position: class:`vpython.vector`
+        """
+        # TODO sanity check input
+        # Move the base, then update all of the joints
         self.joints[0].update_position(position)
         self.__position_joints()
 
     def print_joint_angles(self, is_degrees=False):
+        """
+        Print all of the current joint angles (Local rotation and total rotation (rotation from other joints))
+        """
         # TODO degrees conversion
-        for i in range(0, self.num_joints):
-            if self.joints[i].get_type() == "R":
-                print("Joint", i,
-                      "\n\tLocal angle =", self.joints[i].rotation_angle,
+        # For each joint
+        for joint in range(0, self.num_joints):
+            # If revolute
+            if self.joints[joint].get_type() == "R":
+                print("Joint", joint,
+                      "\n\tLocal angle =", self.joints[joint].rotation_angle,
                       "\n\tTotal angles (x,y,z)= (",
-                      self.joints[i].get_rotation_angle(x_axis_vector), ",",
-                      self.joints[i].get_rotation_angle(y_axis_vector), ",",
-                      self.joints[i].get_rotation_angle(z_axis_vector), ")",)
+                      self.joints[joint].get_rotation_angle(x_axis_vector), ",",
+                      self.joints[joint].get_rotation_angle(y_axis_vector), ",",
+                      self.joints[joint].get_rotation_angle(z_axis_vector), ")",)
+            # If not a revolute
             else:
-                print("Joint", i,
+                print("Joint", joint,
                       "\n\tLocal angle = <Not a rotating joint>",
                       "\n\tTotal angles (x,y,z)= (",
-                      self.joints[i].get_rotation_angle(x_axis_vector), ",",
-                      self.joints[i].get_rotation_angle(y_axis_vector), ",",
-                      self.joints[i].get_rotation_angle(z_axis_vector), ")", )
+                      self.joints[joint].get_rotation_angle(x_axis_vector), ",",
+                      self.joints[joint].get_rotation_angle(y_axis_vector), ",",
+                      self.joints[joint].get_rotation_angle(z_axis_vector), ")", )
