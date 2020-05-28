@@ -35,12 +35,12 @@ class DefaultJoint:
                                    axis=(self.__connect_to - self.__connect_from),
                                    visible=False)
         # Set the x vector direction
-        self.x_vector = axis
+        self.__x_vector = axis
 
         # Set the rotation angles
-        self.x_rotation = radians(0)
-        self.y_rotation = radians(0)
-        self.z_rotation = radians(0)
+        self.__x_rotation = radians(0)
+        self.__y_rotation = radians(0)
+        self.__z_rotation = radians(0)
 
         # Set the graphic
         self.__graphic_obj = self.__set_graphic(graphic_object)
@@ -50,7 +50,7 @@ class DefaultJoint:
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
-        self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, self.x_rotation)
+        self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
         self.__update_reference_frame()
 
     def update_position(self, new_pos):
@@ -83,18 +83,18 @@ class DefaultJoint:
         # Determine the axis of rotation based on the given joint axis direction
         # Then add the rotation amount to the axis counter
         if axis_of_rotation.equals(x_axis_vector):
-            rotation_axis = self.x_vector
-            self.x_rotation = wrap_to_pi(self.x_rotation + angle_of_rotation)
+            rotation_axis = self.__x_vector
+            self.__x_rotation = wrap_to_pi(self.__x_rotation + angle_of_rotation)
         elif axis_of_rotation.equals(y_axis_vector):
-            rotation_axis = self.y_vector
-            self.y_rotation = wrap_to_pi(self.y_rotation + angle_of_rotation)
+            rotation_axis = self.__y_vector
+            self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
         elif axis_of_rotation.equals(z_axis_vector):
-            rotation_axis = self.z_vector
-            self.z_rotation = wrap_to_pi(self.z_rotation + angle_of_rotation)
+            rotation_axis = self.__z_vector
+            self.__z_rotation = wrap_to_pi(self.__z_rotation + angle_of_rotation)
         else:
             # Default to the y-axis
-            rotation_axis = self.y_vector
-            self.y_rotation = wrap_to_pi(self.y_rotation + angle_of_rotation)
+            rotation_axis = self.__y_vector
+            self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
 
         # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
         self.__graphic_obj.rotate(angle=angle_of_rotation, axis=rotation_axis, origin=self.__connect_from)
@@ -138,13 +138,13 @@ class DefaultJoint:
         Update the reference frame axis vectors
         """
         # X vector is through the tooltip
-        self.x_vector = self.__graphic_obj.axis
+        self.__x_vector = self.__graphic_obj.axis
         # self.x_vector.mag = self.__length
         # Y vector is in the 'up' direction of the object
-        self.y_vector = self.__graphic_obj.up
+        self.__y_vector = self.__graphic_obj.up
         # self.y_vector.mag = self.__length
         # Z vector is the cross product of the two
-        self.z_vector = self.x_vector.cross(self.y_vector)
+        self.__z_vector = self.__x_vector.cross(self.__y_vector)
         # self.z_vector.mag = self.__length
 
     def draw_reference_frame(self, is_visible):
@@ -161,27 +161,27 @@ class DefaultJoint:
                 # Set invisible, and also update its orientations
                 self.__graphic_ref.visible = False
                 self.__graphic_ref.pos = self.__connect_to
-                self.__graphic_ref.axis = self.x_vector
-                self.__graphic_ref.up = self.y_vector
+                self.__graphic_ref.axis = self.__x_vector
+                self.__graphic_ref.up = self.__y_vector
         # Else: draw
         else:
             # If graphic does not currently exist
             if self.__graphic_ref is None:
                 # Create one
-                self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.x_vector, self.x_rotation)
+                self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
             # Else graphic does exist
             else:
                 self.__graphic_ref.pos = self.__connect_to
-                self.__graphic_ref.axis = self.x_vector
-                self.__graphic_ref.up = self.y_vector
+                self.__graphic_ref.axis = self.__x_vector
+                self.__graphic_ref.up = self.__y_vector
 
     def __draw_graphic(self):
         """
         Draw the objects graphic on screen
         """
         self.__graphic_obj.pos = self.__connect_from
-        self.__graphic_obj.axis = self.x_vector
-        self.__graphic_obj.up = self.y_vector
+        self.__graphic_obj.axis = self.__x_vector
+        self.__graphic_obj.up = self.__y_vector
 
     def set_joint_visibility(self, is_visible):
         """
@@ -248,13 +248,13 @@ class DefaultJoint:
         :rtype: float (radians)
         """
         if axis.equals(x_axis_vector):
-            return self.x_rotation
+            return self.__x_rotation
         elif axis.equals(y_axis_vector):
-            return self.y_rotation
+            return self.__y_rotation
         elif axis.equals(z_axis_vector):
-            return self.z_rotation
+            return self.__z_rotation
         else:
-            return self.y_rotation
+            return self.__y_rotation
 
     def get_axis_vector(self, axis):
         """
@@ -266,13 +266,13 @@ class DefaultJoint:
         :rtype: class:`vpython.vector`
         """
         if axis.equals(x_axis_vector):
-            return self.x_vector
+            return self.__x_vector
         elif axis.equals(y_axis_vector):
-            return self.y_vector
+            return self.__y_vector
         elif axis.equals(z_axis_vector):
-            return self.z_vector
+            return self.__z_vector
         else:
-            return self.y_vector
+            return self.__y_vector
 
     def get_joint_type(self):
         return ""
