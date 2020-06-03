@@ -63,22 +63,41 @@ class SerialLink:
         """
         return len(self.links)
 
-    def fkine(self, stance, unit='rad'):
+    def fkine(self, jointconfig, unit='rad', alltout=False):
         """
         Calculates forward kinematics for a list of joint angles.
-        :param stance: stance is list of joint angles.
-        :param unit: unit of input angles.
+        :param jointconfig: stance is list of joint angles.
+        :param unit: unit of input angles. 'rad' or 'deg'.
+        :param alltout: request intermediate transformations
         :return: homogeneous transformation matrix.
         """
-        if type(stance) is np.ndarray:
-            stance = stance
+        if type(jointconfig) == list:
+            jointconfig = argcheck.getvector(jointconfig)
         if unit == 'deg':
-            stance = stance * pi / 180
-        t = SE3(self.base)
-        for i in range(self.length):
-            t = t * self.links[i].A(stance[i])
-        t = t * SE3(self.tool)
-        return t
+            jointconfig = jointconfig * pi / 180
+        if alltout:
+            allt = list(range(0, self.length))
+        if jointconfig.size == self.length:
+            t = SE3(self.base)
+            for i in range(self.length):
+                t = t * self.links[i].A(jointconfig[i])
+                if alltout:
+                    allt[i] = t
+            t = t * SE3(self.tool)
+        else:
+            assert jointconfig.shape[1] == self.length, "joinconfig must have {self.length} columns"
+            t = list(range(0, jointconfig.shape[0]))
+            for k in range(jointconfig.shape[0]):
+                qk = jointconfig[k, :]
+                tt = SE3(self.base)
+                for i in range(self.length):
+                    tt = tt * self.links[i].A(qk[i])
+                t[k] = tt * SE3(self.tool)
+
+        if alltout:
+            return t, allt
+        else:
+            return t
 
     def ikine(self, T, q0=None, unit='rad'):
         """
