@@ -46,20 +46,6 @@ class SerialLink:
             The manipulator Hessian matrix maps joint acceleration to end-effector
             spatial acceleration in the 0 frame
 
-    Examples
-    --------
-    >>> L[0] = Revolute('d', 0, 'a', a1, 'alpha', np.pi/2)
-
-    >>> L[1] = Revolute('d', 0, 'a', a2, 'alpha', 0)
-
-    >>> twolink = SerialLink(L, 'name', 'two link');
-
-    See Also
-    --------
-    ropy.robot.ets : A superclass which represents the kinematics of a 
-                     serial-link manipulator
-    ropy.robot.Link : A link superclass for all link types
-    ropy.robot.Revolute : A revolute link class
     """
 
     def __init__(self, *argv):

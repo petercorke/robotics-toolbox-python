@@ -1,155 +1,108 @@
 #!/usr/bin/env python
 
 import numpy as np
-from rtb.robot.Link import Link
-# from ropy.robot.fkine import fkine
-# from ropy.robot.jocobe import jacobe
-# from ropy.robot.jocob0 import jacob0
-# from ropy.robot.ets import ets
+from roboticstoolbox.robot.Link import *
+from spatialmath.pose3d import *
+from scipy.optimize import minimize
 
-class SerialLink(object):
-    """
-    A superclass for arm type robots
+class SerialLink:
 
-    Note: Link subclass elements passed in must be all standard, or all 
-          modified, DH parameters.
-    
-    Attributes:
-    --------
-        name : string
-            Name of the robot
-        manufacturer : string
-            Manufacturer of the robot
-        base : float np.ndarray(4,4)
-            Locaation of the base
-        tool : float np.ndarray(4,4)
-            Location of the tool
-        links : List[n]
-            Series of links which define the robot
-        mdh : int
-            0 if standard D&H, else 1
-        n : int
-            Number of joints in the robot
-        T : float np.ndarray(4,4)
-            The current pose of the robot
-        q : float np.ndarray(1,n)
-            The current joint angles of the robot
-        Je : float np.ndarray(6,n)
-            The manipulator Jacobian matrix maps joint velocity to end-effector
-            spatial velocity in the ee frame
-        J0 : float np.ndarray(6,n)
-            The manipulator Jacobian matrix maps joint velocity to end-effector
-            spatial velocity in the 0 frame
-        He : float np.ndarray(6,n,n)
-            The manipulator Hessian matrix maps joint acceleration to end-effector
-            spatial acceleration in the ee frame
-        H0 : float np.ndarray(6,n,n)
-            The manipulator Hessian matrix maps joint acceleration to end-effector
-            spatial acceleration in the 0 frame
-
-    Examples
-    --------
-    >>> L[0] = Revolute('d', 0, 'a', a1, 'alpha', np.pi/2)
-
-    >>> L[1] = Revolute('d', 0, 'a', a2, 'alpha', 0)
-
-    >>> twolink = SerialLink(L, 'name', 'two link');
-
-    See Also
-    --------
-    ropy.robot.ets : A superclass which represents the kinematics of a 
-                     serial-link manipulator
-    ropy.robot.Link : A link superclass for all link types
-    ropy.robot.Revolute : A revolute link class
-    """
-
-    def __init__(self,
-            L, 
-            name = 'noname', 
-            manufacturer = '', 
-            base = np.eye(4,4),
-            tool = np.eye(4,4)
-            ):
-
-        self._name = name
-        self._manuf = manufacturer
-        self._links = []
-        self._base = base
-        self._tool = tool
-        self._T = np.eye(4)
-
-        super(SerialLink, self).__init__()        
-
-        if not isinstance(L, list):
-            raise TypeError('The links L must be stored in a list.')
+    def __init__(self, links, name=None, base=None, tool=None, stl_files=None, q=None, param=None):
+        """
+        Creates a SerialLink object.
+        :param links: a list of links that will constitute SerialLink object.
+        :param name: name property of the object.
+        :param base: base transform applied to the SerialLink object.
+        :param stl_files: STL file names to associate with links. Only works for pre-implemented models in model module.
+        :param q: initial angles for link joints.
+        :param colors: colors of STL files.
+        """
+        self.pipeline = None
+        self.links = links
+        if q is None:
+            self.q = np.array([0 for each in links])
+        if base is None:
+            self.base = np.eye(4, 4)
         else:
-            if not isinstance(L[0], Link):
-                raise TypeError('The links in L must be of Link type.')
-            else:
-                self._links = L
+            assert (type(base) is np.ndarray) and (base.shape == (4, 4))
+            self.base = base
+        if tool is None:
+            self.tool = np.eye(4, 4)
+        else:
+            assert (type(tool) is np.ndarray) and (tool.shape == (4, 4))
+            self.tool = tool
+        # Following arguments initialised by plot function and animate functions only
+        if stl_files is None:
+            # Default stick figure model code goes here
+            pass
+        else:
+            self.stl_files = stl_files
+        if name is None:
+            self.name = ''
+        else:
+            self.name = name
+        if param is None:
+            # If model deosn't pass params, then use these default ones
+            self.param = {
+                "cube_axes_x_bounds": np.array([[-1.5, 1.5]]),
+                "cube_axes_y_bounds": np.array([[-1.5, 1.5]]),
+                "cube_axes_z_bounds": np.array([[-1.5, 1.5]]),
+                "floor_position": np.array([[0, -1.5, 0]])
+            }
+        else:
+            self.param = param
 
-        self._n = len(self._links)
-        self._q = np.zeros((self._n,))
-
-        self._mdh = self.links[0].mdh
-        for i in range(self._n):
-            if not self._links[i].mdh == self._mdh:
-                raise ValueError('Robot has mixed D&H links conventions.')
-
-
-
-    # Property methods
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def manuf(self):
-        return self._manuf
-
-    @property
-    def links(self):
-        return self._links
-
-    @property
-    def base(self):
-        return self._base
+    def __iter__(self):
+        return (each for each in self.links)
 
     @property
-    def tool(self):
-        return self._tool
+    def length(self):
+        """
+        length property
+        :return: int
+        """
+        return len(self.links)
 
-    @property
-    def n(self):
-        return self._n
+    def fkine(self, stance, unit='rad'):
+        """
+        Calculates forward kinematics for a list of joint angles.
+        :param stance: stance is list of joint angles.
+        :param unit: unit of input angles.
+        :return: homogeneous transformation matrix.
+        """
+        if type(stance) is np.ndarray:
+            stance = stance
+        if unit == 'deg':
+            stance = stance * pi / 180
+        t = SE3(self.base)
+        for i in range(self.length):
+            t = t * self.links[i].A(stance[i])
+        t = t * SE3(self.tool)
+        return t
 
-    @property
-    def mdh(self):
-        return self._mdh
+    def ikine(self, T, q0=None, unit='rad'):
+        """
+        Calculates inverse kinematics for homogeneous transformation matrix using numerical optimisation method.
+        :param T: homogeneous transformation matrix.
+        :param q0: initial list of joint angles for optimisation.
+        :param unit: preferred unit for returned joint angles. Allowed values: 'rad' or 'deg'.
+        :return: a list of 6 joint angles.
+        """
+        assert T.shape == (4, 4)
+        bounds = [(link.qlim[0], link.qlim[1]) for link in self]
+        reach = 0
+        for link in self:
+            reach += abs(link.a) + abs(link.d)
+        omega = np.diag([1, 1, 1, 3 / reach])
+        if q0 is None:
+            q0 = np.zeros((1, self.length))
 
-    @property
-    def q(self):
-        return self._q  
+        def objective(x):
+            return (
+                np.square(((np.linalg.lstsq(T, self.fkine(x).A, rcond=-1)[0]) - np.eye(4, 4)) * omega)).sum()
 
-
-    # Setter methods
-
-    @base.setter
-    def f(self, T):
-        if not isinstance(T, np.ndarray):
-            raise TypeError('Transformation matrix must be a numpy ndarray')
-        elif T.shape != (4,4):
-            raise ValueError('Transformation matrix must be a 4x4')
-        self._base = T
-
-    @q.setter
-    def q(self, q_new):
-        if not isinstance(q_new, np.ndarray):
-            raise TypeError('q array must be a numpy ndarray')
-        elif q_new.shape != (self._n,):
-            raise ValueError('q must be a 1 dim (n,) array')
-        
-        self._q = q_new
-
-
+        sol = minimize(objective, x0=q0, bounds=bounds)
+        if unit == 'deg':
+            return sol.x * 180 / pi
+        else:
+            return sol.x

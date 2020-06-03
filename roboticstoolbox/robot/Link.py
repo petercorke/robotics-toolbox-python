@@ -200,7 +200,7 @@ class Link(list):
             parser.add_argument("--offset", help="joint variable offset (default 0)",
                                 type=float, default=0)
             parser.add_argument("--qlim", help="joint limit",
-                                type=float, default=0)
+                                type=list, default=[-pi/2, pi/2])
             parser.add_argument("--type", help="joint type, 'revolute', 'prismatic' or 'fixed'",
                                 choices=['', 'revolute', 'prismatic', 'fixed'], default='')
             parser.add_argument("--convention", help="D&h parameters, 'standard' or 'modified'",
@@ -240,7 +240,7 @@ class Link(list):
 
                 self.offset = opt.offset
                 self.flip = opt.flip
-                self.qlim = opt.qlim
+                self.qlim = argcheck.getvector(opt.qlim)
 
                 self.m = opt.m
                 self.r = opt.r
@@ -340,7 +340,7 @@ class Link(list):
         """
         Link.A Link transform matrix
 
-        T = L.A(Q) is an SE3 object representing the transformation between link
+        T = L.A(q) is an SE3 object representing the transformation between link
         frames when the link variable q which is either the Denavit-Hartenberg
         parameter theta (revolute) or d (prismatic).  For:
          - standard DH parameters, this is from the previous frame to the current.
