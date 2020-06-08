@@ -7,11 +7,13 @@ Permission to use and copy is granted provided that acknowledgement of
 the authors is made.
 
 @author: Luis Fernando Lara Tobar and Peter Corke
+
+Edited 3/06 Samuel Drew
 """
 
-from numpy import *
-from utility import *
-import transform as T
+import numpy as np
+from spatialmath.base.argcheck import *
+
 
 def jtraj(q0, q1, tv, qd0=None, qd1=None):
     """
@@ -44,82 +46,84 @@ def jtraj(q0, q1, tv, qd0=None, qd1=None):
 
     """
 
-    if isinstance(tv,(int,int32,float,float64)):
-        tscal = float(1)
-        t = mat(range(0,tv)).T/(tv-1.) # Normalized time from 0 -> 1
+    if isscalar(tv):
+        tscal = 1
+        t = np.array([range(0, tv)]).T/(tv-1) # Normalized time from 0 -> 1
     else:
-        tv = arg2array(tv);
-        tscal = float(max(tv))
-        t = mat(tv).T / tscal
+        tv = getvector(tv)
+        tscal = max(tv)
+        t = tv[np.newaxis].T / tscal
     
-    q0 = arg2array(q0)
-    q1 = arg2array(q1)
+    q0 = getvector(q0)
+    q1 = getvector(q1)
     
     if qd0 == None:
-        qd0 = zeros((shape(q0)))
+        qd0 = np.zeros(q0.shape)
     else:
-        qd0 = arg2array(qd0);
+        qd0 = getvector(qd0);
     if qd1 == None:
-        qd1 = zeros((shape(q1)))
+        qd1 = np.zeros(q1.shape)
     else:
-        qd1 = arg2array(qd1)
-
-    print qd0
-    print qd1
+        qd1 = getvector(qd1)
     
     # compute the polynomial coefficients
-    A = 6*(q1 - q0) - 3*(qd1 + qd0)*tscal
-    B = -15*(q1 - q0) + (8*qd0 + 7*qd1)*tscal
-    C = 10*(q1 - q0) - (6*qd0 + 4*qd1)*tscal
-    E = qd0*tscal # as the t vector has been normalized
-    F = q0
+    a = 6*(q1 - q0) - 3*(qd1 + qd0)*tscal
+    b = -15*(q1 - q0) + (8*qd0 + 7*qd1)*tscal
+    c = 10*(q1 - q0) - (6*qd0 + 4*qd1)*tscal
+    e = qd0*tscal # as the t vector has been normalized
+    f = q0
 
-    tt = concatenate((power(t,5),power(t,4),power(t,3),power(t,2),t,ones(shape(t))),1)
-    c = vstack((A, B, C, zeros(shape(A)), E, F))
-    qt = tt * c
+    tt = np.concatenate((np.power(t, 5),
+                         np.power(t, 4),
+                         np.power(t, 3),
+                         np.power(t, 2),
+                         t, np.ones(t.shape)),1)
+    c = np.vstack((a, b, c, np.zeros(a.shape), e, f))
+    qt = np.dot(tt, c)
 
-    # compute velocity
-    c = vstack((zeros(shape(A)),5*A,4*B,3*C,zeros(shape(A)),E))
-    qdt = tt * c / tscal
+    # # compute velocity
+    # c = vstack((zeros(shape(a)),5*a,4*b,3*c,zeros(shape(a)),e))
+    # qdt = tt * c / tscal
+    #
+    #
+    # # compute acceleration
+    # c = vstack((zeros(shape(a)),zeros(shape(a)),20*a,12*b,6*c,zeros(shape(a))))
+    # qddt = tt * c / (tscal**2)
+
+    # return qt,qdt,qddt
+    return qt
 
 
-    # compute acceleration
-    c = vstack((zeros(shape(A)),zeros(shape(A)),20*A,12*B,6*C,zeros(shape(A))))
-    qddt = tt * c / (tscal**2)
-
-    return qt,qdt,qddt
-
-
-def ctraj(t0, t1, r):
-    """
-    Compute a Cartesian trajectory between poses C{t0} and C{t1}.
-    The number of points is the length of the path distance vector C{r}.
-    Each element of C{r} gives the distance along the path, and the 
-    must be in the range [0 1].
-
-    If {r} is a scalar it is taken as the number of points, and the points 
-    are equally spaced between C{t0} and C{t1}.
-
-    The trajectory is a list of transform matrices.
-    
-    @type t0: homogeneous transform
-    @param t0: initial pose
-    @rtype: list of M{4x4} matrices
-    @return: Cartesian trajectory
-    @see: L{trinterp}, L{jtraj}
-    """
-
-    if isinstance(r,(int,int32,float,float64)):
-        i = mat(range(1,r+1))
-        r = (i-1.)/(r-1)
-    else:
-        r = arg2array(r);
-
-    if any(r>1) or any(r<0):
-        raise 'path position values (R) must 0<=R<=1'
-    traj = []
-    for s in r.T:
-        traj.append( T.trinterp(t0, t1, float(s)) )
-    return traj
+# def ctraj(t0, t1, r):
+#     """
+#     Compute a Cartesian trajectory between poses C{t0} and C{t1}.
+#     The number of points is the length of the path distance vector C{r}.
+#     Each element of C{r} gives the distance along the path, and the
+#     must be in the range [0 1].
+#
+#     If {r} is a scalar it is taken as the number of points, and the points
+#     are equally spaced between C{t0} and C{t1}.
+#
+#     The trajectory is a list of transform matrices.
+#
+#     @type t0: homogeneous transform
+#     @param t0: initial pose
+#     @rtype: list of M{4x4} matrices
+#     @return: Cartesian trajectory
+#     @see: L{trinterp}, L{jtraj}
+#     """
+#
+#     if isinstance(r,(int,int32,float,float64)):
+#         i = mat(range(1,r+1))
+#         r = (i-1.)/(r-1)
+#     else:
+#         r = arg2array(r);
+#
+#     if any(r>1) or any(r<0):
+#         raise 'path position values (R) must 0<=R<=1'
+#     traj = []
+#     for s in r.T:
+#         traj.append( T.trinterp(t0, t1, float(s)) )
+#     return traj
     
 

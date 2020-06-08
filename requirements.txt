@@ -1,6 +1,0 @@
-# file containing conda packages to install
-numpy
-sympy
-scipy
-notebook
-opencv
