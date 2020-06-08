@@ -9,7 +9,7 @@ def import_puma_560():
     :return: Puma560 robot
     :rtype: class:`graphics.graphics_robot.Robot`
     """
-    puma560 = Robot(
+    puma560 = GraphicalRobot(
         [
             create_link_0(),
             create_link_1(),
