@@ -132,6 +132,8 @@ class DefaultJoint:
                                                    diff_angle(y_prev, y_new), \
                                                    diff_angle(z_prev, z_new)
 
+        print("Prev: ", x_prev, y_prev, z_prev)
+        print("New: ", x_new, y_new, z_new)
         print("DIFF", round(degrees(angle_diff_x)), round(degrees(angle_diff_y)), round(degrees(angle_diff_z)), "\n")
         min_angle_diff = min(angle_diff_x, angle_diff_y, angle_diff_z)
         if min_angle_diff == angle_diff_x:
@@ -342,6 +344,7 @@ class RotationalJoint(DefaultJoint):
         current_angle = self.rotation_angle
         # Calculate amount to rotate the link
         angle_diff = wrap_to_pi(new_angle - current_angle)
+        print("angle_diff =", angle_diff)
         # Update the link
         self.rotate_around_joint_axis(angle_diff, self.rotation_axis)
         self.rotation_angle = new_angle
@@ -513,6 +516,7 @@ class GraphicalRobot:
             rot_axis = self.joints[link_num].get_axis_vector(self.joints[link_num].rotation_axis)
             # For each next joint, apply the same rotation
             for affected_joint in range(link_num + 1, self.num_joints):
+                print("updating joint", affected_joint)
                 self.joints[affected_joint].rotate_around_vector(new_angle, rot_axis)
             # Reposition joints to connect back to each other
             self.__position_joints()
@@ -570,19 +574,25 @@ class GraphicalRobot:
         # TODO degrees conversion
         # For each joint
         for joint in range(0, self.num_joints):
+            total_x = self.joints[joint].get_rotation_angle(x_axis_vector)
+            total_y = self.joints[joint].get_rotation_angle(y_axis_vector)
+            total_z = self.joints[joint].get_rotation_angle(z_axis_vector)
+
+            if is_degrees:
+                total_x = round(degrees(total_x), 3)
+                total_y = round(degrees(total_y), 3)
+                total_z = round(degrees(total_z), 3)
+
             # If revolute
             if self.joints[joint].get_joint_type() == "R":
+                local_angle = self.joints[joint].rotation_angle
+                if is_degrees:
+                    local_angle = round(degrees(local_angle), 3)
                 print("Joint", joint,
-                      "\n\tLocal angle =", self.joints[joint].rotation_angle,
-                      "\n\tTotal angles (x,y,z)= (",
-                      self.joints[joint].get_rotation_angle(x_axis_vector), ",",
-                      self.joints[joint].get_rotation_angle(y_axis_vector), ",",
-                      self.joints[joint].get_rotation_angle(z_axis_vector), ")", )
+                      "\n\tLocal angle =", local_angle,
+                      "\n\tTotal angles (x,y,z)= (", total_x, ",", total_y, ",", total_z, ")", )
             # If not a revolute
             else:
                 print("Joint", joint,
                       "\n\tLocal angle = <Not a rotating joint>",
-                      "\n\tTotal angles (x,y,z)= (",
-                      self.joints[joint].get_rotation_angle(x_axis_vector), ",",
-                      self.joints[joint].get_rotation_angle(y_axis_vector), ",",
-                      self.joints[joint].get_rotation_angle(z_axis_vector), ")", )
+                      "\n\tTotal angles (x,y,z)= (", total_x, ",", total_y, ",", total_z, ")", )
