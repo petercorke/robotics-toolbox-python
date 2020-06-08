@@ -123,7 +123,6 @@ class DefaultJoint:
 
         # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
         self.__graphic_obj.rotate(angle=angle_of_rotation, axis=axis_of_rotation, origin=self.__connect_from)
-
         # Update the vectors and reference frames
         self.__update_reference_frame()
         x_new, y_new, z_new = self.__x_vector, self.__y_vector, self.__z_vector
@@ -132,9 +131,7 @@ class DefaultJoint:
                                                    diff_angle(y_prev, y_new), \
                                                    diff_angle(z_prev, z_new)
 
-        print("Prev: ", x_prev, y_prev, z_prev)
-        print("New: ", x_new, y_new, z_new)
-        print("DIFF", round(degrees(angle_diff_x)), round(degrees(angle_diff_y)), round(degrees(angle_diff_z)), "\n")
+
         min_angle_diff = min(angle_diff_x, angle_diff_y, angle_diff_z)
         if min_angle_diff == angle_diff_x:
             self.__x_rotation = wrap_to_pi(self.__x_rotation + angle_of_rotation)
@@ -344,7 +341,6 @@ class RotationalJoint(DefaultJoint):
         current_angle = self.rotation_angle
         # Calculate amount to rotate the link
         angle_diff = wrap_to_pi(new_angle - current_angle)
-        print("angle_diff =", angle_diff)
         # Update the link
         self.rotate_around_joint_axis(angle_diff, self.rotation_axis)
         self.rotation_angle = new_angle
@@ -510,14 +506,16 @@ class GraphicalRobot:
             # If the angle already is as required, return
             if self.joints[link_num].rotation_angle == new_angle:
                 return
+            # Save prev angle to calculate rotation amount
+            prev_angle = self.joints[link_num].rotation_angle
             # Rotate
             self.joints[link_num].rotate_joint(new_angle)
             # Calculate the vector representation of the axis rotated around
             rot_axis = self.joints[link_num].get_axis_vector(self.joints[link_num].rotation_axis)
             # For each next joint, apply the same rotation
             for affected_joint in range(link_num + 1, self.num_joints):
-                print("updating joint", affected_joint)
-                self.joints[affected_joint].rotate_around_vector(new_angle, rot_axis)
+                rot_angle = new_angle - prev_angle
+                self.joints[affected_joint].rotate_around_vector(rot_angle, rot_axis)
             # Reposition joints to connect back to each other
             self.__position_joints()
         else:
@@ -537,16 +535,20 @@ class GraphicalRobot:
         for joint_num in range(0, self.num_joints):
             # If joint is a revolute
             if self.joints[joint_num].get_joint_type() == "R":
+                new_angle = new_angles[joint_num]
                 # If the angle is the already the same, return
-                if self.joints[joint_num].rotation_angle == new_angles[joint_num]:
+                if self.joints[joint_num].rotation_angle == new_angle:
                     continue
+                # Save prev angle to calculate rotation amount
+                prev_angle = self.joints[joint_num].rotation_angle
                 # Rotate
-                self.joints[joint_num].rotate_joint(new_angles[joint_num])
+                self.joints[joint_num].rotate_joint(new_angle)
                 # Calculate the vector representation of the axis that was rotated around
                 rot_axis = self.joints[joint_num].get_axis_vector(self.joints[joint_num].rotation_axis)
                 # For each successive joint, rotate it the same
                 for affected_joint in range(joint_num + 1, self.num_joints):
-                    self.joints[affected_joint].rotate_around_vector(new_angles[joint_num], rot_axis)
+                    rot_angle = new_angle - prev_angle
+                    self.joints[affected_joint].rotate_around_vector(rot_angle, rot_axis)
             else:
                 pass
         # Reposition all joints to connect to the previous segment
