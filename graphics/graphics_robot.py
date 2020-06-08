@@ -131,7 +131,9 @@ class DefaultJoint:
                                                    diff_angle(y_prev, y_new), \
                                                    diff_angle(z_prev, z_new)
 
-
+        # Works out which axis of rotation the local one closest represents
+        # (i.e. if facing (+x) straight up, world rotations closely resembles +z)
+        # axis of rotation will have the smallest (it's less affected by the rotation)
         min_angle_diff = min(angle_diff_x, angle_diff_y, angle_diff_z)
         if min_angle_diff == angle_diff_x:
             self.__x_rotation = wrap_to_pi(self.__x_rotation + angle_of_rotation)
@@ -251,7 +253,8 @@ class DefaultJoint:
         :return: Connect_to (toolpoint) position
         :rtype: class:`vpython.vector`
         """
-        return self.__connect_to
+        # Return new vector to avoid copy by reference
+        return vector(self.__connect_to)
 
     def get_rotation_angle(self, axis):
         """
@@ -262,14 +265,18 @@ class DefaultJoint:
         :return: Current angle of rotation with respect to world (includes rotation from previous joints)
         :rtype: float (radians)
         """
+        # Ensure copying value not reference
+        ans = 0
         if axis.equals(x_axis_vector):
-            return self.__x_rotation
+            ans = self.__x_rotation
         elif axis.equals(y_axis_vector):
-            return self.__y_rotation
+            ans = self.__y_rotation
         elif axis.equals(z_axis_vector):
-            return self.__z_rotation
+            ans = self.__z_rotation
         else:
-            return self.__y_rotation
+            ans = self.__y_rotation
+
+        return ans
 
     def get_axis_vector(self, axis):
         """
@@ -280,14 +287,15 @@ class DefaultJoint:
         :return: Current vector representation of the joints X, Y, or Z axis
         :rtype: class:`vpython.vector`
         """
+        # Return new vectors to avoid pass by reference
         if axis.equals(x_axis_vector):
-            return self.__x_vector
+            return vector(self.__x_vector)
         elif axis.equals(y_axis_vector):
-            return self.__y_vector
+            return vector(self.__y_vector)
         elif axis.equals(z_axis_vector):
-            return self.__z_vector
+            return vector(self.__z_vector)
         else:
-            return self.__y_vector
+            return vector(self.__y_vector)
 
     def get_joint_type(self):
         """
