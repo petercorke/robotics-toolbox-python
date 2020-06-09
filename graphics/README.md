@@ -14,6 +14,9 @@ Instructions on how to use the graphical section of the toolbox to come.
  * Error handling
    * Throw custom error messages
    * Handle vpython error messages
+ * STL
+   * Load Binary STL files
+   * Option to save a mesh to STL?
  * 2D Graphics
    * Will likely not be done in vpython (overkill)
 # 
