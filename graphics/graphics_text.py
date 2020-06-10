@@ -84,10 +84,12 @@ def draw_text(label_text, label_position):
     return the_label
 
 
-def create_grid_numbers(bool_camera_relative, num_squares):
+def create_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     """
     Draw the grid numbers along the xyz axes.
 
+    :param numbers_list:
+    :type numbers_list:
     :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
     :type bool_camera_relative: bool
     :param num_squares: How many unit squares to draw along the axis.
@@ -128,36 +130,87 @@ def create_grid_numbers(bool_camera_relative, num_squares):
     min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
     max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
 
-    nums = []
+    # If input is empty, append new, otherwise update current
+    append = len(numbers_list) == 0
+    # Dimensions don't change between updates, so indexing shall remain the same
+    index = 0
 
     # X plane
-    for x_pos in range(min_x_coord, max_x_coord + sign(max_x_coord)):
+    for x_pos in range(min_x_coord, max_x_coord + 1):
         # Draw the corresponding unit number at each x coordinate
-        nums.append(draw_text(str(x_pos), vector(x_pos + padding, y_origin + padding, z_origin)))
-    # Draw the axis label at either the positive or negative side
+        txt = str(x_pos)
+        pos = vector(x_pos + padding, y_origin + padding, z_origin)
+        if append:
+            numbers_list.append(draw_text(txt, pos))
+        else:
+            numbers_list[index].text = txt
+            numbers_list[index].pos = pos
+            index += 1
+    # Draw the axis label at either the positive or negative side away from center
+    # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
+    txt = "X"
     if (sign(camera_axes.x) * -1) > 0:
-        nums.append(draw_text("X", vector(max_x_coord + 1, y_origin, z_origin)))
+        pos = vector(max_x_coord + 1, y_origin, z_origin)
     else:
-        nums.append(draw_text("X", vector(min_x_coord - 1, y_origin, z_origin)))
+        pos = vector(min_x_coord - 1, y_origin, z_origin)
+    if append:
+        numbers_list.append(draw_text(txt, pos))
+    else:
+        numbers_list[index].text = txt
+        numbers_list[index].pos = pos
+        index += 1
 
     # Y plane
-    for y_pos in range(min_y_coord, max_y_coord + sign(max_y_coord)):
-        # Draw the corresponding unit number at each y coordinate
-        nums.append(draw_text(str(y_pos), vector(x_origin, y_pos + padding, z_origin + padding)))
-    # Draw the axis label at either the positive or negative side
+    for y_pos in range(min_y_coord, max_y_coord + 1):
+        # Draw the corresponding unit number at each x coordinate
+        txt = str(y_pos)
+        pos = vector(x_origin, y_pos + padding, z_origin + padding)
+        if append:
+            numbers_list.append(draw_text(txt, pos))
+        else:
+            numbers_list[index].text = txt
+            numbers_list[index].pos = pos
+            index += 1
+    # Draw the axis label at either the positive or negative side away from center
+    # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
+    txt = "Y"
     if (sign(camera_axes.y) * -1) > 0:
-        nums.append(draw_text("Y", vector(x_origin, max_y_coord + 1, z_origin)))
+        pos = vector(x_origin, max_y_coord + 1, z_origin)
     else:
-        nums.append(draw_text("Y", vector(x_origin, min_y_coord - 1, z_origin)))
+        pos = vector(x_origin, min_y_coord - 1, z_origin)
+    if append:
+        numbers_list.append(draw_text(txt, pos))
+    else:
+        numbers_list[index].text = txt
+        numbers_list[index].pos = pos
+        index += 1
 
     # Z plane
-    for z_pos in range(min_z_coord, max_z_coord + sign(max_z_coord)):
-        # Draw the corresponding unit number at each z coordinate
-        nums.append(draw_text(str(z_pos), vector(x_origin, y_origin - padding, z_pos + padding)))
-    # Draw the axis label at either the positive or negative side
+    for z_pos in range(min_z_coord, max_z_coord + 1):
+        # Draw the corresponding unit number at each x coordinate
+        txt = str(z_pos)
+        pos = vector(x_origin, y_origin - padding, z_pos + padding)
+        if append:
+            numbers_list.append(draw_text(txt, pos))
+        else:
+            numbers_list[index].text = txt
+            numbers_list[index].pos = pos
+            index += 1
+    # Draw the axis label at either the positive or negative side away from center
+    # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
+    txt = "Z"
     if (sign(camera_axes.z) * -1) > 0:
-        nums.append(draw_text("Z", vector(x_origin, y_origin, max_z_coord + 1)))
+        pos = vector(x_origin, y_origin, max_z_coord + 1)
     else:
-        nums.append(draw_text("Z", vector(x_origin, y_origin, min_z_coord - 1)))
+        pos = vector(x_origin, y_origin, min_z_coord - 1)
+    if append:
+        numbers_list.append(draw_text(txt, pos))
+    else:
+        numbers_list[index].text = txt
+        numbers_list[index].pos = pos
+        index += 1
 
-    return nums
+    if append:
+        print("Append set", len(numbers_list), "values. index = ", index)
+    else:
+        print("Reapply set", len(numbers_list), "values. index = ", index)

@@ -10,7 +10,7 @@ class GraphicsGrid:
         self.camera_pos = scene.camera.pos
         self.camera_axes = scene.camera.axis
         # Initialise a grid object
-        self.grid_object = None
+        self.grid_object = [None, []]
 
     def draw_grid(self):
         """
@@ -22,9 +22,10 @@ class GraphicsGrid:
         relative_cam = True  # Whether the grid follows the camera rotation and movement
 
         the_grid = self.create_grid(relative_cam, num_squares)
-        the_numbers = create_grid_numbers(relative_cam, num_squares)
+        self.grid_object[0] = the_grid
 
-        self.grid_object = [the_grid, the_numbers]
+        # Update the labels instead of recreating them
+        create_grid_numbers(self.grid_object[1], relative_cam, num_squares)
 
     def create_grid(self, bool_camera_relative, num_squares):
         """
@@ -145,7 +146,7 @@ class GraphicsGrid:
 
             # Delete old grid
             self.set_visibility(False)
-            self.grid_object = None
+            self.grid_object[0] = None
 
             # Save new grid
             self.draw_grid()
@@ -163,8 +164,8 @@ class GraphicsGrid:
         """
         # If no grid, turn the objects invisible
         self.grid_object[0].visible = is_visible
-        for number in self.grid_object[1]:
-            number.visible = is_visible
+        #for number in self.grid_object[1]:
+        #    number.visible = is_visible
 
 
 def create_line(pos1, pos2):
