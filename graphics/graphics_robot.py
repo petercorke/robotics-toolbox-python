@@ -1,6 +1,7 @@
 from graphics.graphics_canvas import *
 from graphics.common_functions import *
 
+
 class DefaultJoint:
     """
     This class forms a base for all the different types of joints
@@ -266,15 +267,15 @@ class DefaultJoint:
         :rtype: float (radians)
         """
         # Ensure copying value not reference
-        ans = 0
+        ans = 0.0
         if axis.equals(x_axis_vector):
-            ans = self.__x_rotation
+            ans += self.__x_rotation
         elif axis.equals(y_axis_vector):
-            ans = self.__y_rotation
+            ans += self.__y_rotation
         elif axis.equals(z_axis_vector):
-            ans = self.__z_rotation
+            ans += self.__z_rotation
         else:
-            ans = self.__y_rotation
+            ans += self.__y_rotation
 
         return ans
 

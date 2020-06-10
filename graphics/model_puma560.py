@@ -7,7 +7,7 @@ def import_puma_560():
     Create a Robot class object based on the puma560 robot
 
     :return: Puma560 robot
-    :rtype: class:`graphics.graphics_robot.Robot`
+    :rtype: class:`graphics.graphics_robot.GraphicalRobot`
     """
     puma560 = GraphicalRobot(
         [

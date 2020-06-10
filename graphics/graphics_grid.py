@@ -123,6 +123,10 @@ class GraphicsGrid:
         # Combine all into one object
         grid = compound([xy_plane, xz_plane, yz_plane])
 
+        # TODO
+        #  Instead of creating a new grid everytime, reuse old, but rotate. e.g. (+) inc in x-axis pos = (+) rot about z
+        #  Other option is to not do compound, but update pos of each of the planes. (might be easier)
+
         return grid
 
     def update_grid(self):
