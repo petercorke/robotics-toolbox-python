@@ -88,14 +88,12 @@ def create_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     """
     Draw the grid numbers along the xyz axes.
 
-    :param numbers_list:
-    :type numbers_list:
+    :param numbers_list: A reference to a list of the labels that gets updated.
+    :type numbers_list: class:`vpython.label` list
     :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
     :type bool_camera_relative: bool
     :param num_squares: How many unit squares to draw along the axis.
     :type num_squares: int
-    :return: A list of labels
-    :rtype: class:`vpython.label` list
     """
 
     # Initial conditions
@@ -209,8 +207,3 @@ def create_grid_numbers(numbers_list, bool_camera_relative, num_squares):
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
         index += 1
-
-    if append:
-        print("Append set", len(numbers_list), "values. index = ", index)
-    else:
-        print("Reapply set", len(numbers_list), "values. index = ", index)
