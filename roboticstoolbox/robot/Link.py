@@ -165,7 +165,7 @@ class Link(list):
             # format input into argparse
             argstr = ""
             known = ['theta', 'a', 'd', 'alpha', 'G', 'B', 'Tc', 'Jm', 'I', 'm', 'r',
-                     'offset', 'qlim', 'type', 'convention', 'sym', 'flip']
+                     'offset', 'qlim', 'type', 'convention', 'sym', 'flip', 'help']
             for arg in argv:
                 if arg in known:
                     argstr += "--" + arg + " "
@@ -291,10 +291,11 @@ class Link(list):
                     self.B = 0
                     self.Tc = [0, 0]
                     self.qlim = 0
-                if argv[1] == 'modified':
-                    self.mdh = 1
-                else:
-                    self.mdh = 0
+
+                self.mdh = 0
+                if len(argv) == 2:
+                    if argv[1] == 'modified':
+                        self.mdh == 1
 
     def __repr__(self):
 

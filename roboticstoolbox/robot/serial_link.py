@@ -108,6 +108,8 @@ class SerialLink:
         :return: a list of 6 joint angles.
         """
         assert T.shape == (4, 4)
+        if type(T) == SE3:
+            T = T.A
         bounds = [(link.qlim[0], link.qlim[1]) for link in self]
         reach = 0
         for link in self:
