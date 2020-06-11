@@ -92,9 +92,12 @@ class DefaultJoint:
             rotation_axis = self.__z_vector
             self.__z_rotation = wrap_to_pi(self.__z_rotation + angle_of_rotation)
         else:
+            error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
+                        "or z_axis_vector ({3}). Use rotate_around_vector for rotation about an arbitrary vector."
+            raise ValueError(error_str.format(axis_of_rotation), x_axis_vector, y_axis_vector, z_axis_vector)
             # Default to the y-axis
-            rotation_axis = self.__y_vector
-            self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
+            # rotation_axis = self.__y_vector
+            # self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
 
         # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
         self.__graphic_obj.rotate(angle=angle_of_rotation, axis=rotation_axis, origin=self.__connect_from)
@@ -333,8 +336,6 @@ class RotationalJoint(DefaultJoint):
                  graphic_obj=None):
         # Call super init function
         super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
-        # TODO
-        #  sanity check input
         self.rotation_axis = rotation_axis
         self.rotation_angle = radians(0)
 
@@ -447,9 +448,6 @@ class Gripper(DefaultJoint):
 
 
 class GraphicalRobot:
-    # TODO:
-    #  Have functions to update links,
-    #  take in rotation, translation, etc, params
     """
     The GraphicalRobot class encapsulates all of the different joint types to easily control the robot arm.
 
@@ -458,7 +456,8 @@ class GraphicalRobot:
     """
 
     def __init__(self, joints):
-        # TODO sanity check input
+        if len(joints) == 0:
+            raise ValueError("Robot was given", len(joints), "joints. Must have at least 1.")
         self.joints = joints
         self.num_joints = len(joints)
         self.is_shown = True
@@ -510,6 +509,10 @@ class GraphicalRobot:
         :param new_angle: The required angle to set the arm rotated towards
         :type new_angle: float (radians)
         """
+        if (link_num < 0) or (link_num >= self.num_joints):
+            error_str = "link number given ({0}) is not between range of 0 (inclusive) and {1} (exclusive)"
+            raise IndexError(error_str.format(link_num, self.num_joints))
+
         # If the joint is a revolute
         if self.joints[link_num].get_joint_type() == "R":
             # If the angle already is as required, return
@@ -528,18 +531,22 @@ class GraphicalRobot:
             # Reposition joints to connect back to each other
             self.__position_joints()
         else:
-            # TODO error handling
-            pass
+            error_str = "Given joint {0} is not a revolute joint. It is a {1} joint"
+            raise ValueError(error_str.format(link_num, self.joints[link_num].get_joint_type()))
 
     def set_all_joint_angles(self, new_angles):
         """
         Set all of the angles for each joint in the robot.
 
-        :param new_angles: List of new angles (radians) to set each joint to. Must have the same length as number of joints in
-        robot arm, even if the joints aren't revolute
+        :param new_angles: List of new angles (radians) to set each joint to.
+        Must have the same length as number of joints in robot arm, even if the joints aren't revolute
         :type new_angles: float list (radians)
         """
-        # TODO error handling (Out of bounds, not revolute)
+        # Raise error if lengths don't match
+        if len(new_angles) != len(self.joints):
+            error_str = "Length of given angles ({0}) does not match number of joints ({1})."
+            raise IndexError(error_str.format(len(new_angles), len(self.joints)))
+
         # For each joint
         for joint_num in range(0, self.num_joints):
             # If joint is a revolute
@@ -559,7 +566,8 @@ class GraphicalRobot:
                     rot_angle = new_angle - prev_angle
                     self.joints[affected_joint].rotate_around_vector(rot_angle, rot_axis)
             else:
-                pass
+                # Skip over any non-revolute joints. Print message saying so
+                print("Joint", joint_num, "is not a revolute. Skipping...")
         # Reposition all joints to connect to the previous segment
         self.__position_joints()
 
@@ -570,7 +578,6 @@ class GraphicalRobot:
         :param position: 3D position to move the base's origin to
         :type position: class:`vpython.vector`
         """
-        # TODO sanity check input
         # Move the base, then update all of the joints
         self.joints[0].update_position(position)
         self.__position_joints()
@@ -582,7 +589,6 @@ class GraphicalRobot:
         :param is_degrees: Whether or not to display angles as degrees or radians (default)
         :type is_degrees: bool, optional
         """
-        # TODO degrees conversion
         # For each joint
         for joint in range(0, self.num_joints):
             total_x = self.joints[joint].get_rotation_angle(x_axis_vector)
