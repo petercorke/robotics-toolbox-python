@@ -6,13 +6,14 @@ Instructions on how to use the graphical section of the toolbox to come.
  * Robot Joints
    * Rotational Joint
    * Prismatic Joint
-   * Static Joint
+   * ~~Static Joint~~
    * Gripper Joint
  * Grid Updating
    * On rotation/move finish
-   * Don't redraw labels, move/update them
+   * ~~Don't redraw labels, move/update them~~
+   * Don't redraw the grid, move/update them
  * Error handling
-   * Throw custom error messages
+   * ~~Throw custom error messages~~
    * Handle vpython error messages
  * STL
    * Load Binary STL files
