@@ -127,3 +127,27 @@ class SerialLink:
             return sol.x * 180 / pi
         else:
             return sol.x
+
+
+
+    def plot(self, jointconfig, unit='rad'):
+
+        # if type(jointconfig) == list:
+        #     jointconfig = argcheck.getvector(jointconfig)
+        # if unit == 'deg':
+        #     jointconfig = jointconfig * pi / 180
+        # # if no trajectory joint config just call fkine for pose
+        # if jointconfig.size == self.length:
+        #     endpose = self.fkine(jointconfig, unit, alltout=True)
+        # else:
+        #     assert jointconfig.shape[1] == self.length, "joinconfig must have {self.length} columns"
+        #     t = list(range(0, jointconfig.shape[0]))
+        #
+        #     for j in range(jointconfig.shape[1]):
+        #         jset = jointconfig[:, j]
+        #         for k in range(jointconfig.shape[0]):
+        #             row = jointconfig[k, :]
+        #             tt = SE3(self.base)
+        #             for i in range(self.length):
+        #                 tt = tt * self.links[i].A(row[i])
+        #             t[k] = tt * SE3(self.tool)

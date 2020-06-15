@@ -226,15 +226,15 @@ class Link(list):
 
                 if opt.theta != 0:
                     # constant value of theta means it must be prismatic
-                    self.theta = opt.theta
                     self.jointtype = 'P'
                     print('Prismatic joint, theta =', opt.theta)
                 if opt.d != 0:
                     # constant value of d means it must be revolute
-                    self.d = opt.d
                     self.jointtype = 'R'
                     print('Revolute joint, d =', opt.d)
 
+                self.theta = opt.theta
+                self.d = opt.d
                 self.a = opt.a
                 self.alpha = opt.alpha
 
