@@ -120,7 +120,12 @@ def test_rotational_link():
 
 def test_graphical_robot():
     canvas_grid = init_canvas()
-    x = GraphicalRobot([create_link_0()])
+
+    x = GraphicalRobot([
+        RotationalJoint(vector(0, 0, 0), vector(1, 1, 1))
+    ])
+
+    x.set_joint_angle(0, radians(20))
 
 
 def test_place_joint():
