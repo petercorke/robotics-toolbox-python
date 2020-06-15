@@ -1,6 +1,9 @@
 from graphics.graphics_canvas import *
 from graphics.common_functions import *
 
+# TODO
+#  update non-stl obj creation (position wrong, ref wrong)
+
 
 class DefaultJoint:
     """
@@ -50,8 +53,8 @@ class DefaultJoint:
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
-        self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
         self.__update_reference_frame()
+        self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
 
     def update_position(self, new_pos):
         """
@@ -241,6 +244,12 @@ class DefaultJoint:
                               up=z_axis_vector)
             # Set the boxes new origin
             graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=x_axis_vector)
+            # Set the boxes x and y vector first before applying the Z axis
+            # Otherwise rotates to the new vector from the original point (unintentionally rotating around it's z axis)
+            graphic_obj.axis = vector((self.__connect_to.x - self.__connect_from.x),
+                                      (self.__connect_to.y - self.__connect_from.y),
+                                      0)
+            graphic_obj.axis.z = (self.__connect_to.z - self.__connect_from.z)
             return graphic_obj
         else:
             # TODO When texture application available, put it here
