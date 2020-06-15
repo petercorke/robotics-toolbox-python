@@ -14,6 +14,9 @@ import unittest
 
 class TestET(unittest.TestCase):
 
+    def test_fail(self):
+        self.assertRaises(ValueError, rp.ET.TRx)
+
     def test_TRx(self):
         fl = 1.543
 
