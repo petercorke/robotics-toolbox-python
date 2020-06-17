@@ -1,6 +1,8 @@
 from vpython import *
 from graphics.common_functions import *
 
+
+# TODO maybe change input to include extension? Or have entire path as input?
 def import_object_from_stl(filename):
     """
     Import an stl object and convert it into a usable vpython object.
