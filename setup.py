@@ -27,6 +27,6 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['numpy', 'spatialmath-python']
+    install_requires=['numpy', 'spatialmath-python', 'vpython']
 
 )
