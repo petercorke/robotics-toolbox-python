@@ -4,6 +4,7 @@ import numpy as np
 from roboticstoolbox.robot.Link import *
 from spatialmath.pose3d import *
 from scipy.optimize import minimize
+from graphics.graphics_test_features import *
 
 class SerialLink:
 
@@ -95,7 +96,7 @@ class SerialLink:
                 t[k] = tt * SE3(self.tool)
 
         if alltout:
-            return t, allt
+            return allt
         else:
             return t
 
@@ -128,26 +129,24 @@ class SerialLink:
         else:
             return sol.x
 
-
-
     def plot(self, jointconfig, unit='rad'):
 
-        # if type(jointconfig) == list:
-        #     jointconfig = argcheck.getvector(jointconfig)
-        # if unit == 'deg':
-        #     jointconfig = jointconfig * pi / 180
-        # # if no trajectory joint config just call fkine for pose
-        # if jointconfig.size == self.length:
-        #     endpose = self.fkine(jointconfig, unit, alltout=True)
-        # else:
-        #     assert jointconfig.shape[1] == self.length, "joinconfig must have {self.length} columns"
-        #     t = list(range(0, jointconfig.shape[0]))
-        #
-        #     for j in range(jointconfig.shape[1]):
-        #         jset = jointconfig[:, j]
-        #         for k in range(jointconfig.shape[0]):
-        #             row = jointconfig[k, :]
-        #             tt = SE3(self.base)
-        #             for i in range(self.length):
-        #                 tt = tt * self.links[i].A(row[i])
-        #             t[k] = tt * SE3(self.tool)
+        if type(jointconfig) == list:
+            jointconfig = argcheck.getvector(jointconfig)
+        if unit == 'deg':
+            jointconfig = jointconfig * pi / 180
+        if jointconfig.size == self.length:
+            poses = self.fkine(jointconfig, unit, alltout=True)
+            t = list(range(len(poses)))
+            for i in range(len(poses)):
+                t[i] = poses[i].t
+            # add the base
+            t.insert(0, SE3(self.base).t)
+            grjoints = list(range(len(t)))
+
+            canvas_grid = init_canvas()
+
+            for i in range(1, len(t)):
+                grjoints[i] = RotationalJoint(vector(t[i-1][0], t[i-1][1], t[i-1][2]), vector(t[i][0], t[i][1], t[i][2]))
+
+            x = GraphicalRobot(grjoints)
