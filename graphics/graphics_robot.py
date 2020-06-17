@@ -1,9 +1,6 @@
 from graphics.graphics_canvas import *
 from graphics.common_functions import *
 
-# TODO
-#  update non-stl obj creation (position wrong, ref wrong)
-
 
 class DefaultJoint:
     """

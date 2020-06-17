@@ -168,6 +168,7 @@ class GraphicsGrid:
         """
         # If no grid, turn the objects invisible
         self.grid_object[0].visible = is_visible
+        # TODO this will need to be uncommented once grid_object reuse is done
         #for number in self.grid_object[1]:
         #    number.visible = is_visible
 

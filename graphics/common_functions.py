@@ -5,6 +5,7 @@ y_axis_vector = vector(0, 1, 0)
 z_axis_vector = vector(0, 0, 1)
 
 
+# TODO handle radians (needed more than degrees)
 def wrap_to_pi(angle):
     angle = angle % radians(360)
     if angle > radians(180):
