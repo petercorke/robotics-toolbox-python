@@ -14,7 +14,7 @@ This is a Python implementation of the [Robotics Toolbox for MATLAB<sup>&reg;</s
 
 * GitHub repository [https://github.com/petercorke/robotics-toolbox-python](https://github.com/petercorke/robotics-toolbox-python)      
 * Documentation [https://petercorke.github.io/robotics-toolbox-python](https://petercorke.github.io/robotics-toolbox-python)
-* Dependencies: `spatialmath-python`, `numpy`
+* Dependencies: `spatialmath-python`, `numpy`, `vpython`
 
 # Getting going
 
