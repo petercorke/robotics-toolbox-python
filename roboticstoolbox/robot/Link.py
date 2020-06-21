@@ -1,10 +1,6 @@
 """
 Link object.
-Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
-Based on original Robotics Toolbox for Matlab code by Peter Corke.
-Permission to use and copy is granted provided that acknowledgement of
-the authors is made.
-@author: Luis Fernando Lara Tobar and Peter Corke
+Python implementation by Samuel Drew
 """
 
 from numpy import *
@@ -19,8 +15,8 @@ class Link(list):
 
     def __init__(self, *argv):
         """
-        %Link Create robot link object
-        %
+        Link Create robot link object
+
         % This the class constructor which has several call signatures.
         %
         % L = Link() is a Link object with default parameters.

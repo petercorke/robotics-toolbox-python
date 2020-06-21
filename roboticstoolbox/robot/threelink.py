@@ -1,7 +1,7 @@
 """
-Defines the object 'robot' in the current workspace
+Defines the object 'tl' in the current workspace
 
-Also define the vector q = [0 0 0] which corresponds to the zero joint
+Also define the vector qz = [0 0 0] which corresponds to the zero joint
 angle configuration.
 
 @author: Luis Fernando Lara Tobar and Peter Corke
