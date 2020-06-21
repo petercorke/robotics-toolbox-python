@@ -2,11 +2,11 @@
 These functions are not ordinary testing functions.
 These tests cannot be automated, and must be manually validated.
 
-To execute, import this file into the console.
+To execute, import all from this file into the console. "from graphics.graphics_test_features import *"
 Next select which test you which to run, and call the function.
 A canvas will be created and display the respective graphics.
 Verify the output is as expected.
-Then close the browser window and run a different function. (To clear the graphics. Currently, no clearing implemented)
+Then close the browser window and run a different function. (Help clear graphics. Currently, no clearing implemented)
 """
 
 from graphics.model_puma560 import *
