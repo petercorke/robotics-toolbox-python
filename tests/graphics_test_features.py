@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 These functions are not ordinary testing functions.
 These tests cannot be automated, and must be manually validated.
@@ -145,3 +146,7 @@ def test_animate_joints():
 
 def test_import_textures():
     pass
+
+if __name__ == "__main__":
+    # run the Puma demo by default
+    test_puma560_angle_change()
