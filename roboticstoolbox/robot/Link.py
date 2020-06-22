@@ -1,10 +1,6 @@
 """
 Link object.
-Python implementation by: Luis Fernando Lara Tobar and Peter Corke.
-Based on original Robotics Toolbox for Matlab code by Peter Corke.
-Permission to use and copy is granted provided that acknowledgement of
-the authors is made.
-@author: Luis Fernando Lara Tobar and Peter Corke
+Python implementation by Samuel Drew
 """
 
 from numpy import *
@@ -19,8 +15,8 @@ class Link(list):
 
     def __init__(self, *argv):
         """
-        %Link Create robot link object
-        %
+        Link Create robot link object
+
         % This the class constructor which has several call signatures.
         %
         % L = Link() is a Link object with default parameters.
@@ -165,7 +161,7 @@ class Link(list):
             # format input into argparse
             argstr = ""
             known = ['theta', 'a', 'd', 'alpha', 'G', 'B', 'Tc', 'Jm', 'I', 'm', 'r',
-                     'offset', 'qlim', 'type', 'convention', 'sym', 'flip']
+                     'offset', 'qlim', 'type', 'convention', 'sym', 'flip', 'help']
             for arg in argv:
                 if arg in known:
                     argstr += "--" + arg + " "
@@ -226,15 +222,15 @@ class Link(list):
 
                 if opt.theta != 0:
                     # constant value of theta means it must be prismatic
-                    self.theta = opt.theta
                     self.jointtype = 'P'
                     print('Prismatic joint, theta =', opt.theta)
                 if opt.d != 0:
                     # constant value of d means it must be revolute
-                    self.d = opt.d
                     self.jointtype = 'R'
                     print('Revolute joint, d =', opt.d)
 
+                self.theta = opt.theta
+                self.d = opt.d
                 self.a = opt.a
                 self.alpha = opt.alpha
 
@@ -291,10 +287,11 @@ class Link(list):
                     self.B = 0
                     self.Tc = [0, 0]
                     self.qlim = 0
-                if argv[1] == 'modified':
-                    self.mdh = 1
-                else:
-                    self.mdh = 0
+
+                self.mdh = 0
+                if len(argv) == 2:
+                    if argv[1] == 'modified':
+                        self.mdh == 1
 
     def __repr__(self):
 

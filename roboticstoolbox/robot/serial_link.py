@@ -4,6 +4,7 @@ import numpy as np
 from roboticstoolbox.robot.Link import *
 from spatialmath.pose3d import *
 from scipy.optimize import minimize
+from graphics.graphics_test_features import *
 
 class SerialLink:
 
@@ -95,7 +96,7 @@ class SerialLink:
                 t[k] = tt * SE3(self.tool)
 
         if alltout:
-            return t, allt
+            return allt
         else:
             return t
 
@@ -108,6 +109,8 @@ class SerialLink:
         :return: a list of 6 joint angles.
         """
         assert T.shape == (4, 4)
+        if type(T) == SE3:
+            T = T.A
         bounds = [(link.qlim[0], link.qlim[1]) for link in self]
         reach = 0
         for link in self:
@@ -125,3 +128,32 @@ class SerialLink:
             return sol.x * 180 / pi
         else:
             return sol.x
+
+    def plot(self, jointconfig, unit='rad'):
+        """
+        Creates a 3D plot of the robot in your web browser
+        :param jointconfig: takes an array or list of joint angles
+        :param unit: unit of angles. radians if not defined
+        :return: a vpython robot object.
+        """
+        if type(jointconfig) == list:
+            jointconfig = argcheck.getvector(jointconfig)
+        if unit == 'deg':
+            jointconfig = jointconfig * pi / 180
+        if jointconfig.size == self.length:
+            poses = self.fkine(jointconfig, unit, alltout=True)
+            t = list(range(len(poses)))
+            for i in range(len(poses)):
+                t[i] = poses[i].t
+            # add the base
+            t.insert(0, SE3(self.base).t)
+            grjoints = list(range(len(t)-1))
+
+            canvas_grid = init_canvas()
+
+            for i in range(1, len(t)):
+                grjoints[i-1] = RotationalJoint(vector(t[i-1][0], t[i-1][1], t[i-1][2]), vector(t[i][0], t[i][1], t[i][2]))
+            print(grjoints)
+            x = GraphicalRobot(grjoints)
+
+            return x
