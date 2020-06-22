@@ -21,13 +21,13 @@ class GraphicsGrid:
         num_squares = 10  # Length of the grid in each direction (in units)
         relative_cam = True  # Whether the grid follows the camera rotation and movement
 
-        the_grid = self.create_grid(relative_cam, num_squares)
+        the_grid = self.__create_grid(relative_cam, num_squares)
         self.grid_object[0] = the_grid
 
         # Update the labels instead of recreating them
         create_grid_numbers(self.grid_object[1], relative_cam, num_squares)
 
-    def create_grid(self, bool_camera_relative, num_squares):
+    def __create_grid(self, bool_camera_relative, num_squares):
         """
         Draw a grid along each 3D plane, that is closest to the camera.
 
@@ -171,6 +171,30 @@ class GraphicsGrid:
         # TODO this will need to be uncommented once grid_object reuse is done
         #for number in self.grid_object[1]:
         #    number.visible = is_visible
+        
+    def clear_scene(self):
+        """
+        Clear the canvas of all objects (keeping the grid)
+
+        Due to how VPython operates, there is no 'deletion' of objects directly.
+        To 'delete' objects, first they must be rendered invisible.
+
+        Then: if a new object with the same variable name is used, the previous memory will be freed.
+        Or: del variable_name will free its memory.
+        If the object wasn't invisible, it would remain visible in the scene.
+
+        Since the scene doesnt track variable names, the best way to clear the scene is to render all objects invisible,
+        and have the user assume they are all deleted. However, all objects can be redisplayed by setting the visibility
+        """
+        # Save current grid visibility
+        grid_visibility = self.grid_object[0].visible
+
+        # Set all objects invisible
+        for scene_object in scene.objects:
+            scene_object.visible = False
+
+        # Set grid visibility to previous
+        self.set_visibility(grid_visibility)
 
 
 def create_line(pos1, pos2):

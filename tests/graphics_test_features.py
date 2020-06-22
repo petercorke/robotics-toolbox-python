@@ -2,7 +2,7 @@
 These functions are not ordinary testing functions.
 These tests cannot be automated, and must be manually validated.
 
-To execute, import all from this file into the console. "from graphics.graphics_test_features import *"
+To execute, import all from this file into the console. "from tests.graphics_test_features import *"
 Next select which test you which to run, and call the function.
 A canvas will be created and display the respective graphics.
 Verify the output is as expected.
@@ -137,6 +137,15 @@ def test_puma560_angle_change():
 
     print("Final Angles")
     puma560.print_joint_angles(True)
+
+
+def test_clear_scene():
+    the_grid = init_canvas()
+    puma560 = import_puma_560()
+    puma560.move_base(vector(1, 1, 0))
+    sleep(2)
+    the_grid.clear_scene()
+    del puma560
 
 
 def test_animate_joints():
