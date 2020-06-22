@@ -39,7 +39,6 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     convert_grid_to_z_up()
 
     graphics_grid = GraphicsGrid()
-    graphics_grid.draw_grid()
     if not grid:
         graphics_grid.set_visibility(False)
 
