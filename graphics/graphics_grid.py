@@ -17,6 +17,7 @@ class GraphicsGrid:
         """
         Initialise the grid along the x, y, z axes.
         """
+        # TODO base off user input?
         num_squares = 10  # Length of the grid in each direction (in units)
         relative_cam = True  # Whether the grid follows the camera rotation and movement
 
@@ -125,6 +126,14 @@ class GraphicsGrid:
         return grid
 
     def __move_grid_objects(self, bool_camera_relative, num_squares):
+        """
+        Reusing the current assets, move the planes to the new origins.
+
+        :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
+        :type bool_camera_relative: bool
+        :param num_squares: How many unit squares to draw along the axis.
+        :type num_squares: int
+        """
         camera_axes = self.camera_axes
         # Locate centre of axes
         if bool_camera_relative:
@@ -155,6 +164,7 @@ class GraphicsGrid:
         min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
         max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
 
+        # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
         x_middle = (max_x_coord + min_x_coord) / 2
         y_middle = (max_y_coord + min_y_coord) / 2
         z_middle = (max_z_coord + min_z_coord) / 2
@@ -180,9 +190,7 @@ class GraphicsGrid:
     def update_grid(self):
         """
         Update the grid axes and numbers if the camera position/rotation has changed.
-
         """
-
         # Obtain the new camera settings
         new_camera_pos = scene.camera.pos
         new_camera_axes = scene.camera.axis
@@ -197,6 +205,7 @@ class GraphicsGrid:
             self.camera_axes = new_camera_axes
 
             # Update grid
+            # TODO base off user input?
             num_squares = 10  # Length of the grid in each direction (in units)
             relative_cam = True  # Whether the grid follows the camera rotation and movement
             self.__move_grid_objects(relative_cam, num_squares)
