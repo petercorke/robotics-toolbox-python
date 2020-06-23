@@ -10,6 +10,9 @@ class GraphicsGrid:
         self.camera_pos = scene.camera.pos
         self.camera_axes = scene.camera.axis
         # Initialise a grid object
+        # grid_object[0] will always be the 3 plane graphics. [XY, XZ, YZ] (alphabetical in order and connection)
+        # grid_object[1] will always be the labels. There is always a certain number of indices.
+        # Order is [x-plane numbers, "X", y-plane numbers, "Y", z-plane numbers, "Z"]
         self.grid_object = [[], []]
         self.__init_grid()
 

@@ -1,5 +1,8 @@
 from vpython import radians, vector
 
+"""
+global variables that can be used to easily reference X, Y, and Z axes directions.
+"""
 x_axis_vector = vector(1, 0, 0)
 y_axis_vector = vector(0, 1, 0)
 z_axis_vector = vector(0, 0, 1)
@@ -13,6 +16,7 @@ def wrap_to_pi(angle_type, angle):
     :type angle_type: `str`
     :param angle: The angle to wrap
     :type angle: `float`
+    :raises ValueError: Throws the error if the given string is not "deg" or "rad"
     :return: The wrapped angle
     :rtype: `float`
     """

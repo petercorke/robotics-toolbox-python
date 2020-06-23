@@ -79,6 +79,7 @@ class DefaultJoint:
         :type angle_of_rotation: float (radians)
         :param axis_of_rotation: X, Y, or Z axis to apply around the objects specific X, Y, or Z axes
         :type axis_of_rotation: class:`vpython.vector`
+        :raise ValueError: The given axis_of_rotation must be one of the default X, Y, Z vectors (e.g. x_axis_vector)
         """
         # Determine the axis of rotation based on the given joint axis direction
         # Then add the rotation amount to the axis counter
@@ -274,6 +275,7 @@ class DefaultJoint:
         :type axis: class:`vpython.vector`
         :return: Current angle of rotation with respect to world (includes rotation from previous joints)
         :rtype: float (radians)
+        :raise ValueError: The given axis_of_rotation must be one of the default X, Y, Z vectors (e.g. x_axis_vector)
         """
         # Ensure copying value not reference
         ans = 0.0
@@ -284,7 +286,9 @@ class DefaultJoint:
         elif axis.equals(z_axis_vector):
             ans += self.__z_rotation
         else:
-            ans += self.__y_rotation
+            error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
+                        "or z_axis_vector ({3})."
+            raise ValueError(error_str.format(axis), x_axis_vector, y_axis_vector, z_axis_vector)
 
         return ans
 
@@ -296,6 +300,7 @@ class DefaultJoint:
         :type axis: class:`vpython.vector`
         :return: Current vector representation of the joints X, Y, or Z axis
         :rtype: class:`vpython.vector`
+        :raise ValueError: The given axis_of_rotation must be one of the default X, Y, Z vectors (e.g. x_axis_vector)
         """
         # Return new vectors to avoid pass by reference
         if axis.equals(x_axis_vector):
@@ -305,7 +310,9 @@ class DefaultJoint:
         elif axis.equals(z_axis_vector):
             return vector(self.__z_vector)
         else:
-            return vector(self.__y_vector)
+            error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
+                        "or z_axis_vector ({3})."
+            raise ValueError(error_str.format(axis), x_axis_vector, y_axis_vector, z_axis_vector)
 
     def get_joint_type(self):
         """
@@ -459,6 +466,7 @@ class GraphicalRobot:
 
     :param joints: A list of the joints in order from base (0) to gripper (end), or other types.
     :type joints: list
+    :raise ValueError: The given length of joints must not be 0
     """
 
     def __init__(self, joints):
@@ -514,6 +522,8 @@ class GraphicalRobot:
         :type link_num: int
         :param new_angle: The required angle to set the arm rotated towards
         :type new_angle: float (radians)
+        :raise IndexError: Link index must be between 0 (inclusive) and number of joints (exclusive)
+        :raise TypeError: The joint index chosen must be indexing a revolute joint
         """
         if (link_num < 0) or (link_num >= self.num_joints):
             error_str = "link number given ({0}) is not between range of 0 (inclusive) and {1} (exclusive)"
@@ -538,7 +548,7 @@ class GraphicalRobot:
             self.__position_joints()
         else:
             error_str = "Given joint {0} is not a revolute joint. It is a {1} joint"
-            raise ValueError(error_str.format(link_num, self.joints[link_num].get_joint_type()))
+            raise TypeError(error_str.format(link_num, self.joints[link_num].get_joint_type()))
 
     def set_all_joint_angles(self, new_angles):
         """
@@ -547,6 +557,7 @@ class GraphicalRobot:
         :param new_angles: List of new angles (radians) to set each joint to.
         Must have the same length as number of joints in robot arm, even if the joints aren't revolute
         :type new_angles: float list (radians)
+        :raise IndexError: The length of the given list must equal the number of joints.
         """
         # Raise error if lengths don't match
         if len(new_angles) != len(self.joints):
