@@ -16,6 +16,13 @@ class GraphicsGrid:
         self.grid_object = [[], []]
         self.__init_grid()
 
+        # Private parameters for indexing in grid_object
+        self.__xy_plane_idx = 0
+        self.__xz_plane_idx = 1
+        self.__yz_plane_idx = 2
+        self.__planes_idx = 0
+        self.__labels_idx = 1
+
     def __init_grid(self):
         """
         Initialise the grid along the x, y, z axes.
@@ -25,10 +32,10 @@ class GraphicsGrid:
         relative_cam = True  # Whether the grid follows the camera rotation and movement
 
         the_grid = self.__create_grid_objects(relative_cam, num_squares)
-        self.grid_object[0] = the_grid
+        self.grid_object[self.__planes_idx] = the_grid
 
         # Update the labels instead of recreating them
-        update_grid_numbers(self.grid_object[1], relative_cam, num_squares)
+        update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares)
 
     def __create_grid_objects(self, bool_camera_relative, num_squares):
         """
@@ -124,7 +131,10 @@ class GraphicsGrid:
         yz_plane = compound(yz_lines)
 
         # Combine all into one list
-        grid = [xy_plane, xz_plane, yz_plane]
+        grid = []
+        grid[self.__xy_plane_idx] = xy_plane
+        grid[self.__xz_plane_idx] = xz_plane
+        grid[self.__yz_plane_idx] = yz_plane
 
         return grid
 
@@ -174,21 +184,21 @@ class GraphicsGrid:
 
         # XY Plane
         if camera_axes.z < 0:
-            self.grid_object[0][0].pos = vector(x_middle, y_middle, min_z_coord)
+            self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, min_z_coord)
         else:
-            self.grid_object[0][0].pos = vector(x_middle, y_middle, max_z_coord)
+            self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, max_z_coord)
 
         # XZ Plane
         if camera_axes.y < 0:
-            self.grid_object[0][1].pos = vector(x_middle, min_y_coord, z_middle)
+            self.grid_object[self.__planes_idx][self.__xz_plane_idx].pos = vector(x_middle, min_y_coord, z_middle)
         else:
-            self.grid_object[0][1].pos = vector(x_middle, max_y_coord, z_middle)
+            self.grid_object[self.__planes_idx][self.__xz_plane_idx].pos = vector(x_middle, max_y_coord, z_middle)
 
         # YZ Plane
         if camera_axes.x < 0:
-            self.grid_object[0][2].pos = vector(min_x_coord, y_middle, z_middle)
+            self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = vector(min_x_coord, y_middle, z_middle)
         else:
-            self.grid_object[0][2].pos = vector(max_x_coord, y_middle, z_middle)
+            self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = vector(max_x_coord, y_middle, z_middle)
 
     def update_grid(self):
         """
@@ -212,7 +222,7 @@ class GraphicsGrid:
             num_squares = 10  # Length of the grid in each direction (in units)
             relative_cam = True  # Whether the grid follows the camera rotation and movement
             self.__move_grid_objects(relative_cam, num_squares)
-            update_grid_numbers(self.grid_object[1], relative_cam, num_squares)
+            update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares)
 
         # Else save current grid
         else:
@@ -226,9 +236,9 @@ class GraphicsGrid:
         :param is_visible: Boolean of whether to display the grid
         :type is_visible: bool
         """
-        for plane in self.grid_object[0]:
+        for plane in self.grid_object[self.__planes_idx]:
             plane.visible = is_visible
-        for number in self.grid_object[1]:
+        for number in self.grid_object[self.__labels_idx]:
             number.visible = is_visible
         
     def clear_scene(self):
@@ -246,7 +256,7 @@ class GraphicsGrid:
         and have the user assume they are all deleted. However, all objects can be redisplayed by setting the visibility
         """
         # Save current grid visibility
-        grid_visibility = self.grid_object[0][0].visible
+        grid_visibility = self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible
 
         # Set all objects invisible
         for scene_object in scene.objects:
