@@ -9,12 +9,6 @@ class GraphicsGrid:
         # Save the current camera settings
         self.camera_pos = scene.camera.pos
         self.camera_axes = scene.camera.axis
-        # Initialise a grid object
-        # grid_object[0] will always be the 3 plane graphics. [XY, XZ, YZ] (alphabetical in order and connection)
-        # grid_object[1] will always be the labels. There is always a certain number of indices.
-        # Order is [x-plane numbers, "X", y-plane numbers, "Y", z-plane numbers, "Z"]
-        self.grid_object = [[], []]
-        self.__init_grid()
 
         # Private parameters for indexing in grid_object
         self.__xy_plane_idx = 0
@@ -22,6 +16,15 @@ class GraphicsGrid:
         self.__yz_plane_idx = 2
         self.__planes_idx = 0
         self.__labels_idx = 1
+
+        # Initialise a grid object
+        # grid_object[0] will always be the 3 plane graphics. [XY, XZ, YZ] (alphabetical in order and connection)
+        # grid_object[1] will always be the labels. There is always a certain number of indices.
+        # Order is [x-plane numbers, "X", y-plane numbers, "Y", z-plane numbers, "Z"]
+        self.grid_object = [[], []]
+        self.__init_grid()
+
+
 
     def __init_grid(self):
         """
@@ -131,7 +134,7 @@ class GraphicsGrid:
         yz_plane = compound(yz_lines)
 
         # Combine all into one list
-        grid = []
+        grid = [None, None, None]
         grid[self.__xy_plane_idx] = xy_plane
         grid[self.__xz_plane_idx] = xz_plane
         grid[self.__yz_plane_idx] = yz_plane
