@@ -149,12 +149,32 @@ def test_clear_scene():
     del puma560
 
 
+def test_clear_scene_with_grid_updating():
+    the_grid = init_canvas()
+    puma560 = import_puma_560()
+    the_grid.update_grid()
+
+    puma560.move_base(vector(1, 1, 0))
+    the_grid.update_grid()
+
+    sleep(2)
+    the_grid.update_grid()
+
+    the_grid.clear_scene()
+    del puma560
+
+    while True:
+        sleep(1)
+        the_grid.update_grid()
+
+
 def test_animate_joints():
     pass
 
 
 def test_import_textures():
     pass
+
 
 if __name__ == "__main__":
     # run the Puma demo by default
