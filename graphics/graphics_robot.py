@@ -84,13 +84,13 @@ class DefaultJoint:
         # Then add the rotation amount to the axis counter
         if axis_of_rotation.equals(x_axis_vector):
             rotation_axis = self.__x_vector
-            self.__x_rotation = wrap_to_pi(self.__x_rotation + angle_of_rotation)
+            self.__x_rotation = wrap_to_pi("rad", self.__x_rotation + angle_of_rotation)
         elif axis_of_rotation.equals(y_axis_vector):
             rotation_axis = self.__y_vector
-            self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
+            self.__y_rotation = wrap_to_pi("rad", self.__y_rotation + angle_of_rotation)
         elif axis_of_rotation.equals(z_axis_vector):
             rotation_axis = self.__z_vector
-            self.__z_rotation = wrap_to_pi(self.__z_rotation + angle_of_rotation)
+            self.__z_rotation = wrap_to_pi("rad", self.__z_rotation + angle_of_rotation)
         else:
             error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
                         "or z_axis_vector ({3}). Use rotate_around_vector for rotation about an arbitrary vector."
@@ -140,11 +140,11 @@ class DefaultJoint:
         # axis of rotation will have the smallest (it's less affected by the rotation)
         min_angle_diff = min(angle_diff_x, angle_diff_y, angle_diff_z)
         if min_angle_diff == angle_diff_x:
-            self.__x_rotation = wrap_to_pi(self.__x_rotation + angle_of_rotation)
+            self.__x_rotation = wrap_to_pi("rad", self.__x_rotation + angle_of_rotation)
         elif min_angle_diff == angle_diff_y:
-            self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
+            self.__y_rotation = wrap_to_pi("rad", self.__y_rotation + angle_of_rotation)
         else:
-            self.__z_rotation = wrap_to_pi(self.__z_rotation + angle_of_rotation)
+            self.__z_rotation = wrap_to_pi("rad", self.__z_rotation + angle_of_rotation)
 
         # Calculate the updated toolpoint location
         self.__connect_dir.rotate(angle=angle_of_rotation, axis=axis_of_rotation)
@@ -353,10 +353,10 @@ class RotationalJoint(DefaultJoint):
         :type new_angle: float (radians)
         """
         # Wrap given angle to -pi to pi
-        new_angle = wrap_to_pi(new_angle)
+        new_angle = wrap_to_pi("rad", new_angle)
         current_angle = self.rotation_angle
         # Calculate amount to rotate the link
-        angle_diff = wrap_to_pi(new_angle - current_angle)
+        angle_diff = wrap_to_pi("rad", new_angle - current_angle)
         # Update the link
         self.rotate_around_joint_axis(angle_diff, self.rotation_axis)
         self.rotation_angle = new_angle
