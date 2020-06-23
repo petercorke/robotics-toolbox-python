@@ -3,11 +3,13 @@
 These functions are not ordinary testing functions.
 These tests cannot be automated, and must be manually validated.
 
-To execute, import all from this file into the console. "from graphics.graphics_test_features import *"
+To execute, import all from this file into the console. "from tests.graphics_test_features import *"
 Next select which test you which to run, and call the function.
 A canvas will be created and display the respective graphics.
 Verify the output is as expected.
-Then close the browser window and run a different function. (Help clear graphics. Currently, no clearing implemented)
+Then close the browser window and run a different function. (Help clear graphics. Currently, no clearing implemented).
+
+Alternatively, executing this file will run the test_puma560_angle_change() function.
 """
 
 from graphics.model_puma560 import *
@@ -140,12 +142,51 @@ def test_puma560_angle_change():
     puma560.print_joint_angles(True)
 
 
+def test_clear_scene():
+    """
+    This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
+    """
+    the_grid = init_canvas()
+
+    puma560 = import_puma_560()
+    puma560.move_base(vector(1, 1, 0))
+
+    sleep(2)
+
+    the_grid.clear_scene()
+    del puma560
+
+
+def test_clear_scene_with_grid_updating():
+    """
+    This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
+    Meanwhile, grid update calls have been placed in between. (Currently the only way to update the grid)
+    """
+    the_grid = init_canvas()
+    puma560 = import_puma_560()
+    the_grid.update_grid()
+
+    puma560.move_base(vector(1, 1, 0))
+    the_grid.update_grid()
+
+    sleep(2)
+    the_grid.update_grid()
+
+    the_grid.clear_scene()
+    del puma560
+
+    while True:
+        sleep(1)
+        the_grid.update_grid()
+
+
 def test_animate_joints():
     pass
 
 
 def test_import_textures():
     pass
+
 
 if __name__ == "__main__":
     # run the Puma demo by default

@@ -84,7 +84,7 @@ def draw_text(label_text, label_position):
     return the_label
 
 
-def create_grid_numbers(numbers_list, bool_camera_relative, num_squares):
+def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     """
     Draw the grid numbers along the xyz axes.
 

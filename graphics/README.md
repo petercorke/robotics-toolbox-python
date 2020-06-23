@@ -11,7 +11,7 @@ Instructions on how to use the graphical section of the toolbox below.
  * Grid Updating
    * On rotation/move finish
    * ~~Don't redraw labels, move/update them~~
-   * Don't redraw the grid, move/update them
+   * ~~Don't redraw the grid, move/update them~~
  * Error handling
    * ~~Throw custom error messages~~
    * Handle vpython error messages
@@ -39,6 +39,8 @@ The `vector` class is also very crucial to the graphics. It can either represent
 For convenience, some functions and variables are provided for easy use. `wrap_to_pi()` takes in an angle, and specification on degrees or radians. It returns the respective angle between -pi and pi.
 Three vectors are also supplied for readability to ensure correct axes are used when referencing. `x_axis_vector`, `y_axis_vector`, `z_axis_vector` can be used when supplying the rotation axis, for example.
 ```python
+# Wrap an angle (deg) to the range [-pi pi]. use "rad" instead of "deg" for radian angles.
+wrap_to_pi("deg", 450)
 # Rotate the joint around its local x-axis by 30 degrees
 rot_link.rotate_around_joint_axis(radians(30), x_axis_vector)
 ```
@@ -69,6 +71,15 @@ canvas_grid.update_grid()
 canvas_grid.set_visibility(False)
 ```
 Now that the scene is created, a robot must be created to be displayed.
+
+At anytime you can clear the scene of all objects (The grid will remain if visible). Note: This will note delete the objects,
+they still exist, and can be rendered visible afterwards. However, overwriting/deleting the variables will free the memory.
+If an object is overwritten/deleted while still visible, the objects will remain in the scene.
+```python
+canvas_grid.clear_scene()
+```
+
+ 
 
 ## Displaying Robot Joints
 If you want to use the example puma560 robot, simply call the creation function that will return a GraphicalRobot object. It will automatically be displayed in the canvas
