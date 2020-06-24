@@ -149,13 +149,14 @@ new_link_graphic = Gripper(connect_from,
 new_link_basic = Gripper(connect_from, connect_to)
 ```
 ## Importing an STL
-Importing an STL can either be straight-forward or a bit tedious. Firstly, import the STL file into VPython using `import_object_from_stl()`.
+Importing an STL can either be straight-forward or a bit tedious. Firstly, import the STL file into VPython using `import_object_from_numpy_stl()`.
 This will create a compound object from the triangles, and display it in the canvas.
 ```python
+# DEPRECATED OLD FUNCTION
+# my_mesh = import_object_from_stl('my_object')
+
 # Create a compound object from an STL file 'my_object'
-# The search path is relative to ./graphics/models/
-# Only the filename is required (no extension)
-my_mesh = import_object_from_stl('my_object')
+my_mesh = import_object_from_numpy_stl('./graphics/models/my_object.stl')
 ```
 Then depending on where the object triangles are configured from the file, it may need to be translated or rotated.
 
@@ -166,7 +167,7 @@ If the loaded object was not oriented correctly upon loading, it can be manually
 Manual inspection of the objects orientation will guide to how to rotate the object in space. They can be easily rotated through VPython's object rotate function
 ```python
 # Load the mesh
-my_stl_obj = import_object_from_stl('my_object')
+my_stl_obj = import_object_from_numpy_stl('./graphics/models/my_object.stl')
 
 # Rotate the object about the +Y axis 90 degrees
 my_stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
@@ -177,7 +178,7 @@ This function takes in a graphical object, and two 3D points representing the wo
 For example, if an STL object loads in and the origin is below (-z) where it should be, and the origin is at the bottom of the object, the following code will translate it up and set the origin.
 ```python
 # Load the mesh
-my_stl_obj = import_object_from_stl('my_object')
+my_stl_obj = import_object_from_numpy_stl('./graphics/models/my_object.stl')
 
 # Find the coordinates of where the desired origin is 
 # It's at the bottom of the object, that is entirely below the z=0 plane
