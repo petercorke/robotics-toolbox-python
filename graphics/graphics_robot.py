@@ -53,24 +53,6 @@ class DefaultJoint:
         self.__update_reference_frame()
         self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
 
-    def update_position(self, new_pos):
-        """
-        Move the position of the link to the specified location
-
-        :param new_pos: 3D vector representing the new location for the origin (connection_from) of the link
-        :type new_pos: class:`vpython.vector`
-        """
-        # Calculate translational movement amount
-        axes_movement = new_pos - self.__connect_from
-        # Update each position
-        self.__connect_from += axes_movement
-        self.__connect_to += axes_movement
-        self.__connect_dir.pos += axes_movement
-        # If the reference frame exists, redraw it
-        if self.__graphic_ref is not None:
-            self.draw_reference_frame(self.__graphic_ref.visible)
-        self.__draw_graphic()
-
     def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
         """
         Rotate the joint by a specific amount around one of the joints xyz axes
@@ -155,19 +137,64 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
 
+    def update_position(self, new_pos):
+        """
+        Move the position of the link to the specified location
+
+        :param new_pos: 3D vector representing the new location for the origin (connection_from) of the link
+        :type new_pos: class:`vpython.vector`
+        """
+        # Calculate translational movement amount
+        axes_movement = new_pos - self.__connect_from
+        # Update each position
+        self.__connect_from += axes_movement
+        self.__connect_to += axes_movement
+        self.__connect_dir.pos += axes_movement
+        # If the reference frame exists, redraw it
+        if self.__graphic_ref is not None:
+            self.draw_reference_frame(self.__graphic_ref.visible)
+        self.__draw_graphic()
+
+    def update_pose(self, se_object):
+        """
+        Given an SE object, update the pose of the joint.
+
+        :param se_object:
+        :type se_object:
+        """
+        # Get the new pose details
+        new_x_axis = se_object.n
+        new_y_axis = se_object.o
+        # new_z_axis = se_object.a  # not needed
+        new_position = se_object.t
+
+        # Change to VPython-accepted parameters
+        new_x_vector = vector(new_x_axis[0], new_x_axis[1], new_x_axis[2])
+        new_y_vector = vector(new_y_axis[0], new_y_axis[1], new_y_axis[2])
+        new_pos_vector = vector(new_position[0], new_position[1], new_position[2])
+
+        # Update the graphic object
+        self.__graphic_obj.axis = new_x_vector
+        self.__graphic_obj.up = new_y_vector
+        self.__graphic_obj.pos = new_pos_vector
+
+        # Update the reference frame
+        self.__update_reference_frame()
+        self.draw_reference_frame(self.__graphic_ref.visible)
+
     def __update_reference_frame(self):
         """
         Update the reference frame axis vectors
         """
         # X vector is through the tooltip
         self.__x_vector = self.__graphic_obj.axis
-        # self.x_vector.mag = self.__length
+        # self.__x_vector.mag = self.__length
         # Y vector is in the 'up' direction of the object
         self.__y_vector = self.__graphic_obj.up
-        # self.y_vector.mag = self.__length
+        # self.__y_vector.mag = self.__length
         # Z vector is the cross product of the two
         self.__z_vector = self.__x_vector.cross(self.__y_vector)
-        # self.z_vector.mag = self.__length
+        # self.__z_vector.mag = self.__length
 
     def draw_reference_frame(self, is_visible):
         """
