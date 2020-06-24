@@ -31,7 +31,7 @@ def create_link_0():
     :rtype: class:`graphics.graphics_robot.RotationalJoint
     """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl(filename='link0')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link0.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj_z_origin = stl_obj.pos.z - stl_obj.width / 2
@@ -60,7 +60,7 @@ def create_link_1():
         :rtype: class:`graphics.graphics_robot.StaticJoint
         """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl(filename='link1')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link1.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
@@ -92,7 +92,7 @@ def create_link_2():
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl('link2')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link2.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj.rotate(angle=radians(-90), axis=x_axis_vector, origin=vector(0, 0, 0))
@@ -124,7 +124,7 @@ def create_link_3():
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl('link3')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link3.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
@@ -156,7 +156,7 @@ def create_link_4():
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl('link4')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link4.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj.rotate(angle=radians(-90), axis=z_axis_vector, origin=vector(0, 0, 0))
@@ -187,7 +187,7 @@ def create_link_5():
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl('link5')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link5.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj.rotate(angle=radians(90), axis=x_axis_vector, origin=vector(0, 0, 0))
@@ -218,7 +218,7 @@ def create_link_6():
         :rtype: class:`graphics.graphics_robot.Gripper
         """
     # Load the STL file into an object
-    stl_obj = import_object_from_stl('link6')
+    stl_obj = import_object_from_numpy_stl('./graphics/models/link6.stl')
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
     stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))

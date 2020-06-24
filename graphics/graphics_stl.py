@@ -1,8 +1,8 @@
 from vpython import *
 from graphics.common_functions import *
+from stl import mesh
 
 
-# TODO maybe change input to include extension? Or have entire path as input?
 def import_object_from_stl(filename):
     """
     Import an stl object and convert it into a usable vpython object.
@@ -14,10 +14,11 @@ def import_object_from_stl(filename):
     :type filename: str
     :return: Compound object of a collection of triangles formed from an stl file.
     :rtype: class:`vpython.compound`
-    """
-    # TODO: put error handling in case binary stl file used instead of ascii
 
-    # TODO: put error handling in case of bad file
+    .. deprecated::
+        A new function using numpy import is available. It accepts both ASCII and BINARY formats.
+    """
+    raise DeprecationWarning("This function is outdated. Use import_object_from_numpy_stl")
 
     # Open the file
     filepath = './graphics/models/' + filename + '.stl'
@@ -61,6 +62,63 @@ def import_object_from_stl(filename):
                 vertices = []
 
     return compound(triangles)
+
+
+def import_object_from_numpy_stl(filename):
+    """
+    Import either an ASCII or BINARY file format of an STL file.
+    The triangles will be combined into a single compound entity.
+
+    :param filename: Path of the stl file to import.
+    :type filename: str
+    :return: Compound object of a collection of triangles formed from an stl file.
+    :rtype: class:`vpython.compound`
+    """
+    # Load the mesh using NumPy-STL
+    the_mesh = mesh.Mesh.from_file(filename)
+
+    num_faces = len(the_mesh.vectors)
+    triangles = []
+
+    # For every face in the model
+    for face in range(0, num_faces):
+        # Get the (3) 3D points
+        point0 = the_mesh.vectors[face][0]
+        point1 = the_mesh.vectors[face][1]
+        point2 = the_mesh.vectors[face][2]
+
+        # Get the normal direction for the face
+        normal0 = the_mesh.normals[face][0]
+        normal1 = the_mesh.normals[face][1]
+        normal2 = the_mesh.normals[face][2]
+        normal = vec(normal0, normal1, normal2)
+
+        # Create the VPython 3D points
+        vertex0 = vertex(
+            pos=vec(point0[0], point0[1], point0[2]),
+            normal=normal,
+            color=color.white
+        )
+        vertex1 = vertex(
+            pos=vec(point1[0], point1[1], point1[2]),
+            normal=normal,
+            color=color.white
+        )
+        vertex2 = vertex(
+            pos=vec(point2[0], point2[1], point2[2]),
+            normal=normal,
+            color=color.white
+        )
+
+        # Combine them in a list
+        vertices = [vertex0, vertex1, vertex2]
+
+        # Create a triangle using the points, and add it to the list
+        triangles.append(triangle(vs=vertices))
+
+    # Return a compound of the triangles
+    visual_mesh = compound(triangles)
+    return visual_mesh
 
 
 def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin):
