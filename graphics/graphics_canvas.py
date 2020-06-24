@@ -62,6 +62,7 @@ def convert_grid_to_z_up():
     return
 
 
+# CHANGE - internals referenced by SE3
 def draw_reference_frame_axes(origin, x_axis_vector_dir, x_axis_rotation):
     """
     Draw x, y, z axes from the given point.

@@ -21,6 +21,8 @@ class DefaultJoint:
     :type graphic_object: class:`vpython.compound`
     """
 
+    # CHANGE - internals referenced by SE3
+    # Take in SE3, and link to STL (if wanted)
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
@@ -53,6 +55,7 @@ class DefaultJoint:
         self.__update_reference_frame()
         self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
 
+    # Keep, but will be for private use??
     def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
         """
         Rotate the joint by a specific amount around one of the joints xyz axes
@@ -94,6 +97,7 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
 
+    # Keep, but will be for private use??
     def rotate_around_vector(self, angle_of_rotation, axis_of_rotation):
         """
         Rotate the object around a particular vector. Is utilised when rotating a different joint,
@@ -137,6 +141,7 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
 
+    # CHANGE - take in SE3, only update position
     def update_position(self, new_pos):
         """
         Move the position of the link to the specified location
@@ -155,6 +160,7 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
 
+    # DONE
     def update_pose(self, se_object):
         """
         Given an SE object, update the pose of the joint.
@@ -182,6 +188,7 @@ class DefaultJoint:
         self.__update_reference_frame()
         self.draw_reference_frame(self.__graphic_ref.visible)
 
+    # CHANGE - internals referenced by SE3
     def __update_reference_frame(self):
         """
         Update the reference frame axis vectors
@@ -196,6 +203,7 @@ class DefaultJoint:
         self.__z_vector = self.__x_vector.cross(self.__y_vector)
         # self.__z_vector.mag = self.__length
 
+    # CHANGE - internals referenced by SE3
     def draw_reference_frame(self, is_visible):
         """
         Draw a reference frame at the tool point position.
@@ -224,6 +232,7 @@ class DefaultJoint:
                 self.__graphic_ref.axis = self.__x_vector
                 self.__graphic_ref.up = self.__y_vector
 
+    # REMOVE
     def __draw_graphic(self):
         """
         Draw the objects graphic on screen
@@ -232,6 +241,7 @@ class DefaultJoint:
         self.__graphic_obj.axis = self.__x_vector
         self.__graphic_obj.up = self.__y_vector
 
+    # DONE
     def set_joint_visibility(self, is_visible):
         """
         Choose whether or not the joint is displayed in the canvas.
@@ -246,6 +256,7 @@ class DefaultJoint:
             self.__graphic_ref.visible = is_visible
             self.visible = is_visible
 
+    # CHANGE - internals referenced by SE3
     def __set_graphic(self, given_obj):
         """
         Set the graphic object depending on if one was given. If no object was given, create a box and return it
@@ -280,10 +291,12 @@ class DefaultJoint:
             # TODO When texture application available, put it here
             return given_obj
 
+    # DONE
     def __import_texture(self):
         # TODO (much later)
         pass
 
+    # REMOVE
     def get_connection_to_pos(self):
         """
         Return the private variable containing the connection position (toolpoint)
@@ -294,6 +307,7 @@ class DefaultJoint:
         # Return new vector to avoid copy by reference
         return vector(self.__connect_to)
 
+    # REMOVE
     def get_rotation_angle(self, axis):
         """
         Get the current angle of rotation around a specified X, Y, or Z axis
@@ -319,6 +333,7 @@ class DefaultJoint:
 
         return ans
 
+    # CHANGE - internals referenced by SE3
     def get_axis_vector(self, axis):
         """
         Get the current vector of a specified X, Y, or Z axis
@@ -341,6 +356,7 @@ class DefaultJoint:
                         "or z_axis_vector ({3})."
             raise ValueError(error_str.format(axis), x_axis_vector, y_axis_vector, z_axis_vector)
 
+    # DONE
     def get_joint_type(self):
         """
         Return the type of joint (To Be Overridden by Child classes)
@@ -368,6 +384,7 @@ class RotationalJoint(DefaultJoint):
     :type graphic_obj: class:`vpython.compound`
     """
 
+    # CHANGE - internals referenced by SE3
     def __init__(self,
                  connection_from_prev_seg,
                  connection_to_next_seg,
@@ -379,6 +396,7 @@ class RotationalJoint(DefaultJoint):
         self.rotation_axis = rotation_axis
         self.rotation_angle = radians(0)
 
+    # Keep, but might be unused
     def rotate_joint(self, new_angle):
         """
         Rotate the joint to a given angle in range [-pi pi] (radians)
@@ -395,6 +413,7 @@ class RotationalJoint(DefaultJoint):
         self.rotate_around_joint_axis(angle_diff, self.rotation_axis)
         self.rotation_angle = new_angle
 
+    # DONE
     def get_joint_type(self):
         """
         Return the type of joint (R for Rotational)
@@ -510,6 +529,7 @@ class GraphicalRobot:
         """
         self.__position_joints()
 
+    # CHANGE - internals referenced by SE3
     def __position_joints(self):
         """
         Position all joints based upon each respective connect_from and connect_to points.
@@ -519,6 +539,7 @@ class GraphicalRobot:
             # Place the joint connect_from (origin) to the previous segments connect_to
             self.joints[joint_num].update_position(self.joints[joint_num - 1].get_connection_to_pos())
 
+    # DONE
     def set_robot_visibility(self, is_visible):
         """
         Set the entire robots visibility inside the canvas.
@@ -531,6 +552,7 @@ class GraphicalRobot:
                 joint.set_joint_visibility(is_visible)
                 self.is_shown = is_visible
 
+    # DONE
     def set_reference_visibility(self, is_visible):
         """
         Set the visibility of the reference frame for all joints.
@@ -541,6 +563,7 @@ class GraphicalRobot:
         for joint in self.joints:
             joint.draw_reference_frame(is_visible)
 
+    # CHANGE - internals referenced by SE3
     def set_joint_angle(self, link_num, new_angle):
         """
         Set the angle (radians) for a specific joint in the robot.
@@ -577,6 +600,7 @@ class GraphicalRobot:
             error_str = "Given joint {0} is not a revolute joint. It is a {1} joint"
             raise TypeError(error_str.format(link_num, self.joints[link_num].get_joint_type()))
 
+    # CHANGE - internals referenced by SE3
     def set_all_joint_angles(self, new_angles):
         """
         Set all of the angles for each joint in the robot.
@@ -615,6 +639,7 @@ class GraphicalRobot:
         # Reposition all joints to connect to the previous segment
         self.__position_joints()
 
+    # CHANGE - internals referenced by SE3
     def move_base(self, position):
         """
         Move the base around to a particular position.
@@ -626,6 +651,7 @@ class GraphicalRobot:
         self.joints[0].update_position(position)
         self.__position_joints()
 
+    # CHANGE - internals referenced by SE3
     def print_joint_angles(self, is_degrees=False):
         """
         Print all of the current joint angles (Local rotation and total rotation (rotation from other joints))
