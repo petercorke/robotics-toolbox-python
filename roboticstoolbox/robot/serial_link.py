@@ -4,7 +4,7 @@ import numpy as np
 from roboticstoolbox.robot.Link import *
 from spatialmath.pose3d import *
 from scipy.optimize import minimize
-from graphics.graphics_test_features import *
+from graphics.graphics_robot import *
 
 class SerialLink:
 
