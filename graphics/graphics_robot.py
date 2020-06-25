@@ -17,7 +17,7 @@ class DefaultJoint:
     """
 
     # DONE
-    def __init__(self, initial_se3, structure=None):
+    def __init__(self, initial_se3, structure):
 
         if not isinstance(structure, float) or not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
@@ -323,7 +323,7 @@ class RotationalJoint(DefaultJoint):
     """
 
     # DONE
-    def __init__(self, initial_se3, structure=None):
+    def __init__(self, initial_se3, structure):
         # Call super init function
         super().__init__(initial_se3, structure)
         self.rotation_axis = z_axis_vector
@@ -369,7 +369,7 @@ class PrismaticJoint(DefaultJoint):
     :type structure: `float` or `str`
     """
     # TODO
-    def __init__(self, initial_se3, structure=None):
+    def __init__(self, initial_se3, structure):
         super().__init__(initial_se3, structure)
         self.min_translation = None
         self.max_translation = None
@@ -400,7 +400,7 @@ class StaticJoint(DefaultJoint):
     :type structure: `float` or `str`
     """
 
-    def __init__(self, initial_se3, structure=None):
+    def __init__(self, initial_se3, structure):
         super().__init__(initial_se3, structure)
 
     def get_joint_type(self):
@@ -424,7 +424,7 @@ class Gripper(DefaultJoint):
     :type structure: `float` or `str`
     """
 
-    def __init__(self, initial_se3, structure=None):
+    def __init__(self, initial_se3, structure):
         super().__init__(initial_se3, structure)
 
     # TODO close/open gripper
@@ -442,35 +442,34 @@ class Gripper(DefaultJoint):
 class GraphicalRobot:
     """
     The GraphicalRobot class encapsulates all of the different joint types to easily control the robot arm.
-
-    :param joints: A list of the joints in order from base (0) to gripper (end), or other types.
-    :type joints: list
-    :raise ValueError: The given length of joints must not be 0
     """
 
-    def __init__(self, joints):
-        if len(joints) == 0:
-            raise ValueError("Robot was given", len(joints), "joints. Must have at least 1.")
-        self.joints = joints
-        self.num_joints = len(joints)
+    def __init__(self):
+        self.joints = []
+        self.num_joints = 0
         self.is_shown = True
-        self.__create_robot()
 
-    def __create_robot(self):
-        """
-        Upon creation of the robot, orient all objects correctly.
-        """
-        self.__position_joints()
+    def add_link(self, typeof, pose, visual_identity):
+        typeof = typeof.upper()
 
-    # CHANGE - internals referenced by SE3
-    def __position_joints(self):
-        """
-        Position all joints based upon each respective connect_from and connect_to points.
-        """
-        # For each joint in the robot (exclude base)
-        for joint_num in range(1, self.num_joints):
-            # Place the joint connect_from (origin) to the previous segments connect_to
-            self.joints[joint_num].update_position(self.joints[joint_num - 1].get_connection_to_pos())
+        if typeof is 'R':
+            link = RotationalJoint(pose, visual_identity)
+        elif typeof is 'P':
+            link = PrismaticJoint(pose, visual_identity)
+        elif typeof is 'S':
+            link = StaticJoint(pose, visual_identity)
+        elif typeof is 'G':
+            link = Gripper(pose, visual_identity)
+        else:
+            raise ValueError("typeof should be either 'R' (Rotational), 'P' (Prismatic), "
+                             "'S' (Static), or 'G' (Gripper)")
+
+        self.joints[self.num_joints] = link
+        self.num_joints += 1
+
+    def remove_last_link(self):
+        self.joints = self.joints[0:self.num_joints-1]
+        self.num_joints -= 1
 
     # DONE
     def set_robot_visibility(self, is_visible):
@@ -508,6 +507,7 @@ class GraphicalRobot:
         :raise IndexError: Link index must be between 0 (inclusive) and number of joints (exclusive)
         :raise TypeError: The joint index chosen must be indexing a revolute joint
         """
+        raise PendingDeprecationWarning("Will likely be unused")
         if (link_num < 0) or (link_num >= self.num_joints):
             error_str = "link number given ({0}) is not between range of 0 (inclusive) and {1} (exclusive)"
             raise IndexError(error_str.format(link_num, self.num_joints))
@@ -543,6 +543,7 @@ class GraphicalRobot:
         :type new_angles: float list (radians)
         :raise IndexError: The length of the given list must equal the number of joints.
         """
+        raise PendingDeprecationWarning("Will likely be unused")
         # Raise error if lengths don't match
         if len(new_angles) != len(self.joints):
             error_str = "Length of given angles ({0}) does not match number of joints ({1})."
@@ -572,47 +573,12 @@ class GraphicalRobot:
         # Reposition all joints to connect to the previous segment
         self.__position_joints()
 
-    # CHANGE - internals referenced by SE3
-    def move_base(self, position):
+    # DONE
+    def print_joint_poses(self):
         """
-        Move the base around to a particular position.
-
-        :param position: 3D position to move the base's origin to
-        :type position: class:`vpython.vector`
-        """
-        # Move the base, then update all of the joints
-        self.joints[0].update_position(position)
-        self.__position_joints()
-
-    # CHANGE - internals referenced by SE3
-    def print_joint_angles(self, is_degrees=False):
-        """
-        Print all of the current joint angles (Local rotation and total rotation (rotation from other joints))
-
-        :param is_degrees: Whether or not to display angles as degrees or radians (default)
-        :type is_degrees: bool, optional
+        Print all of the current joint poses
         """
         # For each joint
-        for joint in range(0, self.num_joints):
-            total_x = self.joints[joint].get_rotation_angle(x_axis_vector)
-            total_y = self.joints[joint].get_rotation_angle(y_axis_vector)
-            total_z = self.joints[joint].get_rotation_angle(z_axis_vector)
-
-            if is_degrees:
-                total_x = round(degrees(total_x), 3)
-                total_y = round(degrees(total_y), 3)
-                total_z = round(degrees(total_z), 3)
-
-            # If revolute
-            if self.joints[joint].get_joint_type() == "R":
-                local_angle = self.joints[joint].rotation_angle
-                if is_degrees:
-                    local_angle = round(degrees(local_angle), 3)
-                print("Joint", joint,
-                      "\n\tLocal angle =", local_angle,
-                      "\n\tTotal angles (x,y,z)= (", total_x, ",", total_y, ",", total_z, ")", )
-            # If not a revolute
-            else:
-                print("Joint", joint,
-                      "\n\tLocal angle = <Not a rotating joint>",
-                      "\n\tTotal angles (x,y,z)= (", total_x, ",", total_y, ",", total_z, ")", )
+        for joint in self.joints:
+            print("Type:", joint.get_joint_type())
+            print("\tPose:\n\t", joint.get_pose(), "\n")
