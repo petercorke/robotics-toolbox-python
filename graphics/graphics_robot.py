@@ -19,7 +19,7 @@ class DefaultJoint:
     # DONE
     def __init__(self, initial_se3, structure):
 
-        if not isinstance(structure, float) or not isinstance(structure, str):
+        if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
                         "or a file path to an STL (str)"
             raise TypeError(error_str.format(float, str, type(structure)))
@@ -29,13 +29,15 @@ class DefaultJoint:
         # Set the graphic
         self.__graphic_obj = self.__set_graphic(structure)
         self.visible = True
-        self.update_pose(self.__pose)
+
 
         # Calculate the length of the link (Generally longest side is the length)
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__pose)
+
+        self.update_pose(self.__pose)
 
     # Keep, but will be for private use??
     def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
@@ -177,6 +179,7 @@ class DefaultJoint:
         self.__graphic_obj.pos = new_position
 
         # Update the reference frame
+        self.__pose = se_object
         self.__update_reference_frame()
         self.draw_reference_frame(self.__graphic_ref.visible)
 
@@ -449,25 +452,44 @@ class GraphicalRobot:
         self.num_joints = 0
         self.is_shown = True
 
-    def add_link(self, typeof, pose, visual_identity):
+    def append_link(self, typeof, pose, structure):
+        """
+        Append a joint to the end of the robot.
+
+        :param typeof: String character of the joint type. e.g. 'R', 'P', 'S', 'G'
+        :type typeof: `str`
+        :param pose: SE3 object for the pose of the joint
+        :type pose: `SE3`
+        :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
+        :type structure: `float` or `str`
+        """
+        # Capitalise the type for case-insensitive use
         typeof = typeof.upper()
 
-        if typeof is 'R':
-            link = RotationalJoint(pose, visual_identity)
-        elif typeof is 'P':
-            link = PrismaticJoint(pose, visual_identity)
-        elif typeof is 'S':
-            link = StaticJoint(pose, visual_identity)
-        elif typeof is 'G':
-            link = Gripper(pose, visual_identity)
+        if typeof == 'R':
+            link = RotationalJoint(pose, structure)
+        elif typeof == 'P':
+            link = PrismaticJoint(pose, structure)
+        elif typeof == 'S':
+            link = StaticJoint(pose, structure)
+        elif typeof == 'G':
+            link = Gripper(pose, structure)
         else:
-            raise ValueError("typeof should be either 'R' (Rotational), 'P' (Prismatic), "
+            raise ValueError("typeof should be (case-insensitive) either 'R' (Rotational), 'P' (Prismatic), "
                              "'S' (Static), or 'G' (Gripper)")
 
-        self.joints[self.num_joints] = link
+        # Append the joint to the robot
+        self.joints.append(link)
         self.num_joints += 1
 
-    def remove_last_link(self):
+    def detach_link(self):
+        """
+        Detach the end link of the robot.
+        """
+        # TODO handle if no joints to detach
+        # TODO handle clearing it from canvas
+
+        # Keep all but the last joint
         self.joints = self.joints[0:self.num_joints-1]
         self.num_joints -= 1
 
@@ -483,6 +505,18 @@ class GraphicalRobot:
             for joint in self.joints:
                 joint.set_joint_visibility(is_visible)
                 self.is_shown = is_visible
+
+    def set_joint_poses(self, all_poses):
+        """
+        Set the joint poses.
+
+        :param all_poses: List of all the new poses to set
+        :type all_poses: `SE3` list
+        """
+        # TODO warn if no joints
+        # TODO warn if input size not correct
+        for idx in range(0, self.num_joints):
+            self.joints[idx].update_pose(all_poses[idx])
 
     # DONE
     def set_reference_visibility(self, is_visible):
