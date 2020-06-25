@@ -62,21 +62,21 @@ def convert_grid_to_z_up():
     return
 
 
-# CHANGE - internals referenced by SE3
-def draw_reference_frame_axes(origin, x_axis_vector_dir, x_axis_rotation):
+# DONE
+def draw_reference_frame_axes(se3_pose):
     """
     Draw x, y, z axes from the given point.
     Each axis is represented in the objects reference frame.
 
-    :param origin: 3D vector representing the point to draw the reference from at.
-    :type origin: class:`vpython.vector`
-    :param x_axis_vector_dir: 3D vector representing the direction of the positive x axis.
-    :type x_axis_vector_dir: class:`vpython.vector`
-    :param x_axis_rotation: Angle in radians to rotate the frame around the x-axis.
-    :type x_axis_rotation: float
+    :param se3_pose: SE3 pose representation of the reference frame
+    :type se3_pose: `SE3`
     :return: Compound object of the 3 axis arrows.
     :rtype: class:`vpython.compound`
     """
+
+    origin = get_pose_pos(se3_pose)
+    x_axis = get_pose_x_vec(se3_pose)
+    y_axis = get_pose_y_vec(se3_pose)
 
     # Create Basic Frame
     # Draw X Axis
@@ -92,11 +92,8 @@ def draw_reference_frame_axes(origin, x_axis_vector_dir, x_axis_rotation):
     # Set origin to where axis converge (instead of the middle of the resulting object bounding box)
     frame_ref = compound([x_arrow, y_arrow, z_arrow], origin=origin)
 
-    # Rotate frame around x, y, z axes as required
-    # Set x-axis along required vector, and rotate around the x-axis to corresponding angle to align last two axes
-    # NB: Set XY axis first, as vpython is +y up bias, objects rotate respective to this bias when setting axis
-    frame_ref.axis = vector(x_axis_vector_dir.x, x_axis_vector_dir.y, 0)
-    frame_ref.axis = x_axis_vector_dir
-    frame_ref.rotate(angle=x_axis_rotation)
+    # Set frame axes
+    frame_ref.axis = x_axis
+    frame_ref.up = y_axis
 
     return frame_ref
