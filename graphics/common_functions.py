@@ -1,11 +1,63 @@
 from vpython import radians, vector
 
 """
-global variables that can be used to easily reference X, Y, and Z axes directions.
+global variables that can be used to easily reference X, Y, and Z axis directions.
 """
 x_axis_vector = vector(1, 0, 0)
 y_axis_vector = vector(0, 1, 0)
 z_axis_vector = vector(0, 0, 1)
+
+
+def get_pose_x_vec(se3_obj):
+    """
+    Convert SE3 details to VPython vector format
+
+    :param se3_obj: SE3 pose and orientation object
+    :type se3_obj: `SE3`
+    :return: VPython vector representation of the X orientation
+    :rtype: `vpython.vector`
+    """
+    data = se3_obj.n
+    return vector(data[0], data[1], data[2])
+
+
+def get_pose_y_vec(se3_obj):
+    """
+    Convert SE3 details to VPython vector format
+
+    :param se3_obj: SE3 pose and orientation object
+    :type se3_obj: `SE3`
+    :return: VPython vector representation of the Y orientation
+    :rtype: `vpython.vector`
+    """
+    data = se3_obj.o
+    return vector(data[0], data[1], data[2])
+
+
+def get_pose_z_vec(se3_obj):
+    """
+    Convert SE3 details to VPython vector format
+
+    :param se3_obj: SE3 pose and orientation object
+    :type se3_obj: `SE3`
+    :return: VPython vector representation of the Z orientation
+    :rtype: `vpython.vector`
+    """
+    data = se3_obj.a
+    return vector(data[0], data[1], data[2])
+
+
+def get_pose_pos(se3_obj):
+    """
+    Convert SE3 details to VPython vector format
+
+    :param se3_obj: SE3 pose and orientation object
+    :type se3_obj: `SE3`
+    :return: VPython vector representation of the position
+    :rtype: `vpython.vector`
+    """
+    data = se3_obj.t
+    return vector(data[0], data[1], data[2])
 
 
 def wrap_to_pi(angle_type, angle):
