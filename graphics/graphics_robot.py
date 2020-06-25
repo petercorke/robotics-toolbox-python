@@ -462,6 +462,7 @@ class GraphicalRobot:
         :type pose: `SE3`
         :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
         :type structure: `float` or `str`
+        :raises ValueError: typeof must be a valid character
         """
         # Capitalise the type for case-insensitive use
         typeof = typeof.upper()
@@ -485,8 +486,13 @@ class GraphicalRobot:
     def detach_link(self):
         """
         Detach the end link of the robot.
+
+        :raises UserWarning: Must have a joint available to detach
         """
-        # TODO handle if no joints to detach
+        # Check if no joints to detach
+        if self.num_joints == 0:
+            raise UserWarning("No robot joints to detach")
+
         # TODO handle clearing it from canvas
 
         # Keep all but the last joint
@@ -512,9 +518,17 @@ class GraphicalRobot:
 
         :param all_poses: List of all the new poses to set
         :type all_poses: `SE3` list
+        :raises UserWarning: Robot must not have 0 joints, and given poses length must equal number of joints.
         """
-        # TODO warn if no joints
-        # TODO warn if input size not correct
+        # Sanity checks
+        if self.num_joints == 0:
+            raise UserWarning("Robot has 0 joints. Create some using append_link()")
+
+        if self.num_joints != len(all_poses):
+            err = "Number of given poses {0} does not equal number of joints {1}"
+            raise UserWarning(err.format(len(all_poses), self.num_joints))
+
+        # Update the joints
         for idx in range(0, self.num_joints):
             self.joints[idx].update_pose(all_poses[idx])
 
