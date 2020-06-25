@@ -17,9 +17,7 @@ class DefaultJoint:
     """
 
     # DONE
-    def __init__(self,
-                 initial_se3,
-                 structure=None):
+    def __init__(self, initial_se3, structure=None):
 
         if not isinstance(structure, float) or not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
@@ -50,7 +48,7 @@ class DefaultJoint:
         :type axis_of_rotation: class:`vpython.vector`
         :raise ValueError: The given axis_of_rotation must be one of the default X, Y, Z vectors (e.g. x_axis_vector)
         """
-        raise DeprecationWarning("Currently out of date. Will be updated soon.")
+        raise PendingDeprecationWarning("Currently out of date. Will be updated soon.")
         # Determine the axis of rotation based on the given joint axis direction
         # Then add the rotation amount to the axis counter
         if axis_of_rotation.equals(x_axis_vector):
@@ -90,7 +88,7 @@ class DefaultJoint:
         :param axis_of_rotation: X, Y, or Z axis to apply around the objects specific X, Y, or Z axes
         :type axis_of_rotation: class:`vpython.vector`
         """
-        raise DeprecationWarning("Currently out of date. Will be updated soon.")
+        raise PendingDeprecationWarning("Currently out of date. Will be updated soon.")
 
         x_prev, y_prev, z_prev = vector(self.__x_vector), vector(self.__y_vector), vector(self.__z_vector)
 
@@ -318,30 +316,18 @@ class RotationalJoint(DefaultJoint):
     """
     A rotational joint based off the default joint class
 
-    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
-    :type connection_from_prev_seg: class:`vpython.vector`
-    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
-    :type connection_to_next_seg: class:`vpython.vector`
-    :param x_axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
-    :type x_axis: class:`vpython.vector`
-    :param rotation_axis: Vector representation of the joint axis that it rotates around, defaults to +y axis (0, 1, 0)
-    :type rotation_axis: class:`vpython.vector`
-    :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
-    defaults to `None`
-    :type graphic_obj: class:`vpython.compound`
+    :param initial_se3: Pose to set the joint to initially
+    :type initial_se3: `SE3`
+    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
+    :type structure: `float` or `str`
     """
 
-    # CHANGE - internals referenced by SE3
-    def __init__(self,
-                 connection_from_prev_seg,
-                 connection_to_next_seg,
-                 x_axis=x_axis_vector,
-                 rotation_axis=y_axis_vector,
-                 graphic_obj=None):
+    # DONE
+    def __init__(self, initial_se3, structure=None):
         # Call super init function
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
-        self.rotation_axis = rotation_axis
-        self.rotation_angle = radians(0)
+        super().__init__(initial_se3, structure)
+        self.rotation_axis = z_axis_vector
+        # self.rotation_angle = radians(0)
 
     # Keep, but might be unused
     def rotate_joint(self, new_angle):
@@ -351,6 +337,8 @@ class RotationalJoint(DefaultJoint):
         :param new_angle: The new angle in range [-pi pi] that the link is to be rotated to.
         :type new_angle: float (radians)
         """
+        raise PendingDeprecationWarning("Will likely be unused")
+
         # Wrap given angle to -pi to pi
         new_angle = wrap_to_pi("rad", new_angle)
         current_angle = self.rotation_angle
@@ -372,9 +360,17 @@ class RotationalJoint(DefaultJoint):
 
 
 class PrismaticJoint(DefaultJoint):
+    """
+    A prismatic joint based from the default joint class
+
+    :param initial_se3: Pose to set the joint to initially
+    :type initial_se3: `SE3`
+    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
+    :type structure: `float` or `str`
+    """
     # TODO
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
+    def __init__(self, initial_se3, structure=None):
+        super().__init__(initial_se3, structure)
         self.min_translation = None
         self.max_translation = None
 
@@ -398,19 +394,14 @@ class StaticJoint(DefaultJoint):
     This class represents a static joint (one that doesn't translate or rotate on it's own).
     It has no extra functions to utilise.
 
-    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
-    :type connection_from_prev_seg: class:`vpython.vector`
-    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
-    :type connection_to_next_seg: class:`vpython.vector`
-    :param x_axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
-    :type x_axis: class:`vpython.vector`
-    :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
-    defaults to `None`
-    :type graphic_obj: class:`vpython.compound`
+    :param initial_se3: Pose to set the joint to initially
+    :type initial_se3: `SE3`
+    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
+    :type structure: `float` or `str`
     """
 
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
+    def __init__(self, initial_se3, structure=None):
+        super().__init__(initial_se3, structure)
 
     def get_joint_type(self):
         """
@@ -427,19 +418,14 @@ class Gripper(DefaultJoint):
     This class represents a gripper joint with a moving gripper (To Be Implemented).
     Usually the end joint of a robot.
 
-    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
-    :type connection_from_prev_seg: class:`vpython.vector`
-    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
-    :type connection_to_next_seg: class:`vpython.vector`
-    :param x_axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
-    :type x_axis: class:`vpython.vector`
-    :param graphic_obj: Graphical object for which the joint will use. If none given, auto generates an object,
-    defaults to `None`
-    :type graphic_obj: class:`vpython.compound`
+    :param initial_se3: Pose to set the joint to initially
+    :type initial_se3: `SE3`
+    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
+    :type structure: `float` or `str`
     """
 
-    def __init__(self, connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj=None):
-        super().__init__(connection_from_prev_seg, connection_to_next_seg, x_axis, graphic_obj)
+    def __init__(self, initial_se3, structure=None):
+        super().__init__(initial_se3, structure)
 
     # TODO close/open gripper
 
