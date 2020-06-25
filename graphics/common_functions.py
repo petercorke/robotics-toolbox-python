@@ -1,4 +1,6 @@
 from vpython import radians, vector
+from numpy import array
+from spatialmath import SE3
 
 """
 global variables that can be used to easily reference X, Y, and Z axis directions.
@@ -58,6 +60,32 @@ def get_pose_pos(se3_obj):
     """
     data = se3_obj.t
     return vector(data[0], data[1], data[2])
+
+
+def vpython_to_se3(graphic_object):
+    """
+    This function will take in a graphics object and output it's pose as an SE3 object
+
+    :param graphic_object: A VPython graphic object
+    :type graphic_object: `vpython.object`
+    :return: SE3 representation of the pose
+    :rtype: `SE3`
+    """
+    # Get the x, y, z axes and position
+    x_vec = graphic_object.axis
+    y_vec = graphic_object.up
+    z_vec = x_vec.cross(y_vec)
+    pos = graphic_object.pos
+
+    # Form a numpy array
+    T = array([
+        [x_vec.x, y_vec.x, z_vec.x, pos.x],
+        [x_vec.y, y_vec.y, z_vec.y, pos.y],
+        [x_vec.z, y_vec.z, z_vec.z, pos.z],
+        [      0,       0,       0,     1]
+    ])
+
+    return SE3(T)
 
 
 def wrap_to_pi(angle_type, angle):
