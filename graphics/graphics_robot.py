@@ -1,5 +1,5 @@
 from graphics.graphics_canvas import *
-from graphics.common_functions import *
+from graphics.graphics_stl import *
 
 
 class DefaultJoint:
@@ -10,50 +10,34 @@ class DefaultJoint:
     - Static
     - Gripper
 
-    :param connection_from_prev_seg: Origin point of the joint (Where it connects to the previous segment)
-    :type connection_from_prev_seg: class:`vpython.vector`
-    :param connection_to_next_seg: Tooltip point of the joint (Where it connects to the next segment)
-    :type connection_to_next_seg: class:`vpython.vector`
-    :param axis: Vector representation of the joints +x axis, defaults to +x axis (1, 0, 0)
-    :type axis: class:`vpython.vector`
-    :param graphic_object: Graphical object for which the joint will use. If none given, auto generates an object,
-    defaults to `None`
-    :type graphic_object: class:`vpython.compound`
+    :param initial_se3: Pose to set the joint to initially
+    :type initial_se3: `SE3`
+    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
+    :type structure: `float` or `str`
     """
 
-    # CHANGE - internals referenced by SE3
-    # Take in SE3, and link to STL (if wanted)
+    # DONE
     def __init__(self,
-                 connection_from_prev_seg,
-                 connection_to_next_seg,
-                 axis=x_axis_vector,
-                 graphic_object=None):
+                 initial_se3,
+                 structure=None):
 
-        # Set connection points
-        self.__connect_from = connection_from_prev_seg
-        self.__connect_to = connection_to_next_seg
-        # Set an arrow to track position and direction for easy updates (auto applies transforms)
-        self.__connect_dir = arrow(pos=self.__connect_from,
-                                   axis=(self.__connect_to - self.__connect_from),
-                                   visible=False)
-        # Set the x vector direction
-        self.__x_vector = axis
+        if not isinstance(structure, float) or not isinstance(structure, str):
+            error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
+                        "or a file path to an STL (str)"
+            raise TypeError(error_str.format(float, str, type(structure)))
 
-        # Set the rotation angles
-        self.__x_rotation = radians(0)
-        self.__y_rotation = radians(0)
-        self.__z_rotation = radians(0)
+        self.__pose = initial_se3
 
         # Set the graphic
-        self.__graphic_obj = self.__set_graphic(graphic_object)
+        self.__graphic_obj = self.__set_graphic(structure)
         self.visible = True
+        self.update_pose(self.__pose)
 
         # Calculate the length of the link (Generally longest side is the length)
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
-        self.__update_reference_frame()
-        self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
+        self.__graphic_ref = draw_reference_frame_axes(self.__pose)
 
     # Keep, but will be for private use??
     def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
@@ -66,6 +50,7 @@ class DefaultJoint:
         :type axis_of_rotation: class:`vpython.vector`
         :raise ValueError: The given axis_of_rotation must be one of the default X, Y, Z vectors (e.g. x_axis_vector)
         """
+        raise DeprecationWarning("Currently out of date. Will be updated soon.")
         # Determine the axis of rotation based on the given joint axis direction
         # Then add the rotation amount to the axis counter
         if axis_of_rotation.equals(x_axis_vector):
@@ -81,9 +66,6 @@ class DefaultJoint:
             error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
                         "or z_axis_vector ({3}). Use rotate_around_vector for rotation about an arbitrary vector."
             raise ValueError(error_str.format(axis_of_rotation), x_axis_vector, y_axis_vector, z_axis_vector)
-            # Default to the y-axis
-            # rotation_axis = self.__y_vector
-            # self.__y_rotation = wrap_to_pi(self.__y_rotation + angle_of_rotation)
 
         # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
         self.__graphic_obj.rotate(angle=angle_of_rotation, axis=rotation_axis, origin=self.__connect_from)
@@ -108,8 +90,8 @@ class DefaultJoint:
         :param axis_of_rotation: X, Y, or Z axis to apply around the objects specific X, Y, or Z axes
         :type axis_of_rotation: class:`vpython.vector`
         """
-        # TODO
-        #  calculate amount to update x,y,z angles by based on vectors and angle
+        raise DeprecationWarning("Currently out of date. Will be updated soon.")
+
         x_prev, y_prev, z_prev = vector(self.__x_vector), vector(self.__y_vector), vector(self.__z_vector)
 
         # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
@@ -141,69 +123,75 @@ class DefaultJoint:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
 
-    # CHANGE - take in SE3, only update position
-    def update_position(self, new_pos):
+    # DONE
+    def update_position(self, se_object):
         """
-        Move the position of the link to the specified location
+        Given an SE object, update just the orientation of the joint.
 
-        :param new_pos: 3D vector representing the new location for the origin (connection_from) of the link
-        :type new_pos: class:`vpython.vector`
+        :param se_object: SE3 pose representation of the joint
+        :type se_object: `SE3`
         """
-        # Calculate translational movement amount
-        axes_movement = new_pos - self.__connect_from
-        # Update each position
-        self.__connect_from += axes_movement
-        self.__connect_to += axes_movement
-        self.__connect_dir.pos += axes_movement
-        # If the reference frame exists, redraw it
-        if self.__graphic_ref is not None:
-            self.draw_reference_frame(self.__graphic_ref.visible)
-        self.__draw_graphic()
+        new_position = get_pose_pos(se_object)
+        self.__graphic_obj.pos = new_position
+
+        # Update the reference frame
+        self.__update_reference_frame()
+        self.draw_reference_frame(self.__graphic_ref.visible)
+
+    # DONE
+    def update_orientation(self, se_object):
+        """
+        Given an SE object, update just the orientation of the joint.
+
+        :param se_object: SE3 pose representation of the joint
+        :type se_object: `SE3`
+        """
+        # Get the new pose details
+        new_x_axis = get_pose_x_vec(se_object)
+        new_y_axis = get_pose_y_vec(se_object)
+        # new_z_axis = get_pose_z_vec(se_object)  # not needed
+
+        # Update the graphic object
+        self.__graphic_obj.axis = new_x_axis
+        self.__graphic_obj.up = new_y_axis
+
+        # Update the reference frame
+        self.__update_reference_frame()
+        self.draw_reference_frame(self.__graphic_ref.visible)
 
     # DONE
     def update_pose(self, se_object):
         """
         Given an SE object, update the pose of the joint.
 
-        :param se_object:
-        :type se_object:
+        :param se_object: SE3 pose representation of the joint
+        :type se_object: `SE3`
         """
         # Get the new pose details
-        new_x_axis = se_object.n
-        new_y_axis = se_object.o
-        # new_z_axis = se_object.a  # not needed
-        new_position = se_object.t
-
-        # Change to VPython-accepted parameters
-        new_x_vector = vector(new_x_axis[0], new_x_axis[1], new_x_axis[2])
-        new_y_vector = vector(new_y_axis[0], new_y_axis[1], new_y_axis[2])
-        new_pos_vector = vector(new_position[0], new_position[1], new_position[2])
+        new_x_axis = get_pose_x_vec(se_object)
+        new_y_axis = get_pose_y_vec(se_object)
+        # new_z_axis = get_pose_z_vec(se_object)  # not needed
+        new_position = get_pose_pos(se_object)
 
         # Update the graphic object
-        self.__graphic_obj.axis = new_x_vector
-        self.__graphic_obj.up = new_y_vector
-        self.__graphic_obj.pos = new_pos_vector
+        self.__graphic_obj.axis = new_x_axis
+        self.__graphic_obj.up = new_y_axis
+        self.__graphic_obj.pos = new_position
 
         # Update the reference frame
         self.__update_reference_frame()
         self.draw_reference_frame(self.__graphic_ref.visible)
 
-    # CHANGE - internals referenced by SE3
+    # DONE
     def __update_reference_frame(self):
         """
         Update the reference frame axis vectors
         """
-        # X vector is through the tooltip
-        self.__x_vector = self.__graphic_obj.axis
-        # self.__x_vector.mag = self.__length
-        # Y vector is in the 'up' direction of the object
-        self.__y_vector = self.__graphic_obj.up
-        # self.__y_vector.mag = self.__length
-        # Z vector is the cross product of the two
-        self.__z_vector = self.__x_vector.cross(self.__y_vector)
-        # self.__z_vector.mag = self.__length
+        self.__x_vector = get_pose_x_vec(self.__pose)
+        self.__y_vector = get_pose_y_vec(self.__pose)
+        self.__z_vector = get_pose_z_vec(self.__pose)
 
-    # CHANGE - internals referenced by SE3
+    # DONE
     def draw_reference_frame(self, is_visible):
         """
         Draw a reference frame at the tool point position.
@@ -217,29 +205,20 @@ class DefaultJoint:
             if self.__graphic_ref is not None:
                 # Set invisible, and also update its orientations
                 self.__graphic_ref.visible = False
-                self.__graphic_ref.pos = self.__connect_to
-                self.__graphic_ref.axis = self.__x_vector
-                self.__graphic_ref.up = self.__y_vector
+                self.__graphic_ref.pos = get_pose_pos(self.__pose)
+                self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
+                self.__graphic_ref.up = get_pose_y_vec(self.__pose)
         # Else: draw
         else:
             # If graphic does not currently exist
             if self.__graphic_ref is None:
                 # Create one
-                self.__graphic_ref = draw_reference_frame_axes(self.__connect_to, self.__x_vector, self.__x_rotation)
+                self.__graphic_ref = draw_reference_frame_axes(self.__pose)
             # Else graphic does exist
             else:
-                self.__graphic_ref.pos = self.__connect_to
-                self.__graphic_ref.axis = self.__x_vector
-                self.__graphic_ref.up = self.__y_vector
-
-    # REMOVE
-    def __draw_graphic(self):
-        """
-        Draw the objects graphic on screen
-        """
-        self.__graphic_obj.pos = self.__connect_from
-        self.__graphic_obj.axis = self.__x_vector
-        self.__graphic_obj.up = self.__y_vector
+                self.__graphic_ref.pos = get_pose_pos(self.__pose)
+                self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
+                self.__graphic_ref.up = get_pose_y_vec(self.__pose)
 
     # DONE
     def set_joint_visibility(self, is_visible):
@@ -256,84 +235,42 @@ class DefaultJoint:
             self.__graphic_ref.visible = is_visible
             self.visible = is_visible
 
-    # CHANGE - internals referenced by SE3
-    def __set_graphic(self, given_obj):
+    # DONE - May need modifying
+    def __set_graphic(self, structure):
         """
         Set the graphic object depending on if one was given. If no object was given, create a box and return it
 
-        :param given_obj: Graphical object for the joint
-        :type given_obj: class:`vpython.compound`
-        :return: New graphical object for the joint
+        :param structure: `float` or `str` representing the joint length or STL path to load from
+        :type structure: `float` or `str`
+        :return: Graphical object for the joint
         :rtype: class:`vpython.compound`
         """
-        # If stl_filename is None, use a box
-        if given_obj is None:
-            box_midpoint = vector(
-                (self.__connect_to - self.__connect_from).mag / 2,
-                0,
-                0
-            )
+        if isinstance(structure, float):
+            length = structure
+
+            box_midpoint = vector(length / 2, 0, 0)
+
             # Create a box along the +x axis, with the origin (point of rotation) at (0, 0, 0)
-            graphic_obj = box(pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
-                              axis=x_axis_vector,
-                              size=vector((self.__connect_to - self.__connect_from).mag, 0.1, 0.1),
-                              up=z_axis_vector)
+            graphic_obj = box(
+                pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
+                axis=x_axis_vector,
+                size=vector(length, 0.1, 0.1),
+                up=y_axis_vector
+            )
+
             # Set the boxes new origin
-            graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=x_axis_vector)
-            # Set the boxes x and y vector first before applying the Z axis
-            # Otherwise rotates to the new vector from the original point (unintentionally rotating around it's z axis)
-            graphic_obj.axis = vector((self.__connect_to.x - self.__connect_from.x),
-                                      (self.__connect_to.y - self.__connect_from.y),
-                                      0)
-            graphic_obj.axis.z = (self.__connect_to.z - self.__connect_from.z)
+            graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=x_axis_vector, up=y_axis_vector)
+
             return graphic_obj
         else:
-            # TODO When texture application available, put it here
-            return given_obj
+            return import_object_from_numpy_stl(structure)
 
     # DONE
     def __import_texture(self):
         # TODO (much later)
         pass
 
-    # REMOVE
-    def get_connection_to_pos(self):
-        """
-        Return the private variable containing the connection position (toolpoint)
-
-        :return: Connect_to (toolpoint) position
-        :rtype: class:`vpython.vector`
-        """
-        # Return new vector to avoid copy by reference
-        return vector(self.__connect_to)
-
-    # REMOVE
-    def get_rotation_angle(self, axis):
-        """
-        Get the current angle of rotation around a specified X, Y, or Z axis
-
-        :param axis: Specified joint axis to get the angle of rotation of
-        :type axis: class:`vpython.vector`
-        :return: Current angle of rotation with respect to world (includes rotation from previous joints)
-        :rtype: float (radians)
-        :raise ValueError: The given axis_of_rotation must be one of the default X, Y, Z vectors (e.g. x_axis_vector)
-        """
-        # Ensure copying value not reference
-        ans = 0.0
-        if axis.equals(x_axis_vector):
-            ans += self.__x_rotation
-        elif axis.equals(y_axis_vector):
-            ans += self.__y_rotation
-        elif axis.equals(z_axis_vector):
-            ans += self.__z_rotation
-        else:
-            error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
-                        "or z_axis_vector ({3})."
-            raise ValueError(error_str.format(axis), x_axis_vector, y_axis_vector, z_axis_vector)
-
-        return ans
-
-    # CHANGE - internals referenced by SE3
+    # DONE
     def get_axis_vector(self, axis):
         """
         Get the current vector of a specified X, Y, or Z axis
@@ -346,15 +283,25 @@ class DefaultJoint:
         """
         # Return new vectors to avoid pass by reference
         if axis.equals(x_axis_vector):
-            return vector(self.__x_vector)
+            return self.__x_vector
         elif axis.equals(y_axis_vector):
-            return vector(self.__y_vector)
+            return self.__y_vector
         elif axis.equals(z_axis_vector):
-            return vector(self.__z_vector)
+            return self.__z_vector
         else:
             error_str = "Bad input vector given ({0}). Must be either x_axis_vector ({1}), y_axis_vector ({2})," \
                         "or z_axis_vector ({3})."
-            raise ValueError(error_str.format(axis), x_axis_vector, y_axis_vector, z_axis_vector)
+            raise ValueError(error_str.format(axis, x_axis_vector, y_axis_vector, z_axis_vector))
+
+    # DONE
+    def get_pose(self):
+        """
+        Return the current pose of the joint
+
+        :return: SE3 representation of the current joint pose
+        :rtype: `SE3`
+        """
+        return self.__pose
 
     # DONE
     def get_joint_type(self):
