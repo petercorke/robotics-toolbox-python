@@ -117,17 +117,30 @@ def test_graphical_robot_creation():
     robot.append_link('r', p3, 1.0)
 
     arr = array([
-        [0, 0, 1, 1],
-        [0, 1, 0, 1],
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 0],
+        [0, 0, 0, 1]
+    ])
+    new_p1 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
         [1, 0, 0, 1],
         [0, 0, 0, 1]
     ])
+    new_p2 = SE3(arr)
 
-    new_p = SE3(arr)
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 2],
+        [0, 0, 0, 1]
+    ])
+    new_p3 = SE3(arr)
 
-    new_p1 = new_p
-    new_p2 = new_p.Tx(1)
-    new_p3 = new_p.Tx(2)
+    sleep(2)
 
     robot.set_joint_poses([
         new_p1,
