@@ -314,6 +314,10 @@ class DefaultJoint:
         """
         return ""
 
+    # DONE
+    def get_graphic_object(self):
+        return self.__graphic_obj
+
 
 class RotationalJoint(DefaultJoint):
     """
