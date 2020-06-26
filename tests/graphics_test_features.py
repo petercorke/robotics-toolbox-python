@@ -13,8 +13,11 @@ Alternatively, executing this file will run the test_puma560_angle_change() func
 """
 
 from graphics.model_puma560 import *
+from numpy import array
+from spatialmath import SE3
 
 
+# DONE
 def test_grid_updating():
     """
     This test will create a canvas and update the grid every second.
@@ -26,6 +29,7 @@ def test_grid_updating():
         canvas_grid.update_grid()
 
 
+# DONE
 def test_reference_frame_pose():
     """
     This test will create a canvas, and place reference frames at the given positions and orientations.
@@ -34,27 +38,35 @@ def test_reference_frame_pose():
     canvas_grid = init_canvas()
 
     # Test 1 | Position (0, 0, 0), Axis (1, 0, 0), No Rotation
-    draw_reference_frame_axes(vector(0, 0, 0), vector(1, 0, 0), radians(0))
+    arr = array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
+    draw_reference_frame_axes(SE3(arr))
 
     # Test 2 | Position (1, 1, 1), Axis (0, 0, 1), No Rotation
-    draw_reference_frame_axes(vector(1, 1, 1), vector(0, 0, 1), radians(0))
+    arr = array([
+        [0, 0, 1, 1],
+        [0, 1, 0, 1],
+        [1, 0, 0, 1],
+        [0, 0, 0, 1]
+    ])
+    draw_reference_frame_axes(SE3(arr))
 
-    # Test 3 | Position (2, 2, 2), Axis (1, 0, 0), 30 deg rot
-    draw_reference_frame_axes(vector(2, 2, 2), vector(1, 0, 0), radians(30))
-
-    # Test 4 | Position (3, 3, 3), Axis (1, 1, 1), No Rotation
-    draw_reference_frame_axes(vector(3, 3, 3), vector(1, 1, 1), radians(0))
-
-    # Test 5 | Position (4, 4, 4), Axis (1, 1, 1), 30 deg rot
-    draw_reference_frame_axes(vector(4, 4, 4), vector(1, 1, 1), radians(30))
-
-    # Test 6 | Position (5, 5, 5), Axis (2, -1, 4), No Rotation
-    draw_reference_frame_axes(vector(5, 5, 5), vector(2, -1, 4), radians(0))
-
-    # Test 7 | Position (6, 6, 6), Axis (2, -1, 4), 30 deg rot
-    draw_reference_frame_axes(vector(6, 6, 6), vector(2, -1, 4), radians(30))
+    # Test 3 | Position (2, 2, 2), Axis (0, 1, 0), 30 deg rot
+    arr = array([
+        [0, -1, 0, 2],
+        [1, 0, 0, 2],
+        [0, 0, 1, 2],
+        [0, 0, 0, 1]
+    ])
+    se = SE3(arr)
+    draw_reference_frame_axes(se.Rx(30, 'deg'))
 
 
+# AWAIT
 def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
@@ -63,51 +75,68 @@ def test_import_stl():
     canvas_grid = init_canvas()
 
     puma560 = import_puma_560()
-    puma560.move_base(vector(1, 1, 0))
 
 
+# DONE
 def test_rotational_link():
     """
     This test will create a simple rotational link from (0, 0, 0) to (1, 0, 0).
-    Depending on which for loop is commented out:
-    The joint will then rotate in a positive direction about it's +y axis.
-    OR
-    The joint will rotate to the given angles in the list.
     """
     canvas_grid = init_canvas()
-    # rot = vector(0, 0, 1)
-    rot = vector(0, 1, 0)
-    # rot = vector(1, 0, 0)
-    rot_link = RotationalJoint(vector(0, 0, 0), vector(1, 0, 0), x_axis=x_axis_vector, rotation_axis=rot)
-    rot_link.rotate_around_joint_axis(radians(30), x_axis_vector)
+
+    arr = array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
+    se3 = SE3(arr)
+
+    rot_link = RotationalJoint(se3, 1.0)
     rot_link.draw_reference_frame(True)
 
-    # for angle in [0, 45, 90, 135, 180, -135, -90, -45, 33, -66, -125, 162, 360, 450, -270, -333]:
-    #    sleep(5)
-    #    rot_link.rotate_joint(radians(angle))
 
-    for angle in range(0, 360):
-        sleep(0.05)
-        rot_link.rotate_joint(radians(angle))
-
-
+# DONE
 def test_graphical_robot_creation():
     """
     This test will create a simple 3-link graphical robot.
-    The joints are then set to particular angles to show rotations.
+    The joints are then set to new poses to show updating does occur.
     """
     canvas_grid = init_canvas()
 
-    x = GraphicalRobot([
-        RotationalJoint(vector(0, 0, 0), vector(1, 0, 0)),
-        RotationalJoint(vector(1, 0, 0), vector(2, 0, 0)),
-        RotationalJoint(vector(2, 0, 0), vector(3, 0, 0))
+    p = SE3()
+
+    p1 = p
+    p2 = p.Tx(1)
+    p3 = p.Tx(2)
+
+    robot = GraphicalRobot()
+
+    robot.append_link('r', p1, 1.0)
+    robot.append_link('R', p2, 1.0)
+    robot.append_link('r', p3, 1.0)
+
+    arr = array([
+        [0, 0, 1, 1],
+        [0, 1, 0, 1],
+        [1, 0, 0, 1],
+        [0, 0, 0, 1]
     ])
 
-    sleep(2)
-    x.set_all_joint_angles([radians(-45), radians(45), radians(15)])
+    new_p = SE3(arr)
+
+    new_p1 = new_p
+    new_p2 = new_p.Tx(1)
+    new_p3 = new_p.Tx(2)
+
+    robot.set_joint_poses([
+        new_p1,
+        new_p2,
+        new_p3
+    ])
 
 
+# AWAIT
 def test_puma560_angle_change():
     """
     This test loads in the Puma560 model and changes its angles over time.
@@ -142,6 +171,7 @@ def test_puma560_angle_change():
     puma560.print_joint_angles(True)
 
 
+# AWAIT
 def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
@@ -157,6 +187,7 @@ def test_clear_scene():
     del puma560
 
 
+# AWAIT
 def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
