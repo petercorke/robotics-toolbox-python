@@ -222,6 +222,10 @@ class DefaultJoint:
                 self.__graphic_ref.up = get_pose_y_vec(self.__pose)
 
     # DONE
+    def set_stl_joint_origin(self, current_location, required_location):
+        set_stl_origin(self.__graphic_obj, current_location, required_location)
+
+    # DONE
     def set_joint_visibility(self, is_visible):
         """
         Choose whether or not the joint is displayed in the canvas.
