@@ -319,6 +319,12 @@ class DefaultJoint:
 
     # DONE
     def get_graphic_object(self):
+        """
+        Getter function that returns the graphical object of the joint
+
+        :return: VPython graphical entity of the joint
+        :rtype: `vpython.object`
+        """
         return self.__graphic_obj
 
 
@@ -458,6 +464,15 @@ class GraphicalRobot:
         self.joints = []
         self.num_joints = 0
         self.is_shown = True
+
+    def append_made_link(self, joint):
+        """
+        Append an already made joint to the end of the robot (Useful for links manually created)
+        :param joint: A joint object already constructed
+        :type joint: `graphics.graphics_robot.DefaultJoint` or inherited classes
+        """
+        self.joints.append(joint)
+        self.num_joints += 1
 
     def append_link(self, typeof, pose, structure):
         """
