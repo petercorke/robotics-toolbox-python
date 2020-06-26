@@ -9,17 +9,16 @@ def import_puma_560():
     :return: Puma560 robot
     :rtype: class:`graphics.graphics_robot.GraphicalRobot`
     """
-    puma560 = GraphicalRobot(
-        [
-            create_link_0(),
-            create_link_1(),
-            create_link_2(),
-            create_link_3(),
-            create_link_4(),
-            create_link_5(),
-            create_link_6()
-        ]
-    )
+    puma560 = GraphicalRobot()
+
+    puma560.append_made_link(create_link_0())
+    puma560.append_made_link(create_link_1())
+    puma560.append_made_link(create_link_2())
+    puma560.append_made_link(create_link_3())
+    puma560.append_made_link(create_link_4())
+    puma560.append_made_link(create_link_5())
+    puma560.append_made_link(create_link_6())
+
     return puma560
 
 
