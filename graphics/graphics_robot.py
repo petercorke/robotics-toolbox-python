@@ -30,14 +30,13 @@ class DefaultJoint:
         self.__graphic_obj = self.__set_graphic(structure)
         self.visible = True
 
-
         # Calculate the length of the link (Generally longest side is the length)
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__pose)
 
-        self.update_pose(self.__pose)
+        #self.update_pose(self.__pose)
 
     # Keep, but will be for private use??
     def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
