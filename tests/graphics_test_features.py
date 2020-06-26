@@ -66,14 +66,12 @@ def test_reference_frame_pose():
     draw_reference_frame_axes(se.Rx(30, 'deg'))
 
 
-# AWAIT
+# DONE
 def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
-    The robot should have all joint angles to 0 (Robot is in an 'L' shape from (1, 1, 0) in the +X axis direction)
     """
     canvas_grid = init_canvas()
-
     puma560 = import_puma_560()
 
 
@@ -149,42 +147,29 @@ def test_graphical_robot_creation():
     ])
 
 
-# AWAIT
+# NEED POSES
 def test_puma560_angle_change():
     """
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
     canvas_grid = init_canvas()
-
     puma560 = import_puma_560()
-    puma560.move_base(vector(1, 1, 0))
 
     puma560.set_reference_visibility(False)
-    print("Prior Angles")
-    puma560.print_joint_angles(True)
 
-    sleep(2)
-    puma560.set_all_joint_angles([
-        radians(45), 0, 0, 0, 0, 0, 0,
+    print("Prior Poses")
+    puma560.print_joint_poses()
+
+    puma560.set_joint_poses([
+        # TODO
     ])
 
-    sleep(2)
-    puma560.set_all_joint_angles([
-        radians(45), 0, radians(-90), 0, 0, 0, 0,
-    ])
-
-    sleep(2)
-    puma560.set_joint_angle(4, radians(156))
-
-    sleep(2)
-    puma560.set_joint_angle(2, radians(-23))
-
-    print("Final Angles")
-    puma560.print_joint_angles(True)
+    print("Final Poses")
+    puma560.print_joint_angles()
 
 
-# AWAIT
+# DONE
 def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
@@ -192,7 +177,7 @@ def test_clear_scene():
     the_grid = init_canvas()
 
     puma560 = import_puma_560()
-    puma560.move_base(vector(1, 1, 0))
+    puma560.set_reference_visibility(True)
 
     sleep(2)
 
@@ -200,7 +185,7 @@ def test_clear_scene():
     del puma560
 
 
-# AWAIT
+# NEED POSES
 def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
@@ -210,7 +195,9 @@ def test_clear_scene_with_grid_updating():
     puma560 = import_puma_560()
     the_grid.update_grid()
 
-    puma560.move_base(vector(1, 1, 0))
+    puma560.set_joint_poses([
+        # TODO
+    ])
     the_grid.update_grid()
 
     sleep(2)

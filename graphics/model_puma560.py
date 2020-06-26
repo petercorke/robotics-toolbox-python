@@ -19,6 +19,8 @@ def import_puma_560():
     puma560.append_made_link(create_link_5())
     puma560.append_made_link(create_link_6())
 
+    # TODO set poses correctly to reflect 'L' shape default position
+
     return puma560
 
 
