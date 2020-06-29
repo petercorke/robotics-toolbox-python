@@ -1,4 +1,7 @@
-from graphics.graphics_text import *
+# from graphics.graphics_text import *
+from vpython import scene, vector, compound, mag, box, color
+from graphics.graphics_text import update_grid_numbers
+from numpy import sign
 
 
 class GraphicsGrid:
@@ -23,8 +26,6 @@ class GraphicsGrid:
         # Order is [x-plane numbers, "X", y-plane numbers, "Y", z-plane numbers, "Z"]
         self.grid_object = [[], []]
         self.__init_grid()
-
-
 
     def __init_grid(self):
         """

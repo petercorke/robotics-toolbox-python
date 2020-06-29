@@ -1,5 +1,9 @@
-from graphics.graphics_canvas import *
-from graphics.graphics_stl import *
+# from graphics.graphics_canvas import *
+# from graphics.graphics_stl import *
+from vpython import box, vector, compound
+from graphics.graphics_canvas import draw_reference_frame_axes
+from graphics.common_functions import *
+from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
 
 
 class DefaultJoint:
@@ -52,6 +56,7 @@ class DefaultJoint:
         raise PendingDeprecationWarning("Currently out of date. Will be updated soon.")
         # Determine the axis of rotation based on the given joint axis direction
         # Then add the rotation amount to the axis counter
+        """
         if axis_of_rotation.equals(x_axis_vector):
             rotation_axis = self.__x_vector
             self.__x_rotation = wrap_to_pi("rad", self.__x_rotation + angle_of_rotation)
@@ -77,6 +82,7 @@ class DefaultJoint:
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
+        """
 
     # Keep, but will be for private use??
     def rotate_around_vector(self, angle_of_rotation, axis_of_rotation):
@@ -91,6 +97,7 @@ class DefaultJoint:
         """
         raise PendingDeprecationWarning("Currently out of date. Will be updated soon.")
 
+        """
         x_prev, y_prev, z_prev = vector(self.__x_vector), vector(self.__y_vector), vector(self.__z_vector)
 
         # Rotate the graphic object of the link to automatically transform the xyz axes and the graphic
@@ -121,6 +128,7 @@ class DefaultJoint:
         if self.__graphic_ref is not None:
             self.draw_reference_frame(self.__graphic_ref.visible)
         self.__draw_graphic()
+        """
 
     # DONE
     def update_position(self, se_object):

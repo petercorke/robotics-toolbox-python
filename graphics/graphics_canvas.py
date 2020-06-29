@@ -1,5 +1,8 @@
-from graphics.graphics_grid import *
+# from graphics.graphics_grid import *
+# from graphics.common_functions import *
+from vpython import scene, color, arrow, compound
 from graphics.common_functions import *
+from graphics.graphics_grid import GraphicsGrid
 
 
 def init_canvas(height=500, width=1000, title='', caption='', grid=True):

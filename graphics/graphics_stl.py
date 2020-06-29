@@ -1,4 +1,4 @@
-from vpython import *
+from vpython import vec, vertex, color, triangle, compound
 from graphics.common_functions import *
 from stl import mesh
 

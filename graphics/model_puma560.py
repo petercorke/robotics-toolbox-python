@@ -1,5 +1,8 @@
-from graphics.graphics_robot import *
-from graphics.graphics_stl import *
+# from graphics.graphics_robot import *
+# from graphics.graphics_stl import *
+from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
+from vpython import vector
+from spatialmath import SE3
 
 
 def import_puma_560():
@@ -147,7 +150,7 @@ def create_link_4():
     # stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
 
     # Change color
-    stl_obj.color = color.magenta
+    # stl_obj.color = color.magenta
 
     return link
 
