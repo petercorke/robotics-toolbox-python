@@ -523,10 +523,13 @@ class GraphicalRobot:
         if self.num_joints == 0:
             raise UserWarning("No robot joints to detach")
 
-        # TODO handle clearing it from canvas
+        # Turn off the graphics in the canvas
+        self.joints[self.num_joints - 1].set_joint_visibility(False)
+        # Ensure deletion
+        self.joints[self.num_joints - 1] = None
 
-        # Keep all but the last joint
-        self.joints = self.joints[0:self.num_joints-1]
+        # Resize list
+        self.joints = self.joints[0:self.num_joints - 1]
         self.num_joints -= 1
 
     # DONE
