@@ -17,7 +17,6 @@ from spatialmath import SE3
 import graphics as gph
 
 
-# DONE
 def test_grid_updating():
     """
     This test will create a canvas and update the grid every second.
@@ -29,7 +28,6 @@ def test_grid_updating():
         canvas_grid.update_grid()
 
 
-# DONE
 def test_reference_frame_pose():
     """
     This test will create a canvas, and place reference frames at the given positions and orientations.
@@ -66,7 +64,6 @@ def test_reference_frame_pose():
     gph.draw_reference_frame_axes(se.Rx(30, 'deg'))
 
 
-# DONE
 def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
@@ -75,7 +72,6 @@ def test_import_stl():
     puma560 = gph.import_puma_560()
 
 
-# DONE
 def test_rotational_link():
     """
     This test will create a simple rotational link from (0, 0, 0) to (1, 0, 0).
@@ -94,7 +90,6 @@ def test_rotational_link():
     rot_link.draw_reference_frame(True)
 
 
-# DONE
 def test_graphical_robot_creation():
     """
     This test will create a simple 3-link graphical robot.
@@ -147,7 +142,7 @@ def test_graphical_robot_creation():
     ])
 
 
-# NEED POSES
+# TODO
 def test_puma560_angle_change():
     """
     This test loads in the Puma560 model and changes its angles over time.
@@ -169,7 +164,6 @@ def test_puma560_angle_change():
     puma560.print_joint_angles()
 
 
-# DONE
 def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
@@ -185,7 +179,7 @@ def test_clear_scene():
     del puma560
 
 
-# NEED POSES
+# TODO
 def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
