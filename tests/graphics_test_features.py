@@ -83,10 +83,10 @@ def test_rotational_link():
     canvas_grid = gph.init_canvas()
 
     arr = array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
+        [0, 0, -1, 0],
+        [0, 1,  0, 0],
+        [1, 0,  0, 0],
+        [0, 0,  0, 1]
     ])
     se3 = SE3(arr)
 
