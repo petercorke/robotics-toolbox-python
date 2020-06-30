@@ -40,7 +40,9 @@ class DefaultJoint:
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__pose)
 
-        #self.update_pose(self.__pose)
+        # Apply the initial pose if not given an STL (STL may need origin updating)
+        if isinstance(structure, float):
+            self.update_pose(self.__pose)
 
     # Keep, but will be for private use??
     def rotate_around_joint_axis(self, angle_of_rotation, axis_of_rotation):
@@ -230,6 +232,17 @@ class DefaultJoint:
 
     # DONE
     def set_stl_joint_origin(self, current_location, required_location):
+        """
+        Modify the origin position of the graphical object.
+        This is mainly used when loading STL objects. If the origin (point of rotation/placement) does not align with
+        reality, it can be set.
+        It translates the object to place the origin at the required location, and save the new origin to the object.
+
+        :param current_location: 3D coordinate of where the real origin is in space.
+        :type current_location: `vpython.vector`
+        :param required_location: 3D coordinate of where the real origin should be in space
+        :type required_location: `vpython.vector`
+        """
         set_stl_origin(self.__graphic_obj, current_location, required_location)
 
     # DONE
@@ -392,15 +405,13 @@ class PrismaticJoint(DefaultJoint):
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float` or `str`
     """
-    # TODO
     def __init__(self, initial_se3, structure):
         super().__init__(initial_se3, structure)
         self.min_translation = None
         self.max_translation = None
 
     def translate_joint(self, new_translation):
-        # TODO calculate new connectTo point, update relevant super() params
-        # TODO Update graphic
+        # TODO
         pass
 
     def get_joint_type(self):
@@ -465,7 +476,7 @@ class Gripper(DefaultJoint):
 
 class GraphicalRobot:
     """
-    The GraphicalRobot class encapsulates all of the different joint types to easily control the robot arm.
+    The GraphicalRobot class holds all of the different joints to easily control the robot arm.
     """
 
     def __init__(self):
@@ -476,6 +487,7 @@ class GraphicalRobot:
     def append_made_link(self, joint):
         """
         Append an already made joint to the end of the robot (Useful for links manually created)
+
         :param joint: A joint object already constructed
         :type joint: `graphics.graphics_robot.DefaultJoint` or inherited classes
         """
