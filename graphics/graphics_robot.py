@@ -256,11 +256,14 @@ class DefaultJoint:
 
         :param structure: `float` or `str` representing the joint length or STL path to load from
         :type structure: `float` or `str`
+        :raises ValueError: Joint length must be greater than 0
         :return: Graphical object for the joint
         :rtype: class:`vpython.compound`
         """
         if isinstance(structure, float):
             length = structure
+            if length <= 0.0:
+                raise ValueError("Joint length must be greater than 0")
 
             box_midpoint = vector(length / 2, 0, 0)
 
