@@ -1,6 +1,6 @@
 # from graphics.graphics_canvas import *
 # from graphics.graphics_stl import *
-from vpython import box, vector, compound
+from vpython import box, compound, scene
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -537,6 +537,16 @@ class GraphicalRobot:
                 joint.set_joint_visibility(is_visible)
                 self.is_shown = is_visible
 
+    def set_reference_visibility(self, is_visible):
+        """
+        Set the visibility of the reference frame for all joints.
+
+        :param is_visible: Whether the reference frames should be visible or not.
+        :type is_visible: bool
+        """
+        for joint in self.joints:
+            joint.draw_reference_frame(is_visible)
+
     def set_joint_poses(self, all_poses):
         """
         Set the joint poses.
@@ -557,15 +567,27 @@ class GraphicalRobot:
         for idx in range(0, self.num_joints):
             self.joints[idx].update_pose(all_poses[idx])
 
-    def set_reference_visibility(self, is_visible):
+    def animate(self, frame_poses):
         """
-        Set the visibility of the reference frame for all joints.
+        Calling this function will animate the robot through its frames.
 
-        :param is_visible: Whether the reference frames should be visible or not.
-        :type is_visible: bool
+        :param frame_poses: A 2D list of each joint pose for each frame.
+        :type frame_poses: `list`
+        :raises ValueError: Number of frames must be greater than 0
         """
-        for joint in self.joints:
-            joint.draw_reference_frame(is_visible)
+        num_frames = len(frame_poses)
+
+        # Validate num_frames
+        if num_frames == 0:
+            raise ValueError("0 frames were given. Supply at least 1 iteration of poses.")
+
+        for poses in frame_poses:
+            # Validation done in set_joint_poses
+            print("Updating...")
+            self.set_joint_poses(poses)
+            # TODO use one/both/something else
+            # scene.waitfor("draw_complete")
+            # sleep(0.16667)
 
     def set_joint_angle(self, link_num, new_angle):
         """
