@@ -213,6 +213,17 @@ my_graphical_robot.set_joint_poses([
 ])
 ```
 
+Alternatively, an `animate` function allows the robot to iterate through given poses to simulate movement.
+Given an array of poses (per frame) the robot will transition through each pose.
+```python
+my_graphical_robot.animate([
+    [pose1, pose2, pose3],  # Frame 1
+    [pose1, pose2, pose3],  # Frame 2
+    [pose1, pose2, pose3],  # Frame 3
+    [pose1, pose2, pose3]   # Frame 4
+])
+```
+
 Lastly, a print function `print_joint_poses()` will print out the current poses of all joints.
 ```python
 # Print joint poses
