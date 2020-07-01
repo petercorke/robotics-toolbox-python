@@ -3,7 +3,7 @@
 These functions are not ordinary testing functions.
 These tests cannot be automated, and must be manually validated.
 
-To execute, import all from this file into the console. "from tests.graphics_test_features import *"
+To execute, import from this file into the console. "import test.test_graphics as test_gph"
 Next select which test you which to run, and call the function.
 A canvas will be created and display the respective graphics.
 Verify the output is as expected.
@@ -205,8 +205,34 @@ def test_clear_scene_with_grid_updating():
         the_grid.update_grid()
 
 
+# TODO
 def test_animate_joints():
-    pass
+    """
+    This test will create a three link robot, and iterate through a series of frames to animate movement.
+    """
+    the_grid = gph.init_canvas()
+
+    p = SE3()
+
+    p1 = p
+    p2 = p.Tx(1)
+    p3 = p.Tx(2)
+
+    robot = gph.GraphicalRobot()
+
+    robot.append_link('r', p1, 1.0)
+    robot.append_link('R', p2, 1.0)
+    robot.append_link('r', p3, 1.0)
+
+    robot.animate([
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()],
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()],
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()],
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()],
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()],
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()],
+        [SE3().Rand(), SE3().Rand(), SE3().Rand()]
+    ])
 
 
 def test_import_textures():
