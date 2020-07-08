@@ -34,7 +34,7 @@ def create_link_0():
     :return: Rotational joint representing joint 0
     :rtype: class:`graphics.graphics_robot.RotationalJoint
     """
-    stl_obj_path = './graphics/models/link0.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link0.stl'
 
     link = RotationalJoint(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
@@ -59,7 +59,7 @@ def create_link_1():
     :return: Rotational joint representing joint 1
     :rtype: class:`graphics.graphics_robot.StaticJoint
     """
-    stl_obj_path = './graphics/models/link1.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link1.stl'
 
     link = StaticJoint(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
@@ -84,7 +84,7 @@ def create_link_2():
         :return: Rotational joint representing joint 2
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
-    stl_obj_path = './graphics/models/link2.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link2.stl'
 
     link = RotationalJoint(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
@@ -110,7 +110,7 @@ def create_link_3():
         :return: Rotational joint representing joint 3
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
-    stl_obj_path = './graphics/models/link3.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link3.stl'
 
     link = RotationalJoint(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
@@ -136,7 +136,7 @@ def create_link_4():
         :return: Rotational joint representing joint 4
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
-    stl_obj_path = './graphics/models/link4.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link4.stl'
 
     link = RotationalJoint(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
@@ -162,7 +162,7 @@ def create_link_5():
         :return: Rotational joint representing joint 5
         :rtype: class:`graphics.graphics_robot.RotationalJoint
         """
-    stl_obj_path = './graphics/models/link5.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link5.stl'
 
     link = RotationalJoint(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
@@ -188,7 +188,7 @@ def create_link_6():
         :return: Rotational joint representing joint 6
         :rtype: class:`graphics.graphics_robot.Gripper
         """
-    stl_obj_path = './graphics/models/link6.stl'
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link6.stl'
 
     link = Gripper(SE3(), stl_obj_path)
     stl_obj = link.get_graphic_object()
