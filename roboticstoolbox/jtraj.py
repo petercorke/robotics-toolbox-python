@@ -2,7 +2,7 @@ import numpy as np
 import spatialmath.base.argcheck as arg
 from collections import namedtuple
 
-def  jtraj(q0, q1, tv, qd0=None, qd1=None, vel=False, accel=False):
+def  jtraj(q0, q1, tv, qd0=None, qd1=None):
     """
     JTRAJ Compute a joint space trajectory
     
@@ -12,16 +12,13 @@ def  jtraj(q0, q1, tv, qd0=None, qd1=None, vel=False, accel=False):
     :type q1: array_like
     :param tv: time vector or number of steps
     :type tv: array_like or int
-    :param vel: output velocity trajectory, defaults to False
-    :type vel: bool, optional
-    :param accel: output acceleration trajectory, defaults to False
-    :type accel: bool, optional
     :param qd0: initial velocity, defaults to zero
     :type qd0: array_like, optional
     :param qd1: final velocity, defaults to zero
     :type qd1: array_like, optional
     :return: trajectory of coordinates and optionally velocity and acceleration
-    :rtype: np.ndarray, or namedtuple of np.ndarray
+    :return: trajectory of coordinates plus optionally velocity and acceleration
+    :rtype: namedtuple
 
 
     ``Q = JTRAJ(Q0, QF, M)`` is a joint space trajectory ``Q`` (MxN) where the joint
@@ -88,34 +85,19 @@ def  jtraj(q0, q1, tv, qd0=None, qd1=None, vel=False, accel=False):
     n = len(q0)
     
     tt = np.array([t**5, t**4, t**3, t**2, t, np.ones(t.shape)]).T
-    c = np.array([A, B, C, np.zeros(A.shape), E, F])
+    coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])
     
-    qt = tt @ c
+    qt = tt @ coeffs
     
-    if not vel and not accel:
-        return qt
+    # compute  velocity
+    c = np.array([np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E])
+    qdt = tt @ coeffs / tscal
 
-    if vel and not accel:
-        out = namedtuple('jtraj', 'q qd')
-    elif not vel and accel:
-        out = namedtuple('jtraj', 'q qdd')
-    else:
-        out = namedtuple('jtraj', 'q qd qdd')
-                
-    out.q = qt
-    if vel:
-        # compute optional velocity
-        c = np.array([np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E])
-        qdt = tt @ c / tscal
-        out.qd = qdt
+    # compute  acceleration
+    c = np.array([np.zeros(A.shape), np.zeros(A.shape), 20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
+    qddt = tt @ coeffs / tscal**2
 
-    # compute optional acceleration
-    if accel:
-        c = np.array([np.zeros(A.shape), np.zeros(A.shape), 20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
-        qddt = tt @ c / tscal**2
-        out.qdd = qddt
-
-    return out
+    return namedtuple('jtraj', 't q qd qdd')(tt, qt, qdt, qddt)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

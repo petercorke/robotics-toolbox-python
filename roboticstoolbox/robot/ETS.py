@@ -247,6 +247,30 @@ class ETS(object):
                     J[3:, j] = a
 
                     j += 1
+                elif self.ets[i]._axis == 'tx':
+                    U = U @ self.ets[i].T(q[j])
+                    n = U[:3, 0]
+
+                    J[:3, j] = n
+                    J[3:, j] = np.array([0, 0, 0])
+
+                    j += 1
+                elif self.ets[i]._axis == 'ty':
+                    U = U @ self.ets[i].T(q[j])
+                    o = U[:3, 1]
+
+                    J[:3, j] = o
+                    J[3:, j] = np.array([0, 0, 0])
+
+                    j += 1
+                elif self.ets[i]._axis == 'tz':
+                    U = U @ self.ets[i].T(q[j])
+                    a = U[:3, 2]
+
+                    J[:3, j] = a
+                    J[3:, j] = np.array([0, 0, 0])
+
+                    j += 1
 
         return J
 
@@ -398,3 +422,52 @@ class ETS(object):
             )
 
         return model
+
+
+    """
+    The spatial velocity Jacobian which relates the velocity in base 
+    frame to velocity in the end-effector frame.
+    
+    Parameters
+    ----------
+    q : float np.ndarray(1,n)
+        The joint angles/configuration of the robot
+    Returns
+    -------
+    J : float np.ndarray(6,n)
+        The velocity Jacobian in ee frame
+    Examples
+    --------
+    >>> J = panda.jacobev(np.array([1,1,1,1,1,1,1]))
+    >>> J = panda.Jev
+    
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+    """
+    def jacobev(self, q):
+        r = self.fkine(q)[0:3,0:3]
+        r = np.linalg.inv(r)
+
+        Jv = np.zeros((6,6))
+        Jv[:3,:3] = r
+        Jv[3:,3:] = r
+
+        return Jv
+
+    def jacobe(self, q):
+        J0 = self.jacob0(q)
+        Je = self.jacobev(q) @ J0
+        return Je
+
+    def jacob0v(self, q):
+        r = self.fkine(q)[0:3,0:3]
+
+        Jv = np.zeros((6,6))
+        Jv[:3,:3] = r
+        Jv[3:,3:] = r
+
+        return Jv
