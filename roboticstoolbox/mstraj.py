@@ -1,11 +1,11 @@
 import numpy as np
 import math
 
-import jtraj
+from roboticstoolbox import jtraj
 from collections import namedtuple
 
 
-def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qdf=None, extra=False, verbose=False):
+def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qdf=None, verbose=False):
 
     """
     MSTRAJ Multi-segment multi-axis trajectory
@@ -26,12 +26,10 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     :type qd0: array_like, optional
     :param qdf: final joint velocity, defaults to zero
     :type qdf: array_like, optional
-    :param extra: return extra information, defaults to False
-    :type extra: bool, optional
     :param verbose: print debug information, defaults to False
     :type verbose: bool, optional
-    :return: trajectory or trajectory plus extra info
-    :rtype: np.ndarray, 
+    :return: trajectory plus extra info
+    :rtype: namedtuple
 
      ``TRAJ = MSTRAJ(WP, QDMAX, TSEG, Q0, DT, TACC)`` is a trajectory
      (KxN) for N axes moving simultaneously through M segment.  Each segment
@@ -193,7 +191,8 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
         qd = dq / tseg
 
         # add the blend polynomial
-        qb = jtraj.jtraj(q0, q_prev + tacc2 * qd, np.arange(0, taccx, dt), qd0=qd_prev, qd1=qd)
+        print(jtraj)
+        qb = jtraj.jtraj(q0, q_prev + tacc2 * qd, np.arange(0, taccx, dt), qd0=qd_prev, qd1=qd).q
         tg = np.vstack([tg, qb[1:,:]])
 
         clock = clock + taccx     # update the clock
@@ -209,28 +208,14 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
         qd_prev = qd
 
     # add the final blend
-    qb = jtraj.jtraj(q0, q_next, np.arange(0, tacc2, dt), qd0=qd_prev, qd1=qdf)
+    qb = jtraj.jtraj(q0, q_next, np.arange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).q
     tg = np.vstack([tg, qb[1:,:]])
 
     print(info)
 
     infolist.append(info(None, tseg, None, clock))
     
-    if extra:
-        out = namedtuple('mstraj', 't q arrive info')
-        out.t = dt * np.arange(0, tg.shape[0])
-        out.q = tg
-        out.arrive = arrive
-        out.info = infolist
-        out.viapoints = viapoints
-        return out
-    else:
-        return tg
-
-
-    #return (TG, t, info)
-    
-    return tg
+    return namedtuple('mstraj', 't q arrive info via')(dt * np.arange(0, tg.shape[0]), tg, arrive, infolist, viapoints)
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
