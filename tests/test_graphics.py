@@ -23,9 +23,6 @@ def test_grid_updating():
     Eventually, the grid will only update through callbacks of key/button releases.
     """
     canvas_grid = gph.init_canvas()
-    while True:
-        sleep(1)
-        canvas_grid.update_grid()
 
 
 def test_reference_frame_pose():
@@ -183,26 +180,18 @@ def test_clear_scene():
 def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
-    Meanwhile, grid update calls have been placed in between. (Currently the only way to update the grid)
     """
     the_grid = gph.init_canvas()
     puma560 = gph.import_puma_560()
-    the_grid.update_grid()
 
     puma560.set_joint_poses([
         # TODO
     ])
-    the_grid.update_grid()
 
     sleep(2)
-    the_grid.update_grid()
 
     the_grid.clear_scene()
     del puma560
-
-    while True:
-        sleep(1)
-        the_grid.update_grid()
 
 
 # TODO

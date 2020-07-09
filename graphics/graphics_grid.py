@@ -8,6 +8,7 @@ class GraphicsGrid:
     """
     This class holds the current grid displayed in the canvas
     """
+
     def __init__(self):
         # Save the current camera settings
         self.camera_pos = scene.camera.pos
@@ -26,6 +27,9 @@ class GraphicsGrid:
         # Order is [x-plane numbers, "X", y-plane numbers, "Y", z-plane numbers, "Z"]
         self.grid_object = [[], []]
         self.__init_grid()
+
+        # Bind mouse releases to the update_grid function
+        scene.bind('mouseup keyup', self.__update_grid)
 
     def __init_grid(self):
         """
@@ -204,7 +208,7 @@ class GraphicsGrid:
         else:
             self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = vector(max_x_coord, y_middle, z_middle)
 
-    def update_grid(self):
+    def __update_grid(self):
         """
         Update the grid axes and numbers if the camera position/rotation has changed.
         """
