@@ -5,7 +5,8 @@ from ropy.robot.link import Link
 from ropy.robot.fkine import fkine
 from ropy.robot.jocobe import jacobe
 from ropy.robot.jocob0 import jacob0
-from ropy.robot.ets import ets
+from spatialmath.base.argcheck import getvector, ismatrix
+import spatialmath.base as sp
 
 class SerialLink(object):
     """
@@ -14,38 +15,24 @@ class SerialLink(object):
     Note: Link subclass elements passed in must be all standard, or all 
           modified, DH parameters.
     
-    Attributes:
-    --------
-        name : string
-            Name of the robot
-        manufacturer : string
-            Manufacturer of the robot
-        base : float np.ndarray(4,4)
-            Locaation of the base
-        tool : float np.ndarray(4,4)
-            Location of the tool
-        links : List[n]
-            Series of links which define the robot
-        mdh : int
-            0 if standard D&H, else 1
-        n : int
-            Number of joints in the robot
-        T : float np.ndarray(4,4)
-            The current pose of the robot
-        q : float np.ndarray(1,n)
-            The current joint angles of the robot
-        Je : float np.ndarray(6,n)
-            The manipulator Jacobian matrix maps joint velocity to end-effector
-            spatial velocity in the ee frame
-        J0 : float np.ndarray(6,n)
-            The manipulator Jacobian matrix maps joint velocity to end-effector
-            spatial velocity in the 0 frame
-        He : float np.ndarray(6,n,n)
-            The manipulator Hessian matrix maps joint acceleration to end-effector
-            spatial acceleration in the ee frame
-        H0 : float np.ndarray(6,n,n)
-            The manipulator Hessian matrix maps joint acceleration to end-effector
-            spatial acceleration in the 0 frame
+    :param name: Name of the robot
+    :type name: string
+    :param manufacturer: Manufacturer of the robot
+    :type manufacturer: string
+    :param base: Locaation of the base 
+    :type base: float np.ndarray(4,4)
+    :param tool: Location of the tool 
+    :type tool: float np.ndarray(4,4)
+    :param links: Series of links which define the robot 
+    :type links: List[n]
+    :param mdh: 0 if standard D&H, else 1 
+    :type mdh: int
+    :param n: Number of joints in the robot
+    :type n: int
+    :param T: The current pose of the robot 
+    :type T: float np.ndarray(4,4)
+    :param q: The current joint angles of the robot
+    :type q: float np.ndarray(1,n)
 
     Examples
     --------
@@ -67,8 +54,8 @@ class SerialLink(object):
             L, 
             name = 'noname', 
             manufacturer = '', 
-            base = np.eye(4,4),
-            tool = np.eye(4,4)
+            base = np.eye(4, 4),
+            tool = np.eye(4, 4)
             ):
 
         self._name = name
@@ -80,6 +67,7 @@ class SerialLink(object):
 
         super(SerialLink, self).__init__()        
 
+        # Verify link length
         if not isinstance(L, list):
             raise TypeError('The links L must be stored in a list.')
         else:
@@ -87,17 +75,18 @@ class SerialLink(object):
                 raise TypeError('The links in L must be of Link type.')
             else:
                 self._links = L
-
+        
+        # Number of joints in the robot
         self._n = len(self._links)
+
+        # Current joint angles of the robot
         self._q = np.zeros((self._n,))
 
+        # Check the DH convention
         self._mdh = self.links[0].mdh
         for i in range(self._n):
             if not self._links[i].mdh == self._mdh:
                 raise ValueError('Robot has mixed D&H links conventions.')
-
-        # Initialise Properties
-        self._ets = ets(self)
 
 
     # Property methods
@@ -134,49 +123,8 @@ class SerialLink(object):
     def q(self):
         return self._q  
 
-    @property
-    def T(self):
-        return self.fkine(self.q)
-
-    @property
-    def Je(self):
-        return self.jacobe(self.q)
-
-    @property
-    def J0(self):
-        return self._ets.jacob0(self.q)
-
-    # @property
-    # def He(self):
-    #     self._He = self._ets.hessiane(self.q)
-    #     return self._He
-
-    @property
-    def H0(self):
-        return self.hessian0(self.q)
-
-    @property
-    def Jev(self):
-        return self.jacobev(self.q)
-
-    @property
-    def J0v(self):
-        return self.jacob0v(self.q)
-
-    @property
-    def ets(self):
-        return self._ets.to_string()
-
-    @property
-    def Jm(self):
-        return self.jacobm(self.q)
-
-    @property
-    def m(self):
-        return self.manip(self.q)
 
     # Setter methods
-
     @base.setter
     def f(self, T):
         if not isinstance(T, np.ndarray):
@@ -268,231 +216,3 @@ class SerialLink(object):
         Jv[3:,3:] = r
 
         return Jv
-
-
-
-    """
-    The manipulator Jacobian matrix maps joint velocity to end-effector 
-    spatial velocity, expressed in the world-coordinate frame. This 
-    function calulcates this based on the ETS of the robot. This Jacobian
-    is in the base frame.
-    
-    Parameters
-    ----------
-    q : float np.ndarray(1,n)
-        The joint angles/configuration of the robot
-
-    Returns
-    -------
-    J : float np.ndarray(6,n)
-        The manipulator Jacobian in 0 frame
-
-    Examples
-    --------
-    >>> J = panda.jacob0(np.array([1,1,1,1,1,1,1]))
-    >>> J = panda.J0
-    
-    See Also
-    --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
-    ropy.robot.m : Calculates the manipulability index of the robot
-    ropy.robot.Jm : Calculates the manipiulability Jacobian
-    ropy.robot.fkine : Calculates the forward kinematics of a robot
-
-    References
-    --------
-    - Kinematic Derivatives using the Elementary Transform Sequence,
-      J. Haviland and P. Corke
-    """
-    def jacob0(self, q):
-        return self._ets.jacob0(q)
-
-
-
-    """
-    The manipulator Jacobian matrix maps joint velocity to end-effector 
-    spatial velocity, expressed in the world-coordinate frame. This 
-    function calulcates this based on the ETS of the robot. This Jacobian
-    is in the end-effector frame.
-    
-    Parameters
-    ----------
-    q : float np.ndarray(1,n)
-        The joint angles/configuration of the robot
-
-    Returns
-    -------
-    J : float np.ndarray(6,n)
-        The manipulator Jacobian in ee frame
-
-    Examples
-    --------
-    >>> J = panda.jacobe(np.array([1,1,1,1,1,1,1]))
-    >>> J = panda.Je
-    
-    See Also
-    --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
-    ropy.robot.m : Calculates the manipulability index of the robot
-    ropy.robot.Jm : Calculates the manipiulability Jacobian
-    ropy.robot.fkine : Calculates the forward kinematics of a robot
-
-    References
-    --------
-    - Kinematic Derivatives using the Elementary Transform Sequence,
-      J. Haviland and P. Corke
-    """
-    def jacobe(self, q):
-        J0 = self._ets.jacob0(q)
-        Je = self.jacobev(q) @ J0
-        return Je
-
-
-
-    """
-    The manipulator Hessian tensor maps joint acceleration to end-effector 
-    spatial acceleration, expressed in the world-coordinate frame. This 
-    function calulcates this based on the ETS of the robot.
-    
-    Parameters
-    ----------
-    q : float np.ndarray(1,n)
-        The joint angles/configuration of the robot
-
-    Returns
-    -------
-    H : float np.ndarray(1,n,n)
-        The manipulator Hessian in 0 frame
-
-    Examples
-    --------
-    >>> H = panda.hessian0(np.array([1,1,1,1,1,1,1]))
-    >>> H = panda.H0
-    
-    See Also
-    --------
-    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
-    ropy.robot.m : Calculates the manipulability index of the robot
-    ropy.robot.Jm : Calculates the manipiulability Jacobian
-    ropy.robot.fkine : Calculates the forward kinematics of a robot
-
-    References
-    --------
-    - Kinematic Derivatives using the Elementary Transform Sequence,
-      J. Haviland and P. Corke
-    """
-    def hessian0(self, q):
-        return self._ets.hessian0(q)
-
-
-
-    '''
-    Evaluates the forward kinematics of a robot based on its ETS and 
-    joint angles q.
-    
-    Attributes:
-    --------
-        q : float np.ndarray(1,n)
-            The joint angles/configuration of the robot
-
-    Returns
-    -------
-    T : float np.ndarray(4,4)
-        The pose of the end-effector
-
-    Examples
-    --------
-    >>> T = panda.fkine(np.array([1,1,1,1,1,1,1]))
-    >>> T = panda.T
-
-    See Also
-    --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
-    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
-    ropy.robot.m : Calculates the manipulability index of the robot
-    ropy.robot.Jm : Calculates the manipiulability Jacobian
-
-    References
-    --------
-    - Kinematic Derivatives using the Elementary Transform Sequence,
-      J. Haviland and P. Corke
-    '''
-    def fkine(self, q):
-        return self._ets.fkine(q)
-
-
-
-    """
-    Calculates the manipulability index (scalar) robot at the joint 
-    configuration q. It indicates dexterity, that is, how isotropic the robot's
-    % motion is with respect to the 6 degrees of Cartesian motion. The measure
-    is high when the manipulator is capable of equal motion in all directions
-    and low when the manipulator is close to a singularity.
-    
-    Parameters
-    ----------
-    q : float np.ndarray(1,n)
-        The joint angles/configuration of the robot
-
-    Returns
-    -------
-    m : float
-        The manipulability index
-
-    Examples
-    --------
-    >>> m = panda.manip(np.array([1,1,1,1,1,1,1]))
-    >>> m = panda.m
-    
-    See Also
-    --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
-    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
-    ropy.robot.Jm : Calculates the manipiulability Jacobian
-    ropy.robot.fkine : Calculates the forward kinematics of a robot
-
-    References
-    --------
-    - Analysis and control of robot manipulators with redundancy,
-      T. Yoshikawa,
-      Robotics Research: The First International Symposium (M. Brady and R. Paul, eds.),
-      pp. 735-747, The MIT press, 1984.
-    """
-    def manip(self, q):
-        return self._ets.m(q)
-
-
-
-    """
-    Calculates the manipulability Jacobian. This measure relates the rate of 
-    change of the manipulability to the joint velocities of the robot.
-    
-    Parameters
-    ----------
-    dq : float np.ndarray(1,n)
-        The joint velocities of the robot
-
-    Returns
-    -------
-    m : float
-        The manipulability index
-
-    Examples
-    --------
-    >>> Jm = panda.jacobm(np.array([1,1,1,1,1,1,1]))
-    >>> Jm = panda.Jm
-    
-    See Also
-    --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
-    ropy.robot.jacob0 : Calculates the kinematic Jacobian in the world frame 
-    ropy.robot.m : Calculates the manipulability index of the robot
-    ropy.robot.fkine : Calculates the forward kinematics of a robot
-
-    References
-    --------
-    - Maximising Manipulability in Resolved-Rate Motion Control,
-      J. Haviland and P. Corke
-    """
-    def jacobm(self, q):
-        return self._ets.Jm(q)
