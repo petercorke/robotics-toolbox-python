@@ -4,6 +4,7 @@ from vpython import box, compound, scene
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
+from time import perf_counter
 
 
 class DefaultJoint:
@@ -570,27 +571,40 @@ class GraphicalRobot:
         for idx in range(0, self.num_joints):
             self.joints[idx].update_pose(all_poses[idx])
 
-    def animate(self, frame_poses):
+    def animate(self, frame_poses, fps):
         """
         Calling this function will animate the robot through its frames.
 
         :param frame_poses: A 2D list of each joint pose for each frame.
         :type frame_poses: `list`
-        :raises ValueError: Number of frames must be greater than 0
+        :param fps: Number of frames per second to render at (limited by number of graphics trying to update)
+        :type fps: `int`
+        :raises ValueError: Number of frames and fps must be greater than 0
         """
         num_frames = len(frame_poses)
-
         # Validate num_frames
         if num_frames == 0:
             raise ValueError("0 frames were given. Supply at least 1 iteration of poses.")
 
+        if fps <= 0:
+            raise ValueError("fps must be greater than 0.")
+        f = 1 / fps
+
         for poses in frame_poses:
-            # Validation done in set_joint_poses
-            print("Updating...")
-            self.set_joint_poses(poses)
-            # TODO use one/both/something else
-            # scene.waitfor("draw_complete")
-            # sleep(0.16667)
+            # Get current time
+            t_start = perf_counter()
+
+            self.set_joint_poses(poses)  # Validation done in set_joint_poses
+            # Wait for scene to finish drawing
+            scene.waitfor("draw_complete")
+
+            # Get current time
+            t_stop = perf_counter()
+
+            # Wait for time of frame to finish
+            # If drawing takes longer than frame frequency, this while is skipped
+            while t_stop - t_start < f:
+                t_stop = perf_counter()
 
     def set_joint_angle(self, link_num, new_angle):
         """

@@ -232,7 +232,7 @@ def test_animate_joints():
         [SE3().Rand(), SE3().Rand(), SE3().Rand()],
         [SE3().Rand(), SE3().Rand(), SE3().Rand()],
         [SE3().Rand(), SE3().Rand(), SE3().Rand()]
-    ])
+    ], 7)
 
 
 def test_import_textures():
