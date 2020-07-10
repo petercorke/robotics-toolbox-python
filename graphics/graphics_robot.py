@@ -283,9 +283,33 @@ class DefaultJoint:
         else:
             return import_object_from_numpy_stl(structure)
 
-    def __import_texture(self):
-        # TODO (much later)
-        pass
+    def set_texture(self, colour=None, texture_link=None):
+        """
+        Apply the texture/colour to the object. If both are given, both are applied.
+        Texture link can either be a link to an online image, or local file.
+
+        WARNING: If the image has a width or height that is not a power of 2
+        (that is, not 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, etc.),
+        the image is stretched to the next larger width or height that is a power of 2.
+
+        :param colour: List of RGB values
+        :type colour: `list`
+        :param texture_link: Path/website to a texture image
+        :type texture_link: `str`
+        """
+        # Apply the colour
+        if colour is not None:
+            colour_vec = vector(colour[0], colour[1], colour[2])
+            self.__graphic_obj.color = colour_vec
+
+        # Apply the texture
+        if texture_link is not None:
+            self.__graphic_obj.texture = {
+                'file': texture_link
+                # 'bumpmap', 'place', 'flipx', 'flipy', 'turn'
+            }
+            # Wait for the texture to load
+            scene.waitfor("textures")
 
     def get_axis_vector(self, axis):
         """

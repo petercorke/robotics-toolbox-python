@@ -215,7 +215,8 @@ def test_animate_joints():
 
 
 def test_import_textures():
-    pass
+    new_rot = gph.RotationalJoint(SE3(), 1.0)
+    new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
 
 
 if __name__ == "__main__":
