@@ -3,11 +3,11 @@
 These functions are not ordinary testing functions.
 These tests cannot be automated, and must be manually validated.
 
-To execute, import from this file into the console. "import test.test_graphics as test_gph"
+To execute, import from this file into the console. "import tests.test_graphics as test_gph"
+A canvas will be created and automatically opened.
 Next select which test you which to run, and call the function.
-A canvas will be created and display the respective graphics.
 Verify the output is as expected.
-Then close the browser window and run a different function. (Help clear graphics. Currently, no clearing implemented).
+You can then clear the screen before calling a new function (no need to close the browser session).
 
 Alternatively, executing this file will run the test_puma560_angle_change() function.
 """
@@ -17,12 +17,15 @@ from spatialmath import SE3
 import graphics as gph
 
 
-def test_grid_updating():
+# Create a canvas on import, to allow clearing between function calls
+grid = gph.init_canvas()
+
+
+def clear():
     """
-    This test will create a canvas and update the grid every second.
-    Eventually, the grid will only update through callbacks of key/button releases.
+    Clears the current scene
     """
-    canvas_grid = gph.init_canvas()
+    grid.clear_scene()
 
 
 def test_reference_frame_pose():
@@ -30,8 +33,6 @@ def test_reference_frame_pose():
     This test will create a canvas, and place reference frames at the given positions and orientations.
     Each frame must be manually inspected for validity.
     """
-    canvas_grid = gph.init_canvas()
-
     # Test 1 | Position (0, 0, 0), Axis (1, 0, 0), No Rotation
     arr = array([
         [1, 0, 0, 0],
@@ -65,7 +66,6 @@ def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
     """
-    canvas_grid = gph.init_canvas()
     puma560 = gph.import_puma_560()
 
 
@@ -73,8 +73,6 @@ def test_rotational_link():
     """
     This test will create a simple rotational link from (0, 0, 0) to (1, 0, 0).
     """
-    canvas_grid = gph.init_canvas()
-
     arr = array([
         [0, 0, -1, 0],
         [0, 1,  0, 0],
@@ -92,8 +90,6 @@ def test_graphical_robot_creation():
     This test will create a simple 3-link graphical robot.
     The joints are then set to new poses to show updating does occur.
     """
-    canvas_grid = gph.init_canvas()
-
     p = SE3()
 
     p1 = p
@@ -145,7 +141,6 @@ def test_puma560_angle_change():
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
-    canvas_grid = gph.init_canvas()
     puma560 = gph.import_puma_560()
 
     puma560.set_reference_visibility(False)
@@ -165,14 +160,12 @@ def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    the_grid = gph.init_canvas()
-
     puma560 = gph.import_puma_560()
     puma560.set_reference_visibility(True)
 
     sleep(2)
 
-    the_grid.clear_scene()
+    clear()
     del puma560
 
 
@@ -181,7 +174,6 @@ def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    the_grid = gph.init_canvas()
     puma560 = gph.import_puma_560()
 
     puma560.set_joint_poses([
@@ -190,7 +182,7 @@ def test_clear_scene_with_grid_updating():
 
     sleep(2)
 
-    the_grid.clear_scene()
+    clear()
     del puma560
 
 
@@ -199,8 +191,6 @@ def test_animate_joints():
     """
     This test will create a three link robot, and iterate through a series of frames to animate movement.
     """
-    the_grid = gph.init_canvas()
-
     p = SE3()
 
     p1 = p
@@ -230,4 +220,5 @@ def test_import_textures():
 
 if __name__ == "__main__":
     # run the Puma demo by default
+    # grid = gph.init_canvas()
     test_puma560_angle_change()
