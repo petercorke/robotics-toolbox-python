@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import numpy as np
-# from robotics.robot.serial_link import SerialLink
+# from robotics.robot.SerialLink import SerialLink
 
 def fkine(robot, q):
     '''

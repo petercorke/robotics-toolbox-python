@@ -2,7 +2,7 @@
 
 import numpy as np
 from ropy.robot.Link import Revolute
-from ropy.robot.serial_link import SerialLink
+from ropy.robot.SerialLink import SerialLink
 from ropy.tools.transform import transl, xyzrpy_to_trans
 
 class Sawyer(SerialLink):

@@ -1,4 +1,4 @@
-from ropy.robot.serial_link import SerialLink
+from ropy.robot.SerialLink import SerialLink
 from ropy.robot.Link import Link, Revolute, Prismatic
 from ropy.robot.fkine import fkine
 from ropy.robot.jocobe import jacobe

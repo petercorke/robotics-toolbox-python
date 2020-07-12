@@ -7,6 +7,7 @@ from __future__ import print_function
 import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
+import ropy as rp
 
 
 class Link(object):
@@ -60,7 +61,7 @@ class Link(object):
             alpha=0.0,
             theta=0.0,
             a=0.0,
-            sigma=0.0,
+            sigma=0,
             mdh=0.0,
             offset=0.0,
             qlim=np.zeros(2),
@@ -75,11 +76,11 @@ class Link(object):
             ):
 
         # Kinematic parameters
+        self.sigma = sigma
         self.theta = theta
         self.d = d
         self.alpha = alpha
         self.a = a
-        self.sigma = sigma
         self.mdh = mdh
         self.offset = offset
 
@@ -94,6 +95,20 @@ class Link(object):
         self.B = B
         self.Tc = Tc
         self.G = G
+
+    def __add__(self, l2):
+        print(isinstance(l2, Link))
+        if isinstance(l2, Link):
+            return rp.SerialLink([self, l2])
+        else:
+            raise TypeError("Cannot add a Link with a non Link object")
+
+    def __str__(self):
+        # TODO
+        pass
+
+    def __repr__(self):
+        self.__str__()
 
     @property
     def d(self):
@@ -161,7 +176,10 @@ class Link(object):
 
     @d.setter
     def d(self, d_new):
-        self._d = d_new
+        if self.sigma and d_new != 0.0:
+            raise ValueError("f is not valid for prismatic joints")
+        else:
+            self._d = d_new
 
     @alpha.setter
     def alpha(self, alpha_new):
@@ -169,7 +187,10 @@ class Link(object):
 
     @theta.setter
     def theta(self, theta_new):
-        self._theta = theta_new
+        if not self.sigma and theta_new != 0.0:
+            raise ValueError("theta is not valid for revolute joints")
+        else:
+            self._theta = theta_new
 
     @a.setter
     def a(self, a_new):
@@ -367,108 +388,182 @@ class Link(object):
         """
 
         if viscous:
-            self.B = 0.0
+            self.B = [0.0, 0.0]
 
         if coulomb:
             self.Tc = [0.0, 0.0]
 
-    # def friction(self, qd)
+    def friction(self, qd):
+        """
+        Calculates the joint friction force/torque (1xN) for joint
+        velocity QD (1xN). The friction model includes:
+        - Viscous friction which is a linear function of velocity.
+        - Coulomb friction which is proportional to sign(QD).
+
+        Notes::
+        - The friction value should be added to the motor output torque, it has
+            a negative value when QD>0.
+        - The returned friction value is referred to the output of the gearbox.
+        - The friction parameters in the Link object are referred to the motor.
+        - Motor viscous friction is scaled up by G^2.
+        - Motor Coulomb friction is scaled up by G.
+        - The appropriate Coulomb friction value to use in the non-symmetric
+            case depends on the sign of the joint velocity, not the motor
+            velocity.
+        - The absolute value of the gear ratio is used.  Negative gear ratios
+            are tricky: the Puma560 has negative gear ratio for joints 1 and
+            3.
+
+        :param qd: The joint velocity
+        :type qd: float
+
+        :return tau: the friction force/torque
+        :rtype tau: float
+        """
+
+        tau = self.B * np.abs(self.G) * qd
+
+        if qd > 0:
+            tau += self.Tc[0]
+        elif qd < 0:
+            tau += self.Tc[1]
+
+        return tau
+
 
 class Revolute(Link):
     """
     A class for revolute link types
 
-        :param theta: kinematic - joint angle
-        :type theta: float
-        :param d: kinematic - link offset
-        :type d: float
-        :param alpha: kinematic - link twist
-        :type alpha: float
-        :param a: kinematic - link length
-        :type a: float
-        :param sigma: kinematic - 0 if revolute, 1 if prismatic
-        :type sigma: int
-        :param mdh: kinematic - 0 if standard D&H, else 1
-        :type mdh: int
-        :param offset: kinematic - joint variable offset
-        :type offset: float
-        :param qlim: kinematic - joint variable limits [min max]
-        :type qlim: float np.ndarray(1,2)
-        :param flip: joint moves in opposite direction
-        :type flip: bool
+    :param d: kinematic - link offset
+    :type d: float
+    :param alpha: kinematic - link twist
+    :type alpha: float
+    :param a: kinematic - link length
+    :type a: float
+    :param sigma: kinematic - 0 if revolute, 1 if prismatic
+    :type sigma: int
+    :param mdh: kinematic - 0 if standard D&H, else 1
+    :type mdh: int
+    :param offset: kinematic - joint variable offset
+    :type offset: float
+
+    :param qlim: joint variable limits [min max]
+    :type qlim: float np.ndarray(1,2)
+    :param flip: joint moves in opposite direction
+    :type flip: bool
+
+    :param m: dynamic - link mass
+    :type m: float
+    :param r: dynamic - position of COM with respect to link frame
+    :type r:  float np.ndarray(3,1)
+    :param I: dynamic - inertia of link with respect to COM
+    :type I: float np.ndarray(3,3)
+    :param Jm: dynamic - motor inertia
+    :type Jm: float
+    :param B: dynamic - motor viscous friction (1x1 or 2x1)
+    :type B: float or float np.ndarray(2,1)
+    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
+    :type Tc: float np.ndarray(2,1)
+    :param G: dynamic - gear ratio
+    :type G: float
+
+    References:
+    Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
     """
 
     def __init__(
             self,
-            theta=0,
-            d=0,
-            alpha=0,
-            a=0,
-            sigma=0,
-            mdh=0,
-            offset=0,
-            qlim=0,
-            flip=False
+            d=0.0,
+            alpha=0.0,
+            a=0.0,
+            mdh=0.0,
+            offset=0.0,
+            qlim=np.zeros(2),
+            flip=False,
+            m=0.0,
+            r=np.zeros(3),
+            I=np.zeros((3, 3)),
+            Jm=0.0,
+            B=np.zeros(2),
+            Tc=np.zeros(2),
+            G=1.0
             ):
 
+        theta = 0.0
+        sigma = 0
+
         super(Revolute, self).__init__(
-            theta, d, alpha, a, sigma, mdh, offset, qlim, flip)
-
-        if self.d is None:
-            self.d = 0
-
-        self.is_revolute = True
-        self.is_prismatic = False
-
-        if self.theta != 0:
-            raise ValueError('Theta cannot be specified for a revolute link')
+            d, alpha, theta, a, sigma, mdh, offset,
+            qlim, flip, m, r, I, Jm, B, Tc, G)
 
 
 class Prismatic(Link):
     """
-    A class for prismatic link types
+    A subclass of the Link class for a prismatic joint: holds all information
+    related to a robot link such as kinematics parameters, rigid-body inertial
+    parameters, motor and transmission parameters.
 
-        :param theta: kinematic: joint coordinate
-        :type theta: float
-        :param d: kinematic: link offset
-        :type d: float
-        :param alpha: kinematic: link twist
-        :type alpha: float
-        :param a: kinematic: link length
-        :type a: float
-        :param sigma: kinematic: 0 if revolute, 1 if prismatic
-        :type sigma: int
-        :param mdh: kinematic: 0 if standard D&H, else 1
-        :type mdh: int
-        :param offset: kinematic: joint variable offset
-        :type offset: float
-        :param qlim: kinematic: joint variable limits [min max]
-        :type qlim: float np.ndarray(1,2)
-        :param flip: joint moves in opposite direction
-        :type flip: bool
+    :param theta: kinematic: joint angle
+    :type theta: float
+    :param d: kinematic - link offset
+    :type d: float
+    :param alpha: kinematic - link twist
+    :type alpha: float
+    :param a: kinematic - link length
+    :type a: float
+    :param sigma: kinematic - 0 if revolute, 1 if prismatic
+    :type sigma: int
+    :param mdh: kinematic - 0 if standard D&H, else 1
+    :type mdh: int
+    :param offset: kinematic - joint variable offset
+    :type offset: float
+
+    :param qlim: joint variable limits [min max]
+    :type qlim: float np.ndarray(1,2)
+    :param flip: joint moves in opposite direction
+    :type flip: bool
+
+    :param m: dynamic - link mass
+    :type m: float
+    :param r: dynamic - position of COM with respect to link frame
+    :type r:  float np.ndarray(3,1)
+    :param I: dynamic - inertia of link with respect to COM
+    :type I: float np.ndarray(3,3)
+    :param Jm: dynamic - motor inertia
+    :type Jm: float
+    :param B: dynamic - motor viscous friction (1x1 or 2x1)
+    :type B: float or float np.ndarray(2,1)
+    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
+    :type Tc: float np.ndarray(2,1)
+    :param G: dynamic - gear ratio
+    :type G: float
+
+    References:
+    Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
     """
 
     def __init__(
             self,
-            theta=0,
-            d=0,
-            alpha=0,
-            a=0,
-            sigma=1,
-            mdh=0,
-            offset=0,
-            qlim=0,
-            flip=False
+            alpha=0.0,
+            theta=0.0,
+            a=0.0,
+            mdh=0.0,
+            offset=0.0,
+            qlim=np.zeros(2),
+            flip=False,
+            m=0.0,
+            r=np.zeros(3),
+            I=np.zeros((3, 3)),
+            Jm=0.0,
+            B=np.zeros(2),
+            Tc=np.zeros(2),
+            G=1.0
             ):
 
+        d = 0.0
+        sigma = 1
+
         super(Prismatic, self).__init__(
-            theta, d, alpha, a, sigma, mdh, offset, qlim, flip)
-
-        if self.d is None:
-            self.d = 0
-
-        self.is_prismatic = True
-        self.is_revolute = False
-
-        if self.d != 0:
-            raise ValueError('d cannot be specified for a prismatic link')
+            d, alpha, theta, a, sigma, mdh, offset,
+            qlim, flip, m, r, I, Jm, B, Tc, G)

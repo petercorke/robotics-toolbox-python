@@ -8,6 +8,7 @@ from ropy.robot.jocob0 import jacob0
 from spatialmath.base.argcheck import getvector, ismatrix
 import spatialmath.base as sp
 
+
 class SerialLink(object):
     """
     A superclass for arm type robots

@@ -2,7 +2,7 @@
 
 import numpy as np
 from rtb.robot.Link import Revolute
-from rtb.robot.serial_link import SerialLink
+from rtb.robot.SerialLink import SerialLink
 # from rtb.tools.transform import transl, xyzrpy_to_trans
 
 class PandaMDH(SerialLink):
