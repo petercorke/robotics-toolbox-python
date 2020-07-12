@@ -8,7 +8,7 @@ from graphics.graphics_robot import *
 
 class SerialLink:
 
-    def __init__(self, links, name=None, base=None, tool=None, stl_files=None, q=None, param=None):
+    def __init__(self, links, name=None, base=None, tool=None, stl_files=None, q=None, param=None, manufacturer=None, comment=None, meshdir=None, configurations={}):
         """
         Creates a SerialLink object.
         :param links: a list of links that will constitute SerialLink object.
@@ -52,9 +52,23 @@ class SerialLink:
             }
         else:
             self.param = param
+        self.manufacturer = manufacturer
+        self.comment = comment
+        self.meshdir = meshdir
+        self.configurations = configurations
 
     def __iter__(self):
         return (each for each in self.links)
+
+    def __repr__(self):
+        s = ''
+        for joint, link in enumerate(self.links):
+            s += "{:2d}: {:s}\n".format(joint+1, str(link))
+        return s
+
+    def config(self, name):
+        return self.configurations[name]
+    
 
     @property
     def length(self):
@@ -81,10 +95,10 @@ class SerialLink:
         if jointconfig.size == self.length:
             t = SE3(self.base)
             for i in range(self.length):
-                t = t * self.links[i].A(jointconfig[i])
+                t *= self.links[i].A(jointconfig[i])
                 if alltout:
                     allt[i] = t
-            t = t * SE3(self.tool)
+            t *= SE3(self.tool)
         else:
             assert jointconfig.shape[1] == self.length, "joinconfig must have {self.length} columns"
             t = list(range(0, jointconfig.shape[0]))
@@ -92,9 +106,8 @@ class SerialLink:
                 qk = jointconfig[k, :]
                 tt = SE3(self.base)
                 for i in range(self.length):
-                    tt = tt * self.links[i].A(qk[i])
+                    tt *= self.links[i].A(qk[i])
                 t[k] = tt * SE3(self.tool)
-
         if alltout:
             return allt
         else:
