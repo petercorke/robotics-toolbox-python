@@ -13,7 +13,7 @@ class Link(list):
 
     """
 
-    def __init__(self, *argv):
+    def __init__(self, **kwargs):
         """
         Link Create robot link object
 
@@ -120,180 +120,41 @@ class Link(list):
         % See also Revolute, Prismatic, RevoluteMDH, PrismaticMDH.
         """
 
-        print("Link constructor called with ", len(argv), " arguments:", argv)
-        if len(argv) == 0:
-            print("Creating Link class object with default parameters")
-            """
-            Create an 'empty' Link object
-            This call signature is needed to support arrays of Links
-            """
-            # kinematic parameters
+        # kinematic parameters
 
-            self.alpha = 0
-            self.a = 0
-            self.theta = 0
-            self.d = 0
-            self.jointtype = 'R'
-            self.mdh = 0
-            self.offset = 0
-            self.flip = False
-            self.qlim = []
+        self.alpha = 0
+        self.a = 0
+        self.theta = 0
+        self.d = 0
+        self.jointtype = 'R'
+        self.mdh = 0
+        self.offset = 0
+        self.flip = False
+        self.qlim = []
+        self.mdh = False
 
-            """
-            Dynamic parameters
-            These parameters must be set by the user if dynamics is used
-            """
-            self.m = 0
-            self.r = [0, 0, 0]
-            self.I = zeros([3, 3])
+        """
+        Dynamic parameters
+        These parameters must be set by the user if dynamics is used
+        """
+        self.m = 0
+        self.r = [0, 0, 0]
+        self._I = zeros([3, 3])
 
-            # Dynamic params with default(zero friction)
-            self.Jm = 0
-            self.G = 1
-            self.B = 0
-            self.Tc = [0, 0]
+        # Dynamic params with default(zero friction)
+        self.Jm = 0
+        self.G = 1
+        self.B = 0
+        self.Tc = [0, 0]
 
-        elif len(argv) == 1 and isinstance(argv, Link):
-            # Clone the passed Link object
-            self = argv
+        # for every passed argument, check if its a valid attribute and then set it
+        for name, value in kwargs.items():
+            if name in self.__dict__:
+                setattr(self, name, value)
+            if '_' + name in self.__dict__:
+                setattr(self, name, value)
 
-        else:
-            # format input into argparse
-            argstr = ""
-            known = ['theta', 'a', 'd', 'alpha', 'G', 'B', 'Tc', 'Jm', 'I', 'm', 'r',
-                     'offset', 'qlim', 'type', 'convention', 'sym', 'flip', 'help']
-            for arg in argv:
-                if arg in known:
-                    argstr += "--" + arg + " "
-                else:
-                    argstr += str(arg) + " "
-
-            # Create a new Link based on parameters
-            # parse all possible options
-            parser = argparse.ArgumentParser()
-            parser.add_argument('--theta', help="joint angle, if not specified joint is revolute",
-                                type=float, default=0)
-            parser.add_argument("--a", help="joint offset (default 0)",
-                                type=float, default=0)
-            parser.add_argument("--d", help="joint extension, if not specified joint is prismatic",
-                                type=float, default=0)
-            parser.add_argument("--alpha", help="joint twist (default 0)",
-                                type=float, default=0)
-            parser.add_argument("--G", help="motor gear ratio (default 1)",
-                                type=float, default=0)
-            parser.add_argument("--B", help="joint friction, motor referenced (default 0)",
-                                type=float, default=0)
-            parser.add_argument("--Tc", help="Coulomb friction, motor referenced (1x1 or 2x1), (default [0, 0])",
-                                type=list, default=[0, 0])
-            parser.add_argument("--Jm", help="motor inertia, motor referenced (default 0))",
-                                type=float, default=0)
-            parser.add_argument("--I", help="link inertia matrix (3x1, 6x1 or 3x3)",
-                                type=ndarray, default=zeros([3, 3]))
-            parser.add_argument("--m", help="link mass (1x1)",
-                                type=float, default=0)
-            parser.add_argument("--r", help="link centre of gravity (3x1)",
-                                type=list, default=[0, 0, 0])
-            parser.add_argument("--offset", help="joint variable offset (default 0)",
-                                type=float, default=0)
-            parser.add_argument("--qlim", help="joint limit",
-                                type=list, default=[-pi/2, pi/2])
-            parser.add_argument("--type", help="joint type, 'revolute', 'prismatic' or 'fixed'",
-                                choices=['', 'revolute', 'prismatic', 'fixed'], default='')
-            parser.add_argument("--convention", help="D&h parameters, 'standard' or 'modified'",
-                                choices=['standard', 'modified'], default='standard')
-            parser.add_argument("--sym", help="consider all parameter values as symbolic not numeric'",
-                                action="store_true")
-            parser.add_argument("--flip", help="TODO add help for 'flip'",
-                                action="store_true")
-            (opt, args) = parser.parse_known_args(argstr.split())
-
-            if not args:
-
-                assert opt.d == 0 or opt.theta == 0, "Bad argument, cannot specify both d and theta"
-
-                if opt.type == 'revolute':
-                    print('Revolute joint')
-                    self.jointtype = 'R'
-                    assert opt.theta == 0, "Bad argument, cannot specify 'theta' for revolute joint"
-                elif opt.type == 'prismatic':
-                    print('Prismatic joint')
-                    self.jointtype = 'P'
-                    assert opt.d == 0, "Bad argument, cannot specify 'd' for prismatic joint"
-
-                if opt.theta != 0:
-                    # constant value of theta means it must be prismatic
-                    self.jointtype = 'P'
-                    print('Prismatic joint, theta =', opt.theta)
-                if opt.d != 0:
-                    # constant value of d means it must be revolute
-                    self.jointtype = 'R'
-                    print('Revolute joint, d =', opt.d)
-
-                self.theta = opt.theta
-                self.d = opt.d
-                self.a = opt.a
-                self.alpha = opt.alpha
-
-                self.offset = opt.offset
-                self.flip = opt.flip
-                self.qlim = argcheck.getvector(opt.qlim)
-
-                self.m = opt.m
-                self.r = opt.r
-                self.I = opt.I
-                self.Jm = opt.Jm
-                self.G = opt.G
-                self.B = opt.B
-                self.Tc = opt.Tc
-                self.mdh = ['standard', 'modified'].index(opt.convention)
-
-            else:
-                """
-                This is the old call format, where all parameters are given by
-                a vector containing kinematic-only, or kinematic plus dynamic
-                parameters
-                
-                eg. L3 = Link([0, 0.15005, 0.0203, -pi/2, 0], 'standard')
-                """
-                print("old format")
-                dh = argv[0]
-                assert len(dh) >= 4, "Bad argument, must provide params (theta d a alpha)"
-
-                # set the kinematic parameters
-                self.theta = dh[0]
-                self.d = dh[1]
-                self.a = dh[2]
-                self.alpha = dh[3]
-
-                self.jointtype = 'R'
-                self.offset = 0
-                self.flip = False
-                self.mdh = 0
-
-                # optionally set jointtype and offset
-                if len(dh) >= 5:
-                    if dh[4] == 1:
-                        self.jointtype = 'P'
-                if len(dh) == 6:
-                    self.offset = dh[5]
-
-                else:
-                    # we know nothing about the dynamics
-                    self.m = 0
-                    self.r = [0, 0, 0]
-                    self.I = zeros([3, 3])
-                    self.Jm = 0
-                    self.G = 1
-                    self.B = 0
-                    self.Tc = [0, 0]
-                    self.qlim = 0
-
-                self.mdh = 0
-                if len(argv) == 2:
-                    if argv[1] == 'modified':
-                        self.mdh == 1
-
-    def __repr__(self):
+    def __str__(self):
 
         if not self.mdh:
             conv = 'std'
@@ -308,6 +169,16 @@ class Link(list):
                    str(self.theta)+", a = "+str(self.a)+", alpha = "+str(self.alpha)
         else:
             return "jointtype unspecified"
+
+    ## TODO getter/setter for all values that need checking
+    @property
+    def I(self):
+        return self._I
+    
+    @I.setter
+    def I(self, value):
+        print("setting I to ", value)
+        self._I = value
 
     def type(self):
         """
@@ -382,3 +253,10 @@ class Link(list):
 
         return SE3(T)
 
+class RevoluteDH(Link):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+class PrismaticDH(Link):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
