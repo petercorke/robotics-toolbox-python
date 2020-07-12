@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from ropy.robot.link import Revolute, Prismatic
+from ropy.robot.Link import Revolute, Prismatic
 from ropy.robot.serial_link import SerialLink
 from ropy.tools.transform import transl, xyzrpy_to_trans
 
