@@ -6,9 +6,9 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 import numpy as np
-import spatialmath.base as sp
-from spatialmath.base.argcheck import getvector, ismatrix
-from roboticstoolbox.robot.ET import ET
+import spatialmath as sp
+from spatialmath.base.argcheck import getvector, verifymatrix
+# from roboticstoolbox.robot.ET import ET
 
 
 class ETS(object):
@@ -64,66 +64,66 @@ class ETS(object):
         # Current joint angles of the robot
         self._q = np.zeros((self._n,))
 
-    @classmethod
-    def dh_to_ets(cls, robot):
-        """
-        Converts a robot modelled with standard or modified DH parameters to an
-        ETS representation
+    # @classmethod
+    # def dh_to_ets(cls, robot):
+    #     """
+    #     Converts a robot modelled with standard or modified DH parameters to an
+    #     ETS representation
 
-        :param robot: The robot model to be converted
-        :type robot: SerialLink
-        :return: List of returned :class:`bluepy.btle.Characteristic` objects
-        :rtype: ets class
-        """
-        ets = []
-        q_idx = []
-        M = 0
+    #     :param robot: The robot model to be converted
+    #     :type robot: SerialLink
+    #     :return: List of returned :class:`bluepy.btle.Characteristic` objects
+    #     :rtype: ets class
+    #     """
+    #     ets = []
+    #     q_idx = []
+    #     M = 0
 
-        for j in range(robot.n):
-            L = robot.links[j]
+    #     for j in range(robot.n):
+    #         L = robot.links[j]
 
-            # Method for modified DH parameters
-            if robot.mdh:
+    #         # Method for modified DH parameters
+    #         if robot.mdh:
 
-                # Append Tx(a)
-                if L.a != 0:
-                    ets.append(et(et.Ttx, L.a))
-                    M += 1
+    #             # Append Tx(a)
+    #             if L.a != 0:
+    #                 ets.append(ET.Ttx(L.a))
+    #                 M += 1
 
-                # Append Rx(alpha)
-                if L.alpha != 0:
-                    ets.append(et(et.TRx, L.alpha))
-                    M += 1
+    #             # Append Rx(alpha)
+    #             if L.alpha != 0:
+    #                 ets.append(ET.TRx(L.alpha))
+    #                 M += 1
 
-                if L.is_revolute:
-                    # Append Tz(d)
-                    if L.d != 0:
-                        ets.append(et(et.Ttz, L.d))
-                        M += 1
+    #             if L.is_revolute:
+    #                 # Append Tz(d)
+    #                 if L.d != 0:
+    #                     ets.append(ET.Ttz(L.d))
+    #                     M += 1
 
-                    # Append Rz(q)
-                    ets.append(et(et.TRz, i=j+1))
-                    q_idx.append(M)
-                    M += 1
+    #                 # Append Rz(q)
+    #                 ets.append(ET.TRz(joint=j+1))
+    #                 q_idx.append(M)
+    #                 M += 1
 
-                else:
-                    # Append Tz(q)
-                    ets.append(et(et.Ttz, i=j+1))
-                    q_idx.append(M)
-                    M += 1
+    #             else:
+    #                 # Append Tz(q)
+    #                 ets.append(ET.Ttz(joint=j+1))
+    #                 q_idx.append(M)
+    #                 M += 1
 
-                    # Append Rz(theta)
-                    if L.theta != 0:
-                        ets.append(et(et.TRz, L.alpha))
-                        M += 1
+    #                 # Append Rz(theta)
+    #                 if L.theta != 0:
+    #                     ets.append(ET.TRz(L.alpha))
+    #                     M += 1
 
-        return cls(
-            ets,
-            q_idx,
-            robot.name,
-            robot.manuf,
-            robot.base,
-            robot.tool)
+    #     return cls(
+    #         ets,
+    #         q_idx,
+    #         robot.name,
+    #         robot.manuf,
+    #         robot.base,
+    #         robot.tool)
 
     @property
     def q(self):
@@ -160,6 +160,19 @@ class ETS(object):
     @property
     def q_idx(self):
         return self._q_idx
+
+    @q.setter
+    def q(self, q_new):
+        q_new = getvector(q_new, self.n)
+        self._q = q_new
+
+    @base.setter
+    def base(self, base_new):
+        if isinstance(base_new, sp.SE3):
+            self._base = base_new.A
+        else:
+            verifymatrix(base_new, (4, 4))
+            self._base = base_new
 
     def fkine(self, q):
         '''
@@ -220,7 +233,7 @@ class ETS(object):
             if i != self.q_idx[j]:
                 U = U @ self.ets[i].T()
             else:
-                if self.ets[i].axis_func == ET.TRz:
+                if self.ets[i]._axis == 'Rz':
                     U = U @ self.ets[i].T(q[j])
                     Tu = np.linalg.inv(U) @ T
 
@@ -232,6 +245,30 @@ class ETS(object):
 
                     J[:3, j] = (o * x) - (n * y)
                     J[3:, j] = a
+
+                    j += 1
+                elif self.ets[i]._axis == 'tx':
+                    U = U @ self.ets[i].T(q[j])
+                    n = U[:3, 0]
+
+                    J[:3, j] = n
+                    J[3:, j] = np.array([0, 0, 0])
+
+                    j += 1
+                elif self.ets[i]._axis == 'ty':
+                    U = U @ self.ets[i].T(q[j])
+                    o = U[:3, 1]
+
+                    J[:3, j] = o
+                    J[3:, j] = np.array([0, 0, 0])
+
+                    j += 1
+                elif self.ets[i]._axis == 'tz':
+                    U = U @ self.ets[i].T(q[j])
+                    a = U[:3, 2]
+
+                    J[:3, j] = a
+                    J[3:, j] = np.array([0, 0, 0])
 
                     j += 1
 
@@ -261,7 +298,8 @@ class ETS(object):
                 J0 = self.jacob0(q)
             else:
                 raise ValueError('One of q or J0 must be supplied')
-        # TODO: Check J
+        else:
+            verifymatrix(J0, (6, self.n))
 
         H = np.zeros((6, self.n, self.n))
 
@@ -305,7 +343,8 @@ class ETS(object):
                 J = self.jacob0(q)
             else:
                 raise ValueError('One of q or J must be supplied')
-        # TODO: Check J
+        else:
+            verifymatrix(J, (6, self.n))
 
         return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
@@ -335,11 +374,13 @@ class ETS(object):
                 J = self.jacob0(q)
             else:
                 raise ValueError('One of q or J must be supplied')
-        # TODO: Check J
+        else:
+            verifymatrix(J, (6, self.n))
 
         if H is None:
             H = self.hessian0(J0=J)
-        # TODO: Check H
+        else:
+            verifymatrix(H, (6, self.n, self.n))
 
         manipulability = self.manipulability(J=J)
         b = np.linalg.inv(J @ np.transpose(J))
@@ -364,16 +405,11 @@ class ETS(object):
         for i in range(self._n):
             axes += self.ets[self.q_idx[i]].axis
 
-        rpy = sp.tr2rpy(self.tool, unit='deg')
+        rpy = sp.base.tr2rpy(self.tool, unit='deg')
 
-        if rpy[0] == 0:
-            rpy[0] = 0
-
-        if rpy[1] == 0:
-            rpy[1] = 0
-
-        if rpy[2] == 0:
-            rpy[2] = 0
+        for i in range(3):
+            if rpy[i] == 0:
+                rpy[i] = 0
 
         model = '\n%s (%s): %d axis, %s, ETS\n'\
             'Elementary Transform Sequence:\n'\
@@ -386,3 +422,52 @@ class ETS(object):
             )
 
         return model
+
+
+    """
+    The spatial velocity Jacobian which relates the velocity in base 
+    frame to velocity in the end-effector frame.
+    
+    Parameters
+    ----------
+    q : float np.ndarray(1,n)
+        The joint angles/configuration of the robot
+    Returns
+    -------
+    J : float np.ndarray(6,n)
+        The velocity Jacobian in ee frame
+    Examples
+    --------
+    >>> J = panda.jacobev(np.array([1,1,1,1,1,1,1]))
+    >>> J = panda.Jev
+    
+    See Also
+    --------
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.m : Calculates the manipulability index of the robot
+    ropy.robot.Jm : Calculates the manipiulability Jacobian
+    ropy.robot.fkine : Calculates the forward kinematics of a robot
+    """
+    def jacobev(self, q):
+        r = self.fkine(q)[0:3,0:3]
+        r = np.linalg.inv(r)
+
+        Jv = np.zeros((6,6))
+        Jv[:3,:3] = r
+        Jv[3:,3:] = r
+
+        return Jv
+
+    def jacobe(self, q):
+        J0 = self.jacob0(q)
+        Je = self.jacobev(q) @ J0
+        return Je
+
+    def jacob0v(self, q):
+        r = self.fkine(q)[0:3,0:3]
+
+        Jv = np.zeros((6,6))
+        Jv[:3,:3] = r
+        Jv[3:,3:] = r
+
+        return Jv
