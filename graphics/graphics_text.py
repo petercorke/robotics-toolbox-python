@@ -1,4 +1,4 @@
-from vpython import *
+from vpython import color, label, mag, scene, vector
 from numpy import sign
 
 
