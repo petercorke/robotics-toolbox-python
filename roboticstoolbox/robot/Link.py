@@ -13,7 +13,7 @@ class Link(list):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, units='rad', **kwargs):
         """
         Link Create robot link object
 
@@ -149,6 +149,11 @@ class Link(list):
 
         # for every passed argument, check if its a valid attribute and then set it
         for name, value in kwargs.items():
+            if units == 'deg' and name in ['alpha', 'theta', 'qlim']:
+                if isinstance(value, (list, tuple)):
+                    value = [v * pi / 180 for v in value]
+                else:
+                    value *= pi / 180
             if name in self.__dict__:
                 setattr(self, name, value)
             if '_' + name in self.__dict__:
@@ -162,11 +167,12 @@ class Link(list):
             conv = 'mod'
 
         if self.jointtype == 'R':
-            return "Revolute("+conv+") joint with attributes: d = "+\
-                   str(self.d)+", a = "+str(self.a)+", alpha = "+str(self.alpha)
+            return "Revolute("+conv+") joint with attributes: " + \
+                f"d={self.d:.3g}, a={self.a:.3g}, alpha={self.alpha:.3g}, qlim=({self.qlim[0]:.3g}, {self.qlim[1]:.3g})"
+                   #str(self.d)+", a = "+str(self.a)+", alpha = "+str(self.alpha)+", qlim = "+str(self.qlim)
         elif self.jointtype == 'P':
             return "Prismatic("+conv+") joint with attributes: theta = "+\
-                   str(self.theta)+", a = "+str(self.a)+", alpha = "+str(self.alpha)
+                   str(self.theta)+", a = "+str(self.a)+", alpha = "+str(self.alpha)+", qlim = "+str(self.qlim)
         else:
             return "jointtype unspecified"
 

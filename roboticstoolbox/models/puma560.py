@@ -19,9 +19,9 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from math import pi
 from roboticstoolbox.robot import serial_link
 from roboticstoolbox.robot.Link import RevoluteDH
+from math import pi
 
 class Puma560(serial_link.SerialLink):
     """
@@ -65,12 +65,10 @@ class Puma560(serial_link.SerialLink):
 
     def __init__(self):
 
-        deg = pi / 180
-
         links = [
             RevoluteDH(d=0,   # link length (Dennavit-Hartenberg notation)
                      a=0,                 # link offset (Dennavit-Hartenberg notation)
-                     alpha=pi / 2,        # link twist (Dennavit-Hartenberg notation)
+                     alpha=90,            # link twist (Dennavit-Hartenberg notation)
                      I=[0, 0.35, 0, 0, 0, 0],  # inertia tensor of link with respect to center of mass I = [L_xx, L_yy, L_zz, L_xy, L_yz, L_xz]
                      r=[0, 0, 0],         # distance of ith origin to center of mass [x,y,z] in link reference frame
                      m=0,                 # mass of link
@@ -78,7 +76,8 @@ class Puma560(serial_link.SerialLink):
                      G=-62.6111,          # gear ratio
                      B=1.48e-3,           # actuator viscous friction coefficient (measured at the motor)
                      Tc=[0.395, -0.435],  # actuator Coulomb friction coefficient for direction [-,+] (measured at the motor)
-                     qlim=[-160 * deg, 160 * deg]),  # minimum and maximum joint angle
+                     qlim=[-160, 160],   # minimum and maximum joint angle
+                     units='deg'),
             RevoluteDH(d=0, a=0.4318, alpha=0,
                      I=[0.13, 0.524, 0.539, 0, 0, 0],
                      r=[-0.3638, 0.006, 0.2275],
@@ -87,8 +86,9 @@ class Puma560(serial_link.SerialLink):
                      G=107.815,
                      B=.817e-3,
                      Tc=[0.126, -0.071],
-                     qlim=[-45 * deg, 225 * deg]),
-            RevoluteDH(d=0.15005, a=0.0203, alpha=-pi / 2,
+                     qlim=[-45, 225],
+                     units='deg'),
+            RevoluteDH(d=0.15005, a=0.0203, alpha=-90,
                      I=[0.066, 0.086, 0.0125, 0, 0, 0],
                      r=[-0.0203, -0.0141, 0.070],
                      m=4.8,
@@ -96,8 +96,9 @@ class Puma560(serial_link.SerialLink):
                      G=-53.7063,
                      B=1.38e-3,
                      Tc=[0.132, -0.105],
-                     qlim=[-225 * deg, 45 * deg]),
-            RevoluteDH(d=0.4318, a=0, alpha=pi / 2,
+                     qlim=[-225, 45],
+                     units='deg'),
+            RevoluteDH(d=0.4318, a=0, alpha=90,
                      I=[1.8e-3, 1.3e-3, 1.8e-3, 0, 0, 0],
                      r=[0, 0.019, 0],
                      m=0.82,
@@ -105,8 +106,9 @@ class Puma560(serial_link.SerialLink):
                      G=76.0364,
                      B=71.2e-6,
                      Tc=[11.2e-3, -16.9e-3],
-                     qlim=[-110 * deg, 170 * deg]),
-            RevoluteDH(d=0, a=0, alpha=-pi / 2,
+                     qlim=[-110, 170],
+                     units='deg'),
+            RevoluteDH(d=0, a=0, alpha=-90,
                      I=[0.3e-3, 0.4e-3, 0.3e-3, 0, 0, 0],
                      r=[0, 0, 0],
                      m=0.34,
@@ -114,7 +116,8 @@ class Puma560(serial_link.SerialLink):
                      G=71.923,
                      B=82.6e-6,
                      Tc=[9.26e-3, -14.5e-3],
-                     qlim=[-100 * deg, 100 * deg]),
+                     qlim=[-100 , 100],
+                     units='deg'),
             RevoluteDH(d=0, a=0, alpha=0,
                      I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
                      r=[0, 0, 0.032],
@@ -123,14 +126,17 @@ class Puma560(serial_link.SerialLink):
                      G=76.686,
                      B=36.7e-6,
                      Tc=[3.96e-3, -10.5e-3],
-                     qlim=[-266 * deg, 266 * deg])
+                     qlim=[-266, 266],
+                     units='deg'),
         ]
 
-        configs = {}
-        configs['qz'] = [0, 0, 0, 0, 0, 0]  # zero angles, L shaped pose
-        configs['qr'] = [0, pi / 2, -pi / 2, 0, 0, 0]  # ready pose, arm up
-        configs['qs'] = [0, 0, -pi / 2, 0, 0, 0]
-        configs['qn'] = [0, pi / 4, pi, 0, pi / 4, 0]
+        # define some joint configurations (in radians)
+        configs = {
+                    'qz': [0, 0, 0, 0, 0, 0],             # zero angles, L shaped pose
+                    'qr': [0, pi / 2, -pi / 2, 0, 0, 0],  # ready pose, arm up
+                    'qs': [0, 0, -pi / 2, 0, 0, 0],       # straight and horizontal
+                    'qn': [0, pi / 4, pi, 0, pi / 4, 0],  # nominal table top picking pose
+                    }
 
         super().__init__(links=links, name="Puma 560",
                          manufacturer="Unimation",

@@ -12,4 +12,4 @@ print(T)
 
 # we should be able to execute a line like the following
 #   - right now the browser window and axes appear, but no robot
-puma.plot( puma.config('qr') )
+# puma.plot( puma.config('qr') )
