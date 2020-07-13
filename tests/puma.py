@@ -9,3 +9,7 @@ print(puma)
 # do forward kinematics
 T = puma.fkine( puma.config('qr') )
 print(T)
+
+# we should be able to execute a line like the following
+#   - right now the browser window and axes appear, but no robot
+puma.plot( puma.config('qr') )
