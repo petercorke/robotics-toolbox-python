@@ -117,7 +117,7 @@ def import_object_from_numpy_stl(filename):
         triangles.append(triangle(vs=vertices))
 
     # Return a compound of the triangles
-    visual_mesh = compound(triangles)
+    visual_mesh = compound(triangles, origin=vector(0, 0, 0))
     return visual_mesh
 
 
