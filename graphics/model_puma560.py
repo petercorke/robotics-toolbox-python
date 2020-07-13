@@ -1,5 +1,9 @@
-from graphics.graphics_robot import *
-from graphics.graphics_stl import *
+# from graphics.graphics_robot import *
+# from graphics.graphics_stl import *
+from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
+from roboticstoolbox import Puma560
+from vpython import vector
+from spatialmath import SE3
 
 
 def import_puma_560():
@@ -9,17 +13,30 @@ def import_puma_560():
     :return: Puma560 robot
     :rtype: class:`graphics.graphics_robot.GraphicalRobot`
     """
-    puma560 = GraphicalRobot(
-        [
-            create_link_0(),
-            create_link_1(),
-            create_link_2(),
-            create_link_3(),
-            create_link_4(),
-            create_link_5(),
-            create_link_6()
-        ]
-    )
+    puma560 = GraphicalRobot()
+
+    puma560.append_made_link(create_link_0())
+    puma560.append_made_link(create_link_1())
+    puma560.append_made_link(create_link_2())
+    puma560.append_made_link(create_link_3())
+    puma560.append_made_link(create_link_4())
+    puma560.append_made_link(create_link_5())
+    puma560.append_made_link(create_link_6())
+
+    # Get the poses for a zero-position
+    puma = Puma560()
+    poses = puma.fkine(puma.config('qz'), alltout=True)
+
+    puma560.set_joint_poses([
+        SE3(),  # 0 (Base doesn't change)
+        poses[0],  # 1
+        poses[1],  # 2
+        poses[2],  # 3
+        poses[3],  # 4
+        poses[4],  # 5
+        poses[5]   # 6
+    ])
+
     return puma560
 
 
@@ -28,59 +45,48 @@ def create_link_0():
     Create the specific joint link and return it as a Joint object
 
     :return: Rotational joint representing joint 0
-    :rtype: class:`graphics.graphics_robot.RotationalJoint
+    :rtype: class:`graphics.graphics_robot.RotationalJoint`
     """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link0.stl')
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link0.stl'
+
+    link = RotationalJoint(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj_z_origin = stl_obj.pos.z - stl_obj.width / 2
-    stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, stl_obj_z_origin)
-    stl_obj_required_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, 0)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.blue
+    # stl_obj_z_origin = stl_obj.pos.z - stl_obj.width / 2
+    # stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, stl_obj_z_origin)
+    # stl_obj_required_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, 0)
+    # link.set_stl_joint_origin(stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    connection_to = vector(0, 0, stl_obj.width)
-    link = RotationalJoint(connection_from,
-                           connection_to,
-                           x_axis=x_axis_vector,
-                           rotation_axis=z_axis_vector,
-                           graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.blue
+
     return link
 
 
 def create_link_1():
     """
-        Create the specific joint link and return it as a Joint object
+    Create the specific joint link and return it as a Joint object
 
-        :return: Rotational joint representing joint 1
-        :rtype: class:`graphics.graphics_robot.StaticJoint
-        """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link1.stl')
+    :return: Rotational joint representing joint 1
+    :rtype: class:`graphics.graphics_robot.StaticJoint`
+    """
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link1.stl'
+
+    link = StaticJoint(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
-    stl_obj.rotate(angle=radians(90), axis=z_axis_vector, origin=vector(0, 0, 0))
-    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
-    stl_obj_z_origin = -stl_obj.height / 2
-    stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, stl_obj_z_origin)
-    stl_obj_required_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, 0)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.green
+    # stl_obj_y_origin = -stl_obj.height / 2
+    # stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj_y_origin, stl_obj.pos.z)
+    # stl_obj_required_origin_location = vector(stl_obj.pos.x, 0, stl_obj.pos.z)
+    # link.set_stl_joint_origin(stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    # Numbers come from previous adjustments, plus extra observed in meshlab
-    connection_to = vector(0, 0.184, stl_obj.width / 2)
-    link = StaticJoint(connection_from,
-                       connection_to,
-                       x_axis=x_axis_vector,
-                       graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.green
+
     return link
 
 
@@ -89,30 +95,24 @@ def create_link_2():
         Create the specific joint link and return it as a Joint object
 
         :return: Rotational joint representing joint 2
-        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        :rtype: class:`graphics.graphics_robot.RotationalJoint`
         """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link2.stl')
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link2.stl'
+
+    link = RotationalJoint(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+    #
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(-90), axis=x_axis_vector, origin=vector(0, 0, 0))
-    stl_obj_x_origin = -0.437
-    stl_obj_y_origin = 0.15
-    stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj_y_origin, stl_obj.pos.z)
-    stl_obj_required_origin_location = vector(0, 0, stl_obj.pos.z)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.red
+    # stl_obj_x_origin = -0.437
+    # stl_obj_z_origin = 0.15
+    # stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj.pos.y, stl_obj_z_origin)
+    # stl_obj_required_origin_location = vector(0, stl_obj.pos.y, 0)
+    # link.set_stl_joint_origin(stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    # Numbers come from previous adjustments, plus extra observed in meshlab
-    connection_to = vector(0.437, 0.0338, 0)
-    link = RotationalJoint(connection_from,
-                           connection_to,
-                           x_axis=x_axis_vector,
-                           rotation_axis=y_axis_vector,
-                           graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.red
+
     return link
 
 
@@ -121,30 +121,24 @@ def create_link_3():
         Create the specific joint link and return it as a Joint object
 
         :return: Rotational joint representing joint 3
-        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        :rtype: class:`graphics.graphics_robot.RotationalJoint`
         """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link3.stl')
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link3.stl'
+
+    link = RotationalJoint(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
-    stl_obj_y_origin = stl_obj.height / 2
-    stl_obj_x_origin = -0.05
-    stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj_y_origin, stl_obj.pos.z)
-    stl_obj_required_origin_location = vector(0, 0, stl_obj.pos.z)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.cyan
+    # stl_obj_y_origin = -stl_obj.height / 2
+    # stl_obj_z_origin = -0.05
+    # stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj_y_origin, stl_obj_z_origin)
+    # stl_obj_required_origin_location = vector(stl_obj.pos.x, 0, 0)
+    # link.set_stl_joint_origin(stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    # Numbers come from previous adjustments, plus extra observed in meshlab
-    connection_to = vector(0.36 + 0.05, -stl_obj.height / 2, 0)
-    link = RotationalJoint(connection_from,
-                           connection_to,
-                           x_axis=x_axis_vector,
-                           rotation_axis=y_axis_vector,
-                           graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.cyan
+
     return link
 
 
@@ -153,29 +147,24 @@ def create_link_4():
         Create the specific joint link and return it as a Joint object
 
         :return: Rotational joint representing joint 4
-        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        :rtype: class:`graphics.graphics_robot.RotationalJoint`
         """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link4.stl')
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link4.stl'
+
+    link = RotationalJoint(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(-90), axis=z_axis_vector, origin=vector(0, 0, 0))
-    stl_obj_x_origin = -0.071
-    stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj.pos.y, stl_obj.pos.z)
-    stl_obj_required_origin_location = vector(0, stl_obj.pos.y, stl_obj.pos.z)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.magenta
+    # stl_obj.rotate(angle=radians(-90), axis=z_axis_vector, origin=vector(0, 0, 0))
+    # stl_obj_x_origin = -0.071
+    # stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj.pos.y, stl_obj.pos.z)
+    # stl_obj_required_origin_location = vector(0, stl_obj.pos.y, stl_obj.pos.z)
+    # stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    # Numbers come from previous adjustments, plus extra observed in meshlab
-    connection_to = vector(0.071, 0, 0)
-    link = RotationalJoint(connection_from,
-                           connection_to,
-                           x_axis=x_axis_vector,
-                           rotation_axis=x_axis_vector,
-                           graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.magenta
+
     return link
 
 
@@ -184,29 +173,24 @@ def create_link_5():
         Create the specific joint link and return it as a Joint object
 
         :return: Rotational joint representing joint 5
-        :rtype: class:`graphics.graphics_robot.RotationalJoint
+        :rtype: class:`graphics.graphics_robot.RotationalJoint`
         """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link5.stl')
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link5.stl'
+
+    link = RotationalJoint(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=x_axis_vector, origin=vector(0, 0, 0))
-    stl_obj.rotate(angle=radians(90), axis=z_axis_vector, origin=vector(0, 0, 0))
-    stl_obj_current_origin_location = vector(0, 0, 0)
-    stl_obj_required_origin_location = vector(0, 0, 0)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.yellow
+    # stl_obj.rotate(angle=radians(90), axis=x_axis_vector, origin=vector(0, 0, 0))
+    # stl_obj.rotate(angle=radians(90), axis=z_axis_vector, origin=vector(0, 0, 0))
+    # stl_obj_current_origin_location = vector(0, 0, 0)
+    # stl_obj_required_origin_location = vector(0, 0, 0)
+    # stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    # Numbers come from previous adjustments, plus extra observed in meshlab
-    connection_to = vector(0.046, 0, 0)
-    link = RotationalJoint(connection_from,
-                           connection_to,
-                           x_axis=x_axis_vector,
-                           rotation_axis=z_axis_vector,
-                           graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.yellow
+
     return link
 
 
@@ -215,26 +199,21 @@ def create_link_6():
         Create the specific joint link and return it as a Joint object
 
         :return: Rotational joint representing joint 6
-        :rtype: class:`graphics.graphics_robot.Gripper
+        :rtype: class:`graphics.graphics_robot.Gripper`
         """
-    # Load the STL file into an object
-    stl_obj = import_object_from_numpy_stl('./graphics/models/link6.stl')
+    stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link6.stl'
+
+    link = Gripper(SE3(), stl_obj_path)
+    # stl_obj = link.get_graphic_object()
+
     # Orient the object so that it's origin and toolpoint in known locations
     # This way, rotations are relative to the correct 3D position of the object
-    stl_obj.rotate(angle=radians(90), axis=y_axis_vector, origin=vector(0, 0, 0))
-    stl_obj_x_origin = 0.043
-    stl_obj_current_origin_location = vector(stl_obj_x_origin, stl_obj.pos.y, stl_obj.pos.z)
-    stl_obj_required_origin_location = vector(0, stl_obj.pos.y, stl_obj.pos.z)
-    stl_obj = set_stl_origin(stl_obj, stl_obj_current_origin_location, stl_obj_required_origin_location)
-    # Change color
-    stl_obj.color = color.black
+    # stl_obj_z_origin = 0.043
+    # stl_obj_current_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, stl_obj_z_origin)
+    # stl_obj_required_origin_location = vector(stl_obj.pos.x, stl_obj.pos.y, 0)
+    # link.set_stl_joint_origin(stl_obj_current_origin_location, stl_obj_required_origin_location)
 
-    # Create the robot link
-    connection_from = vector(0, 0, 0)
-    # Numbers come from previous adjustments, plus extra observed in meshlab
-    connection_to = vector(stl_obj.length, 0, 0)
-    link = Gripper(connection_from,
-                   connection_to,
-                   x_axis=x_axis_vector,
-                   graphic_obj=stl_obj)
+    # Change color
+    # stl_obj.color = color.black
+
     return link
