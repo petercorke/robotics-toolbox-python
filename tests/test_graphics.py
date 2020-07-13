@@ -14,6 +14,7 @@ Alternatively, executing this file will run the test_puma560_angle_change() func
 from time import sleep
 from numpy import array
 from spatialmath import SE3
+from roboticstoolbox import Puma560
 import graphics as gph
 
 
@@ -67,6 +68,7 @@ def test_import_stl():
     This test will create a canvas with the Puma560 model loaded in.
     """
     puma560 = gph.import_puma_560()
+    puma560.print_joint_poses()
 
 
 def test_rotational_link():
@@ -135,7 +137,6 @@ def test_graphical_robot_creation():
     ])
 
 
-# TODO
 def test_puma560_angle_change():
     """
     This test loads in the Puma560 model and changes its angles over time.
@@ -148,12 +149,22 @@ def test_puma560_angle_change():
     print("Prior Poses")
     puma560.print_joint_poses()
 
+    # Get the poses for a ready-position
+    puma = Puma560()
+    poses = puma.fkine(puma.config('qr'), alltout=True)
+
     puma560.set_joint_poses([
-        # TODO
+        SE3(),  # 0 (Base doesn't change)
+        poses[0],  # 1
+        poses[1],  # 2
+        poses[2],  # 3
+        poses[3],  # 4
+        poses[4],  # 5
+        poses[5]  # 6
     ])
 
     print("Final Poses")
-    puma560.print_joint_angles()
+    puma560.print_joint_poses()
 
 
 def test_clear_scene():
@@ -169,15 +180,24 @@ def test_clear_scene():
     del puma560
 
 
-# TODO
 def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
     puma560 = gph.import_puma_560()
 
+    # Get the poses for a ready-position
+    puma = Puma560()
+    poses = puma.fkine(puma.config('qr'), alltout=True)
+
     puma560.set_joint_poses([
-        # TODO
+        SE3(),  # 0 (Base doesn't change)
+        poses[0],  # 1
+        poses[1],  # 2
+        poses[2],  # 3
+        poses[3],  # 4
+        poses[4],  # 5
+        poses[5]  # 6
     ])
 
     sleep(2)
