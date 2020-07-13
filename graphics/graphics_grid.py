@@ -273,6 +273,9 @@ class GraphicsGrid:
         # Set grid visibility to previous
         self.set_visibility(grid_visibility)
 
+        # Wait for scene to update
+        scene.waitfor("draw_complete")
+
 
 def create_line(pos1, pos2):
     """
