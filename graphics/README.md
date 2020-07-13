@@ -149,16 +149,12 @@ my_robot.append_made_link(link1)
 my_robot.append_made_link(link2)
 ``` 
 
-### Deleting
 To remove the end effector joint, use the `detach_link()` function. Acting like a stack, it will pop the latest joint created off the robot.
-
 ```python
 # Remove the end effector joint
 my_robot.detach_link()
 ```
-
 ## Importing an STL object
-
 STL files may not be correctly positioned/oriented when loaded in.
 Depending on where the object triangles are configured from the file, the origin of the object may not be where intended.
 
