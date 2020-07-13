@@ -178,9 +178,9 @@ class DefaultJoint:
         new_position = get_pose_pos(se_object)
 
         # Update the graphic object
+        self.__graphic_obj.pos = new_position
         self.__graphic_obj.axis = new_x_axis
         self.__graphic_obj.up = new_y_axis
-        self.__graphic_obj.pos = new_position
 
         # Update the reference frame
         self.__pose = se_object
