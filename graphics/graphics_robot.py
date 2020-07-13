@@ -711,6 +711,8 @@ class GraphicalRobot:
         Print all of the current joint poses
         """
         # For each joint
+        num = 0
         for joint in self.joints:
-            print("Type:", joint.get_joint_type())
-            print("\tPose:\n\t", joint.get_pose(), "\n")
+            print("Joint", num, "| Type:", joint.get_joint_type(), "| Pose:")
+            print(joint.get_pose(), "\n")
+            num += 1
