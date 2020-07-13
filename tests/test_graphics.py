@@ -153,6 +153,8 @@ def test_puma560_angle_change():
     puma = Puma560()
     poses = puma.fkine(puma.config('qr'), alltout=True)
 
+    sleep(2)
+
     puma560.set_joint_poses([
         SE3(),  # 0 (Base doesn't change)
         poses[0],  # 1
@@ -189,6 +191,8 @@ def test_clear_scene_with_grid_updating():
     # Get the poses for a ready-position
     puma = Puma560()
     poses = puma.fkine(puma.config('qr'), alltout=True)
+
+    sleep(2)
 
     puma560.set_joint_poses([
         SE3(),  # 0 (Base doesn't change)
