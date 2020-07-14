@@ -71,12 +71,6 @@ def convert_grid_to_z_up():
     scene.forward = x_axis_vector
     scene.up = z_axis_vector
 
-    # Place camera at center to aid rotations
-    scene.camera.pos = vector(0, 0, 0)
-    # Rotate about y then x axis
-    # (Camera defaults looking in -z direction -> (0, 0, -1))
-    scene.camera.rotate(radians(90), axis=y_axis_vector)
-    scene.camera.rotate(radians(90), axis=x_axis_vector)
     # Place the camera in the + axes
     scene.camera.pos = vector(10, 10, 10)
     scene.camera.axis = -scene.camera.pos
@@ -121,7 +115,6 @@ def draw_reference_frame_axes(se3_pose):
 
 def handle_keyboard_mouse_inputs():
     """
-
     Pans amount dependent on distance between camera and focus point.
     Closer = smaller pan amount
 
