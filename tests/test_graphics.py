@@ -239,8 +239,29 @@ def test_animate_joints():
 
 
 def test_import_textures():
+    """
+    Test importing textures and changing joint colours
+    """
     new_rot = gph.RotationalJoint(SE3(), 1.0)
+
+    # Load a sample texture
     new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+    sleep(5)
+
+    # Green shift the texture
+    new_rot.set_texture(colour=[0, 0.75, 0],
+                        texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+    sleep(5)
+
+    # Remove the texture and red shift
+    new_rot.set_texture(colour=[1, 0, 0])
+
+    sleep(5)
+
+    # Remove all details
+    new_rot.set_texture()
 
 
 if __name__ == "__main__":

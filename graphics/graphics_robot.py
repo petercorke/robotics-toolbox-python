@@ -1,6 +1,6 @@
 # from graphics.graphics_canvas import *
 # from graphics.graphics_stl import *
-from vpython import box, compound, scene
+from vpython import box, compound, scene, color
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -18,7 +18,7 @@ class DefaultJoint:
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: `SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float` or `str`
+    :type structure: `float`, `str`
     """
 
     def __init__(self, initial_se3, structure):
@@ -333,6 +333,9 @@ class DefaultJoint:
         Apply the texture/colour to the object. If both are given, both are applied.
         Texture link can either be a link to an online image, or local file.
 
+        WARNING: If the texture can't be loaded, the object will have no texture
+        (appear invisible, but not set as invisible).
+
         WARNING: If the image has a width or height that is not a power of 2
         (that is, not 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, etc.),
         the image is stretched to the next larger width or height that is a power of 2.
@@ -341,12 +344,8 @@ class DefaultJoint:
         :type colour: `list`
         :param texture_link: Path/website to a texture image
         :type texture_link: `str`
+        :raises ValueError: RGB values must be normalised between 0 and 1
         """
-        # Apply the colour
-        if colour is not None:
-            colour_vec = vector(colour[0], colour[1], colour[2])
-            self.__graphic_obj.color = colour_vec
-
         # Apply the texture
         if texture_link is not None:
             self.__graphic_obj.texture = {
@@ -355,6 +354,20 @@ class DefaultJoint:
             }
             # Wait for the texture to load
             scene.waitfor("textures")
+        else:
+            # Remove any texture
+            self.__graphic_obj.texture = None
+
+        # Apply the colour
+        if colour is not None:
+            if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+               colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+                raise ValueError("RGB values must be normalised between 0 and 1")
+            colour_vec = vector(colour[0], colour[1], colour[2])
+            self.__graphic_obj.color = colour_vec
+        else:
+            # Set to white if none given
+            self.__graphic_obj.color = color.white
 
     def get_axis_vector(self, axis):
         """

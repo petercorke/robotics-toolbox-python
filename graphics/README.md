@@ -154,11 +154,43 @@ To remove the end effector joint, use the `detach_link()` function. Acting like 
 # Remove the end effector joint
 my_robot.detach_link()
 ```
+
+## Applying Textures / Colours
+Joints can be coloured, given textures, or both. Using a joint object, calling `set_texture()` will apply the given options.
+Textures are given as `str` paths to a local file, or a web hosted image. Colours are input as a list of RGB values.
+These values must be normalised from 0 to 1. When both are given, the texture gets colour shifted.
+Not supplying a texture will remove any texture already supplied.
+Not supplying a colour will set it to white (default).
+
+**WARNING:** If the texture can't be loaded, the object will have no texture
+(appear invisible, but not set as invisible).
+
+**WARNING:** If the image has a width or height that is not a power of 2
+(that is, not 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, etc.),
+the image is stretched to the next larger width or height that is a power of 2.
+
+```python
+new_rot = gph.RotationalJoint(SE3(), 1.0)
+
+# Load a sample texture
+new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+# Green shift the texture
+new_rot.set_texture(colour=[0, 0.75, 0],
+                    texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+# Remove the texture and red shift
+new_rot.set_texture(colour=[1, 0, 0])
+
+# Remove all details
+new_rot.set_texture()
+```
+
 ## Importing an STL object
 STL files may not be correctly positioned/oriented when loaded in.
 Depending on where the object triangles are configured from the file, the origin of the object may not be where intended.
 
-When loaded in, the origin is set (by default) to the center of the bounding box of the object.
+When loaded in, the origin is set (by default) to (0, 0, 0).
 
 Upon observation (through VPython or 3D editor software), you can find the coordinates of the origin in respect to the world.
 
