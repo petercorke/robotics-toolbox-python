@@ -96,19 +96,37 @@ class Link(object):
         self.Tc = Tc
         self.G = G
 
-    def __add__(self, l2):
-        print(isinstance(l2, Link))
-        if isinstance(l2, Link):
-            return rp.SerialLink([self, l2])
+    def __add__(self, L):
+        if isinstance(L, Link):
+            return rp.SerialLink([self, L])
+
+        elif isinstance(L, rp.SerialLink):
+            nlinks = [self]
+
+            # TODO - Should I do a deep copy here a physically copy the Links
+            # and not just the references?
+            # Copy Link references to new list
+            for i in range(L.n):
+                nlinks.append(L.links[i])
+
+            return rp.SerialLink(
+                nlinks,
+                name=L.name,
+                manufacturer=L.manuf,
+                base=L.base,
+                tool=L.tool,
+                gravity=L.gravity)
+
         else:
             raise TypeError("Cannot add a Link with a non Link object")
 
     def __str__(self):
         # TODO
-        pass
+        string = "a: {0}".format(self.alpha)
+        return string
 
     def __repr__(self):
-        self.__str__()
+        return str(self)
 
     @property
     def d(self):
