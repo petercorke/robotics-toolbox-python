@@ -67,7 +67,7 @@ def vpython_to_se3(graphic_object):
     This function will take in a graphics object and output it's pose as an SE3 object
 
     :param graphic_object: A VPython graphic object
-    :type graphic_object: `vpython.object`
+    :type graphic_object: class:`vpython.object`
     :return: SE3 representation of the pose
     :rtype: class:`spatialmath.pose3d.SE3`
     """

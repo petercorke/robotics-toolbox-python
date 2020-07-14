@@ -143,7 +143,7 @@ def handle_keyboard_mouse_inputs():
     cam_focus = vector(scene.center)
 
     # Weird manipulation to get correct vector directions. (scene.camera.up always defaults to world up)
-    cam_axis = norm(vector(scene.camera.axis))  # X
+    cam_axis = (vector(scene.camera.axis))  # X
     cam_side_axis = scene.camera.up.cross(cam_axis)  # Y
     cam_up = cam_axis.cross(cam_side_axis)  # Z
 
