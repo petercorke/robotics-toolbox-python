@@ -7,7 +7,7 @@ def draw_label(label_text, label_position):
     Display a label at a given position, with borders and lines
 
     :param label_text: String of text to be written on the label.
-    :type label_text: str
+    :type label_text: `str`
     :param label_position: 3D vector position to draw the label at.
     :type label_position: class:`vpython.vector`
     :return: The created label object.
@@ -43,7 +43,7 @@ def draw_text(label_text, label_position):
     Display a label at a given position, without borders or lines.
 
     :param label_text: String of text to be written on the label.
-    :type label_text: str
+    :type label_text: `str`
     :param label_position: 3D vector position to draw the label at.
     :type label_position: class:`vpython.vector`
     :return: The created label object.
@@ -89,11 +89,11 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     Draw the grid numbers along the xyz axes.
 
     :param numbers_list: A reference to a list of the labels that gets updated.
-    :type numbers_list: class:`vpython.label` list
+    :type numbers_list: `list`
     :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
-    :type bool_camera_relative: bool
+    :type bool_camera_relative: `bool`
     :param num_squares: How many unit squares to draw along the axis.
-    :type num_squares: int
+    :type num_squares: `int`
     """
 
     # Initial conditions

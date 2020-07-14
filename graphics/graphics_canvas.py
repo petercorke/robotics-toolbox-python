@@ -1,5 +1,3 @@
-# from graphics.graphics_grid import *
-# from graphics.common_functions import *
 from vpython import scene, color, arrow, compound
 from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid
@@ -14,15 +12,15 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
         - Axes drawn (if applicable)
 
     :param height: Height of the canvas on screen (Pixels), defaults to 500.
-    :type height: int, optional
+    :type height: `int`, optional
     :param width: Width of the canvas on screen (Pixels), defaults to 1000.
-    :type width: int, optional
+    :type width: `int`, optional
     :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
-    :type title: str, optional
+    :type title: `str`, optional
     :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
-    :type caption: str, optional
+    :type caption: `str`, optional
     :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
-    :type grid: bool, optional
+    :type grid: `bool`, optional
     :return: The graphics grid object for use outside canvas creation
     :rtype: class:`GraphicsGrid`
     """
@@ -71,7 +69,7 @@ def draw_reference_frame_axes(se3_pose):
     Each axis is represented in the objects reference frame.
 
     :param se3_pose: SE3 pose representation of the reference frame
-    :type se3_pose: `SE3`
+    :type se3_pose: class:`spatialmath.pose3d.SE3`
     :return: Compound object of the 3 axis arrows.
     :rtype: class:`vpython.compound`
     """

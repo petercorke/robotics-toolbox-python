@@ -11,7 +11,7 @@ def import_object_from_stl(filename):
     https://github.com/vpython/vpython-jupyter/blob/master/convert_stl.zip
 
     :param filename: Name of the stl file to import (Exclude path and extension).
-    :type filename: str
+    :type filename: `str`
     :return: Compound object of a collection of triangles formed from an stl file.
     :rtype: class:`vpython.compound`
 
@@ -70,7 +70,7 @@ def import_object_from_numpy_stl(filename):
     The triangles will be combined into a single compound entity.
 
     :param filename: Path of the stl file to import.
-    :type filename: str
+    :type filename: `str`
     :return: Compound object of a collection of triangles formed from an stl file.
     :rtype: class:`vpython.compound`
     """
