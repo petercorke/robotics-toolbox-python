@@ -31,6 +31,11 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     scene.height = height
     scene.autoscale = False
 
+    # Disable default controls
+    scene.userpan = False
+    scene.userzoom = True  # Keep zoom controls (scrollwheel)
+    scene.userspin = False
+
     if title != '':
         scene.title = title
 
@@ -116,18 +121,22 @@ def draw_reference_frame_axes(se3_pose):
 
 def handle_keyboard_mouse_inputs():
     """
+
+    Pans amount dependent on distance between camera and focus point.
+    Closer = smaller pan amount
+
     A = move left (pan)
     D = move right (pan)
     W = move forward (pan)
     S = move backward (pan)
 
-    <- = rotate left (rotate)
-    -> = rotate right (rotate)
-    ^ = rotate up (rotate)
-    V = rotate down (rotate)
+    <- = rotate left along camera axes (rotate)
+    -> = rotate right along camera axes (rotate)
+    ^ = rotate up along camera axes (rotate)
+    V = rotate down along camera axes (rotate)
 
-    Q = rotate counterclockwise (rotate)
-    E = rotate clockwise (rotate)
+    Q = rotate clockwise around +Z (rotate)
+    E = rotate counterclockwise around +Z (rotate)
 
     LMB = rotate
     RMB = pan
@@ -135,7 +144,7 @@ def handle_keyboard_mouse_inputs():
     """
     # Constants
     pan_amount = 0.05  # units
-    rot_amount = 0.05  # deg
+    rot_amount = 1.0  # deg
 
     # Current settings
     cam_distance = scene.camera.axis.mag
@@ -151,12 +160,6 @@ def handle_keyboard_mouse_inputs():
     keys = keysdown()
 
     # Check if the keys are pressed, update vectors as required
-    # Pan ->
-    #   move cam_pos along cam_axis
-    #   move cam_focus along cam_axis
-    # Rotate ->
-    #   move cam_pos about cam_focus
-
     if 'w' in keys:
         cam_pos = cam_pos + cam_axis * pan_amount
         cam_focus = cam_focus + cam_axis * pan_amount
@@ -172,10 +175,38 @@ def handle_keyboard_mouse_inputs():
 
     # Update camera
     scene.camera.pos = cam_pos
-    scene.camera.focus = cam_focus
     scene.camera.axis = cam_axis
+    scene.camera.focus = cam_focus
 
-    # if 'left' in keys:
-    #     scene.camera.rotate(angle=radians(rot_amount), axis=cam_up, origin=cam_pos)
+    # Get an SE3 of the camera
+    cam_arr = array([
+        [norm(cam_axis).x, norm(cam_side_axis).x, norm(cam_up).x, cam_pos.x],
+        [norm(cam_axis).y, norm(cam_side_axis).y, norm(cam_up).y, cam_pos.y],
+        [norm(cam_axis).z, norm(cam_side_axis).z, norm(cam_up).z, cam_pos.z],
+        [               0,                     0,              0,         1]
+    ])
+    cam_se3 = SE3(cam_arr)
 
+    # If only one rotation key is pressed
+    if 'q' in keys and 'e' not in keys:
+        # Rotate SE3
+        new_se3 = cam_se3 * SE3().Rz(-rot_amount, 'deg')
+        # Obtain new parameters
+        new_x_vec = get_pose_x_vec(new_se3)
+        new_x_vec.mag = cam_distance
+        new_pos = cam_focus - new_x_vec
+        # Apply changes
+        scene.camera.pos = new_pos
+        scene.camera.axis = new_x_vec
 
+    # If only one rotation key is pressed
+    if 'e' in keys and 'q' not in keys:
+        # Rotate SE3
+        new_se3 = cam_se3 * SE3().Rz(rot_amount, 'deg')
+        # Obtain new parameters
+        new_x_vec = get_pose_x_vec(new_se3)
+        new_x_vec.mag = cam_distance
+        new_pos = cam_focus - new_x_vec
+        # Apply changes
+        scene.camera.pos = new_pos
+        scene.camera.axis = new_x_vec
