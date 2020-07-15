@@ -132,7 +132,6 @@ def handle_keyboard_inputs():
     E = roll right (rotate)
 
     ctrl + LMB = rotate (Default Vpython)
-
     """
     # Constants
     pan_amount = 0.02  # units
@@ -151,42 +150,44 @@ def handle_keyboard_inputs():
     # Get a list of keys
     keys = keysdown()
 
+    # Userspin uses ctrl, so skip this check to avoid changing camera pose while ctrl is held
     if 'ctrl' in keys:
         return
 
     ####################################################################################################################
     # PANNING
     # Check if the keys are pressed, update vectors as required
+    # Changing camera position updates the scene center to follow same changes
     if 'w' in keys:
         cam_pos = cam_pos + cam_axis * pan_amount
-        # cam_focus = cam_focus + cam_axis * pan_amount
     if 's' in keys:
         cam_pos = cam_pos - cam_axis * pan_amount
-        # cam_focus = cam_focus - cam_axis * pan_amount
     if 'a' in keys:
         cam_pos = cam_pos + cam_side_axis * pan_amount
-        # cam_focus = cam_focus + cam_side_axis * pan_amount
     if 'd' in keys:
         cam_pos = cam_pos - cam_side_axis * pan_amount
-        # cam_focus = cam_focus - cam_side_axis * pan_amount
 
-    # Update camera
+    # Update camera position before rotation (to keep pan and rotate separate)
     scene.camera.pos = cam_pos
-    # scene.camera.axis = cam_axis
-    # scene.center = cam_focus
 
     ####################################################################################################################
     # Camera Roll
     # If only one rotation key is pressed
     if 'q' in keys and 'e' not in keys:
+        # Rotate camera up
         cam_up = cam_up.rotate(angle=-radians(rot_amount), axis=cam_axis)
+        # Set magnitude as it went to inf
         cam_up.mag = cam_axis.mag
+        # Set
         scene.up = cam_up
 
     # If only one rotation key is pressed
     if 'e' in keys and 'q' not in keys:
+        # Rotate camera up
         cam_up = cam_up.rotate(angle=radians(rot_amount), axis=cam_axis)
+        # Set magnitude as it went to inf
         cam_up.mag = cam_axis.mag
+        # Set
         scene.up = cam_up
 
     ####################################################################################################################
@@ -194,8 +195,11 @@ def handle_keyboard_inputs():
     d = cam_distance
     move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))  # SAS Cosine
 
+    # If only left not right key
     if 'left' in keys and 'right' not in keys:
+        # Calculate distance to translate
         cam_pos = cam_pos + norm(cam_side_axis)*move_dist
+        # Calculate new camera axis
         cam_axis = -(cam_pos - cam_focus)
     if 'right' in keys and 'left' not in keys:
         cam_pos = cam_pos - norm(cam_side_axis)*move_dist
@@ -207,6 +211,7 @@ def handle_keyboard_inputs():
         cam_pos = cam_pos - norm(cam_up)*move_dist
         cam_axis = -(cam_pos - cam_focus)
 
+    # Update camera position and axis
     scene.camera.pos = cam_pos
     scene.camera.axis = cam_axis
 
