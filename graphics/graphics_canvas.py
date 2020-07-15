@@ -42,7 +42,7 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     if caption != '':
         scene.caption = caption
 
-    setup_ui_controls()
+    ui_controls = setup_ui_controls()
 
     convert_grid_to_z_up()
     # Any time a key or mouse is held down, run the callback function
@@ -224,6 +224,7 @@ def handle_keyboard_inputs():
     scene.camera.axis = cam_axis
 
 
+# TODO
 def reset_camera():
     """
     Reset the camera to a default position and orientation
@@ -237,9 +238,34 @@ def reset_camera():
     # TODO
 
 
+# TODO
 def menu_item_chosen():
     """
     When a menu item is chosen, update the relevant checkboxes/options
+    """
+    pass
+
+
+# TODO
+def reference_frame_checkbox():
+    """
+    When a checkbox is changed for the reference frame option, update the graphics
+    """
+    pass
+
+
+# TODO
+def robot_visibility_checkbox():
+    """
+    When a checkbox is changed for the robot visibility, update the graphics
+    """
+    pass
+
+
+# TODO
+def opacity_slider():
+    """
+    Update the opacity slider depending on the slider value
     """
     pass
 
@@ -248,6 +274,28 @@ def setup_ui_controls():
     """
     The initial configuration of the user interface
     """
+    # Button to reset camera\
+    scene.append_to_caption('\n')
+    btn_reset = button(bind=reset_camera, text="Reset Camera")
+    scene.append_to_caption('\t')
+
+    # Drop down for robots / joints in frame
+    menu_robots = menu(choices=['r1', 'r2'], bind=menu_item_chosen)
+    scene.append_to_caption('\n')
+
+    # Checkbox for reference frame visibilities
+    chkbox_ref = checkbox(bind=reference_frame_checkbox, text="Show Reference Frames")
+    scene.append_to_caption('\t')
+
+    # Checkbox for robot visibility
+    chkbox_rob = checkbox(bind=robot_visibility_checkbox, text="Show Robot")
+    scene.append_to_caption('\n')
+
+    # Slider for robot opacity
+    scene.append_to_caption('Opacity:')
+    sld_opc = slider(bind=opacity_slider)
+    scene.append_to_caption('\n')
+
     # Control manual
     controls_str = '<br><b>Controls</b><br>' \
                    '<b>PAN</b><br>' \
@@ -265,26 +313,7 @@ def setup_ui_controls():
     # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
     scene.append_to_caption(controls_str)
 
-    # Button to reset camera
-    button(bind=reset_camera, text="Reset Camera")
-    scene.append_to_caption('\n\n')
-
-    # Drop down for robots / joints in frame
-    menu(choices=['r1', 'r2'], bind=menu_item_chosen)
-    scene.append_to_caption('\n\n')
-
-    # Checkbox for reference frame visibilities
-    checkbox(bind=None, text="Show Reference Frames")
-    scene.append_to_caption('\n\n')
-
-    # Checkbox for robot visibility
-    checkbox(bind=None, text="Show Robot")
-    scene.append_to_caption('\n\n')
-
-    # Slider for robot opacity
-    scene.append_to_caption('Opacity:')
-    slider(bind=None)
-    scene.append_to_caption('\n\n')
+    return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, sld_opc]
 
 
 def update_ui_controls():
