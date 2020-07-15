@@ -177,7 +177,7 @@ To remove the end effector joint, use the `detach_link()` function. Acting like 
 my_robot.detach_link()
 ```
 
-## Applying Textures / Colours
+## Applying Textures / Colours / Opacity
 Joints can be coloured, given textures, or both. Using a joint object, calling `set_texture()` will apply the given options.
 Textures are given as `str` paths to a local file, or a web hosted image. Colours are input as a list of RGB values.
 These values must be normalised from 0 to 1. When both are given, the texture gets colour shifted.
@@ -206,6 +206,16 @@ new_rot.set_texture(colour=[1, 0, 0])
 
 # Remove all details
 new_rot.set_texture()
+```
+
+Changing the opacity can help show reference frames that are hidden by the robot graphics.
+The opacity values must be between 0 and 1 inclusively.
+```python
+# Change a joint opacity to near invisible
+new_rot.set_transparency(0.3)
+
+# Change a robot to near invisible
+my_robot.set_transparency(0.3)
 ```
 
 ## Importing an STL object

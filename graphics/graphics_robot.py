@@ -322,6 +322,18 @@ class DefaultJoint:
             # Set to white if none given
             self.__graphic_obj.color = color.white
 
+    def set_transparency(self, opacity):
+        """
+        Sets the transparency of the joint.
+
+        :param opacity: Normalised value (0 -> 1) to set the opacity. 0 = transparent, 1 = opaque
+        :type opacity: `float`
+        :raises ValueError: Value must be between 0 and 1 inclusively
+        """
+        if opacity < 0 or opacity > 1:
+            raise ValueError("Value must be between 0 and 1 inclusively")
+        self.__graphic_obj.opacity = opacity
+
     def get_axis_vector(self, axis):
         """
         Get the current vector of a specified X, Y, or Z axis
@@ -586,6 +598,17 @@ class GraphicalRobot:
         """
         for joint in self.joints:
             joint.draw_reference_frame(is_visible)
+
+    def set_transparency(self, opacity):
+        """
+        Set the transparency of the robot.
+        Allows for easier identification of the reference frames (if hidden by the robot itself)
+
+        :param opacity: Normalised value (0 -> 1) to set the opacity. 0 = transparent, 1 = opaque
+        :type opacity: `float`
+        """
+        for joint in self.joints:
+            joint.set_transparency(opacity)
 
     def set_joint_poses(self, all_poses):
         """

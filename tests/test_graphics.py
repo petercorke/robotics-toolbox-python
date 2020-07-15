@@ -238,7 +238,7 @@ def test_animate_joints():
     ], 7)
 
 
-def test_import_textures():
+def test_robot_decor():
     """
     Test importing textures and changing joint colours
     """
@@ -262,6 +262,9 @@ def test_import_textures():
 
     # Remove all details
     new_rot.set_texture()
+
+    # Set transparency
+    new_rot.set_transparency(0.3)
 
 
 if __name__ == "__main__":
