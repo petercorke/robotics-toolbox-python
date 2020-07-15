@@ -1,4 +1,4 @@
-from vpython import scene, color, arrow, compound, keysdown, rate, norm, sqrt, cos
+from vpython import scene, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid
 
@@ -41,6 +41,8 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
 
     if caption != '':
         scene.caption = caption
+
+    setup_ui_controls()
 
     convert_grid_to_z_up()
     # Any time a key or mouse is held down, run the callback function
@@ -222,3 +224,68 @@ def handle_keyboard_inputs():
     scene.camera.axis = cam_axis
 
 
+def reset_camera():
+    """
+    Reset the camera to a default position and orientation
+    """
+    # Reset Camera
+    scene.up = z_axis_vector
+    scene.camera.pos = vector(10, 10, 10)
+    scene.camera.axis = -scene.camera.pos
+
+    # Update grid
+    # TODO
+
+
+def menu_item_chosen():
+    """
+    When a menu item is chosen, update the relevant checkboxes/options
+    """
+    pass
+
+
+def setup_ui_controls():
+    """
+    The initial configuration of the user interface
+    """
+    # Control manual
+    controls_str = '<br><b>Controls</b><br>' \
+                   '<b>PAN</b><br>' \
+                   'W , S | <i>forward / backward</i><br>' \
+                   'A , D | <i>left / right</i><br>' \
+                   'SPACE , SHIFT | <i>up / down</i><br>' \
+                   '<b>ROTATE</b><br>' \
+                   'CTRL + LMB | <i>free spin</i><br>' \
+                   'ARROWS KEYS | <i>rotate direction</i><br>' \
+                   'Q , E | <i>roll left / right</i><br>' \
+                   '<b>ZOOM</b></br>' \
+                   'MOUSEWHEEL | <i>zoom in / out</i><br>' \
+                   '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>'
+    # Disable the arrow keys from scrolling in the browser
+    # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
+    scene.append_to_caption(controls_str)
+
+    # Button to reset camera
+    button(bind=reset_camera, text="Reset Camera")
+    scene.append_to_caption('\n\n')
+
+    # Drop down for robots / joints in frame
+    menu(choices=['r1', 'r2'], bind=menu_item_chosen)
+    scene.append_to_caption('\n\n')
+
+    # Checkbox for reference frame visibilities
+    checkbox(bind=None, text="Show Reference Frames")
+    scene.append_to_caption('\n\n')
+
+    # Checkbox for robot visibility
+    checkbox(bind=None, text="Show Robot")
+    scene.append_to_caption('\n\n')
+
+    # Slider for robot opacity
+    scene.append_to_caption('Opacity:')
+    slider(bind=None)
+    scene.append_to_caption('\n\n')
+
+
+def update_ui_controls():
+    pass
