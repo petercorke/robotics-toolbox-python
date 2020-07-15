@@ -1,6 +1,7 @@
 from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
 from roboticstoolbox import Puma560
 from spatialmath import SE3
+from vpython import color
 
 
 def import_puma_560():
@@ -49,7 +50,7 @@ def create_link_0():
     link = StaticJoint(SE3(), stl_obj_path)
 
     # Change color
-    # stl_obj.color = color.blue
+    link.set_texture(colour=[0, 0, 1])
 
     return link
 
@@ -66,7 +67,7 @@ def create_link_1():
     link = RotationalJoint(SE3(), stl_obj_path)
 
     # Change color
-    # stl_obj.color = color.green
+    link.set_texture(colour=[0, 1, 0])
 
     return link
 
@@ -83,7 +84,7 @@ def create_link_2():
     link = RotationalJoint(SE3(), stl_obj_path)
 
     # Change color
-    # stl_obj.color = color.red
+    link.set_texture(colour=[1, 0, 0])
 
     return link
 
@@ -101,7 +102,7 @@ def create_link_3():
     # stl_obj = link.get_graphic_object()
 
     # Change color
-    # stl_obj.color = color.cyan
+    link.set_texture(colour=[0, 1, 1])
 
     return link
 
@@ -118,7 +119,7 @@ def create_link_4():
     link = RotationalJoint(SE3(), stl_obj_path)
 
     # Change color
-    # stl_obj.color = color.magenta
+    link.set_texture(colour=[1, 0, 1])
 
     return link
 
@@ -135,7 +136,7 @@ def create_link_5():
     link = RotationalJoint(SE3(), stl_obj_path)
 
     # Change color
-    # stl_obj.color = color.yellow
+    link.set_texture(colour=[1, 1, 0])
 
     return link
 
@@ -152,6 +153,6 @@ def create_link_6():
     link = Gripper(SE3(), stl_obj_path)
 
     # Change color
-    # stl_obj.color = color.black
+    link.set_texture(colour=[0, 0, 0])
 
     return link
