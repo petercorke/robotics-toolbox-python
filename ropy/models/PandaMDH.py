@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
 import numpy as np
+from spatialmath.base import trotz, transl
 from ropy.robot.Link import Revolute
 from ropy.robot.SerialLink import SerialLink
-# from rtb.tools.transform import transl, xyzrpy_to_trans
+
 
 class PandaMDH(SerialLink):
     """
     A class representing the Franka Emika Panda robot arm.
 
     DH Parameters taken from https://frankaemika.github.io/docs/control_parameters.html
-    
+
     Attributes:
     --------
         name : string
@@ -41,7 +42,8 @@ class PandaMDH(SerialLink):
 
         deg = np.pi/180
         mm = 1e-3
-        
+        tool_offset = (103)*mm
+
         flange = (107)*mm
         d7 = (58.4)*mm
         
@@ -56,8 +58,13 @@ class PandaMDH(SerialLink):
         L = [L1, L2, L3, L4, L5, L6, L7]
 
         # super(Panda, self).__init__(L, name = 'Panda', manufacturer = 'Franka Emika', tool = transl(0, 0, d7))
+        tool = transl(0, 0, tool_offset) @  trotz(-np.pi/4)
 
-        super(PandaMDH, self).__init__(L, name = 'Panda', manufacturer = 'Franka Emika', tool=np.eye(4))
+        super(PandaMDH, self).__init__(
+            L,
+            name='Panda',
+            manufacturer='Franka Emika',
+            tool=tool)
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 

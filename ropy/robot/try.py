@@ -55,4 +55,4 @@ qq = np.c_[q, q]
 
 r0 = rp.SerialLink([l0, l1, l2, l3])
 
-print(r0.fkine(q).A)
+print(r0.jacobe(q))

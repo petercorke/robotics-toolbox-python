@@ -5,7 +5,6 @@ from ropy.robot.Link import Link
 # from ropy.robot.jocobe import jacobe
 # from ropy.robot.jocob0 import jacob0
 from spatialmath.base.argcheck import getvector, ismatrix, isscalar
-import spatialmath.base as sp
 from spatialmath import SE3
 
 
@@ -75,7 +74,6 @@ class SerialLink(object):
         self.base = base
         self.tool = tool
         self.gravity = gravity
-        self._T = SE3()
 
         super(SerialLink, self).__init__()
 
@@ -159,10 +157,6 @@ class SerialLink(object):
         return self._tool
 
     @property
-    def T(self):
-        return self._T
-
-    @property
     def gravity(self):
         return self._gravity
 
@@ -220,10 +214,6 @@ class SerialLink(object):
             v = np.c_[v, self.links[i].qlim]
         return v
 
-    @name.setter
-    def name(self, name_new):
-        self._name = name_new
-
     @manuf.setter
     def manuf(self, manuf_new):
         self._manuf = manuf_new
@@ -252,9 +242,9 @@ class SerialLink(object):
     def q(self, q_new):
         self._q = getvector(q_new, self.n)
 
-    def A(self, joints, q):
+    def A(self, joints, q=None):
         """
-        Transforms between link frames for the J'th joint.  Q is a vector
+        Transforms between link frames for the J'th joint.  q is a vector
         (1xN) of joint variables. For:
         - standard DH parameters, this is from frame {J-1} to frame {J}.
         - modified DH parameters, this is from frame {J} to frame {J+1}.
@@ -264,7 +254,8 @@ class SerialLink(object):
 
         :param joints:
         :type joints: int, tuple or 2 element list
-        :param q: The joint angles/configuration of the robot
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values)
         :type q: float np.ndarray(1,n)
 
         :return T: The transform between link 0 and joints or joints[0]
@@ -280,10 +271,15 @@ class SerialLink(object):
             j0 = 0
             jn = joints
 
+        jn += 1
+
         if jn > self.n:
             raise ValueError("The joints value out of range")
 
-        q = getvector(q, self.n)
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
 
         T = SE3()
 
@@ -292,11 +288,12 @@ class SerialLink(object):
 
         return T
 
-    def islimit(self, q):
+    def islimit(self, q=None):
         """
         Joint limit test
 
-        :param q: The joint angles/configuration of the robot
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values)
         :type q: float np.ndarray(1,n)
 
         :return v: is a vector of boolean values, one per joint, False if q[i]
@@ -304,7 +301,11 @@ class SerialLink(object):
         :rtype v: bool list
         """
 
-        q = getvector(q, self.n)
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
         v = []
 
         for i in range(self.n):
@@ -353,7 +354,7 @@ class SerialLink(object):
         """
 
         p = getvector(p, 3, out='col')
-        lastlink = self.links(self.n-1)
+        lastlink = self.links[self.n-1]
 
         lastlink.m = m
         lastlink.r = p
@@ -431,7 +432,7 @@ class SerialLink(object):
         qdeg[k] *= 180 / np.pi
         return qdeg
 
-    def toradians(self, q):
+    def toradians(self, q=None):
         """
         Convert joint angles to radians
 
@@ -477,7 +478,9 @@ class SerialLink(object):
         else:
             q = getvector(q, self.n)
 
-    def fkine(self, q):
+        # TODO Implement this
+
+    def fkine(self, q=None):
         '''
         Evaluate fkine for each point on a trajectory of joints q
 
@@ -500,7 +503,7 @@ class SerialLink(object):
         cols = 0
         if q is None:
             q = np.copy(self.q)
-        elif q.ndim == 2 and q.shape[1] > 1:
+        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[1] > 1:
             cols = q.shape[1]
             ismatrix(q, (self.n, cols))
         else:
@@ -509,89 +512,146 @@ class SerialLink(object):
         if cols == 0:
             # Single configuration
             t = self.base
-            print(self.tool)
             for i in range(self.n):
                 t = t * self.links[i].A(q[i])
             t = t * self.tool
         else:
             # Trajectory
-            t = SE3([self.base for i in range(cols)])
 
-            # for i in range(cols):
-            #     for j in range(self.n):
-            #         t[i] = t[i] * self.links[j].A(q[j, i])
-            #     t[i] = t[i] * self.tool
+            for i in range(cols):
+                tr = self.base
+                for j in range(self.n):
+                    tr *= self.links[j].A(q[j, i])
+                tr = tr * self.tool
+
+                if i == 0:
+                    t = SE3(tr)
+                else:
+                    t.append(tr)
 
         return t
 
+    def jacobe(self, q=None):
+        """
+        The manipulator Jacobian matrix maps joint velocity to end-effector
+        spatial velocity v = Je*qd in the end-effector frame.
 
-    # """
-    # The spatial velocity Jacobian which relates the velocity in end-effector
-    # frame to velocity in the base frame.
+        :param q: The joint angles/configuration of the robot (Not optional,
+            stored q is always radians)
+        :type q: float np.ndarray(1,n)
 
-    # Parameters
-    # ----------
-    # q : float np.ndarray(1,n)
-    #     The joint angles/configuration of the robot
+        :return J: The manipulator Jacobian in ee frame
+        :rtype: float np.ndarray(6,n)
+        """
 
-    # Returns
-    # -------
-    # J : float np.ndarray(6,n)
-    #     The velocity Jacobian in 0 frame
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
 
-    # Examples
-    # --------
-    # >>> J = panda.jacob0v(np.array([1,1,1,1,1,1,1]))
-    # >>> J = panda.J0v
+        n = self.n
+        L = self.links
+        J = np.zeros((6, self.n))
 
-    # See Also
-    # --------
-    # ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame
-    # ropy.robot.m : Calculates the manipulability index of the robot
-    # ropy.robot.Jm : Calculates the manipiulability Jacobian
-    # ropy.robot.fkine : Calculates the forward kinematics of a robot
-    # """
-    # def jacob0v(self, q):
-    #     r = self.fkine(q)[0:3,0:3]
+        U = self.tool.A
 
-    #     Jv = np.zeros((6,6))
-    #     Jv[:3,:3] = r
-    #     Jv[3:,3:] = r
+        for j in range(n-1, -1, -1):
+            if self.mdh == 0:
+                # standard DH convention
+                U = L[j].A(q[j]).A @ U
 
-    #     return Jv
+            if not L[j].sigma:
+                # revolute axis
+                d = np.array([
+                    [-U[0, 0] * U[1, 3] + U[1, 0] * U[0, 3]],
+                    [-U[0, 1] * U[1, 3] + U[1, 1] * U[0, 3]],
+                    [-U[0, 2] * U[1, 3] + U[1, 2] * U[0, 3]]
+                ])
+                delta = np.expand_dims(U[2, :3], axis=1)  # nz oz az
+            else:
+                # prismatic axis
+                d = np.expand_dims(U[2, :3], axis=1)      # nz oz az
+                delta = np.zeros((3, 1))
 
-    # """
-    # The spatial velocity Jacobian which relates the velocity in base
-    # frame to velocity in the end-effector frame.
+            J[:, j] = np.squeeze(np.concatenate((d, delta)))
 
-    # Parameters
-    # ----------
-    # q : float np.ndarray(1,n)
-    #     The joint angles/configuration of the robot
+            if self.mdh != 0:
+                # modified DH convention
+                U = L[j].A(q[j]).A @ U
 
-    # Returns
-    # -------
-    # J : float np.ndarray(6,n)
-    #     The velocity Jacobian in ee frame
+        return J
 
-    # Examples
-    # --------
-    # >>> J = panda.jacobev(np.array([1,1,1,1,1,1,1]))
-    # >>> J = panda.Jev
+    def jacob0(self, q=None):
+        """
+        The manipulator Jacobian matrix maps joint velocity to end-effector
+        spatial velocity v = Je*qd in the end-effector frame.
 
-    # See Also
-    # --------
-    # ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame
-    # ropy.robot.m : Calculates the manipulability index of the robot
-    # ropy.robot.Jm : Calculates the manipiulability Jacobian
-    # ropy.robot.fkine : Calculates the forward kinematics of a robot
-    # """
-    # def jacobev(self, q):
-    #     r = self.fkine(q)[0:3,0:3]
-    #     r = np.linalg.inv(r)
+        :param q: The joint angles/configuration of the robot (Not optional,
+            stored q is always radians)
+        :type q: float np.ndarray(1,n)
 
-    #     Jv = np.zeros((6,6))
-    #     Jv[:3,:3] = r
-    #     Jv[3:,3:] = r
+        :return J: The manipulator Jacobian in ee frame
+        :rtype: float np.ndarray(6,n)
+        """
 
-    #     return Jv
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        J0 = self.jacob0v(q) @ self.jacobe(q)
+
+        return J0
+
+    def jacob0v(self, q=None):
+        """
+        The spatial velocity Jacobian which relates the velocity in
+        end-effector frame to velocity in the base frame.
+
+        :param q: The joint angles/configuration of the robot (Not optional,
+            stored q is always radians)
+        :type q: float np.ndarray(1,n)
+
+        :returns J: The velocity Jacobian in 0 frame
+        :rtype J: float np.ndarray(6,n)
+        """
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        r = self.fkine(q).R
+
+        Jv = np.zeros((6, 6))
+        Jv[:3, :3] = r
+        Jv[3:, 3:] = r
+
+        return Jv
+
+    def jacobev(self, q=None):
+        """
+        The spatial velocity Jacobian which relates the velocity in
+        the base frame to the velocity in the end-effector frame.
+
+        :param q: The joint angles/configuration of the robot (Not optional,
+            stored q is always radians)
+        :type q: float np.ndarray(1,n)
+
+        :returns J: The velocity Jacobian in ee frame
+        :rtype J: float np.ndarray(6,n)
+        """
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        r = self.fkine(q).R
+        r = np.linalg.inv(r)
+
+        Jv = np.zeros((6, 6))
+        Jv[:3, :3] = r
+        Jv[3:, 3:] = r
+
+        return Jv
