@@ -149,15 +149,19 @@ class Link(list):
 
         # for every passed argument, check if its a valid attribute and then set it
         for name, value in kwargs.items():
-            if units == 'deg' and name in ['alpha', 'theta', 'qlim']:
-                if isinstance(value, (list, tuple)):
-                    value = [v * pi / 180 for v in value]
-                else:
-                    value *= pi / 180
+
+            # convert angular parameters to radians if required
+            if name in ['alpha', 'theta'] and units == 'deg':
+                value *= pi / 180
+
             if name in self.__dict__:
                 setattr(self, name, value)
             if '_' + name in self.__dict__:
                 setattr(self, name, value)
+
+        # convert qlim to radians if required, can only be done after jointtype is known
+        if self.jointtype == 'R' and units == 'deg':
+            self.qlim = [v * pi / 180 for v in self.qlim]
 
     def __str__(self):
 
@@ -184,6 +188,7 @@ class Link(list):
     @I.setter
     def I(self, value):
         print("setting I to ", value)
+        # do stuff here to handle 3-vector, 6-vector, or 3x3 matrix (check it is symmetric)
         self._I = value
 
     def type(self):
