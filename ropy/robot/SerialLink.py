@@ -2,9 +2,8 @@
 
 import numpy as np
 from ropy.robot.Link import Link
-from ropy.robot.fkine import fkine
-from ropy.robot.jocobe import jacobe
-from ropy.robot.jocob0 import jacob0
+# from ropy.robot.jocobe import jacobe
+# from ropy.robot.jocob0 import jacob0
 from spatialmath.base.argcheck import getvector, ismatrix, isscalar
 import spatialmath.base as sp
 from spatialmath import SE3
