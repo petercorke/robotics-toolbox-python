@@ -3,7 +3,7 @@ from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid
 
 
-def init_canvas(height=500, width=1000, title='', caption='', grid=True):
+class GraphicsCanvas:
     """
     Set up the scene with initial conditions.
         - White background
@@ -21,39 +21,103 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     :type caption: `str`, optional
     :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
     :type grid: `bool`, optional
-    :return: The graphics grid object for use outside canvas creation
-    :rtype: class:`GraphicsGrid`
     """
+    def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+        # Apply the settings
+        scene.background = color.white
+        scene.width = width
+        scene.height = height
+        scene.autoscale = False
 
-    # Apply the settings
-    scene.background = color.white
-    scene.width = width
-    scene.height = height
-    scene.autoscale = False
+        # Disable default controls
+        scene.userpan = False
+        scene.userzoom = True  # Keep zoom controls (scrollwheel)
+        scene.userspin = True  # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
 
-    # Disable default controls
-    scene.userpan = False
-    scene.userzoom = True  # Keep zoom controls (scrollwheel)
-    scene.userspin = True  # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
+        # Apply HTML title/caption
+        if title != '':
+            scene.title = title
 
-    if title != '':
-        scene.title = title
+        if caption != '':
+            scene.caption = caption
 
-    if caption != '':
-        scene.caption = caption
+        # Create the UI
+        self.__ui_controls = self.__setup_ui_controls()
 
-    ui_controls = setup_ui_controls()
+        # Rotate the camera
+        convert_grid_to_z_up()
 
-    convert_grid_to_z_up()
-    # Any time a key or mouse is held down, run the callback function
-    rate(30)  # 30Hz
-    scene.bind('keydown', handle_keyboard_inputs)
+        # Any time a key or mouse is held down, run the callback function
+        rate(30)  # 30Hz
+        scene.bind('keydown', handle_keyboard_inputs)
 
-    graphics_grid = GraphicsGrid()
-    if not grid:
-        graphics_grid.set_visibility(False)
+        # Create the grid, and display if wanted
+        self.__graphics_grid = GraphicsGrid()
+        if not grid:
+            self.__graphics_grid.set_visibility(False)
 
-    return graphics_grid
+    def clear_scene(self):
+        self.__graphics_grid.clear_scene()
+
+    def grid_visibility(self, is_visible):
+        self.__graphics_grid.set_visibility(is_visible)
+
+    def __setup_ui_controls(self):
+        """
+        The initial configuration of the user interface
+        """
+        # Button to reset camera
+        scene.append_to_caption('\n')
+        btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
+        scene.append_to_caption('\t')
+
+        # Drop down for robots / joints in frame
+        menu_robots = menu(bind=menu_item_chosen, choices=['r1', 'r2'])
+        scene.append_to_caption('\n')
+
+        # Checkbox for reference frame visibilities
+        chkbox_ref = checkbox(bind=reference_frame_checkbox, text="Show Reference Frames")
+        scene.append_to_caption('\t')
+
+        # Checkbox for robot visibility
+        chkbox_rob = checkbox(bind=robot_visibility_checkbox, text="Show Robot")
+        scene.append_to_caption('\n')
+
+        # Slider for robot opacity
+        scene.append_to_caption('Opacity:')
+        sld_opc = slider(bind=opacity_slider)
+        scene.append_to_caption('\n')
+
+        # Control manual
+        controls_str = '<br><b>Controls</b><br>' \
+                       '<b>PAN</b><br>' \
+                       'W , S | <i>forward / backward</i><br>' \
+                       'A , D | <i>left / right</i><br>' \
+                       'SPACE , SHIFT | <i>up / down</i><br>' \
+                       '<b>ROTATE</b><br>' \
+                       'CTRL + LMB | <i>free spin</i><br>' \
+                       'ARROWS KEYS | <i>rotate direction</i><br>' \
+                       'Q , E | <i>roll left / right</i><br>' \
+                       '<b>ZOOM</b></br>' \
+                       'MOUSEWHEEL | <i>zoom in / out</i><br>' \
+                       '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>'
+        # Disable the arrow keys from scrolling in the browser
+        # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
+        scene.append_to_caption(controls_str)
+
+        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, sld_opc]
+
+    def __reset_camera(self):
+        """
+        Reset the camera to a default position and orientation
+        """
+        # Reset Camera
+        scene.up = z_axis_vector
+        scene.camera.pos = vector(10, 10, 10)
+        scene.camera.axis = -scene.camera.pos
+
+        # Update grid
+        self.__graphics_grid.update_grid()
 
 
 def convert_grid_to_z_up():
@@ -225,20 +289,6 @@ def handle_keyboard_inputs():
 
 
 # TODO
-def reset_camera():
-    """
-    Reset the camera to a default position and orientation
-    """
-    # Reset Camera
-    scene.up = z_axis_vector
-    scene.camera.pos = vector(10, 10, 10)
-    scene.camera.axis = -scene.camera.pos
-
-    # Update grid
-    # TODO
-
-
-# TODO
 def menu_item_chosen():
     """
     When a menu item is chosen, update the relevant checkboxes/options
@@ -268,52 +318,6 @@ def opacity_slider():
     Update the opacity slider depending on the slider value
     """
     pass
-
-
-def setup_ui_controls():
-    """
-    The initial configuration of the user interface
-    """
-    # Button to reset camera\
-    scene.append_to_caption('\n')
-    btn_reset = button(bind=reset_camera, text="Reset Camera")
-    scene.append_to_caption('\t')
-
-    # Drop down for robots / joints in frame
-    menu_robots = menu(choices=['r1', 'r2'], bind=menu_item_chosen)
-    scene.append_to_caption('\n')
-
-    # Checkbox for reference frame visibilities
-    chkbox_ref = checkbox(bind=reference_frame_checkbox, text="Show Reference Frames")
-    scene.append_to_caption('\t')
-
-    # Checkbox for robot visibility
-    chkbox_rob = checkbox(bind=robot_visibility_checkbox, text="Show Robot")
-    scene.append_to_caption('\n')
-
-    # Slider for robot opacity
-    scene.append_to_caption('Opacity:')
-    sld_opc = slider(bind=opacity_slider)
-    scene.append_to_caption('\n')
-
-    # Control manual
-    controls_str = '<br><b>Controls</b><br>' \
-                   '<b>PAN</b><br>' \
-                   'W , S | <i>forward / backward</i><br>' \
-                   'A , D | <i>left / right</i><br>' \
-                   'SPACE , SHIFT | <i>up / down</i><br>' \
-                   '<b>ROTATE</b><br>' \
-                   'CTRL + LMB | <i>free spin</i><br>' \
-                   'ARROWS KEYS | <i>rotate direction</i><br>' \
-                   'Q , E | <i>roll left / right</i><br>' \
-                   '<b>ZOOM</b></br>' \
-                   'MOUSEWHEEL | <i>zoom in / out</i><br>' \
-                   '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>'
-    # Disable the arrow keys from scrolling in the browser
-    # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
-    scene.append_to_caption(controls_str)
-
-    return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, sld_opc]
 
 
 def update_ui_controls():

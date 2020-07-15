@@ -19,14 +19,14 @@ import graphics as gph
 
 
 # Create a canvas on import, to allow clearing between function calls
-grid = gph.init_canvas()
+g_canvas = gph.GraphicsCanvas()
 
 
 def clear():
     """
     Clears the current scene
     """
-    grid.clear_scene()
+    g_canvas.clear_scene()
 
 
 def test_reference_frame_pose():
@@ -269,5 +269,4 @@ def test_robot_decor():
 
 if __name__ == "__main__":
     # run the Puma demo by default
-    # grid = gph.init_canvas()
     test_puma560_angle_change()
