@@ -60,7 +60,7 @@ def test_reference_frame_pose():
         [0, 0, 0, 1]
     ])
     se = SE3(arr)
-    gph.draw_reference_frame_axes(se.Rx(30, 'deg'))
+    gph.draw_reference_frame_axes(se * SE3().Rx(30, 'deg'))
 
 
 def test_import_stl():

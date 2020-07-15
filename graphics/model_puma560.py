@@ -1,7 +1,6 @@
 from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
 from roboticstoolbox import Puma560
 from spatialmath import SE3
-from vpython import color
 
 
 def import_puma_560():
