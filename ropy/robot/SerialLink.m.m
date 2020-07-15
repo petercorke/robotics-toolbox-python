@@ -76,67 +76,6 @@
             end
         end
 
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %   set/get methods
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        function v = get.d(r)
-            v = [r.links.d];
-        end
-        function v = get.a(r)
-            v = [r.links.a];
-        end
-        function v = get.theta(r)
-            v = [r.links.theta];
-        end
-        function v = get.alpha(r)
-            v = [r.links.alpha];
-        end
-        
-        function set.offset(r, v)
-            if length(v) ~= length(v)
-                error('offset vector length must equal number DOF');
-            end
-            L = r.links;
-            for i=1:r.n
-                L(i).offset = v(i);
-            end
-            r.links = L;
-        end
-
-        function v = get.offset(r)
-            v = [r.links.offset];
-        end
-
-        function set.qlim(r, v)
-            if numrows(v) ~= r.n
-                error('insufficient rows in joint limit matrix');
-            end
-            L = r.links;
-            for i=1:r.n
-                L(i).qlim = v(i,:);
-            end
-            r.links = L;
-        end
-
-        function v = get.qlim(r)
-            L = r.links;
-            v = zeros(r.n, 2);
-            for i=1:r.n
-                if isempty(L(i).qlim)
-                    if L(i).isrevolute
-                        v(i,:) = [-pi pi];
-                    else
-                        v(i,:) = [-Inf Inf];
-                    end
-                else
-                    v(i,:) = L(i).qlim;
-                end
-            end
-        end
-
-        % general methods
                 
         function v = configstr(r)
         %SerialLink.configstr
@@ -258,55 +197,8 @@
                 r.links.dyn();
             end
         end
-        
 
 
-                 
-        function p = isprismatic(robot)
-        %SerialLink.isprismatic identify prismatic joints
-        %
-        % X = R.isprismatic is a list of logical variables, one per joint, true if
-        % the corresponding joint is prismatic, otherwise false.
-        %
-        % See also Link.isprismatic, SerialLink.isrevolute.
-            p = robot.links.isprismatic();
-        end
-        
-        function p = isrevolute(robot)
-        %SerialLink.isrevolute identify revolute joints
-        %
-        % X = R.isrevolute is a list of logical variables, one per joint, true if
-        % the corresponding joint is revolute, otherwise false.
-        %
-        % See also Link.isrevolute, SerialLink.isprismatic.
-            p = robot.links.isrevolute();
-        end
-        
-        function qdeg = todegrees(robot, q)
-        %SerialLink.todegrees Convert joint angles to degrees
-        %
-        % Q2 = R.todegrees(Q) is a vector of joint coordinates where those elements
-        % corresponding to revolute joints are converted from radians to degrees.
-        % Elements corresponding to prismatic joints are copied unchanged.
-        %
-        % See also SerialiLink.toradians.
-            k = robot.isrevolute;
-            qdeg = q;
-            qdeg(:,k) = qdeg(:,k) * 180/pi;
-        end
-        
-        function qrad = toradians(robot, q)
-        %SerialLink.toradians Convert joint angles to radians
-        %
-        % Q2 = R.toradians(Q) is a vector of joint coordinates where those elements
-        % corresponding to revolute joints are converted from degrees to radians.
-        % Elements corresponding to prismatic joints are copied unchanged.
-        %
-        % See also SerialiLink.todegrees.
-            k = robot.isrevolute;
-            qrad = q;
-            qrad(:,k) = qrad(:,k) * pi/180;
-        end
         
         function J = jacobn(robot, varargin)
             warning('RTB:SerialLink:deprecated', 'Use jacobe instead of jacobn');

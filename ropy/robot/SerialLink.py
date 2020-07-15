@@ -179,6 +179,48 @@ class SerialLink(object):
     def q(self):
         return self._q
 
+    @property
+    def d(self):
+        v = []
+        for i in range(self.n):
+            v.append(self.links[i].d)
+        return v
+
+    @property
+    def a(self):
+        v = []
+        for i in range(self.n):
+            v.append(self.links[i].a)
+        return v
+
+    @property
+    def theta(self):
+        v = []
+        for i in range(self.n):
+            v.append(self.links[i].theta)
+        return v
+
+    @property
+    def r(self):
+        v = np.copy(self.links[0].r)
+        for i in range(1, self.n):
+            v = np.c_[v, self.links[i].r]
+        return v
+
+    @property
+    def offset(self):
+        v = []
+        for i in range(self.n):
+            v.append(self.links[i].offset)
+        return v
+
+    @property
+    def qlim(self):
+        v = np.copy(self.links[0].qlim)
+        for i in range(1, self.n):
+            v = np.c_[v, self.links[i].qlim]
+        return v
+
     @name.setter
     def name(self, name_new):
         self._name = name_new
@@ -209,7 +251,7 @@ class SerialLink(object):
 
     @q.setter
     def q(self, q_new):
-        self._q = getvector(q_new, self.n, 'col')
+        self._q = getvector(q_new, self.n)
 
     def A(self, joints, q):
         """
@@ -319,7 +361,7 @@ class SerialLink(object):
 
     def jointdynamics(self, q, qd):
         """
-        Transfer function of joint actuator. Returns a vector of N 
+        Transfer function of joint actuator. Returns a vector of N
         continuous-time transfer function objects that represent the
         transfer function 1/(Js+B) for each joint based on the dynamic
         parameters of the robot and the configuration q (1xN).
@@ -333,6 +375,155 @@ class SerialLink(object):
 
         # TODO a tf object implementation?
         pass
+
+    def isprismatic(self):
+        """
+        Identify prismatic joints
+
+        :return: a list of bool variables, one per joint, true if
+            the corresponding joint is prismatic, otherwise false.
+        :rtype: bool list
+        """
+
+        p = []
+
+        for i in range(self.n):
+            p.append(self.links[i].isprismatic())
+
+        return p
+
+    def isrevolute(self):
+        """
+        Identify revolute joints
+
+        :return: a list of bool variables, one per joint, true if
+            the corresponding joint is revolute, otherwise false.
+        :rtype: bool list
+        """
+
+        p = []
+
+        for i in range(self.n):
+            p.append(self.links[i].isrevolute())
+
+        return p
+
+    def todegrees(self, q=None):
+        """
+        Convert joint angles to degrees
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values)
+        :type q: float np.ndarray(1,n)
+
+        :return: a vector of joint coordinates where those elements
+            corresponding to revolute joints are converted from radians to
+            degrees. Elements corresponding to prismatic joints are copied
+            unchanged.
+        :rtype: float np.ndarray(n,)
+        """
+
+        if q is None:
+            qdeg = np.copy(self.q)
+        else:
+            qdeg = getvector(q, self.n)
+
+        k = self.isrevolute()
+        qdeg[k] *= 180 / np.pi
+        return qdeg
+
+    def toradians(self, q):
+        """
+        Convert joint angles to radians
+
+        :param q: The joint angles/configuration of the robot (Not optional,
+            stored q is always radians)
+        :type q: float np.ndarray(1,n)
+
+        :return: a vector of joint coordinates where those elements
+            corresponding to revolute joints are converted from degrees to
+            radians. Elements corresponding to prismatic joints are copied
+            unchanged.
+        :rtype: float np.ndarray(n,)
+        """
+
+        if q is None:
+            qrad = np.copy(self.q)
+        else:
+            qrad = getvector(q, self.n)
+
+        k = self.isrevolute()
+        qrad[k] *= np.pi / 180
+        return qrad
+
+    def twists(self, q=None):
+        """
+        Joint axis twists. Calculates a vector of Twist objects tw (1xN) that
+        represent the axes of the joints for the robot with joint coordinates
+        q (1xN). Also returns T0 which is an SE3 object representing the pose
+        of the tool.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values)
+        :type q: float np.ndarray(n,)
+
+        :return tw: a vector of Twist objects
+        :rtype tw: float np.ndarray(n,)
+        :return T0: Represents the pose of the tool
+        :rtype T0: SE3
+        """
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+    def fkine(self, q):
+        '''
+        Evaluate fkine for each point on a trajectory of joints q
+
+        Note:
+        - The robot's base or tool transform, if present, are incorporated
+            into the result.
+        - Joint offsets, if defined, are added to q before the forward
+            kinematics are computed.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values). If q is a matrix
+            the rows are interpreted as the generalized joint coordinates
+            for a sequence of points along a trajectory. q(j,i) is the
+            j'th joint parameter for the i'th trajectory point.
+
+        :return T: Homogeneous transformation matrix or trajectory
+        :rtype T: SE3 or SE3 list
+        '''
+
+        cols = 0
+        if q is None:
+            q = np.copy(self.q)
+        elif q.ndim == 2 and q.shape[1] > 1:
+            cols = q.shape[1]
+            ismatrix(q, (self.n, cols))
+        else:
+            q = getvector(q, self.n)
+
+        if cols == 0:
+            # Single configuration
+            t = self.base
+            print(self.tool)
+            for i in range(self.n):
+                t = t * self.links[i].A(q[i])
+            t = t * self.tool
+        else:
+            # Trajectory
+            t = SE3([self.base for i in range(cols)])
+
+            # for i in range(cols):
+            #     for j in range(self.n):
+            #         t[i] = t[i] * self.links[j].A(q[j, i])
+            #     t[i] = t[i] * self.tool
+
+        return t
 
 
     # """

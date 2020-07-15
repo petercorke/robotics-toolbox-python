@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from rtb.robot.Link import Revolute
-from rtb.robot.SerialLink import SerialLink
+from ropy.robot.Link import Revolute
+from ropy.robot.SerialLink import SerialLink
 # from rtb.tools.transform import transl, xyzrpy_to_trans
 
 class PandaMDH(SerialLink):

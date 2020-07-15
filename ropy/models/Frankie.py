@@ -2,8 +2,8 @@
 
 import numpy as np
 from spatialmath.base import trotz, transl
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ET import ET
+from ropy.robot.ETS import ETS
+from ropy.robot.ET import ET
 
 
 class Frankie(ETS):
