@@ -1,4 +1,4 @@
-from vpython import scene, color, arrow, compound, keysdown, rate, norm
+from vpython import scene, color, arrow, compound, keysdown, rate, norm, sqrt, cos
 from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid
 
@@ -152,54 +152,84 @@ def handle_keyboard_mouse_inputs():
     # Get a list of keys
     keys = keysdown()
 
+    ####################################################################################################################
+    # PANNING
+
     # Check if the keys are pressed, update vectors as required
     if 'w' in keys:
         cam_pos = cam_pos + cam_axis * pan_amount
-        cam_focus = cam_focus + cam_axis * pan_amount
+        # cam_focus = cam_focus + cam_axis * pan_amount
     if 's' in keys:
         cam_pos = cam_pos - cam_axis * pan_amount
-        cam_focus = cam_focus - cam_axis * pan_amount
+        # cam_focus = cam_focus - cam_axis * pan_amount
     if 'a' in keys:
         cam_pos = cam_pos + cam_side_axis * pan_amount
-        cam_focus = cam_focus + cam_side_axis * pan_amount
+        # cam_focus = cam_focus + cam_side_axis * pan_amount
     if 'd' in keys:
         cam_pos = cam_pos - cam_side_axis * pan_amount
-        cam_focus = cam_focus - cam_side_axis * pan_amount
+        # cam_focus = cam_focus - cam_side_axis * pan_amount
 
     # Update camera
     scene.camera.pos = cam_pos
+    # scene.camera.axis = cam_axis
+    # scene.center = cam_focus
+
+    ####################################################################################################################
+    # Camera Roll
+
+    # # Get an SE3 of the camera
+    # cam_arr = array([
+    #     [norm(cam_axis).x, norm(cam_side_axis).x, norm(cam_up).x, cam_pos.x],
+    #     [norm(cam_axis).y, norm(cam_side_axis).y, norm(cam_up).y, cam_pos.y],
+    #     [norm(cam_axis).z, norm(cam_side_axis).z, norm(cam_up).z, cam_pos.z],
+    #     [               0,                     0,              0,         1]
+    # ])
+    # cam_se3 = SE3(cam_arr)
+    #
+    # # If only one rotation key is pressed
+    # if 'q' in keys and 'e' not in keys:
+    #     # Rotate SE3
+    #     new_se3 = cam_se3 * SE3().Rz(-rot_amount, 'deg')
+    #     # Obtain new parameters
+    #     cam_axis = get_pose_x_vec(new_se3)
+    #     cam_axis.mag = cam_distance
+    #     cam_pos = cam_focus - cam_axis
+    #     # Apply changes
+    #     scene.camera.pos = cam_pos
+    #     scene.camera.axis = cam_axis
+    #
+    # # If only one rotation key is pressed
+    # if 'e' in keys and 'q' not in keys:
+    #     # Rotate SE3
+    #     new_se3 = cam_se3 * SE3().Rz(rot_amount, 'deg')
+    #     # Obtain new parameters
+    #     cam_axis = get_pose_x_vec(new_se3)
+    #     cam_axis.mag = cam_distance
+    #     cam_pos = cam_focus - cam_axis
+    #     # Apply changes
+    #     scene.camera.pos = cam_pos
+    #     scene.camera.axis = cam_axis
+
+    ####################################################################################################################
+    # CAMERA ROTATION
+
+    d = cam_distance
+    move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))
+
+    if 'left' in keys and 'right' not in keys:
+        cam_pos = cam_pos + norm(cam_side_axis)*move_dist
+        cam_axis = -(cam_pos - cam_focus)
+    if 'right' in keys and 'left' not in keys:
+        cam_pos = cam_pos - norm(cam_side_axis)*move_dist
+        cam_axis = -(cam_pos - cam_focus)
+    if 'up' in keys and 'down' not in keys:
+        cam_pos = cam_pos + norm(cam_up)*move_dist
+        cam_axis = -(cam_pos - cam_focus)
+    if 'down' in keys and 'up' not in keys:
+        cam_pos = cam_pos - norm(cam_up)*move_dist
+        cam_axis = -(cam_pos - cam_focus)
+
+    scene.camera.pos = cam_pos
     scene.camera.axis = cam_axis
-    scene.camera.focus = cam_focus
 
-    # Get an SE3 of the camera
-    cam_arr = array([
-        [norm(cam_axis).x, norm(cam_side_axis).x, norm(cam_up).x, cam_pos.x],
-        [norm(cam_axis).y, norm(cam_side_axis).y, norm(cam_up).y, cam_pos.y],
-        [norm(cam_axis).z, norm(cam_side_axis).z, norm(cam_up).z, cam_pos.z],
-        [               0,                     0,              0,         1]
-    ])
-    cam_se3 = SE3(cam_arr)
 
-    # If only one rotation key is pressed
-    if 'q' in keys and 'e' not in keys:
-        # Rotate SE3
-        new_se3 = cam_se3 * SE3().Rz(-rot_amount, 'deg')
-        # Obtain new parameters
-        new_x_vec = get_pose_x_vec(new_se3)
-        new_x_vec.mag = cam_distance
-        new_pos = cam_focus - new_x_vec
-        # Apply changes
-        scene.camera.pos = new_pos
-        scene.camera.axis = new_x_vec
-
-    # If only one rotation key is pressed
-    if 'e' in keys and 'q' not in keys:
-        # Rotate SE3
-        new_se3 = cam_se3 * SE3().Rz(rot_amount, 'deg')
-        # Obtain new parameters
-        new_x_vec = get_pose_x_vec(new_se3)
-        new_x_vec.mag = cam_distance
-        new_pos = cam_focus - new_x_vec
-        # Apply changes
-        scene.camera.pos = new_pos
-        scene.camera.axis = new_x_vec
