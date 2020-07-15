@@ -147,6 +147,8 @@ def handle_keyboard_inputs():
     cam_side_axis = scene.camera.up.cross(cam_axis)  # Y
     cam_up = cam_axis.cross(cam_side_axis)  # Z
 
+    cam_up.mag = cam_axis.mag
+
     # Get a list of keys
     keys = keysdown()
 
@@ -166,6 +168,10 @@ def handle_keyboard_inputs():
         cam_pos = cam_pos + cam_side_axis * pan_amount
     if 'd' in keys:
         cam_pos = cam_pos - cam_side_axis * pan_amount
+    if ' ' in keys:
+        cam_pos = cam_pos + cam_up * pan_amount
+    if 'shift' in keys:
+        cam_pos = cam_pos - cam_up * pan_amount
 
     # Update camera position before rotation (to keep pan and rotate separate)
     scene.camera.pos = cam_pos

@@ -41,8 +41,8 @@ Instructions on how to use the graphical section of the toolbox below.
    * A -> Left
    * S -> Backward
    * D -> Right
-   * ~ -> Up
-   * ~ -> Down
+   * SPACE -> Up
+   * SHIFT -> Down
  * Spin
    * Mouse
      * CTRL + LMB -> Free spin
