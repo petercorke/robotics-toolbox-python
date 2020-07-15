@@ -34,7 +34,7 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     # Disable default controls
     scene.userpan = False
     scene.userzoom = True  # Keep zoom controls (scrollwheel)
-    scene.userspin = False
+    scene.userspin = True  # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
 
     if title != '':
         scene.title = title
@@ -45,7 +45,7 @@ def init_canvas(height=500, width=1000, title='', caption='', grid=True):
     convert_grid_to_z_up()
     # Any time a key or mouse is held down, run the callback function
     rate(30)  # 30Hz
-    scene.bind('keydown mousedown', handle_keyboard_mouse_inputs)
+    scene.bind('keydown', handle_keyboard_inputs)
 
     graphics_grid = GraphicsGrid()
     if not grid:
@@ -113,7 +113,7 @@ def draw_reference_frame_axes(se3_pose):
     return frame_ref
 
 
-def handle_keyboard_mouse_inputs():
+def handle_keyboard_inputs():
     """
     Pans amount dependent on distance between camera and focus point.
     Closer = smaller pan amount
@@ -128,15 +128,14 @@ def handle_keyboard_mouse_inputs():
     ^ = rotate up along camera axes (rotate)
     V = rotate down along camera axes (rotate)
 
-    Q = rotate clockwise around +Z (rotate)
-    E = rotate counterclockwise around +Z (rotate)
+    Q = roll left (rotate)
+    E = roll right (rotate)
 
-    LMB = rotate
-    RMB = pan
+    ctrl + LMB = rotate (Default Vpython)
 
     """
     # Constants
-    pan_amount = 0.05  # units
+    pan_amount = 0.02  # units
     rot_amount = 1.0  # deg
 
     # Current settings
@@ -152,9 +151,11 @@ def handle_keyboard_mouse_inputs():
     # Get a list of keys
     keys = keysdown()
 
+    if 'ctrl' in keys:
+        return
+
     ####################################################################################################################
     # PANNING
-
     # Check if the keys are pressed, update vectors as required
     if 'w' in keys:
         cam_pos = cam_pos + cam_axis * pan_amount
@@ -176,45 +177,22 @@ def handle_keyboard_mouse_inputs():
 
     ####################################################################################################################
     # Camera Roll
+    # If only one rotation key is pressed
+    if 'q' in keys and 'e' not in keys:
+        cam_up = cam_up.rotate(angle=-radians(rot_amount), axis=cam_axis)
+        cam_up.mag = cam_axis.mag
+        scene.up = cam_up
 
-    # # Get an SE3 of the camera
-    # cam_arr = array([
-    #     [norm(cam_axis).x, norm(cam_side_axis).x, norm(cam_up).x, cam_pos.x],
-    #     [norm(cam_axis).y, norm(cam_side_axis).y, norm(cam_up).y, cam_pos.y],
-    #     [norm(cam_axis).z, norm(cam_side_axis).z, norm(cam_up).z, cam_pos.z],
-    #     [               0,                     0,              0,         1]
-    # ])
-    # cam_se3 = SE3(cam_arr)
-    #
-    # # If only one rotation key is pressed
-    # if 'q' in keys and 'e' not in keys:
-    #     # Rotate SE3
-    #     new_se3 = cam_se3 * SE3().Rz(-rot_amount, 'deg')
-    #     # Obtain new parameters
-    #     cam_axis = get_pose_x_vec(new_se3)
-    #     cam_axis.mag = cam_distance
-    #     cam_pos = cam_focus - cam_axis
-    #     # Apply changes
-    #     scene.camera.pos = cam_pos
-    #     scene.camera.axis = cam_axis
-    #
-    # # If only one rotation key is pressed
-    # if 'e' in keys and 'q' not in keys:
-    #     # Rotate SE3
-    #     new_se3 = cam_se3 * SE3().Rz(rot_amount, 'deg')
-    #     # Obtain new parameters
-    #     cam_axis = get_pose_x_vec(new_se3)
-    #     cam_axis.mag = cam_distance
-    #     cam_pos = cam_focus - cam_axis
-    #     # Apply changes
-    #     scene.camera.pos = cam_pos
-    #     scene.camera.axis = cam_axis
+    # If only one rotation key is pressed
+    if 'e' in keys and 'q' not in keys:
+        cam_up = cam_up.rotate(angle=radians(rot_amount), axis=cam_axis)
+        cam_up.mag = cam_axis.mag
+        scene.up = cam_up
 
     ####################################################################################################################
     # CAMERA ROTATION
-
     d = cam_distance
-    move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))
+    move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))  # SAS Cosine
 
     if 'left' in keys and 'right' not in keys:
         cam_pos = cam_pos + norm(cam_side_axis)*move_dist
