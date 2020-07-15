@@ -1,7 +1,7 @@
 
-import ropy as rp
-import spatialmath as sm
-import numpy as np
+# import ropy as rp
+# import spatialmath as sm
+# import numpy as np
 
 # t = sm.SE3([np.eye(4) for i in range(5)])
 
@@ -45,14 +45,14 @@ import numpy as np
 
 
 
-l0 = rp.Prismatic()
-l1 = rp.Revolute()
-l2 = rp.Prismatic(theta=2.0)
-l3 = rp.Revolute()
+# l0 = rp.Prismatic()
+# l1 = rp.Revolute()
+# l2 = rp.Prismatic(theta=2.0)
+# l3 = rp.Revolute()
 
-q = np.array([[1], [2], [3], [4]])
-qq = np.c_[q, q]
+# q = np.array([[1], [2], [3], [4]])
+# qq = np.c_[q, q]
 
-r0 = rp.SerialLink([l0, l1, l2, l3])
+# r0 = rp.SerialLink([l0, l1, l2, l3])
 
-print(r0.jacobe(q))
+# print(r0.jacobe(q))

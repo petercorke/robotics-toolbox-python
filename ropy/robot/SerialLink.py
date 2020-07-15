@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+"""
+Created on August 1 2019
+@author: Jesse Haviland
+"""
 
 import numpy as np
 from ropy.robot.Link import Link
-# from ropy.robot.jocobe import jacobe
-# from ropy.robot.jocob0 import jacob0
 from spatialmath.base.argcheck import getvector, ismatrix, isscalar
 from spatialmath import SE3
 

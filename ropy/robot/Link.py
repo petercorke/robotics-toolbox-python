@@ -1,4 +1,8 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
+"""
+Created on August 1 2019
+@author: Jesse Haviland
+"""
 
 from __future__ import absolute_import
 from __future__ import division

@@ -16,7 +16,7 @@ class TestLink(unittest.TestCase):
 
     def test_seriallink(self):
         l0 = rp.Link()
-        r0 = rp.SerialLink([l0])
+        rp.SerialLink([l0])
 
     def test_isprismatic(self):
         l0 = rp.Prismatic()

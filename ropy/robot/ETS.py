@@ -425,9 +425,9 @@ class ETS(object):
 
 
     """
-    The spatial velocity Jacobian which relates the velocity in base 
+    The spatial velocity Jacobian which relates the velocity in base
     frame to velocity in the end-effector frame.
-    
+
     Parameters
     ----------
     q : float np.ndarray(1,n)
@@ -440,21 +440,21 @@ class ETS(object):
     --------
     >>> J = panda.jacobev(np.array([1,1,1,1,1,1,1]))
     >>> J = panda.Jev
-    
+
     See Also
     --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame 
+    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame
     ropy.robot.m : Calculates the manipulability index of the robot
     ropy.robot.Jm : Calculates the manipiulability Jacobian
     ropy.robot.fkine : Calculates the forward kinematics of a robot
     """
     def jacobev(self, q):
-        r = self.fkine(q)[0:3,0:3]
+        r = self.fkine(q)[0:3, 0:3]
         r = np.linalg.inv(r)
 
-        Jv = np.zeros((6,6))
-        Jv[:3,:3] = r
-        Jv[3:,3:] = r
+        Jv = np.zeros((6, 6))
+        Jv[:3, :3] = r
+        Jv[3:, 3:] = r
 
         return Jv
 
@@ -464,10 +464,10 @@ class ETS(object):
         return Je
 
     def jacob0v(self, q):
-        r = self.fkine(q)[0:3,0:3]
+        r = self.fkine(q)[0:3, 0:3]
 
-        Jv = np.zeros((6,6))
-        Jv[:3,:3] = r
-        Jv[3:,3:] = r
+        Jv = np.zeros((6, 6))
+        Jv[:3, :3] = r
+        Jv[3:, 3:] = r
 
         return Jv
