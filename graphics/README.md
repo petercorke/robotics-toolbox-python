@@ -10,14 +10,14 @@ Instructions on how to use the graphical section of the toolbox below.
      * Translate function
    * ~~Static Joint~~
    * **_POSTPONED_** Gripper Joint
- * Grid Updating
-   * On rotation/move finish
+ * ~~Grid Updating~~
+   * ~~On rotation/move finish~~
    * ~~Don't redraw labels, move/update them~~
    * ~~Don't redraw the grid, move/update them~~
  * Error handling
    * ~~Throw custom error messages~~
    * Handle vpython error messages
- * STL
+ * ~~STL~~
    * ~~Load Binary STL files~~
    * **_NOT POSSIBLE_** Option to save a mesh to STL?
      * Can't access object triangles/vertices.
@@ -26,14 +26,36 @@ Instructions on how to use the graphical section of the toolbox below.
    * Will likely not be done in vpython (overkill)
 
 # Wish List
- * Updated Canvas Controls
-   * WASD-QE controls (move/rotate)
-   * Mouse rotation
+ * ~~Updated Canvas Controls~~
+   * ~~WASD-QE controls (move/rotate)~~
+   * ~~Mouse rotation~~
  * Webpage Controls
    * Buttons that allow toggling display options
      * Labels, reference frames, robot, etc
  * Robot Interaction
    * Use the mouse/keyboard to manually rotate/move joints 
+
+# Scene Controls
+ * Pan
+   * W -> Forward
+   * A -> Left
+   * S -> Backward
+   * D -> Right
+   * ~ -> Up
+   * ~ -> Down
+ * Spin
+   * Mouse
+     * CTRL + LMB -> Free spin
+   * Keyboard
+     * Left -> Left
+     * Right -> Right
+     * Up -> Up 
+     * Down -> Down
+     * Q -> Roll Left
+     * E -> Roll Right
+ * Zoom
+   * Scrollwheel
+   
 
 # How To
 ## Importing
