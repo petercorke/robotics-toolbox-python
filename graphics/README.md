@@ -10,14 +10,14 @@ Instructions on how to use the graphical section of the toolbox below.
      * Translate function
    * ~~Static Joint~~
    * **_POSTPONED_** Gripper Joint
- * Grid Updating
-   * On rotation/move finish
+ * ~~Grid Updating~~
+   * ~~On rotation/move finish~~
    * ~~Don't redraw labels, move/update them~~
    * ~~Don't redraw the grid, move/update them~~
  * Error handling
    * ~~Throw custom error messages~~
    * Handle vpython error messages
- * STL
+ * ~~STL~~
    * ~~Load Binary STL files~~
    * **_NOT POSSIBLE_** Option to save a mesh to STL?
      * Can't access object triangles/vertices.
@@ -26,14 +26,36 @@ Instructions on how to use the graphical section of the toolbox below.
    * Will likely not be done in vpython (overkill)
 
 # Wish List
- * Updated Canvas Controls
-   * WASD-QE controls (move/rotate)
-   * Mouse rotation
+ * ~~Updated Canvas Controls~~
+   * ~~WASD-QE controls (move/rotate)~~
+   * ~~Mouse rotation~~
  * Webpage Controls
    * Buttons that allow toggling display options
      * Labels, reference frames, robot, etc
  * Robot Interaction
    * Use the mouse/keyboard to manually rotate/move joints 
+
+# Scene Controls
+ * Pan
+   * W -> Forward
+   * A -> Left
+   * S -> Backward
+   * D -> Right
+   * SPACE -> Up
+   * SHIFT -> Down
+ * Spin
+   * Mouse
+     * CTRL + LMB -> Free spin
+   * Keyboard
+     * Left -> Left
+     * Right -> Right
+     * Up -> Up 
+     * Down -> Down
+     * Q -> Roll Left
+     * E -> Roll Right
+ * Zoom
+   * Scrollwheel
+   
 
 # How To
 ## Importing
@@ -58,25 +80,25 @@ my_link.get_axis_vector(z_axis_vector)
 ## Setting Up The Scene
 Any use of VPython objects requires a scene.
 
-To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. The function will return a GraphicsGrid object. 
+To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
 
 Different attributes can be supplied to the function for some customisation. The display width, height, title, and caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
 ```python
 # Create a default canvas (1000*500, with grid displayed, no title or caption)
-canvas_grid = gph.init_canvas()
+g_canvas = gph.GraphicsCanvas()
 
 # Alternatively create a grid with specified parameters
-canvas_grid = gph.init_canvas(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
 ``` 
-The GraphicsGrid object has functions to update the visual, or to toggle visibility.
-NB: `update_grid()` will be automated in future updates.
-```python
-# Update the grids to relocate/reorient to the camera focus point
-# NB: Will be automated in future updates.
-canvas_grid.update_grid()
 
-# Turn off the visual display of the grid
-canvas_grid.set_visibility(False)
+The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
+The same functionality can be done in code as will be mentioned.
+
+\
+The GraphicsGrid object has functions to toggle grid visibility.
+```python
+# Turn off the grid display
+g_canvas.grid_visibility(False)
 ```
 Now that the scene is created, a robot must be created to be displayed.
 
@@ -84,16 +106,15 @@ At anytime you can clear the scene of all objects (The grid will remain if visib
 they still exist, and can be rendered visible afterwards. However, overwriting/deleting the variables will free the memory.
 If an object is overwritten/deleted while still visible, the objects will remain in the scene.
 ```python
-canvas_grid.clear_scene()
+g_canvas.clear_scene()
 ```
-
 
 ## Creating Robots
 If you want to use the example puma560 robot, simply call the creation function that will return a `GraphicalRobot` object.
 It will automatically be displayed in the canvas
 ```python
 # Import the puma560 models and return a GraphicalRobot object
-puma560 = gph.import_puma_560()
+puma560 = gph.import_puma_560(g_canvas)
 ```
 Otherwise, robots can be manually created using the `GraphicalRobot` class.
 The joints for the robot can be manually or automatically created.
@@ -101,7 +122,7 @@ The joints for the robot can be manually or automatically created.
 Firstly, create a `GraphicalRobot` object
 ```python
 # Create an empty robot
-my_robot = gph.GraphicalRobot()
+my_robot = gph.GraphicalRobot(g_canvas, 'My Robot')
 ```
 Now we can add joints. The joints added to the robot act like a stack. First joints added will be last to be removed (if called to).
 
@@ -154,11 +175,53 @@ To remove the end effector joint, use the `detach_link()` function. Acting like 
 # Remove the end effector joint
 my_robot.detach_link()
 ```
+
+## Applying Textures / Colours / Opacity
+Joints can be coloured, given textures, or both. Using a joint object, calling `set_texture()` will apply the given options.
+Textures are given as `str` paths to a local file, or a web hosted image. Colours are input as a list of RGB values.
+These values must be normalised from 0 to 1. When both are given, the texture gets colour shifted.
+Not supplying a texture will remove any texture already supplied.
+Not supplying a colour will set it to white (default).
+
+**WARNING:** If the texture can't be loaded, the object will have no texture
+(appear invisible, but not set as invisible).
+
+**WARNING:** If the image has a width or height that is not a power of 2
+(that is, not 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, etc.),
+the image is stretched to the next larger width or height that is a power of 2.
+
+```python
+new_rot = gph.RotationalJoint(SE3(), 1.0)
+
+# Load a sample texture
+new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+# Green shift the texture
+new_rot.set_texture(colour=[0, 0.75, 0],
+                    texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+# Remove the texture and red shift
+new_rot.set_texture(colour=[1, 0, 0])
+
+# Remove all details
+new_rot.set_texture()
+```
+
+Changing the opacity can help show reference frames that are hidden by the robot graphics.
+The opacity values must be between 0 and 1 inclusively.
+```python
+# Change a joint opacity to near invisible
+new_rot.set_transparency(0.3)
+
+# Change a robot to near invisible
+my_robot.set_transparency(0.3)
+```
+
 ## Importing an STL object
 STL files may not be correctly positioned/oriented when loaded in.
 Depending on where the object triangles are configured from the file, the origin of the object may not be where intended.
 
-When loaded in, the origin is set (by default) to the center of the bounding box of the object.
+When loaded in, the origin is set (by default) to (0, 0, 0).
 
 Upon observation (through VPython or 3D editor software), you can find the coordinates of the origin in respect to the world.
 

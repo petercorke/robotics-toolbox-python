@@ -19,14 +19,14 @@ import graphics as gph
 
 
 # Create a canvas on import, to allow clearing between function calls
-grid = gph.init_canvas()
+g_canvas = gph.GraphicsCanvas()
 
 
 def clear():
     """
     Clears the current scene
     """
-    grid.clear_scene()
+    g_canvas.clear_scene()
 
 
 def test_reference_frame_pose():
@@ -60,14 +60,14 @@ def test_reference_frame_pose():
         [0, 0, 0, 1]
     ])
     se = SE3(arr)
-    gph.draw_reference_frame_axes(se.Rx(30, 'deg'))
+    gph.draw_reference_frame_axes(se * SE3().Rx(30, 'deg'))
 
 
 def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
     """
-    puma560 = gph.import_puma_560()
+    puma560 = gph.import_puma_560(g_canvas)
     puma560.print_joint_poses()
 
 
@@ -98,7 +98,7 @@ def test_graphical_robot_creation():
     p2 = p.Tx(1)
     p3 = p.Tx(2)
 
-    robot = gph.GraphicalRobot()
+    robot = gph.GraphicalRobot(g_canvas, 'test_3_link_robot')
 
     robot.append_link('r', p1, 1.0)
     robot.append_link('R', p2, 1.0)
@@ -142,9 +142,7 @@ def test_puma560_angle_change():
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
-    puma560 = gph.import_puma_560()
-
-    puma560.set_reference_visibility(False)
+    puma560 = gph.import_puma_560(g_canvas)
 
     print("Prior Poses")
     puma560.print_joint_poses()
@@ -173,7 +171,7 @@ def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560()
+    puma560 = gph.import_puma_560(g_canvas)
     puma560.set_reference_visibility(True)
 
     sleep(2)
@@ -186,7 +184,7 @@ def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560()
+    puma560 = gph.import_puma_560(g_canvas)
 
     # Get the poses for a ready-position
     puma = Puma560()
@@ -221,7 +219,7 @@ def test_animate_joints():
     p2 = p.Tx(1)
     p3 = p.Tx(2)
 
-    robot = gph.GraphicalRobot()
+    robot = gph.GraphicalRobot(g_canvas, 'Robot Animation')
 
     robot.append_link('r', p1, 1.0)
     robot.append_link('R', p2, 1.0)
@@ -238,12 +236,77 @@ def test_animate_joints():
     ], 7)
 
 
-def test_import_textures():
+def test_robot_decor():
+    """
+    Test importing textures and changing joint colours
+    """
     new_rot = gph.RotationalJoint(SE3(), 1.0)
+
+    # Load a sample texture
     new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+    sleep(5)
+
+    # Green shift the texture
+    new_rot.set_texture(colour=[0, 0.75, 0],
+                        texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
+
+    sleep(5)
+
+    # Remove the texture and red shift
+    new_rot.set_texture(colour=[1, 0, 0])
+
+    sleep(5)
+
+    # Remove all details
+    new_rot.set_texture()
+
+    # Set transparency
+    new_rot.set_transparency(0.3)
+
+
+def test_multiple_robots():
+    p = SE3()
+    p1 = p
+    p2 = p.Tx(1)
+    p3 = p.Tx(2)
+
+    robot = gph.GraphicalRobot(g_canvas, 'Robot A')
+
+    robot.append_link('r', p1, 1.0)
+    robot.append_link('R', p2, 1.0)
+    robot.append_link('r', p3, 1.0)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 0],
+        [0, 0, 0, 1]
+    ])
+    new_p1 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 1],
+        [0, 0, 0, 1]
+    ])
+    new_p2 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 2],
+        [0, 0, 0, 1]
+    ])
+    new_p3 = SE3(arr)
+
+    robot2 = gph.GraphicalRobot(g_canvas, 'Robot B')
+    robot2.append_link('r', new_p1, 1.0)
+    robot2.append_link('R', new_p2, 1.0)
+    robot2.append_link('r', new_p3, 1.0)
 
 
 if __name__ == "__main__":
     # run the Puma demo by default
-    # grid = gph.init_canvas()
     test_puma560_angle_change()

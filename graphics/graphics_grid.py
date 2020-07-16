@@ -1,4 +1,3 @@
-# from graphics.graphics_text import *
 from vpython import scene, vector, compound, mag, box, color
 from graphics.graphics_text import update_grid_numbers
 from numpy import sign
@@ -29,7 +28,7 @@ class GraphicsGrid:
         self.__init_grid()
 
         # Bind mouse releases to the update_grid function
-        scene.bind('mouseup keyup', self.__update_grid)
+        scene.bind('mouseup keyup', self.update_grid)
 
     def __init_grid(self):
         """
@@ -50,11 +49,11 @@ class GraphicsGrid:
         Draw a grid along each 3D plane, that is closest to the camera.
 
         :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
-        :type bool_camera_relative: bool
+        :type bool_camera_relative: `bool`
         :param num_squares: How many unit squares to draw along the axis.
-        :type num_squares: int
+        :type num_squares: `int`
         :return: List of the three drawn axes.
-        :rtype: list
+        :rtype: `list`
         """
 
         # Initial conditions
@@ -151,9 +150,9 @@ class GraphicsGrid:
         Reusing the current assets, move the planes to the new origins.
 
         :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
-        :type bool_camera_relative: bool
+        :type bool_camera_relative: `bool`
         :param num_squares: How many unit squares to draw along the axis.
-        :type num_squares: int
+        :type num_squares: `int`
         """
         camera_axes = self.camera_axes
         # Locate centre of axes
@@ -208,7 +207,7 @@ class GraphicsGrid:
         else:
             self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = vector(max_x_coord, y_middle, z_middle)
 
-    def __update_grid(self):
+    def update_grid(self):
         """
         Update the grid axes and numbers if the camera position/rotation has changed.
         """
@@ -242,7 +241,7 @@ class GraphicsGrid:
         Set the visibility of the grid
 
         :param is_visible: Boolean of whether to display the grid
-        :type is_visible: bool
+        :type is_visible: `bool`
         """
         for plane in self.grid_object[self.__planes_idx]:
             plane.visible = is_visible

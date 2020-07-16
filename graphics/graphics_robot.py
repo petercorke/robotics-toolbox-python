@@ -1,6 +1,4 @@
-# from graphics.graphics_canvas import *
-# from graphics.graphics_stl import *
-from vpython import box, compound, scene
+from vpython import box, compound, scene, color
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -16,9 +14,9 @@ class DefaultJoint:
     - Gripper
 
     :param initial_se3: Pose to set the joint to initially
-    :type initial_se3: `SE3`
+    :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float` or `str`
+    :type structure: `float`, `str`
     """
 
     def __init__(self, initial_se3, structure):
@@ -135,7 +133,7 @@ class DefaultJoint:
         Given an SE object, update just the orientation of the joint.
 
         :param se_object: SE3 pose representation of the joint
-        :type se_object: `SE3`
+        :type se_object: class:`spatialmath.pose3d.SE3`
         """
         new_position = get_pose_pos(se_object)
         self.__graphic_obj.pos = new_position
@@ -149,7 +147,7 @@ class DefaultJoint:
         Given an SE object, update just the orientation of the joint.
 
         :param se_object: SE3 pose representation of the joint
-        :type se_object: `SE3`
+        :type se_object: class:`spatialmath.pose3d.SE3`
         """
         # Get the new pose details
         new_x_axis = get_pose_x_vec(se_object)
@@ -169,7 +167,7 @@ class DefaultJoint:
         Given an SE object, update the pose of the joint.
 
         :param se_object: SE3 pose representation of the joint
-        :type se_object: `SE3`
+        :type se_object: class:`spatialmath.pose3d.SE3`
         """
         # Get the new pose details
         new_x_axis = get_pose_x_vec(se_object)
@@ -187,51 +185,6 @@ class DefaultJoint:
         self.__update_reference_frame()
         self.draw_reference_frame(self.__graphic_ref.visible)
 
-    def update_position(self, new_pos):
-        """
-        Move the position of the link to the specified location
-
-        :param new_pos: 3D vector representing the new location for the origin (connection_from) of the link
-        :type new_pos: class:`vpython.vector`
-        """
-        # Calculate translational movement amount
-        axes_movement = new_pos - self.__connect_from
-        # Update each position
-        self.__connect_from += axes_movement
-        self.__connect_to += axes_movement
-        self.__connect_dir.pos += axes_movement
-        # If the reference frame exists, redraw it
-        if self.__graphic_ref is not None:
-            self.draw_reference_frame(self.__graphic_ref.visible)
-        self.__draw_graphic()
-
-    def update_pose(self, se_object):
-        """
-        Given an SE object, update the pose of the joint.
-
-        :param se_object:
-        :type se_object:
-        """
-        # Get the new pose details
-        new_x_axis = se_object.n
-        new_y_axis = se_object.o
-        # new_z_axis = se_object.a  # not needed
-        new_position = se_object.t
-
-        # Change to VPython-accepted parameters
-        new_x_vector = vector(new_x_axis[0], new_x_axis[1], new_x_axis[2])
-        new_y_vector = vector(new_y_axis[0], new_y_axis[1], new_y_axis[2])
-        new_pos_vector = vector(new_position[0], new_position[1], new_position[2])
-
-        # Update the graphic object
-        self.__graphic_obj.axis = new_x_vector
-        self.__graphic_obj.up = new_y_vector
-        self.__graphic_obj.pos = new_pos_vector
-
-        # Update the reference frame
-        self.__update_reference_frame()
-        self.draw_reference_frame(self.__graphic_ref.visible)
-
     def __update_reference_frame(self):
         """
         Update the reference frame axis vectors
@@ -245,28 +198,12 @@ class DefaultJoint:
         Draw a reference frame at the tool point position.
 
         :param is_visible: Whether the reference frame should be drawn or not
-        :type is_visible: bool
+        :type is_visible: `bool`
         """
-        # If not visible, turn off
-        if not is_visible:
-            # If a reference frame exists
-            if self.__graphic_ref is not None:
-                # Set invisible, and also update its orientations
-                self.__graphic_ref.visible = False
-                self.__graphic_ref.pos = get_pose_pos(self.__pose)
-                self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
-                self.__graphic_ref.up = get_pose_y_vec(self.__pose)
-        # Else: draw
-        else:
-            # If graphic does not currently exist
-            if self.__graphic_ref is None:
-                # Create one
-                self.__graphic_ref = draw_reference_frame_axes(self.__pose)
-            # Else graphic does exist
-            else:
-                self.__graphic_ref.pos = get_pose_pos(self.__pose)
-                self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
-                self.__graphic_ref.up = get_pose_y_vec(self.__pose)
+        self.__graphic_ref.pos = get_pose_pos(self.__pose)
+        self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
+        self.__graphic_ref.up = get_pose_y_vec(self.__pose)
+        self.__graphic_ref.visible = is_visible
 
     def set_stl_joint_origin(self, current_location, required_location):
         """
@@ -276,9 +213,9 @@ class DefaultJoint:
         It translates the object to place the origin at the required location, and save the new origin to the object.
 
         :param current_location: 3D coordinate of where the real origin is in space.
-        :type current_location: `vpython.vector`
+        :type current_location: class:`vpython.vector`
         :param required_location: 3D coordinate of where the real origin should be in space
-        :type required_location: `vpython.vector`
+        :type required_location: class:`vpython.vector`
         """
         set_stl_origin(self.__graphic_obj, current_location, required_location)
 
@@ -287,13 +224,13 @@ class DefaultJoint:
         Choose whether or not the joint is displayed in the canvas.
 
         :param is_visible: Whether the joint should be drawn or not
-        :type is_visible: bool
+        :type is_visible: `bool`
         """
         # If the option is different to current setting
         if is_visible is not self.visible:
             # Update
             self.__graphic_obj.visible = is_visible
-            self.__graphic_ref.visible = is_visible
+            # self.__graphic_ref.visible = is_visible
             self.visible = is_visible
 
     def __set_graphic(self, structure):
@@ -301,7 +238,7 @@ class DefaultJoint:
         Set the graphic object depending on if one was given. If no object was given, create a box and return it
 
         :param structure: `float` or `str` representing the joint length or STL path to load from
-        :type structure: `float` or `str`
+        :type structure: `float`, `str`
         :raises ValueError: Joint length must be greater than 0
         :return: Graphical object for the joint
         :rtype: class:`vpython.compound`
@@ -333,20 +270,19 @@ class DefaultJoint:
         Apply the texture/colour to the object. If both are given, both are applied.
         Texture link can either be a link to an online image, or local file.
 
+        WARNING: If the texture can't be loaded, the object will have no texture
+        (appear invisible, but not set as invisible).
+
         WARNING: If the image has a width or height that is not a power of 2
         (that is, not 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, etc.),
         the image is stretched to the next larger width or height that is a power of 2.
 
         :param colour: List of RGB values
-        :type colour: `list`
+        :type colour: `list`, optional
         :param texture_link: Path/website to a texture image
-        :type texture_link: `str`
+        :type texture_link: `str`, optional
+        :raises ValueError: RGB values must be normalised between 0 and 1
         """
-        # Apply the colour
-        if colour is not None:
-            colour_vec = vector(colour[0], colour[1], colour[2])
-            self.__graphic_obj.color = colour_vec
-
         # Apply the texture
         if texture_link is not None:
             self.__graphic_obj.texture = {
@@ -355,6 +291,32 @@ class DefaultJoint:
             }
             # Wait for the texture to load
             scene.waitfor("textures")
+        else:
+            # Remove any texture
+            self.__graphic_obj.texture = None
+
+        # Apply the colour
+        if colour is not None:
+            if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+               colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+                raise ValueError("RGB values must be normalised between 0 and 1")
+            colour_vec = vector(colour[0], colour[1], colour[2])
+            self.__graphic_obj.color = colour_vec
+        else:
+            # Set to white if none given
+            self.__graphic_obj.color = color.white
+
+    def set_transparency(self, opacity):
+        """
+        Sets the transparency of the joint.
+
+        :param opacity: Normalised value (0 -> 1) to set the opacity. 0 = transparent, 1 = opaque
+        :type opacity: `float`
+        :raises ValueError: Value must be between 0 and 1 inclusively
+        """
+        if opacity < 0 or opacity > 1:
+            raise ValueError("Value must be between 0 and 1 inclusively")
+        self.__graphic_obj.opacity = opacity
 
     def get_axis_vector(self, axis):
         """
@@ -383,7 +345,7 @@ class DefaultJoint:
         Return the current pose of the joint
 
         :return: SE3 representation of the current joint pose
-        :rtype: `SE3`
+        :rtype: class:`spatialmath.pose3d.SE3`
         """
         return self.__pose
 
@@ -401,7 +363,7 @@ class DefaultJoint:
         Getter function that returns the graphical object of the joint
 
         :return: VPython graphical entity of the joint
-        :rtype: `vpython.object`
+        :rtype: class:`vpython.object`
         """
         return self.__graphic_obj
 
@@ -411,9 +373,9 @@ class RotationalJoint(DefaultJoint):
     A rotational joint based off the default joint class
 
     :param initial_se3: Pose to set the joint to initially
-    :type initial_se3: `SE3`
+    :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float` or `str`
+    :type structure: `float`, `str`
     """
 
     def __init__(self, initial_se3, structure):
@@ -426,8 +388,8 @@ class RotationalJoint(DefaultJoint):
         """
         Rotate the joint to a given angle in range [-pi pi] (radians)
 
-        :param new_angle: The new angle in range [-pi pi] that the link is to be rotated to.
-        :type new_angle: float (radians)
+        :param new_angle: The new angle (radians) in range [-pi pi] that the link is to be rotated to.
+        :type new_angle: `float`
         """
         raise PendingDeprecationWarning("Will likely be unused")
 
@@ -455,9 +417,9 @@ class PrismaticJoint(DefaultJoint):
     A prismatic joint based from the default joint class
 
     :param initial_se3: Pose to set the joint to initially
-    :type initial_se3: `SE3`
+    :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float` or `str`
+    :type structure: `float`, `str`
     """
     def __init__(self, initial_se3, structure):
         super().__init__(initial_se3, structure)
@@ -484,9 +446,9 @@ class StaticJoint(DefaultJoint):
     It has no extra functions to utilise.
 
     :param initial_se3: Pose to set the joint to initially
-    :type initial_se3: `SE3`
+    :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float` or `str`
+    :type structure: `float`, `str`
     """
 
     def __init__(self, initial_se3, structure):
@@ -508,9 +470,9 @@ class Gripper(DefaultJoint):
     Usually the end joint of a robot.
 
     :param initial_se3: Pose to set the joint to initially
-    :type initial_se3: `SE3`
+    :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float` or `str`
+    :type structure: `float`, `str`
     """
 
     def __init__(self, initial_se3, structure):
@@ -531,19 +493,26 @@ class Gripper(DefaultJoint):
 class GraphicalRobot:
     """
     The GraphicalRobot class holds all of the different joints to easily control the robot arm.
+    :param graphics_canvas: The canvas to add the robot to
+    :type graphics_canvas: class:`GraphicsCanvas`
     """
-
-    def __init__(self):
+    def __init__(self, graphics_canvas, name):
         self.joints = []
         self.num_joints = 0
-        self.is_shown = True
+        self.rob_shown = True
+        self.ref_shown = True
+        self.opacity = 1
+        self.name = name
+        # Add the robot to the canvas
+        graphics_canvas.add_robot(self)
 
     def append_made_link(self, joint):
         """
         Append an already made joint to the end of the robot (Useful for links manually created)
 
         :param joint: A joint object already constructed
-        :type joint: `graphics.graphics_robot.DefaultJoint` or inherited classes
+        :type joint: class:`graphics.graphics_robot.RotationalJoint`, class:`graphics.graphics_robot.PrismaticJoint`,
+        class:`graphics.graphics_robot.StaticJoint`, class:`graphics.graphics_robot.Gripper`
         """
         self.joints.append(joint)
         self.num_joints += 1
@@ -555,9 +524,9 @@ class GraphicalRobot:
         :param typeof: String character of the joint type. e.g. 'R', 'P', 'S', 'G'
         :type typeof: `str`
         :param pose: SE3 object for the pose of the joint
-        :type pose: `SE3`
+        :type pose: class:`spatialmath.pose3d.SE3`
         :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
-        :type structure: `float` or `str`
+        :type structure: `float`, `str`
         :raises ValueError: typeof must be a valid character
         """
         # Capitalise the type for case-insensitive use
@@ -603,29 +572,44 @@ class GraphicalRobot:
         Set the entire robots visibility inside the canvas.
 
         :param is_visible: Whether the robot should be visible or not.
-        :type is_visible: bool
+        :type is_visible: `bool`
         """
-        if is_visible is not self.is_shown:
+        if is_visible is not self.rob_shown:
             for joint in self.joints:
                 joint.set_joint_visibility(is_visible)
-                self.is_shown = is_visible
+                self.rob_shown = is_visible
 
     def set_reference_visibility(self, is_visible):
         """
         Set the visibility of the reference frame for all joints.
 
         :param is_visible: Whether the reference frames should be visible or not.
-        :type is_visible: bool
+        :type is_visible: `bool`
         """
-        for joint in self.joints:
-            joint.draw_reference_frame(is_visible)
+        if is_visible is not self.ref_shown:
+            for joint in self.joints:
+                joint.draw_reference_frame(is_visible)
+            self.ref_shown = is_visible
+
+    def set_transparency(self, opacity):
+        """
+        Set the transparency of the robot.
+        Allows for easier identification of the reference frames (if hidden by the robot itself)
+
+        :param opacity: Normalised value (0 -> 1) to set the opacity. 0 = transparent, 1 = opaque
+        :type opacity: `float`
+        """
+        if opacity is not self.opacity:
+            for joint in self.joints:
+                joint.set_transparency(opacity)
+            self.opacity = opacity
 
     def set_joint_poses(self, all_poses):
         """
         Set the joint poses.
 
         :param all_poses: List of all the new poses to set
-        :type all_poses: `SE3` list
+        :type all_poses: class:`spatialmath.pose3d.SE3` list
         :raises UserWarning: Robot must not have 0 joints, and given poses length must equal number of joints.
         """
         # Sanity checks
@@ -680,9 +664,9 @@ class GraphicalRobot:
         Set the angle (radians) for a specific joint in the robot.
 
         :param link_num: Index of the joint in the robot arm (Base = 0, Gripper = end)
-        :type link_num: int
+        :type link_num: `int`
         :param new_angle: The required angle to set the arm rotated towards
-        :type new_angle: float (radians)
+        :type new_angle: `float`
         :raise IndexError: Link index must be between 0 (inclusive) and number of joints (exclusive)
         :raise TypeError: The joint index chosen must be indexing a revolute joint
         """
