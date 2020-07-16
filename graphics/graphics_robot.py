@@ -200,26 +200,10 @@ class DefaultJoint:
         :param is_visible: Whether the reference frame should be drawn or not
         :type is_visible: `bool`
         """
-        # If not visible, turn off
-        if not is_visible:
-            # If a reference frame exists
-            if self.__graphic_ref is not None:
-                # Set invisible, and also update its orientations
-                self.__graphic_ref.visible = False
-                self.__graphic_ref.pos = get_pose_pos(self.__pose)
-                self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
-                self.__graphic_ref.up = get_pose_y_vec(self.__pose)
-        # Else: draw
-        else:
-            # If graphic does not currently exist
-            if self.__graphic_ref is None:
-                # Create one
-                self.__graphic_ref = draw_reference_frame_axes(self.__pose)
-            # Else graphic does exist
-            else:
-                self.__graphic_ref.pos = get_pose_pos(self.__pose)
-                self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
-                self.__graphic_ref.up = get_pose_y_vec(self.__pose)
+        self.__graphic_ref.pos = get_pose_pos(self.__pose)
+        self.__graphic_ref.axis = get_pose_x_vec(self.__pose)
+        self.__graphic_ref.up = get_pose_y_vec(self.__pose)
+        self.__graphic_ref.visible = is_visible
 
     def set_stl_joint_origin(self, current_location, required_location):
         """
@@ -602,6 +586,7 @@ class GraphicalRobot:
         :param is_visible: Whether the reference frames should be visible or not.
         :type is_visible: `bool`
         """
+        print("Checking", is_visible, "against", self.ref_shown)
         if is_visible is not self.ref_shown:
             for joint in self.joints:
                 joint.draw_reference_frame(is_visible)

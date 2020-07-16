@@ -50,7 +50,6 @@ class GraphicsCanvas:
         self.__idx_chkbox_ref = 2  # Reference Visibility Checkbox
         self.__idx_chkbox_rob = 3  # Robot Visibility Checkbox
         self.__idx_sld_opc = 4  # Opacity Slider
-        self.__save_state_offset = 2  # Number to subtract when indexing in the save state (btn/menu aren't included)
 
         # 2D array of all UI options data for each robot onscreen
         # checkbox ref, checkbox robot, and slider opacity
@@ -123,7 +122,7 @@ class GraphicsCanvas:
         scene.append_to_caption('\n')
 
         # Checkbox for reference frame visibilities
-        chkbox_ref = checkbox(bind=reference_frame_checkbox, text="Show Reference Frames", checked=True)
+        chkbox_ref = checkbox(bind=self.__reference_frame_checkbox, text="Show Reference Frames", checked=True)
         scene.append_to_caption('\t')
 
         # Checkbox for robot visibility
@@ -182,6 +181,13 @@ class GraphicsCanvas:
 
         self.__ui_controls[self.__idx_sld_opc].value = \
             self.__robots[self.__selected_robot].opacity
+
+    def __reference_frame_checkbox(self, c):
+        """
+        When a checkbox is changed for the reference frame option, update the graphics
+        """
+        print(c.checked)
+        self.__robots[self.__selected_robot].set_reference_visibility(c.checked)
 
 
 def convert_grid_to_z_up():
@@ -350,14 +356,6 @@ def handle_keyboard_inputs():
     # Update camera position and axis
     scene.camera.pos = cam_pos
     scene.camera.axis = cam_axis
-
-
-# TODO
-def reference_frame_checkbox():
-    """
-    When a checkbox is changed for the reference frame option, update the graphics
-    """
-    pass
 
 
 # TODO
