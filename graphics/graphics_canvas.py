@@ -51,12 +51,9 @@ class GraphicsCanvas:
         self.__idx_chkbox_rob = 3  # Robot Visibility Checkbox
         self.__idx_sld_opc = 4  # Opacity Slider
 
-        # 2D array of all UI options data for each robot onscreen
-        # checkbox ref, checkbox robot, and slider opacity
-        self.__selected_robot = 0
-
         # List of robots currently in the scene
         self.__robots = []
+        self.__selected_robot = 0
 
         # Rotate the camera
         convert_grid_to_z_up()
@@ -71,17 +68,27 @@ class GraphicsCanvas:
             self.__graphics_grid.set_visibility(False)
 
     def clear_scene(self):
+        """
+        This function will clear the screen of all objects
+        """
         self.__graphics_grid.clear_scene()
+        # TODO update UI
 
     def grid_visibility(self, is_visible):
+        """
+        Update the grid visibility in the scene
+
+        :param is_visible: Whether the grid should be visible or not
+        :type is_visible: `bool`
+        """
         self.__graphics_grid.set_visibility(is_visible)
 
     def add_robot(self, robot):
         """
-        This function is called when a new robot is created. It adds it to the menu.
+        This function is called when a new robot is created. It adds it to the drop down menu.
 
         :param robot: A graphical robot to add to the scene
-        :type robot: class:`GraphicalRobot`
+        :type robot: class:`graphics.graphics_robot.GraphicalRobot`
         """
         # ALTHOUGH THE DOCUMENTATION SAYS THAT MENU CHOICES CAN BE UPDATED,
         # THE PACKAGE DOES NOT ALLOW IT.
@@ -168,6 +175,9 @@ class GraphicsCanvas:
     def __menu_item_chosen(self, m):
         """
         When a menu item is chosen, update the relevant checkboxes/options
+
+        :param m: The menu object that has been used to select an item.
+        :type: class:`menu`
         """
         # Get selected item
         self.__selected_robot = m.index
@@ -185,18 +195,27 @@ class GraphicsCanvas:
     def __reference_frame_checkbox(self, c):
         """
         When a checkbox is changed for the reference frame option, update the graphics
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
         """
         self.__robots[self.__selected_robot].set_reference_visibility(c.checked)
 
     def __robot_visibility_checkbox(self, c):
         """
         When a checkbox is changed for the robot visibility, update the graphics
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
         """
         self.__robots[self.__selected_robot].set_robot_visibility(c.checked)
 
     def __opacity_slider(self, s):
         """
         Update the opacity slider depending on the slider value
+
+        :param s: The slider object that has been modified
+        :type s: class:`slider`
         """
         self.__robots[self.__selected_robot].set_transparency(s.value)
 

@@ -80,25 +80,25 @@ my_link.get_axis_vector(z_axis_vector)
 ## Setting Up The Scene
 Any use of VPython objects requires a scene.
 
-To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. The function will return a GraphicsGrid object. 
+To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
 
 Different attributes can be supplied to the function for some customisation. The display width, height, title, and caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
 ```python
 # Create a default canvas (1000*500, with grid displayed, no title or caption)
-canvas_grid = gph.init_canvas()
+g_canvas = gph.GraphicsCanvas()
 
 # Alternatively create a grid with specified parameters
-canvas_grid = gph.init_canvas(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
 ``` 
-The GraphicsGrid object has functions to update the visual, or to toggle visibility.
-NB: `update_grid()` will be automated in future updates.
-```python
-# Update the grids to relocate/reorient to the camera focus point
-# NB: Will be automated in future updates.
-canvas_grid.update_grid()
 
-# Turn off the visual display of the grid
-canvas_grid.set_visibility(False)
+The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
+The same functionality can be done in code as will be mentioned.
+
+\
+The GraphicsGrid object has functions to toggle grid visibility.
+```python
+# Turn off the grid display
+g_canvas.grid_visibility(False)
 ```
 Now that the scene is created, a robot must be created to be displayed.
 
@@ -106,16 +106,15 @@ At anytime you can clear the scene of all objects (The grid will remain if visib
 they still exist, and can be rendered visible afterwards. However, overwriting/deleting the variables will free the memory.
 If an object is overwritten/deleted while still visible, the objects will remain in the scene.
 ```python
-canvas_grid.clear_scene()
+g_canvas.clear_scene()
 ```
-
 
 ## Creating Robots
 If you want to use the example puma560 robot, simply call the creation function that will return a `GraphicalRobot` object.
 It will automatically be displayed in the canvas
 ```python
 # Import the puma560 models and return a GraphicalRobot object
-puma560 = gph.import_puma_560()
+puma560 = gph.import_puma_560(g_canvas)
 ```
 Otherwise, robots can be manually created using the `GraphicalRobot` class.
 The joints for the robot can be manually or automatically created.
@@ -123,7 +122,7 @@ The joints for the robot can be manually or automatically created.
 Firstly, create a `GraphicalRobot` object
 ```python
 # Create an empty robot
-my_robot = gph.GraphicalRobot()
+my_robot = gph.GraphicalRobot(g_canvas, 'My Robot')
 ```
 Now we can add joints. The joints added to the robot act like a stack. First joints added will be last to be removed (if called to).
 
