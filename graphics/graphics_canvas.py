@@ -54,8 +54,10 @@ class GraphicsCanvas:
 
         # 2D array of all UI options data for each robot onscreen
         # checkbox ref, checkbox robot, and slider opacity
-        self.__ui_save_state = []
         self.__selected_robot = 0
+
+        # List of robots currently in the scene
+        self.__robots = []
 
         # Rotate the camera
         convert_grid_to_z_up()
@@ -101,8 +103,8 @@ class GraphicsCanvas:
         # Create the updated caption.
         self.__ui_controls = self.__setup_ui_controls(new_list)
 
-        # Save default settings to save-state
-        self.__ui_save_state.append([True, True, 1])
+        # Add robot to list
+        self.__robots.append(robot)
 
     def __setup_ui_controls(self, list_of_names):
         """
@@ -173,13 +175,13 @@ class GraphicsCanvas:
 
         # Load settings for that robot and update UI
         self.__ui_controls[self.__idx_chkbox_ref].checked = \
-            self.__ui_save_state[self.__selected_robot][self.__idx_chkbox_ref - self.__save_state_offset]
+            self.__robots[self.__selected_robot].ref_shown
 
         self.__ui_controls[self.__idx_chkbox_rob].checked = \
-            self.__ui_save_state[self.__selected_robot][self.__idx_chkbox_rob - self.__save_state_offset]
+            self.__robots[self.__selected_robot].rob_shown
 
         self.__ui_controls[self.__idx_sld_opc].value = \
-            self.__ui_save_state[self.__selected_robot][self.__idx_sld_opc - self.__save_state_offset]
+            self.__robots[self.__selected_robot].opacity
 
 
 def convert_grid_to_z_up():

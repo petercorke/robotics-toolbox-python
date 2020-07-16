@@ -515,7 +515,9 @@ class GraphicalRobot:
     def __init__(self, graphics_canvas, name):
         self.joints = []
         self.num_joints = 0
-        self.is_shown = True
+        self.rob_shown = True
+        self.ref_shown = True
+        self.opacity = 1
         self.name = name
         # Add the robot to the canvas
         graphics_canvas.add_robot(self)
@@ -588,10 +590,10 @@ class GraphicalRobot:
         :param is_visible: Whether the robot should be visible or not.
         :type is_visible: `bool`
         """
-        if is_visible is not self.is_shown:
+        if is_visible is not self.rob_shown:
             for joint in self.joints:
                 joint.set_joint_visibility(is_visible)
-                self.is_shown = is_visible
+                self.rob_shown = is_visible
 
     def set_reference_visibility(self, is_visible):
         """
@@ -600,8 +602,10 @@ class GraphicalRobot:
         :param is_visible: Whether the reference frames should be visible or not.
         :type is_visible: `bool`
         """
-        for joint in self.joints:
-            joint.draw_reference_frame(is_visible)
+        if is_visible is not self.ref_shown:
+            for joint in self.joints:
+                joint.draw_reference_frame(is_visible)
+            self.ref_shown = is_visible
 
     def set_transparency(self, opacity):
         """
@@ -611,8 +615,10 @@ class GraphicalRobot:
         :param opacity: Normalised value (0 -> 1) to set the opacity. 0 = transparent, 1 = opaque
         :type opacity: `float`
         """
-        for joint in self.joints:
-            joint.set_transparency(opacity)
+        if opacity is not self.opacity:
+            for joint in self.joints:
+                joint.set_transparency(opacity)
+            self.opacity = opacity
 
     def set_joint_poses(self, all_poses):
         """
