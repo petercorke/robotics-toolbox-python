@@ -1,4 +1,4 @@
-from vpython import box, compound, scene, color
+from vpython import box, compound, color
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -17,15 +17,18 @@ class DefaultJoint:
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param scene: The scene in which to add the link
+    :type scene: class:`vpython.canvas`
     """
 
-    def __init__(self, initial_se3, structure):
+    def __init__(self, initial_se3, structure, scene):
 
         if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
                         "or a file path to an STL (str)"
             raise TypeError(error_str.format(float, str, type(structure)))
 
+        self.__scene = scene
         self.__pose = initial_se3
 
         # Set the graphic
@@ -36,7 +39,7 @@ class DefaultJoint:
         self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
-        self.__graphic_ref = draw_reference_frame_axes(self.__pose)
+        self.__graphic_ref = draw_reference_frame_axes(self.__pose, self.__scene)
 
         # Apply the initial pose if not given an STL (STL may need origin updating)
         if isinstance(structure, float):
@@ -217,7 +220,7 @@ class DefaultJoint:
         :param required_location: 3D coordinate of where the real origin should be in space
         :type required_location: class:`vpython.vector`
         """
-        set_stl_origin(self.__graphic_obj, current_location, required_location)
+        set_stl_origin(self.__graphic_obj, current_location, required_location, self.__scene)
 
     def set_joint_visibility(self, is_visible):
         """
@@ -252,6 +255,7 @@ class DefaultJoint:
 
             # Create a box along the +x axis, with the origin (point of rotation) at (0, 0, 0)
             graphic_obj = box(
+                canvas=self.__scene,
                 pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
                 axis=x_axis_vector,
                 size=vector(length, 0.1, 0.1),
@@ -263,7 +267,7 @@ class DefaultJoint:
 
             return graphic_obj
         else:
-            return import_object_from_numpy_stl(structure)
+            return import_object_from_numpy_stl(structure, self.__scene)
 
     def set_texture(self, colour=None, texture_link=None):
         """
@@ -290,7 +294,7 @@ class DefaultJoint:
                 # 'bumpmap', 'place', 'flipx', 'flipy', 'turn'
             }
             # Wait for the texture to load
-            scene.waitfor("textures")
+            self.__scene.waitfor("textures")
         else:
             # Remove any texture
             self.__graphic_obj.texture = None
@@ -372,15 +376,17 @@ class RotationalJoint(DefaultJoint):
     """
     A rotational joint based off the default joint class
 
+    :param scene: The scene in which to add the object
+    :type scene: class:`vpython.canvas`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
     """
 
-    def __init__(self, initial_se3, structure):
+    def __init__(self, initial_se3, structure, scene):
         # Call super init function
-        super().__init__(initial_se3, structure)
+        super().__init__(initial_se3, structure, scene)
         self.rotation_axis = z_axis_vector
         # self.rotation_angle = radians(0)
 
@@ -416,13 +422,15 @@ class PrismaticJoint(DefaultJoint):
     """
     A prismatic joint based from the default joint class
 
+    :param scene: The scene in which to add the object
+    :type scene: class:`vpython.canvas`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
     """
-    def __init__(self, initial_se3, structure):
-        super().__init__(initial_se3, structure)
+    def __init__(self, initial_se3, structure, scene):
+        super().__init__(initial_se3, structure, scene)
         self.min_translation = None
         self.max_translation = None
 
@@ -445,14 +453,16 @@ class StaticJoint(DefaultJoint):
     This class represents a static joint (one that doesn't translate or rotate on it's own).
     It has no extra functions to utilise.
 
+    :param scene: The scene in which to add the object
+    :type scene: class:`vpython.canvas`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
     """
 
-    def __init__(self, initial_se3, structure):
-        super().__init__(initial_se3, structure)
+    def __init__(self, initial_se3, structure, scene):
+        super().__init__(initial_se3, structure, scene)
 
     def get_joint_type(self):
         """
@@ -469,14 +479,16 @@ class Gripper(DefaultJoint):
     This class represents a gripper joint with a moving gripper (To Be Implemented).
     Usually the end joint of a robot.
 
+    :param scene: The scene in which to add the object
+    :type scene: class:`vpython.canvas`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
     """
 
-    def __init__(self, initial_se3, structure):
-        super().__init__(initial_se3, structure)
+    def __init__(self, initial_se3, structure, scene):
+        super().__init__(initial_se3, structure, scene)
 
     # TODO close/open gripper
 
@@ -493,8 +505,11 @@ class Gripper(DefaultJoint):
 class GraphicalRobot:
     """
     The GraphicalRobot class holds all of the different joints to easily control the robot arm.
+
     :param graphics_canvas: The canvas to add the robot to
     :type graphics_canvas: class:`GraphicsCanvas`
+    :param name: The name of the robot to identify it
+    :type name: `str`
     """
     def __init__(self, graphics_canvas, name):
         self.joints = []
@@ -504,6 +519,7 @@ class GraphicalRobot:
         self.opacity = 1
         self.name = name
         # Add the robot to the canvas
+        self.__scene = graphics_canvas.scene
         graphics_canvas.add_robot(self)
 
     def append_made_link(self, joint):
@@ -514,6 +530,7 @@ class GraphicalRobot:
         :type joint: class:`graphics.graphics_robot.RotationalJoint`, class:`graphics.graphics_robot.PrismaticJoint`,
         class:`graphics.graphics_robot.StaticJoint`, class:`graphics.graphics_robot.Gripper`
         """
+        # TODO have some check to ensure objects are in the same scene
         self.joints.append(joint)
         self.num_joints += 1
 
@@ -533,13 +550,13 @@ class GraphicalRobot:
         typeof = typeof.upper()
 
         if typeof == 'R':
-            link = RotationalJoint(pose, structure)
+            link = RotationalJoint(pose, structure, self.__scene)
         elif typeof == 'P':
-            link = PrismaticJoint(pose, structure)
+            link = PrismaticJoint(pose, structure, self.__scene)
         elif typeof == 'S':
-            link = StaticJoint(pose, structure)
+            link = StaticJoint(pose, structure, self.__scene)
         elif typeof == 'G':
-            link = Gripper(pose, structure)
+            link = Gripper(pose, structure, self.__scene)
         else:
             raise ValueError("typeof should be (case-insensitive) either 'R' (Rotational), 'P' (Prismatic), "
                              "'S' (Static), or 'G' (Gripper)")
@@ -649,7 +666,7 @@ class GraphicalRobot:
 
             self.set_joint_poses(poses)  # Validation done in set_joint_poses
             # Wait for scene to finish drawing
-            scene.waitfor("draw_complete")
+            self.__scene.waitfor("draw_complete")
 
             # Get current time
             t_stop = perf_counter()

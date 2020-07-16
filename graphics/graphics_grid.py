@@ -1,4 +1,4 @@
-from vpython import scene, vector, compound, mag, box, color
+from vpython import vector, compound, mag, box, color
 from graphics.graphics_text import update_grid_numbers
 from numpy import sign
 
@@ -8,10 +8,14 @@ class GraphicsGrid:
     This class holds the current grid displayed in the canvas
     """
 
-    def __init__(self):
+    def __init__(self, scene):
+
+        # Save the scene the grid is placed in
+        self.__scene = scene
+
         # Save the current camera settings
-        self.camera_pos = scene.camera.pos
-        self.camera_axes = scene.camera.axis
+        self.camera_pos = self.__scene.camera.pos
+        self.camera_axes = self.__scene.camera.axis
 
         # Private parameters for indexing in grid_object
         self.__xy_plane_idx = 0
@@ -28,7 +32,7 @@ class GraphicsGrid:
         self.__init_grid()
 
         # Bind mouse releases to the update_grid function
-        scene.bind('mouseup keyup', self.update_grid)
+        self.__scene.bind('mouseup keyup', self.update_grid)
 
     def __init_grid(self):
         """
@@ -42,7 +46,7 @@ class GraphicsGrid:
         self.grid_object[self.__planes_idx] = the_grid
 
         # Update the labels instead of recreating them
-        update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares)
+        update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares, self.__scene)
 
     def __create_grid_objects(self, bool_camera_relative, num_squares):
         """
@@ -63,7 +67,9 @@ class GraphicsGrid:
         camera_axes = self.camera_axes
         # Locate centre of axes
         if bool_camera_relative:
-            x_origin, y_origin, z_origin = round(scene.center.x), round(scene.center.y), round(scene.center.z)
+            x_origin, y_origin, z_origin = round(self.__scene.center.x),\
+                                           round(self.__scene.center.y),\
+                                           round(self.__scene.center.z)
         else:
             x_origin, y_origin, z_origin = 0, 0, 0
 
@@ -95,13 +101,15 @@ class GraphicsGrid:
             # Draw a line across for each x coord, along the same y-axis, from min to max z coord
             xz_lines.append(create_line(
                 vector(x_point, y_origin, min_z_coord),
-                vector(x_point, y_origin, max_z_coord)
+                vector(x_point, y_origin, max_z_coord),
+                self.__scene
             ))
         for z_point in range(min_z_coord, max_z_coord + 1):
             # Draw a line across each z coord, along the same y-axis, from min to max z coord
             xz_lines.append(create_line(
                 vector(min_x_coord, y_origin, z_point),
-                vector(max_x_coord, y_origin, z_point)
+                vector(max_x_coord, y_origin, z_point),
+                self.__scene
             ))
 
         # XY plane
@@ -109,13 +117,15 @@ class GraphicsGrid:
             # Draw a line across each x coord, along the same z-axis, from min to max y coord
             xy_lines.append(create_line(
                 vector(x_point, min_y_coord, z_origin),
-                vector(x_point, max_y_coord, z_origin)
+                vector(x_point, max_y_coord, z_origin),
+                self.__scene
             ))
         for y_point in range(min_y_coord, max_y_coord + 1):
             # Draw a line across each y coord, along the same z-axis, from min to max x coord
             xy_lines.append(create_line(
                 vector(min_x_coord, y_point, z_origin),
-                vector(max_x_coord, y_point, z_origin)
+                vector(max_x_coord, y_point, z_origin),
+                self.__scene
             ))
 
         # YZ plane
@@ -123,13 +133,15 @@ class GraphicsGrid:
             # Draw a line across each y coord, along the same x-axis, from min to max z coord
             yz_lines.append(create_line(
                 vector(x_origin, y_point, min_z_coord),
-                vector(x_origin, y_point, max_z_coord)
+                vector(x_origin, y_point, max_z_coord),
+                self.__scene
             ))
         for z_point in range(min_z_coord, max_z_coord + 1):
             # Draw a line across each z coord, along the same x-axis, from min to max y coord
             yz_lines.append(create_line(
                 vector(x_origin, min_y_coord, z_point),
-                vector(x_origin, max_y_coord, z_point)
+                vector(x_origin, max_y_coord, z_point),
+                self.__scene
             ))
 
         # Compound the lines together into respective objects
@@ -157,7 +169,9 @@ class GraphicsGrid:
         camera_axes = self.camera_axes
         # Locate centre of axes
         if bool_camera_relative:
-            x_origin, y_origin, z_origin = round(scene.center.x), round(scene.center.y), round(scene.center.z)
+            x_origin, y_origin, z_origin = round(self.__scene.center.x),\
+                                           round(self.__scene.center.y),\
+                                           round(self.__scene.center.z)
         else:
             x_origin, y_origin, z_origin = 0, 0, 0
 
@@ -212,8 +226,8 @@ class GraphicsGrid:
         Update the grid axes and numbers if the camera position/rotation has changed.
         """
         # Obtain the new camera settings
-        new_camera_pos = scene.camera.pos
-        new_camera_axes = scene.camera.axis
+        new_camera_pos = self.__scene.camera.pos
+        new_camera_axes = self.__scene.camera.axis
 
         old_camera_pos = self.camera_pos
         old_camera_axes = self.camera_axes
@@ -229,7 +243,7 @@ class GraphicsGrid:
             num_squares = 10  # Length of the grid in each direction (in units)
             relative_cam = True  # Whether the grid follows the camera rotation and movement
             self.__move_grid_objects(relative_cam, num_squares)
-            update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares)
+            update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares, self.__scene)
 
         # Else save current grid
         else:
@@ -266,20 +280,22 @@ class GraphicsGrid:
         grid_visibility = self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible
 
         # Set all objects invisible
-        for scene_object in scene.objects:
+        for scene_object in self.__scene.objects:
             scene_object.visible = False
 
         # Set grid visibility to previous
         self.set_visibility(grid_visibility)
 
         # Wait for scene to update
-        scene.waitfor("draw_complete")
+        self.__scene.waitfor("draw_complete")
 
 
-def create_line(pos1, pos2):
+def create_line(pos1, pos2, scene):
     """
     Create a line from position 1 to position 2.
 
+    :param scene: The scene in which to draw the object
+    :type scene: class:`vpython.canvas`
     :param pos1: 3D position of one end of the line.
     :type pos1: class:`vpython.vector`
     :param pos2: 3D position of the other end of the line.
@@ -297,4 +313,10 @@ def create_line(pos1, pos2):
 
     # Return a box of thin width and height to resemble a line
     thickness = 0.01
-    return box(pos=position, axis=axis_dir, length=line_len, width=thickness, height=thickness, color=color.black)
+    return box(canvas=scene,
+               pos=position,
+               axis=axis_dir,
+               length=line_len,
+               width=thickness,
+               height=thickness,
+               color=color.black)

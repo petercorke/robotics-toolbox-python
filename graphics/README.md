@@ -2,39 +2,6 @@ This folder contains the graphics functionality of the toolbox.
 Instructions on how to use the graphical section of the toolbox below.
 (Pictures to come)
 
-# TODO
- * Robot Joints
-   * Rotational Joint
-     * Rotate function
-   * Prismatic Joint
-     * Translate function
-   * ~~Static Joint~~
-   * **_POSTPONED_** Gripper Joint
- * ~~Grid Updating~~
-   * ~~On rotation/move finish~~
-   * ~~Don't redraw labels, move/update them~~
-   * ~~Don't redraw the grid, move/update them~~
- * Error handling
-   * ~~Throw custom error messages~~
-   * Handle vpython error messages
- * ~~STL~~
-   * ~~Load Binary STL files~~
-   * **_NOT POSSIBLE_** Option to save a mesh to STL?
-     * Can't access object triangles/vertices.
-     * Maybe just save vpython object details and recreate? won't allow compounds though. only basic entities.
- * 2D Graphics
-   * Will likely not be done in vpython (overkill)
-
-# Wish List
- * ~~Updated Canvas Controls~~
-   * ~~WASD-QE controls (move/rotate)~~
-   * ~~Mouse rotation~~
- * Webpage Controls
-   * Buttons that allow toggling display options
-     * Labels, reference frames, robot, etc
- * Robot Interaction
-   * Use the mouse/keyboard to manually rotate/move joints 
-
 # Scene Controls
  * Pan
    * W -> Forward
@@ -93,6 +60,9 @@ g_canvas = gph.GraphicsCanvas(height=768, width=1024, title="Scene 1", caption="
 
 The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
 The same functionality can be done in code as will be mentioned.
+ * Choose robot to edit
+ * Toggle robot/frame visibility
+ * Change robot opacity
 
 \
 The GraphicsGrid object has functions to toggle grid visibility.
@@ -111,13 +81,14 @@ g_canvas.clear_scene()
 
 ## Creating Robots
 If you want to use the example puma560 robot, simply call the creation function that will return a `GraphicalRobot` object.
-It will automatically be displayed in the canvas
+It will be displayed in the scene that is provided.
 ```python
 # Import the puma560 models and return a GraphicalRobot object
-puma560 = gph.import_puma_560(g_canvas)
+puma560 = gph.import_puma_560(g_canvas.scene)
 ```
 Otherwise, robots can be manually created using the `GraphicalRobot` class.
 The joints for the robot can be manually or automatically created.
+Creation takes in the canvas object to be displayed in, as well as a name for the robot.
 
 Firstly, create a `GraphicalRobot` object
 ```python
@@ -156,14 +127,15 @@ The types that can be created are identical to previously mentioned in the Autom
 `RotationalJoint`, `PrismaticJoint`, `StaticJoint`, `Gripper` are the class names of the different joints.
 
 To create a joint, each class requires the same variables as the automatic version (minus the joint type string).
+Also included must be the scene to display the joint in, similar to importing the Puma560 model.
 
 Although the creation process is "the same", manually creating a joint lets you more easily update any graphical issues associated with it.
 For example, the STL you want to load may not be orientated/positioned correctly (How to fix is mentioned later)
 
 ```python
 # Create two basic rotational links
-link1 = gph.RotationalJoint(SE3(), 1.0)
-link2 = gph.RotationalJoint(SE3(), 1.4)
+link1 = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene)
+link2 = gph.RotationalJoint(SE3(), 1.4, g_canvas.scene)
 
 # Add to the robot
 my_robot.append_made_link(link1)
@@ -191,7 +163,7 @@ Not supplying a colour will set it to white (default).
 the image is stretched to the next larger width or height that is a power of 2.
 
 ```python
-new_rot = gph.RotationalJoint(SE3(), 1.0)
+new_rot = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene)
 
 # Load a sample texture
 new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
@@ -231,7 +203,7 @@ This method is part of all joint types. It takes two 3D coordinates representing
 For example, if an STL object loads in and the origin is below (-z axis) where it should be, and the origin is at the bottom of the object, the following code will translate it up and set the origin.
 ```python
 # Load the mesh in the link
-link = gph.RotationalLink(SE3(), './path/to/file.stl')
+link = gph.RotationalLink(SE3(), './path/to/file.stl', g_canvas.scene)
 
 # Obtain the graphical object to help with coordinates
 # May not be necessary if you already know the 3D coordinates
