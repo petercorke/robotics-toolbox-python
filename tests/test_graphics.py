@@ -98,7 +98,7 @@ def test_graphical_robot_creation():
     p2 = p.Tx(1)
     p3 = p.Tx(2)
 
-    robot = gph.GraphicalRobot()
+    robot = gph.GraphicalRobot(g_canvas, 'test_3_link_robot')
 
     robot.append_link('r', p1, 1.0)
     robot.append_link('R', p2, 1.0)
@@ -265,6 +265,50 @@ def test_robot_decor():
 
     # Set transparency
     new_rot.set_transparency(0.3)
+
+
+def test_multiple_robots():
+    p = SE3()
+    p1 = p
+    p2 = p.Tx(1)
+    p3 = p.Tx(2)
+
+    robot = gph.GraphicalRobot(g_canvas, 'Robot A')
+
+    robot.append_link('r', p1, 1.0)
+    robot.append_link('R', p2, 1.0)
+    robot.append_link('r', p3, 1.0)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 0],
+        [0, 0, 0, 1]
+    ])
+    new_p1 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 1],
+        [0, 0, 0, 1]
+    ])
+    new_p2 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 2],
+        [0, 0, 0, 1]
+    ])
+    new_p3 = SE3(arr)
+
+    robot2 = gph.GraphicalRobot(g_canvas, 'Robot B')
+    robot2.append_link('r', new_p1, 1.0)
+    robot2.append_link('R', new_p2, 1.0)
+    robot2.append_link('r', new_p3, 1.0)
+
+
 
 
 if __name__ == "__main__":

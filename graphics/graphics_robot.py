@@ -509,12 +509,16 @@ class Gripper(DefaultJoint):
 class GraphicalRobot:
     """
     The GraphicalRobot class holds all of the different joints to easily control the robot arm.
+    :param graphics_canvas: The canvas to add the robot to
+    :type graphics_canvas: class:`GraphicsCanvas`
     """
-
-    def __init__(self):
+    def __init__(self, graphics_canvas, name):
         self.joints = []
         self.num_joints = 0
         self.is_shown = True
+        self.name = name
+        # Add the robot to the canvas
+        graphics_canvas.add_robot(self)
 
     def append_made_link(self, joint):
         """

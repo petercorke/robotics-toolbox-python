@@ -30,7 +30,7 @@ class GraphicsCanvas:
         scene.autoscale = False
 
         # Disable default controls
-        scene.userpan = False
+        scene.userpan = False  # Remove shift+mouse panning (not very good controls)
         scene.userzoom = True  # Keep zoom controls (scrollwheel)
         scene.userspin = True  # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
 
@@ -38,11 +38,24 @@ class GraphicsCanvas:
         if title != '':
             scene.title = title
 
+        self.__default_caption = caption
         if caption != '':
             scene.caption = caption
 
         # Create the UI
-        self.__ui_controls = self.__setup_ui_controls()
+        self.__ui_controls = self.__setup_ui_controls([])
+        # Indices to easily identify entities
+        self.__idx_btn_reset = 0  # Camera Reset Button
+        self.__idx_menu_robots = 1  # Menu box
+        self.__idx_chkbox_ref = 2  # Reference Visibility Checkbox
+        self.__idx_chkbox_rob = 3  # Robot Visibility Checkbox
+        self.__idx_sld_opc = 4  # Opacity Slider
+        self.__save_state_offset = 2  # Number to subtract when indexing in the save state (btn/menu aren't included)
+
+        # 2D array of all UI options data for each robot onscreen
+        # checkbox ref, checkbox robot, and slider opacity
+        self.__ui_save_state = []
+        self.__selected_robot = 0
 
         # Rotate the camera
         convert_grid_to_z_up()
@@ -62,9 +75,41 @@ class GraphicsCanvas:
     def grid_visibility(self, is_visible):
         self.__graphics_grid.set_visibility(is_visible)
 
-    def __setup_ui_controls(self):
+    def add_robot(self, robot):
+        """
+        This function is called when a new robot is created. It adds it to the menu.
+
+        :param robot: A graphical robot to add to the scene
+        :type robot: class:`GraphicalRobot`
+        """
+        # ALTHOUGH THE DOCUMENTATION SAYS THAT MENU CHOICES CAN BE UPDATED,
+        # THE PACKAGE DOES NOT ALLOW IT.
+        # THUS THIS 'HACK' MUST BE DONE TO REFRESH THE UI WITH AN UPDATED LIST
+
+        # Save the list of robot names
+        new_list = []
+        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+            new_list.append(name)
+        # Add the new one
+        new_list.append(robot.name)
+
+        # Remove all UI elements
+        for item in self.__ui_controls:
+            item.delete()
+        # Restore the caption
+        scene.caption = self.__default_caption
+        # Create the updated caption.
+        self.__ui_controls = self.__setup_ui_controls(new_list)
+
+        # Save default settings to save-state
+        self.__ui_save_state.append([True, True, 1])
+
+    def __setup_ui_controls(self, list_of_names):
         """
         The initial configuration of the user interface
+
+        :param list_of_names: A list of names of the robots in the screen
+        :type list_of_names: `list`
         """
         # Button to reset camera
         scene.append_to_caption('\n')
@@ -72,20 +117,20 @@ class GraphicsCanvas:
         scene.append_to_caption('\t')
 
         # Drop down for robots / joints in frame
-        menu_robots = menu(bind=menu_item_chosen, choices=['r1', 'r2'])
+        menu_robots = menu(bind=self.__menu_item_chosen, choices=list_of_names)
         scene.append_to_caption('\n')
 
         # Checkbox for reference frame visibilities
-        chkbox_ref = checkbox(bind=reference_frame_checkbox, text="Show Reference Frames")
+        chkbox_ref = checkbox(bind=reference_frame_checkbox, text="Show Reference Frames", checked=True)
         scene.append_to_caption('\t')
 
         # Checkbox for robot visibility
-        chkbox_rob = checkbox(bind=robot_visibility_checkbox, text="Show Robot")
+        chkbox_rob = checkbox(bind=robot_visibility_checkbox, text="Show Robot", checked=True)
         scene.append_to_caption('\n')
 
         # Slider for robot opacity
         scene.append_to_caption('Opacity:')
-        sld_opc = slider(bind=opacity_slider)
+        sld_opc = slider(bind=opacity_slider, value=1)
         scene.append_to_caption('\n')
 
         # Control manual
@@ -118,6 +163,23 @@ class GraphicsCanvas:
 
         # Update grid
         self.__graphics_grid.update_grid()
+
+    def __menu_item_chosen(self, m):
+        """
+        When a menu item is chosen, update the relevant checkboxes/options
+        """
+        # Get selected item
+        self.__selected_robot = m.index
+
+        # Load settings for that robot and update UI
+        self.__ui_controls[self.__idx_chkbox_ref].checked = \
+            self.__ui_save_state[self.__selected_robot][self.__idx_chkbox_ref - self.__save_state_offset]
+
+        self.__ui_controls[self.__idx_chkbox_rob].checked = \
+            self.__ui_save_state[self.__selected_robot][self.__idx_chkbox_rob - self.__save_state_offset]
+
+        self.__ui_controls[self.__idx_sld_opc].value = \
+            self.__ui_save_state[self.__selected_robot][self.__idx_sld_opc - self.__save_state_offset]
 
 
 def convert_grid_to_z_up():
@@ -289,14 +351,6 @@ def handle_keyboard_inputs():
 
 
 # TODO
-def menu_item_chosen():
-    """
-    When a menu item is chosen, update the relevant checkboxes/options
-    """
-    pass
-
-
-# TODO
 def reference_frame_checkbox():
     """
     When a checkbox is changed for the reference frame option, update the graphics
@@ -317,8 +371,4 @@ def opacity_slider():
     """
     Update the opacity slider depending on the slider value
     """
-    pass
-
-
-def update_ui_controls():
     pass
