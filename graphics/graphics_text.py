@@ -1,8 +1,8 @@
-from vpython import color, label, mag, scene, vector
+from vpython import color, label, mag, vector
 from numpy import sign
 
 
-def draw_label(label_text, label_position):
+def draw_label(label_text, label_position, scene):
     """
     Display a label at a given position, with borders and lines
 
@@ -10,6 +10,8 @@ def draw_label(label_text, label_position):
     :type label_text: `str`
     :param label_position: 3D vector position to draw the label at.
     :type label_position: class:`vpython.vector`
+    :param scene: The scene in which to draw the object
+    :type scene: class:`vpython.canvas`
     :return: The created label object.
     :rtype: class:`vpython.label`
     """
@@ -24,6 +26,7 @@ def draw_label(label_text, label_position):
     label_line_color = color.black
 
     the_label = label(
+        canvas=scene,
         pos=label_position,
         text=label_text,
         height=label_height,
@@ -38,7 +41,7 @@ def draw_label(label_text, label_position):
     return the_label
 
 
-def draw_text(label_text, label_position):
+def draw_text(label_text, label_position, scene):
     """
     Display a label at a given position, without borders or lines.
 
@@ -46,6 +49,8 @@ def draw_text(label_text, label_position):
     :type label_text: `str`
     :param label_position: 3D vector position to draw the label at.
     :type label_position: class:`vpython.vector`
+    :param scene: The scene in which to draw the object
+    :type scene: class:`vpython.canvas`
     :return: The created label object.
     :rtype: class:`vpython.label`
     """
@@ -68,6 +73,7 @@ def draw_text(label_text, label_position):
     label_linewidth = 0.1
 
     the_label = label(
+        canvas=scene,
         pos=label_position,
         text=label_text,
         height=label_height,
@@ -84,7 +90,7 @@ def draw_text(label_text, label_position):
     return the_label
 
 
-def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
+def update_grid_numbers(numbers_list, bool_camera_relative, num_squares, scene):
     """
     Draw the grid numbers along the xyz axes.
 
@@ -94,6 +100,8 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     :type bool_camera_relative: `bool`
     :param num_squares: How many unit squares to draw along the axis.
     :type num_squares: `int`
+    :param scene: The scene in which to draw the object
+    :type scene: class:`vpython.canvas`
     """
 
     # Initial conditions
@@ -139,7 +147,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
         txt = str(x_pos)
         pos = vector(x_pos + padding, y_origin + padding, z_origin)
         if append:
-            numbers_list.append(draw_text(txt, pos))
+            numbers_list.append(draw_text(txt, pos, scene))
         else:
             numbers_list[index].text = txt
             numbers_list[index].pos = pos
@@ -152,7 +160,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     else:
         pos = vector(min_x_coord - 1, y_origin, z_origin)
     if append:
-        numbers_list.append(draw_text(txt, pos))
+        numbers_list.append(draw_text(txt, pos, scene))
     else:
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
@@ -164,7 +172,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
         txt = str(y_pos)
         pos = vector(x_origin, y_pos + padding, z_origin + padding)
         if append:
-            numbers_list.append(draw_text(txt, pos))
+            numbers_list.append(draw_text(txt, pos, scene))
         else:
             numbers_list[index].text = txt
             numbers_list[index].pos = pos
@@ -177,7 +185,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     else:
         pos = vector(x_origin, min_y_coord - 1, z_origin)
     if append:
-        numbers_list.append(draw_text(txt, pos))
+        numbers_list.append(draw_text(txt, pos, scene))
     else:
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
@@ -189,7 +197,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
         txt = str(z_pos)
         pos = vector(x_origin, y_origin - padding, z_pos + padding)
         if append:
-            numbers_list.append(draw_text(txt, pos))
+            numbers_list.append(draw_text(txt, pos, scene))
         else:
             numbers_list[index].text = txt
             numbers_list[index].pos = pos
@@ -202,7 +210,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares):
     else:
         pos = vector(x_origin, y_origin, min_z_coord - 1)
     if append:
-        numbers_list.append(draw_text(txt, pos))
+        numbers_list.append(draw_text(txt, pos, scene))
     else:
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
