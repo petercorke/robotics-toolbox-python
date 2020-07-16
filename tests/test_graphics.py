@@ -67,7 +67,7 @@ def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
     """
-    puma560 = gph.import_puma_560()
+    puma560 = gph.import_puma_560(g_canvas)
     puma560.print_joint_poses()
 
 
@@ -142,9 +142,7 @@ def test_puma560_angle_change():
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
-    puma560 = gph.import_puma_560()
-
-    puma560.set_reference_visibility(False)
+    puma560 = gph.import_puma_560(g_canvas)
 
     print("Prior Poses")
     puma560.print_joint_poses()
@@ -173,7 +171,7 @@ def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560()
+    puma560 = gph.import_puma_560(g_canvas)
     puma560.set_reference_visibility(True)
 
     sleep(2)
@@ -186,7 +184,7 @@ def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560()
+    puma560 = gph.import_puma_560(g_canvas)
 
     # Get the poses for a ready-position
     puma = Puma560()
@@ -221,7 +219,7 @@ def test_animate_joints():
     p2 = p.Tx(1)
     p3 = p.Tx(2)
 
-    robot = gph.GraphicalRobot()
+    robot = gph.GraphicalRobot(g_canvas, 'Robot Animation')
 
     robot.append_link('r', p1, 1.0)
     robot.append_link('R', p2, 1.0)
@@ -307,8 +305,6 @@ def test_multiple_robots():
     robot2.append_link('r', new_p1, 1.0)
     robot2.append_link('R', new_p2, 1.0)
     robot2.append_link('r', new_p3, 1.0)
-
-
 
 
 if __name__ == "__main__":

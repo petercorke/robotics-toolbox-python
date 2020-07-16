@@ -3,14 +3,16 @@ from roboticstoolbox import Puma560
 from spatialmath import SE3
 
 
-def import_puma_560():
+def import_puma_560(g_canvas):
     """
     Create a Robot class object based on the puma560 robot
 
+    :param g_canvas: The canvas to display the robot in
+    :type g_canvas: class:`graphics.graphics_canvas.GraphicsCanvas`
     :return: Puma560 robot
     :rtype: class:`graphics.graphics_robot.GraphicalRobot`
     """
-    puma560 = GraphicalRobot()
+    puma560 = GraphicalRobot(g_canvas, 'Puma560')
 
     puma560.append_made_link(create_link_0())
     puma560.append_made_link(create_link_1())
