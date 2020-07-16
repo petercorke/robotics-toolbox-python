@@ -126,7 +126,7 @@ class GraphicsCanvas:
         scene.append_to_caption('\t')
 
         # Checkbox for robot visibility
-        chkbox_rob = checkbox(bind=robot_visibility_checkbox, text="Show Robot", checked=True)
+        chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=True)
         scene.append_to_caption('\n')
 
         # Slider for robot opacity
@@ -186,8 +186,13 @@ class GraphicsCanvas:
         """
         When a checkbox is changed for the reference frame option, update the graphics
         """
-        print(c.checked)
         self.__robots[self.__selected_robot].set_reference_visibility(c.checked)
+
+    def __robot_visibility_checkbox(self, c):
+        """
+        When a checkbox is changed for the robot visibility, update the graphics
+        """
+        self.__robots[self.__selected_robot].set_robot_visibility(c.checked)
 
 
 def convert_grid_to_z_up():
@@ -356,14 +361,6 @@ def handle_keyboard_inputs():
     # Update camera position and axis
     scene.camera.pos = cam_pos
     scene.camera.axis = cam_axis
-
-
-# TODO
-def robot_visibility_checkbox():
-    """
-    When a checkbox is changed for the robot visibility, update the graphics
-    """
-    pass
 
 
 # TODO

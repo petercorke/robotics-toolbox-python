@@ -230,7 +230,7 @@ class DefaultJoint:
         if is_visible is not self.visible:
             # Update
             self.__graphic_obj.visible = is_visible
-            self.__graphic_ref.visible = is_visible
+            # self.__graphic_ref.visible = is_visible
             self.visible = is_visible
 
     def __set_graphic(self, structure):
@@ -586,7 +586,6 @@ class GraphicalRobot:
         :param is_visible: Whether the reference frames should be visible or not.
         :type is_visible: `bool`
         """
-        print("Checking", is_visible, "against", self.ref_shown)
         if is_visible is not self.ref_shown:
             for joint in self.joints:
                 joint.draw_reference_frame(is_visible)
