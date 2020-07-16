@@ -131,7 +131,7 @@ class GraphicsCanvas:
 
         # Slider for robot opacity
         scene.append_to_caption('Opacity:')
-        sld_opc = slider(bind=opacity_slider, value=1)
+        sld_opc = slider(bind=self.__opacity_slider, value=1)
         scene.append_to_caption('\n')
 
         # Control manual
@@ -193,6 +193,12 @@ class GraphicsCanvas:
         When a checkbox is changed for the robot visibility, update the graphics
         """
         self.__robots[self.__selected_robot].set_robot_visibility(c.checked)
+
+    def __opacity_slider(self, s):
+        """
+        Update the opacity slider depending on the slider value
+        """
+        self.__robots[self.__selected_robot].set_transparency(s.value)
 
 
 def convert_grid_to_z_up():
@@ -361,11 +367,3 @@ def handle_keyboard_inputs():
     # Update camera position and axis
     scene.camera.pos = cam_pos
     scene.camera.axis = cam_axis
-
-
-# TODO
-def opacity_slider():
-    """
-    Update the opacity slider depending on the slider value
-    """
-    pass
