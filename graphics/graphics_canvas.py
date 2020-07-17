@@ -46,6 +46,14 @@ class GraphicsCanvas:
         if caption != '':
             self.scene.caption = caption
 
+        # List of robots currently in the scene
+        self.__robots = []
+        self.__selected_robot = 0
+        # Checkbox states
+        self.__grid_visibility = grid
+        self.__camera_lock = False
+        self.__grid_relative = True
+
         # Create the UI
         self.__ui_controls = self.__setup_ui_controls([])
         # Indices to easily identify entities
@@ -53,11 +61,12 @@ class GraphicsCanvas:
         self.__idx_menu_robots = 1  # Menu box
         self.__idx_chkbox_ref = 2  # Reference Visibility Checkbox
         self.__idx_chkbox_rob = 3  # Robot Visibility Checkbox
-        self.__idx_sld_opc = 4  # Opacity Slider
-
-        # List of robots currently in the scene
-        self.__robots = []
-        self.__selected_robot = 0
+        self.__idx_chkbox_grid = 4  # Grid Visibility Checkbox
+        self.__idx_chkbox_cam = 5  # Camera Lock Checkbox
+        self.__idx_chkbox_rel = 6  # Grid Relative Checkbox
+        self.__idx_sld_opc = 7  # Opacity Slider
+        self.__idx_btn_del = 8  # Delete button
+        self.__idx_btn_clr = 9  # Clear button
 
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
@@ -68,15 +77,28 @@ class GraphicsCanvas:
 
         # Create the grid, and display if wanted
         self.__graphics_grid = GraphicsGrid(self.scene)
-        if not grid:
+        if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
     def clear_scene(self):
         """
         This function will clear the screen of all objects
         """
-        self.__graphics_grid.clear_scene()
-        # TODO update UI
+        # self.__graphics_grid.clear_scene()
+
+        # Set all robots variables as invisible
+        for robot in self.__robots:
+            robot.set_reference_visibility(False)
+            robot.set_robot_visibility(False)
+
+        self.scene.waitfor("draw_complete")
+
+        new_list = []
+        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+            new_list.append(name)
+
+        self.__selected_robot = 0
+        self.__reload_caption(new_list)
 
     def grid_visibility(self, is_visible):
         """
@@ -105,16 +127,42 @@ class GraphicsCanvas:
         # Add the new one
         new_list.append(robot.name)
 
-        # Remove all UI elements
-        for item in self.__ui_controls:
-            item.delete()
-        # Restore the caption
-        self.scene.caption = self.__default_caption
-        # Create the updated caption.
-        self.__ui_controls = self.__setup_ui_controls(new_list)
+        self.__reload_caption(new_list)
 
         # Add robot to list
         self.__robots.append(robot)
+        # Set it as selected
+        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots)-1
+        self.__selected_robot = len(self.__robots)-1
+
+    def __del_robot(self):
+        """
+        Remove a robot from the scene and the UI controls
+        """
+        if len(self.__robots) == 0:
+            # Alert the user and return
+            self.scene.append_to_caption('<script type="text/javascript">alert("No robot to delete");</script>')
+            return
+
+        # Clear the robot visuals
+        self.__robots[self.__selected_robot].set_reference_visibility(False)
+        self.__robots[self.__selected_robot].set_robot_visibility(False)
+
+        # Remove from UI
+        new_list = []
+        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+            new_list.append(name)
+        # Add the new one
+        del new_list[self.__selected_robot]
+        del self.__robots[self.__selected_robot]
+
+        # Select the top item
+        if len(self.__ui_controls[self.__idx_menu_robots].choices) > 0:
+            self.__ui_controls[self.__idx_menu_robots].index = 0
+            self.__selected_robot = len(self.__robots) - 1
+
+        # Update UI
+        self.__reload_caption(new_list)
 
     def __handle_keyboard_inputs(self):
         """
@@ -136,6 +184,10 @@ class GraphicsCanvas:
 
         ctrl + LMB = rotate (Default Vpython)
         """
+        # If camera lock, just skip the function
+        if self.__camera_lock:
+            return
+
         # Constants
         pan_amount = 0.02  # units
         rot_amount = 1.0  # deg
@@ -224,6 +276,18 @@ class GraphicsCanvas:
         self.scene.camera.pos = cam_pos
         self.scene.camera.axis = cam_axis
 
+    def __reload_caption(self, new_list):
+        """
+        Reload the UI with the new list of robot names
+        """
+        # Remove all UI elements
+        for item in self.__ui_controls:
+            item.delete()
+        # Restore the caption
+        self.scene.caption = self.__default_caption
+        # Create the updated caption.
+        self.__ui_controls = self.__setup_ui_controls(new_list)
+
     def __setup_ui_controls(self, list_of_names):
         """
         The initial configuration of the user interface
@@ -236,21 +300,61 @@ class GraphicsCanvas:
         btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
         self.scene.append_to_caption('\t')
 
-        # Drop down for robots / joints in frame
-        menu_robots = menu(bind=self.__menu_item_chosen, choices=list_of_names)
+        chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
+        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
+        self.scene.append_to_caption('''
+            <script type="text/javascript">
+                $(document).keyup(function(event) {
+                    if(event.which === 32) {
+                        event.preventDefault();
+                    }
+                });
+            </script>''')
+        # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
+        self.scene.append_to_caption('\t')
+
+        chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
         self.scene.append_to_caption('\n')
 
+        # Drop down for robots / joints in frame
+        menu_robots = menu(bind=self.__menu_item_chosen, choices=list_of_names)
+        self.scene.append_to_caption('\t')
+
+        # Button to delete the selected robot
+        btn_del = button(bind=self.__del_robot, text="Delete Robot")
+        self.scene.append_to_caption('\t')
+
+        # Button to clear the robots in screen
+        btn_clr = button(bind=self.clear_scene, text="Clear Scene")
+        self.scene.append_to_caption('\n')
+
+        # Checkbox for grid visibility
+        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility", checked=self.__grid_visibility)
+        self.scene.append_to_caption('\t')
+
         # Checkbox for reference frame visibilities
-        chkbox_ref = checkbox(bind=self.__reference_frame_checkbox, text="Show Reference Frames", checked=True)
+        if len(self.__robots) == 0:
+            chkbox_ref = checkbox(bind=self.__reference_frame_checkbox, text="Show Reference Frames", checked=True)
+        else:
+            chk = self.__robots[self.__selected_robot].ref_shown
+            chkbox_ref = checkbox(bind=self.__reference_frame_checkbox, text="Show Reference Frames", checked=chk)
         self.scene.append_to_caption('\t')
 
         # Checkbox for robot visibility
-        chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=True)
+        if len(self.__robots) == 0:
+            chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=True)
+        else:
+            chk = self.__robots[self.__selected_robot].rob_shown
+            chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=chk)
         self.scene.append_to_caption('\n')
 
         # Slider for robot opacity
         self.scene.append_to_caption('Opacity:')
-        sld_opc = slider(bind=self.__opacity_slider, value=1)
+        if len(self.__robots) == 0:
+            sld_opc = slider(bind=self.__opacity_slider, value=1)
+        else:
+            opc = self.__robots[self.__selected_robot].opacity
+            sld_opc = slider(bind=self.__opacity_slider, value=opc)
         self.scene.append_to_caption('\n')
 
         # Control manual
@@ -270,8 +374,11 @@ class GraphicsCanvas:
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
 
-        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, sld_opc]
+        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
 
+    #######################################
+    # UI CALLBACKS
+    #######################################
     def __reset_camera(self):
         """
         Reset the camera to a default position and orientation
@@ -311,7 +418,8 @@ class GraphicsCanvas:
         :param c: The checkbox that has been toggled
         :type c: class:`checkbox`
         """
-        self.__robots[self.__selected_robot].set_reference_visibility(c.checked)
+        if len(self.__robots) > 0:
+            self.__robots[self.__selected_robot].set_reference_visibility(c.checked)
 
     def __robot_visibility_checkbox(self, c):
         """
@@ -320,7 +428,42 @@ class GraphicsCanvas:
         :param c: The checkbox that has been toggled
         :type c: class:`checkbox`
         """
-        self.__robots[self.__selected_robot].set_robot_visibility(c.checked)
+        if len(self.__robots) > 0:
+            self.__robots[self.__selected_robot].set_robot_visibility(c.checked)
+
+    def __grid_visibility_checkbox(self, c):
+        """
+        When a checkbox is changed for the grid visibility, update the graphics
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        self.grid_visibility(c.checked)
+        self.__grid_visibility = c.checked
+
+    def __camera_lock_checkbox(self, c):
+        """
+        When a checkbox is changed for the camera lock, update the camera
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        # Update parameters
+        # True = locked
+        self.__camera_lock = c.checked
+        # True = enabled
+        self.scene.userspin = not c.checked
+        self.scene.userzoom = not c.checked
+
+    def __grid_relative_checkbox(self, c):
+        """
+        When a checkbox is changed for the grid lock, update the grid
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        self.__graphics_grid.set_relative(c.checked)
+        self.__grid_relative = c.checked
 
     def __opacity_slider(self, s):
         """
@@ -329,7 +472,9 @@ class GraphicsCanvas:
         :param s: The slider object that has been modified
         :type s: class:`slider`
         """
-        self.__robots[self.__selected_robot].set_transparency(s.value)
+        if len(self.__robots) > 0:
+            self.__robots[self.__selected_robot].set_transparency(s.value)
+    #######################################
 
 
 def convert_grid_to_z_up(scene):
