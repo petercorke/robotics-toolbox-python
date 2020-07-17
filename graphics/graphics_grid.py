@@ -17,6 +17,9 @@ class GraphicsGrid:
         self.camera_pos = self.__scene.camera.pos
         self.camera_axes = self.__scene.camera.axis
 
+        self.__relative_cam = True
+        self.__num_squares = 10
+
         # Private parameters for indexing in grid_object
         self.__xy_plane_idx = 0
         self.__xz_plane_idx = 1
@@ -38,24 +41,16 @@ class GraphicsGrid:
         """
         Initialise the grid along the x, y, z axes.
         """
-        # TODO base off user input?
-        num_squares = 10  # Length of the grid in each direction (in units)
-        relative_cam = True  # Whether the grid follows the camera rotation and movement
-
-        the_grid = self.__create_grid_objects(relative_cam, num_squares)
+        the_grid = self.__create_grid_objects()
         self.grid_object[self.__planes_idx] = the_grid
 
         # Update the labels instead of recreating them
-        update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares, self.__scene)
+        update_grid_numbers(self.grid_object[self.__labels_idx], self.__relative_cam, self.__num_squares, self.__scene)
 
-    def __create_grid_objects(self, bool_camera_relative, num_squares):
+    def __create_grid_objects(self):
         """
         Draw a grid along each 3D plane, that is closest to the camera.
 
-        :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
-        :type bool_camera_relative: `bool`
-        :param num_squares: How many unit squares to draw along the axis.
-        :type num_squares: `int`
         :return: List of the three drawn axes.
         :rtype: `list`
         """
@@ -66,7 +61,7 @@ class GraphicsGrid:
         yz_lines = []
         camera_axes = self.camera_axes
         # Locate centre of axes
-        if bool_camera_relative:
+        if self.__relative_cam:
             x_origin, y_origin, z_origin = round(self.__scene.center.x),\
                                            round(self.__scene.center.y),\
                                            round(self.__scene.center.z)
@@ -87,14 +82,14 @@ class GraphicsGrid:
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
         # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
-        max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+        min_x_coord = x_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
+        max_x_coord = x_origin + int((self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
 
-        min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
-        max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+        min_y_coord = y_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
+        max_y_coord = y_origin + int((self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
 
-        min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
-        max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+        min_z_coord = z_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
+        max_z_coord = z_origin + int((self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
 
         # XZ plane
         for x_point in range(min_x_coord, max_x_coord + 1):
@@ -157,18 +152,13 @@ class GraphicsGrid:
 
         return grid
 
-    def __move_grid_objects(self, bool_camera_relative, num_squares):
+    def __move_grid_objects(self):
         """
         Reusing the current assets, move the planes to the new origins.
-
-        :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
-        :type bool_camera_relative: `bool`
-        :param num_squares: How many unit squares to draw along the axis.
-        :type num_squares: `int`
         """
         camera_axes = self.camera_axes
         # Locate centre of axes
-        if bool_camera_relative:
+        if self.__relative_cam:
             x_origin, y_origin, z_origin = round(self.__scene.center.x),\
                                            round(self.__scene.center.y),\
                                            round(self.__scene.center.z)
@@ -189,14 +179,14 @@ class GraphicsGrid:
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
         # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
-        max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+        min_x_coord = x_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
+        max_x_coord = x_origin + int((self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
 
-        min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
-        max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+        min_y_coord = y_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
+        max_y_coord = y_origin + int((self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
 
-        min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
-        max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+        min_z_coord = z_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
+        max_z_coord = z_origin + int((self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
 
         # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
         x_middle = (max_x_coord + min_x_coord) / 2
@@ -239,16 +229,11 @@ class GraphicsGrid:
             self.camera_axes = new_camera_axes
 
             # Update grid
-            # TODO base off user input?
-            num_squares = 10  # Length of the grid in each direction (in units)
-            relative_cam = True  # Whether the grid follows the camera rotation and movement
-            self.__move_grid_objects(relative_cam, num_squares)
-            update_grid_numbers(self.grid_object[self.__labels_idx], relative_cam, num_squares, self.__scene)
-
-        # Else save current grid
-        else:
-            # Already current
-            pass
+            self.__move_grid_objects()
+            update_grid_numbers(self.grid_object[self.__labels_idx],
+                                self.__relative_cam,
+                                self.__num_squares,
+                                self.__scene)
 
     def set_visibility(self, is_visible):
         """
@@ -261,6 +246,16 @@ class GraphicsGrid:
             plane.visible = is_visible
         for number in self.grid_object[self.__labels_idx]:
             number.visible = is_visible
+
+    def set_relative(self, is_relative):
+        """
+        Set whether the grid should be locked to (0, 0, 0) or relative to camera focus point
+
+        :param is_relative: Whether the camera is dynamic (True) or static (False)
+        :type is_relative: `bool`
+        """
+        self.__relative_cam = is_relative
+        self.update_grid()
         
     # def clear_scene(self):
     #     """

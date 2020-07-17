@@ -52,6 +52,7 @@ class GraphicsCanvas:
         # Checkbox states
         self.__grid_visibility = grid
         self.__camera_lock = False
+        self.__grid_relative = True
 
         # Create the UI
         self.__ui_controls = self.__setup_ui_controls([])
@@ -62,9 +63,10 @@ class GraphicsCanvas:
         self.__idx_chkbox_rob = 3  # Robot Visibility Checkbox
         self.__idx_chkbox_grid = 4  # Grid Visibility Checkbox
         self.__idx_chkbox_cam = 5  # Camera Lock Checkbox
-        self.__idx_sld_opc = 6  # Opacity Slider
-        self.__idx_btn_del = 7  # Delete button
-        self.__idx_btn_clr = 8  # Clear button
+        self.__idx_chkbox_rel = 6  # Grid Relative Checkbox
+        self.__idx_sld_opc = 7  # Opacity Slider
+        self.__idx_btn_del = 8  # Delete button
+        self.__idx_btn_clr = 9  # Clear button
 
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
@@ -309,6 +311,9 @@ class GraphicsCanvas:
                 });
             </script>''')
         # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
+        self.scene.append_to_caption('\t')
+
+        chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
         self.scene.append_to_caption('\n')
 
         # Drop down for robots / joints in frame
@@ -369,7 +374,7 @@ class GraphicsCanvas:
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
 
-        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, sld_opc, btn_del, btn_clr]
+        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
 
     def __reset_camera(self):
         """
@@ -446,6 +451,16 @@ class GraphicsCanvas:
         # True = enabled
         self.scene.userspin = not c.checked
         self.scene.userzoom = not c.checked
+
+    def __grid_relative_checkbox(self, c):
+        """
+        When a checkbox is changed for the grid lock, update the grid
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        self.__graphics_grid.set_relative(c.checked)
+        self.__grid_relative = c.checked
 
     def __opacity_slider(self, s):
         """

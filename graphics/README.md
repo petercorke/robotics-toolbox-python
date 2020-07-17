@@ -60,9 +60,14 @@ g_canvas = gph.GraphicsCanvas(height=768, width=1024, title="Scene 1", caption="
 
 The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
 The same functionality can be done in code as will be mentioned.
- * Choose robot to edit
+ * Choose which robot to edit
  * Toggle robot/frame visibility
  * Change robot opacity
+ * Toggle grid visibility
+ * Delete a robot from the scene
+ * Clear all robots visuals from the scene
+ * Toggle camera lock
+ * Toggle grid dynamic/static positioning
 
 \
 The GraphicsGrid object has functions to toggle grid visibility.
