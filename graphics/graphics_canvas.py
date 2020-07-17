@@ -376,6 +376,9 @@ class GraphicsCanvas:
 
         return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
 
+    #######################################
+    # UI CALLBACKS
+    #######################################
     def __reset_camera(self):
         """
         Reset the camera to a default position and orientation
@@ -471,6 +474,7 @@ class GraphicsCanvas:
         """
         if len(self.__robots) > 0:
             self.__robots[self.__selected_robot].set_transparency(s.value)
+    #######################################
 
 
 def convert_grid_to_z_up(scene):
