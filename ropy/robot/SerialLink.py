@@ -1031,7 +1031,7 @@ class SerialLink(object):
             use the stored gravity values).
         :type grav: float np.ndarray(3,)
 
-        :return tau: The generalised joint force/torques due to gravity TAU
+        :return tau: The generalised joint force/torques due to gravity
         :rtype tau: float np.ndarray(1,n)
         """
 
@@ -1126,3 +1126,43 @@ class SerialLink(object):
         c[0] = a[1] * b[2] - a[2] * b[1]
         c[1] = a[2] * b[0] - a[0] * b[2]
         return c
+
+    def gravload(self, q=None, grav=None):
+        """
+        Calculates the joint gravity loading (n) for the robot Rin the joint
+        configuration q (n), where n is the number of robot joints.
+        Gravitational acceleration is a property of the robot object.
+
+        If q is a matrix (nxm) each column is interpreted as a joint
+        configuration vector, and the result is a matrix (nxm) each column
+        being the corresponding joint torques.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+        :param grav: The gravity vector (Optional, if not supplied will
+            use the stored gravity values).
+        :type grav: float np.ndarray(3,)
+
+        :return taug: The generalised joint force/torques due to gravity
+        :rtype taug: float np.ndarray(1,n)
+        """
+
+        if grav is None:
+            grav = np.copy(self.gravity)
+        else:
+            grav = getvector(grav, 3)
+
+        try:
+            if q is not None:
+                q = getvector(q, self.n, 'col')
+            else:
+                q = np.copy(self.q)
+                q = getvector(q, self.n, 'col')
+
+            poses = 1
+        except ValueError:
+            poses = q.shape[1]
+            verifymatrix(q, (self.n, poses))
+
+        taug = rne(q, np.zeros(self.n), np.zeros(self.n), grav)
