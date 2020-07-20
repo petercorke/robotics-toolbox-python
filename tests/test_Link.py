@@ -104,18 +104,18 @@ class TestLink(unittest.TestCase):
         l2 = rp.Link(Tc=2, B=[3, 6])
         l3 = rp.Link(Tc=2, B=[3, 6])
 
-        l1.nofriction()
-        l2.nofriction(viscous=True)
-        l3.nofriction(coulomb=False)
+        n0 = l1.nofriction()
+        n1 = l2.nofriction(viscous=True)
+        n2 = l3.nofriction(coulomb=False)
 
-        nt.assert_array_almost_equal(l1.B, l0.B)
-        nt.assert_array_almost_equal(l1.Tc, [0, 0])
+        nt.assert_array_almost_equal(n0.B, l0.B)
+        nt.assert_array_almost_equal(n0.Tc, [0, 0])
 
-        nt.assert_array_almost_equal(l2.B, np.array([[0], [0]]))
-        nt.assert_array_almost_equal(l2.Tc, [0, 0])
+        nt.assert_array_almost_equal(n1.B, np.array([[0], [0]]))
+        nt.assert_array_almost_equal(n1.Tc, [0, 0])
 
-        nt.assert_array_almost_equal(l3.B, l0.B)
-        nt.assert_array_almost_equal(l3.Tc, l0.Tc)
+        nt.assert_array_almost_equal(n2.B, l0.B)
+        nt.assert_array_almost_equal(n2.Tc, l0.Tc)
 
     def test_sigma(self):
         l0 = rp.Link(sigma=0)

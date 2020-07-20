@@ -409,11 +409,32 @@ class Link(object):
         :type viscous: bool
         """
 
+        # Copy the Link
+        link = Link(
+            d=self.d,
+            alpha=self.alpha,
+            theta=self.theta,
+            a=self.a,
+            sigma=self.sigma,
+            mdh=self.mdh,
+            offset=self.offset,
+            qlim=self.qlim,
+            flip=self.flip,
+            m=self.m,
+            r=self.r,
+            I=self.I,
+            Jm=self.Jm,
+            B=self.B,
+            Tc=self.Tc,
+            G=self.G)
+
         if viscous:
-            self.B = [0.0, 0.0]
+            link.B = [0.0, 0.0]
 
         if coulomb:
-            self.Tc = [0.0, 0.0]
+            link.Tc = [0.0, 0.0]
+
+        return link
 
     def friction(self, qd):
         """

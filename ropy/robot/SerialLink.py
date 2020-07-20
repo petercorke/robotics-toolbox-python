@@ -6,7 +6,8 @@ Created on August 1 2019
 
 import numpy as np
 from ropy.robot.Link import Link
-from spatialmath.base.argcheck import getvector, ismatrix, isscalar
+from spatialmath.base.argcheck import \
+    getvector, ismatrix, isscalar, verifymatrix
 from spatialmath import SE3
 
 
@@ -538,8 +539,8 @@ class SerialLink(object):
         The manipulator Jacobian matrix maps joint velocity to end-effector
         spatial velocity v = Je*qd in the end-effector frame.
 
-        :param q: The joint angles/configuration of the robot (Not optional,
-            stored q is always radians)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
         :type q: float np.ndarray(1,n)
 
         :return J: The manipulator Jacobian in ee frame
@@ -588,8 +589,8 @@ class SerialLink(object):
         The manipulator Jacobian matrix maps joint velocity to end-effector
         spatial velocity v = Je*qd in the end-effector frame.
 
-        :param q: The joint angles/configuration of the robot (Not optional,
-            stored q is always radians)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
         :type q: float np.ndarray(1,n)
 
         :return J: The manipulator Jacobian in ee frame
@@ -610,8 +611,8 @@ class SerialLink(object):
         The spatial velocity Jacobian which relates the velocity in
         end-effector frame to velocity in the base frame.
 
-        :param q: The joint angles/configuration of the robot (Not optional,
-            stored q is always radians)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
         :type q: float np.ndarray(1,n)
 
         :returns J: The velocity Jacobian in 0 frame
@@ -636,8 +637,8 @@ class SerialLink(object):
         The spatial velocity Jacobian which relates the velocity in
         the base frame to the velocity in the end-effector frame.
 
-        :param q: The joint angles/configuration of the robot (Not optional,
-            stored q is always radians)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
         :type q: float np.ndarray(1,n)
 
         :returns J: The velocity Jacobian in ee frame
@@ -657,3 +658,166 @@ class SerialLink(object):
         Jv[3:, 3:] = r
 
         return Jv
+
+    def accel(self, qd, torque, q=None):
+        """
+        Calculates a vector (nx1) of joint accelerations that result
+        from applying the actuator force/torque (1xN) to the manipulator
+        in state q (1xN) and qd (1xN), and n is the number of robot joints.
+
+        If q, qd, torque are matrices (KxN) then qdd is a matrix (KxN) where
+        each row is the acceleration corresponding to the equivalent rows of
+        q, qd, torque.
+
+        Note::
+        - Useful for simulation of manipulator dynamics, in
+          conjunction with a numerical integration function.
+        - Uses the method 1 of Walker and Orin to compute the forward dynamics.
+        - Featherstone's method is more efficient for robots with large numbers
+          of joints.
+        - Joint friction is considered.
+
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(1,n)
+        :param torque: The joint torques of the robot
+        :type torque: float np.ndarray(1,n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(1,n)
+
+        References:
+        - Efficient dynamic computer simulation of robotic mechanisms,
+          M. W. Walker and D. E. Orin,
+          ASME Journa of Dynamic Systems, Measurement and Control, vol.
+          104, no. 3, pp. 205-211, 1982.
+        """
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        qd = getvector(qd, self.n)
+        torque = getvector(torque, self.n)
+
+        # TODO After rne
+
+        # Compute current manipulator inertia torques resulting from unit
+        # acceleration of each joint with no gravity.
+        # M = rne(robot, ones(n,1)*q, zeros(n,n), eye(n), 'gravity', [0 0 0]);
+
+        # Compute gravity and coriolis torque torques resulting from zero
+        # acceleration at given velocity & with gravity acting.
+        # tau = rne(robot, q, qd, zeros(1,n));
+
+        # qdd = M \ (torque - tau)';
+
+    def nofriction(self, coulomb=True, viscous=False):
+        """
+        Copies the robot and returns a robot with the same parameters except,
+        the Coulomb and/or viscous friction parameter to zero
+
+        :param coulomb: if True, will set the coulomb friction to 0
+        :type coulomb: bool
+        :param viscous: if True, will set the viscous friction to 0
+        :type viscous: bool
+        """
+
+        L = []
+
+        for i in range(self.n):
+            L.append(self.links[i].nofriction(coulomb, viscous))
+
+        return SerialLink(
+            L,
+            name='NF' + self.name,
+            manufacturer=self.manuf,
+            base=self.base,
+            tool=self.tool,
+            gravity=self.gravity)
+
+    def pay(self, W, q=None, J=None, frame=1):
+        """
+        pay(W, J) Returns the generalised joint force/torques due to a payload
+        wrench W applied to the end-effector. Where the manipulator Jacobian
+        is J (6xn), and n is the number of robot joints.
+
+        pay(W, q, frame) as above but the Jacobian is calculated at pose q
+        in the frame given by frame which is 0 for base frame, 1 for
+        end-effector frame.
+
+        Uses the formula tau = J'W, where W is a wrench vector applied at the
+        end effector, W = [Fx Fy Fz Mx My Mz]'.
+
+        Trajectory operation:
+          In the case q is nxm or J is 6xnxm then tau is nxm where each row
+          is the generalised force/torque at the pose given by corresponding
+          row of q.
+
+        :param W: A wrench vector applied at the end effector,
+            W = [Fx Fy Fz Mx My Mz]
+        :type q: float np.ndarray(1,n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(1,n)
+        :param J: The manipulator Jacobian (Optional, if not supplied will
+            use the q value).
+        :type J: float np.ndarray(1,n)
+        :param frame: The frame in which to torques are expressed in when J
+            is not supplied. 0 means base frame of the robot, 1 means end-
+            effector frame
+        :type frame: int
+
+        Notes:
+        - Wrench vector and Jacobian must be from the same reference frame.
+        - Tool transforms are taken into consideration when F = 'e'.
+        - Must have a constant wrench - no trajectory support for this yet.
+        """
+
+        try:
+            W = getvector(W, 6)
+            trajn = 0
+        except ValueError:
+            trajn = W.shape[1]
+            verifymatrix(W, (6, trajn))
+
+        if trajn:
+            # A trajectory
+            if J is not None:
+                # Jacobian supplied
+                verifymatrix(J, (6, self.n, trajn))
+            else:
+                # Use q instead
+                verifymatrix(q, (self.n, trajn))
+                J = np.zeros((6, self.n, trajn))
+                for i in range(trajn):
+                    if frame:
+                        J[:, :, i] = self.jacobe(q[:, i])
+                    else:
+                        J[:, :, i] = self.jacob0(q[:, i])
+        else:
+            # Single configuration
+            if J is not None:
+                # Jacobian supplied
+                verifymatrix(J, (6, self.n))
+            else:
+                # Use q instead
+                if q is None:
+                    q = np.copy(self.q)
+                else:
+                    q = getvector(q, self.n)
+
+                if frame:
+                    J = self.jacobe(q)
+                else:
+                    J = self.jacob0(q)
+
+        if trajn == 0:
+            tau = -J.T @ W
+        else:
+            tau = np.zeros((self.n, trajn))
+
+            for i in range(trajn):
+                tau[:, i] = -J[:, :, i].T @ W[:, i]
+
+        return tau

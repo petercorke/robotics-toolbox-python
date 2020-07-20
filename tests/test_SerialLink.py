@@ -502,3 +502,68 @@ class TestLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(r0.jacobev(q), J, decimal=4)
         nt.assert_array_almost_equal(r0.jacobev(), J, decimal=4)
+
+    def test_nofriction(self):
+        l0 = rp.Link(Tc=2, B=[3, 6])
+        l1 = rp.Link(Tc=2, B=[3, 6])
+        l2 = rp.Link(Tc=2, B=[3, 6])
+        l3 = rp.Link(Tc=2, B=[3, 6])
+        L = [l0, l1, l2, l3]
+
+        r0 = rp.SerialLink(L)
+
+        n0 = r0.nofriction()
+        n1 = r0.nofriction(viscous=True)
+        n2 = r0.nofriction(coulomb=False)
+
+        for i in range(4):
+            nt.assert_array_almost_equal(n0.links[i].B, L[i].B)
+            nt.assert_array_almost_equal(n0.links[i].Tc, [0, 0])
+
+            nt.assert_array_almost_equal(n1.links[i].B, np.array([[0], [0]]))
+            nt.assert_array_almost_equal(n1.links[i].Tc, [0, 0])
+
+            nt.assert_array_almost_equal(n2.links[i].B, L[i].B)
+            nt.assert_array_almost_equal(n2.links[i].Tc, L[i].Tc)
+
+    def test_pay(self):
+        panda = rp.PandaMDH()
+        panda.q = [1, 2, 3, 4, 5, 6, 7]
+
+        w = [1, 2, 3, 4, 5, 6]
+
+        wT = np.c_[w, w, w, w]
+        qT = np.c_[panda.q, panda.q, panda.q, panda.q]
+
+        tau = np.array(
+            [6.0241, -4.4972, -7.2160, -4.2400,  7.0215, -4.6884, -6.0000])
+
+        tau0 = np.array(
+            [-5.9498, 1.4604, -3.4544, 1.5026, -3.7777, -6.6578, 2.6047])
+
+        tauT = np.c_[tau, tau, tau, tau]
+        tau0T = np.c_[tau0, tau0, tau0, tau0]
+
+        Je = panda.jacobe()
+        J0 = panda.jacob0()
+
+        JeT = np.zeros((6, 7, 4))
+        for i in range(4):
+            JeT[:, :, i] = Je
+
+        panda.pay(w)
+
+        nt.assert_array_almost_equal(panda.pay(w), tau, decimal=4)
+        nt.assert_array_almost_equal(panda.pay(w, frame=0), tau0, decimal=4)
+
+        nt.assert_array_almost_equal(panda.pay(w, q=panda.q), tau, decimal=4)
+        nt.assert_array_almost_equal(panda.pay(wT, q=qT), tauT, decimal=4)
+        nt.assert_array_almost_equal(
+            panda.pay(wT, q=qT, frame=0), tau0T, decimal=4)
+
+        nt.assert_array_almost_equal(panda.pay(w, J=Je), tau, decimal=4)
+        nt.assert_array_almost_equal(panda.pay(w, J=J0), tau0, decimal=4)
+
+        nt.assert_array_almost_equal(panda.pay(wT, J=JeT), tauT, decimal=4)
+
+        # with self.ass
