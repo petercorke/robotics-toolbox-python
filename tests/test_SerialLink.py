@@ -504,10 +504,10 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(r0.jacobev(), J, decimal=4)
 
     def test_nofriction(self):
-        l0 = rp.Link(Tc=2, B=[3, 6])
-        l1 = rp.Link(Tc=2, B=[3, 6])
-        l2 = rp.Link(Tc=2, B=[3, 6])
-        l3 = rp.Link(Tc=2, B=[3, 6])
+        l0 = rp.Link(Tc=2, B=3)
+        l1 = rp.Link(Tc=2, B=3)
+        l2 = rp.Link(Tc=2, B=3)
+        l3 = rp.Link(Tc=2, B=3)
         L = [l0, l1, l2, l3]
 
         r0 = rp.SerialLink(L)
@@ -520,7 +520,7 @@ class TestLink(unittest.TestCase):
             nt.assert_array_almost_equal(n0.links[i].B, L[i].B)
             nt.assert_array_almost_equal(n0.links[i].Tc, [0, 0])
 
-            nt.assert_array_almost_equal(n1.links[i].B, np.array([[0], [0]]))
+            nt.assert_array_almost_equal(n1.links[i].B, 0)
             nt.assert_array_almost_equal(n1.links[i].Tc, [0, 0])
 
             nt.assert_array_almost_equal(n2.links[i].B, L[i].B)
@@ -566,4 +566,110 @@ class TestLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.pay(wT, J=JeT), tauT, decimal=4)
 
-        # with self.ass
+        with self.assertRaises(ValueError):
+            panda.pay(wT, panda.q)
+
+        with self.assertRaises(TypeError):
+            panda.pay(wT)
+
+    def test_friction(self):
+        l0 = rp.Revolute(d=2, B=3, G=2, Tc=[2, -1])
+        qd = [1, 2, 3, 4]
+
+        r0 = rp.SerialLink([l0, l0, l0, l0])
+
+        tau = np.array([-16, -28, -40, -52])
+
+        nt.assert_array_almost_equal(r0.friction(qd), tau)
+
+    def test_allfkine(self):
+        panda = rp.PandaMDH()
+        q = [1, 2, 3, 4, 5, 6, 7]
+        panda.q = q
+
+        t0 = np.array([
+            [0.5403, -0.8415, 0, 0],
+            [0.8415, 0.5403, 0, 0],
+            [0, 0, 1, 0.333],
+            [0, 0, 0, 1]
+        ])
+        t1 = np.array([
+            [-0.2248, -0.4913, -0.8415, 0],
+            [-0.3502, -0.7651, 0.5403, 0],
+            [-0.9093, 0.4161, 0, 0.333],
+            [0, 0, 0, 1]
+        ])
+        t2 = np.array([
+            [0.1038, 0.8648, 0.4913, 0.1552],
+            [0.4229, -0.4855, 0.7651, 0.2418],
+            [0.9002, 0.1283, -0.4161, 0.2015],
+            [0, 0, 0, 1]
+        ])
+        t3 = np.array([
+            [-0.4397, -0.2425, -0.8648, 0.1638],
+            [-0.8555, -0.1801, 0.4855, 0.2767],
+            [-0.2735, 0.9533, -0.1283, 0.2758],
+            [0, 0, 0, 1]
+        ])
+        t4 = np.array([
+            [-0.9540, -0.1763, -0.2425, 0.107],
+            [0.2229, -0.9581, -0.1801, 0.2781],
+            [-0.2006, -0.2258, 0.9533, 0.6644],
+            [0, 0, 0, 1]
+        ])
+        t5 = np.array([
+            [-0.8482, -0.4994, 0.1763, 0.107],
+            [0.2643, -0.1106, 0.9581, 0.2781],
+            [-0.4590, 0.8593, 0.2258, 0.6644],
+            [0, 0, 0, 1]
+        ])
+        t6 = np.array([
+            [-0.5236,  0.6902, 0.4994, 0.08575],
+            [0.8287, 0.5487, 0.1106, 0.3132],
+            [-0.1977, 0.4718, -0.8593, 0.5321],
+            [0, 0, 0, 1]
+        ])
+
+        Tall = panda.allfkine(q)
+        Tall2 = panda.allfkine()
+
+        nt.assert_array_almost_equal(Tall[0].A, t0, decimal=4)
+        nt.assert_array_almost_equal(Tall[1].A, t1, decimal=4)
+        nt.assert_array_almost_equal(Tall[2].A, t2, decimal=4)
+        nt.assert_array_almost_equal(Tall[3].A, t3, decimal=4)
+        nt.assert_array_almost_equal(Tall[4].A, t4, decimal=4)
+        nt.assert_array_almost_equal(Tall[5].A, t5, decimal=4)
+        nt.assert_array_almost_equal(Tall[6].A, t6, decimal=4)
+        nt.assert_array_almost_equal(Tall2[0].A, t0, decimal=4)
+
+    def test_gravjac(self):
+        l0 = rp.Revolute(d=2, B=3, G=2, Tc=[2, -1], alpha=0.4, a=0.2,
+                         r=[0.1, 0.2, 0.05], m=0.5)
+        l1 = rp.Prismatic(theta=0.1, B=3, G=2, Tc=[2, -1], a=0.2,
+                          r=[0.1, 0.2, 0.05], m=0.5)
+
+        r0 = rp.SerialLink([l0, l0, l0, l0])
+        r1 = rp.SerialLink([l0, l0, l0, l1])
+        q = [0.3, 0.4, 0.2, 0.1]
+        qT = np.c_[q, q]
+        r0.q = q
+
+        grav = [0.3, 0.5, 0.7]
+
+        tauB = [0, 4.6280, 3.1524, 0.9324]
+        tauB2 = [1.9412, 1.1374, 0.3494, -0.0001]
+        tauB3 = [0, 3.2819, 2.0195, 1.9693]
+
+        res0 = r0.gravjac(qT)
+        res1 = r0.gravjac(q)
+        res2 = r0.gravjac(q, grav)
+        res3 = r0.gravjac()
+        res4 = r1.gravjac(q)
+
+        nt.assert_array_almost_equal(res0[:, 0], tauB, decimal=4)
+        nt.assert_array_almost_equal(res0[:, 1], tauB, decimal=4)
+        nt.assert_array_almost_equal(res1[:, 0], tauB, decimal=4)
+        nt.assert_array_almost_equal(res2[:, 0], tauB2, decimal=4)
+        nt.assert_array_almost_equal(res3[:, 0], tauB, decimal=4)
+        nt.assert_array_almost_equal(res4[:, 0], tauB3, decimal=4)
+

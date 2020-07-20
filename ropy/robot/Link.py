@@ -48,8 +48,8 @@ class Link(object):
     :type I: float np.ndarray(3,3)
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float or float np.ndarray(2,1)
+    :param B: dynamic - motor viscous friction
+    :type B: float
     :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
     :type Tc: float np.ndarray(2,1)
     :param G: dynamic - gear ratio
@@ -277,7 +277,7 @@ class Link(object):
 
     @B.setter
     def B(self, B_new):
-        self._B = getvector(B_new, 2, out='col')
+        self._B = B_new  # getvector(B_new, 2, out='col')
 
     @Tc.setter
     def Tc(self, Tc_new):
@@ -470,6 +470,9 @@ class Link(object):
             tau += self.Tc[0]
         elif qd < 0:
             tau += self.Tc[1]
+
+        # Scale up by gear ratio
+        tau = -np.abs(self.G) * tau
 
         return tau
 

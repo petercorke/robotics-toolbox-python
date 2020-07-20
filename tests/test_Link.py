@@ -88,21 +88,19 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(l4.A(np.pi).A, T0.A)
 
     def test_friction(self):
-        l0 = rp.Link(Tc=2, B=[3, 6], G=4)
+        l0 = rp.Revolute(d=2, Tc=[2, -1], B=3, G=2)
 
-        tau = np.array([
-            [122],
-            [242]
-        ])
+        tau = -124
+        tau2 = 122
 
-        nt.assert_array_almost_equal(l0.friction(10), tau)
-        nt.assert_array_almost_equal(l0.friction(-10), -tau)
+        nt.assert_almost_equal(l0.friction(10), tau)
+        nt.assert_almost_equal(l0.friction(-10), tau2)
 
     def test_nofriction(self):
-        l0 = rp.Link(Tc=2, B=[3, 6])
-        l1 = rp.Link(Tc=2, B=[3, 6])
-        l2 = rp.Link(Tc=2, B=[3, 6])
-        l3 = rp.Link(Tc=2, B=[3, 6])
+        l0 = rp.Link(Tc=2, B=3)
+        l1 = rp.Link(Tc=2, B=3)
+        l2 = rp.Link(Tc=2, B=3)
+        l3 = rp.Link(Tc=2, B=3)
 
         n0 = l1.nofriction()
         n1 = l2.nofriction(viscous=True)
@@ -111,7 +109,7 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(n0.B, l0.B)
         nt.assert_array_almost_equal(n0.Tc, [0, 0])
 
-        nt.assert_array_almost_equal(n1.B, np.array([[0], [0]]))
+        nt.assert_array_almost_equal(n1.B, 0)
         nt.assert_array_almost_equal(n1.Tc, [0, 0])
 
         nt.assert_array_almost_equal(n2.B, l0.B)

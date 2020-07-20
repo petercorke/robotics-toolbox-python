@@ -498,6 +498,7 @@ class SerialLink(object):
             the rows are interpreted as the generalized joint coordinates
             for a sequence of points along a trajectory. q(j,i) is the
             j'th joint parameter for the i'th trajectory point.
+        :type q: float np.ndarray(n) or (nxm)
 
         :return T: Homogeneous transformation matrix or trajectory
         :rtype T: SE3 or SE3 list
@@ -533,6 +534,41 @@ class SerialLink(object):
                     t.append(tr)
 
         return t
+
+    def allfkine(self, q=None):
+        '''
+        Evaluate fkine for each joint within a robot
+
+        Note:
+        - The robot's base or tool transform, if present, are incorporated
+            into the result.
+        - Joint offsets, if defined, are added to q before the forward
+            kinematics are computed.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+
+        :return T: Homogeneous transformationtrajectory
+        :rtype T: SE3 list
+        '''
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        t = self.base
+        Tall = SE3()
+        for i in range(self.n):
+            t = t * self.links[i].A(q[i])
+
+            if i == 0:
+                Tall = SE3(t)
+            else:
+                Tall.append(t)
+
+        return Tall
 
     def jacobe(self, q=None):
         """
@@ -669,7 +705,7 @@ class SerialLink(object):
         each row is the acceleration corresponding to the equivalent rows of
         q, qd, torque.
 
-        Note::
+        Notes:
         - Useful for simulation of manipulator dynamics, in
           conjunction with a numerical integration function.
         - Uses the method 1 of Walker and Orin to compute the forward dynamics.
@@ -684,6 +720,9 @@ class SerialLink(object):
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float np.ndarray(1,n)
+
+        :return a: The joint accelerations of the robot
+        :rtype a: float np.ndarray(1,n)
 
         References:
         - Efficient dynamic computer simulation of robotic mechanisms,
@@ -721,6 +760,9 @@ class SerialLink(object):
         :type coulomb: bool
         :param viscous: if True, will set the viscous friction to 0
         :type viscous: bool
+
+        :return: A copy of the robot with modified friction
+        :rtype: SerialLink
         """
 
         L = []
@@ -767,6 +809,9 @@ class SerialLink(object):
             is not supplied. 0 means base frame of the robot, 1 means end-
             effector frame
         :type frame: int
+
+        :return tau: The joint forces/torques due to w
+        :rtype tau: float np.ndarray(1,n)
 
         Notes:
         - Wrench vector and Jacobian must be from the same reference frame.
@@ -821,3 +866,263 @@ class SerialLink(object):
                 tau[:, i] = -J[:, :, i].T @ W[:, i]
 
         return tau
+
+    def friction(self, qd):
+        """
+        Calculates the vector of joint friction forces/torques for the robot
+        moving with joint velocities qd.
+
+        The friction model includes:
+        - Viscous friction which is a linear function of velocity.
+        - Coulomb friction which is proportional to sign(qd).
+
+        Notes:
+        - The friction value should be added to the motor output torque, it
+          has a negative value when qd>0.
+        - The returned friction value is referred to the output of the
+          gearbox.
+        - The friction parameters in the Link object are referred to the
+          motor.
+        - Motor viscous friction is scaled up by G^2.
+        - Motor Coulomb friction is scaled up by G.
+        - The appropriate Coulomb friction value to use in the non-symmetric
+          case depends on the sign of the joint velocity, not the motor
+          velocity.
+        - The absolute value of the gear ratio is used. Negative gear ratios
+          are tricky: the Puma560 has negative gear ratio for joints 1 and 3.
+
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(1,n)
+
+        :return: The joint friction forces.torques for the robot
+        :rtype: float np.ndarray(n,)
+        """
+
+        qd = getvector(qd, self.n)
+        tau = np.zeros(self.n)
+
+        for i in range(self.n):
+            tau[i] = self.links[i].friction(qd[i])
+
+        return tau
+
+    def cinertia(self, q=None):
+        """
+        The nxn Cartesian (operational space) inertia matrix which relates
+        Cartesian force/torque to Cartesian acceleration at the joint
+        configuration q.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(1,n)
+
+        :return M: The inertia matrix
+        :rtype M: float np.ndarray(n,n)
+        """
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        J = self.jacob0(q)
+        Ji = np.linalg.pinv(J)
+        M = self.inertia(q)
+        Mx = Ji.T @ M @ Ji
+
+    def coriolis(self, qd, q=None):
+        """
+        Calculates the Coriolis/centripetal matrix (nxn) for the robot in
+        configuration q and velocity qd, where N is the number of joints.
+        The product c*qd is the vector of joint force/torque due to
+        velocity coupling. The diagonal elements are due to centripetal
+        effects and the off-diagonal elements are due to Coriolis effects.
+        This matrix is also known as the velocity coupling matrix, since
+        it describes the disturbance forces on any joint due to velocity
+        of all other joints.
+
+        If q and qd are matrices (nxk), each row is interpretted as a
+        joint state vector, and the result (nxnxk) is a 3d-matrix where
+        each plane corresponds to a row of q and qd.
+
+        Notes:
+        - Joint viscous friction is also a joint force proportional to
+            velocity but it is eliminated in the computation of this value.
+        - Computationally slow, involves n^2/2 invocations of RNE.
+
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(1,n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(1,n)
+
+        :return C: The Coriolis/centripetal matrix
+        :rtype C: float np.ndarray(n,n)
+        """
+
+        try:
+            qd = getvector(qd, self.n)
+            trajn = 0
+
+            if q is None:
+                q = np.copy(self.q)
+            else:
+                q = getvector(q, self.n)
+        except ValueError:
+            trajn = qd.shape[1]
+            verifymatrix(qd, (self.n, trajn))
+            verifymatrix(q, (self.n, trajn))
+
+        r1 = self.nofriction(true, true)
+
+        C = np.zeros((self.n, self.n))
+        Csq = np.zeros((self.n, self.n))
+
+        # Find the torques that depend on a single finite joint speed,
+        # these are due to the squared (centripetal) terms
+        # set QD = [1 0 0 ...] then resulting torque is due to qd_1^2
+        for i in range(self.n):
+            QD = np.zeros((1, self.n))
+            QD[i] = 1
+            tau = r1.rne(q, QD, np.zeros(self.n), gravity=[0, 0, 0])
+            Csq[:, i] = Csq[:, j] + tau.T
+
+        # Find the torques that depend on a pair of finite joint speeds,
+        # these are due to the product (Coridolis) terms
+        # set QD = [1 1 0 ...] then resulting torque is due to
+        # qd_1 qd_2 + qd_1^2 + qd_2^2
+        for i in range(self.n):
+            for j in range(i+1, self.n):
+                # Find a product term  qd_i * qd_j
+                QD = np.zeros((1, self.n))
+                QD[i] = 1
+                QD[j] = 1
+                tau = r1.rne(q, QD, zeros(size(q)), gravity=[0, 0, 0])
+                C[:, j] = C[:, j] + (tau.T - Csq[:, j] - Csq[:, i]) \
+                    * qd[i]/2
+                C[:, i] = C[:, i] + (tau.T - Csq[:, j] - Csq[:, i]) \
+                    * qd[j]/2
+
+        C = C + Csq @ np.diag(qd)
+
+    def gravjac(self, q=None, grav=None):
+        """
+        Calculates the generalised joint force/torques due to gravity tau
+        (1xN) and the manipulator Jacobian in the base frame jacob0 (6xn)
+        for robot pose q (1xn), where N is the number of robot joints.
+
+        Trajectory operation:
+        If q is nxm where n is the number of robot joints then a
+        trajectory is assumed where each row of q corresponds to a robot
+        configuration. tau (nxm) is the generalised joint torque, each row
+        corresponding to an input pose, and jacob0 (6xnxm) where each
+        plane is a Jacobian corresponding to an input pose.
+
+        Notes:
+        - The gravity vector is defined by the SerialLink property if not
+            explicitly given.
+        - Does not use inverse dynamics function RNE.
+        - Faster than computing gravity and Jacobian separately.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+        :param grav: The gravity vector (Optional, if not supplied will
+            use the stored gravity values).
+        :type grav: float np.ndarray(3,)
+
+        :return tau: The generalised joint force/torques due to gravity TAU
+        :rtype tau: float np.ndarray(1,n)
+        """
+
+        if grav is None:
+            grav = np.copy(self.gravity)
+        else:
+            grav = getvector(grav, 3)
+
+        try:
+            if q is not None:
+                q = getvector(q, self.n, 'col')
+            else:
+                q = np.copy(self.q)
+                q = getvector(q, self.n, 'col')
+
+            poses = 1
+        except ValueError:
+            poses = q.shape[1]
+            verifymatrix(q, (self.n, poses))
+
+        if not self.mdh:
+            baseAxis = self.base.a
+            baseOrigin = self.base.t
+
+        tauB = np.zeros((self.n, poses))
+        J = np.zeros((6, self.n, poses))
+
+        # Forces
+        force = np.zeros((3, self.n))
+
+        for joint in range(self.n):
+            force[:, joint] = np.squeeze(self.links[joint].m * grav)
+
+        # Centre of masses (local frames)
+        r = np.zeros((4, self.n))
+        for joint in range(self.n):
+            r[:, joint] = np.r_[np.squeeze(self.links[joint].r), 1]
+
+        for pose in range(poses):
+            com_arr = np.zeros((3, self.n))
+
+            Te = self.fkine(q[:, pose])
+            T = self.allfkine(q[:, pose])
+
+            jointOrigins = np.zeros((3, self.n))
+            jointAxes = np.zeros((3, self.n))
+            for i in range(self.n):
+                jointOrigins[:, i] = T[i].t
+                jointAxes[:, i] = T[i].a
+
+            if not self.mdh:
+                jointOrigins = np.c_[
+                    baseOrigin, jointOrigins[:, :-1]
+                ]
+                jointAxes = np.c_[
+                    baseAxis, jointAxes[:, :-1]
+                ]
+
+            # Backwards recursion
+            for joint in range(self.n-1, -1, -1):
+                # C.o.M. in world frame, homog
+                com = T[joint].A @ r[:, joint]
+
+                # Add it to the distal others
+                com_arr[:, joint] = com[0:3]
+
+                t = np.zeros(3)
+
+                # for all links distal to it
+                for link in range(joint, self.n):
+                    if not self.links[joint].sigma:
+                        # Revolute joint
+                        d = com_arr[:, link] - jointOrigins[:, joint]
+                        t = t + self._cross3(d, force[:, link])
+                        # Though r x F would give the applied torque
+                        # and not the reaction torque, the gravity
+                        # vector is nominally in the positive z
+                        # direction, not negative, hence the force is
+                        # the reaction force
+                    else:
+                        # Prismatic joint
+                        # Force on prismatic joint
+                        t = t + force[:, link]
+
+                tauB[joint, pose] = t.T @ jointAxes[:, joint]
+
+        return tauB
+
+    def _cross3(self, a, b):
+        c = np.zeros(3)
+        c[2] = a[0] * b[1] - a[1] * b[0]
+        c[0] = a[1] * b[2] - a[2] * b[1]
+        c[1] = a[2] * b[0] - a[0] * b[2]
+        return c
