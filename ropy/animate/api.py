@@ -6,7 +6,23 @@ import numpy as np
 panda = rp.PandaMDH()
 panda.q = panda.qr
 
-q = [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]
+# q = [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]
+q = panda.qr.tolist()
+
+T = panda.fkine(q)
+print(T)
+
+q1, err, success = panda.ikcon(T)
+q1 = q1.tolist()
+T2 = panda.fkine(q1)
+# print(T2)
+
+# q2 = [-0.0011,    0.9013,    0.0210,   -0.0698,   -0.0199,    0.9620,    0.7861]
+# T2 = panda.fkine(q2)
+# print(T2)
+
+
+
 # q = [0, 0, 0, -1, 0, 0, 0]
 # q = panda.q.tolist()
 
@@ -22,7 +38,7 @@ for i in range(panda.n):
     l.append(li)
 
 
-l[3][3] = 0.1
+# l[3][3] = 0.1
 
 # l1 = panda.A([0, 1])
 
@@ -44,7 +60,7 @@ sim.q(q_ob)
 
 # v = np.array([[0.01, 0.01, 0.01, 0, 0, 0]]).T
 
-# for i in range(5000):
+# for i in range(1000):
 #     panda.q = sim.get_q(id)
 #     qd = np.linalg.pinv(panda.jacobe()) @ v
 #     qd = qd.tolist()

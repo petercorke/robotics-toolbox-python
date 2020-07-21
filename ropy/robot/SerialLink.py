@@ -8,7 +8,9 @@ import numpy as np
 from ropy.robot.Link import Link
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
+from spatialmath.base.transforms3d import tr2delta
 from spatialmath import SE3
+from scipy.optimize import minimize, Bounds
 
 
 class SerialLink(object):
@@ -930,6 +932,8 @@ class SerialLink(object):
         M = self.inertia(q)
         Mx = Ji.T @ M @ Ji
 
+        return Mx
+
     def coriolis(self, qd, q=None):
         """
         Calculates the Coriolis/centripetal matrix (nxn) for the robot in
@@ -973,7 +977,7 @@ class SerialLink(object):
             verifymatrix(qd, (self.n, trajn))
             verifymatrix(q, (self.n, trajn))
 
-        r1 = self.nofriction(true, true)
+        r1 = self.nofriction(True, True)
 
         C = np.zeros((self.n, self.n))
         Csq = np.zeros((self.n, self.n))
@@ -985,7 +989,7 @@ class SerialLink(object):
             QD = np.zeros((1, self.n))
             QD[i] = 1
             tau = r1.rne(q, QD, np.zeros(self.n), gravity=[0, 0, 0])
-            Csq[:, i] = Csq[:, j] + tau.T
+            Csq[:, i] = Csq[:, i] + tau.T
 
         # Find the torques that depend on a pair of finite joint speeds,
         # these are due to the product (Coridolis) terms
@@ -997,7 +1001,7 @@ class SerialLink(object):
                 QD = np.zeros((1, self.n))
                 QD[i] = 1
                 QD[j] = 1
-                tau = r1.rne(q, QD, zeros(size(q)), gravity=[0, 0, 0])
+                tau = r1.rne(q, QD, np.zeros(self.n), gravity=[0, 0, 0])
                 C[:, j] = C[:, j] + (tau.T - Csq[:, j] - Csq[:, i]) \
                     * qd[i]/2
                 C[:, i] = C[:, i] + (tau.T - Csq[:, j] - Csq[:, i]) \
@@ -1073,7 +1077,6 @@ class SerialLink(object):
         for pose in range(poses):
             com_arr = np.zeros((3, self.n))
 
-            Te = self.fkine(q[:, pose])
             T = self.allfkine(q[:, pose])
 
             jointOrigins = np.zeros((3, self.n))
@@ -1166,3 +1169,329 @@ class SerialLink(object):
             verifymatrix(q, (self.n, poses))
 
         taug = rne(q, np.zeros(self.n), np.zeros(self.n), grav)
+
+    def ikcon(self, T, q0=None):
+        """
+        Inverse kinematics by optimization with joint limits
+
+        Calculates the joint coordinates (1xn) corresponding to the robot
+        end-effector pose T which is an SE3 object or homogenenous transform
+        matrix (4x4), and N is the number of robot joints. OPTIONS is an
+        optional list of name/value pairs than can be passed to fmincon.
+
+        Q = robot.ikunc(T, Q0, OPTIONS) as above but specify the
+        initial joint coordinates Q0 used for the minimisation.
+
+        [Q,ERR,EXITFLAG] = robot.ikcon(T, ...) as above but also returns the
+        status EXITFLAG from fmincon.
+
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
+        transform sequence (4x4xm) then returns the joint coordinates
+        corresponding to each of the transforms in the sequence. q is nxm
+        where N is the number of robot joints. The initial estimate of q
+        for each time step is taken as the solution from the previous time
+        step.
+
+        ERR and EXITFLAG are also Mx1 and indicate the results of optimisation
+        for the corresponding trajectory step.
+
+        Notes:
+        - Joint limits are considered in this solution.
+        - Can be used for robots with arbitrary degrees of freedom.
+        - In the case of multiple feasible solutions, the solution returned
+          depends on the initial choice of q0.
+        - Works by minimizing the error between the forward kinematics of the
+          joint angle solution and the end-effector frame as an optimisation.
+          The objective function (error) is described as:
+                  sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+          Where omega is some gain matrix, currently not modifiable.
+        """
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        try:
+            if q0 is not None:
+                q0 = getvector(q0, self.n, 'col')
+            else:
+                q0 = np.zeros((self.n, trajn))
+        except ValueError:
+            verifymatrix(q0, (self.n, trajn))
+
+        # create output variables
+        qstar = np.zeros((self.n, trajn))
+        error = []
+        exitflag = []
+
+        reach = np.sum(np.abs([self.a, self.d]))
+        omega = np.diag([1, 1, 1, 3/reach])
+
+        fun = lambda q: \
+            np.sum(
+                ((np.linalg.pinv(Ti.A) @ self.fkine(q).A - np.eye(4)) @ omega)
+                ** 2
+            )
+
+        bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
+
+        for i in range(trajn):
+            Ti = T[i]
+            res = minimize(fun, q0[:, i], bounds=bnds, options={'gtol': 1e-6})
+            qstar[:, i] = res.x
+            error.append(res.fun)
+            exitflag.append(res.success)
+
+        if trajn > 1:
+            return qstar, error, exitflag
+        else:
+            return qstar[:, 0], error[0], exitflag[0]
+
+    def ikine(
+            self, T,
+            ilimit=500,
+            rlimit=100,
+            tol=1e-10,
+            Y=0.1,
+            Ymin=0,
+            mask=None,
+            q0=None,
+            search=True,
+            slimit=100,
+            transpose=False):
+        """
+        Inverse kinematics by optimization without joint limits
+
+        q = ikine(T) are the joint coordinates (1xn) corresponding to the
+        robot end-effector pose T which is an SE3 object or homogenenous
+        transform matrix (4x4), and n is the number of robot joints.
+
+        This method can be used for robots with any number of degrees of
+        freedom.
+
+        :param ilimit: maximum number of iterations
+        :type ilimit: int (default 500)
+        :param rlimit: maximum number of consecutive step rejections
+        :type rlimit: int (default 100)
+        :param tol: final error tolerance
+        :type tol: float (default 1e-10)
+        :param Y: initial value of lambda
+        :type Y: float (default 0.1)
+        :param Ymin: minimum allowable value of lambda
+        :type Ymin: float (default 0)
+        # :param quiet: be quiet
+        # :type quiet:
+        # :param verbose: be verbose
+        # :type verbose:
+        :param mask: mask vector that correspond to translation in X, Y and Z
+            and rotation about X, Y and Z respectively.
+        :type mask: float np.ndarray(6)
+        :param q0: initial joint configuration (default all zeros)
+        :type q0: float np.ndarray(n) (default all zeros)
+        :param search: search over all configurations
+        :type search: bool
+        :param slimit: maximum number of search attempts
+        :type slimit: int (default 100)
+        :param transpose: use Jacobian transpose with step size A, rather
+            than Levenberg-Marquadt
+        :type transpose:   
+
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects (1xm) or a homogeneous
+        transform sequence (4x4xm) then returns the joint coordinates
+        corresponding to each of the transforms in the sequence. q is nxm
+        where n is the number of robot joints. The initial estimate of q for
+        each time step is taken as the solution from the previous time step.
+
+        Underactuated robots:
+        For the case where the manipulator has fewer than 6 DOF the solution
+        space has more dimensions than can be spanned by the manipulator joint
+        coordinates.
+
+        In this case we specify the 'mask' option where the mask vector (1x6)
+        specifies the Cartesian DOF (in the wrist coordinate frame) that will
+        be ignored in reaching a solution.  The mask vector has six elements
+        that correspond to translation in X, Y and Z, and rotation about X, Y
+        and Z respectively. The value should be 0 (for ignore) or 1. The
+        number of non-zero elements should equal the number of manipulator
+        DOF.
+
+        For example when using a 3 DOF manipulator rotation orientation might
+        be unimportant in which case use the option: mask = [1 1 1 0 0 0].
+
+        For robots with 4 or 5 DOF this method is very difficult to use since
+        orientation is specified by T in world coordinates and the achievable
+        orientations are a function of the tool position.
+
+        References:
+        - Robotics, Vision & Control, P. Corke, Springer 2011, Section 8.4.
+
+        Notes:
+        - Solution is computed iteratively.
+        - Implements a Levenberg-Marquadt variable step size solver.
+        - The tolerance is computed on the norm of the error between current
+          and desired tool pose.  This norm is computed from distances
+          and angles without any kind of weighting.
+        - The inverse kinematic solution is generally not unique, and
+          depends on the initial guess q0 (defaults to 0).
+        - The default value of q0 is zero which is a poor choice for most
+          manipulators (eg. puma560, twolink) since it corresponds to a
+          kinematic singularity.
+        - Such a solution is completely general, though much less efficient
+          than specific inverse kinematic solutions derived symbolically,
+          like ikine6s or ikine3.
+        - This approach allows a solution to be obtained at a singularity, but
+          the joint angles within the null space are arbitrarily assigned.
+        - Joint offsets, if defined, are added to the inverse kinematics to
+          generate q.
+        - Joint limits are not considered in this solution.
+        - The 'search' option peforms a brute-force search with initial
+          conditions chosen from the entire configuration space.
+        - If the search option is used any prismatic joint must have joint
+          limits defined.
+        """
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        try:
+            if q0 is not None:
+                q0 = getvector(q0, self.n, 'col')
+            else:
+                q0 = np.zeros((self.n, trajn))
+        except ValueError:
+            verifymatrix(q0, (self.n, trajn))
+
+        if mask is not None:
+            mask = getvector(mask, 6)
+        else:
+            mask = np.ones(6)
+
+        if search:
+            # Randomised search for a starting point
+            search = False
+            # quiet = True
+
+            for k in range(slimit):
+
+                q0n = np.zeros(self.n)
+                for j in range(self.n):
+                    qlim = self.links[j].qlim
+                    if np.sum(np.abs(qlim)) == 0:
+                        if not self.links[j].sigma:
+                            q0n[j] = np.random.rand() * 2 * np.pi - np.pi
+                        else:
+                            raise ValueError('For a prismatic joint, '
+                                             'search requires joint limits')
+                    else:
+                        q0n[j] = np.random.rand() * (qlim[1]-qlim[0]) + qlim[0]
+
+                # fprintf('Trying q = %s\n', num2str(q))
+
+                q = self.ikine(
+                    T,
+                    ilimit,
+                    rlimit,
+                    tol,
+                    Y,
+                    Ymin,
+                    mask,
+                    q0n,
+                    search,
+                    slimit,
+                    transpose)
+
+                if not np.sum(np.abs(q)) == 0:
+                    return q, True
+
+            q = []
+            return q, False
+
+        if not self.n >= np.sum(mask):
+            raise ValueError('Number of robot DOF must be >= the same number '
+                             'of 1s in the mask matrix')
+        W = np.diag(mask)
+
+        # Preallocate space for results
+        qt = np.zeros((len(T), self.n))
+
+        # Total iteration count
+        tcount = 0
+
+        # Rejected step count
+        rejcount = 0
+
+        failed = False
+        # revolutes = self.isrevolute()
+
+        for i in range(len(T)):
+            iterations = 0
+            q = np.copy(q0)
+
+            while True:
+                # Update the count and test against iteration limit
+                iterations += 1
+
+                if iterations > ilimit:
+                    err = 'ikine: iteration limit {0} exceeded (pose {1}), '\
+                          'final err %g'.format(ilimit, i, nm)
+                    failed = True
+                    break
+
+                e = tr2delta(self.fkine(q[:, i]), T[i])
+
+                # Are we there yet
+                if np.norm(W @ e) < tol:
+                    break
+
+                # Compute the Jacobian
+                J = self.jacobe(q[:, i])
+
+                JtJ = J.T @ W @ J
+
+                if transpose is not None:
+                    # Do the simple Jacobian transpose with constant gain
+                    dq = transpose * J.T @ e
+                else:
+                    # Do the damped inverse Gauss-Newton with
+                    # Levenberg-Marquadt
+                    dq = np.linalg.inv(
+                        JtJ + (Y + Ymin) @ eye(size(JtJ))
+                        ) @ J.T @ W @ e
+
+                    # Compute possible new value of
+                    qnew = q + dq.T
+
+                    # And figure out the new error
+                    enew = tr2delta(self.fkine(qnew), T)
+
+                    # Was it a good update?
+                    if np.norm(W @ enew) < np.norm(W @ e):
+                        # Step is accepted
+                        q = qnew
+                        e = enew
+                        Y = Y/2
+                        rejcount = 0
+                    else:
+                        # Step is rejected, increase the damping and retry
+                        Y = Y*2
+                        rejcount += 1
+                        if rejcount > rlimit:
+                            err = 'ikine: rejected-step limit {0} exceeded ' \
+                                  '(pose {1}), final err {2}'.format(
+                                      rlimit, i, np.norm(W @ enew))
+                            failed = True
+                            break
+
+                # Wrap angles for revolute joints
+                # k = (q > pi) & revolutes;
+                # q[k] -= 2 * np.pi
+                
+                # k = (q < -pi) & revolutes;
+                # q[k] += + 2 * np.pi
+                
+                # nm = np.norm(W @ e)

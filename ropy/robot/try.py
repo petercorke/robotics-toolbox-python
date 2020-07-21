@@ -1,7 +1,17 @@
 
-# import ropy as rp
-# import spatialmath as sm
-# import numpy as np
+import ropy as rp
+import spatialmath as sm
+import numpy as np
+
+panda = rp.PandaMDH()
+panda.q = panda.qr
+T = panda.fkine()
+
+q, err, success = panda.ikcon(T)
+
+print(q)
+
+# a
 
 # t = sm.SE3([np.eye(4) for i in range(5)])
 

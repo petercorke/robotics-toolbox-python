@@ -673,3 +673,20 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(res3[:, 0], tauB, decimal=4)
         nt.assert_array_almost_equal(res4[:, 0], tauB3, decimal=4)
 
+    def test_ikcon(self):
+        panda = rp.PandaMDH()
+        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+        T = panda.fkine(q)
+        Tt = sm.SE3([T, T, T])
+
+        qr = [7.69161412e-04, 9.01409257e-01, -1.46372859e-02,
+              -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
+              7.84926515e-01]
+
+
+        qa, err, success = panda.ikcon(T)
+        qa2, err, success = panda.ikcon(Tt)
+
+        nt.assert_array_almost_equal(qa, qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[:, 1], qr, decimal=4)

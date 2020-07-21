@@ -69,5 +69,6 @@ class PandaMDH(SerialLink):
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 
         self.qz = np.array([0, 0, 0, 0, 0, 0, 0])
-        self.qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
+        # self.qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
+        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
