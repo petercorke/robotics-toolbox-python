@@ -6,7 +6,7 @@ from spatialmath import SE3
 from vpython import vector, box
 from numpy import array
 from math import pi
-
+# Can't import the graphics the usual way as it needs to make use of functions not imported through __init__
 import graphics.common_functions as common
 import graphics.graphics_canvas as canvas
 import graphics.graphics_robot as robot
@@ -174,106 +174,166 @@ class TestCanvas(unittest.TestCase):
 class TestGrid(unittest.TestCase):
     def test_grid_init(self):
         # Create a scene
-        scene = canvas.GraphicsCanvas(grid=False)
+        scene = canvas.GraphicsCanvas(title="Test Grid Init", grid=False)
 
         # Create a (technically second) graphics grid for the scene
         grid = canvas.GraphicsGrid(scene.scene)
 
 
 class TestRobot(unittest.TestCase):
+    def setUp(self) -> None:
+        self.scene = canvas.GraphicsCanvas()
+
+        #    0.707107 -0.707107  0         0
+        #    0.707107  0.707107  0         1
+        #    0         0         1         0.4
+        #    0         0         0         1
+        self.se3 = SE3().Ty(1) * SE3().Tz(0.4) * SE3().Rz(45, 'deg')
+        self.structure = 1.0
+
+    def check_obj_pose(self, obj, pose):
+        self.assertEqual(common.vpython_to_se3(obj.get_graphic_object()), pose)
+
+    def check_joint_type(self, obj, typ):
+        self.assertEqual(obj.get_joint_type(), typ)
+
     ##################################################
     # Init functions
     ##################################################
     def test_default_joint_init(self):
-        raise NotImplementedError
+        self.scene.scene.title = "Test Default Joint init"
+        joint = robot.DefaultJoint(self.se3, self.structure, self.scene.scene)
+        self.check_obj_pose(joint, self.se3)
+
+        # has int not float
+        self.assertRaises(TypeError, robot.DefaultJoint, self.se3, 1, self.scene.scene)
+        # has vars in wrong order
+        self.assertRaises(TypeError, robot.DefaultJoint, 1.0, self.se3, self.scene.scene)
 
     def test_rotational_joint_init(self):
-        raise NotImplementedError
+        self.scene.scene.title = "Test Rotational Joint init"
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        self.check_obj_pose(joint, self.se3)
+        self.check_joint_type(joint, "R")
+
+        # has int not float
+        self.assertRaises(TypeError, robot.RotationalJoint, self.se3, 1, self.scene.scene)
+        # has vars in wrong order
+        self.assertRaises(TypeError, robot.RotationalJoint, 1.0, self.se3, self.scene.scene)
 
     def test_prismatic_joint_init(self):
-        raise NotImplementedError
+        self.scene.scene.title = "Test Prismatic Joint init"
+        joint = robot.PrismaticJoint(self.se3, self.structure, self.scene.scene)
+        self.check_obj_pose(joint, self.se3)
+        self.check_joint_type(joint, "P")
+
+        # has int not float
+        self.assertRaises(TypeError, robot.PrismaticJoint, self.se3, 1, self.scene.scene)
+        # has vars in wrong order
+        self.assertRaises(TypeError, robot.PrismaticJoint, 1.0, self.se3, self.scene.scene)
 
     def test_static_joint_init(self):
-        raise NotImplementedError
+        self.scene.scene.title = "Test Static Joint init"
+        joint = robot.StaticJoint(self.se3, self.structure, self.scene.scene)
+        self.check_obj_pose(joint, self.se3)
+        self.check_joint_type(joint, "S")
+
+        # has int not float
+        self.assertRaises(TypeError, robot.StaticJoint, self.se3, 1, self.scene.scene)
+        # has vars in wrong order
+        self.assertRaises(TypeError, robot.StaticJoint, 1.0, self.se3, self.scene.scene)
 
     def test_gripper_joint_init(self):
-        raise NotImplementedError
+        self.scene.scene.title = "Test Gripper Joint init"
+        joint = robot.Gripper(self.se3, self.structure, self.scene.scene)
+        self.check_obj_pose(joint, self.se3)
+        self.check_joint_type(joint, "G")
+
+        # has int not float
+        self.assertRaises(TypeError, robot.Gripper, self.se3, 1, self.scene.scene)
+        # has vars in wrong order
+        self.assertRaises(TypeError, robot.Gripper, 1.0, self.se3, self.scene.scene)
 
     def test_graphical_robot_init(self):
-        raise NotImplementedError
+        self.scene.scene.title = "Test Graphical Robot init"
+        robot.GraphicalRobot(self.scene, "Robot 1")
+
+        # Canvas obj given not scene
+        self.assertRaises(Exception, robot.GraphicalRobot, self.scene.scene, "Robot 2")
 
     ##################################################
     # Joint Functions
     ##################################################
 
-    def test_set_joint_position(self):
-        raise NotImplementedError
-
-    def test_set_joint_orientation(self):
-        raise NotImplementedError
-
-    def test_set_joint_pose(self):
-        raise NotImplementedError
-
-    def test_draw_reference_frame(self):
-        raise NotImplementedError
-
-    def test_joint_visibility(self):
-        raise NotImplementedError
-
-    def test_joint_texture(self):
-        raise NotImplementedError
-
-    def test_joint_transparency(self):
-        raise NotImplementedError
-
-    def test_set_origin(self):
-        raise NotImplementedError
-
-    def test_joint_get_pose(self):
-        raise NotImplementedError
-
-    def test_joint_get_axis_vector(self):
-        raise NotImplementedError
-
-    def test_joint_get_type(self):
-        raise NotImplementedError
-
-    def test_joint_get_graphic(self):
-        raise NotImplementedError
+    # def test_set_joint_position(self):
+    #     raise NotImplementedError
+    #
+    # def test_set_joint_orientation(self):
+    #     raise NotImplementedError
+    #
+    # def test_set_joint_pose(self):
+    #     raise NotImplementedError
+    #
+    # def test_draw_reference_frame(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_visibility(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_texture(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_transparency(self):
+    #     raise NotImplementedError
+    #
+    # def test_set_origin(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_get_pose(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_get_axis_vector(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_get_type(self):
+    #     raise NotImplementedError
+    #
+    # def test_joint_get_graphic(self):
+    #     raise NotImplementedError
 
     ##################################################
     # Robot functions
     ##################################################
 
-    def test_robot_append_made_link(self):
-        raise NotImplementedError
-
-    def test_robot_append_link(self):
-        raise NotImplementedError
-
-    def test_robot_detach_link(self):
-        raise NotImplementedError
-
-    def test_robot_reference_visibility(self):
-        raise NotImplementedError
-
-    def test_robot_visibility(self):
-        raise NotImplementedError
-
-    def test_robot_transparency(self):
-        raise NotImplementedError
-
-    def test_robot_set_poses(self):
-        raise NotImplementedError
-
-    def test_robot_animate(self):
-        raise NotImplementedError
+    # def test_robot_append_made_link(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_append_link(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_detach_link(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_reference_visibility(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_visibility(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_transparency(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_set_poses(self):
+    #     raise NotImplementedError
+    #
+    # def test_robot_animate(self):
+    #     raise NotImplementedError
 
 
 class TestStl(unittest.TestCase):
-    def test_import_object(self):
-        raise NotImplementedError
+    # def test_import_object(self):
+    #     raise NotImplementedError
+    pass
 
 
 class TestText(unittest.TestCase):
@@ -282,8 +342,9 @@ class TestText(unittest.TestCase):
 
 
 class TestPuma(unittest.TestCase):
-    def test_import_puma560(self):
-        raise NotImplementedError
+    # def test_import_puma560(self):
+    #     raise NotImplementedError
+    pass
 
 
 if __name__ == '__main__':
