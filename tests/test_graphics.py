@@ -172,7 +172,12 @@ class TestCanvas(unittest.TestCase):
 
 
 class TestGrid(unittest.TestCase):
-    pass
+    def test_grid_init(self):
+        # Create a scene
+        scene = canvas.GraphicsCanvas(grid=False)
+
+        # Create a (technically second) graphics grid for the scene
+        grid = canvas.GraphicsGrid(scene.scene)
 
 
 class TestRobot(unittest.TestCase):
