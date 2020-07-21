@@ -758,6 +758,7 @@ class GraphicalRobot:
         """
         # For each joint
         num = 0
+        print(self.name)
         for joint in self.joints:
             print("Joint", num, "| Type:", joint.get_joint_type(), "| Pose:")
             print(joint.get_pose(), "\n")
