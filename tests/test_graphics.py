@@ -9,6 +9,7 @@ from math import pi
 
 import graphics.common_functions as common
 import graphics.graphics_canvas as canvas
+import graphics.graphics_robot as robot
 
 
 class TestCommonFunctions(unittest.TestCase):
@@ -83,7 +84,91 @@ class TestCommonFunctions(unittest.TestCase):
 
 
 class TestCanvas(unittest.TestCase):
-    pass
+    def test_graphics_canvas_init(self):
+        # Create a canvas with all options being used (different to defaults)
+        scene = canvas.GraphicsCanvas(
+            height=360,
+            width=480,
+            title="Test Graphics Canvas Creation",
+            caption="Caption text here",
+            grid=False
+        )
+        try:
+            # Put a box in the created scene
+            box(canvas=scene.scene)
+        except:
+            # Something went wrong
+            self.assertEqual(False, True)
+
+    def test_grid_visibility(self):
+        # Create a scene, with grid=True (default)
+        scene = canvas.GraphicsCanvas(title="Test Grid Visibility", grid=True)
+
+        # Check all objects in scene are visible (default scene will just have grid, assuming init has grid=True)
+        self.assertGreater(len(scene.scene.objects), 0)
+
+        # Change visibility
+        scene.grid_visibility(False)
+
+        # Check all are invisible
+        # Invisible objects are not shown in the objects list
+        self.assertEqual(len(scene.scene.objects), 0)
+
+    def test_add_robot(self):
+        # Create a scene (no grid visible)
+        scene = canvas.GraphicsCanvas(title="Test Add Robot", grid=False)
+
+        # Save number of objects
+        num_objs = len(scene.scene.objects)
+
+        # Create a 3-link robot
+        r = robot.GraphicalRobot(scene, 'robot 1')
+        r.append_link('r', SE3(), 1.0)
+        r.append_link('r', SE3().Tx(1), 1.0)
+        r.append_link('r', SE3().Tx(2), 1.0)
+        # Hide reference frames to only have robot joints in visible list
+        r.set_reference_visibility(False)
+
+        # Check number of new graphics
+        self.assertEqual(len(scene.scene.objects) - num_objs, 3)
+
+    def test_draw_reference_axes(self):
+        # Create a scene, no grid
+        scene = canvas.GraphicsCanvas(title="Test Draw Reference Frame", grid=False)
+
+        # Check objects is empty
+        self.assertEqual(len(scene.scene.objects), 0)
+
+        # Add a reference frame
+        arr = array([
+            [-1,  0,  0, 3],
+            [ 0,  0, -1, 2],
+            [ 0, -1,  0, 3],
+            [ 0,  0,  0, 1]
+        ])
+        expected = SE3(arr)
+        canvas.draw_reference_frame_axes(expected, scene.scene)
+
+        # Through objects, get position, and vectors
+        self.assertEqual(len(scene.scene.objects), 1)
+        obj = scene.scene.objects[0]
+
+        pos = obj.pos
+        x_vec = obj.axis
+        y_vec = obj.up
+        z_vec = x_vec.cross(y_vec)
+
+        # Recreate the SE3
+        arr = array([
+            [x_vec.x, y_vec.x, z_vec.x, pos.x],
+            [x_vec.y, y_vec.y, z_vec.y, pos.y],
+            [x_vec.z, y_vec.z, z_vec.z, pos.z],
+            [0, 0, 0, 1]
+        ])
+        actual = SE3(arr)
+
+        # Check SE3 are equal
+        self.assertEqual(actual, expected)
 
 
 class TestGrid(unittest.TestCase):
