@@ -181,7 +181,83 @@ class TestGrid(unittest.TestCase):
 
 
 class TestRobot(unittest.TestCase):
-    pass
+    def test_default_joint_init(self):
+        raise NotImplementedError
+
+    def test_rotational_joint_init(self):
+        raise NotImplementedError
+
+    def test_prismatic_joint_init(self):
+        raise NotImplementedError
+
+    def test_static_joint_init(self):
+        raise NotImplementedError
+
+    def test_gripper_joint_init(self):
+        raise NotImplementedError
+
+    def test_graphical_robot_init(self):
+        raise NotImplementedError
+
+    def test_set_joint_position(self):
+        raise NotImplementedError
+
+    def test_set_joint_orientation(self):
+        raise NotImplementedError
+
+    def test_set_joint_pose(self):
+        raise NotImplementedError
+
+    def test_draw_reference_frame(self):
+        raise NotImplementedError
+
+    def test_joint_visibility(self):
+        raise NotImplementedError
+
+    def test_joint_texture(self):
+        raise NotImplementedError
+
+    def test_joint_transparency(self):
+        raise NotImplementedError
+
+    def test_set_origin(self):
+        raise NotImplementedError
+
+    def test_joint_get_pose(self):
+        raise NotImplementedError
+
+    def test_joint_get_axis_vector(self):
+        raise NotImplementedError
+
+    def test_joint_get_type(self):
+        raise NotImplementedError
+
+    def test_joint_get_graphic(self):
+        raise NotImplementedError
+
+    def test_robot_append_made_link(self):
+        raise NotImplementedError
+
+    def test_robot_append_link(self):
+        raise NotImplementedError
+
+    def test_robot_detach_link(self):
+        raise NotImplementedError
+
+    def test_robot_reference_visibility(self):
+        raise NotImplementedError
+
+    def test_robot_visibility(self):
+        raise NotImplementedError
+
+    def test_robot_transparency(self):
+        raise NotImplementedError
+
+    def test_robot_set_poses(self):
+        raise NotImplementedError
+
+    def test_robot_animate(self):
+        raise NotImplementedError
 
 
 class TestStl(unittest.TestCase):
