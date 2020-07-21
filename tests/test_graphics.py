@@ -181,6 +181,9 @@ class TestGrid(unittest.TestCase):
 
 
 class TestRobot(unittest.TestCase):
+    ##################################################
+    # Init functions
+    ##################################################
     def test_default_joint_init(self):
         raise NotImplementedError
 
@@ -198,6 +201,10 @@ class TestRobot(unittest.TestCase):
 
     def test_graphical_robot_init(self):
         raise NotImplementedError
+
+    ##################################################
+    # Joint Functions
+    ##################################################
 
     def test_set_joint_position(self):
         raise NotImplementedError
@@ -235,6 +242,10 @@ class TestRobot(unittest.TestCase):
     def test_joint_get_graphic(self):
         raise NotImplementedError
 
+    ##################################################
+    # Robot functions
+    ##################################################
+
     def test_robot_append_made_link(self):
         raise NotImplementedError
 
@@ -261,15 +272,18 @@ class TestRobot(unittest.TestCase):
 
 
 class TestStl(unittest.TestCase):
-    pass
+    def test_import_object(self):
+        raise NotImplementedError
 
 
 class TestText(unittest.TestCase):
+    # No functions to really test here
     pass
 
 
 class TestPuma(unittest.TestCase):
-    pass
+    def test_import_puma560(self):
+        raise NotImplementedError
 
 
 if __name__ == '__main__':
