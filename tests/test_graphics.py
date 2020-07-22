@@ -10,6 +10,7 @@ from math import pi
 import graphics.common_functions as common
 import graphics.graphics_canvas as canvas
 import graphics.graphics_robot as robot
+import graphics.graphics_stl as stl
 
 
 class TestCommonFunctions(unittest.TestCase):
@@ -725,9 +726,22 @@ class TestRobot(unittest.TestCase):
 
 
 class TestStl(unittest.TestCase):
-    # def test_import_object(self):
-    #     raise NotImplementedError
-    pass
+    def test_import_object(self):
+        # Update Scene
+        scene = canvas.GraphicsCanvas(title="Test Import Object")
+
+        # Check num objects
+        num_obj = len(scene.scene.objects)
+
+        # Import an object
+        graphic_obj = stl.import_object_from_numpy_stl(
+            './roboticstoolbox/models/meshes/UNIMATE/puma560/link0.stl',
+            scene.scene
+        )
+
+        # Verify object was added
+        self.assertEqual(graphic_obj.pos, vector(0, 0, 0))  # Object is at origin
+        self.assertEqual(len(scene.scene.objects), num_obj + 1)  # 1 object was added to the scene
 
 
 class TestText(unittest.TestCase):
