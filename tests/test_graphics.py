@@ -16,12 +16,6 @@ class TestCommonFunctions(unittest.TestCase):
     def setUp(self) -> None:
         self.se3 = SE3().Tx(3)
 
-    # @classmethod
-    # def setUpClass(cls) -> None:
-    #     # Load a blank scene, to ensure that the connection is made before tests may be run with it.
-    #     scene = canvas.GraphicsCanvas()
-    #     scene.scene.waitfor("draw_complete")
-
     def test_get_pose_x_vector(self):
         self.assertEqual(common.get_pose_x_vec(self.se3), vector(1, 0, 0))
 
@@ -265,15 +259,45 @@ class TestRobot(unittest.TestCase):
     # Joint Functions
     ##################################################
 
-    # def test_set_joint_position(self):
-    #     raise NotImplementedError
-    #
-    # def test_set_joint_orientation(self):
-    #     raise NotImplementedError
-    #
-    # def test_set_joint_pose(self):
-    #     raise NotImplementedError
-    #
+    def test_set_joint_position(self):
+        # Create a scene
+        self.scene.scene.title = "Test Set Joint Position"
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Move joint x+3, y, z-2
+        joint.update_position(self.se3 * SE3().Tx(3) * SE3().Tz(-2))
+
+        # Check position
+        self.check_obj_pose(joint, self.se3 * SE3().Tx(3) * SE3().Tz(-2))
+
+    def test_set_joint_orientation(self):
+        # Create a scene
+        self.scene.scene.title = "Test Set Joint Orientation"
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Rotate joint x+30d, y, z+45d
+        joint.update_orientation(self.se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
+
+        # Check position
+        self.check_obj_pose(joint, self.se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
+
+    def test_set_joint_pose(self):
+        # Create a scene
+        self.scene.scene.title = "Test Set Joint Pose"
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Move joint x+30d, y, z-2
+        joint.update_pose(self.se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
+
+        # Check position
+        self.check_obj_pose(joint, self.se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
+
     # def test_draw_reference_frame(self):
     #     raise NotImplementedError
     #
