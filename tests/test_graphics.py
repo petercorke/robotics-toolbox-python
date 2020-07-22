@@ -6,11 +6,13 @@ from spatialmath import SE3
 from vpython import vector, box
 from numpy import array
 from math import pi
+from roboticstoolbox import Puma560
 # Can't import the graphics the usual way as it needs to make use of functions not imported through __init__
 import graphics.common_functions as common
 import graphics.graphics_canvas as canvas
 import graphics.graphics_robot as robot
 import graphics.graphics_stl as stl
+import graphics.model_puma560 as mdl_puma
 
 
 class TestCommonFunctions(unittest.TestCase):
@@ -750,9 +752,26 @@ class TestText(unittest.TestCase):
 
 
 class TestPuma(unittest.TestCase):
-    # def test_import_puma560(self):
-    #     raise NotImplementedError
-    pass
+    def test_import_puma560(self):
+        # Create scene
+        scene = canvas.GraphicsCanvas(title="Test Import Puma560")
+
+        # Import puma560
+        robot1 = mdl_puma.import_puma_560(scene)
+
+        # Check all joints are added
+        self.assertEqual(len(robot1.joints), 7)
+
+        # For each joint, check it's in the right pose
+        puma = Puma560()
+        correct_poses = puma.fkine(puma.config('qz'), alltout=True)
+
+        # Initial doesn't have an SE3 in correct_poses
+        self.assertEqual(common.vpython_to_se3(robot1.joints[0].get_graphic_object()), SE3())
+
+        # As the base doesn't have a correct pose, need to offset the check indices
+        for idx in range(len(correct_poses)):
+            self.assertEqual(common.vpython_to_se3(robot1.joints[idx+1].get_graphic_object()), correct_poses[idx])
 
 
 if __name__ == '__main__':
