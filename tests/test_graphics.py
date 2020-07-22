@@ -398,20 +398,93 @@ class TestRobot(unittest.TestCase):
         # Should throw value error
         self.assertRaises(ValueError, joint.set_transparency, 1.5)
 
-    # def test_set_origin(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_get_pose(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_get_axis_vector(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_get_type(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_get_graphic(self):
-    #     raise NotImplementedError
+    def test_set_origin(self):
+        # Update scene
+        self.scene.scene.title = "Test Set Origin"
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Save origin pos
+        first_pos = joint.get_graphic_object().origin
+
+        # Move origin
+        current_pos = vector(1, 0, -0.5)
+        new_pos = vector(0, 0, 0.5)
+        joint.set_stl_joint_origin(current_pos, new_pos)
+
+        # Save new origin
+        second_pos = joint.get_graphic_object().origin
+
+        # Object should go from along +x-axis, to along -x-axis slightly above z=0 plane
+        # Compare
+        self.assertEqual(first_pos, vector(0, 0, 0))  # Check original origin is at 0, 0, 0 (Default)
+        self.assertEqual(second_pos, new_pos)  # Check new set origin is at the new position
+
+    def test_joint_get_pose(self):
+        # Update scene
+        self.scene.scene.title = "Test Get Joint Pose"
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Get pose
+        pose = joint.get_pose()
+
+        # Check it's equal (proves get returned correctly)
+        self.assertEqual(self.se3, pose)
+
+    def test_joint_get_axis_vector(self):
+        # Update scene
+        self.scene.scene.title = "Test Get Joint Pose"
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Get axis vector
+        x_vec = joint.get_axis_vector(common.x_axis_vector)
+        y_vec = joint.get_axis_vector(common.y_axis_vector)
+        z_vec = joint.get_axis_vector(common.z_axis_vector)
+
+        # Check it's equal (proves get returned correctly)
+        self.assertEqual(common.get_pose_x_vec(self.se3), x_vec)
+        self.assertEqual(common.get_pose_y_vec(self.se3), y_vec)
+        self.assertEqual(common.get_pose_z_vec(self.se3), z_vec)
+
+        # Check error is thrown
+        self.assertRaises(ValueError, joint.get_axis_vector, vector(0.5, 2, 3))
+
+    def test_joint_get_type(self):
+        # Update scene
+        self.scene.scene.title = "Test Joint Get Type"
+
+        # Create one of each joint
+        r = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        p = robot.PrismaticJoint(self.se3, self.structure, self.scene.scene)
+        s = robot.StaticJoint(self.se3, self.structure, self.scene.scene)
+        g = robot.Gripper(self.se3, self.structure, self.scene.scene)
+
+        # Check each is correct
+        self.check_joint_type(r, "R")
+        self.check_joint_type(p, "P")
+        self.check_joint_type(s, "S")
+        self.check_joint_type(g, "G")
+
+    def test_joint_get_graphic(self):
+        # Update scene
+        self.scene.scene.title = "Test Joint Get Graphic"
+        self.scene.grid_visibility(False)
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint.draw_reference_frame(False)
+
+        # Get graphic obj
+        gph_obj = joint.get_graphic_object()
+
+        # If obj equal only obj in scene
+        self.assertEqual(len(self.scene.scene.objects), 1)
+        self.assertEqual(gph_obj, self.scene.scene.objects[0])
 
     ##################################################
     # Robot functions
