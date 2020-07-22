@@ -683,10 +683,31 @@ class TestLink(unittest.TestCase):
               -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
               7.84926515e-01]
 
-
         qa, err, success = panda.ikcon(T)
         qa2, err, success = panda.ikcon(Tt)
 
         nt.assert_array_almost_equal(qa, qr, decimal=4)
         nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
         nt.assert_array_almost_equal(qa2[:, 1], qr, decimal=4)
+
+    def test_ikine(self):
+        panda = rp.PandaMDH()
+        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+        T = panda.fkine(q)
+        Tt = sm.SE3([T, T])
+
+        qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
+
+        qa, success, err = panda.ikine(T)
+        qa2, success, err = panda.ikine(Tt)
+        qa3, success, err = panda.ikine(Tt, q0=np.zeros((7, 2)))
+        qa4, success, err = panda.ikine(T, q0=np.zeros(7))
+
+        nt.assert_array_almost_equal(qa, qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[:, 1], qr, decimal=4)
+        nt.assert_array_almost_equal(qa3[:, 1], qr, decimal=4)
+        nt.assert_array_almost_equal(qa4, qr, decimal=4)
+
+        with self.assertRaises(ValueError):
+            panda.ikine(Tt, q0=np.zeros(7))

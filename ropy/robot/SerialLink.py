@@ -1258,9 +1258,9 @@ class SerialLink(object):
             Ymin=0,
             mask=None,
             q0=None,
-            search=True,
+            search=False,
             slimit=100,
-            transpose=False):
+            transpose=None):
         """
         Inverse kinematics by optimization without joint limits
 
@@ -1281,10 +1281,6 @@ class SerialLink(object):
         :type Y: float (default 0.1)
         :param Ymin: minimum allowable value of lambda
         :type Ymin: float (default 0)
-        # :param quiet: be quiet
-        # :type quiet:
-        # :param verbose: be verbose
-        # :type verbose:
         :param mask: mask vector that correspond to translation in X, Y and Z
             and rotation about X, Y and Z respectively.
         :type mask: float np.ndarray(6)
@@ -1296,7 +1292,7 @@ class SerialLink(object):
         :type slimit: int (default 100)
         :param transpose: use Jacobian transpose with step size A, rather
             than Levenberg-Marquadt
-        :type transpose:   
+        :type transpose:
 
         Trajectory operation:
         In all cases if T is a vector of SE3 objects (1xm) or a homogeneous
@@ -1357,10 +1353,14 @@ class SerialLink(object):
             T = SE3(T)
 
         trajn = len(T)
+        err = ''
 
         try:
             if q0 is not None:
-                q0 = getvector(q0, self.n, 'col')
+                if trajn == 1:
+                    q0 = getvector(q0, self.n, 'col')
+                else:
+                    verifymatrix(q0, (self.n, trajn))
             else:
                 q0 = np.zeros((self.n, trajn))
         except ValueError:
@@ -1392,7 +1392,7 @@ class SerialLink(object):
 
                 # fprintf('Trying q = %s\n', num2str(q))
 
-                q = self.ikine(
+                q, _, _ = self.ikine(
                     T,
                     ilimit,
                     rlimit,
@@ -1406,10 +1406,10 @@ class SerialLink(object):
                     transpose)
 
                 if not np.sum(np.abs(q)) == 0:
-                    return q, True
+                    return q, True, err
 
-            q = []
-            return q, False
+            q = np.array([])
+            return q, False, err
 
         if not self.n >= np.sum(mask):
             raise ValueError('Number of robot DOF must be >= the same number '
@@ -1417,7 +1417,7 @@ class SerialLink(object):
         W = np.diag(mask)
 
         # Preallocate space for results
-        qt = np.zeros((len(T), self.n))
+        qt = np.zeros((self.n, len(T)))
 
         # Total iteration count
         tcount = 0
@@ -1426,11 +1426,16 @@ class SerialLink(object):
         rejcount = 0
 
         failed = False
-        # revolutes = self.isrevolute()
+        nm = 0
+
+        revolutes = []
+        for i in range(self.n):
+            revolutes.append(not self.links[i].sigma)
 
         for i in range(len(T)):
             iterations = 0
-            q = np.copy(q0)
+            q = np.copy(q0[:, i])
+            Yl = Y
 
             while True:
                 # Update the count and test against iteration limit
@@ -1438,18 +1443,19 @@ class SerialLink(object):
 
                 if iterations > ilimit:
                     err = 'ikine: iteration limit {0} exceeded (pose {1}), '\
-                          'final err %g'.format(ilimit, i, nm)
+                          'final err {2}'.format(ilimit, i, nm)
                     failed = True
                     break
 
-                e = tr2delta(self.fkine(q[:, i]), T[i])
+                e = tr2delta(self.fkine(q).A, T[i].A)
 
                 # Are we there yet
-                if np.norm(W @ e) < tol:
+                if np.linalg.norm(W @ e) < tol:
+                    # print(iterations)
                     break
 
                 # Compute the Jacobian
-                J = self.jacobe(q[:, i])
+                J = self.jacobe(q)
 
                 JtJ = J.T @ W @ J
 
@@ -1460,38 +1466,50 @@ class SerialLink(object):
                     # Do the damped inverse Gauss-Newton with
                     # Levenberg-Marquadt
                     dq = np.linalg.inv(
-                        JtJ + (Y + Ymin) @ eye(size(JtJ))
+                        JtJ + ((Yl + Ymin) * np.eye(self.n))
                         ) @ J.T @ W @ e
 
                     # Compute possible new value of
-                    qnew = q + dq.T
+                    qnew = q + dq
 
                     # And figure out the new error
-                    enew = tr2delta(self.fkine(qnew), T)
+                    enew = tr2delta(self.fkine(qnew).A, T[i].A)
 
                     # Was it a good update?
-                    if np.norm(W @ enew) < np.norm(W @ e):
+                    if np.linalg.norm(W @ enew) < np.linalg.norm(W @ e):
                         # Step is accepted
                         q = qnew
                         e = enew
-                        Y = Y/2
+                        Yl = Yl/2
                         rejcount = 0
                     else:
                         # Step is rejected, increase the damping and retry
-                        Y = Y*2
+                        Yl = Yl*2
                         rejcount += 1
                         if rejcount > rlimit:
                             err = 'ikine: rejected-step limit {0} exceeded ' \
                                   '(pose {1}), final err {2}'.format(
-                                      rlimit, i, np.norm(W @ enew))
+                                      rlimit, i, np.linalg.norm(W @ enew))
                             failed = True
                             break
 
                 # Wrap angles for revolute joints
-                # k = (q > pi) & revolutes;
-                # q[k] -= 2 * np.pi
-                
-                # k = (q < -pi) & revolutes;
-                # q[k] += + 2 * np.pi
-                
-                # nm = np.norm(W @ e)
+                k = (q > np.pi) & revolutes
+                q[k] -= 2 * np.pi
+
+                k = (q < -np.pi) & revolutes
+                q[k] += + 2 * np.pi
+
+                nm = np.linalg.norm(W @ e)
+
+            qt[:, i] = q
+            tcount += iterations
+
+            if failed:
+                err = 'failed to converge: try a different ' \
+                      'initial value of joint coordinates'
+
+        if trajn == 1:
+            qt = qt[:, 0]
+
+        return qt, not failed, err

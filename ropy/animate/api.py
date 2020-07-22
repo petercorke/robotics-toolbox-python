@@ -50,7 +50,7 @@ sim.connect("tcp://127.0.0.1:4242")
 ob = ["SerialLinkMDH", l]
 id = sim.robot(ob)
 
-q_ob = [id, q]
+q_ob = [id, q1]
 sim.q(q_ob)
 
 # qd = [0, 0, 0, 0.1, 0, 0, 0]

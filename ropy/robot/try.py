@@ -4,12 +4,29 @@ import spatialmath as sm
 import numpy as np
 
 panda = rp.PandaMDH()
-panda.q = panda.qr
-T = panda.fkine()
+q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+T = panda.fkine(q)
 
-q, err, success = panda.ikcon(T)
+qe, success, err = panda.ikine(T)
 
-print(q)
+print(qe)
+print(success)
+print(err)
+
+
+# q, err, success = panda.ikcon(T)
+
+
+
+
+
+# a = np.array([1, 2, 3, 4, 5, 6])
+
+# b = a>2
+# print(b)
+
+
+
 
 # a
 
