@@ -258,7 +258,6 @@ class TestRobot(unittest.TestCase):
     ##################################################
     # Joint Functions
     ##################################################
-
     def test_set_joint_position(self):
         # Create a scene
         self.scene.scene.title = "Test Set Joint Position"
@@ -489,16 +488,84 @@ class TestRobot(unittest.TestCase):
     ##################################################
     # Robot functions
     ##################################################
+    def test_robot_append_made_link(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Append Made Link"
 
-    # def test_robot_append_made_link(self):
-    #     raise NotImplementedError
-    #
-    # def test_robot_append_link(self):
-    #     raise NotImplementedError
-    #
-    # def test_robot_detach_link(self):
-    #     raise NotImplementedError
-    #
+        # Create 2 joints
+        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Create robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+
+        # Add 1 joint
+        robot1.append_made_link(joint1)
+
+        # Print joint poses to prove its added
+        robot1.print_joint_poses()
+
+        # Create a new scene
+        scene2 = canvas.GraphicsCanvas(title="Test Robot Append Made Link 2")
+
+        # Create a new robot in new scene
+        robot2 = robot.GraphicalRobot(scene2, "Robot 2")
+
+        # Add other joint to new scene
+        # Expecting an error (can't add joint to robot in different scene
+        self.assertRaises(ReferenceError, robot2.append_made_link, joint2)
+
+    def test_robot_append_link(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Append Link"
+
+        # Create robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+
+        # Add link
+        robot1.append_link("r", self.se3, self.structure)
+        robot1.append_link("R", self.se3, self.structure)
+
+        # Print poses to verify
+        robot1.print_joint_poses()
+
+        # Try wrong inputs, expecting errors
+        self.assertRaises(ValueError, robot1.append_link, "x", self.se3, self.structure)  # bad joint type
+        self.assertRaises(ValueError, robot1.append_link, "p", self.structure, self.se3)  # incorrect param order
+
+    def test_robot_detach_link(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Detach Link"
+        self.scene.grid_visibility(False)
+
+        # Create robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+
+        # Add two links
+        robot1.append_link("r", self.se3, self.structure)
+        robot1.append_link("r", self.se3 * SE3().Tx(1), self.structure)
+
+        # Count num objects
+        num_obj = len(self.scene.scene.objects)
+
+        # Count num joints
+        num_joints = robot1.num_joints
+
+        # Detach
+        robot1.detach_link()
+
+        # Verify new object count
+        self.assertEqual(len(self.scene.scene.objects), num_obj - 2)  # 2 = one for joint, 1 for ref frame
+
+        # Verify new joint count
+        self.assertEqual(robot1.num_joints, num_joints - 1)  # Taken away 1 joint
+
+        # Create new empty robot
+        robot2 = robot.GraphicalRobot(self.scene, "Robot 2")
+
+        # Attempt to detach from empty
+        self.assertRaises(UserWarning, robot2.detach_link)
+
     # def test_robot_reference_visibility(self):
     #     raise NotImplementedError
     #
