@@ -298,18 +298,106 @@ class TestRobot(unittest.TestCase):
         # Check position
         self.check_obj_pose(joint, self.se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
 
-    # def test_draw_reference_frame(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_visibility(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_texture(self):
-    #     raise NotImplementedError
-    #
-    # def test_joint_transparency(self):
-    #     raise NotImplementedError
-    #
+    def test_draw_reference_frame(self):
+        # Scene update
+        self.scene.scene.title = "Test Draw Reference Frame"
+        self.scene.grid_visibility(False)
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Count num objects
+        num_obj_initial = len(self.scene.scene.objects)
+
+        # Turn off reference frame
+        joint.draw_reference_frame(False)
+
+        # Count num objects
+        num_obj_off = len(self.scene.scene.objects)
+        self.assertEqual(num_obj_initial-num_obj_off, 1)
+
+        # Turn on
+        joint.draw_reference_frame(True)
+
+        # Count num objects
+        num_obj_on = len(self.scene.scene.objects)
+        self.assertEqual(num_obj_on - num_obj_off, 1)
+        self.assertEqual(num_obj_on, num_obj_initial)
+
+    def test_joint_visibility(self):
+        # Scene update
+        self.scene.scene.title = "Test Joint Visibility"
+        self.scene.grid_visibility(False)
+
+        # Create a joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Count num objects
+        num_obj_initial = len(self.scene.scene.objects)
+
+        # Turn off joint graphic
+        joint.set_joint_visibility(False)
+
+        # Count num objects
+        num_obj_off = len(self.scene.scene.objects)
+        self.assertEqual(num_obj_initial - num_obj_off, 1)
+
+        # Turn on
+        joint.set_joint_visibility(True)
+
+        # Count num objects
+        num_obj_on = len(self.scene.scene.objects)
+        self.assertEqual(num_obj_on - num_obj_off, 1)
+        self.assertEqual(num_obj_on, num_obj_initial)
+
+    def test_joint_texture(self):
+        # Scene update
+        self.scene.scene.title = "Test Joint Texture"
+
+        # Create joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Apply texture and colour
+        joint.set_texture(
+            colour=[0.5, 0, 1],
+            texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg"
+        )
+
+        # Ensure texture is not none, and colour is not white
+        gph_obj = joint.get_graphic_object()
+        self.assertNotEqual(gph_obj.color, vector(0.5, 0, 1))
+        self.assertIsNotNone(gph_obj.texture)
+
+        # Remove Texture and colour
+        joint.set_texture()
+
+        # Ensure colour is white, texture is none
+        self.assertEqual(gph_obj.color, vector(1, 1, 1))
+        self.assertIsNotNone(gph_obj.texture)
+
+        # Apply bad colour
+        # Should assert Value Error
+        self.assertRaises(ValueError, joint.set_texture, color=[127, 0, 255])
+
+    def test_joint_transparency(self):
+        # Scene update
+        self.scene.scene.title = "Test Joint Transparency"
+
+        # Create joint
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Apply texture and colour
+        opc_val = 0.34
+        joint.set_transparency(opc_val)
+
+        # Ensure texture is not none, and colour is not white
+        gph_obj = joint.get_graphic_object()
+        self.assertEqual(gph_obj.opacity, opc_val)
+
+        # Set transparency out of range
+        # Should throw value error
+        self.assertRaises(ValueError, joint.set_transparency, 1.5)
+
     # def test_set_origin(self):
     #     raise NotImplementedError
     #
