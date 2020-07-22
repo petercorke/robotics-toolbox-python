@@ -566,15 +566,79 @@ class TestRobot(unittest.TestCase):
         # Attempt to detach from empty
         self.assertRaises(UserWarning, robot2.detach_link)
 
-    # def test_robot_reference_visibility(self):
-    #     raise NotImplementedError
-    #
-    # def test_robot_visibility(self):
-    #     raise NotImplementedError
-    #
-    # def test_robot_transparency(self):
-    #     raise NotImplementedError
-    #
+    def test_robot_reference_visibility(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Reference Visibility"
+        self.scene.grid_visibility(False)
+
+        # Create two link robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1.append_link("r", self.se3, self.structure)
+        robot1.append_link("r", self.se3, self.structure)
+
+        # Count num obj visible
+        num_obj = len(self.scene.scene.objects)
+
+        # Turn off ref frames
+        robot1.set_reference_visibility(False)
+
+        # Verify new amount
+        self.assertEqual(len(self.scene.scene.objects), num_obj - 2)  # Take 1 for each link
+
+        # Turn on ref frames
+        robot1.set_reference_visibility(True)
+
+        # Verify amount
+        self.assertEqual(len(self.scene.scene.objects), num_obj)  # Original amount
+
+    def test_robot_visibility(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Visibility"
+        self.scene.grid_visibility(False)
+
+        # Create two link robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1.append_link("r", self.se3, self.structure)
+        robot1.append_link("r", self.se3, self.structure)
+
+        # Count num obj visible
+        num_obj = len(self.scene.scene.objects)
+
+        # Turn off ref frames
+        robot1.set_robot_visibility(False)
+
+        # Verify new amount
+        self.assertEqual(len(self.scene.scene.objects), num_obj - 2)  # Take 1 for each link
+
+        # Turn on ref frames
+        robot1.set_robot_visibility(True)
+
+        # Verify amount
+        self.assertEqual(len(self.scene.scene.objects), num_obj)  # Original amount
+
+    def test_robot_transparency(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Transparency"
+
+        # Create two joints
+        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+
+        # Create robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+
+        # Add joints
+        robot1.append_made_link(joint1)
+        robot1.append_made_link(joint2)
+
+        # Change opacity value
+        opc_val = 0.33
+        robot1.set_transparency(opc_val)
+
+        # Verify change in all joints
+        self.assertEqual(joint1.get_graphic_object().opacity, opc_val)
+        self.assertEqual(joint2.get_graphic_object().opacity, opc_val)
+
     # def test_robot_set_poses(self):
     #     raise NotImplementedError
     #
