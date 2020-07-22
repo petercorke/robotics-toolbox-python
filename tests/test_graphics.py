@@ -46,10 +46,10 @@ class TestCommonFunctions(unittest.TestCase):
 
         # Check resulting SE3
         arr = array([
-            [ 0, -1, 0, 1],
-            [ 0,  0, 1, 2],
-            [-1,  0, 0, 3],
-            [ 0,  0, 0, 1]
+            [0, -1, 0, 1],
+            [0, 0, 1, 2],
+            [-1, 0, 0, 3],
+            [0, 0, 0, 1]
         ])
         expected = SE3(arr)
         self.assertEqual(common.vpython_to_se3(entity), expected)
@@ -67,11 +67,11 @@ class TestCommonFunctions(unittest.TestCase):
             ['deg', 360, 0],
             ['deg', -360, 0],
             ['rad', 0, 0],
-            ['rad', -3*pi/2, pi/2],
-            ['rad', pi/2, pi/2],
-            ['rad', pi/4, pi/4],
-            ['rad', 10*pi/2, pi],
-            ['rad', -5*pi/2, -pi/2]
+            ['rad', -3 * pi / 2, pi / 2],
+            ['rad', pi / 2, pi / 2],
+            ['rad', pi / 4, pi / 4],
+            ['rad', 10 * pi / 2, pi],
+            ['rad', -5 * pi / 2, -pi / 2]
         ]
         for test in tests:
             self.assertEqual(common.wrap_to_pi(test[0], test[1]), test[2])
@@ -135,10 +135,10 @@ class TestCanvas(unittest.TestCase):
 
         # Add a reference frame
         arr = array([
-            [-1,  0,  0, 3],
-            [ 0,  0, -1, 2],
-            [ 0, -1,  0, 3],
-            [ 0,  0,  0, 1]
+            [-1, 0, 0, 3],
+            [0, 0, -1, 2],
+            [0, -1, 0, 3],
+            [0, 0, 0, 1]
         ])
         expected = SE3(arr)
         canvas.draw_reference_frame_axes(expected, scene.scene)
@@ -313,7 +313,7 @@ class TestRobot(unittest.TestCase):
 
         # Count num objects
         num_obj_off = len(self.scene.scene.objects)
-        self.assertEqual(num_obj_initial-num_obj_off, 1)
+        self.assertEqual(num_obj_initial - num_obj_off, 1)
 
         # Turn on
         joint.draw_reference_frame(True)
@@ -639,11 +639,89 @@ class TestRobot(unittest.TestCase):
         self.assertEqual(joint1.get_graphic_object().opacity, opc_val)
         self.assertEqual(joint2.get_graphic_object().opacity, opc_val)
 
-    # def test_robot_set_poses(self):
-    #     raise NotImplementedError
-    #
-    # def test_robot_animate(self):
-    #     raise NotImplementedError
+        # Test bad opc val
+        self.assertRaises(ValueError, robot1.set_transparency, opc_val)
+
+    def test_robot_set_poses(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Set Poses"
+        self.scene.grid_visibility(False)
+
+        # Create a two link robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1.append_link("r", self.se3, self.structure)
+        robot1.append_link("r", self.se3 * SE3().Tx(1), self.structure)
+
+        s1 = SE3().Tx(2) * SE3().Tz(0.3) * SE3().Ry(23, 'deg')
+        s2 = SE3().Ty(0.5) * SE3().Tx(1.2) * SE3().Rz(-34, 'deg')
+
+        # Set each joint to a known location
+        robot1.set_joint_poses([s1, s2])
+
+        # For each obj in scene, make sure it is one of the two locations
+        # Ensure objects visible are just reference frames (they have same pose as the graphic itself)
+        robot1.set_robot_visibility(False)
+        self.assertEqual(len(self.scene.scene.objects), 2)  # Should only have 2 reference frames in the scene
+        # Both objects must be in either of the poses (but not the same one)
+        self.assertTrue(
+            # 0 in s1, 1 in s2
+            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s1) and
+             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s2))
+            or
+            # 1 in s1, 0 in s2
+            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s1) and
+             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s2))
+        )
+
+        # Try giving not enough poses
+        self.assertRaises(UserWarning, robot1.set_joint_poses, [])
+
+        # Create new robot
+        robot2 = robot.GraphicalRobot(self.scene, "Robot 2")
+
+        # Try setting poses on empty robot
+        self.assertRaises(UserWarning, robot2.set_joint_poses, [s1, s2])
+
+    def test_robot_animate(self):
+        # Update scene
+        self.scene.scene.title = "Test Robot Animate"
+        self.scene.grid_visibility(False)
+
+        # Create a two link robot
+        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1.append_link("r", self.se3, self.structure)
+        robot1.append_link("r", self.se3 * SE3().Tx(1), self.structure)
+
+        s1 = SE3().Tx(2) * SE3().Tz(0.3) * SE3().Ry(23, 'deg')
+        s2 = SE3().Ty(0.5) * SE3().Tx(1.2) * SE3().Rz(-34, 'deg')
+
+        # Set each joint to a known location
+        robot1.animate([[s2, s1], [s1, s2]], 1)
+        # As it can't test positions mid frame, just check final positions are correct
+
+        # For each obj in scene, make sure it is one of the two locations
+        # Ensure objects visible are just reference frames (they have same pose as the graphic itself)
+        robot1.set_robot_visibility(False)
+        self.assertEqual(len(self.scene.scene.objects), 2)  # Should only have 2 reference frames in the scene
+        # Both objects must be in either of the poses (but not the same one)
+        self.assertTrue(
+            # 0 in s1, 1 in s2
+            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s1) and
+             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s2))
+            or
+            # 1 in s1, 0 in s2
+            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s1) and
+             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s2))
+        )
+
+        # Try giving no frames
+        self.assertRaises(ValueError, robot1.animate, [], 1)
+
+        # Try giving bad frame count
+        self.assertRaises(ValueError, robot1.animate, [[s1, s2]], -1)
+
+        # Try giving wrong number SE3s
+        self.assertRaises(ValueError, robot1.animate, [[]], 1)
 
 
 class TestStl(unittest.TestCase):
