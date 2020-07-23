@@ -1620,3 +1620,136 @@ class SerialLink(object):
             qt = qt[:, 0]
 
         return qt, not failed, err
+
+    def ikine3(self, T, left=True, elbow_up=True):
+        """
+        Analytical inverse kinematics for three link robots
+
+        q = ikine3(T) is the joint coordinates (3) corresponding to the robot
+        end-effector pose T represented by the homogenenous transform.  This
+        is a analytic solution for a 3-axis robot (such as the first three
+        joints of a robot like the Puma 560). This will have the arm to the
+        left and the elbow up.
+
+        q = ikine3(T, left, elbow_up) as above except the arm location and
+        elbow position can be specified.
+
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects (m) or a homogeneous
+        transform sequence (4x4xm) then returns the joint coordinates
+        corresponding to each of the transforms in the sequence. Q is 3xm.
+
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
+        :param left: True for arm to the left (default), else arm to the right
+        :type left: bool
+        :param elbow_up: True for elbow up (default), else elbow down
+        :type elbow_up: bool
+
+        Notes::
+        - The same as IKINE6S without the wrist.
+        - The inverse kinematic solution is generally not unique, and
+          depends on the configuration string.
+        - Joint offsets, if defined, are added to the inverse kinematics to
+          generate q.
+
+        Reference:
+        Inverse kinematics for a PUMA 560 based on the equations by Paul and
+        Zhang. From The International Journal of Robotics Research
+        Vol. 5, No. 2, Summer 1986, p. 32-44
+        """
+
+        if not self.n == 3:
+            raise ValueError(
+                "Function only applicable to three degree of freedom robots")
+
+        if self.mdh:
+            raise ValueError(
+                "Function only applicable to robots with standard DH "
+                "parameters")
+
+        if not self.isrevolute() == [True, True, True]:
+            raise ValueError(
+                "Function only applicable to robots with revolute joints")
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        qt = np.zeros((3, trajn))
+
+        for j in range(trajn):
+            theta = np.zeros(3)
+
+            a2 = self.links[1].a
+            a3 = self.links[2].a
+            d3 = self.links[2].d
+
+            # undo base transformation
+            Ti = np.linalg.inv(self.base.A) @ T[j].A
+
+            # The following parameters are extracted from the Homogeneous
+            # Transformation
+            Px = Ti[0, 3]
+            Py = Ti[1, 3]
+            Pz = Ti[2, 3]
+
+            # The configuration parameter determines what n1,n2 values are
+            # used and how many solutions are determined which have values
+            # of -1 or +1.
+
+            # default configuration
+            n1 = -1    # L
+            n2 = -1    # U
+
+            if not left:
+                n1 = 1
+
+            if elbow_up and n1 == 1:
+                n2 = 1
+
+            if not elbow_up:
+                if n1 == 1:
+                    n2 = -1
+                else:
+                    n2 = 1
+
+            # Solve for theta[0]
+            # based on the configuration parameter n1
+
+            r = np.sqrt(Px**2 + Py**2)
+
+            if (n1 == 1):
+                theta[0] = np.arctan2(Py, Px) + np.arcsin(d3/r)
+            else:
+                theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3/r)
+
+            # Solve for theta[1]
+            # based on the configuration parameter n2
+
+            V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
+            r = np.sqrt(V114**2 + Pz**2)
+
+            Psi = np.arccos(
+                (a2**2 - d3**2 - a3**2 + V114**2 + Pz**2) /
+                (2.0 * a2 * r))
+
+            theta[1] = np.arctan2(Pz, V114) + n2 * Psi
+
+            # Solve for theta[2]
+            num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
+            den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
+            theta[2] = np.arctan2(a3, d3) - np.arctan2(num, den)
+
+            # remove the link offset angles
+            for i in range(3):
+                theta[i] -= self.links[i].offset
+
+            # Append to trajectory
+            qt[:, j] = theta
+
+        if trajn == 1:
+            return qt[:, 0]
+        else:
+            return qt

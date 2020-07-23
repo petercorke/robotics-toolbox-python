@@ -3,9 +3,9 @@ import ropy as rp
 import spatialmath as sm
 import numpy as np
 
-panda = rp.PandaMDH()
-q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
-T = panda.fkine(q)
+# panda = rp.PandaMDH()
+# q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+# T = panda.fkine(q)
 
 # qe, success, err = panda.ikine(T)
 
@@ -15,14 +15,26 @@ T = panda.fkine(q)
 
 
 
-l0 = rp.Revolute(d=2.0)
-l1 = rp.Prismatic(theta=1.0)
-r0 = rp.SerialLink([l0, l1])
+# l0 = rp.Revolute(d=2.0)
+# l1 = rp.Prismatic(theta=1.0)
+# r0 = rp.SerialLink([l0, l1])
 
-qa5, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0])
+# qa5, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0])
 
-print(success)
-print(err)
+# print(success)
+# print(err)
+
+
+l0 = rp.Revolute(alpha=np.pi/2)
+l1 = rp.Revolute(a=0.4318)
+l2 = rp.Revolute(d=0.15005, a=0.0203, alpha=-np.pi/2)
+r0 = rp.SerialLink([l0, l1, l2])
+q = [1, 1, 1]
+T = r0.fkine(q)
+
+qr = r0.ikine3(T)
+print(qr)
+
 
 
 

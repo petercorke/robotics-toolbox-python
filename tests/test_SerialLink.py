@@ -69,7 +69,6 @@ class TestLink(unittest.TestCase):
         ans = np.array([np.pi, np.pi, np.pi, np.pi/2.0])
 
         nt.assert_array_almost_equal(r0.toradians(q), ans)
-        nt.assert_array_almost_equal(r0.toradians(), ans)
 
     def test_d(self):
         l0 = rp.Prismatic()
@@ -735,3 +734,47 @@ class TestLink(unittest.TestCase):
             r0.ikine(
                 T, mask=[1, 1, 0, 0, 0, 0], ilimit=1,
                 search=True, slimit=1)
+
+    def test_ikine3(self):
+        l0 = rp.Revolute(alpha=np.pi/2)
+        l1 = rp.Revolute(a=0.4318)
+        l2 = rp.Revolute(d=0.15005, a=0.0203, alpha=-np.pi/2)
+        l3 = rp.Prismatic()
+        l4 = rp.Prismatic(mdh=1)
+        r0 = rp.SerialLink([l0, l1, l2])
+        r1 = rp.SerialLink([l3, l3])
+        r2 = rp.SerialLink([l3, l3, l3])
+        r3 = rp.SerialLink([l4, l4, l4])
+
+        q = [1, 1, 1]
+        r0.q = q
+        T = r0.fkine(q)
+        # T2 = r1.fkine(q)
+        Tt = sm.SE3([T, T])
+
+        res = [2.9647, 1.7561, 0.2344]
+        res2 = [1.0000, 0.6916, 0.2344]
+        res3 = [2.9647, 2.4500, 3.1762]
+        res4 = [1.0000, 1.3855, 3.1762]
+
+        q0 = r0.ikine3(T.A)
+        q1 = r0.ikine3(Tt)
+        q2 = r0.ikine3(T, left=False, elbow_up=False)
+        q3 = r0.ikine3(T, elbow_up=False)
+        q4 = r0.ikine3(T, left=False)
+
+        nt.assert_array_almost_equal(q0, res, decimal=4)
+        nt.assert_array_almost_equal(q1[:, 0], res, decimal=4)
+        nt.assert_array_almost_equal(q1[:, 1], res, decimal=4)
+        nt.assert_array_almost_equal(q2, res2, decimal=4)
+        nt.assert_array_almost_equal(q3, res3, decimal=4)
+        nt.assert_array_almost_equal(q4, res4, decimal=4)
+
+        with self.assertRaises(ValueError):
+            r1.ikine3(T)
+
+        with self.assertRaises(ValueError):
+            r2.ikine3(T)
+
+        with self.assertRaises(ValueError):
+            r3.ikine3(T)
