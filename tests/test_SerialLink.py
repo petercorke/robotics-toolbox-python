@@ -696,12 +696,28 @@ class TestLink(unittest.TestCase):
         T = panda.fkine(q)
         Tt = sm.SE3([T, T])
 
+        l0 = rp.Revolute(d=2.0)
+        l1 = rp.Prismatic(theta=1.0)
+        l2 = rp.Prismatic(theta=1, qlim=[0, 2])
+        r0 = rp.SerialLink([l0, l1])
+        r1 = rp.SerialLink([l0, l2])
+
         qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
 
         qa, success, err = panda.ikine(T)
         qa2, success, err = panda.ikine(Tt)
         qa3, success, err = panda.ikine(Tt, q0=np.zeros((7, 2)))
         qa4, success, err = panda.ikine(T, q0=np.zeros(7))
+
+        # Untested
+        qa5, success, err = r0.ikine(
+            T.A, mask=[1, 1, 0, 0, 0, 0],
+            transpose=5, ilimit=5)
+        qa5, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0])
+        qa6, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0], ilimit=1)
+        qa7, success, err = r1.ikine(
+            T, mask=[1, 1, 0, 0, 0, 0],
+            ilimit=1, search=True, slimit=1)
 
         nt.assert_array_almost_equal(qa, qr, decimal=4)
         nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
@@ -711,3 +727,11 @@ class TestLink(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             panda.ikine(Tt, q0=np.zeros(7))
+
+        with self.assertRaises(ValueError):
+            r0.ikine(T)
+
+        with self.assertRaises(ValueError):
+            r0.ikine(
+                T, mask=[1, 1, 0, 0, 0, 0], ilimit=1,
+                search=True, slimit=1)

@@ -7,11 +7,29 @@ panda = rp.PandaMDH()
 q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 T = panda.fkine(q)
 
-qe, success, err = panda.ikine(T)
+# qe, success, err = panda.ikine(T)
 
-print(qe)
+# print(qe)
+# print(success)
+# print(err)
+
+
+
+l0 = rp.Revolute(d=2.0)
+l1 = rp.Prismatic(theta=1.0)
+r0 = rp.SerialLink([l0, l1])
+
+qa5, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0])
+
 print(success)
 print(err)
+
+
+
+
+
+
+
 
 
 # q, err, success = panda.ikcon(T)

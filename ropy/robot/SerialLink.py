@@ -270,11 +270,11 @@ class SerialLink(object):
 
         if not isscalar(joints):
             joints = getvector(joints, 2)
-            j0 = joints[0]
-            jn = joints[1]
+            j0 = int(joints[0])
+            jn = int(joints[1])
         else:
             j0 = 0
-            jn = joints
+            jn = int(joints)
 
         jn += 1
 
@@ -1264,8 +1264,8 @@ class SerialLink(object):
         """
         Inverse kinematics by optimization without joint limits
 
-        q = ikine(T) are the joint coordinates (1xn) corresponding to the
-        robot end-effector pose T which is an SE3 object or homogenenous
+        q, success, err = ikine(T) are the joint coordinates corresponding to
+        the robot end-effector pose T which is an SE3 object or homogenenous
         transform matrix (4x4), and n is the number of robot joints.
 
         This method can be used for robots with any number of degrees of
@@ -1292,7 +1292,7 @@ class SerialLink(object):
         :type slimit: int (default 100)
         :param transpose: use Jacobian transpose with step size A, rather
             than Levenberg-Marquadt
-        :type transpose:
+        :type transpose: float
 
         Trajectory operation:
         In all cases if T is a vector of SE3 objects (1xm) or a homogeneous
@@ -1353,7 +1353,7 @@ class SerialLink(object):
             T = SE3(T)
 
         trajn = len(T)
-        err = ''
+        err = []
 
         try:
             if q0 is not None:
@@ -1425,7 +1425,7 @@ class SerialLink(object):
         # Rejected step count
         rejcount = 0
 
-        failed = False
+        failed = []
         nm = 0
 
         revolutes = []
@@ -1442,9 +1442,10 @@ class SerialLink(object):
                 iterations += 1
 
                 if iterations > ilimit:
-                    err = 'ikine: iteration limit {0} exceeded (pose {1}), '\
-                          'final err {2}'.format(ilimit, i, nm)
-                    failed = True
+                    err.append('ikine: iteration limit {0} exceeded '
+                               ' (pose {1}), final err {2}'.format(
+                                   ilimit, i, nm))
+                    failed.append(True)
                     break
 
                 e = tr2delta(self.fkine(q).A, T[i].A)
@@ -1487,10 +1488,11 @@ class SerialLink(object):
                         Yl = Yl*2
                         rejcount += 1
                         if rejcount > rlimit:
-                            err = 'ikine: rejected-step limit {0} exceeded ' \
-                                  '(pose {1}), final err {2}'.format(
-                                      rlimit, i, np.linalg.norm(W @ enew))
-                            failed = True
+                            err.append(
+                                'ikine: rejected-step limit {0} exceeded '
+                                '(pose {1}), final err {2}'.format(
+                                    rlimit, i, np.linalg.norm(W @ enew)))
+                            failed.append(True)
                             break
 
                 # Wrap angles for revolute joints
@@ -1506,8 +1508,11 @@ class SerialLink(object):
             tcount += iterations
 
             if failed:
-                err = 'failed to converge: try a different ' \
-                      'initial value of joint coordinates'
+                err.append(
+                    'failed to converge: try a different '
+                    'initial value of joint coordinates')
+            else:
+                failed.append(False)
 
         if trajn == 1:
             qt = qt[:, 0]
