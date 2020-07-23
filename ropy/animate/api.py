@@ -12,15 +12,15 @@ q = panda.qr.tolist()
 T = panda.fkine(q)
 # print(T)
 
-q1, success, err = panda.ikine(T)
-q1 = q1.tolist()
-T2 = panda.fkine(q1)
-print(T * T2)
-
-# q1, err, success = panda.ikcon(T)
+# q1, success, err = panda.ikine(T)
 # q1 = q1.tolist()
 # T2 = panda.fkine(q1)
-# print(T2)
+# print(T * T2)
+
+q1, err, success = panda.ikcon(T)
+q1 = q1.tolist()
+T2 = panda.fkine(q1)
+print(T2)
 
 # q2 = [-0.0011,    0.9013,    0.0210,   -0.0698,   -0.0199,    0.9620,    0.7861]
 # T2 = panda.fkine(q2)

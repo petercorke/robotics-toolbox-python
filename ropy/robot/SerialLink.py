@@ -20,9 +20,6 @@ class SerialLink(object):
     described by a Link-class object using Denavit-Hartenberg parameters
     (standard or modified).
 
-    Note: Link subclass elements passed in must be all standard, or all
-          modified, DH parameters.
-
     :param name: Name of the robot
     :type name: string
     :param manufacturer: Manufacturer of the robot
@@ -41,6 +38,9 @@ class SerialLink(object):
     :type T: float np.ndarray(4,4)
     :param q: The current joint angles of the robot
     :type q: float np.ndarray(1,n)
+
+    Note: Link subclass elements passed in must be all standard, or all
+          modified, DH parameters.
 
     Examples
     --------
@@ -249,15 +249,17 @@ class SerialLink(object):
 
     def A(self, joints, q=None):
         """
-        Transforms between link frames for the J'th joint.  q is a vector
-        (1xN) of joint variables. For:
+        Link forward kinematics.
+
+        T = A(joints, q) transforms between link frames for the J'th joint.
+        q is a vector (n) of joint variables. For:
         - standard DH parameters, this is from frame {J-1} to frame {J}.
         - modified DH parameters, this is from frame {J} to frame {J+1}.
 
-        Notes:
-        - Base and tool transforms are not applied.
+        T = A(joints) as above except uses the stored q value of the
+        robot object.
 
-        :param joints:
+        :param joints: Joints to transform to (int) or between (list/tuple)
         :type joints: int, tuple or 2 element list
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
@@ -266,6 +268,9 @@ class SerialLink(object):
         :return T: The transform between link 0 and joints or joints[0]
             and joints[1]
         :rtype T: SE3
+
+        Notes:
+        - Base and tool transforms are not applied.
         """
 
         if not isscalar(joints):
@@ -295,11 +300,17 @@ class SerialLink(object):
 
     def islimit(self, q=None):
         """
-        Joint limit test
+        Joint limit test.
+
+        v = islimit(q) returns a list of boolean values indicating if the
+        joint configuration q is in vialation of the joint limits.
+
+        v = jointlimit() as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :return v: is a vector of boolean values, one per joint, False if q[i]
             is within the joint limits, else True
@@ -348,9 +359,13 @@ class SerialLink(object):
 
     def payload(self, m, p=np.zeros(3)):
         """
-        Add payload mass adds a payload with point mass m at position p
-        in the end-effector coordinate frame. payload(0) removes added
-        payload.
+        payload(m, p) adds payload mass adds a payload with point mass m at
+        position p in the end-effector coordinate frame.
+
+        payload(m) adds payload mass adds a payload with point mass m at
+        in the end-effector coordinate frame.
+
+        payload(0) removes added payload.
 
         :param m: mass (kg)
         :type m: float
@@ -366,16 +381,21 @@ class SerialLink(object):
 
     def jointdynamics(self, q, qd):
         """
-        Transfer function of joint actuator. Returns a vector of N
-        continuous-time transfer function objects that represent the
-        transfer function 1/(Js+B) for each joint based on the dynamic
-        parameters of the robot and the configuration q (1xN).
-        n is the number of robot joints.
+        Transfer function of joint actuator.
 
-        :param q: The joint angles/configuration of the robot
-        :type q: float np.ndarray(1,n)
+        tf = jointdynamics(qd, q) calculates a vector of n continuous-time
+        transfer function objects that represent the transfer function
+        1/(Js+B) for each joint based on the dynamic parameters of the robot
+        and the configuration q (n). n is the number of robot joints.
+
+        tf = jointdynamics(qd) as above except uses the stored q value of the
+        robot object.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values)
+        :type q: float np.ndarray(n)
         :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(1,n)
+        :type qd: float np.ndarray(n)
         """
 
         # TODO a tf object implementation?
@@ -383,7 +403,10 @@ class SerialLink(object):
 
     def isprismatic(self):
         """
-        Identify prismatic joints
+        Identify prismatic joints.
+
+        p = isprismatic() returns a bool list identifying the prismatic joints
+        within the robot
 
         :return: a list of bool variables, one per joint, true if
             the corresponding joint is prismatic, otherwise false.
@@ -399,7 +422,10 @@ class SerialLink(object):
 
     def isrevolute(self):
         """
-        Identify revolute joints
+        Identify revolute joints.
+
+        p = isrevolute() returns a bool list identifying the revolute joints
+        within the robot
 
         :return: a list of bool variables, one per joint, true if
             the corresponding joint is revolute, otherwise false.
@@ -415,17 +441,22 @@ class SerialLink(object):
 
     def todegrees(self, q=None):
         """
-        Convert joint angles to degrees
+        Convert joint angles to degrees.
+
+        qdeg = toradians(q) converts joint coordinates q to degrees.
+
+        qdeg = toradians() as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :return: a vector of joint coordinates where those elements
             corresponding to revolute joints are converted from radians to
             degrees. Elements corresponding to prismatic joints are copied
             unchanged.
-        :rtype: float np.ndarray(n,)
+        :rtype: float np.ndarray(n)
         """
 
         if q is None:
@@ -437,19 +468,21 @@ class SerialLink(object):
         qdeg[k] *= 180 / np.pi
         return qdeg
 
-    def toradians(self, q=None):
+    def toradians(self, q):
         """
-        Convert joint angles to radians
+        Convert joint angles to radians.
+
+        qrad = toradians(q) converts joint coordinates q to radians.
 
         :param q: The joint angles/configuration of the robot (Not optional,
             stored q is always radians)
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :return: a vector of joint coordinates where those elements
             corresponding to revolute joints are converted from degrees to
             radians. Elements corresponding to prismatic joints are copied
             unchanged.
-        :rtype: float np.ndarray(n,)
+        :rtype: float np.ndarray(n)
         """
 
         if q is None:
@@ -463,14 +496,19 @@ class SerialLink(object):
 
     def twists(self, q=None):
         """
-        Joint axis twists. Calculates a vector of Twist objects tw (1xN) that
+        Joint axis twists.
+
+        tw, T = twists(q) calculates a vector of Twist objects (n) that
         represent the axes of the joints for the robot with joint coordinates
-        q (1xN). Also returns T0 which is an SE3 object representing the pose
-        of the tool.
+        q (n). Also returns T0 which is an SE3 object representing the pose of
+        the tool.
+
+        tw, T = twists() as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(n,)
+        :type q: float np.ndarray(n)
 
         :return tw: a vector of Twist objects
         :rtype tw: float np.ndarray(n,)
@@ -487,13 +525,14 @@ class SerialLink(object):
 
     def fkine(self, q=None):
         '''
-        Evaluate fkine for each point on a trajectory of joints q
+        T = fkine(q) evaluates forward kinematics for the robot at joint
+        configuration q.
 
-        Note:
-        - The robot's base or tool transform, if present, are incorporated
-            into the result.
-        - Joint offsets, if defined, are added to q before the forward
-            kinematics are computed.
+        T = fkine() as above except uses the stored q value of the
+        robot object.
+
+        Trajectory operation:
+        for each point on a trajectory of joints q
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values). If q is a matrix
@@ -504,6 +543,12 @@ class SerialLink(object):
 
         :return T: Homogeneous transformation matrix or trajectory
         :rtype T: SE3 or SE3 list
+
+        Note:
+        - The robot's base or tool transform, if present, are incorporated
+            into the result.
+        - Joint offsets, if defined, are added to q before the forward
+            kinematics are computed.
         '''
 
         cols = 0
@@ -539,20 +584,24 @@ class SerialLink(object):
 
     def allfkine(self, q=None):
         '''
-        Evaluate fkine for each joint within a robot
+        Tall = allfkine(q) evaluates fkine for each joint within a robot and
+        returns a trajecotry of poses.
 
-        Note:
-        - The robot's base or tool transform, if present, are incorporated
-            into the result.
-        - Joint offsets, if defined, are added to q before the forward
-            kinematics are computed.
+        Tall = allfkine() as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float np.ndarray(n)
 
-        :return T: Homogeneous transformationtrajectory
+        :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
+
+        Notes:
+        - The robot's base or tool transform, if present, are incorporated
+            into the result.
+        - Joint offsets, if defined, are added to q before the forward
+            kinematics are computed.
         '''
 
         if q is None:
@@ -574,12 +623,16 @@ class SerialLink(object):
 
     def jacobe(self, q=None):
         """
-        The manipulator Jacobian matrix maps joint velocity to end-effector
-        spatial velocity v = Je*qd in the end-effector frame.
+        Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity. v = Je*qd in the
+        end-effector frame.
+
+        Je = jacobe(q) as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :return J: The manipulator Jacobian in ee frame
         :rtype: float np.ndarray(6,n)
@@ -624,12 +677,16 @@ class SerialLink(object):
 
     def jacob0(self, q=None):
         """
-        The manipulator Jacobian matrix maps joint velocity to end-effector
-        spatial velocity v = Je*qd in the end-effector frame.
+        J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity. v = J0*qd in the
+        base frame.
+
+        J0 = jacob0(q) as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :return J: The manipulator Jacobian in ee frame
         :rtype: float np.ndarray(6,n)
@@ -646,12 +703,16 @@ class SerialLink(object):
 
     def jacob0v(self, q=None):
         """
-        The spatial velocity Jacobian which relates the velocity in
-        end-effector frame to velocity in the base frame.
+        Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
+        configuration q, which relates the velocity in the end-effector frame
+        to velocity in the base frame
+
+        Jv = jacob0v(q) as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :returns J: The velocity Jacobian in 0 frame
         :rtype J: float np.ndarray(6,n)
@@ -672,12 +733,16 @@ class SerialLink(object):
 
     def jacobev(self, q=None):
         """
-        The spatial velocity Jacobian which relates the velocity in
-        the base frame to the velocity in the end-effector frame.
+        Jv = jacobev(q) is the spatial velocity Jacobian, at joint
+        configuration q, which relates the velocity in the base frame to the
+        velocity in the end-effector frame.
+
+        Jv = jacobev(q) as above except uses the stored q value of the
+        robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :returns J: The velocity Jacobian in ee frame
         :rtype J: float np.ndarray(6,n)
@@ -699,13 +764,28 @@ class SerialLink(object):
 
     def accel(self, qd, torque, q=None):
         """
-        Calculates a vector (nx1) of joint accelerations that result
-        from applying the actuator force/torque (1xN) to the manipulator
-        in state q (1xN) and qd (1xN), and n is the number of robot joints.
+        qdd = accel(qd, torque, q) calculates a vector (n) of joint
+        accelerations that result from applying the actuator force/torque (n)
+        to the manipulator in state q (n) and qd (n), and n is the number of
+        robot joints.
 
-        If q, qd, torque are matrices (KxN) then qdd is a matrix (KxN) where
-        each row is the acceleration corresponding to the equivalent rows of
+        a = accel(qd, torque) as above except uses the stored q value of the
+        robot object.
+
+        If q, qd, torque are matrices (nxk) then qdd is a matrix (nxk) where
+        each row is the acceleration corresponding to the equivalent cols of
         q, qd, torque.
+
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(n)
+        :param torque: The joint torques of the robot
+        :type torque: float np.ndarray(n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+
+        :return qdd: The joint accelerations of the robot
+        :rtype qdd: float np.ndarray(n)
 
         Notes:
         - Useful for simulation of manipulator dynamics, in
@@ -714,17 +794,6 @@ class SerialLink(object):
         - Featherstone's method is more efficient for robots with large numbers
           of joints.
         - Joint friction is considered.
-
-        :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(1,n)
-        :param torque: The joint torques of the robot
-        :type torque: float np.ndarray(1,n)
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
-
-        :return a: The joint accelerations of the robot
-        :rtype a: float np.ndarray(1,n)
 
         References:
         - Efficient dynamic computer simulation of robotic mechanisms,
@@ -755,8 +824,13 @@ class SerialLink(object):
 
     def nofriction(self, coulomb=True, viscous=False):
         """
-        Copies the robot and returns a robot with the same parameters except,
-        the Coulomb and/or viscous friction parameter to zero
+        NFrobot = nofriction(coulomb, viscous) copies the robot and returns
+        a robot with the same parameters except, the Coulomb and/or viscous
+        friction parameter set to zero
+
+        NFrobot = nofriction(coulomb, viscous) copies the robot and returns
+        a robot with the same parameters except the Coulomb friction parameter
+        is set to zero
 
         :param coulomb: if True, will set the coulomb friction to 0
         :type coulomb: bool
@@ -782,12 +856,12 @@ class SerialLink(object):
 
     def pay(self, W, q=None, J=None, frame=1):
         """
-        pay(W, J) Returns the generalised joint force/torques due to a payload
-        wrench W applied to the end-effector. Where the manipulator Jacobian
-        is J (6xn), and n is the number of robot joints.
+        tau = pay(W, J) Returns the generalised joint force/torques due to a
+        payload wrench W applied to the end-effector. Where the manipulator
+        Jacobian is J (6xn), and n is the number of robot joints.
 
-        pay(W, q, frame) as above but the Jacobian is calculated at pose q
-        in the frame given by frame which is 0 for base frame, 1 for
+        tau = pay(W, q, frame) as above but the Jacobian is calculated at pose
+        q in the frame given by frame which is 0 for base frame, 1 for
         end-effector frame.
 
         Uses the formula tau = J'W, where W is a wrench vector applied at the
@@ -871,12 +945,18 @@ class SerialLink(object):
 
     def friction(self, qd):
         """
-        Calculates the vector of joint friction forces/torques for the robot
-        moving with joint velocities qd.
+        tau = friction(qd) calculates the vector of joint friction
+        forces/torques for the robot moving with joint velocities qd.
 
         The friction model includes:
         - Viscous friction which is a linear function of velocity.
         - Coulomb friction which is proportional to sign(qd).
+
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(n)
+
+        :return: The joint friction forces.torques for the robot
+        :rtype: float np.ndarray(n,)
 
         Notes:
         - The friction value should be added to the motor output torque, it
@@ -892,12 +972,6 @@ class SerialLink(object):
           velocity.
         - The absolute value of the gear ratio is used. Negative gear ratios
           are tricky: the Puma560 has negative gear ratio for joints 1 and 3.
-
-        :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(1,n)
-
-        :return: The joint friction forces.torques for the robot
-        :rtype: float np.ndarray(n,)
         """
 
         qd = getvector(qd, self.n)
@@ -910,13 +984,16 @@ class SerialLink(object):
 
     def cinertia(self, q=None):
         """
-        The nxn Cartesian (operational space) inertia matrix which relates
-        Cartesian force/torque to Cartesian acceleration at the joint
-        configuration q.
+        M = cinertia(q) is the nxn Cartesian (operational space) inertia
+        matrix which relates Cartesian force/torque to Cartesian
+        acceleration at the joint configuration q.
+
+        M = cinertia(q) as above except uses the stored q value of the robot
+        object.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
+        :type q: float np.ndarray(n)
 
         :return M: The inertia matrix
         :rtype M: float np.ndarray(n,n)
@@ -936,32 +1013,35 @@ class SerialLink(object):
 
     def coriolis(self, qd, q=None):
         """
-        Calculates the Coriolis/centripetal matrix (nxn) for the robot in
-        configuration q and velocity qd, where N is the number of joints.
-        The product c*qd is the vector of joint force/torque due to
-        velocity coupling. The diagonal elements are due to centripetal
-        effects and the off-diagonal elements are due to Coriolis effects.
-        This matrix is also known as the velocity coupling matrix, since
-        it describes the disturbance forces on any joint due to velocity
-        of all other joints.
+        C = coriolis(qd, q) calculates the Coriolis/centripetal matrix (nxn)
+        for the robot in configuration q and velocity qd, where n is the
+        number of joints. The product c*qd is the vector of joint
+        force/torque due to velocity coupling. The diagonal elements are due
+        to centripetal effects and the off-diagonal elements are due to
+        Coriolis effects. This matrix is also known as the velocity coupling
+        matrix, since it describes the disturbance forces on any joint due to
+        velocity of all other joints.
+
+        C = coriolis(qd) as above except uses the stored q value of the robot
+        object.
 
         If q and qd are matrices (nxk), each row is interpretted as a
         joint state vector, and the result (nxnxk) is a 3d-matrix where
         each plane corresponds to a row of q and qd.
 
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+
+        :return C: The Coriolis/centripetal matrix
+        :rtype C: float np.ndarray(n,n)
+
         Notes:
         - Joint viscous friction is also a joint force proportional to
             velocity but it is eliminated in the computation of this value.
         - Computationally slow, involves n^2/2 invocations of RNE.
-
-        :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(1,n)
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
-
-        :return C: The Coriolis/centripetal matrix
-        :rtype C: float np.ndarray(n,n)
         """
 
         try:
@@ -1011,9 +1091,11 @@ class SerialLink(object):
 
     def gravjac(self, q=None, grav=None):
         """
-        Calculates the generalised joint force/torques due to gravity tau
-        (1xN) and the manipulator Jacobian in the base frame jacob0 (6xn)
-        for robot pose q (1xn), where N is the number of robot joints.
+        tauB = gravjac(q, grav) calculates the generalised joint force/torques
+        due to gravity.
+
+        tauB = gravjac() as above except uses the stored q and gravitational
+        acceleration of the robot object.
 
         Trajectory operation:
         If q is nxm where n is the number of robot joints then a
@@ -1021,12 +1103,6 @@ class SerialLink(object):
         configuration. tau (nxm) is the generalised joint torque, each row
         corresponding to an input pose, and jacob0 (6xnxm) where each
         plane is a Jacobian corresponding to an input pose.
-
-        Notes:
-        - The gravity vector is defined by the SerialLink property if not
-            explicitly given.
-        - Does not use inverse dynamics function RNE.
-        - Faster than computing gravity and Jacobian separately.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
@@ -1036,7 +1112,13 @@ class SerialLink(object):
         :type grav: float np.ndarray(3,)
 
         :return tau: The generalised joint force/torques due to gravity
-        :rtype tau: float np.ndarray(1,n)
+        :rtype tau: float np.ndarray(n,)
+
+        Notes:
+        - The gravity vector is defined by the SerialLink property if not
+            explicitly given.
+        - Does not use inverse dynamics function RNE.
+        - Faster than computing gravity and Jacobian separately.
         """
 
         if grav is None:
@@ -1132,9 +1214,12 @@ class SerialLink(object):
 
     def gravload(self, q=None, grav=None):
         """
-        Calculates the joint gravity loading (n) for the robot Rin the joint
-        configuration q (n), where n is the number of robot joints.
-        Gravitational acceleration is a property of the robot object.
+        taug = gravload(q, grav) calculates the joint gravity loading (n) for
+        the robot in the joint configuration q, and the gravitational load
+        grav.
+
+        taug = gravload() as above except uses the stored q and gravitational
+        acceleration of the robot object.
 
         If q is a matrix (nxm) each column is interpreted as a joint
         configuration vector, and the result is a matrix (nxm) each column
@@ -1145,10 +1230,10 @@ class SerialLink(object):
         :type q: float np.ndarray(n)
         :param grav: The gravity vector (Optional, if not supplied will
             use the stored gravity values).
-        :type grav: float np.ndarray(3,)
+        :type grav: float np.ndarray(3)
 
         :return taug: The generalised joint force/torques due to gravity
-        :rtype taug: float np.ndarray(1,n)
+        :rtype taug: float np.ndarray(n,)
         """
 
         if grav is None:
@@ -1174,27 +1259,33 @@ class SerialLink(object):
         """
         Inverse kinematics by optimization with joint limits
 
-        Calculates the joint coordinates (1xn) corresponding to the robot
-        end-effector pose T which is an SE3 object or homogenenous transform
-        matrix (4x4), and N is the number of robot joints. OPTIONS is an
-        optional list of name/value pairs than can be passed to fmincon.
+        q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
+        corresponding to the robot end-effector pose T which is an SE3 object
+        or homogenenous transform matrix (4x4), and N is the number of robot
+        joints. Initial joint coordinates Q0 used for the minimisation.
 
-        Q = robot.ikunc(T, Q0, OPTIONS) as above but specify the
-        initial joint coordinates Q0 used for the minimisation.
-
-        [Q,ERR,EXITFLAG] = robot.ikcon(T, ...) as above but also returns the
-        status EXITFLAG from fmincon.
+        q, success, err = ikcon(T) as above but q0 is set to 0.
 
         Trajectory operation:
-        In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
+        In all cases if T is a vector of SE3 objects or a homogeneous
         transform sequence (4x4xm) then returns the joint coordinates
         corresponding to each of the transforms in the sequence. q is nxm
         where N is the number of robot joints. The initial estimate of q
         for each time step is taken as the solution from the previous time
-        step.
+        step. Retruns trajectory of joints q (nxm), list of success (m) and
+        list of errors (m)
 
-        ERR and EXITFLAG are also Mx1 and indicate the results of optimisation
-        for the corresponding trajectory step.
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
+        :param q0: initial joint configuration (default all zeros)
+        :type q0: float np.ndarray(n) (default all zeros)
+
+        :retrun q: The calculated joint values
+        :rtype q: float np.ndarray(n)
+        :retrun success: IK solved (True) or failed (False)
+        :rtype success: bool
+        :retrun error: Final pose error
+        :rtype error: float
 
         Notes:
         - Joint limits are considered in this solution.
@@ -1245,9 +1336,9 @@ class SerialLink(object):
             exitflag.append(res.success)
 
         if trajn > 1:
-            return qstar, error, exitflag
+            return qstar, exitflag, error
         else:
-            return qstar[:, 0], error[0], exitflag[0]
+            return qstar[:, 0], exitflag[0], error[0]
 
     def ikine(
             self, T,
@@ -1271,6 +1362,17 @@ class SerialLink(object):
         This method can be used for robots with any number of degrees of
         freedom.
 
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects (m) or a homogeneous
+        transform sequence (4x4xm) then returns the joint coordinates
+        corresponding to each of the transforms in the sequence. q is nxm
+        where n is the number of robot joints. The initial estimate of q for
+        each time step is taken as the solution from the previous time step.
+        Retruns trajectory of joints q (nxm), list of success (m) and list of
+        errors (m)
+
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
         :param ilimit: maximum number of iterations
         :type ilimit: int (default 500)
         :param rlimit: maximum number of consecutive step rejections
@@ -1294,12 +1396,12 @@ class SerialLink(object):
             than Levenberg-Marquadt
         :type transpose: float
 
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects (1xm) or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is nxm
-        where n is the number of robot joints. The initial estimate of q for
-        each time step is taken as the solution from the previous time step.
+        :retrun q: The calculated joint values
+        :rtype q: float np.ndarray(n)
+        :retrun success: IK solved (True) or failed (False)
+        :rtype success: bool
+        :retrun error: If failed, what went wrong
+        :rtype error: List of String
 
         Underactuated robots:
         For the case where the manipulator has fewer than 6 DOF the solution

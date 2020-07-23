@@ -683,8 +683,8 @@ class TestLink(unittest.TestCase):
               -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
               7.84926515e-01]
 
-        qa, err, success = panda.ikcon(T)
-        qa2, err, success = panda.ikcon(Tt)
+        qa, success, err = panda.ikcon(T)
+        qa2, success, err = panda.ikcon(Tt)
 
         nt.assert_array_almost_equal(qa, qr, decimal=4)
         nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
