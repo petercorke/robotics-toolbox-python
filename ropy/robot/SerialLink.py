@@ -1646,6 +1646,9 @@ class SerialLink(object):
         :param elbow_up: True for elbow up (default), else elbow down
         :type elbow_up: bool
 
+        :retrun q: The calculated joint values
+        :rtype q: float np.ndarray(n)
+
         Notes::
         - The same as IKINE6S without the wrist.
         - The inverse kinematic solution is generally not unique, and
@@ -1753,3 +1756,149 @@ class SerialLink(object):
             return qt[:, 0]
         else:
             return qt
+
+    def ikine6s(self, T, left=True, elbow_up=True, wrist_flip=False):
+        """
+        Analytical inverse kinematics
+
+        q = ikine6s(T) are the joint coordinates (n) corresponding to the
+        robot end-effector pose T which is an SE3 object or homogenenous
+        transform matrix (4x4), and n is the number of robot joints. This
+        is an analytic solution for a 6-axis robot with a spherical wrist
+        (the most common form for industrial robot arms).
+
+        q = ikine6s(T, left, elbow_up, wrist_flip) as above except the arm
+        location, elbow position, and wrist orientation can be specified.
+
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
+        transform sequence (4x4xM) then the inverse kinematics is computed for
+        all m poses resulting in q (nxm) with each row representing the joint
+        angles at the corresponding pose.
+
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
+        :param left: True for arm to the left (default), else arm to the right
+        :type left: bool
+        :param elbow_up: True for elbow up (default), else elbow down
+        :type elbow_up: bool
+        :param wrist_flip: False for wrist not flipped (default), else wrist
+            flipped (rotated by 180 deg)
+        :type wrist_flip: bool
+
+        :retrun q: The calculated joint values
+        :rtype q: float np.ndarray(n)
+
+        Notes:
+        - Treats a number of specific cases:
+        - Robot with no shoulder offset
+        - Robot with a shoulder offset (has lefty/righty configuration)
+        - Robot with a shoulder offset and a prismatic third joint (like
+            Stanford arm)
+        - The Puma 560 arms with shoulder and elbow offsets (4 lengths
+            parameters)
+        - The Kuka KR5 with many offsets (7 length parameters)
+        - The inverse kinematics for the various cases determined using
+            ikine_sym.
+        - The inverse kinematic solution is generally not unique, and
+            depends on the configuration string.
+        - Joint offsets, if defined, are added to the inverse kinematics to
+            generate q.
+        - Only applicable for standard Denavit-Hartenberg parameters
+
+        Reference:
+        - Inverse kinematics for a PUMA 560,
+        Paul and Zhang,
+        The International Journal of Robotics Research,
+        Vol. 5, No. 2, Summer 1986, p. 32-44
+        """
+
+        if not self.n == 6:
+            raise ValueError(
+                "Function only applicable to six degree of freedom robots")
+
+        if self.mdh:
+            raise ValueError(
+                "Function only applicable to robots with standard DH "
+                "parameters")
+
+        if not self.isrevolute() == [True, True, True, True, True, True]:
+            raise ValueError(
+                "Function only applicable to robots with revolute joints")
+
+        if not self.isspherical():
+            raise ValueError(
+                "Function only applicable to robots with a spherical wrist")
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        qt = np.zeros((6, trajn))
+
+        sol = [1, 1, 1]
+
+        if not left:
+            sol[0] = 2
+
+        if not elbow_up:
+            sol[1] = 2
+
+        if wrist_flip:
+            sol[2] = 2
+
+        if self._is_simple(L):
+            self.ikineType = 'nooffset'
+        elif self._is_puma(L):
+            self.ikineType = 'puma'
+        elif self._is_offset(L):
+            self.ikineType = 'offset'
+        elif self._is_rrp(L):
+            self.ikineType = 'rrp'
+        else:
+            return('This kinematic structure not supported')
+
+        # for j in range(trajn):
+        #     pass
+
+    def _is_simple(self):
+        L = self.links
+        alpha = [-np.pi/2, 0, np.pi/2]
+        s = np.all([L[1:2].d] == 0) and \
+            (
+                np.all([L[0:2].alpha] == alpha) or
+                np.all([L[0:2].alpha] == -alpha)
+            ) and \
+            np.all([L[0:2].isrevolute] == 1) and \
+            (L[0].a == 0)
+
+    def _is_offset(self):
+        L = self.links
+        alpha = [-np.pi/2, 0, np.pi/2]
+        s = (
+                np.all([L[0:2].alpha] == alpha) or
+                np.all([L[0:2].alpha] == -alpha)
+            ) and \
+            np.all([L[0:2].isrevolute] == 1)
+
+    def _is_rrp(self):
+        L = self.links
+        alpha = [-np.pi/2, np.pi/2, 0]
+        s = np.all([L[1:2].a] == 0) and \
+            (
+                np.all([L[0:2].alpha] == alpha) or
+                np.all([L[0:2].alpha] == -alpha)
+            ) and \
+            np.all([L[0:2].isrevolute] == [1 1 0])
+
+    def _is_puma(self):
+        L = self.links
+        alpha = [np.pi/2, 0, -np.pi/2]
+        s = (
+                L[1].d == 0 and
+                L[0].a == 0 and
+                not L[2].d == 0 and
+                not (L[2].a == 0) and
+                np.all([L[0:2].alpha] == alpha) and
+                np.all([L[0:2].isrevolute] == 1))
