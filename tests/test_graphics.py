@@ -367,7 +367,7 @@ class TestRobot(unittest.TestCase):
 
         # Ensure texture is not none, and colour is not white
         gph_obj = joint.get_graphic_object()
-        self.assertNotEqual(gph_obj.color, vector(0.5, 0, 1))
+        self.assertEqual(gph_obj.color, vector(0.5, 0, 1))
         self.assertIsNotNone(gph_obj.texture)
 
         # Remove Texture and colour
@@ -375,7 +375,7 @@ class TestRobot(unittest.TestCase):
 
         # Ensure colour is white, texture is none
         self.assertEqual(gph_obj.color, vector(1, 1, 1))
-        self.assertIsNotNone(gph_obj.texture)
+        self.assertIsNone(gph_obj.texture)
 
         # Apply bad colour
         # Should assert Value Error
@@ -407,8 +407,8 @@ class TestRobot(unittest.TestCase):
         # Create a joint
         joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
 
-        # Save origin pos
-        first_pos = joint.get_graphic_object().origin
+        # Save origin pos (copy of)
+        first_pos = vector(joint.get_graphic_object().origin)
 
         # Move origin
         current_pos = vector(1, 0, -0.5)
@@ -534,7 +534,7 @@ class TestRobot(unittest.TestCase):
 
         # Try wrong inputs, expecting errors
         self.assertRaises(ValueError, robot1.append_link, "x", self.se3, self.structure)  # bad joint type
-        self.assertRaises(ValueError, robot1.append_link, "p", self.structure, self.se3)  # incorrect param order
+        self.assertRaises(TypeError, robot1.append_link, "p", self.structure, self.se3)  # incorrect param order
 
     def test_robot_detach_link(self):
         # Update scene
@@ -643,7 +643,7 @@ class TestRobot(unittest.TestCase):
         self.assertEqual(joint2.get_graphic_object().opacity, opc_val)
 
         # Test bad opc val
-        self.assertRaises(ValueError, robot1.set_transparency, opc_val)
+        self.assertRaises(ValueError, robot1.set_transparency, -0.2)
 
     def test_robot_set_poses(self):
         # Update scene
@@ -668,12 +668,12 @@ class TestRobot(unittest.TestCase):
         # Both objects must be in either of the poses (but not the same one)
         self.assertTrue(
             # 0 in s1, 1 in s2
-            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s1) and
-             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s2))
+            (common.vpython_to_se3(self.scene.scene.objects[0]) == s1 and
+             common.vpython_to_se3(self.scene.scene.objects[1]) == s2)
             or
             # 1 in s1, 0 in s2
-            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s1) and
-             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s2))
+            (common.vpython_to_se3(self.scene.scene.objects[1]) == s1 and
+             common.vpython_to_se3(self.scene.scene.objects[0]) == s2)
         )
 
         # Try giving not enough poses
@@ -709,12 +709,12 @@ class TestRobot(unittest.TestCase):
         # Both objects must be in either of the poses (but not the same one)
         self.assertTrue(
             # 0 in s1, 1 in s2
-            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s1) and
-             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s2))
+            (common.vpython_to_se3(self.scene.scene.objects[0]) == s1 and
+             common.vpython_to_se3(self.scene.scene.objects[1]) == s2)
             or
             # 1 in s1, 0 in s2
-            (self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[1]), s1) and
-             self.assertEqual(common.vpython_to_se3(self.scene.scene.objects[0]), s2))
+            (common.vpython_to_se3(self.scene.scene.objects[1]) == s1 and
+             common.vpython_to_se3(self.scene.scene.objects[0]) == s2)
         )
 
         # Try giving no frames
@@ -724,13 +724,14 @@ class TestRobot(unittest.TestCase):
         self.assertRaises(ValueError, robot1.animate, [[s1, s2]], -1)
 
         # Try giving wrong number SE3s
-        self.assertRaises(ValueError, robot1.animate, [[]], 1)
+        self.assertRaises(UserWarning, robot1.animate, [[]], 1)
 
 
 class TestStl(unittest.TestCase):
     def test_import_object(self):
         # Update Scene
         scene = canvas.GraphicsCanvas(title="Test Import Object")
+        scene.grid_visibility(False)
 
         # Check num objects
         num_obj = len(scene.scene.objects)

@@ -14,13 +14,13 @@ def import_puma_560(g_canvas):
     """
     puma560 = GraphicalRobot(g_canvas, 'Puma560')
 
-    puma560.append_made_link(create_link_0(g_canvas))
-    puma560.append_made_link(create_link_1(g_canvas))
-    puma560.append_made_link(create_link_2(g_canvas))
-    puma560.append_made_link(create_link_3(g_canvas))
-    puma560.append_made_link(create_link_4(g_canvas))
-    puma560.append_made_link(create_link_5(g_canvas))
-    puma560.append_made_link(create_link_6(g_canvas))
+    puma560.append_made_link(create_link_0(g_canvas.scene))
+    puma560.append_made_link(create_link_1(g_canvas.scene))
+    puma560.append_made_link(create_link_2(g_canvas.scene))
+    puma560.append_made_link(create_link_3(g_canvas.scene))
+    puma560.append_made_link(create_link_4(g_canvas.scene))
+    puma560.append_made_link(create_link_5(g_canvas.scene))
+    puma560.append_made_link(create_link_6(g_canvas.scene))
 
     # Get the poses for a zero-position
     puma = Puma560()

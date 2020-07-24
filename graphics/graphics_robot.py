@@ -577,6 +577,7 @@ class GraphicalRobot:
 
         # Turn off the graphics in the canvas
         self.joints[self.num_joints - 1].set_joint_visibility(False)
+        self.joints[self.num_joints - 1].draw_reference_frame(False)
         # Ensure deletion
         self.joints[self.num_joints - 1] = None
 
