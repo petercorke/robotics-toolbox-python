@@ -2446,7 +2446,6 @@ class SerialLink(object):
                 q0[:, i],
                 options={'gtol': 1e-6, 'maxiter': ilimit})
 
-            print(res)
             qt[:, i] = res.x
             success.append(res.success)
             err.append(res.fun)

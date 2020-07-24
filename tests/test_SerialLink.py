@@ -941,3 +941,22 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(q0[:, 0], qr0, decimal=4)
         nt.assert_array_almost_equal(q0[:, 1], qr0, decimal=4)
         nt.assert_array_almost_equal(q1, qr1, decimal=4)
+
+    def test_ikunc(self):
+        puma = rp.Puma560()
+        q = puma.qr
+        T = puma.fkine(q)
+        Tt = sm.SE3([T, T])
+
+        q0, _, _ = puma.ikunc(Tt)
+        q1, success, _ = puma.ikunc(T.A)
+        q2, success, _ = puma.ikunc(T, ilimit=1)
+
+        nt.assert_array_almost_equal(
+            T.A - puma.fkine(q0[:, 0]).A, np.zeros((4, 4)), decimal=4)
+
+        nt.assert_array_almost_equal(
+            T.A - puma.fkine(q0[:, 1]).A, np.zeros((4, 4)), decimal=4)
+
+        nt.assert_array_almost_equal(
+            T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
