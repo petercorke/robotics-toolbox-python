@@ -379,7 +379,7 @@ class TestRobot(unittest.TestCase):
 
         # Apply bad colour
         # Should assert Value Error
-        self.assertRaises(ValueError, joint.set_texture, color=[127, 0, 255])
+        self.assertRaises(ValueError, joint.set_texture, colour=[127, 0, 255])
 
     def test_joint_transparency(self):
         # Scene update
@@ -405,7 +405,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Set Origin"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(SE3(), self.structure, self.scene.scene)
 
         # Save origin pos (copy of)
         first_pos = vector(joint.get_graphic_object().origin)
@@ -421,7 +421,7 @@ class TestRobot(unittest.TestCase):
         # Object should go from along +x-axis, to along -x-axis slightly above z=0 plane
         # Compare
         self.assertEqual(first_pos, vector(0, 0, 0))  # Check original origin is at 0, 0, 0 (Default)
-        self.assertEqual(second_pos, new_pos)  # Check new set origin is at the new position
+        self.assertEqual(second_pos, new_pos - current_pos)  # Check new set origin is at the new position
 
     def test_joint_get_pose(self):
         # Update scene
@@ -744,7 +744,8 @@ class TestStl(unittest.TestCase):
 
         # Verify object was added
         self.assertEqual(graphic_obj.pos, vector(0, 0, 0))  # Object is at origin
-        self.assertEqual(len(scene.scene.objects), num_obj + 1)  # 1 object was added to the scene
+        # Can't check how many objects, as each triangle counts as one. No way to know correct amount
+        # self.assertEqual(len(scene.scene.objects), num_obj + 1)  # 1 object was added to the scene
 
 
 class TestText(unittest.TestCase):
