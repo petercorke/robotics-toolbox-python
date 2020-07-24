@@ -8,7 +8,7 @@ import numpy as np
 from ropy.robot.Link import Link
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
-from spatialmath.base.transforms3d import tr2delta
+from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3
 from scipy.optimize import minimize, Bounds
 
@@ -48,7 +48,7 @@ class SerialLink(object):
 
     >>> L[1] = Revolute('d', 0, 'a', a2, 'alpha', 0)
 
-    >>> twolink = SerialLink(L, 'name', 'two link');
+    >>> twolink = SerialLink(L, 'name', 'two link')
 
     See Also
     --------
@@ -814,13 +814,13 @@ class SerialLink(object):
 
         # Compute current manipulator inertia torques resulting from unit
         # acceleration of each joint with no gravity.
-        # M = rne(robot, ones(n,1)*q, zeros(n,n), eye(n), 'gravity', [0 0 0]);
+        # M = rne(robot, ones(n,1)*q, zeros(n,n), eye(n), 'gravity', [0 0 0])
 
         # Compute gravity and coriolis torque torques resulting from zero
         # acceleration at given velocity & with gravity acting.
-        # tau = rne(robot, q, qd, zeros(1,n));
+        # tau = rne(robot, q, qd, zeros(1,n))
 
-        # qdd = M \ (torque - tau)';
+        # qdd = M \ (torque - tau)'
 
     def nofriction(self, coulomb=True, viscous=False):
         """
@@ -1855,10 +1855,125 @@ class SerialLink(object):
         else:
             raise ValueError('This kinematic structure not supported')
 
-        print(self.ikineType)
+        q = np.zeros((self.n, trajn))
+        err = []
 
-        # for j in range(trajn):
-        #     pass
+        for j in range(trajn):
+
+            theta = np.zeros(self.n)
+
+            # Undo base and tool transformations
+            Ti = np.linalg.inv(self.base.A) @ T[j].A @ \
+                np.linalg.inv(self.tool.A)
+
+            if self.ikineType == 'puma':
+                # Puma model with shoulder and elbow offsets
+                # - Inverse kinematics for a PUMA 560,
+                #   Paul and Zhang,
+                #   The International Journal of Robotics Research,
+                #   Vol. 5, No. 2, Summer 1986, p. 32-44
+
+                a2 = self.links[1].a
+                a3 = self.links[2].a
+                d1 = self.links[0].d
+                d3 = self.links[2].d
+                d4 = self.links[3].d
+
+                # The following parameters are extracted from the Homogeneous
+                # Transformation as defined in equation 1, p. 34
+                Ox = Ti[0, 1]
+                Oy = Ti[1, 1]
+                Oz = Ti[2, 1]
+
+                Ax = Ti[0, 2]
+                Ay = Ti[1, 2]
+                Az = Ti[2, 2]
+
+                Px = Ti[0, 3]
+                Py = Ti[1, 3]
+                Pz = Ti[2, 3] - d1
+
+                # Solve for theta[0]
+                # r is defined in equation 38, p. 39.
+                # theta[0] uses equations 40 and 41, p.39,
+                # based on the configuration parameter n1
+
+                r = np.sqrt(Px**2 + Py**2)
+                if sol[0] == 1:
+                    theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3/r)
+                else:
+                    theta[0] = np.arctan2(Py, Px) + np.arcsin(d3/r)
+
+                # Solve for theta[1]
+                # V114 is defined in equation 43, p.39.
+                # r is defined in equation 47, p.39.
+                # Psi is defined in equation 49, p.40.
+                # theta[1] uses equations 50 and 51, p.40, based on the
+                # configuration parameter n2
+                if sol[1] == 1:
+                    n2 = -1
+                else:
+                    n2 = 1
+
+                if sol[0] == 2:
+                    n2 = -n2
+
+                V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
+                r = np.sqrt(V114**2 + Pz**2)
+                Psi = np.arccos(
+                    (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2) /
+                    (2.0 * a2 * r))
+                if np.isnan(Psi):
+                    theta = []
+                else:
+                    theta[1] = np.arctan2(Pz, V114) + n2 * Psi
+
+                    # Solve for theta[2]
+                    # theta[2] uses equation 57, p. 40.
+                    num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
+                    den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
+                    theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
+
+            if not np.sum(theta) == 0:
+                # Solve for the wrist rotation
+                # We need to account for some random translations between the
+                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
+                # final frame.
+
+                # Transform of first 3 joints
+                T13 = self.A([0, 2], theta)
+
+                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
+                Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
+
+                # Tz(d6) Tx(a5) Rx(alpha6)
+                Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
+                    SE3.Rx(self.links[5].alpha)
+
+                R = np.linalg.inv(Td4.A) @ np.linalg.inv(T13.A) @ Ti @ \
+                    np.linalg.inv(Tt.A)
+
+                # The spherical wrist implements Euler angles
+                if sol[2] == 1:
+                    theta[3:6] = tr2eul(R, 'flip')
+                else:
+                    theta[3:6] = tr2eul(R)
+
+                if self.links[3].alpha > 0:
+                    theta[4] = -theta[4]
+
+                # Remove the link offset angles
+                for k in range(self.n):
+                    theta[k] -= self.links[k].offset
+
+                q[:, j] = theta
+            else:
+                err.append('point not reachable')
+
+        if trajn == 1:
+            return q[:, 0], err
+        else:
+            return q, err
 
     def _is_simple(self):
         L = self.links
