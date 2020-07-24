@@ -1822,10 +1822,6 @@ class SerialLink(object):
                 "Function only applicable to robots with standard DH "
                 "parameters")
 
-        if not self.isrevolute() == [True, True, True, True, True, True]:
-            raise ValueError(
-                "Function only applicable to robots with revolute joints")
-
         if not self.isspherical():
             raise ValueError(
                 "Function only applicable to robots with a spherical wrist")
@@ -1848,16 +1844,18 @@ class SerialLink(object):
         if wrist_flip:
             sol[2] = 2
 
-        if self._is_simple(L):
+        if self._is_simple():
             self.ikineType = 'nooffset'
-        elif self._is_puma(L):
+        elif self._is_puma():
             self.ikineType = 'puma'
-        elif self._is_offset(L):
+        elif self._is_offset():
             self.ikineType = 'offset'
-        elif self._is_rrp(L):
+        elif self._is_rrp():
             self.ikineType = 'rrp'
         else:
-            return('This kinematic structure not supported')
+            raise ValueError('This kinematic structure not supported')
+
+        print(self.ikineType)
 
         # for j in range(trajn):
         #     pass
@@ -1865,32 +1863,62 @@ class SerialLink(object):
     def _is_simple(self):
         L = self.links
         alpha = [-np.pi/2, 0, np.pi/2]
-        s = np.all([L[1:2].d] == 0) and \
+        s = (L[1].d == 0 and L[2].d == 0) and \
             (
-                np.all([L[0:2].alpha] == alpha) or
-                np.all([L[0:2].alpha] == -alpha)
+                (
+                    L[0].alpha == alpha[0] and
+                    L[1].alpha == alpha[1] and
+                    L[2].alpha == alpha[2]
+                ) or
+                (
+                    L[0].alpha == -alpha[0] and
+                    L[1].alpha == -alpha[1] and
+                    L[2].alpha == -alpha[2]
+                )
             ) and \
-            np.all([L[0:2].isrevolute] == 1) and \
-            (L[0].a == 0)
+            (not L[0].sigma and not L[1].sigma and not L[2].sigma) and \
+            L[0].a == 0
+
+        return s
 
     def _is_offset(self):
         L = self.links
         alpha = [-np.pi/2, 0, np.pi/2]
         s = (
-                np.all([L[0:2].alpha] == alpha) or
-                np.all([L[0:2].alpha] == -alpha)
+                (
+                    L[0].alpha == alpha[0] and
+                    L[1].alpha == alpha[1] and
+                    L[2].alpha == alpha[2]
+                ) or
+                (
+                    L[0].alpha == -alpha[0] and
+                    L[1].alpha == -alpha[1] and
+                    L[2].alpha == -alpha[2]
+                )
             ) and \
-            np.all([L[0:2].isrevolute] == 1)
+            (not L[0].sigma and not L[1].sigma and not L[2].sigma)
+
+        return s
 
     def _is_rrp(self):
         L = self.links
         alpha = [-np.pi/2, np.pi/2, 0]
-        s = np.all([L[1:2].a] == 0) and \
+        s = (L[1].a == 0 and L[2].a == 0) and \
             (
-                np.all([L[0:2].alpha] == alpha) or
-                np.all([L[0:2].alpha] == -alpha)
+                (
+                    L[0].alpha == alpha[0] and
+                    L[1].alpha == alpha[1] and
+                    L[2].alpha == alpha[2]
+                ) or
+                (
+                    L[0].alpha == -alpha[0] and
+                    L[1].alpha == -alpha[1] and
+                    L[2].alpha == -alpha[2]
+                )
             ) and \
-            np.all([L[0:2].isrevolute] == [1 1 0])
+            not L[0].sigma and not L[1].sigma and L[2].sigma
+
+        return s
 
     def _is_puma(self):
         L = self.links
@@ -1899,6 +1927,12 @@ class SerialLink(object):
                 L[1].d == 0 and
                 L[0].a == 0 and
                 not L[2].d == 0 and
-                not (L[2].a == 0) and
-                np.all([L[0:2].alpha] == alpha) and
-                np.all([L[0:2].isrevolute] == 1))
+                not L[2].a == 0 and
+                (
+                    L[0].alpha == alpha[0] and
+                    L[1].alpha == alpha[1] and
+                    L[2].alpha == alpha[2]
+                ) and
+                (not L[0].sigma and not L[1].sigma and not L[2].sigma))
+
+        return s

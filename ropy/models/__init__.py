@@ -7,6 +7,7 @@ from ropy.models.mdl_mico import Mico
 from ropy.models.Panda import Panda
 from ropy.models.PandaMDH import PandaMDH
 from ropy.models.Frankie import Frankie
+from ropy.models.Puma560 import Puma560
 
 __all__ = [
     'Panda',
@@ -14,5 +15,6 @@ __all__ = [
     'Frankie',
     'LBR7',
     'Sawyer',
-    'Mico'
+    'Mico',
+    'Puma560'
 ]

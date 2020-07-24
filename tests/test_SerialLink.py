@@ -778,3 +778,80 @@ class TestLink(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             r3.ikine3(T)
+
+    def test_ikine6s_puma(self):
+        r0 = rp.Puma560()
+        q = r0.qr
+        T = r0.fkine(q)
+
+        r0.ikine6s(T)
+
+    def test_ikine6s_rrp(self):
+
+        l0 = rp.Revolute(alpha=-np.pi/2)
+        l1 = rp.Revolute(alpha=np.pi/2)
+        l2 = rp.Prismatic()
+        l3 = rp.Revolute(alpha=-np.pi/2)
+        l4 = rp.Revolute(alpha=np.pi/2)
+        l5 = rp.Revolute()
+        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
+
+        q = [1, 1, 1, 1, 1, 1]
+        T = r0.fkine(q)
+
+        r0.ikine6s(T)
+
+    def test_ikine6s_simple(self):
+        l0 = rp.Revolute(alpha=-np.pi/2)
+        l1 = rp.Revolute()
+        l2 = rp.Revolute(alpha=np.pi/2)
+        l3 = rp.Revolute(alpha=-np.pi/2)
+        l4 = rp.Revolute(alpha=np.pi/2)
+        l5 = rp.Revolute()
+        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
+
+        q = [1, 1, 1, 1, 1, 1]
+        T = r0.fkine(q)
+        r0.ikine6s(T)
+
+    def test_ikine6s_offset(self):
+        l0 = rp.Revolute(alpha=-np.pi/2)
+        l1 = rp.Revolute(d=1.0)
+        l2 = rp.Revolute(alpha=np.pi/2)
+        l3 = rp.Revolute(alpha=-np.pi/2)
+        l4 = rp.Revolute(alpha=np.pi/2)
+        l5 = rp.Revolute()
+        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
+
+        q = [1, 1, 1, 1, 1, 1]
+        T = r0.fkine(q)
+        r0.ikine6s(T.A, left=False, elbow_up=False, wrist_flip=True)
+
+    def test_ikine6s_fail(self):
+        l0 = rp.Revolute(alpha=np.pi/2)
+        l1 = rp.Revolute(d=1.0)
+        l2 = rp.Revolute(alpha=np.pi/2)
+        l3 = rp.Revolute(alpha=-np.pi/2)
+        l4a = rp.Revolute(alpha=np.pi/2)
+        l4b = rp.Revolute()
+        l5 = rp.Revolute()
+        l6 = rp.Revolute(mdh=1)
+        r0 = rp.SerialLink([l0, l1, l2, l3, l4a, l5])
+        r1 = rp.SerialLink([l0, l1, l2, l3, l4b, l5])
+        r2 = rp.SerialLink([l1, l2, l3])
+        r3 = rp.SerialLink([l6, l6, l6, l6, l6, l6])
+
+        q = [1, 1, 1, 1, 1, 1]
+        T = r0.fkine(q)
+
+        with self.assertRaises(ValueError):
+            r0.ikine6s(T)
+
+        with self.assertRaises(ValueError):
+            r1.ikine6s(T)
+
+        with self.assertRaises(ValueError):
+            r2.ikine6s(T)
+
+        with self.assertRaises(ValueError):
+            r3.ikine6s(T)
