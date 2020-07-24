@@ -6,6 +6,9 @@ from numpy import sign
 class GraphicsGrid:
     """
     This class holds the current grid displayed in the canvas
+
+    :param scene: The scene in which to add the grid
+    :type scene: class:`vpython.canvas`
     """
 
     def __init__(self, scene):

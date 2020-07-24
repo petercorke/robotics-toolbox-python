@@ -577,6 +577,7 @@ class GraphicalRobot:
 
         # Turn off the graphics in the canvas
         self.joints[self.num_joints - 1].set_joint_visibility(False)
+        self.joints[self.num_joints - 1].draw_reference_frame(False)
         # Ensure deletion
         self.joints[self.num_joints - 1] = None
 
@@ -758,6 +759,7 @@ class GraphicalRobot:
         """
         # For each joint
         num = 0
+        print(self.name)
         for joint in self.joints:
             print("Joint", num, "| Type:", joint.get_joint_type(), "| Pose:")
             print(joint.get_pose(), "\n")
