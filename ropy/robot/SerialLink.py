@@ -2309,7 +2309,7 @@ class SerialLink(object):
         except ValueError:
             verifymatrix(q0, (self.n, trajn))
 
-        qt = np.zeros((6, trajn))
+        qt = np.zeros((self.n, trajn))
         success = []
         err = []
         col = 2
@@ -2357,6 +2357,96 @@ class SerialLink(object):
             if res.success and i < trajn-1:
                 q0[:, i+1] = res.x
 
+            qt[:, i] = res.x
+            success.append(res.success)
+            err.append(res.fun)
+
+        if trajn == 1:
+            return qt[:, 0], success[0], err[0]
+        else:
+            return qt, success, err
+
+    def ikunc(self, T, q0=None, ilimit=1000):
+        """
+        Inverse manipulator by optimization without joint limits
+
+        q, success, err = ikunc(T) are the joint coordinates (n) corresponding
+        to the robot end-effector pose T which is an SE3 object or
+        homogenenous transform matrix (4x4), and n is the number of robot
+        joints. Also returns success and err which is the scalar final value
+        of the objective function.
+
+        q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the
+        initial joint coordinates q0 used for the minimisation.
+
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects (m) or a homogeneous
+        transform sequence (4x4xm) then returns the joint coordinates
+        corresponding to each of the transforms in the sequence. q is nxm
+        where n is the number of robot joints. The initial estimate of q
+        for each time step is taken as the solution from the previous time
+        step.
+
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
+        :param ilimit: Iteration limit (default 1000)
+        :type ilimit: bool
+
+        :retrun q: The calculated joint values
+        :rtype q: float np.ndarray(n)
+        :retrun success: IK solved (True) or failed (False)
+        :rtype success: bool
+        :retrun error: Final pose error
+        :rtype error: float
+
+        Notes:
+        - Joint limits are not considered in this solution.
+        - Can be used for robots with arbitrary degrees of freedom.
+        - In the case of multiple feasible solutions, the solution returned
+          depends on the initial choice of q0
+        - Works by minimizing the error between the forward kinematics of the
+          joint angle solution and the end-effector frame as an optimisation.
+          The objective function (error) is described as:
+                  sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+          Where omega is some gain matrix, currently not modifiable.
+        """
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        if q0 is None:
+            q0 = np.zeros((self.n, trajn))
+
+        try:
+            q0 = getvector(q0, self.n, 'col')
+        except ValueError:
+            verifymatrix(q0, (self.n, trajn))
+
+        qt = np.zeros((self.n, trajn))
+        success = []
+        err = []
+
+        reach = np.sum(np.abs([self.a, self.d]))
+        omega = np.diag([1, 1, 1, 3/reach])
+
+        def sumsqr(arr):
+            return np.sum(np.power(arr, 2))
+
+        for i in range(trajn):
+
+            Ti = T[i]
+
+            res = minimize(
+                lambda q: sumsqr(
+                    (
+                        (np.linalg.inv(Ti.A) @ self.fkine(q).A) -
+                        np.eye(4)) @ omega),
+                q0[:, i],
+                options={'gtol': 1e-6, 'maxiter': ilimit})
+
+            print(res)
             qt[:, i] = res.x
             success.append(res.success)
             err.append(res.fun)

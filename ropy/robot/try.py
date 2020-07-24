@@ -41,7 +41,7 @@ T = puma.fkine(q)
 
 # puma.ikine6s(T)
 
-qr = puma.ikinem(T)
+qr = puma.ikunc(T)
 print(qr)
 
 
