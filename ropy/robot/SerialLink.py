@@ -2300,7 +2300,7 @@ class SerialLink(object):
         trajn = len(T)
 
         if q0 is None:
-            q0 = np.zeros(self.n)
+            q0 = np.zeros((self.n, trajn))
 
         try:
             q0 = getvector(q0, self.n, 'col')
@@ -2329,7 +2329,7 @@ class SerialLink(object):
 
             if stiffness > 0:
                 # Enforce a continuity constraint on joints, minimum bend
-                E += np.sum(diff(q)**2) * stiffness
+                E += np.sum(np.diff(q)**2) * stiffness
 
             return E
 
@@ -2352,6 +2352,9 @@ class SerialLink(object):
                     q0[:, i],
                     options={'gtol': 1e-6, 'maxiter': ilimit})
 
+            if res.success and i < trajn-1:
+                q0[:, i+1] = res.x
+
             qt[:, i] = res.x
             success.append(res.success)
             err.append(res.fun)
@@ -2359,4 +2362,4 @@ class SerialLink(object):
         if trajn == 1:
             return qt[:, 0], success[0], err[0]
         else:
-            return st, success, err
+            return qt, success, err

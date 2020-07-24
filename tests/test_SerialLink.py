@@ -928,17 +928,16 @@ class TestLink(unittest.TestCase):
         puma = rp.Puma560()
         q = puma.qr
         T = puma.fkine(q)
-        # Tt = s
+        Tt = sm.SE3([T, T])
 
         qr0 = [0,  1.5238e+00, -1.4768e+00, 0.0, -4.6949e-02, 0.0]
         qr1 = [-2.6625e-06, 1.5708e+00, -1.5708e+00, 5.4125e-03, -6.5779e-06,
                0.0000e+00]
 
         q0, _, _ = puma.ikinem(Tt)
-        q1, _, _ = puma.ikinem(T, qlimits=False)
+        q1, success, _ = puma.ikinem(T.A, qlimits=False)
+        q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
 
-        print(T)
-        print(puma.fkine(q1))
-
-        nt.assert_array_almost_equal(q0, qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[:, 0], qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[:, 1], qr0, decimal=4)
         nt.assert_array_almost_equal(q1, qr1, decimal=4)
