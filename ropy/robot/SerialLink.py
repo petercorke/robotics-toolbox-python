@@ -988,7 +988,7 @@ class SerialLink(object):
         matrix which relates Cartesian force/torque to Cartesian
         acceleration at the joint configuration q.
 
-        M = cinertia(q) as above except uses the stored q value of the robot
+        M = cinertia() as above except uses the stored q value of the robot
         object.
 
         :param q: The joint angles/configuration of the robot (Optional,
@@ -1010,6 +1010,58 @@ class SerialLink(object):
         Mx = Ji.T @ M @ Ji
 
         return Mx
+
+    def inertia(self, q=None):
+        """
+        SerialLink.INERTIA Manipulator inertia matrix
+
+        I = inertia(q) is the symmetric joint inertia matrix (nxn) which
+        relates joint torque to joint acceleration for the robot at joint
+        configuration q.
+
+        I = inertia() as above except uses the stored q value of the robot
+        object.
+
+        If q is a matrix (nxk), each row is interpretted as a joint state
+        vector, and the result is a 3d-matrix (nxnxk) where each plane
+        corresponds to the inertia for the corresponding row of q.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+
+        :return I: The inertia matrix
+        :rtype I: float np.ndarray(n,n)
+
+        Notes:
+        - The diagonal elements I(J,J) are the inertia seen by joint actuator
+          J.
+        - The off-diagonal elements I(J,K) are coupling inertias that relate
+          acceleration on joint J to force/torque on joint K.
+        - The diagonal terms include the motor inertia reflected through the
+          gear ratio.
+        """
+
+        cols = 1
+        if q is None:
+            q = np.copy(self.q, 'col')
+        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[1] > 1:
+            cols = q.shape[1]
+            ismatrix(q, (self.n, cols))
+        else:
+            q = getvector(q, self.n, 'col')
+
+        In = np.zeros((self.n, self.n))
+
+        for i in range(cols):
+            m = rne(
+                robot, ones(self.n, 1) @ q[:, i],
+                np.zeros((self.n, self.n)),
+                np.eye(self.n),
+                gravity=[0 0 0])
+            # M = cat(3, M, m);
+
+        return In
 
     def coriolis(self, qd, q=None):
         """
