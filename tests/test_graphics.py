@@ -16,7 +16,7 @@ import graphics.model_puma560 as mdl_puma
 
 
 class TestCommonFunctions(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.se3 = SE3().Tx(3)
 
     def test_get_pose_x_vector(self):
@@ -178,7 +178,7 @@ class TestGrid(unittest.TestCase):
 
 
 class TestRobot(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.scene = canvas.GraphicsCanvas()
 
         #    0.707107 -0.707107  0         0
