@@ -1761,14 +1761,14 @@ class SerialLink(object):
         """
         Analytical inverse kinematics
 
-        q = ikine6s(T) are the joint coordinates (n) corresponding to the
+        q, err = ikine6s(T) are the joint coordinates (n) corresponding to the
         robot end-effector pose T which is an SE3 object or homogenenous
         transform matrix (4x4), and n is the number of robot joints. This
         is an analytic solution for a 6-axis robot with a spherical wrist
         (the most common form for industrial robot arms).
 
-        q = ikine6s(T, left, elbow_up, wrist_flip) as above except the arm
-        location, elbow position, and wrist orientation can be specified.
+        q, err = ikine6s(T, left, elbow_up, wrist_flip) as above except the
+        arm location, elbow position, and wrist orientation can be specified.
 
         Trajectory operation:
         In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
@@ -1786,8 +1786,10 @@ class SerialLink(object):
             flipped (rotated by 180 deg)
         :type wrist_flip: bool
 
-        :retrun q: The calculated joint values
+        :return q: The calculated joint values
         :rtype q: float np.ndarray(n)
+        :return err: Any errors encountered
+        :rtype err: list String
 
         Notes:
         - Treats a number of specific cases:
@@ -2225,3 +2227,136 @@ class SerialLink(object):
                 (not L[0].sigma and not L[1].sigma and not L[2].sigma))
 
         return s
+
+    def ikinem(self, T, q0=None, pweight=1.0, stiffness=0.0,
+               qlimits=True, ilimit=1000, nolm=False):
+        """
+        Numerical inverse kinematics with joint limits
+        q, success, err = ikinem(T) is the joint coordinates corresponding to
+        the robot end-effector pose T which is a homogenenous transform.
+
+        q, success, err = R.ikinem(T, q0, pweight, stiffness, qlimits, ilimit,
+        nolm) as above except with options defined such as the initial
+        estimate of the joint coordinates q0.
+
+        Trajectory operation:
+        In all cases if T is 4x4xm it is taken as a homogeneous transform
+        sequence and ikinem(T) returns the joint coordinates corresponding to
+        each of the transforms in the sequence. q is nxm where n is the number
+        of robot joints. The initial estimate of q for each time step is taken
+        as the solution from the previous time step.
+
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
+        :param pweight: weighting on position error norm compared to rotation
+            error (default 1)
+        :type pweight: float
+        :param stiffness: Stiffness used to impose a smoothness contraint on
+            joint angles, useful when n is large (default 0)
+        :type stiffness: float
+        :param qlimits: Enforce joint limits (default True)
+        :type qlimits: bool
+        :param ilimit: Iteration limit (default 1000)
+        :type ilimit: bool
+        :param nolm: Disable Levenberg-Marquadt
+        :type nolm: bool
+
+        :retrun q: The calculated joint values
+        :rtype q: float np.ndarray(n)
+        :retrun success: IK solved (True) or failed (False)
+        :rtype success: bool
+        :retrun error: Final pose error
+        :rtype error: float
+
+        Notes:
+        - PROTOTYPE CODE UNDER DEVELOPMENT, intended to do numerical inverse
+          kinematics with joint limits
+        - The inverse kinematic solution is generally not unique, and
+          depends on the initial guess q0 (defaults to 0).
+        - The function to be minimized is highly nonlinear and the solution is
+          often trapped in a local minimum, adjust q0 if this happens.
+        - The default value of q0 is zero which is a poor choice for most
+          manipulators (eg. puma560, twolink) since it corresponds to a
+          kinematic singularity.
+        - Such a solution is completely general, though much less efficient
+          than specific inverse kinematic solutions derived symbolically, like
+          ikine6s or ikine3.
+        - Uses Levenberg-Marquadt minimizer LMFsolve if it can be found,
+          if 'nolm' is not given, and 'qlimits' false
+        - The error function to be minimized is computed on the norm of the
+          error between current and desired tool pose.  This norm is computed
+          from distances and angles and 'pweight' can be used to scale the
+          position error norm to be congruent with rotation error norm.
+        - This approach allows a solution to obtained at a singularity, but
+          the joint angles within the null space are arbitrarily assigned.
+        - Joint offsets, if defined, are added to the inverse kinematics to
+          generate q.
+        - Joint limits become explicit contraints if 'qlimits' is set.
+        """
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        if q0 is None:
+            q0 = np.zeros(self.n)
+
+        try:
+            q0 = getvector(q0, self.n, 'col')
+        except ValueError:
+            verifymatrix(q0, (self.n, trajn))
+
+        qt = np.zeros((6, trajn))
+        success = []
+        err = []
+        col = 2
+
+        # Define the cost function to minimise
+        def cost(q, T, pweight, col, stiffness):
+            Tq = self.fkine(q)
+
+            # find the pose error in SE(3)
+            dT = T.t - Tq.t
+
+            # translation error
+            E = np.linalg.norm(dT) * pweight
+
+            # Rotation error
+            # Find dot product of
+            dd = np.dot(T.A[0:3, col], Tq.A[0:3, col])
+            E += np.arccos(dd)**2 * 1000
+
+            if stiffness > 0:
+                # Enforce a continuity constraint on joints, minimum bend
+                E += np.sum(diff(q)**2) * stiffness
+
+            return E
+
+        for i in range(trajn):
+
+            Ti = T[i]
+
+            if qlimits:
+                qlim = self.qlim
+                bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
+
+                res = minimize(
+                    lambda q: cost(q, Ti, pweight, col, stiffness),
+                    q0[:, i], bounds=bnds,
+                    options={'gtol': 1e-6, 'maxiter': ilimit})
+            else:
+                # No joint limits, unconstrained optimization
+                res = minimize(
+                    lambda q: cost(q, Ti, pweight, col, stiffness),
+                    q0[:, i],
+                    options={'gtol': 1e-6, 'maxiter': ilimit})
+
+            qt[:, i] = res.x
+            success.append(res.success)
+            err.append(res.fun)
+
+        if trajn == 1:
+            return qt[:, 0], success[0], err[0]
+        else:
+            return st, success, err
