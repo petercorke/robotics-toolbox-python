@@ -1058,7 +1058,7 @@ class SerialLink(object):
                 robot, ones(self.n, 1) @ q[:, i],
                 np.zeros((self.n, self.n)),
                 np.eye(self.n),
-                gravity=[0 0 0])
+                gravity=[0, 0, 0])
             # M = cat(3, M, m);
 
         return In
