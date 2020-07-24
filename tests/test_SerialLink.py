@@ -784,14 +784,16 @@ class TestLink(unittest.TestCase):
         q = r0.qr
         T = r0.fkine(q)
 
-        qr = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
+        qr0 = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
+        qr1 = [0.0000, 1.5238, -1.4768, -0.0000, -0.0470, -0.0000]
 
         q0, _ = r0.ikine6s(T)
-        nt.assert_array_almost_equal(q0, qr, decimal=4)
+        q1, _ = r0.ikine6s(T, left=False, elbow_up=False, wrist_flip=True)
 
+        nt.assert_array_almost_equal(q0, qr0, decimal=4)
+        nt.assert_array_almost_equal(q1, qr1, decimal=4)
 
     def test_ikine6s_rrp(self):
-
         l0 = rp.Revolute(alpha=-np.pi/2)
         l1 = rp.Revolute(alpha=np.pi/2)
         l2 = rp.Prismatic()
@@ -799,11 +801,25 @@ class TestLink(unittest.TestCase):
         l4 = rp.Revolute(alpha=np.pi/2)
         l5 = rp.Revolute()
         r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-
+        r1 = rp.SerialLink([l1, l0, l2, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
-        T = r0.fkine(q)
+        T1 = r0.fkine(q)
+        T2 = r1.fkine(q)
 
-        r0.ikine6s(T)
+        qr0 = [1.0000, -2.1416, -1.0000, -1.0000, -2.1416, 1.0000]
+        qr1 = [-2.1416, -1.0000,  1.0000, -2.1416, 1.0000, 1.0000]
+        qr2 = [1.0000, 1.0000, 1.0000, -2.1416, -1.0000, -2.1416]
+        qr3 = [-2.1416, 2.1416, -1.0000, -1.0000, 2.1416, -2.1416]
+
+        q0, _ = r0.ikine6s(T1)
+        q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
+        q2, _ = r1.ikine6s(T2)
+        q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
+
+        nt.assert_array_almost_equal(q0, qr0, decimal=4)
+        nt.assert_array_almost_equal(q1, qr1, decimal=4)
+        nt.assert_array_almost_equal(q2, qr2, decimal=4)
+        nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
     def test_ikine6s_simple(self):
         l0 = rp.Revolute(alpha=-np.pi/2)
@@ -813,10 +829,25 @@ class TestLink(unittest.TestCase):
         l4 = rp.Revolute(alpha=np.pi/2)
         l5 = rp.Revolute()
         r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-
+        r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
-        T = r0.fkine(q)
-        r0.ikine6s(T)
+        T1 = r0.fkine(q)
+        T2 = r1.fkine(q)
+
+        qr0 = [0, 0, 0, -0.9741, -2.2630, -0.4605]
+        qr1 = [0, 0, 0, 0.1947, -1.3811, 1.8933]
+        qr2 = [0, 0, 0, 2.1675, 2.2630, 2.6811]
+        qr3 = [0, 0, 0, -2.9468, 1.3811, -1.2483]
+
+        q0, _ = r0.ikine6s(T1)
+        q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
+        q2, _ = r1.ikine6s(T2)
+        q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
+
+        nt.assert_array_almost_equal(q0, qr0, decimal=4)
+        nt.assert_array_almost_equal(q1, qr2, decimal=4)
+        nt.assert_array_almost_equal(q2, qr1, decimal=4)
+        nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
     def test_ikine6s_offset(self):
         l0 = rp.Revolute(alpha=-np.pi/2)
@@ -826,10 +857,39 @@ class TestLink(unittest.TestCase):
         l4 = rp.Revolute(alpha=np.pi/2)
         l5 = rp.Revolute()
         r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-
+        r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
+        T1 = r0.fkine(q)
+        T2 = r1.fkine(q)
+
+        qr0 = [1.0000, 3.1416, -0.0000, -1.1675, -0.8786, 2.6811]
+        qr1 = [1.0000, -1.1059, 2.6767, 0.8372, 1.2639, 1.3761]
+        qr2 = [1.0000, 3.1416, -3.1416, -0.8053, -1.3811, 1.8933]
+        qr3 = [1.0000, -1.1059, -0.4649, 1.8311, 2.3192, -2.6398]
+
+        q0, _ = r0.ikine6s(T1.A)
+        q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
+        q2, _ = r1.ikine6s(T2)
+        q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
+
+        nt.assert_array_almost_equal(q0, qr0, decimal=4)
+        nt.assert_array_almost_equal(q1, qr1, decimal=4)
+        nt.assert_array_almost_equal(q2, qr2, decimal=4)
+        nt.assert_array_almost_equal(q3, qr3, decimal=4)
+
+    def test_ikine6s_traj(self):
+        r0 = rp.Puma560()
+        q = r0.qr
         T = r0.fkine(q)
-        r0.ikine6s(T.A, left=False, elbow_up=False, wrist_flip=True)
+        Tt = sm.SE3([T, T, T])
+
+        qr0 = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
+
+        q0, _ = r0.ikine6s(Tt)
+
+        nt.assert_array_almost_equal(q0[:, 0], qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[:, 1], qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[:, 2], qr0, decimal=4)
 
     def test_ikine6s_fail(self):
         l0 = rp.Revolute(alpha=np.pi/2)
@@ -844,6 +904,10 @@ class TestLink(unittest.TestCase):
         r1 = rp.SerialLink([l0, l1, l2, l3, l4b, l5])
         r2 = rp.SerialLink([l1, l2, l3])
         r3 = rp.SerialLink([l6, l6, l6, l6, l6, l6])
+
+        puma = rp.Puma560()
+        T = sm.SE3(0, 10, 10)
+        puma.ikine6s(T)
 
         q = [1, 1, 1, 1, 1, 1]
         T = r0.fkine(q)
