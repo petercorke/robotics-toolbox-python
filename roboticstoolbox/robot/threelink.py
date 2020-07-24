@@ -13,12 +13,12 @@ from roboticstoolbox.robot.serial_link import *
 
 L = []
 
-L.append(Link('a', 1, 'type', 'revolute'))
-L.append(Link('a', 1, 'type', 'revolute'))
-L.append(Link('a', 1, 'type', 'revolute'))
+L.append(Link(a=1, jointtype='R'))
+L.append(Link(a=1, jointtype='R'))
+L.append(Link(a=1, jointtype='R'))
 
 
-qz = [0,0,0]
+qz = [0.1,0.1,0.1]
 
 tl = SerialLink(L, name='Simple three link')
 

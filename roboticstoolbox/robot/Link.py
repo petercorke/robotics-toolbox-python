@@ -130,7 +130,7 @@ class Link(list):
         self.mdh = 0
         self.offset = 0
         self.flip = False
-        self.qlim = []
+        self.qlim = [-pi, pi]
         self.mdh = False
 
         """

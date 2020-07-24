@@ -4,7 +4,8 @@ import numpy as np
 from roboticstoolbox.robot.Link import *
 from spatialmath.pose3d import *
 from scipy.optimize import minimize
-# from graphics.graphics_robot import *
+import graphics as gph
+
 
 class SerialLink:
 
@@ -91,13 +92,14 @@ class SerialLink:
         if unit == 'deg':
             jointconfig = jointconfig * pi / 180
         if alltout:
-            allt = list(range(0, self.length))
+            allt = [SE3(self.base)]
         if jointconfig.size == self.length:
             t = SE3(self.base)
             for i in range(self.length):
                 t *= self.links[i].A(jointconfig[i])
                 if alltout:
-                    allt[i] = t
+                    allt.append(t)
+            #TODO tool isn't shown in allt
             t *= SE3(self.tool)
         else:
             assert jointconfig.shape[1] == self.length, "joinconfig must have {self.length} columns"
@@ -155,18 +157,24 @@ class SerialLink:
             jointconfig = jointconfig * pi / 180
         if jointconfig.size == self.length:
             poses = self.fkine(jointconfig, unit, alltout=True)
-            t = list(range(len(poses)))
-            for i in range(len(poses)):
-                t[i] = poses[i].t
-            # add the base
-            t.insert(0, SE3(self.base).t)
-            grjoints = list(range(len(t)-1))
 
-            canvas_grid = init_canvas()
+            g_canvas = gph.GraphicsCanvas()
+            print("canvas created")
 
-            for i in range(1, len(t)):
-                grjoints[i-1] = RotationalJoint(vector(t[i-1][0], t[i-1][1], t[i-1][2]), vector(t[i][0], t[i][1], t[i][2]))
-            print(grjoints)
-            x = GraphicalRobot(grjoints)
+            roplot = gph.GraphicalRobot(g_canvas, self.name)
 
-            return x
+            for i in range(1, len(poses)):
+
+                # calculate length of joint
+                x1 = poses[i-1].t[0]
+                x2 = poses[i].t[0]
+                y1 = poses[i-1].t[1]
+                y2 = poses[i].t[1]
+                z1 = poses[i-1].t[2]
+                z2 = poses[i].t[2]
+                length = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1))
+
+                # add joint to robot
+                roplot.append_link(self.links[i-1].jointtype, poses[i], length)
+
+            return
