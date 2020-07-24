@@ -1320,17 +1320,19 @@ class SerialLink(object):
         reach = np.sum(np.abs([self.a, self.d]))
         omega = np.diag([1, 1, 1, 3/reach])
 
-        fun = lambda q: (
-            np.sum(
-                ((np.linalg.pinv(Ti.A) @ self.fkine(q).A - np.eye(4)) @ omega)
+        def cost(q, T, omega):
+            return np.sum(
+                ((np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @ omega)
                 ** 2
-            ))
+            )
 
         bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
 
         for i in range(trajn):
             Ti = T[i]
-            res = minimize(fun, q0[:, i], bounds=bnds, options={'gtol': 1e-6})
+            res = minimize(
+                lambda q: cost(q, Ti, omega),
+                q0[:, i], bounds=bnds, options={'gtol': 1e-6})
             qstar[:, i] = res.x
             error.append(res.fun)
             exitflag.append(res.success)
