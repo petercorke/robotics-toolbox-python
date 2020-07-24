@@ -784,7 +784,11 @@ class TestLink(unittest.TestCase):
         q = r0.qr
         T = r0.fkine(q)
 
-        r0.ikine6s(T)
+        qr = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
+
+        q0, _ = r0.ikine6s(T)
+        nt.assert_array_almost_equal(q0, qr, decimal=4)
+
 
     def test_ikine6s_rrp(self):
 
