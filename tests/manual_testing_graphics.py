@@ -67,7 +67,7 @@ def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
     """
-    puma560 = gph.import_puma_560(g_canvas.scene)
+    puma560 = gph.import_puma_560(g_canvas)
     puma560.print_joint_poses()
 
 
@@ -142,7 +142,7 @@ def test_puma560_angle_change():
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
-    puma560 = gph.import_puma_560(g_canvas.scene)
+    puma560 = gph.import_puma_560(g_canvas)
 
     print("Prior Poses")
     puma560.print_joint_poses()
@@ -171,7 +171,7 @@ def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560(g_canvas.scene)
+    puma560 = gph.import_puma_560(g_canvas)
     puma560.set_reference_visibility(True)
 
     sleep(2)
@@ -184,7 +184,7 @@ def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560(g_canvas.scene)
+    puma560 = gph.import_puma_560(g_canvas)
 
     # Get the poses for a ready-position
     puma = Puma560()
