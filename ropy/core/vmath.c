@@ -11,40 +11,6 @@
 #include    <stdio.h>
 
 
-// static PyObject *method_add(PyObject *self, PyObject *args) {
-//     int a, b;
-//     // int bytes_copied = -1;
-
-//     /* Parse arguments */
-//     if(!PyArg_ParseTuple(args, "dd", &a, &b)) {
-//         return NULL;
-//     }
-
-//     // FILE *fp = fopen(filename, "w");
-//     // bytes_copied = fputs(str, fp);
-//     // fclose(fp);
-
-//     int res = a + b;
-
-//     return Py_BuildValue("d", res);
-//     // PyLong_FromLong(res);
-// }
-
-
-
-
-
-
-
-
-
-
-// void inithelloworld(void) {
-//    Py_InitModule3("helloworld", helloworld_funcs,
-//                   "Extension module example!");
-// }
-
-
 /**
  * Vector cross product.
  *

@@ -30,11 +30,8 @@
  *
  */
 
-// #include "mex.h"
 #include <math.h>
 #include <Python.h>
-
-// #include <numpy/arrayobject.h>
 #include    "frne.h"
 
 /*
@@ -70,19 +67,12 @@
 
 
 static PyObject *init(PyObject *self, PyObject *args) {
-    // int j, njoints, p, nq;
-    // double  *fext = NULL;
-    // double *grav = NULL;
-    Robot       robot;
-    // mxArray     *link0;
-    // mxArray     *mx_robot;
-    // mxArray     *mx_links;
-    // static int  first_time = 0;
 
-    PyObject *L, *grav;
-    int *njoints, *mdh;
+    Robot robot;
+    PyObject *L, *gravity;
+    int njoints, mdh;
 
-    if (!PyArg_ParseTuple(args, "iiOO", &njoints, &mdh, &L, &grav)) {
+    if (!PyArg_ParseTuple(args, "iiOO", &njoints, &mdh, &L, &gravity)) {
         return NULL;
     }
 
@@ -97,7 +87,7 @@ static PyObject *init(PyObject *self, PyObject *args) {
 
     // Create iterators for arrays
     PyObject *iter_L = PyObject_GetIter(L);
-    PyObject *iter_grav = PyObject_GetIter(grav);
+    PyObject *iter_grav = PyObject_GetIter(gravity);
 
     // Create the gravity vector
     robot.gravity = (Vect *)calloc(1, sizeof(Vect));
@@ -105,18 +95,35 @@ static PyObject *init(PyObject *self, PyObject *args) {
     robot.gravity->y = PyFloat_AsDouble(PyIter_Next(iter_grav));
     robot.gravity->z = PyFloat_AsDouble(PyIter_Next(iter_grav));
 
-    while (1) {
-        PyObject *next = PyIter_Next(iter_L);
-        if (!next) {
-            break;
+    for (int i = 0; i < njoints; i++) {
+
+        Link    *l = &robot.links[0];
+
+        // Allocate memory for Vectors
+        l->rbar = (Vect *)calloc(1, sizeof(Vect));
+        l->I = (double *)calloc(9, sizeof(double));
+        l->Tc = (double *)calloc(2, sizeof(double));
+
+        l->alpha =  PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->A =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->theta =  PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->D =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->jointtype =  PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->offset = PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->m =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->rbar->x =   PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->rbar->y =   PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->rbar->z =   PyFloat_AsDouble(PyIter_Next(iter_L));
+
+        for (int j = 0; j < 9; j++) {
+            l->I[j] =      PyFloat_AsDouble(PyIter_Next(iter_L));
         }
 
-        if (!PyFloat_Check(next)) {
-            printf("fy\n");
-        }
-
-        double foo = PyFloat_AsDouble(next);
-        printf("Num: %f\n", foo);
+        l->Jm =     PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->G =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->B =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->Tc[0] =     PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->Tc[1] =     PyFloat_AsDouble(PyIter_Next(iter_L));
     }
 
     printf("n: %d\n", robot.njoints);
@@ -124,27 +131,27 @@ static PyObject *init(PyObject *self, PyObject *args) {
     printf("Gravity: %f, %f, %f\n", robot.gravity->x, robot.gravity->y, robot.gravity->z);
 
 
+    // TAU = RNE(ROBOT, Q, QD, QDD, GRAV, FEXT)
+    double  *q, *qd, *qdd, *grav, *fext;
+    int nq = njoints, nqd = njoints, nqdd = njoints;
 
-    // robot.gravity = Vect()
+    // Allocate memory for joints
+    q = (double *)calloc(njoints, sizeof(double));
+    qd = (double *)calloc(njoints, sizeof(double));
+    qdd = (double *)calloc(njoints, sizeof(double));
+    grav = (Vect *)calloc(1, sizeof(Vect));
 
-    // if (grav)
-    //     robot.gravity = (Vect *)grav;
-    // else
-    //     robot.gravity = (Vect *)mxGetPr( mxGetProperty(mx_robot, (mwIndex)0, "gravity") );
-
-
-
+    for (int i = 0; i < njoints; i++) {
+        q[i] = 0;
+        qd[i] = 0;
+        qdd[i] = 0;
+    }
 
 
 
     return Py_BuildValue("s", "Hi");
 }
 
-// static PyMethodDef CosMethods[] =
-// {
-//      {"add", method_add, METH_VARARGS, "add two numbers"},
-//      {NULL, NULL, 0, NULL}
-// };
 
 // static char helloworld_docs[] =
 //    "helloworld( ): Any message you want to put here!!\n";
@@ -345,90 +352,7 @@ PyInit_frne(void)
 //         error("wrong number of arguments, %d given", nrhs);
 //     }
 
-//     /*
-//      * fill out the robot structure
-//      */
-//     robot.njoints = njoints;
 
-//     if (grav)
-//         robot.gravity = (Vect *)grav;
-//     else
-//         robot.gravity = (Vect *)mxGetPr( mxGetProperty(mx_robot, (mwIndex)0, "gravity") );
-
-//     /*
-//      * rotate gravity if base transform is set
-//      */
-
-//     /*
-//      * get MDH flag
-//      */
-//     robot.dhtype = mstruct_getint(mx_robot, 0, "mdh");
-
-//     /* build link structure */
-//     robot.links = (Link *)mxCalloc((mwSize) njoints, (mwSize) sizeof(Link));
-
-
-// /***********************************************************************
-//  * Now we have to get pointers to data spread all across a cell-array
-//  * of Matlab structures.
-//  *
-//  * Matlab structure elements can be found by name (slow) or by number (fast).
-//  * We assume that since the link structures are all created by the same
-//  * constructor, the index number for each element will be the same for all
-//  * links.  However we make no assumption about the numbers themselves.
-//  ***********************************************************************/
-
-//     /* get pointer to the first link structure */
-//     link0 = mxGetProperty(mx_robot, (mwIndex) 0, "links");
-//     if (link0 == NULL)
-//         error("couldn't find element link in robot object");
-
-//     /*
-//      * Elements of the link structure are:
-//      *
-//      *  alpha: 
-//      *  A:
-//      *  theta:
-//      *  D:
-//      *  offset:
-//      *  jointtype:
-//      *  mdh:
-//      *  m:
-//      *  r:
-//      *  I:
-//      *  Jm:
-//      *  G:
-//      *  B:
-//      *  Tc:
-//      */
-
-//     if (first_time == 0) {
-//         mexPrintf("Fast RNE: (c) Peter Corke 2002-2012\n");
-//         first_time = 1;
-//     }
-
-//     /*
-//      * copy data from the Link objects into the local links structure
-//      * to save function calls later
-//      */
-//     for (j=0; j<njoints; j++) {
-//         Link    *l = &robot.links[j];
-//         mxArray *links = mxGetProperty(mx_robot, (mwIndex) 0, "links"); // links array
-
-//         l->alpha =  mxGetScalar( mxGetProperty(links, (mwIndex) j, "alpha") );
-//         l->A =      mxGetScalar( mxGetProperty(links, (mwIndex) j, "a") );
-//         l->theta =  mxGetScalar( mxGetProperty(links, (mwIndex) j, "theta") );
-//         l->D =      mxGetScalar( mxGetProperty(links, (mwIndex) j, "d") );
-//         l->jointtype =  mxGetScalar( mxGetProperty(links, (mwIndex) j, "jointtype") );
-//         l->offset = mxGetScalar( mxGetProperty(links, (mwIndex) j, "offset") );
-//         l->m =      mxGetScalar( mxGetProperty(links, (mwIndex) j, "m") );
-//         l->rbar =   (Vect *)mxGetPr( mxGetProperty(links, (mwIndex) j, "r") );
-//         l->I =      mxGetPr( mxGetProperty(links, (mwIndex) j, "I") );
-//         l->Jm =     mxGetScalar( mxGetProperty(links, (mwIndex) j, "Jm") );
-//         l->G =      mxGetScalar( mxGetProperty(links, (mwIndex) j, "G") );
-//         l->B =      mxGetScalar( mxGetProperty(links, (mwIndex) j, "B") );
-//         l->Tc =     mxGetPr( mxGetProperty(links, (mwIndex) j, "Tc") );
-//     }
 
 //     /* Create a matrix for the return argument */
 //     TAU_OUT = mxCreateDoubleMatrix((mwSize) nq, (mwSize) njoints, mxREAL);
@@ -467,71 +391,71 @@ PyInit_frne(void)
 //     mxFree(robot.links);
 // }
 
-// /*
-//  *  Written by;
-//  *
-//  *      Peter I. Corke
-//  *      CSIRO Division of Manufacturing Technology
-//  *      Preston, Melbourne.  Australia. 3072.
-//  *
-//  *      pic@mlb.dmt.csiro.au
-//  *
-//  *  Permission to use and distribute is granted, provided that this message
-//  * is retained, and due credit given when the results are incorporated in
-//  * publised work.
-//  *
-//  */
+/*
+ *  Written by;
+ *
+ *      Peter I. Corke
+ *      CSIRO Division of Manufacturing Technology
+ *      Preston, Melbourne.  Australia. 3072.
+ *
+ *      pic@mlb.dmt.csiro.au
+ *
+ *  Permission to use and distribute is granted, provided that this message
+ * is retained, and due credit given when the results are incorporated in
+ * publised work.
+ *
+ */
 
-// /**
-//  * Return the link rotation matrix and translation vector.
-//  *
-//  * @param l Link object for which R and p* are required.
-//  * @param th Joint angle, overrides value in link object
-//  * @param d Link extension, overrides value in link object
-//  * @param type Kinematic convention.
-//  */
-// static void
-// rot_mat (
-//     Link    *l,
-//     double  th,
-//     double  d,
-//     DHType  type
-// ) {
-//     double      st, ct, sa, ca;
+/**
+ * Return the link rotation matrix and translation vector.
+ *
+ * @param l Link object for which R and p* are required.
+ * @param th Joint angle, overrides value in link object
+ * @param d Link extension, overrides value in link object
+ * @param type Kinematic convention.
+ */
+static void
+rot_mat (
+    Link    *l,
+    double  th,
+    double  d,
+    DHType  type
+) {
+    double      st, ct, sa, ca;
 
-// #ifdef  sun
-//     sincos(th, &st, &ct);
-//     sincos(l->alpha, &sa, &ca);
-// #else
-//     st = sin(th);
-//     ct = cos(th);
-//     sa = sin(l->alpha);
-//     ca = cos(l->alpha);
-// #endif
+#ifdef  sun
+    sincos(th, &st, &ct);
+    sincos(l->alpha, &sa, &ca);
+#else
+    st = sin(th);
+    ct = cos(th);
+    sa = sin(l->alpha);
+    ca = cos(l->alpha);
+#endif
 
-//     switch (type) {
-// case STANDARD:
-//     l->R.n.x = ct;      l->R.o.x = -ca*st;  l->R.a.x = sa*st;
-//     l->R.n.y = st;      l->R.o.y = ca*ct;   l->R.a.y = -sa*ct;
-//     l->R.n.z = 0.0;     l->R.o.z = sa;      l->R.a.z = ca;
+    switch (type) {
+case STANDARD:
+    l->R.n.x = ct;      l->R.o.x = -ca*st;  l->R.a.x = sa*st;
+    l->R.n.y = st;      l->R.o.y = ca*ct;   l->R.a.y = -sa*ct;
+    l->R.n.z = 0.0;     l->R.o.z = sa;      l->R.a.z = ca;
 
-//     l->r.x = l->A;
-//     l->r.y = d * sa;
-//     l->r.z = d * ca;
-//     break;
-// case MODIFIED:
-//     l->R.n.x = ct;      l->R.o.x = -st;     l->R.a.x = 0.0;
-//     l->R.n.y = st*ca;   l->R.o.y = ca*ct;   l->R.a.y = -sa;
-//     l->R.n.z = st*sa;   l->R.o.z = ct*sa;   l->R.a.z = ca;
+    l->r.x = l->A;
+    l->r.y = d * sa;
+    l->r.z = d * ca;
+    break;
+case MODIFIED:
+    l->R.n.x = ct;      l->R.o.x = -st;     l->R.a.x = 0.0;
+    l->R.n.y = st*ca;   l->R.o.y = ca*ct;   l->R.a.y = -sa;
+    l->R.n.z = st*sa;   l->R.o.z = ct*sa;   l->R.a.z = ca;
 
-//     l->r.x = l->A;
-//     l->r.y = -d * sa;
-//     l->r.z = d * ca;
-//     break;
-// default:
-//      error("Invalid DH type %d (expecting 0 = DH or 1 = MDH)", type);
-//     }
-// }
+    l->r.x = l->A;
+    l->r.y = -d * sa;
+    l->r.z = d * ca;
+    break;
+default:
+     perror("Invalid DH type (expecting 0 = DH or 1 = MDH)");
+    }
+}
 
 // /*************************************************************************
 //  * Matlab structure access methods, get the field from joint i
