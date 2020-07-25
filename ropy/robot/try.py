@@ -2,6 +2,23 @@
 import ropy as rp
 import spatialmath as sm
 import numpy as np
+import ctypes
+import frne
+
+puma = rp.Puma560()
+
+
+
+# c_p = ctypes.POINTER(ctypes.c_double)
+
+ls = np.zeros(13*6)
+ls = ls.astype(np.float64)
+
+# ls_p = ls.ctypes.data_as(c_p)
+
+
+r = frne.init(puma.n, puma.mdh, ls, puma.gravity[:, 0])
+print(r)
 
 # panda = rp.PandaMDH()
 # q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
@@ -35,14 +52,14 @@ import numpy as np
 # qr = r0.ikine3(T)
 # print(qr)
 
-puma = rp.Puma560()
-q = puma.qr
-T = puma.fkine(q)
+# puma = rp.Puma560()
+# q = puma.qr
+# T = puma.fkine(q)
 
-# puma.ikine6s(T)
+# # puma.ikine6s(T)
 
-qr = puma.ikunc(T)
-print(qr)
+# qr = puma.ikunc(T)
+# print(qr)
 
 
 # # rrp

@@ -5,8 +5,45 @@
  * \brief Simple vector/matrix maths library.
  */
 
-#include	"mex.h"
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #include	"vmath.h"
+#include    <stdio.h>
+
+
+// static PyObject *method_add(PyObject *self, PyObject *args) {
+//     int a, b;
+//     // int bytes_copied = -1;
+
+//     /* Parse arguments */
+//     if(!PyArg_ParseTuple(args, "dd", &a, &b)) {
+//         return NULL;
+//     }
+
+//     // FILE *fp = fopen(filename, "w");
+//     // bytes_copied = fputs(str, fp);
+//     // fclose(fp);
+
+//     int res = a + b;
+
+//     return Py_BuildValue("d", res);
+//     // PyLong_FromLong(res);
+// }
+
+
+
+
+
+
+
+
+
+
+// void inithelloworld(void) {
+//    Py_InitModule3("helloworld", helloworld_funcs,
+//                   "Extension module example!");
+// }
+
 
 /**
  * Vector cross product.
@@ -120,41 +157,41 @@ mat_vect_mult (Vect *r, double *m, Vect *v)
 	r->z = m[2]*v->x + m[5]*v->y + m[8]*v->z;
 }
 
-/**
- * Print vector.
- *
- * @param s Identification string, printed first.
- * @param v Vector
- *
- * Vector is printed on a single line, preceded by the string \p s.
- */
-void
-vect_print(char *s, Vect *v)
-{
-	int	j;
+// /**
+//  * Print vector.
+//  *
+//  * @param s Identification string, printed first.
+//  * @param v Vector
+//  *
+//  * Vector is printed on a single line, preceded by the string \p s.
+//  */
+// void
+// vect_print(char *s, Vect *v)
+// {
+// 	int	j;
 
-	mexPrintf("%10s: ", s);
-	mexPrintf("%15.3f", v->x);
-	mexPrintf("%15.3f", v->y);
-	mexPrintf("%15.3f\n", v->z);
-}
+// 	mexPrintf("%10s: ", s);
+// 	mexPrintf("%15.3f", v->x);
+// 	mexPrintf("%15.3f", v->y);
+// 	mexPrintf("%15.3f\n", v->z);
+// }
 
 
-/**
- * Print matrix.
- *
- * @param s Identification string, printed first.
- * @param m Rotation matrix.
- *
- * Vector is printed on a single line, preceded by the string \p s.
- */
-void
-rot_print(char *s, Rot *m)
-{
-	int	j;
+// /**
+//  * Print matrix.
+//  *
+//  * @param s Identification string, printed first.
+//  * @param m Rotation matrix.
+//  *
+//  * Vector is printed on a single line, preceded by the string \p s.
+//  */
+// void
+// rot_print(char *s, Rot *m)
+// {
+// 	int	j;
 
-	mexPrintf("%s:\n", s);
-	mexPrintf(" %15.3f%15.3f%15.3f\n", m->n.x, m->o.x, m->a.x);
-	mexPrintf(" %15.3f%15.3f%15.3f\n", m->n.y, m->o.y, m->a.y);
-	mexPrintf(" %15.3f%15.3f%15.3f\n", m->n.z, m->o.z, m->a.z);
-}
+// 	mexPrintf("%s:\n", s);
+// 	mexPrintf(" %15.3f%15.3f%15.3f\n", m->n.x, m->o.x, m->a.x);
+// 	mexPrintf(" %15.3f%15.3f%15.3f\n", m->n.y, m->o.y, m->a.y);
+// 	mexPrintf(" %15.3f%15.3f%15.3f\n", m->n.z, m->o.z, m->a.z);
+// }

@@ -66,7 +66,7 @@ class Link(object):
             theta=0.0,
             a=0.0,
             sigma=0,
-            mdh=0.0,
+            mdh=0,
             offset=0.0,
             qlim=np.zeros(2),
             flip=False,
@@ -224,7 +224,7 @@ class Link(object):
 
     @mdh.setter
     def mdh(self, mdh_new):
-        self._mdh = mdh_new
+        self._mdh = int(mdh_new)
 
     @offset.setter
     def offset(self, offset_new):
