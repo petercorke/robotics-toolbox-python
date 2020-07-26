@@ -105,7 +105,7 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     Robot *robot;
     PyObject *rO, *qO, *qdO, *qddO, *gravO, *fextO;
     double  *q, *qd, *qdd, *fext;
-    Vect *grav;
+    // Vect *grav;
     int nq = 1; //, nqd = njoints, nqdd = njoints;
     int njoints;
 
@@ -124,7 +124,7 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     qd = (double *)calloc(njoints, sizeof(double));
     qdd = (double *)calloc(njoints, sizeof(double));
     fext = (double *)calloc(6, sizeof(double));
-    grav = (Vect *)malloc(sizeof(Vect));
+    // grav = (Vect *)malloc(sizeof(Vect));
 
     // Create iterators for arrays
     PyObject *iq = PyObject_GetIter(qO);
@@ -134,9 +134,9 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     PyObject *ifext = PyObject_GetIter(fextO);
 
     // Create the gravity vector
-    grav->x = PyFloat_AsDouble(PyIter_Next(igrav));
-    grav->y = PyFloat_AsDouble(PyIter_Next(igrav));
-    grav->z = PyFloat_AsDouble(PyIter_Next(igrav));
+    robot->gravity->x = PyFloat_AsDouble(PyIter_Next(igrav));
+    robot->gravity->y = PyFloat_AsDouble(PyIter_Next(igrav));
+    robot->gravity->z = PyFloat_AsDouble(PyIter_Next(igrav));
 
     // Create the joint arrays
     for (int i = 0; i < njoints; i++) {
@@ -182,7 +182,7 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     free(q);
     free(qd);
     free(qdd);
-    free(grav);
+    // free(grav);
     free(fext);
 
     PyObject* ret = PyList_New(njoints);
