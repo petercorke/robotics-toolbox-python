@@ -47,16 +47,21 @@ import time
 puma = rp.Puma560()
 puma.q = puma.qn
 
-z = np.zeros(6)
-o = np.ones(6)
+qd = [0.1, 0.2, 0.8, 0.2, 0.5, 1.0]
+torque = [1.0, 3.2, 1.8, 0.1, 0.7, 4.6]
 
-t0 = puma.rne(z, z, puma.qn)
-t1 = puma.rne(z, o, puma.qn)
+print(puma.accel(qd, torque))
 
-print(puma._rne_changed)
-puma.gravity = [0, 0, 9.81]
-print(puma._rne_changed)
-t2 = puma.rne(z, o, puma.qn)
+# z = np.zeros(6)
+# o = np.ones(6)
+
+# t0 = puma.rne(z, z, puma.qn)
+# t1 = puma.rne(z, o, puma.qn)
+
+# print(puma._rne_changed)
+# puma.gravity = [0, 0, 9.81]
+# print(puma._rne_changed)
+# t2 = puma.rne(z, o, puma.qn)
 
 
 # t2 = time.time()

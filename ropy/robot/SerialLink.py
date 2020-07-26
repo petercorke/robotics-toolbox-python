@@ -849,25 +849,41 @@ class SerialLink(object):
           104, no. 3, pp. 205-211, 1982.
         """
 
+        trajn = 1
+
         if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+            q = self.q
 
-        qd = getvector(qd, self.n)
-        torque = getvector(torque, self.n)
+        try:
+            q = getvector(q, self.n, 'col')
+            qd = getvector(qd, self.n, 'col')
+            torque = getvector(torque, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
+            verifymatrix(qd, (self.n, trajn))
+            verifymatrix(torque, (self.n, trajn))
 
-        # TODO After rne
+        qdd = np.zeros((self.n, trajn))
 
-        # Compute current manipulator inertia torques resulting from unit
-        # acceleration of each joint with no gravity.
-        # M = rne(robot, ones(n,1)*q, zeros(n,n), eye(n), 'gravity', [0 0 0])
+        for i in range(trajn):
+            # Compute current manipulator inertia torques resulting from unit
+            # acceleration of each joint with no gravity.
+            qI = np.c_[q[:, i]] @ np.ones((1, self.n))
+            qdI = np.zeros((self.n, self.n))
+            qddI = np.eye(self.n)
 
-        # Compute gravity and coriolis torque torques resulting from zero
-        # acceleration at given velocity & with gravity acting.
-        # tau = rne(robot, q, qd, zeros(1,n))
+            m = self.rne(qddI, qdI, qI, grav=[0, 0, 0])
 
-        # qdd = M \ (torque - tau)'
+            # Compute gravity and coriolis torque torques resulting from zero
+            # acceleration at given velocity & with gravity acting.
+            tau = np.expand_dims(
+                self.rne(np.zeros((1, self.n)), qd[:, i], q[:, i]),
+                axis=1)
+
+            qdd[:, i] = np.linalg.inv(m) @ (torque - tau).flatten()
+
+        return qdd
 
     def nofriction(self, coulomb=True, viscous=False):
         """
