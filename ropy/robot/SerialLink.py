@@ -175,7 +175,6 @@ class SerialLink(object):
                 args[0]._init_rne()
                 args[0]._rne_init = True
                 args[0]._rne_changed = False
-                print("hello")
             return func(*args)
         return wrapper
 
@@ -2560,13 +2559,73 @@ class SerialLink(object):
 
     @_check_rne
     def rne(self, qdd, qd, q=None, grav=None, fext=None):
+        """
+        Inverse dynamics
 
-        grav = self.gravity
-        fext = np.zeros(6)
+        tau = rne(qdd, qd, q, grav, fext) is the joint torque required for
+        the robot to achieve the specified joint position q (1xn), velocity qd
+        (1xn) and acceleration qdd (1xn), where n is the number of robot
+        joints. fext describes the wrench acting on the end-effector
 
-        q = self.qn
-        qd = np.ones(self.n)
-        qdd = np.ones(self.n)
-        tau = frne(self._rne_ob, q, qd, qdd, grav, fext)
+        Trajectory operation:
+        If q, qd and qdd (nxm) are matrices with m cols representing a
+        trajectory then tau (nxm) is a matrix with cols corresponding to each
+        trajectory step.
 
-        return tau
+        :param qdd: The joint accelerations of the robot
+        :type qdd: float np.ndarray(n)
+        :param qd: The joint velocities of the robot
+        :type qd: float np.ndarray(n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+        :param grav: Gravity vector to overwrite robots gravity value
+        :type grav: float np.ndarray(6)
+        :param fext: Specify wrench acting on the end-effector
+             W=[Fx Fy Fz Mx My Mz]
+        :type fext: float np.ndarray(6)
+
+        Notes:
+        - The torque computed contains a contribution due to armature inertia
+          and joint friction.
+        - If a model has no dynamic parameters set the result is zero.
+        """
+
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+            qd = getvector(qd, self.n, 'col')
+            qdd = getvector(qdd, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[2]
+            verifymatrix(q, (self.n, trajn))
+            verifymatrix(qd, (self.n, trajn))
+            verifymatrix(qdd, (self.n, trajn))
+
+        if grav is None:
+            grav = self.gravity
+
+        # The c function doesn't handle base rotation, so we need to hack the
+        # gravity vector instead
+        grav = self.base.R.T @ grav
+        grav = getvector(grav, 3)
+
+        if fext is None:
+            fext = np.zeros(6)
+        else:
+            fext = getvector(fext, 6)
+
+        tau = np.zeros((self.n, trajn))
+
+        for i in range(trajn):
+            tau[:, i] = frne(
+                self._rne_ob, q[:, i], qd[:, i], qdd[:, i], grav, fext)
+
+        if trajn == 1:
+            return tau[:, 0]
+        else:
+            return tau

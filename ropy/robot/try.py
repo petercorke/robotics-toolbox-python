@@ -33,7 +33,14 @@ puma = rp.Puma560()
 # frne.delete(r)
 # frne.point(r)
 # t1 = time.time()
-print(puma.rne(1, 2, 3, 4, 5))
+
+z = np.zeros(6)
+o = np.ones(6)
+
+
+tau = puma.rne(o, o, puma.qn)
+print(tau)
+
 # t2 = time.time()
 # puma.rne(1, 2, 3, 4, 5)
 # t3 = time.time()
