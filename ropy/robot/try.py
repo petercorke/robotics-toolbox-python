@@ -7,7 +7,7 @@ import frne
 
 import time
 
-puma = rp.Puma560()
+# puma = rp.Puma560()
 
 # L = np.zeros(24*9)
 
@@ -34,12 +34,30 @@ puma = rp.Puma560()
 # frne.point(r)
 # t1 = time.time()
 
+# z = np.zeros(6)
+# o = np.ones(6)
+
+
+# tau = puma.rne(o, o, puma.qn)
+# print(tau)
+
+
+
+
+puma = rp.Puma560()
+puma.q = puma.qn
+
 z = np.zeros(6)
 o = np.ones(6)
 
+t0 = puma.rne(z, z, puma.qn)
+t1 = puma.rne(z, o, puma.qn)
 
-tau = puma.rne(o, o, puma.qn)
-print(tau)
+print(puma._rne_changed)
+puma.gravity = [0, 0, 9.81]
+print(puma._rne_changed)
+t2 = puma.rne(z, o, puma.qn)
+
 
 # t2 = time.time()
 # puma.rne(1, 2, 3, 4, 5)

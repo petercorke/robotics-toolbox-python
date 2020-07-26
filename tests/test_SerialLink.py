@@ -960,3 +960,59 @@ class TestLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(
             T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
+
+    def test_rne(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+
+        z = np.zeros(6)
+        o = np.ones(6)
+
+        tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
+        tr1 = [29.1421, 56.5044, 16.3528, 1.2645, 1.1239, 0.5196]
+        tr2 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
+        tr3 = [32.2416, 59.2850, 16.7723, 2.8687, 0.2991, 1.7138]
+
+        t0 = puma.rne(z, z, puma.qn)
+        t1 = puma.rne(z, o, puma.qn)
+
+        puma.gravity = [0, 0, 9.81]
+        t2 = puma.rne(o, o, puma.qn)
+        t3 = puma.rne(z, z, grav=[0, 0, 9.81])
+        t4 = puma.rne(z, z, q=puma.qn, fext=o)
+
+        nt.assert_array_almost_equal(t0, tr0, decimal=4)
+        nt.assert_array_almost_equal(t1, tr1, decimal=4)
+        nt.assert_array_almost_equal(t2, tr2, decimal=4)
+        nt.assert_array_almost_equal(t3, tr0, decimal=4)
+
+        # TODO Debug fext
+        # nt.assert_array_almost_equal(t4, tr3, decimal=4)
+
+    def test_rne_traj(self):
+        puma = rp.Puma560()
+
+        z = np.zeros(6)
+        o = np.ones(6)
+
+        tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
+        tr1 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
+
+        t0 = puma.rne(np.c_[z, o], np.c_[z, o], np.c_[puma.qn, puma.qn])
+
+        nt.assert_array_almost_equal(t0[:, 0], tr0, decimal=4)
+        nt.assert_array_almost_equal(t0[:, 1], tr1, decimal=4)
+
+    def test_rne_delete(self):
+        puma = rp.Puma560()
+
+        z = np.zeros(6)
+
+        tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
+
+        t0 = puma.rne(z, z, puma.qn)
+        puma.delete_rne()
+        t1 = puma.rne(z, z, puma.qn)
+
+        nt.assert_array_almost_equal(t0, tr0, decimal=4)
+        nt.assert_array_almost_equal(t1, tr0, decimal=4)

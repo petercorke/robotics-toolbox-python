@@ -97,32 +97,32 @@ newton_euler (
 
 #ifdef DEBUG
     /* display the incoming parameters */
-    mexPrintf("-------------------- ne.c ------------------\n");
-    mexPrintf("njoints: %d\n", robot->njoints);
-    mexPrintf("gravity: %f %f %f\n", robot->gravity->x, robot->gravity->y, robot->gravity->z);
+    printf("-------------------- ne.c ------------------\n");
+    printf("njoints: %d\n", robot->njoints);
+    printf("gravity: %f %f %f\n", robot->gravity->x, robot->gravity->y, robot->gravity->z);
     
-    mexPrintf("qd: ");
-    for (j=0; j<robot->njoints; j++)
-        mexPrintf("%f ", qd[j]);
-    mexPrintf("\n");
+    printf("qd: ");
+    for (int j=0; j<robot->njoints; j++)
+        printf("%f ", qd[j]);
+    printf("\n");
     
-    mexPrintf("qdd: ");
-    for (j=0; j<robot->njoints; j++)
-        mexPrintf("%f ", qdd[j]);
-    mexPrintf("\n");
+    printf("qdd: ");
+    for (int j=0; j<robot->njoints; j++)
+        printf("%f ", qdd[j]);
+    printf("\n");
     
-    for (j=0; j<robot->njoints; j++) {
-        mexPrintf("-- joint %d:\n", j);
+    for (int j=0; j<robot->njoints; j++) {
+        printf("-- joint %d:\n", j);
         Link *l = &robot->links[j];
-        mexPrintf("DH:  %f %f %f %f\n", l->theta, l->D, l->A, l->alpha, l->jointtype);
-        mexPrintf("CoM: %f %f %f\n", l->rbar->x, l->rbar->y, l->rbar->z);
-        mexPrintf("m:   %f\n", l->m);
-        mexPrintf("J:   %f %f %f\n", l->I[0], l->I[1], l->I[2]);
-        mexPrintf("     %f %f %f\n", l->I[3], l->I[4], l->I[5]);
-        mexPrintf("     %f %f %f\n", l->I[6], l->I[7], l->I[8]);
-        mexPrintf("G:   %f\n", l->G);
-        mexPrintf("B:   %f\n", l->B);
-        mexPrintf("Jm:   %f\n", l->Jm);
+        printf("DH:  %f %f %f %f\n", l->theta, l->D, l->A, l->alpha, l->jointtype);
+        printf("CoM: %f %f %f\n", l->rbar->x, l->rbar->y, l->rbar->z);
+        printf("m:   %f\n", l->m);
+        printf("J:   %f %f %f\n", l->I[0], l->I[1], l->I[2]);
+        printf("     %f %f %f\n", l->I[3], l->I[4], l->I[5]);
+        printf("     %f %f %f\n", l->I[6], l->I[7], l->I[8]);
+        printf("G:   %f\n", l->G);
+        printf("B:   %f\n", l->B);
+        printf("Jm:   %f\n", l->Jm);
     }
 #endif
     

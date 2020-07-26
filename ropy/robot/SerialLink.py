@@ -170,12 +170,12 @@ class SerialLink(object):
         self._rne_ob = init(self.n, self.mdh, L, self.gravity[:, 0])
 
     def _check_rne(func):
-        def wrapper(*args):
+        def wrapper(*args, **kwargs):
             if not args[0]._rne_init or args[0]._rne_changed:
                 args[0]._init_rne()
                 args[0]._rne_init = True
                 args[0]._rne_changed = False
-            return func(*args)
+            return func(*args, **kwargs)
         return wrapper
 
     def _listen_rne(func):
@@ -272,8 +272,8 @@ class SerialLink(object):
     def manuf(self, manuf_new):
         self._manuf = manuf_new
 
-    @_listen_rne
     @gravity.setter
+    @_listen_rne
     def gravity(self, gravity_new):
         self._gravity = getvector(gravity_new, 3, 'col')
 
@@ -535,10 +535,7 @@ class SerialLink(object):
         :rtype: float np.ndarray(n)
         """
 
-        if q is None:
-            qrad = np.copy(self.q)
-        else:
-            qrad = getvector(q, self.n)
+        qrad = getvector(q, self.n)
 
         k = self.isrevolute()
         qrad[k] *= np.pi / 180
@@ -2601,7 +2598,7 @@ class SerialLink(object):
             qd = getvector(qd, self.n, 'col')
             qdd = getvector(qdd, self.n, 'col')
         except ValueError:
-            trajn = q.shape[2]
+            trajn = q.shape[1]
             verifymatrix(q, (self.n, trajn))
             verifymatrix(qd, (self.n, trajn))
             verifymatrix(qdd, (self.n, trajn))
