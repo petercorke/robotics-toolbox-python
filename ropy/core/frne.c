@@ -56,7 +56,15 @@
 #define POINTER(x)  mxGetPr(x)
 
 /* forward defines */
-// static void rot_mat (Link *l, double th, double d, DHType type);
+// void newton_euler (
+// 	Robot	*robot,		/*!< robot object  */
+// 	double	*tau,		/*!< returned joint torques */
+// 	double	*qd,		/*!< joint velocities */
+// 	double	*qdd,		/*!< joint accelerations */
+// 	double	*fext,		/*!< external force on manipulator tip */
+// 	int	stride		/*!< indexing stride for qd, qdd */
+// );
+static void rot_mat (Link *l, double th, double d, DHType type);
 // static int mstruct_getfield_number(mxArray *m, char *field);
 // static int mstruct_getint(mxArray *m, int i, char *field);
 // static double mstruct_getreal(mxArray *m, int i, char *field);
@@ -97,23 +105,34 @@ static PyObject *init(PyObject *self, PyObject *args) {
 
     for (int i = 0; i < njoints; i++) {
 
-        Link    *l = &robot.links[0];
+        Link    *l = &robot.links[i];
 
         // Allocate memory for Vectors
         l->rbar = (Vect *)calloc(1, sizeof(Vect));
         l->I = (double *)calloc(9, sizeof(double));
         l->Tc = (double *)calloc(2, sizeof(double));
 
+        // l->r = (Vect *)calloc(1, sizeof(Vect));
+        // l->R = (Rot *)calloc(1, sizeof(Rot));
+        // l->omega = (Vect *)calloc(1, sizeof(Vect));
+        // l->omega_d = (Vect *)calloc(1, sizeof(Vect));
+        // l->acc = (Vect *)calloc(1, sizeof(Vect));
+        // l->abar = (Vect *)calloc(1, sizeof(Vect));
+        // l->f = (Vect *)calloc(1, sizeof(Vect));
+        // l->n = (Vect *)calloc(1, sizeof(Vect));
+
         l->alpha =  PyFloat_AsDouble(PyIter_Next(iter_L));
         l->A =      PyFloat_AsDouble(PyIter_Next(iter_L));
         l->theta =  PyFloat_AsDouble(PyIter_Next(iter_L));
         l->D =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->jointtype =  PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->jointtype =  (DHType)PyFloat_AsDouble(PyIter_Next(iter_L));
         l->offset = PyFloat_AsDouble(PyIter_Next(iter_L));
         l->m =      PyFloat_AsDouble(PyIter_Next(iter_L));
         l->rbar->x =   PyFloat_AsDouble(PyIter_Next(iter_L));
         l->rbar->y =   PyFloat_AsDouble(PyIter_Next(iter_L));
         l->rbar->z =   PyFloat_AsDouble(PyIter_Next(iter_L));
+
+        
 
         for (int j = 0; j < 9; j++) {
             l->I[j] =      PyFloat_AsDouble(PyIter_Next(iter_L));
@@ -129,25 +148,73 @@ static PyObject *init(PyObject *self, PyObject *args) {
     printf("n: %d\n", robot.njoints);
     printf("DH: %d\n", robot.dhtype);
     printf("Gravity: %f, %f, %f\n", robot.gravity->x, robot.gravity->y, robot.gravity->z);
-
+    // printf("r: %f, %f, %f\n", robot.links[0].rbar->x, robot.links[0].rbar->y, robot.links[0].rbar->z);
 
     // TAU = RNE(ROBOT, Q, QD, QDD, GRAV, FEXT)
     double  *q, *qd, *qdd, *grav, *fext;
-    int nq = njoints, nqd = njoints, nqdd = njoints;
+    int nq = 1; //, nqd = njoints, nqdd = njoints;
 
     // Allocate memory for joints
     q = (double *)calloc(njoints, sizeof(double));
     qd = (double *)calloc(njoints, sizeof(double));
     qdd = (double *)calloc(njoints, sizeof(double));
+    fext = (double *)calloc(6, sizeof(double));
     grav = (Vect *)calloc(1, sizeof(Vect));
 
     for (int i = 0; i < njoints; i++) {
         q[i] = 0;
-        qd[i] = 0;
-        qdd[i] = 0;
+        qd[i] = 1;
+        qdd[i] = 1;
     }
 
+    q[0] = 0;
+    q[1] = 0.7854;
+    q[2] = 3.1416;
+    q[3] = 0;
+    q[4] = 0.7854;
+    q[5] = 0;
 
+    for (int i = 0; i < 6; i++) {
+        fext[i] = 0;
+    }
+
+    // Create a matrix for the return argument */
+    double  *tau;
+    // TAU_OUT = mxCreateDoubleMatrix((mwSize) nq, (mwSize) njoints, mxREAL);
+    tau = (double *)calloc(njoints, sizeof(double));
+
+
+#define MEL(x,R,C)  (x[(R)+(C)*nq])
+
+    // // For each point in the input trajectory
+    // for (int p = 0; p < nq; p++) {
+    int p = 0;
+
+    // Update all position dependent variables
+    for (int j = 0; j < njoints; j++) {
+        Link    *l = &robot.links[j];
+
+        switch (l->jointtype) {
+        case REVOLUTE:
+            rot_mat(l, MEL(q,p,j)+l->offset, l->D, robot.dhtype);
+            break;
+        case PRISMATIC:
+            rot_mat(l, l->theta, MEL(q,p,j)+l->offset, robot.dhtype);
+            break;
+        default:
+            perror("Invalid joint type %d (expecting 'R' or 'P')");
+        }
+    }
+
+    // newton_euler(&robot, &tau[p], &qd[p], &qdd[p], fext, nq);
+    newton_euler(&robot, tau, qd, qdd, fext, nq);
+
+    printf("Tau: %f %f %f %f %f %f\n", tau[0], tau[1], tau[2], tau[3], tau[4], tau[5]);
+
+
+    // newton_euler(1, 2, 3, 4, 5, 6);
+
+    // }
 
     return Py_BuildValue("s", "Hi");
 }

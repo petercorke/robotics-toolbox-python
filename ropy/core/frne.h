@@ -32,8 +32,8 @@ typedef
 /* Link joint type */
 typedef
     enum _axistype {
-        REVOLUTE = 'R',
-        PRISMATIC = 'P'
+        REVOLUTE ,
+        PRISMATIC
 } Sigma;
 
 /* A robot link structure */
@@ -46,7 +46,7 @@ typedef struct _link {
     double  D;          /* link length */
     double  theta;      /* link rotation angle */
     double  offset;     /* link coordinate offset */
-    int jointtype;      /* axis type; revolute ('R') or prismatic ('P') */
+    Sigma jointtype;      /* axis type; revolute ('R') or prismatic ('P') */
 
     /**********************************************************
      ***************** dynamic parameters *********************

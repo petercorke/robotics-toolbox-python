@@ -68,9 +68,9 @@ newton_euler (
 	double	*fext,		/*!< external force on manipulator tip */
 	int	stride		/*!< indexing stride for qd, qdd */
 ) {
-	Vect			t1, t2, t3, t4;
-	Vect			qdv, qddv;
-	Vect			F, N;
+	Vect		t1, t2, t3, t4;
+	Vect		qdv, qddv;
+	Vect		F, N;
 	Vect		z0 = {0.0, 0.0, 1.0};
 	Vect		zero = {0.0, 0.0, 0.0};
 	Vect		f_tip = {0.0, 0.0, 0.0};
@@ -253,6 +253,7 @@ newton_euler (
 			/* 
 			 * calculate omega[j]
 			 */
+			
 			if (j == 0)
 				t1 = qdv;
 			else
@@ -283,6 +284,7 @@ newton_euler (
 			} else 
 				rot_trans_vect_mult(&t1, ROT(j), ACC(j-1));
 			vect_add(ACC(j), ACC(j), &t1);
+			
 			break;
 
 		case PRISMATIC:
