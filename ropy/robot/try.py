@@ -1,46 +1,71 @@
-
 import ropy as rp
-import spatialmath as sm
 import numpy as np
-import ctypes
-import frne
 
-puma = rp.Puma560()
+# Initialise a Franka-Emika Panda Robot
+panda = rp.Panda()
 
-L = np.zeros(24*9)
+# The current joint angles of the Panda
+# You need to obtain these from however you interfave with your robot
+# eg. ROS messages, PyRep etc.
+panda.q = np.array([0, -3, 0, -2.3, 0, 2, 0])
 
-for i in range(puma.n):
-    j = i * 24
-    L[j] = puma.links[i].alpha
-    L[j+1] = puma.links[i].a
-    L[j+2] = puma.links[i].theta
-    L[j+3] = puma.links[i].d
-    L[j+4] = puma.links[i].sigma
-    L[j+5] = puma.links[i].offset
-    L[j+6] = puma.links[i].m
-    L[j+7:j+10] = puma.links[i].r.flatten()
-    L[j+10:j+19] = puma.links[i].I.flatten()
-    L[j+19] = puma.links[i].Jm
-    L[j+20] = puma.links[i].G
-    L[j+21] = puma.links[i].B
-    L[j+22:j+24] = puma.links[i].Tc.flatten()
+# The current pose of the robot
+wTe = panda.fkine()
+
+# The desired pose of the robot
+# = Current pose offset 20cm in the x-axis
+wTep = np.copy(wTe)
+wTep[0, 3] += 0.2
+
+arrived = False
+while not arrived:
+
+    # The current joint angles of the Panda
+    # You need to obtain these from however you interfave with your robot
+    # eg. ROS messages, PyRep etc.
+    panda.q = np.array([0, -3, 0, -2.3, 0, 2, 0])
+
+    # The desired end-effecor spatial velocity
+    v, arrived = rp.p_servo(wTe, wTep)
+
+    # Solve for the joint velocities dq
+    # Perfrom the pseudoinverse of the manipulator Jacobian in the end-effector frame
+    dq = np.linalg.pinv(panda.jacobe()) @ v
+
+    # Send the joint velocities to the robot
+    # eg. ROS messages, PyRep etc.
 
 
 
+# import ropy as rp
+# import spatialmath as sm
+# import numpy as np
+# import ctypes
+# import frne
+
+# puma = rp.Puma560()
+
+# L = np.zeros(24*9)
+
+# for i in range(puma.n):
+#     j = i * 24
+#     L[j] = puma.links[i].alpha
+#     L[j+1] = puma.links[i].a
+#     L[j+2] = puma.links[i].theta
+#     L[j+3] = puma.links[i].d
+#     L[j+4] = puma.links[i].sigma
+#     L[j+5] = puma.links[i].offset
+#     L[j+6] = puma.links[i].m
+#     L[j+7:j+10] = puma.links[i].r.flatten()
+#     L[j+10:j+19] = puma.links[i].I.flatten()
+#     L[j+19] = puma.links[i].Jm
+#     L[j+20] = puma.links[i].G
+#     L[j+21] = puma.links[i].B
+#     L[j+22:j+24] = puma.links[i].Tc.flatten()
 
 
-
-
-# c_p = ctypes.POINTER(ctypes.c_double)
-
-# ls = np.zeros(13*6)
-# ls = ls.astype(np.float64)
-
-# ls_p = ls.ctypes.data_as(c_p)
-
-
-r = frne.init(puma.n, puma.mdh, L, puma.gravity[:, 0])
-print(r)
+# r = frne.init(puma.n, puma.mdh, L, puma.gravity[:, 0])
+# print(r)
 
 # panda = rp.PandaMDH()
 # q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])

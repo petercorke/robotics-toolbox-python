@@ -174,7 +174,7 @@ class ETS(object):
             verifymatrix(base_new, (4, 4))
             self._base = base_new
 
-    def fkine(self, q):
+    def fkine(self, q=None):
         '''
         Evaluates the forward kinematics of a robot based on its ETS and
         joint angles q.
@@ -189,7 +189,10 @@ class ETS(object):
             Sequence, J. Haviland and P. Corke
         '''
 
-        q = getvector(q, self.n)
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
 
         j = 0
         trans = np.eye(4)
@@ -207,7 +210,7 @@ class ETS(object):
 
         return trans
 
-    def jacob0(self, q):
+    def jacob0(self, q=None):
         """
         The manipulator Jacobian matrix maps joint velocity to end-effector
         spatial velocity, expressed in the world-coordinate frame.
@@ -221,7 +224,10 @@ class ETS(object):
             Sequence, J. Haviland and P. Corke
         """
 
-        q = getvector(q, self.n)
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
 
         T = self.fkine(q)
         U = np.eye(4)
@@ -293,11 +299,12 @@ class ETS(object):
         """
 
         if J0 is None:
-            if q is not None:
-                q = getvector(q, self.n)
-                J0 = self.jacob0(q)
+            if q is None:
+                q = np.copy(self.q)
             else:
-                raise ValueError('One of q or J0 must be supplied')
+                q = getvector(q, self.n)
+
+            J0 = self.jacob0(q)
         else:
             verifymatrix(J0, (6, self.n))
 
@@ -338,11 +345,12 @@ class ETS(object):
         """
 
         if J is None:
-            if q is not None:
-                q = getvector(q, self.n)
-                J = self.jacob0(q)
+            if q is None:
+                q = np.copy(self.q)
             else:
-                raise ValueError('One of q or J must be supplied')
+                q = getvector(q, self.n)
+
+            J = self.jacob0(q)
         else:
             verifymatrix(J, (6, self.n))
 
@@ -369,11 +377,12 @@ class ETS(object):
         """
 
         if J is None:
-            if q is not None:
-                q = getvector(q, self.n)
-                J = self.jacob0(q)
+            if q is None:
+                q = np.copy(self.q)
             else:
-                raise ValueError('One of q or J must be supplied')
+                q = getvector(q, self.n)
+
+            J = self.jacob0(q)
         else:
             verifymatrix(J, (6, self.n))
 
@@ -423,7 +432,6 @@ class ETS(object):
 
         return model
 
-
     """
     The spatial velocity Jacobian which relates the velocity in base
     frame to velocity in the end-effector frame.
@@ -458,7 +466,13 @@ class ETS(object):
 
         return Jv
 
-    def jacobe(self, q):
+    def jacobe(self, q=None):
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
         J0 = self.jacob0(q)
         Je = self.jacobev(q) @ J0
         return Je
