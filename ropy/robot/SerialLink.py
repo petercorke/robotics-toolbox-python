@@ -877,13 +877,16 @@ class SerialLink(object):
 
             # Compute gravity and coriolis torque torques resulting from zero
             # acceleration at given velocity & with gravity acting.
-            tau = np.expand_dims(
-                self.rne(np.zeros((1, self.n)), qd[:, i], q[:, i]),
-                axis=1)
+            tau = self.rne(np.zeros((1, self.n)), qd[:, i], q[:, i])
 
-            qdd[:, i] = np.linalg.inv(m) @ (torque - tau).flatten()
+            inter = np.expand_dims((torque[:, i] - tau), axis=1)
 
-        return qdd
+            qdd[:, i] = (np.linalg.inv(m) @ inter).flatten()
+
+        if trajn == 1:
+            return qdd[:, 0]
+        else:
+            return qdd
 
     def nofriction(self, coulomb=True, viscous=False):
         """

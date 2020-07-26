@@ -1018,11 +1018,19 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(t1, tr0, decimal=4)
 
     def test_accel(self):
-        pass
-        # puma = rp.Puma560()
-        # puma.q = puma.qn
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
 
-        # qd = [0.1, 0.2, 0.8, 0.2, 0.5, 1.0]
-        # torque = [1.0, 3.2, 1.8, 0.1, 0.7, 4.6]
+        qd = [0.1, 0.2, 0.8, 0.2, 0.5, 1.0]
+        torque = [1.0, 3.2, 1.8, 0.1, 0.7, 4.6]
 
-        # print(puma.accel(qd, torque))
+        res = [-7.4102, -9.8432, -10.9694, -4.4314, -0.9881, 21.0228]
+
+        qdd0 = puma.accel(qd, torque, q)
+        qdd1 = puma.accel(np.c_[qd, qd], np.c_[torque, torque], np.c_[q, q])
+        qdd2 = puma.accel(qd, torque)
+
+        nt.assert_array_almost_equal(qdd0, res, decimal=4)
+        nt.assert_array_almost_equal(qdd1[:, 0], res, decimal=4)
+        nt.assert_array_almost_equal(qdd2, res, decimal=4)
