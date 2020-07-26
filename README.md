@@ -29,23 +29,31 @@ import numpy as np
 panda = rp.Panda()
 
 # Set the joint angles of the robot
-q0 = np.array([0,0,-1.2,0,0,-2,0])
+q0 = np.array([0, -1.57, -1.57, 1.57, 0, -1.57, 1.57])
 panda.q = q0
-
-# Calculate the Kinematic Jacobian (in the world frame) at joint angles q0
-panda.jacob0(q0)
 
 # Calculate the forward kinematics of the robot at joint angles q0
 panda.fkine(q0)
+# or
+panda.fkine()  # Use the robot's attribute q set by panda.q =
+
+# Calculate the Kinematic Jacobian (in the world frame) at joint angles q0
+panda.jacob0(q0)
+# or
+panda.jacob0()
 
 # Calculate the manipulability of the robot at joint angles q0
-panda.manip(q0)
+panda.manipulability(q0)
+# or
+panda.manipulability()
 
 # Calculate the Kinematic Hessian (in the world frame) at joint angles q0
 panda.hessian0(q0)
+# or
+panda.hessian0()
 
 # Print the Elementary Transform Sequence (ETS) of the robot
-print(panda.ets)
+print(panda)
 
 ```
 
@@ -66,12 +74,12 @@ panda = rp.Panda()
 panda.q = np.array([0, -3, 0, -2.3, 0, 2, 0])
 
 # The current pose of the robot
-wTe = panda.T
+wTe = panda.fkine()
 
 # The desired pose of the robot
 # = Current pose offset 20cm in the x-axis
 wTep = np.copy(wTe)
-wTep[0,3] += 0.2
+wTep[0, 3] += 0.2
 
 # Gain term (lambda) for control minimisation
 Y = 0.005
@@ -92,11 +100,11 @@ while not arrived:
 
     # Form the equality constraints
     # The kinematic Jacobian in the end-effecor frame
-    Aeq = panda.Je
+    Aeq = panda.jacobe()
     beq = v.reshape((6,))
 
     # Linear component of objective function: the manipulability Jacobian
-    c = -panda.Jm.reshape((7,))
+    c = -panda.jacobm().reshape((7,))
 
     # Solve for the joint velocities dq
     dq = qp.solve_qp(Q, c, None, None, Aeq, beq)
@@ -121,12 +129,12 @@ panda = rp.Panda()
 panda.q = np.array([0, -3, 0, -2.3, 0, 2, 0])
 
 # The current pose of the robot
-wTe = panda.T
+wTe = panda.fkine()
 
 # The desired pose of the robot
 # = Current pose offset 20cm in the x-axis
 wTep = np.copy(wTe)
-wTep[0,3] += 0.2
+wTep[0, 3] += 0.2
 
 arrived = False
 while not arrived:
@@ -138,10 +146,10 @@ while not arrived:
 
     # The desired end-effecor spatial velocity
     v, arrived = rp.p_servo(wTe, wTep)
-    
+
     # Solve for the joint velocities dq
     # Perfrom the pseudoinverse of the manipulator Jacobian in the end-effector frame
-    dq = np.linalg.pinv(panda.Je) @ v
+    dq = np.linalg.pinv(panda.jacobe()) @ v
 
     # Send the joint velocities to the robot
     # eg. ROS messages, PyRep etc.
