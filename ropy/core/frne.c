@@ -1,223 +1,39 @@
 /**
  * \file frne.c
- * \author Peter Corke
  * \author Jesse Haviland
+ * \author Peter Corke
  * \brief MEX file body
  *
  *
  *  FRNE
  *
- *  TAU = FRNE(ROBOT, Q, QD, QDD)
- *  TAU = FRNE(ROBOT, [Q QD QDD])
+ *  TAU = FRNE(ROBOT*, Q, QD, QDD, GRAV, FEXT)
+ *  ROBOT* = INIT(N, MDH, L, GRAV)
  *
- *  where   Q, QD and QDD are row vectors of the manipulator state; pos,
+ *  where Q, QD and QDD are row vectors of the manipulator state; pos,
  *  vel, and accel.
  *
  *  Returns the joint torque required to achieve the specified joint 
- *  position, velocity and acceleration state.  Gravity is taken
+ *  position, velocity and acceleration state. Gravity is taken
  *  from the robot object.
- *
- *  TAU = RNE(ROBOT, Q, QD, QDD, GRAV)
- *  TAU = RNE(ROBOT, [Q QD QDD], GRAV)
  *
  *  GRAV overrides the gravity vector in the robot object.
  * 
  *  An external force/moment acting on the end of the manipulator may 
- *  also be specified by a 6-element vector [Fx Fy Fz Mx My Mz].
- *
- *  TAU = RNE(ROBOT, Q, QD, QDD, GRAV, FEXT)
- *  TAU = RNE(ROBOT, [Q QD QDD], GRAV, FEXT)
+ *  also be specified by a 6-element vector FEXT [Fx Fy Fz Mx My Mz].
+ * 
  *
  */
 
 #include <math.h>
 #include <Python.h>
-#include    "frne.h"
+#include "frne.h"
 
-/*
-#define DEBUG
-*/
-
-// /* Input Arguments */
-// #define ROBOT_IN    prhs[0]
-// #define A1_IN       prhs[1]
-// #define A2_IN       prhs[2]
-// #define A3_IN       prhs[3]
-// #define A4_IN       prhs[4]
-// #define A5_IN       prhs[5]
-
-// /* Output Arguments */
-// #define TAU_OUT plhs[0]
-
-/* Some useful things */
-#define NUMROWS(x)  mxGetM(x)
-#define NUMCOLS(x)  mxGetN(x)
-#define NUMELS(x)   (mxGetN(x)*mxGetM(x))
-#define POINTER(x)  mxGetPr(x)
-
-/* forward defines */
-// void newton_euler (
-// 	Robot	*robot,		/*!< robot object  */
-// 	double	*tau,		/*!< returned joint torques */
-// 	double	*qd,		/*!< joint velocities */
-// 	double	*qdd,		/*!< joint accelerations */
-// 	double	*fext,		/*!< external force on manipulator tip */
-// 	int	stride		/*!< indexing stride for qd, qdd */
-// );
+// forward defines
+static PyObject *init(PyObject *self, PyObject *args);
+static PyObject *frne(PyObject *self, PyObject *args);
+static PyObject *delete(PyObject *self, PyObject *args);
 static void rot_mat (Link *l, double th, double d, DHType type);
-// static int mstruct_getfield_number(mxArray *m, char *field);
-// static int mstruct_getint(mxArray *m, int i, char *field);
-// static double mstruct_getreal(mxArray *m, int i, char *field);
-// static double * mstruct_getrealvect(mxArray *m, int i, char *field);
-// void error(char *s, ...);
-
-
-
-
-static PyObject *init(PyObject *self, PyObject *args) {
-
-    Robot robot;
-    PyObject *L, *gravity;
-    int njoints, mdh;
-
-    if (!PyArg_ParseTuple(args, "iiOO", &njoints, &mdh, &L, &gravity)) {
-        return NULL;
-    }
-
-    // Fill out the robot structure
-    robot.njoints = njoints;
-
-    // Get MDH flag
-    robot.dhtype = (DHType)mdh;
-
-    // Build link structure
-    robot.links = (Link *)calloc(njoints, sizeof(Link));
-
-    // Create iterators for arrays
-    PyObject *iter_L = PyObject_GetIter(L);
-    PyObject *iter_grav = PyObject_GetIter(gravity);
-
-    // Create the gravity vector
-    robot.gravity = (Vect *)calloc(1, sizeof(Vect));
-    robot.gravity->x = PyFloat_AsDouble(PyIter_Next(iter_grav));
-    robot.gravity->y = PyFloat_AsDouble(PyIter_Next(iter_grav));
-    robot.gravity->z = PyFloat_AsDouble(PyIter_Next(iter_grav));
-
-    for (int i = 0; i < njoints; i++) {
-
-        Link    *l = &robot.links[i];
-
-        // Allocate memory for Vectors
-        l->rbar = (Vect *)calloc(1, sizeof(Vect));
-        l->I = (double *)calloc(9, sizeof(double));
-        l->Tc = (double *)calloc(2, sizeof(double));
-
-        // l->r = (Vect *)calloc(1, sizeof(Vect));
-        // l->R = (Rot *)calloc(1, sizeof(Rot));
-        // l->omega = (Vect *)calloc(1, sizeof(Vect));
-        // l->omega_d = (Vect *)calloc(1, sizeof(Vect));
-        // l->acc = (Vect *)calloc(1, sizeof(Vect));
-        // l->abar = (Vect *)calloc(1, sizeof(Vect));
-        // l->f = (Vect *)calloc(1, sizeof(Vect));
-        // l->n = (Vect *)calloc(1, sizeof(Vect));
-
-        l->alpha =  PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->A =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->theta =  PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->D =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->jointtype =  (DHType)PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->offset = PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->m =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->rbar->x =   PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->rbar->y =   PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->rbar->z =   PyFloat_AsDouble(PyIter_Next(iter_L));
-
-        
-
-        for (int j = 0; j < 9; j++) {
-            l->I[j] =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        }
-
-        l->Jm =     PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->G =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->B =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->Tc[0] =     PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->Tc[1] =     PyFloat_AsDouble(PyIter_Next(iter_L));
-    }
-
-    printf("n: %d\n", robot.njoints);
-    printf("DH: %d\n", robot.dhtype);
-    printf("Gravity: %f, %f, %f\n", robot.gravity->x, robot.gravity->y, robot.gravity->z);
-    // printf("r: %f, %f, %f\n", robot.links[0].rbar->x, robot.links[0].rbar->y, robot.links[0].rbar->z);
-
-    // TAU = RNE(ROBOT, Q, QD, QDD, GRAV, FEXT)
-    double  *q, *qd, *qdd, *grav, *fext;
-    int nq = 1; //, nqd = njoints, nqdd = njoints;
-
-    // Allocate memory for joints
-    q = (double *)calloc(njoints, sizeof(double));
-    qd = (double *)calloc(njoints, sizeof(double));
-    qdd = (double *)calloc(njoints, sizeof(double));
-    fext = (double *)calloc(6, sizeof(double));
-    grav = (Vect *)calloc(1, sizeof(Vect));
-
-    for (int i = 0; i < njoints; i++) {
-        q[i] = 0;
-        qd[i] = 1;
-        qdd[i] = 1;
-    }
-
-    q[0] = 0;
-    q[1] = 0.7854;
-    q[2] = 3.1416;
-    q[3] = 0;
-    q[4] = 0.7854;
-    q[5] = 0;
-
-    for (int i = 0; i < 6; i++) {
-        fext[i] = 0;
-    }
-
-    // Create a matrix for the return argument */
-    double  *tau;
-    // TAU_OUT = mxCreateDoubleMatrix((mwSize) nq, (mwSize) njoints, mxREAL);
-    tau = (double *)calloc(njoints, sizeof(double));
-
-
-#define MEL(x,R,C)  (x[(R)+(C)*nq])
-
-    // // For each point in the input trajectory
-    // for (int p = 0; p < nq; p++) {
-    int p = 0;
-
-    // Update all position dependent variables
-    for (int j = 0; j < njoints; j++) {
-        Link    *l = &robot.links[j];
-
-        switch (l->jointtype) {
-        case REVOLUTE:
-            rot_mat(l, MEL(q,p,j)+l->offset, l->D, robot.dhtype);
-            break;
-        case PRISMATIC:
-            rot_mat(l, l->theta, MEL(q,p,j)+l->offset, robot.dhtype);
-            break;
-        default:
-            perror("Invalid joint type %d (expecting 'R' or 'P')");
-        }
-    }
-
-    // newton_euler(&robot, &tau[p], &qd[p], &qdd[p], fext, nq);
-    newton_euler(&robot, tau, qd, qdd, fext, nq);
-
-    printf("Tau: %f %f %f %f %f %f\n", tau[0], tau[1], tau[2], tau[3], tau[4], tau[5]);
-
-
-    // newton_euler(1, 2, 3, 4, 5, 6);
-
-    // }
-
-    return Py_BuildValue("s", "Hi");
-}
 
 
 // static char helloworld_docs[] =
@@ -227,7 +43,17 @@ static PyMethodDef frneMethods[] = {
     {
         "init",
         (PyCFunction)init,
-        METH_VARARGS, "Hello"
+        METH_VARARGS, "Create Robot"
+    },
+    {
+        "frne",
+        (PyCFunction)frne,
+        METH_VARARGS, "Fast rne"
+    },
+    {
+        "delete",
+        (PyCFunction)delete,
+        METH_VARARGS, "Delete robot memory"
     },
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
@@ -242,236 +68,203 @@ static struct PyModuleDef frnemodule =
     frneMethods
 };
 
-PyMODINIT_FUNC
-PyInit_frne(void)
+PyMODINIT_FUNC PyInit_frne(void)
 {
     return PyModule_Create(&frnemodule);
 }
 
 
+static PyObject *delete(PyObject *self, PyObject *args) {
+
+    Robot *robot;
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O", &obj)) {
+        return NULL;
+    }
+
+    if (!(robot = (Robot*) PyCapsule_GetPointer(obj, "Robot"))) {
+        return NULL;
+    }
+
+    for (int i = 0; i < robot->njoints; i++) {
+        free(robot->links[i].I);
+        free(robot->links[i].Tc);
+        free(robot->links[i].rbar);
+    }
+
+    free(robot->gravity);
+    free(robot->links);
+    free(robot);
+    return Py_BuildValue("i", 1);
+}
 
 
+static PyObject *frne(PyObject *self, PyObject *args) {
+
+    Robot *robot;
+    PyObject *rO, *qO, *qdO, *qddO, *gravO, *fextO;
+    double  *q, *qd, *qdd, *fext;
+    Vect *grav;
+    int nq = 1; //, nqd = njoints, nqdd = njoints;
+    int njoints;
+
+    if (!PyArg_ParseTuple(args, "OOOOOO", &rO, &qO, &qdO, &qddO, &gravO, &fextO)) {
+        return NULL;
+    }
+
+    if (!(robot = (Robot*) PyCapsule_GetPointer(rO, "Robot"))) {
+        return NULL;
+    }
+
+    njoints = robot->njoints;
+
+    // Allocate memory for joints
+    q = (double *)calloc(njoints, sizeof(double));
+    qd = (double *)calloc(njoints, sizeof(double));
+    qdd = (double *)calloc(njoints, sizeof(double));
+    fext = (double *)calloc(6, sizeof(double));
+    grav = (Vect *)malloc(sizeof(Vect));
+
+    // Create iterators for arrays
+    PyObject *iq = PyObject_GetIter(qO);
+    PyObject *iqd = PyObject_GetIter(qdO);
+    PyObject *iqdd = PyObject_GetIter(qddO);
+    PyObject *igrav = PyObject_GetIter(gravO);
+    PyObject *ifext = PyObject_GetIter(fextO);
+
+    // Create the gravity vector
+    grav->x = PyFloat_AsDouble(PyIter_Next(igrav));
+    grav->y = PyFloat_AsDouble(PyIter_Next(igrav));
+    grav->z = PyFloat_AsDouble(PyIter_Next(igrav));
+
+    // Create the joint arrays
+    for (int i = 0; i < njoints; i++) {
+        q[i] = PyFloat_AsDouble(PyIter_Next(iq));
+        qd[i] = PyFloat_AsDouble(PyIter_Next(iqd));
+        qdd[i] = PyFloat_AsDouble(PyIter_Next(iqdd));
+    }
+
+    // Create the fext array
+    for (int i = 0; i < 6; i++) {
+        fext[i] = PyFloat_AsDouble(PyIter_Next(ifext));
+    }
+
+    // Create a matrix for the return argument */
+    double  *tau;
+    tau = (double *)calloc(njoints, sizeof(double));
 
 
+    #define MEL(x,R,C)  (x[(R)+(C)*nq])
+
+    // // For each point in the input trajectory
+    // for (int p = 0; p < nq; p++) {
+    int p = 0;
+
+    // Update all position dependent variables
+    for (int j = 0; j < njoints; j++) {
+        Link *l = &robot->links[j];
+
+        switch (l->jointtype) {
+        case REVOLUTE:
+            rot_mat(l, MEL(q,p,j)+l->offset, l->D, robot->dhtype);
+            break;
+        case PRISMATIC:
+            rot_mat(l, l->theta, MEL(q,p,j)+l->offset, robot->dhtype);
+            break;
+        default:
+            perror("Invalid joint type %d (expecting 'R' or 'P')");
+        }
+    }
+
+    newton_euler(robot, tau, qd, qdd, fext, nq);
+
+    free(q);
+    free(qd);
+    free(qdd);
+    free(grav);
+    free(fext);
+
+    PyObject* ret = PyList_New(njoints);
+    for (int i = 0; i < njoints; ++i) {
+        PyObject* python_float = Py_BuildValue("d", tau[i]);
+        PyList_SetItem(ret, i, python_float);
+    }
+
+    free(tau);
+
+    return ret;
+}
 
 
+static PyObject *init(PyObject *self, PyObject *args) {
 
+    Robot *robot;
+    PyObject *L, *gravity;
+    PyObject *ret;
+    int njoints, mdh;
 
+    if (!PyArg_ParseTuple(args, "iiOO", &njoints, &mdh, &L, &gravity)) {
+        return NULL;
+    }
 
+    // Allocate memory for the robot
+    robot = (Robot *)malloc(sizeof(Robot));
 
+    // Fill out the robot structure
+    robot->njoints = njoints;
 
+    // Get MDH flag
+    robot->dhtype = (DHType)mdh;
 
+    // Build link structure
+    robot->links = (Link *)calloc(njoints, sizeof(Link));
 
-// /* default values for gravity and external load */
+    // Create iterators for arrays
+    PyObject *iter_L = PyObject_GetIter(L);
+    PyObject *iter_grav = PyObject_GetIter(gravity);
 
-// /**
-//  * MEX function entry point.
-//  */
-// void 
-// mexFunction(
-//     int     nlhs,
-//     mxArray     *plhs[],
-//     int     nrhs,
-//     const mxArray   *prhs[]
-// ) {
-//     double  *q, *qd, *qdd;
-//     double  *tau;
-//     unsigned int    m,n;
-//     int j, njoints, p, nq;
-//     double  *fext = NULL;
-//     double *grav = NULL;
-//     Robot       robot;
-//     mxArray     *link0;
-//     mxArray     *mx_robot;
-//     mxArray     *mx_links;
-//     static int  first_time = 0;
+    // Create the gravity vector
+    robot->gravity = (Vect *)malloc(sizeof(Vect));
+    robot->gravity->x = PyFloat_AsDouble(PyIter_Next(iter_grav));
+    robot->gravity->y = PyFloat_AsDouble(PyIter_Next(iter_grav));
+    robot->gravity->z = PyFloat_AsDouble(PyIter_Next(iter_grav));
 
-//     /*
-//     fprintf(stderr, "Fast RNE: (c) Peter Corke 2002-2011\n");
-//     */
+    for (int i = 0; i < njoints; i++) {
 
-//     if (  !mxIsClass(ROBOT_IN, "SerialLink") )
-//         mexErrMsgTxt("frne: first argument is not a robot structure\n");
+        Link    *l = &robot->links[i];
 
-//     mx_robot = (mxArray *)ROBOT_IN;
-    
-//     njoints = mstruct_getint(mx_robot, 0, "n");
+        // Allocate memory for Vectors
+        l->rbar = (Vect *)malloc(sizeof(Vect));
+        l->I = (double *)calloc(9, sizeof(double));
+        l->Tc = (double *)calloc(2, sizeof(double));
 
-// /***********************************************************************
-//  * Handle the different calling formats.
-//  * Setup pointers to q, qd and qdd inputs 
-//  ***********************************************************************/
-//     switch (nrhs) {
-//     case 2:
-//     /*
-//      * TAU = RNE(ROBOT, [Q QD QDD])
-//      */ 
-//         if (NUMCOLS(A1_IN) != 3 * njoints)
-//             mexErrMsgTxt("frne: too few cols in [Q QD QDD]");
-//         q = POINTER(A1_IN);
-//         nq = NUMROWS(A1_IN);
-//         qd = &q[njoints*nq];
-//         qdd = &q[2*njoints*nq];
-//         break;
-        
-//     case 3:
-//     /*
-//      * TAU = RNE(ROBOT, [Q QD QDD], GRAV)
-//      */ 
-//         if (NUMCOLS(A1_IN) != (3 * njoints))
-//             mexErrMsgTxt("frne: too few cols in [Q QD QDD]");
-//         q = POINTER(A1_IN);
-//         nq = NUMROWS(A1_IN);
-//         qd = &q[njoints*nq];
-//         qdd = &q[2*njoints*nq];
+        l->alpha =  PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->A =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->theta =  PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->D =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->jointtype =  (DHType)PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->offset = PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->m =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->rbar->x =   PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->rbar->y =   PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->rbar->z =   PyFloat_AsDouble(PyIter_Next(iter_L));
 
-//         if (NUMELS(A2_IN) != 3)
-//             mexErrMsgTxt("frne: gravity vector expected");
-//         grav = POINTER(A2_IN);
-//         break;
+        for (int j = 0; j < 9; j++) {
+            l->I[j] =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        }
 
-//     case 4:
-//     /*
-//      * TAU = RNE(ROBOT, Q, QD, QDD)
-//      * TAU = RNE(ROBOT, [Q QD QDD], GRAV, FEXT)
-//      */ 
-//         if (NUMCOLS(A1_IN) == (3 * njoints)) {
-//             q = POINTER(A1_IN);
-//             nq = NUMROWS(A1_IN);
-//             qd = &q[njoints*nq];
-//             qdd = &q[2*njoints*nq];
+        l->Jm =     PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->G =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->B =      PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->Tc[0] =     PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->Tc[1] =     PyFloat_AsDouble(PyIter_Next(iter_L));
+    }
 
-//             if (NUMELS(A2_IN) != 3)
-//                 mexErrMsgTxt("frne: gravity vector expected");
-//             grav = POINTER(A2_IN);
-//             if (NUMELS(A3_IN) != 6)
-//                 mexErrMsgTxt("frne: Fext vector expected");
-//             fext = POINTER(A3_IN);
-//         } else {
-//             int nqd = NUMROWS(A2_IN),
-//                 nqdd = NUMROWS(A3_IN);
+    ret = PyCapsule_New(robot, "Robot", NULL);
+    return ret;
+}
 
-//             nq = NUMROWS(A1_IN);
-//             if ((nq != nqd) || (nqd != nqdd))
-//                 mexErrMsgTxt("frne: Q QD QDD must be same length");
-//             if ( (NUMCOLS(A1_IN) != njoints) ||
-//                  (NUMCOLS(A2_IN) != njoints) ||
-//                  (NUMCOLS(A3_IN) != njoints)
-//             ) 
-//                 mexErrMsgTxt("frne: Q must have Naxis columns");
-//             q = POINTER(A1_IN);
-//             qd = POINTER(A2_IN);
-//             qdd = POINTER(A3_IN);
-//         }
-//         break;
-
-//     case 5: {
-//     /*
-//      * TAU = RNE(ROBOT, Q, QD, QDD, GRAV)
-//      */
-//         int nqd = NUMROWS(A2_IN),
-//             nqdd = NUMROWS(A3_IN);
-
-//         nq = NUMROWS(A1_IN);
-//         if ((nq != nqd) || (nqd != nqdd))
-//             mexErrMsgTxt("frne: Q QD QDD must be same length");
-//         if ( (NUMCOLS(A1_IN) != njoints) ||
-//              (NUMCOLS(A2_IN) != njoints) ||
-//              (NUMCOLS(A3_IN) != njoints)
-//         ) 
-//             mexErrMsgTxt("frne: Q must have Naxis columns");
-//         q = POINTER(A1_IN);
-//         qd = POINTER(A2_IN);
-//         qdd = POINTER(A3_IN);
-//         if (NUMELS(A4_IN) != 3)
-//             mexErrMsgTxt("frne: gravity vector expected");
-//         grav = POINTER(A4_IN);
-//         break;
-//     }
-
-//     case 6: {
-//     /*
-//      * TAU = RNE(ROBOT, Q, QD, QDD, GRAV, FEXT)
-//      */
-//         int nqd = NUMROWS(A2_IN),
-//             nqdd = NUMROWS(A3_IN);
-
-//         nq = NUMROWS(A1_IN);
-//         if ((nq != nqd) || (nqd != nqdd))
-//             mexErrMsgTxt("frne: Q QD QDD must be same length");
-//         if ( (NUMCOLS(A1_IN) != njoints) ||
-//              (NUMCOLS(A2_IN) != njoints) ||
-//              (NUMCOLS(A3_IN) != njoints)
-//         ) 
-//             mexErrMsgTxt("frne: Q must have Naxis columns");
-//         q = POINTER(A1_IN);
-//         qd = POINTER(A2_IN);
-//         qdd = POINTER(A3_IN);
-//         if (NUMELS(A4_IN) != 3)
-//             mexErrMsgTxt("frne: gravity vector expected");
-//         grav = POINTER(A4_IN);
-//         if (NUMELS(A5_IN) != 6)
-//             mexErrMsgTxt("frne: Fext vector expected");
-//         fext = POINTER(A5_IN);
-//         break;
-//     }
-//     default:
-//         error("wrong number of arguments, %d given", nrhs);
-//     }
-
-
-
-//     /* Create a matrix for the return argument */
-//     TAU_OUT = mxCreateDoubleMatrix((mwSize) nq, (mwSize) njoints, mxREAL);
-//     tau = mxGetPr(TAU_OUT);
-
-// #define MEL(x,R,C)  (x[(R)+(C)*nq])
-
-//     /* for each point in the input trajectory */
-//     for (p=0; p<nq; p++) {
-//         /*
-//          * update all position dependent variables
-//          */
-//         for (j = 0; j < njoints; j++) {
-//             Link    *l = &robot.links[j];
-
-//             switch (l->jointtype) {
-//             case REVOLUTE:
-//                 rot_mat(l, MEL(q,p,j)+l->offset, l->D, robot.dhtype);
-//                 break;
-//             case PRISMATIC:
-//                 rot_mat(l, l->theta, MEL(q,p,j)+l->offset, robot.dhtype);
-//                 break;
-//             default:
-//                 error("Invalid joint type %d (expecting 'R' or 'P')", l->jointtype);
-//             }
-// #ifdef  DEBUG
-//             rot_print("R", &l->R);
-//             vect_print("p*", &l->r);
-// #endif
-//         }
-
-//         newton_euler(&robot, &tau[p], &qd[p], &qdd[p], fext, nq);
-
-//     }
-
-//     mxFree(robot.links);
-// }
-
-/*
- *  Written by;
- *
- *      Peter I. Corke
- *      CSIRO Division of Manufacturing Technology
- *      Preston, Melbourne.  Australia. 3072.
- *
- *      pic@mlb.dmt.csiro.au
- *
- *  Permission to use and distribute is granted, provided that this message
- * is retained, and due credit given when the results are incorporated in
- * publised work.
- *
- */
 
 /**
  * Return the link rotation matrix and translation vector.
@@ -523,82 +316,3 @@ default:
      perror("Invalid DH type (expecting 0 = DH or 1 = MDH)");
     }
 }
-
-// /*************************************************************************
-//  * Matlab structure access methods, get the field from joint i
-//  *************************************************************************/
-// static mxArray *
-// mstruct_get_element(mxArray *m, int j, char *field)
-// {
-//     mxArray *e;
-
-//     if ((e = mxGetProperty(m, (mwIndex)j, field)) != NULL)
-//         return e;
-//     else {
-//         error("No such field as %s", field);
-//         return NULL;
-//     }
-// }
-
-// static int
-// mstruct_getfield_number(mxArray *m, char *field)
-// {
-//     int f;
-    
-//     if ((f = mxGetFieldNumber(m, field)) < 0)
-//         error("no element %s in link structure");
-
-//     return f;
-// }
-
-// static int
-// mstruct_getint(mxArray *m, int i, char *field)
-// {
-//     mxArray *e;
-
-//     e = mstruct_get_element(m, i, field);
-
-//     return (int) mxGetScalar(e);
-// }
-
-// static double
-// mstruct_getreal(mxArray *m, int i, char *field)
-// {
-//     mxArray *e;
-
-//     e = mstruct_get_element(m, i, field);
-
-//     return mxGetScalar(e);
-// }
-
-// static double *
-// mstruct_getrealvect(mxArray *m, int i, char *field)
-// {
-//     mxArray *e;
-
-//     e = mstruct_get_element(m, i, field);
-
-//     return mxGetPr(e);
-// }
-
-// #include    <stdarg.h>
-
-// /**
-//  * Error message handler.  Takes printf() style format string and variable
-//  * arguments and sends resultant string to Matlab via \t mexErrMsgTxt().
-//  *
-//  * @param s Error message string, \t  printf() style.
-//  */
-// void
-// error(char *s, ...)
-// {
-//     char    b[BUFSIZ];
-
-//     va_list ap;
-
-//     va_start(ap, s);
-
-//     vsprintf(b, s, ap);
-
-//     // mexErrMsgIdAndTxt("RTB:frne:badargs", b);
-// }

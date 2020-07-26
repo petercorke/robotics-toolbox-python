@@ -11,6 +11,7 @@ from spatialmath.base.argcheck import \
 from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3
 from scipy.optimize import minimize, Bounds
+from frne import init, frne, delete
 
 
 class SerialLink(object):
@@ -109,6 +110,11 @@ class SerialLink(object):
         # Check the DH convention
         self._check_dh()
 
+        # rne parameters
+        self._rne_init = False
+        self._rne_ob = None
+        self._rne_changed = False
+
     def __add__(self, L):
         nlinks = []
 
@@ -140,6 +146,50 @@ class SerialLink(object):
         for i in range(self.n):
             if not self.links[i].mdh == self.mdh:
                 raise ValueError('Robot has mixed D&H links conventions.')
+
+    def _init_rne(self):
+        # Compress link data into a 1D array
+        L = np.zeros(24*self.n)
+
+        for i in range(self.n):
+            j = i * 24
+            L[j] = self.links[i].alpha
+            L[j+1] = self.links[i].a
+            L[j+2] = self.links[i].theta
+            L[j+3] = self.links[i].d
+            L[j+4] = self.links[i].sigma
+            L[j+5] = self.links[i].offset
+            L[j+6] = self.links[i].m
+            L[j+7:j+10] = self.links[i].r.flatten()
+            L[j+10:j+19] = self.links[i].I.flatten()
+            L[j+19] = self.links[i].Jm
+            L[j+20] = self.links[i].G
+            L[j+21] = self.links[i].B
+            L[j+22:j+24] = self.links[i].Tc.flatten()
+
+        self._rne_ob = init(self.n, self.mdh, L, self.gravity[:, 0])
+
+    def _check_rne(func):
+        def wrapper(*args):
+            if not args[0]._rne_init or args[0]._rne_changed:
+                args[0]._init_rne()
+                args[0]._rne_init = True
+                args[0]._rne_changed = False
+                print("hello")
+            return func(*args)
+        return wrapper
+
+    def _listen_rne(func):
+        def wrapper(*args):
+            args[0]._rne_changed = True
+            return func(*args)
+        return wrapper
+
+    def delete_rne(self):
+        delete(self._rne_ob)
+        self._rne_init = False
+        self._rne_changed = False
+        self._rne_ob = None
 
     @property
     def name(self):
@@ -223,6 +273,7 @@ class SerialLink(object):
     def manuf(self, manuf_new):
         self._manuf = manuf_new
 
+    @_listen_rne
     @gravity.setter
     def gravity(self, gravity_new):
         self._gravity = getvector(gravity_new, 3, 'col')
@@ -2506,3 +2557,16 @@ class SerialLink(object):
             return qt[:, 0], success[0], err[0]
         else:
             return qt, success, err
+
+    @_check_rne
+    def rne(self, qdd, qd, q=None, grav=None, fext=None):
+
+        grav = self.gravity
+        fext = np.zeros(6)
+
+        q = self.qn
+        qd = np.ones(self.n)
+        qdd = np.ones(self.n)
+        tau = frne(self._rne_ob, q, qd, qdd, grav, fext)
+
+        return tau

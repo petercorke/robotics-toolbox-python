@@ -1,49 +1,13 @@
+
 import ropy as rp
+import spatialmath as sm
 import numpy as np
+import ctypes
+import frne
 
-# Initialise a Franka-Emika Panda Robot
-panda = rp.Panda()
+import time
 
-# The current joint angles of the Panda
-# You need to obtain these from however you interfave with your robot
-# eg. ROS messages, PyRep etc.
-panda.q = np.array([0, -3, 0, -2.3, 0, 2, 0])
-
-# The current pose of the robot
-wTe = panda.fkine()
-
-# The desired pose of the robot
-# = Current pose offset 20cm in the x-axis
-wTep = np.copy(wTe)
-wTep[0, 3] += 0.2
-
-arrived = False
-while not arrived:
-
-    # The current joint angles of the Panda
-    # You need to obtain these from however you interfave with your robot
-    # eg. ROS messages, PyRep etc.
-    panda.q = np.array([0, -3, 0, -2.3, 0, 2, 0])
-
-    # The desired end-effecor spatial velocity
-    v, arrived = rp.p_servo(wTe, wTep)
-
-    # Solve for the joint velocities dq
-    # Perfrom the pseudoinverse of the manipulator Jacobian in the end-effector frame
-    dq = np.linalg.pinv(panda.jacobe()) @ v
-
-    # Send the joint velocities to the robot
-    # eg. ROS messages, PyRep etc.
-
-
-
-# import ropy as rp
-# import spatialmath as sm
-# import numpy as np
-# import ctypes
-# import frne
-
-# puma = rp.Puma560()
+puma = rp.Puma560()
 
 # L = np.zeros(24*9)
 
@@ -65,6 +29,26 @@ while not arrived:
 
 
 # r = frne.init(puma.n, puma.mdh, L, puma.gravity[:, 0])
+# frne.point(r)
+# frne.delete(r)
+# frne.point(r)
+# t1 = time.time()
+print(puma.rne(1, 2, 3, 4, 5))
+# t2 = time.time()
+# puma.rne(1, 2, 3, 4, 5)
+# t3 = time.time()
+# puma.rne(1, 2, 3, 4, 5)
+# t4 = time.time()
+# puma.delete_rne()
+# t5 = time.time()
+# puma.rne(1, 2, 3, 4, 5)
+# t6 = time.time()
+
+# print(t2-t1)
+# print(t3-t2)
+# print(t4-t3)
+# print(t6-t5)
+
 # print(r)
 
 # panda = rp.PandaMDH()

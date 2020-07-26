@@ -10,7 +10,7 @@ from __future__ import print_function
 
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix
+from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import ropy as rp
 
 
@@ -74,7 +74,7 @@ class Link(object):
             r=np.zeros(3),
             I=np.zeros((3, 3)),
             Jm=0.0,
-            B=np.zeros(2),
+            B=0.0,
             Tc=np.zeros(2),
             G=1.0
             ):
@@ -277,7 +277,10 @@ class Link(object):
 
     @B.setter
     def B(self, B_new):
-        self._B = B_new  # getvector(B_new, 2, out='col')
+        if isscalar(B_new):
+            self._B = B_new
+        else:
+            raise TypeError("B must be a scalar")
 
     @Tc.setter
     def Tc(self, Tc_new):
@@ -429,7 +432,7 @@ class Link(object):
             G=self.G)
 
         if viscous:
-            link.B = [0.0, 0.0]
+            link.B = 0.0
 
         if coulomb:
             link.Tc = [0.0, 0.0]
@@ -531,7 +534,7 @@ class Revolute(Link):
             r=np.zeros(3),
             I=np.zeros((3, 3)),
             Jm=0.0,
-            B=np.zeros(2),
+            B=0.0,
             Tc=np.zeros(2),
             G=1.0
             ):
@@ -602,7 +605,7 @@ class Prismatic(Link):
             r=np.zeros(3),
             I=np.zeros((3, 3)),
             Jm=0.0,
-            B=np.zeros(2),
+            B=0.0,
             Tc=np.zeros(2),
             G=1.0
             ):
