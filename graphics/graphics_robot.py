@@ -1,4 +1,4 @@
-from vpython import box, compound, color
+from vpython import box, compound, color, arrow
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -19,9 +19,11 @@ class DefaultJoint:
     :type structure: `float`, `str`
     :param scene: The scene in which to add the link
     :type scene: class:`vpython.canvas`
+    :param axis_through: The axis that the longest side goes through
+    :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
 
         if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
@@ -32,11 +34,12 @@ class DefaultJoint:
         self.__pose = initial_se3
 
         # Set the graphic
-        self.__graphic_obj = self.__set_graphic(structure)
+        self.__graphic_obj = self.__set_graphic(structure, axis_through)
         self.visible = True
 
+        # UNUSED
         # Calculate the length of the link (Generally longest side is the length)
-        self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
+        # self.__length = max(self.__graphic_obj.length, self.__graphic_obj.width, self.__graphic_obj.height)
 
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__pose, self.__scene)
@@ -236,12 +239,14 @@ class DefaultJoint:
             # self.__graphic_ref.visible = is_visible
             self.visible = is_visible
 
-    def __set_graphic(self, structure):
+    def __set_graphic(self, structure, axis_through):
         """
         Set the graphic object depending on if one was given. If no object was given, create a box and return it
 
         :param structure: `float` or `str` representing the joint length or STL path to load from
         :type structure: `float`, `str`
+        :param axis_through: The axis that the longest side goes through
+        :type axis_through: class:`numpy.ndarray`
         :raises ValueError: Joint length must be greater than 0
         :return: Graphical object for the joint
         :rtype: class:`vpython.compound`
@@ -250,20 +255,23 @@ class DefaultJoint:
             length = structure
             if length <= 0.0:
                 raise ValueError("Joint length must be greater than 0")
+            axis = vector(axis_through[0], axis_through[1], axis_through[2])
+            axis.mag = length
 
-            box_midpoint = vector(length / 2, 0, 0)
+            box_midpoint = axis / 2
+            box_tooltip = axis
 
             # Create a box along the +x axis, with the origin (point of rotation) at (0, 0, 0)
             graphic_obj = box(
                 canvas=self.__scene,
                 pos=vector(box_midpoint.x, box_midpoint.y, box_midpoint.z),
-                axis=x_axis_vector,
-                size=vector(length, 0.1, 0.1),
-                up=y_axis_vector
+                axis=axis,
+                size=vector(length, 0.1, 0.1),  # L, W, H
+                # up=y_axis_vector
             )
 
             # Set the boxes new origin
-            graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=x_axis_vector, up=y_axis_vector)
+            graphic_obj = compound([graphic_obj], origin=box_tooltip, axis=axis)
 
             return graphic_obj
         else:
@@ -371,6 +379,15 @@ class DefaultJoint:
         """
         return self.__graphic_obj
 
+    def get_scene(self):
+        """
+        Getter function that returns the scene the object is in
+
+        :return: The scene the object is in
+        :rtype: class:`vpython.canvas`
+        """
+        return self.__scene
+
 
 class RotationalJoint(DefaultJoint):
     """
@@ -382,11 +399,13 @@ class RotationalJoint(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param axis_through: The axis that the longest side goes through
+    :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
         # Call super init function
-        super().__init__(initial_se3, structure, scene)
+        super().__init__(initial_se3, structure, scene, axis_through)
         self.rotation_axis = z_axis_vector
         # self.rotation_angle = radians(0)
 
@@ -428,9 +447,11 @@ class PrismaticJoint(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param axis_through: The axis that the longest side goes through
+    :type axis_through: class:`numpy.ndarray`
     """
-    def __init__(self, initial_se3, structure, scene):
-        super().__init__(initial_se3, structure, scene)
+    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+        super().__init__(initial_se3, structure, scene, axis_through)
         self.min_translation = None
         self.max_translation = None
 
@@ -459,10 +480,12 @@ class StaticJoint(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param axis_through: The axis that the longest side goes through
+    :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene):
-        super().__init__(initial_se3, structure, scene)
+    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+        super().__init__(initial_se3, structure, scene, axis_through)
 
     def get_joint_type(self):
         """
@@ -485,10 +508,12 @@ class Gripper(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param axis_through: The axis that the longest side goes through
+    :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene):
-        super().__init__(initial_se3, structure, scene)
+    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+        super().__init__(initial_se3, structure, scene, axis_through)
 
     # TODO close/open gripper
 
@@ -529,12 +554,15 @@ class GraphicalRobot:
         :param joint: A joint object already constructed
         :type joint: class:`graphics.graphics_robot.RotationalJoint`, class:`graphics.graphics_robot.PrismaticJoint`,
         class:`graphics.graphics_robot.StaticJoint`, class:`graphics.graphics_robot.Gripper`
+        :raises RuntimeError: Ensure the link is in the same scene as the robot
         """
-        # TODO have some check to ensure objects are in the same scene
+        if joint.get_scene() != self.__scene:
+            raise RuntimeError("The given made link is not in the same scene as the robot is.")
+
         self.joints.append(joint)
         self.num_joints += 1
 
-    def append_link(self, typeof, pose, structure):
+    def append_link(self, typeof, pose, structure, axis_through=array([0, 1, 0])):
         """
         Append a joint to the end of the robot.
 
@@ -544,19 +572,21 @@ class GraphicalRobot:
         :type pose: class:`spatialmath.pose3d.SE3`
         :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
         :type structure: `float`, `str`
+        :param axis_through: The axis that the longest side goes through
+        :type axis_through: class:`numpy.ndarray`
         :raises ValueError: typeof must be a valid character
         """
         # Capitalise the type for case-insensitive use
         typeof = typeof.upper()
 
         if typeof == 'R':
-            link = RotationalJoint(pose, structure, self.__scene)
+            link = RotationalJoint(pose, structure, self.__scene, axis_through)
         elif typeof == 'P':
-            link = PrismaticJoint(pose, structure, self.__scene)
+            link = PrismaticJoint(pose, structure, self.__scene, axis_through)
         elif typeof == 'S':
-            link = StaticJoint(pose, structure, self.__scene)
+            link = StaticJoint(pose, structure, self.__scene, axis_through)
         elif typeof == 'G':
-            link = Gripper(pose, structure, self.__scene)
+            link = Gripper(pose, structure, self.__scene, axis_through)
         else:
             raise ValueError("typeof should be (case-insensitive) either 'R' (Rotational), 'P' (Prismatic), "
                              "'S' (Static), or 'G' (Gripper)")

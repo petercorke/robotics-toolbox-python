@@ -94,23 +94,15 @@ def test_graphical_robot_creation():
     """
     p = SE3()
 
-    p1 = p
-    p2 = p.Tx(1)
-    p3 = p.Tx(2)
+    p1 = p.Tx(1)
+    p2 = p.Tx(2)
+    p3 = p.Tx(3)
 
     robot = gph.GraphicalRobot(g_canvas, 'test_3_link_robot')
 
-    robot.append_link('r', p1, 1.0)
-    robot.append_link('R', p2, 1.0)
-    robot.append_link('r', p3, 1.0)
-
-    arr = array([
-        [0, 0, 1, 0],
-        [0, 1, 0, 0],
-        [1, 0, 0, 0],
-        [0, 0, 0, 1]
-    ])
-    new_p1 = SE3(arr)
+    robot.append_link('r', p1, 1.0, axis_through=array([1, 0, 0]))
+    robot.append_link('R', p2, 1.0, axis_through=array([1, 0, 0]))
+    robot.append_link('r', p3, 1.0, axis_through=array([1, 0, 0]))
 
     arr = array([
         [0, 0, 1, 0],
@@ -118,12 +110,20 @@ def test_graphical_robot_creation():
         [1, 0, 0, 1],
         [0, 0, 0, 1]
     ])
-    new_p2 = SE3(arr)
+    new_p1 = SE3(arr)
 
     arr = array([
         [0, 0, 1, 0],
         [0, 1, 0, 0],
         [1, 0, 0, 2],
+        [0, 0, 0, 1]
+    ])
+    new_p2 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 3],
         [0, 0, 0, 1]
     ])
     new_p3 = SE3(arr)
