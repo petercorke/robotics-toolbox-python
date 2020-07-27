@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
 import numpy as np
-import spatialmath as sm
 
 
 class ET(object):
@@ -45,7 +42,7 @@ class ET(object):
             self._j = joint
 
         if self._type is self.STATIC and self.axis[0] == 'R':
-            self._eta_deg = self.eta * (180/np.pi)
+            self._eta_deg = self.eta * (180 / np.pi)
 
     @property
     def eta(self):
@@ -123,10 +120,10 @@ class ET(object):
 
         def axis_func(eta):
             return np.array([
-                [1, 0,          0,         0],
+                [1, 0, 0, 0],
                 [0, np.cos(eta), -np.sin(eta), 0],
-                [0, np.sin(eta),  np.cos(eta), 0],
-                [0, 0,          0,         1]
+                [0, np.sin(eta), np.cos(eta), 0],
+                [0, 0, 0, 1]
             ])
 
         return cls(axis_func, axis='Rx', eta=eta, joint=joint)
@@ -138,10 +135,10 @@ class ET(object):
 
         def axis_func(eta):
             return np.array([
-                [np.cos(eta),  0, np.sin(eta), 0],
-                [0,          1, 0,         0],
+                [np.cos(eta), 0, np.sin(eta), 0],
+                [0, 1, 0, 0],
                 [-np.sin(eta), 0, np.cos(eta), 0],
-                [0,          0, 0,         1]
+                [0, 0, 0, 1]
             ])
 
         return cls(axis_func, axis='Ry', eta=eta, joint=joint)
@@ -154,9 +151,9 @@ class ET(object):
         def axis_func(eta):
             return np.array([
                 [np.cos(eta), -np.sin(eta), 0, 0],
-                [np.sin(eta),  np.cos(eta), 0, 0],
-                [0,          0,         1, 0],
-                [0,          0,         0, 1]
+                [np.sin(eta), np.cos(eta), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
             ])
 
         return cls(axis_func, axis='Rz', eta=eta, joint=joint)

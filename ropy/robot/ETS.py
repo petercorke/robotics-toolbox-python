@@ -42,8 +42,7 @@ class ETS(object):
             name='noname',
             manufacturer='',
             base=np.eye(4, 4),
-            tool=np.eye(4, 4)
-            ):
+            tool=np.eye(4, 4)):
 
         self._name = name
         self._manuf = manufacturer
