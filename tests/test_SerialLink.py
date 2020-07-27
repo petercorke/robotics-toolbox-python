@@ -1057,3 +1057,25 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(I1[:, :, 0], Ir, decimal=4)
         nt.assert_array_almost_equal(I1[:, :, 1], Ir, decimal=4)
         nt.assert_array_almost_equal(I2, Ir, decimal=4)
+
+    def test_cinertia(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        Mr = [
+            [17.2954, -2.7542, -9.6233, -0.0000,  0.2795,  0.0000],
+            [-2.7542, 12.1909,  1.2459, -0.3254, -0.0703, -0.9652],
+            [-9.6233,  1.2459, 13.3348, -0.0000,  0.2767, -0.0000],
+            [-0.0000, -0.3254, -0.0000,  0.1941,  0.0000,  0.1941],
+            [0.2795, -0.0703,  0.2767,  0.0000,  0.1713,  0.0000],
+            [0.0000, -0.9652, -0.0000,  0.1941,  0.0000,  0.5791]]
+
+        M0 = puma.cinertia(q)
+        M1 = puma.cinertia(np.c_[q, q])
+        M2 = puma.cinertia()
+
+        nt.assert_array_almost_equal(M0, Mr, decimal=4)
+        nt.assert_array_almost_equal(M1[:, :, 0], Mr, decimal=4)
+        nt.assert_array_almost_equal(M1[:, :, 1], Mr, decimal=4)
+        nt.assert_array_almost_equal(M2, Mr, decimal=4)
