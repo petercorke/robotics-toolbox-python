@@ -1079,3 +1079,27 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(M1[:, :, 0], Mr, decimal=4)
         nt.assert_array_almost_equal(M1[:, :, 1], Mr, decimal=4)
         nt.assert_array_almost_equal(M2, Mr, decimal=4)
+
+    def test_coriolis(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        qd = [1, 2, 3, 1, 2, 3]
+
+        Cr = [
+            [-0.1735, -2.0494, -0.1178, -0.0002, -0.0045,  0.0001],
+            [0.6274,  1.1572,  1.9287, -0.0015, -0.0003, -0.0000],
+            [-0.3608, -0.7734, -0.0018, -0.0009, -0.0064, -0.0000],
+            [0.0011,  0.0005, -0.0001,  0.0002,  0.0002, -0.0001],
+            [-0.0002,  0.0028,  0.0046, -0.0002, -0.0000, -0.0000],
+            [0.0001,  0.0000,  0.0000,  0.0000,  0.0000,       0]]
+
+        C0 = puma.coriolis(qd, q)
+        C1 = puma.coriolis(np.c_[qd, qd], np.c_[q, q])
+        C2 = puma.coriolis(qd)
+
+        nt.assert_array_almost_equal(C0, Cr, decimal=4)
+        nt.assert_array_almost_equal(C1[:, :, 0], Cr, decimal=4)
+        nt.assert_array_almost_equal(C1[:, :, 1], Cr, decimal=4)
+        nt.assert_array_almost_equal(C2, Cr, decimal=4)
