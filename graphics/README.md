@@ -111,15 +111,20 @@ The input is the first letter of the type (case-insensitive). e.g. (rotational =
 
 Next is the initial pose (SE3 type) of the joint.
 
-Lastly, the 'structure' of the robot. This variable must either be a `float` representing the joint length, or a `str`
+The 'structure' of the robot. This variable must either be a `float` representing the joint length, or a `str`
 representing a full file path to an STL file.
 
 If a `float` length is given, a custom rectangular object will represent it in the scene. Otherwise if a `str` path is given,
 the STL object will be loaded in and used in place of a rectangular joint.
 
+Finally, an optional parameter `axis_through` can be used to specify which (local) axis the robot arm is drawn along
+It is of a numpy array type, and defaults to `array([0, 1, 0])` (y-axis).
+
 ```python
+from numpy import array
+
 # Append a default base joint of length 2.
-my_robot.append_link('r', SE3(), 2.0)
+my_robot.append_link('r', SE3(), 2.0, axis_through=array([0, 1, 0]))
 
 # Append an STL obj rotational joint.
 my_robot.append_link('r', SE3(), './path/to/file.stl')
@@ -133,13 +138,14 @@ The types that can be created are identical to previously mentioned in the Autom
 
 To create a joint, each class requires the same variables as the automatic version (minus the joint type string).
 Also included must be the scene to display the joint in, similar to importing the Puma560 model.
+The `axis_through` parameter is still optional.
 
 Although the creation process is "the same", manually creating a joint lets you more easily update any graphical issues associated with it.
 For example, the STL you want to load may not be orientated/positioned correctly (How to fix is mentioned later)
 
 ```python
 # Create two basic rotational links
-link1 = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene)
+link1 = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene, axis_through=array([1, 0, 0]))
 link2 = gph.RotationalJoint(SE3(), 1.4, g_canvas.scene)
 
 # Add to the robot
