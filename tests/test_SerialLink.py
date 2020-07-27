@@ -667,10 +667,10 @@ class TestLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(res0[:, 0], tauB, decimal=4)
         nt.assert_array_almost_equal(res0[:, 1], tauB, decimal=4)
-        nt.assert_array_almost_equal(res1[:, 0], tauB, decimal=4)
-        nt.assert_array_almost_equal(res2[:, 0], tauB2, decimal=4)
-        nt.assert_array_almost_equal(res3[:, 0], tauB, decimal=4)
-        nt.assert_array_almost_equal(res4[:, 0], tauB3, decimal=4)
+        nt.assert_array_almost_equal(res1, tauB, decimal=4)
+        nt.assert_array_almost_equal(res2, tauB2, decimal=4)
+        nt.assert_array_almost_equal(res3, tauB, decimal=4)
+        nt.assert_array_almost_equal(res4, tauB3, decimal=4)
 
     def test_ikcon(self):
         panda = rp.PandaMDH()

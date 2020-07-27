@@ -1353,7 +1353,10 @@ class SerialLink(object):
 
                 tauB[joint, pose] = t.T @ jointAxes[:, joint]
 
-        return tauB
+        if poses == 1:
+            return tauB[:, 0]
+        else:
+            return tauB
 
     def _cross3(self, a, b):
         c = np.zeros(3)
