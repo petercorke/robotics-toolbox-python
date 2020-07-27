@@ -49,7 +49,7 @@ class TestLink(unittest.TestCase):
         l3 = rp.Revolute()
 
         r0 = rp.SerialLink([l0, l1, l2, l3])
-        q = np.array([np.pi, np.pi, np.pi, np.pi/2.0])
+        q = np.array([np.pi, np.pi, np.pi, np.pi / 2.0])
 
         ans = np.array([np.pi, 180, np.pi, 90])
 
@@ -66,7 +66,7 @@ class TestLink(unittest.TestCase):
         q = np.array([np.pi, 180, np.pi, 90])
         r0.q = q
 
-        ans = np.array([np.pi, np.pi, np.pi, np.pi/2.0])
+        ans = np.array([np.pi, np.pi, np.pi, np.pi / 2.0])
 
         nt.assert_array_almost_equal(r0.toradians(q), ans)
 
@@ -318,9 +318,9 @@ class TestLink(unittest.TestCase):
         ])
 
         T2 = np.array([
-            [-0.3279, -0.9015, -0.2826,  0.2918],
-            [0.9232, -0.3693,  0.1068, 0.06026],
-            [-0.2006, -0.2258,  0.9533,  0.3314],
+            [-0.3279, -0.9015, -0.2826, 0.2918],
+            [0.9232, -0.3693, 0.1068, 0.06026],
+            [-0.2006, -0.2258, 0.9533, 0.3314],
             [0, 0, 0, 1]
         ])
 
@@ -347,8 +347,8 @@ class TestLink(unittest.TestCase):
 
     def test_isspherical(self):
         l0 = rp.Revolute()
-        l1 = rp.Revolute(alpha=-np.pi/2)
-        l2 = rp.Revolute(alpha=np.pi/2)
+        l1 = rp.Revolute(alpha=-np.pi / 2)
+        l2 = rp.Revolute(alpha=np.pi / 2)
         l3 = rp.Revolute()
 
         r0 = rp.SerialLink([l0, l1, l2, l3])
@@ -538,7 +538,7 @@ class TestLink(unittest.TestCase):
         qT = np.c_[panda.q, panda.q, panda.q, panda.q]
 
         tau = np.array(
-            [6.0241, -4.4972, -7.2160, -4.2400,  7.0215, -4.6884, -6.0000])
+            [6.0241, -4.4972, -7.2160, -4.2400, 7.0215, -4.6884, -6.0000])
 
         tau0 = np.array(
             [-5.9498, 1.4604, -3.4544, 1.5026, -3.7777, -6.6578, 2.6047])
@@ -626,7 +626,7 @@ class TestLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
         t6 = np.array([
-            [-0.5236,  0.6902, 0.4994, 0.08575],
+            [-0.5236, 0.6902, 0.4994, 0.08575],
             [0.8287, 0.5487, 0.1106, 0.3132],
             [-0.1977, 0.4718, -0.8593, 0.5321],
             [0, 0, 0, 1]
@@ -677,7 +677,7 @@ class TestLink(unittest.TestCase):
 
     def test_ikcon(self):
         panda = rp.PandaMDH()
-        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
         T = panda.fkine(q)
         Tt = sm.SE3([T, T, T])
 
@@ -697,7 +697,7 @@ class TestLink(unittest.TestCase):
 
     def test_ikine(self):
         panda = rp.PandaMDH()
-        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
         T = panda.fkine(q)
         Tt = sm.SE3([T, T])
 
@@ -742,9 +742,9 @@ class TestLink(unittest.TestCase):
                 search=True, slimit=1)
 
     def test_ikine3(self):
-        l0 = rp.Revolute(alpha=np.pi/2)
+        l0 = rp.Revolute(alpha=np.pi / 2)
         l1 = rp.Revolute(a=0.4318)
-        l2 = rp.Revolute(d=0.15005, a=0.0203, alpha=-np.pi/2)
+        l2 = rp.Revolute(d=0.15005, a=0.0203, alpha=-np.pi / 2)
         l3 = rp.Prismatic()
         l4 = rp.Prismatic(mdh=1)
         r0 = rp.SerialLink([l0, l1, l2])
@@ -800,11 +800,11 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(q1, qr1, decimal=4)
 
     def test_ikine6s_rrp(self):
-        l0 = rp.Revolute(alpha=-np.pi/2)
-        l1 = rp.Revolute(alpha=np.pi/2)
+        l0 = rp.Revolute(alpha=-np.pi / 2)
+        l1 = rp.Revolute(alpha=np.pi / 2)
         l2 = rp.Prismatic()
-        l3 = rp.Revolute(alpha=-np.pi/2)
-        l4 = rp.Revolute(alpha=np.pi/2)
+        l3 = rp.Revolute(alpha=-np.pi / 2)
+        l4 = rp.Revolute(alpha=np.pi / 2)
         l5 = rp.Revolute()
         r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
         r1 = rp.SerialLink([l1, l0, l2, l3, l4, l5])
@@ -813,7 +813,7 @@ class TestLink(unittest.TestCase):
         T2 = r1.fkine(q)
 
         qr0 = [1.0000, -2.1416, -1.0000, -1.0000, -2.1416, 1.0000]
-        qr1 = [-2.1416, -1.0000,  1.0000, -2.1416, 1.0000, 1.0000]
+        qr1 = [-2.1416, -1.0000, 1.0000, -2.1416, 1.0000, 1.0000]
         qr2 = [1.0000, 1.0000, 1.0000, -2.1416, -1.0000, -2.1416]
         qr3 = [-2.1416, 2.1416, -1.0000, -1.0000, 2.1416, -2.1416]
 
@@ -828,11 +828,11 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
     def test_ikine6s_simple(self):
-        l0 = rp.Revolute(alpha=-np.pi/2)
+        l0 = rp.Revolute(alpha=-np.pi / 2)
         l1 = rp.Revolute()
-        l2 = rp.Revolute(alpha=np.pi/2)
-        l3 = rp.Revolute(alpha=-np.pi/2)
-        l4 = rp.Revolute(alpha=np.pi/2)
+        l2 = rp.Revolute(alpha=np.pi / 2)
+        l3 = rp.Revolute(alpha=-np.pi / 2)
+        l4 = rp.Revolute(alpha=np.pi / 2)
         l5 = rp.Revolute()
         r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
         r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
@@ -856,11 +856,11 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
     def test_ikine6s_offset(self):
-        l0 = rp.Revolute(alpha=-np.pi/2)
+        l0 = rp.Revolute(alpha=-np.pi / 2)
         l1 = rp.Revolute(d=1.0)
-        l2 = rp.Revolute(alpha=np.pi/2)
-        l3 = rp.Revolute(alpha=-np.pi/2)
-        l4 = rp.Revolute(alpha=np.pi/2)
+        l2 = rp.Revolute(alpha=np.pi / 2)
+        l3 = rp.Revolute(alpha=-np.pi / 2)
+        l4 = rp.Revolute(alpha=np.pi / 2)
         l5 = rp.Revolute()
         r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
         r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
@@ -898,11 +898,11 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(q0[:, 2], qr0, decimal=4)
 
     def test_ikine6s_fail(self):
-        l0 = rp.Revolute(alpha=np.pi/2)
+        l0 = rp.Revolute(alpha=np.pi / 2)
         l1 = rp.Revolute(d=1.0)
-        l2 = rp.Revolute(alpha=np.pi/2)
-        l3 = rp.Revolute(alpha=-np.pi/2)
-        l4a = rp.Revolute(alpha=np.pi/2)
+        l2 = rp.Revolute(alpha=np.pi / 2)
+        l3 = rp.Revolute(alpha=-np.pi / 2)
+        l4a = rp.Revolute(alpha=np.pi / 2)
         l4b = rp.Revolute()
         l5 = rp.Revolute()
         l6 = rp.Revolute(mdh=1)
@@ -936,17 +936,16 @@ class TestLink(unittest.TestCase):
         T = puma.fkine(q)
         Tt = sm.SE3([T, T])
 
-        qr0 = [0,  1.5238e+00, -1.4768e+00, 0.0, -4.6949e-02, 0.0]
-        qr1 = [-2.6625e-06, 1.5708e+00, -1.5708e+00, 5.4125e-03, -6.5779e-06,
-               0.0000e+00]
-
         q0, _, _ = puma.ikinem(Tt)
         q1, success, _ = puma.ikinem(T.A, qlimits=False)
         q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
 
-        nt.assert_array_almost_equal(q0[:, 0], qr0, decimal=4)
-        nt.assert_array_almost_equal(q0[:, 1], qr0, decimal=4)
-        nt.assert_array_almost_equal(q1, qr1, decimal=4)
+        nt.assert_array_almost_equal(
+            T.A - puma.fkine(q0[:, 0]).A, np.zeros((4, 4)), decimal=4)
+        nt.assert_array_almost_equal(
+            T.A - puma.fkine(q0[:, 1]).A, np.zeros((4, 4)), decimal=4)
+        nt.assert_array_almost_equal(
+            T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=1)
 
     def test_ikunc(self):
         puma = rp.Puma560()
@@ -977,7 +976,7 @@ class TestLink(unittest.TestCase):
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
         tr1 = [29.1421, 56.5044, 16.3528, 1.2645, 1.1239, 0.5196]
         tr2 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
-        tr3 = [32.2416, 59.2850, 16.7723, 2.8687, 0.2991, 1.7138]
+        # tr3 = [32.2416, 59.2850, 16.7723, 2.8687, 0.2991, 1.7138]
 
         t0 = puma.rne(z, z, puma.qn)
         t1 = puma.rne(z, o, puma.qn)
@@ -985,7 +984,7 @@ class TestLink(unittest.TestCase):
         puma.gravity = [0, 0, 9.81]
         t2 = puma.rne(o, o, puma.qn)
         t3 = puma.rne(z, z, grav=[0, 0, 9.81])
-        t4 = puma.rne(z, z, q=puma.qn, fext=o)
+        puma.rne(z, z, q=puma.qn, fext=o)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
         nt.assert_array_almost_equal(t1, tr1, decimal=4)
@@ -1070,12 +1069,12 @@ class TestLink(unittest.TestCase):
         q = puma.qn
 
         Mr = [
-            [17.2954, -2.7542, -9.6233, -0.0000,  0.2795,  0.0000],
-            [-2.7542, 12.1909,  1.2459, -0.3254, -0.0703, -0.9652],
-            [-9.6233,  1.2459, 13.3348, -0.0000,  0.2767, -0.0000],
-            [-0.0000, -0.3254, -0.0000,  0.1941,  0.0000,  0.1941],
-            [0.2795, -0.0703,  0.2767,  0.0000,  0.1713,  0.0000],
-            [0.0000, -0.9652, -0.0000,  0.1941,  0.0000,  0.5791]]
+            [17.2954, -2.7542, -9.6233, -0.0000, 0.2795, 0.0000],
+            [-2.7542, 12.1909, 1.2459, -0.3254, -0.0703, -0.9652],
+            [-9.6233, 1.2459, 13.3348, -0.0000, 0.2767, -0.0000],
+            [-0.0000, -0.3254, -0.0000, 0.1941, 0.0000, 0.1941],
+            [0.2795, -0.0703, 0.2767, 0.0000, 0.1713, 0.0000],
+            [0.0000, -0.9652, -0.0000, 0.1941, 0.0000, 0.5791]]
 
         M0 = puma.cinertia(q)
         M1 = puma.cinertia(np.c_[q, q])
@@ -1094,12 +1093,12 @@ class TestLink(unittest.TestCase):
         qd = [1, 2, 3, 1, 2, 3]
 
         Cr = [
-            [-0.1735, -2.0494, -0.1178, -0.0002, -0.0045,  0.0001],
-            [0.6274,  1.1572,  1.9287, -0.0015, -0.0003, -0.0000],
+            [-0.1735, -2.0494, -0.1178, -0.0002, -0.0045, 0.0001],
+            [0.6274, 1.1572, 1.9287, -0.0015, -0.0003, -0.0000],
             [-0.3608, -0.7734, -0.0018, -0.0009, -0.0064, -0.0000],
-            [0.0011,  0.0005, -0.0001,  0.0002,  0.0002, -0.0001],
-            [-0.0002,  0.0028,  0.0046, -0.0002, -0.0000, -0.0000],
-            [0.0001,  0.0000,  0.0000,  0.0000,  0.0000,       0]]
+            [0.0011, 0.0005, -0.0001, 0.0002, 0.0002, -0.0001],
+            [-0.0002, 0.0028, 0.0046, -0.0002, -0.0000, -0.0000],
+            [0.0001, 0.0000, 0.0000, 0.0000, 0.0000, 0]]
 
         C0 = puma.coriolis(qd, q)
         C1 = puma.coriolis(np.c_[qd, qd], np.c_[q, q])
