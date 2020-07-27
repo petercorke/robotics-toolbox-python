@@ -943,11 +943,11 @@ class TestLink(unittest.TestCase):
         print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
 
         self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)) < 0.2)
+            np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)) < 0.7)
         self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q0[:, 1]).A)) < 0.2)
+            np.sum(np.abs(T.A - puma.fkine(q0[:, 1]).A)) < 0.7)
         self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.2)
+            np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
 
     def test_ikunc(self):
         puma = rp.Puma560()
