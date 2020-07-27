@@ -2,7 +2,7 @@
 
 import numpy as np
 from spatialmath.base import trotz, transl
-from ropy.robot.Link import Revolute
+from ropy.robot.Revolute import Revolute
 from ropy.robot.SerialLink import SerialLink
 
 

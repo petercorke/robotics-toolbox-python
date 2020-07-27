@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """
-Created on August 1 2019
 @author: Jesse Haviland
 """
 
@@ -36,27 +35,28 @@ class Link(object):
     :type offset: float
 
     :param qlim: joint variable limits [min max]
-    :type qlim: float np.ndarray(1,2)
+    :type qlim: float ndarray(2)
     :param flip: joint moves in opposite direction
     :type flip: bool
 
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float np.ndarray(3,1)
+    :type r:  float ndarray(3,1)
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float np.ndarray(3,3)
+    :type I: float ndarray(3,3)
     :param Jm: dynamic - motor inertia
     :type Jm: float
     :param B: dynamic - motor viscous friction
     :type B: float
     :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float np.ndarray(2,1)
+    :type Tc: float ndarray(2)
     :param G: dynamic - gear ratio
     :type G: float
 
-    References:
-    Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+    :references:
+        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+
     """
 
     def __init__(
@@ -76,8 +76,7 @@ class Link(object):
             Jm=0.0,
             B=0.0,
             Tc=np.zeros(2),
-            G=1.0
-            ):
+            G=1.0):
 
         # Kinematic parameters
         self.sigma = sigma
@@ -305,23 +304,25 @@ class Link(object):
 
     def A(self, q):
         """
-        A Link transform matrix. T = L.A(Q) is the link homogeneous
-        transformation matrix (4x4) corresponding to the link variable Q
-        which is either the Denavit-Hartenberg parameter THETA (revolute)
-        or D (prismatic)
+        Link transform matrix
 
-        Notes:
-        - For a revolute joint the THETA parameter of the link is ignored,
-          and Q used instead.
-        - For a prismatic joint the D parameter of the link is ignored, and
-          Q used instead.
-        - The link offset parameter is added to Q before computation of the
-          transformation matrix.
+        T = A(q) is the link homogeneous transformation matrix (4x4)
+        corresponding to the link variable q which is either the
+        Denavit-Hartenberg parameter theta (revolute) or d (prismatic)
 
         :param q: Joint angle (radians)
         :type q: float
         :return T: link homogeneous transformation matrix
         :rtype T: float numpy.ndarray((4, 4))
+
+        :notes:
+            - For a revolute joint the THETA parameter of the link is ignored,
+              and q used instead.
+            - For a prismatic joint the D parameter of the link is ignored,
+              and q used instead.
+            - The link offset parameter is added to Q before computation of
+              the transformation matrix.
+
         """
 
         sa = np.sin(self.alpha)
@@ -346,18 +347,18 @@ class Link(object):
         if self.mdh == 0:
             # standard DH
             T = np.array([
-                [ct,  -st*ca,   st*sa,   self.a*ct],
-                [st,   ct*ca,  -ct*sa,   self.a*st],
-                [0,    sa,      ca,      d],
-                [0,    0,       0,       1]
+                [ct, -st * ca, st * sa, self.a * ct],
+                [st, ct * ca, -ct * sa, self.a * st],
+                [0, sa, ca, d],
+                [0, 0, 0, 1]
             ])
         else:
             # modified DH
             T = np.array([
-                [ct,      -st,       0,     self.a],
-                [st*ca,    ct*ca,   -sa,   -sa*d],
-                [st*sa,    ct*sa,    ca,    ca*d],
-                [0,        0,        0,     1]
+                [ct, -st, 0, self.a],
+                [st * ca, ct * ca, -sa, -sa * d],
+                [st * sa, ct * sa, ca, ca * d],
+                [0, 0, 0, 1]
             ])
 
         return SE3(T)
@@ -368,6 +369,7 @@ class Link(object):
 
         :return: True if joint is exceeded
         :rtype: bool
+
         """
 
         if q < self.qlim[0] or q > self.qlim[1]:
@@ -381,6 +383,7 @@ class Link(object):
 
         :return: Ture if is revolute
         :rtype: bool
+
         """
 
         if not self.sigma:
@@ -394,6 +397,7 @@ class Link(object):
 
         :return: Ture if is prismatic
         :rtype: bool
+
         """
 
         if self.sigma:
@@ -403,8 +407,12 @@ class Link(object):
 
     def nofriction(self, coulomb=True, viscous=False):
         """
-        Copies the link and returns a link with the same parameters except,
-        the Coulomb and/or viscous friction parameter to zero
+        l2 = nofriction(coulomb, viscous) copies the link and returns a link
+        with the same parameters except, the Coulomb and/or viscous friction
+        parameter to zero.
+
+        l2 = nofriction() as above except the the Coulomb parameter is set to
+        zero.
 
         :param coulomb: if True, will set the coulomb friction to 0
         :type coulomb: bool
@@ -441,30 +449,34 @@ class Link(object):
 
     def friction(self, qd):
         """
-        Calculates the joint friction force/torque (1xN) for joint
-        velocity QD (1xN). The friction model includes:
-        - Viscous friction which is a linear function of velocity.
-        - Coulomb friction which is proportional to sign(QD).
+        tau = friction(qd) Calculates the joint friction force/torque (n)
+        for joint velocity qd (n). The friction model includes:
 
-        Notes::
-        - The friction value should be added to the motor output torque, it has
-            a negative value when QD>0.
-        - The returned friction value is referred to the output of the gearbox.
-        - The friction parameters in the Link object are referred to the motor.
-        - Motor viscous friction is scaled up by G^2.
-        - Motor Coulomb friction is scaled up by G.
-        - The appropriate Coulomb friction value to use in the non-symmetric
-            case depends on the sign of the joint velocity, not the motor
-            velocity.
-        - The absolute value of the gear ratio is used.  Negative gear ratios
-            are tricky: the Puma560 has negative gear ratio for joints 1 and
-            3.
+        - Viscous friction which is a linear function of velocity.
+        - Coulomb friction which is proportional to sign(qd).
 
         :param qd: The joint velocity
         :type qd: float
 
         :return tau: the friction force/torque
         :rtype tau: float
+
+        :notes:
+            - The friction value should be added to the motor output torque,
+              it has a negative value when qd > 0.
+            - The returned friction value is referred to the output of the
+              gearbox.
+            - The friction parameters in the Link object are referred to the
+              motor.
+            - Motor viscous friction is scaled up by G^2.
+            - Motor Coulomb friction is scaled up by G.
+            - The appropriate Coulomb friction value to use in the
+              non-symmetric case depends on the sign of the joint velocity,
+              not the motor velocity.
+            - The absolute value of the gear ratio is used.  Negative gear
+              ratios are tricky: the Puma560 has negative gear ratio for
+              joints 1 and 3.
+
         """
 
         tau = self.B * np.abs(self.G) * qd
@@ -479,140 +491,3 @@ class Link(object):
 
         return tau
 
-
-class Revolute(Link):
-    """
-    A class for revolute link types
-
-    :param d: kinematic - link offset
-    :type d: float
-    :param alpha: kinematic - link twist
-    :type alpha: float
-    :param a: kinematic - link length
-    :type a: float
-    :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
-    :param offset: kinematic - joint variable offset
-    :type offset: float
-
-    :param qlim: joint variable limits [min max]
-    :type qlim: float np.ndarray(1,2)
-    :param flip: joint moves in opposite direction
-    :type flip: bool
-
-    :param m: dynamic - link mass
-    :type m: float
-    :param r: dynamic - position of COM with respect to link frame
-    :type r:  float np.ndarray(3,1)
-    :param I: dynamic - inertia of link with respect to COM
-    :type I: float np.ndarray(3,3)
-    :param Jm: dynamic - motor inertia
-    :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float or float np.ndarray(2,1)
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float np.ndarray(2,1)
-    :param G: dynamic - gear ratio
-    :type G: float
-
-    References:
-    Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
-    """
-
-    def __init__(
-            self,
-            d=0.0,
-            alpha=0.0,
-            a=0.0,
-            mdh=0.0,
-            offset=0.0,
-            qlim=np.zeros(2),
-            flip=False,
-            m=0.0,
-            r=np.zeros(3),
-            I=np.zeros((3, 3)),
-            Jm=0.0,
-            B=0.0,
-            Tc=np.zeros(2),
-            G=1.0
-            ):
-
-        theta = 0.0
-        sigma = 0
-
-        super(Revolute, self).__init__(
-            d, alpha, theta, a, sigma, mdh, offset,
-            qlim, flip, m, r, I, Jm, B, Tc, G)
-
-
-class Prismatic(Link):
-    """
-    A subclass of the Link class for a prismatic joint: holds all information
-    related to a robot link such as kinematics parameters, rigid-body inertial
-    parameters, motor and transmission parameters.
-
-    :param theta: kinematic: joint angle
-    :type theta: float
-    :param d: kinematic - link offset
-    :type d: float
-    :param alpha: kinematic - link twist
-    :type alpha: float
-    :param a: kinematic - link length
-    :type a: float
-    :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
-    :param offset: kinematic - joint variable offset
-    :type offset: float
-
-    :param qlim: joint variable limits [min max]
-    :type qlim: float np.ndarray(1,2)
-    :param flip: joint moves in opposite direction
-    :type flip: bool
-
-    :param m: dynamic - link mass
-    :type m: float
-    :param r: dynamic - position of COM with respect to link frame
-    :type r:  float np.ndarray(3,1)
-    :param I: dynamic - inertia of link with respect to COM
-    :type I: float np.ndarray(3,3)
-    :param Jm: dynamic - motor inertia
-    :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float or float np.ndarray(2,1)
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float np.ndarray(2,1)
-    :param G: dynamic - gear ratio
-    :type G: float
-
-    References:
-    Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
-    """
-
-    def __init__(
-            self,
-            alpha=0.0,
-            theta=0.0,
-            a=0.0,
-            mdh=0.0,
-            offset=0.0,
-            qlim=np.zeros(2),
-            flip=False,
-            m=0.0,
-            r=np.zeros(3),
-            I=np.zeros((3, 3)),
-            Jm=0.0,
-            B=0.0,
-            Tc=np.zeros(2),
-            G=1.0
-            ):
-
-        d = 0.0
-        sigma = 1
-
-        super(Prismatic, self).__init__(
-            d, alpha, theta, a, sigma, mdh, offset,
-            qlim, flip, m, r, I, Jm, B, Tc, G)

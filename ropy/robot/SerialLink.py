@@ -54,8 +54,7 @@ class SerialLink(object):
             manufacturer='',
             base=SE3(),
             tool=SE3(),
-            gravity=np.array([0, 0, 9.81])
-            ):
+            gravity=np.array([0, 0, 9.81])):
 
         self.name = name
         self.manuf = manufacturer
@@ -131,23 +130,23 @@ class SerialLink(object):
 
     def _init_rne(self):
         # Compress link data into a 1D array
-        L = np.zeros(24*self.n)
+        L = np.zeros(24 * self.n)
 
         for i in range(self.n):
             j = i * 24
             L[j] = self.links[i].alpha
-            L[j+1] = self.links[i].a
-            L[j+2] = self.links[i].theta
-            L[j+3] = self.links[i].d
-            L[j+4] = self.links[i].sigma
-            L[j+5] = self.links[i].offset
-            L[j+6] = self.links[i].m
-            L[j+7:j+10] = self.links[i].r.flatten()
-            L[j+10:j+19] = self.links[i].I.flatten()
-            L[j+19] = self.links[i].Jm
-            L[j+20] = self.links[i].G
-            L[j+21] = self.links[i].B
-            L[j+22:j+24] = self.links[i].Tc.flatten()
+            L[j + 1] = self.links[i].a
+            L[j + 2] = self.links[i].theta
+            L[j + 3] = self.links[i].d
+            L[j + 4] = self.links[i].sigma
+            L[j + 5] = self.links[i].offset
+            L[j + 6] = self.links[i].m
+            L[j + 7:j + 10] = self.links[i].r.flatten()
+            L[j + 10:j + 19] = self.links[i].I.flatten()
+            L[j + 19] = self.links[i].Jm
+            L[j + 20] = self.links[i].G
+            L[j + 21] = self.links[i].B
+            L[j + 22:j + 24] = self.links[i].Tc.flatten()
 
         self._rne_ob = init(self.n, self.mdh, L, self.gravity[:, 0])
 
