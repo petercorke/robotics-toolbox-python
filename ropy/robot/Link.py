@@ -124,12 +124,45 @@ class Link(object):
             raise TypeError("Cannot add a Link with a non Link object")
 
     def __str__(self):
-        # TODO
-        string = "a: {0}".format(self.alpha)
-        return string
+
+        if not self.sigma:
+            s = "Revolute   theta={:.2f}  d={:.2f}  a={:.2f}  alpha={:.2f}  " \
+                "offset={:.2f}".format(
+                    self.theta, self.d, self.a, self.alpha, self.offset)
+        else:
+            s = "Prismatic  theta={:.2f}  d={:.2f}  a={:.2f}  alpha={:.2f}  " \
+                "offset={:.2f}".format(
+                    self.theta, self.d, self.a, self.alpha, self.offset)
+
+        return s
 
     def __repr__(self):
         return str(self)
+
+    def dyn(self):
+        s = "m     =  {:.2f} \n" \
+            "r     =  {:.2f} {:.2f} {:.2f} \n" \
+            "        | {:.2f} {:.2f} {:.2f} | \n" \
+            "I     = | {:.2f} {:.2f} {:.2f} | \n" \
+            "        | {:.2f} {:.2f} {:.2f} | \n" \
+            "Jm    =  {:.2f} \n" \
+            "B     =  {:.2f} \n" \
+            "Tc    =  {:.2f}(+) {:.2f}(-) \n" \
+            "G     =  {:.2f} \n" \
+            "qlim  =  {:.2f} to {:.2f}".format(
+                self.m,
+                self.r[0, 0], self.r[1, 0], self.r[2, 0],
+                self.I[0, 0], self.I[0, 1], self.I[0, 2],
+                self.I[1, 0], self.I[1, 1], self.I[1, 2],
+                self.I[2, 0], self.I[2, 1], self.I[2, 2],
+                self.Jm,
+                self.B,
+                self.Tc[0], self.Tc[1],
+                self.G,
+                self.qlim[0], self.qlim[1]
+            )
+
+        return s
 
     @property
     def d(self):

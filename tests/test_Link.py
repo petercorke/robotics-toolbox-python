@@ -139,9 +139,36 @@ class TestLink(unittest.TestCase):
         self.assertEqual(l0.Jm, 0.0)
 
     def test_str(self):
-        l0 = rp.Link()
-        l0.__str__()
-        l0.__repr__()
+        l0 = rp.Prismatic()
+        l1 = rp.Revolute()
+
+        s0 = l0.__str__()
+        s1 = l1.__repr__()
+
+        self.assertEqual(
+            s0, "Prismatic  theta=0.00  d=0.00  a=0.00  "
+                "alpha=0.00  offset=0.00")
+        self.assertEqual(
+            s1, "Revolute   theta=0.00  d=0.00  a=0.00  "
+                "alpha=0.00  offset=0.00")
+
+    def test_dyn(self):
+        puma = rp.Puma560()
+
+        s0 = puma.links[0].dyn()
+
+        self.assertEqual(
+            s0,
+            "m     =  0.00 \n"
+            "r     =  0.00 0.00 0.00 \n"
+            "        | 0.00 0.00 0.00 | \n"
+            "I     = | 0.00 0.35 0.00 | \n"
+            "        | 0.00 0.00 0.00 | \n"
+            "Jm    =  0.00 \n"
+            "B     =  0.00 \n"
+            "Tc    =  0.40(+) -0.43(-) \n"
+            "G     =  -62.61 \n"
+            "qlim  =  -2.79 to 2.79")
 
     def test_revolute(self):
         l0 = rp.Revolute()

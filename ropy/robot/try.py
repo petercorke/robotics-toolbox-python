@@ -7,49 +7,14 @@ import frne
 
 import time
 
-# puma = rp.Puma560()
-
-# L = np.zeros(24*9)
-
-# for i in range(puma.n):
-#     j = i * 24
-#     L[j] = puma.links[i].alpha
-#     L[j+1] = puma.links[i].a
-#     L[j+2] = puma.links[i].theta
-#     L[j+3] = puma.links[i].d
-#     L[j+4] = puma.links[i].sigma
-#     L[j+5] = puma.links[i].offset
-#     L[j+6] = puma.links[i].m
-#     L[j+7:j+10] = puma.links[i].r.flatten()
-#     L[j+10:j+19] = puma.links[i].I.flatten()
-#     L[j+19] = puma.links[i].Jm
-#     L[j+20] = puma.links[i].G
-#     L[j+21] = puma.links[i].B
-#     L[j+22:j+24] = puma.links[i].Tc.flatten()
-
-
-# r = frne.init(puma.n, puma.mdh, L, puma.gravity[:, 0])
-# frne.point(r)
-# frne.delete(r)
-# frne.point(r)
-# t1 = time.time()
-
-# z = np.zeros(6)
-# o = np.ones(6)
-
-
-# tau = puma.rne(o, o, puma.qn)
-# print(tau)
-
-
-
 
 puma = rp.Puma560()
 puma.q = puma.qn
 qd = [1, 2, 3, 1, 2, 3]
 
 
-print(puma.itorque(qd, puma.qn))
+print(puma.links[0].dyn())
+# print(puma.links)
 
 # z = np.zeros(6)
 # o = np.ones(6)
