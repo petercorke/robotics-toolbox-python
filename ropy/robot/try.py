@@ -46,9 +46,10 @@ import time
 
 puma = rp.Puma560()
 puma.q = puma.qn
+qd = [1, 2, 3, 1, 2, 3]
 
 
-print(puma.cinertia())
+print(np.round(puma.coriolis(qd, puma.qn), 5))
 
 # z = np.zeros(6)
 # o = np.ones(6)

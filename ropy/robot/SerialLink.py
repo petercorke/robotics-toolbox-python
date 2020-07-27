@@ -1182,50 +1182,59 @@ class SerialLink(object):
         - Computationally slow, involves n^2/2 invocations of RNE.
         """
 
-        try:
-            qd = getvector(qd, self.n)
-            trajn = 0
+        trajn = 1
 
-            if q is None:
-                q = np.copy(self.q)
-            else:
-                q = getvector(q, self.n)
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+            qd = getvector(qd, self.n, 'col')
         except ValueError:
-            trajn = qd.shape[1]
-            verifymatrix(qd, (self.n, trajn))
+            trajn = q.shape[1]
             verifymatrix(q, (self.n, trajn))
+            verifymatrix(qd, (self.n, trajn))
+
+        qdd = np.zeros((self.n, trajn))
 
         r1 = self.nofriction(True, True)
 
-        C = np.zeros((self.n, self.n))
-        Csq = np.zeros((self.n, self.n))
+        C = np.zeros((self.n, self.n, trajn))
+        Csq = np.zeros((self.n, self.n, trajn))
 
         # Find the torques that depend on a single finite joint speed,
         # these are due to the squared (centripetal) terms
         # set QD = [1 0 0 ...] then resulting torque is due to qd_1^2
-        for i in range(self.n):
-            QD = np.zeros((1, self.n))
-            QD[i] = 1
-            tau = r1.rne(q, QD, np.zeros(self.n), gravity=[0, 0, 0])
-            Csq[:, i] = Csq[:, i] + tau.T
+        for j in range(trajn):
+            for i in range(self.n):
+                QD = np.zeros(self.n)
+                QD[i] = 1
+                tau = r1.rne(
+                    np.zeros(self.n), QD, q[:, j], grav=[0, 0, 0])
+                Csq[:, i, j] = Csq[:, i, j] + tau
 
         # Find the torques that depend on a pair of finite joint speeds,
         # these are due to the product (Coridolis) terms
         # set QD = [1 1 0 ...] then resulting torque is due to
         # qd_1 qd_2 + qd_1^2 + qd_2^2
-        for i in range(self.n):
-            for j in range(i+1, self.n):
-                # Find a product term  qd_i * qd_j
-                QD = np.zeros((1, self.n))
-                QD[i] = 1
-                QD[j] = 1
-                tau = r1.rne(q, QD, np.zeros(self.n), gravity=[0, 0, 0])
-                C[:, j] = C[:, j] + (tau.T - Csq[:, j] - Csq[:, i]) \
-                    * qd[i]/2
-                C[:, i] = C[:, i] + (tau.T - Csq[:, j] - Csq[:, i]) \
-                    * qd[j]/2
+        for k in range(trajn):
+            for i in range(self.n):
+                for j in range(i+1, self.n):
+                    # Find a product term  qd_i * qd_j
+                    QD = np.zeros(self.n)
+                    QD[i] = 1
+                    QD[j] = 1
+                    tau = r1.rne(np.zeros(self.n), QD, q[:, k], grav=[0, 0, 0])
 
-        C = C + Csq @ np.diag(qd)
+                    C[:, j, k] = C[:, j, k] + \
+                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[i, k]/2
+
+                    C[:, i, k] = C[:, i, k] + \
+                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[j, k]/2
+
+            C[:, :, k] = C[:, :, k] + Csq[:, :, k] @ np.diag(qd[:, k])
+
+        return C[:, :, 0]
 
     def gravjac(self, q=None, grav=None):
         """
