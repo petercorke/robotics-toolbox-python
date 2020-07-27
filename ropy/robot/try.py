@@ -49,7 +49,7 @@ puma.q = puma.qn
 qd = [1, 2, 3, 1, 2, 3]
 
 
-print(np.round(puma.coriolis(qd, puma.qn), 5))
+print(puma.gravload(puma.qn))
 
 # z = np.zeros(6)
 # o = np.ones(6)

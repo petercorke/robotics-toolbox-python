@@ -1383,27 +1383,35 @@ class SerialLink(object):
         :type grav: float np.ndarray(3)
 
         :return taug: The generalised joint force/torques due to gravity
-        :rtype taug: float np.ndarray(n,)
+        :rtype taug: float np.ndarray(n)
         """
+
+        trajn = 1
+
+        if q is None:
+            q = self.q
 
         if grav is None:
             grav = np.copy(self.gravity)
-        else:
-            grav = getvector(grav, 3)
 
         try:
-            if q is not None:
-                q = getvector(q, self.n, 'col')
-            else:
-                q = np.copy(self.q)
-                q = getvector(q, self.n, 'col')
-
-            poses = 1
+            q = getvector(q, self.n, 'col')
+            grav = getvector(grav, 3, 'col')
         except ValueError:
-            poses = q.shape[1]
-            verifymatrix(q, (self.n, poses))
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
+            verifymatrix(grav, (3, trajn))
 
-        taug = rne(q, np.zeros(self.n), np.zeros(self.n), grav)
+        taug = np.zeros((self.n, trajn))
+
+        for i in range(trajn):
+            taug[:, i] = self.rne(
+                np.zeros(self.n), np.zeros(self.n), q[:, i], grav[:, i])
+
+        if trajn == 1:
+            return taug[:, 0]
+        else:
+            return taug
 
     def ikcon(self, T, q0=None):
         """
