@@ -371,17 +371,14 @@ class SerialLink(object):
         if self.n < 3:
             return False
 
-        L = self.links[self.n-3:self.n]
+        L = self.links[self.n - 3:self.n]
 
-        alpha = [-np.pi/2, np.pi/2]
+        alpha = [-np.pi / 2, np.pi / 2]
 
-        if L[0].a == 0 and L[1].a == 0 and \
-                L[1].d == 0 and \
-                (
-                    (L[0].alpha == alpha[0] and L[1].alpha == alpha[1]) or
-                    (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
-                ) and \
-                L[0].sigma == 0 and L[1].sigma == 0 and L[2].sigma == 0:
+        if L[0].a == 0 and L[1].a == 0 and L[1].d == 0 and (
+                (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
+                or (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
+        ) and L[0].sigma == 0 and L[1].sigma == 0 and L[2].sigma == 0:
 
             return True
         else:
@@ -405,7 +402,7 @@ class SerialLink(object):
         """
 
         p = getvector(p, 3, out='col')
-        lastlink = self.links[self.n-1]
+        lastlink = self.links[self.n - 1]
 
         lastlink.m = m
         lastlink.r = p
@@ -686,7 +683,7 @@ class SerialLink(object):
 
         U = self.tool.A
 
-        for j in range(n-1, -1, -1):
+        for j in range(n - 1, -1, -1):
             if self.mdh == 0:
                 # standard DH convention
                 U = L[j].A(q[j]).A @ U
@@ -1200,8 +1197,6 @@ class SerialLink(object):
             verifymatrix(q, (self.n, trajn))
             verifymatrix(qd, (self.n, trajn))
 
-        qdd = np.zeros((self.n, trajn))
-
         r1 = self.nofriction(True, True)
 
         C = np.zeros((self.n, self.n, trajn))
@@ -1224,7 +1219,7 @@ class SerialLink(object):
         # qd_1 qd_2 + qd_1^2 + qd_2^2
         for k in range(trajn):
             for i in range(self.n):
-                for j in range(i+1, self.n):
+                for j in range(i + 1, self.n):
                     # Find a product term  qd_i * qd_j
                     QD = np.zeros(self.n)
                     QD[i] = 1
@@ -1232,10 +1227,10 @@ class SerialLink(object):
                     tau = r1.rne(np.zeros(self.n), QD, q[:, k], grav=[0, 0, 0])
 
                     C[:, j, k] = C[:, j, k] + \
-                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[i, k]/2
+                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[i, k] / 2
 
                     C[:, i, k] = C[:, i, k] + \
-                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[j, k]/2
+                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[j, k] / 2
 
             C[:, :, k] = C[:, :, k] + Csq[:, :, k] @ np.diag(qd[:, k])
 
@@ -1350,7 +1345,6 @@ class SerialLink(object):
             baseOrigin = self.base.t
 
         tauB = np.zeros((self.n, poses))
-        J = np.zeros((6, self.n, poses))
 
         # Forces
         force = np.zeros((3, self.n))
@@ -1383,7 +1377,7 @@ class SerialLink(object):
                 ]
 
             # Backwards recursion
-            for joint in range(self.n-1, -1, -1):
+            for joint in range(self.n - 1, -1, -1):
                 # C.o.M. in world frame, homog
                 com = T[joint].A @ r[:, joint]
 
@@ -1542,12 +1536,13 @@ class SerialLink(object):
         exitflag = []
 
         reach = np.sum(np.abs([self.a, self.d]))
-        omega = np.diag([1, 1, 1, 3/reach])
+        omega = np.diag([1, 1, 1, 3 / reach])
 
         def cost(q, T, omega):
             return np.sum(
-                ((np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @ omega)
-                ** 2
+                (
+                    (np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @
+                    omega) ** 2
             )
 
         bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
@@ -1719,7 +1714,8 @@ class SerialLink(object):
                             raise ValueError('For a prismatic joint, '
                                              'search requires joint limits')
                     else:
-                        q0n[j] = np.random.rand() * (qlim[1]-qlim[0]) + qlim[0]
+                        q0n[j] = np.random.rand() * (qlim[1] - qlim[0]) + \
+                            qlim[0]
 
                 # fprintf('Trying q = %s\n', num2str(q))
 
@@ -1799,7 +1795,7 @@ class SerialLink(object):
                     # Levenberg-Marquadt
                     dq = np.linalg.inv(
                         JtJ + ((Yl + Ymin) * np.eye(self.n))
-                        ) @ J.T @ W @ e
+                    ) @ J.T @ W @ e
 
                     # Compute possible new value of
                     qnew = q + dq
@@ -1812,11 +1808,11 @@ class SerialLink(object):
                         # Step is accepted
                         q = qnew
                         e = enew
-                        Yl = Yl/2
+                        Yl = Yl / 2
                         rejcount = 0
                     else:
                         # Step is rejected, increase the damping and retry
-                        Yl = Yl*2
+                        Yl = Yl * 2
                         rejcount += 1
                         if rejcount > rlimit:
                             err.append(
@@ -1954,9 +1950,9 @@ class SerialLink(object):
             r = np.sqrt(Px**2 + Py**2)
 
             if (n1 == 1):
-                theta[0] = np.arctan2(Py, Px) + np.arcsin(d3/r)
+                theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
             else:
-                theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3/r)
+                theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
 
             # Solve for theta[1]
             # based on the configuration parameter n2
@@ -1965,8 +1961,8 @@ class SerialLink(object):
             r = np.sqrt(V114**2 + Pz**2)
 
             Psi = np.arccos(
-                (a2**2 - d3**2 - a3**2 + V114**2 + Pz**2) /
-                (2.0 * a2 * r))
+                (a2**2 - d3**2 - a3**2 + V114**2 + Pz**2)
+                / (2.0 * a2 * r))
 
             theta[1] = np.arctan2(Pz, V114) + n2 * Psi
 
@@ -2064,8 +2060,6 @@ class SerialLink(object):
 
         trajn = len(T)
 
-        qt = np.zeros((6, trajn))
-
         sol = [1, 1, 1]
 
         if not left:
@@ -2114,13 +2108,6 @@ class SerialLink(object):
 
                 # The following parameters are extracted from the Homogeneous
                 # Transformation as defined in equation 1, p. 34
-                Ox = Ti[0, 1]
-                Oy = Ti[1, 1]
-                Oz = Ti[2, 1]
-
-                Ax = Ti[0, 2]
-                Ay = Ti[1, 2]
-                Az = Ti[2, 2]
 
                 Px = Ti[0, 3]
                 Py = Ti[1, 3]
@@ -2133,9 +2120,9 @@ class SerialLink(object):
 
                 r = np.sqrt(Px**2 + Py**2)
                 if sol[0] == 1:
-                    theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3/r)
+                    theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
                 else:
-                    theta[0] = np.arctan2(Py, Px) + np.arcsin(d3/r)
+                    theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
 
                 # Solve for theta[1]
                 # V114 is defined in equation 43, p.39.
@@ -2156,8 +2143,8 @@ class SerialLink(object):
                 r = np.sqrt(V114**2 + Pz**2)
 
                 Psi = np.arccos(
-                    (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2) /
-                    (2.0 * a2 * r))
+                    (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
+                    / (2.0 * a2 * r))
 
                 if np.isnan(Psi):
                     theta = []
@@ -2182,12 +2169,12 @@ class SerialLink(object):
                 # Autogenerated code
                 if self.links[0].alpha < 0:
                     if sol[0] == 1:
-                        temp = -px-py*1j
+                        temp = -px - py * 1j
                         if np.abs(temp) == 0:
                             temp = 0
                         theta[0] = np.angle(temp)
                     else:
-                        theta[0] = np.angle(px+py*1j)
+                        theta[0] = np.angle(px + py * 1j)
 
                     print(theta[0])
 
@@ -2209,9 +2196,9 @@ class SerialLink(object):
 
                 else:
                     if sol[0] == 1:
-                        theta[0] = np.angle(px+py*1j)
+                        theta[0] = np.angle(px + py * 1j)
                     else:
-                        temp = -px-py*1j
+                        temp = -px - py * 1j
                         if np.abs(temp) == 0:
                             temp = 0
                         theta[0] = np.angle(temp)
@@ -2311,14 +2298,14 @@ class SerialLink(object):
                     C1 = np.cos(theta[0])
 
                     if sol[1] == 1:
-                        theta[1] = np.angle(d1-pz-C1*px*1j-S1*py*1j)
+                        theta[1] = np.angle(d1-pz-C1*px*1j-S1*py*1j)  # noqa
                     else:
-                        theta[1] = np.angle(-d1+pz+C1*px*1j+S1*py*1j)
+                        theta[1] = np.angle(-d1+pz+C1*px*1j+S1*py*1j)  # noqa
 
                     S2 = np.sin(theta[1])
                     C2 = np.cos(theta[1])
 
-                    theta[2] = -C2*d1+C2*pz+C1*S2*px+S1*S2*py
+                    theta[2] = -C2*d1+C2*pz+C1*S2*px+S1*S2*py  # noqa
 
                 else:
                     if sol[0] == 1:
@@ -2330,16 +2317,16 @@ class SerialLink(object):
                     C1 = np.cos(theta[0])
 
                     if sol[1] == 1:
-                        theta[1] = np.angle(-d1+pz-C1*px*1j-S1*py*1j)
+                        theta[1] = np.angle(-d1+pz-C1*px*1j-S1*py*1j)  # noqa
                     else:
-                        theta[1] = np.angle(d1-pz+C1*px*1j+S1*py*1j)
+                        theta[1] = np.angle(d1-pz+C1*px*1j+S1*py*1j)  # noqa
 
                     print(theta[1])
 
                     S2 = np.sin(theta[1])
                     C2 = np.cos(theta[1])
 
-                    theta[2] = -C2*d1+C2*pz-C1*S2*px-S1*S2*py
+                    theta[2] = -C2*d1+C2*pz-C1*S2*px-S1*S2*py  # noqa
 
             if not np.all(np.isnan(theta)):
                 # Solve for the wrist rotation
@@ -2384,20 +2371,16 @@ class SerialLink(object):
 
     def _is_simple(self):
         L = self.links
-        alpha = [-np.pi/2, 0, np.pi/2]
-        s = (L[1].d == 0 and L[2].d == 0) and \
-            (
-                (
-                    L[0].alpha == alpha[0] and
-                    L[1].alpha == alpha[1] and
-                    L[2].alpha == alpha[2]
-                ) or
-                (
-                    L[0].alpha == -alpha[0] and
-                    L[1].alpha == -alpha[1] and
-                    L[2].alpha == -alpha[2]
-                )
-            ) and \
+        alpha = [-np.pi / 2, 0, np.pi / 2]
+        s = (L[1].d == 0 and L[2].d == 0) and ((
+            L[0].alpha == alpha[0]
+            and L[1].alpha == alpha[1]
+            and L[2].alpha == alpha[2]
+        ) or (
+            L[0].alpha == -alpha[0]
+            and L[1].alpha == -alpha[1]
+            and L[2].alpha == -alpha[2]
+        )) and \
             (not L[0].sigma and not L[1].sigma and not L[2].sigma) and \
             L[0].a == 0
 
@@ -2405,57 +2388,46 @@ class SerialLink(object):
 
     def _is_offset(self):
         L = self.links
-        alpha = [-np.pi/2, 0, np.pi/2]
-        s = (
-                (
-                    L[0].alpha == alpha[0] and
-                    L[1].alpha == alpha[1] and
-                    L[2].alpha == alpha[2]
-                ) or
-                (
-                    L[0].alpha == -alpha[0] and
-                    L[1].alpha == -alpha[1] and
-                    L[2].alpha == -alpha[2]
-                )
-            ) and \
-            (not L[0].sigma and not L[1].sigma and not L[2].sigma)
+        alpha = [-np.pi / 2, 0, np.pi / 2]
+        s = ((
+            L[0].alpha == alpha[0]
+            and L[1].alpha == alpha[1]
+            and L[2].alpha == alpha[2]
+        ) or (
+            L[0].alpha == -alpha[0]
+            and L[1].alpha == -alpha[1]
+            and L[2].alpha == -alpha[2]
+        )) and (not L[0].sigma and not L[1].sigma and not L[2].sigma)
 
         return s
 
     def _is_rrp(self):
         L = self.links
-        alpha = [-np.pi/2, np.pi/2, 0]
-        s = (L[1].a == 0 and L[2].a == 0) and \
-            (
-                (
-                    L[0].alpha == alpha[0] and
-                    L[1].alpha == alpha[1] and
-                    L[2].alpha == alpha[2]
-                ) or
-                (
-                    L[0].alpha == -alpha[0] and
-                    L[1].alpha == -alpha[1] and
-                    L[2].alpha == -alpha[2]
-                )
-            ) and \
-            not L[0].sigma and not L[1].sigma and L[2].sigma
+        alpha = [-np.pi / 2, np.pi / 2, 0]
+        s = (L[1].a == 0 and L[2].a == 0) and ((
+            L[0].alpha == alpha[0]
+            and L[1].alpha == alpha[1]
+            and L[2].alpha == alpha[2]
+        ) or (
+            L[0].alpha == -alpha[0]
+            and L[1].alpha == -alpha[1]
+            and L[2].alpha == -alpha[2]
+        )) and not L[0].sigma and not L[1].sigma and L[2].sigma
 
         return s
 
     def _is_puma(self):
         L = self.links
-        alpha = [np.pi/2, 0, -np.pi/2]
+        alpha = [np.pi / 2, 0, -np.pi / 2]
         s = (
-                L[1].d == 0 and
-                L[0].a == 0 and
-                not L[2].d == 0 and
-                not L[2].a == 0 and
-                (
-                    L[0].alpha == alpha[0] and
-                    L[1].alpha == alpha[1] and
-                    L[2].alpha == alpha[2]
-                ) and
-                (not L[0].sigma and not L[1].sigma and not L[2].sigma))
+            L[1].d == 0
+            and L[0].a == 0
+            and not L[2].d == 0
+            and not L[2].a == 0 and (
+                L[0].alpha == alpha[0]
+                and L[1].alpha == alpha[1]
+                and L[2].alpha == alpha[2]
+            ) and (not L[0].sigma and not L[1].sigma and not L[2].sigma))
 
         return s
 
@@ -2573,7 +2545,6 @@ class SerialLink(object):
             Ti = T[i]
 
             if qlimits:
-                qlim = self.qlim
                 bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
 
                 res = minimize(
@@ -2587,8 +2558,8 @@ class SerialLink(object):
                     q0[:, i],
                     options={'gtol': 1e-6, 'maxiter': ilimit})
 
-            if res.success and i < trajn-1:
-                q0[:, i+1] = res.x
+            if res.success and i < trajn - 1:
+                q0[:, i + 1] = res.x
 
             qt[:, i] = res.x
             success.append(res.success)
@@ -2664,7 +2635,7 @@ class SerialLink(object):
         err = []
 
         reach = np.sum(np.abs([self.a, self.d]))
-        omega = np.diag([1, 1, 1, 3/reach])
+        omega = np.diag([1, 1, 1, 3 / reach])
 
         def sumsqr(arr):
             return np.sum(np.power(arr, 2))
@@ -2674,10 +2645,9 @@ class SerialLink(object):
             Ti = T[i]
 
             res = minimize(
-                lambda q: sumsqr(
-                    (
-                        (np.linalg.inv(Ti.A) @ self.fkine(q).A) -
-                        np.eye(4)) @ omega),
+                lambda q: sumsqr(((
+                    np.linalg.inv(Ti.A) @ self.fkine(q).A) - np.eye(4)) @
+                    omega),
                 q0[:, i],
                 options={'gtol': 1e-6, 'maxiter': ilimit})
 
