@@ -1392,7 +1392,7 @@ class SerialLink(object):
             q = self.q
 
         if grav is None:
-            grav = np.copy(self.gravity)
+            grav = getvector(np.copy(self.gravity), 3, 'col')
 
         try:
             q = getvector(q, self.n, 'col')
@@ -1400,7 +1400,10 @@ class SerialLink(object):
         except ValueError:
             trajn = q.shape[1]
             verifymatrix(q, (self.n, trajn))
-            verifymatrix(grav, (3, trajn))
+
+        if grav.shape[1] < trajn:
+            grav = grav @ np.ones((1, trajn))
+        verifymatrix(grav, (3, trajn))
 
         taug = np.zeros((self.n, trajn))
 

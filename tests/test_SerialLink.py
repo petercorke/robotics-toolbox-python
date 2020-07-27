@@ -1103,3 +1103,24 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(C1[:, :, 0], Cr, decimal=4)
         nt.assert_array_almost_equal(C1[:, :, 1], Cr, decimal=4)
         nt.assert_array_almost_equal(C2, Cr, decimal=4)
+
+    def test_gravload(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        grav = [0, 0, 9.81]
+
+        taur = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
+
+        tau0 = puma.gravload(q)
+        tau1 = puma.gravload(np.c_[q, q])
+        tau2 = puma.gravload(q=np.c_[q, q], grav=np.c_[grav, grav])
+        tau3 = puma.gravload(grav=grav)
+
+        nt.assert_array_almost_equal(tau0, taur, decimal=4)
+        nt.assert_array_almost_equal(tau1[:, 0], taur, decimal=4)
+        nt.assert_array_almost_equal(tau1[:, 1], taur, decimal=4)
+        nt.assert_array_almost_equal(tau2[:, 0], taur, decimal=4)
+        nt.assert_array_almost_equal(tau2[:, 1], taur, decimal=4)
+        nt.assert_array_almost_equal(tau3, taur, decimal=4)
