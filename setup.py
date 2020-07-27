@@ -38,6 +38,6 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['numpy', 'transforms3d', 'spatialmath-python]
+    install_requires=['numpy', 'transforms3d', 'spatialmath-python']
 
 )
