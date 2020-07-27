@@ -682,12 +682,15 @@ class TestLink(unittest.TestCase):
               -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
               7.84926515e-01]
 
-        qa, success, err = panda.ikcon(T)
+        qa, success, err = panda.ikcon(T.A, q0=np.zeros(7))
         qa2, success, err = panda.ikcon(Tt)
+        qa3, _, _ = panda.ikcon(Tt, q0=np.zeros((7, 3)))
 
         nt.assert_array_almost_equal(qa, qr, decimal=4)
         nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
         nt.assert_array_almost_equal(qa2[:, 1], qr, decimal=4)
+        nt.assert_array_almost_equal(qa3[:, 0], qr, decimal=4)
+        nt.assert_array_almost_equal(qa3[:, 1], qr, decimal=4)
 
     def test_ikine(self):
         panda = rp.PandaMDH()
