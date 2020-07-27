@@ -941,9 +941,9 @@ class TestLink(unittest.TestCase):
         q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
 
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[:, 0]).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(q0[:, 0]).A, np.zeros((4, 4)), decimal=1)
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[:, 1]).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(q0[:, 1]).A, np.zeros((4, 4)), decimal=1)
         nt.assert_array_almost_equal(
             T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=1)
 
