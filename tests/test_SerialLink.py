@@ -1033,4 +1033,27 @@ class TestLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(qdd0, res, decimal=4)
         nt.assert_array_almost_equal(qdd1[:, 0], res, decimal=4)
+        nt.assert_array_almost_equal(qdd1[:, 1], res, decimal=4)
         nt.assert_array_almost_equal(qdd2, res, decimal=4)
+
+    def test_inertia(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        Ir = [
+            [3.6594, -0.4044, 0.1006, -0.0025, 0.0000, -0.0000],
+            [-0.4044, 4.4137, 0.3509, 0.0000, 0.0024, 0.0000],
+            [0.1006, 0.3509, 0.9378, 0.0000, 0.0015, 0.0000],
+            [-0.0025, 0.0000, 0.0000, 0.1925, 0.0000, 0.0000],
+            [0.0000, 0.0024, 0.0015, 0.0000, 0.1713, 0.0000],
+            [-0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.1941]]
+
+        I0 = puma.inertia(q)
+        I1 = puma.inertia(np.c_[q, q])
+        I2 = puma.inertia()
+
+        nt.assert_array_almost_equal(I0, Ir, decimal=4)
+        nt.assert_array_almost_equal(I1[:, :, 0], Ir, decimal=4)
+        nt.assert_array_almost_equal(I1[:, :, 1], Ir, decimal=4)
+        nt.assert_array_almost_equal(I2, Ir, decimal=4)

@@ -48,7 +48,7 @@ puma = rp.Puma560()
 puma.q = puma.qn
 
 
-print(puma.inertia())
+print(puma.cinertia())
 
 # z = np.zeros(6)
 # o = np.ones(6)

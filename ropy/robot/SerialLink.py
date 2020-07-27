@@ -1057,6 +1057,10 @@ class SerialLink(object):
         M = cinertia() as above except uses the stored q value of the robot
         object.
 
+        If q is a matrix (nxk), each row is interpretted as a joint state
+        vector, and the result is a 3d-matrix (nxnxk) where each plane
+        corresponds to the cinertia for the corresponding row of q.
+
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float np.ndarray(n)
@@ -1065,17 +1069,29 @@ class SerialLink(object):
         :rtype M: float np.ndarray(n,n)
         """
 
+        trajn = 1
+
         if q is None:
-            q = np.copy(self.q)
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
+
+        Mt = np.zeros((self.n, self.n, trajn))
+
+        for i in range(trajn):
+            J = self.jacob0(q[:, i])
+            Ji = np.linalg.pinv(J)
+            M = self.inertia(q[:, i])
+            Mt[:, :, i] = Ji.T @ M @ Ji
+
+        if trajn == 1:
+            return Mt[:, :, 0]
         else:
-            q = getvector(q, self.n)
-
-        J = self.jacob0(q)
-        Ji = np.linalg.pinv(J)
-        M = self.inertia(q)
-        Mx = Ji.T @ M @ Ji
-
-        return Mx
+            return Mt
 
     def inertia(self, q=None):
         """
