@@ -534,4 +534,3 @@ class Link(object):
         tau = -np.abs(self.G) * tau
 
         return tau
-
