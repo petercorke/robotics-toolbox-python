@@ -49,7 +49,7 @@ puma.q = puma.qn
 qd = [1, 2, 3, 1, 2, 3]
 
 
-print(puma.gravload(puma.qn))
+print(puma.itorque(qd, puma.qn))
 
 # z = np.zeros(6)
 # o = np.ones(6)

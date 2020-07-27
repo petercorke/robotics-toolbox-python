@@ -1239,6 +1239,56 @@ class SerialLink(object):
         else:
             return C
 
+    def itorque(self, qdd, q=None):
+        """
+        Inertia torque
+
+        tauI = itorque(qdd, q) is the inertia force/torque vector (n) at the
+        specified joint configuration q (n) and acceleration qdd (n), and n
+        is the number of robot joints. taui = inertia(q) * qdd.
+
+        If q and qdd are matrices (nxk), each row is interpretted as a joint
+        state vector, and the result is a matrix (nxk) where each row is the
+        corresponding joint torques.
+
+        :param qdd: The joint accelerations of the robot
+        :type qdd: float np.ndarray(n)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float np.ndarray(n)
+
+        :return taui: The inertia torque vector
+        :rtype tai: float np.ndarray(n)
+
+        Note:
+        - If the robot model contains non-zero motor inertia then this will
+          included in the result.
+        """
+
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+            qdd = getvector(qdd, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
+            verifymatrix(qdd, (self.n, trajn))
+
+        taui = np.zeros((self.n, trajn))
+
+        for i in range(trajn):
+            taui[:, i] = self.rne(
+                qdd[:, i], np.zeros(self.n), q[:, i], grav=[0, 0, 0])
+
+        if trajn == 1:
+            return taui[:, 0]
+        else:
+            return taui
+
     def gravjac(self, q=None, grav=None):
         """
         tauB = gravjac(q, grav) calculates the generalised joint force/torques
