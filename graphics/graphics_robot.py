@@ -379,6 +379,15 @@ class DefaultJoint:
         """
         return self.__graphic_obj
 
+    def get_scene(self):
+        """
+        Getter function that returns the scene the object is in
+
+        :return: The scene the object is in
+        :rtype: class:`vpython.canvas`
+        """
+        return self.__scene
+
 
 class RotationalJoint(DefaultJoint):
     """
@@ -545,8 +554,11 @@ class GraphicalRobot:
         :param joint: A joint object already constructed
         :type joint: class:`graphics.graphics_robot.RotationalJoint`, class:`graphics.graphics_robot.PrismaticJoint`,
         class:`graphics.graphics_robot.StaticJoint`, class:`graphics.graphics_robot.Gripper`
+        :raises RuntimeError: Ensure the link is in the same scene as the robot
         """
-        # TODO have some check to ensure objects are in the same scene
+        if joint.get_scene() != self.__scene:
+            raise RuntimeError("The given made link is not in the same scene as the robot is.")
+
         self.joints.append(joint)
         self.num_joints += 1
 

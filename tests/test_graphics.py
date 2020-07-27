@@ -516,7 +516,7 @@ class TestRobot(unittest.TestCase):
 
         # Add other joint to new scene
         # Expecting an error (can't add joint to robot in different scene
-        self.assertRaises(ReferenceError, robot2.append_made_link, joint2)
+        self.assertRaises(RuntimeError, robot2.append_made_link, joint2)
 
     def test_robot_append_link(self):
         # Update scene

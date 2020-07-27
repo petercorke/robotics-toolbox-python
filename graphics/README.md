@@ -143,6 +143,8 @@ The `axis_through` parameter is still optional.
 Although the creation process is "the same", manually creating a joint lets you more easily update any graphical issues associated with it.
 For example, the STL you want to load may not be orientated/positioned correctly (How to fix is mentioned later)
 
+WARNING: The joint must be in the same scene as the robot.
+
 ```python
 # Create two basic rotational links
 link1 = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene, axis_through=array([1, 0, 0]))
