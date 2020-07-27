@@ -1108,26 +1108,30 @@ class SerialLink(object):
           gear ratio.
         """
 
-        cols = 1
+        trajn = 1
+
         if q is None:
-            q = np.copy(self.q, 'col')
-        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[1] > 1:
-            cols = q.shape[1]
-            ismatrix(q, (self.n, cols))
-        else:
+            q = self.q
+
+        try:
             q = getvector(q, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
 
-        In = np.zeros((self.n, self.n))
+        In = np.zeros((self.n, self.n, trajn))
 
-        for i in range(cols):
-            m = rne(
-                robot, ones(self.n, 1) @ q[:, i],
-                np.zeros((self.n, self.n)),
+        for i in range(trajn):
+            In[:, :, i] = self.rne(
                 np.eye(self.n),
-                gravity=[0, 0, 0])
-            # M = cat(3, M, m);
+                np.zeros((self.n, self.n)),
+                np.c_[q[:, i]] @ np.ones((1, self.n)),
+                grav=[0, 0, 0])
 
-        return In
+        if trajn == 1:
+            return In[:, :, 0]
+        else:
+            return In
 
     def coriolis(self, qd, q=None):
         """

@@ -47,10 +47,8 @@ import time
 puma = rp.Puma560()
 puma.q = puma.qn
 
-qd = [0.1, 0.2, 0.8, 0.2, 0.5, 1.0]
-torque = [1.0, 3.2, 1.8, 0.1, 0.7, 4.6]
 
-print(puma.accel(qd, torque))
+print(puma.inertia())
 
 # z = np.zeros(6)
 # o = np.ones(6)
