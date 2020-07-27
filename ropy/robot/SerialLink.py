@@ -1234,7 +1234,10 @@ class SerialLink(object):
 
             C[:, :, k] = C[:, :, k] + Csq[:, :, k] @ np.diag(qd[:, k])
 
-        return C[:, :, 0]
+        if trajn == 1:
+            return C[:, :, 0]
+        else:
+            return C
 
     def gravjac(self, q=None, grav=None):
         """
