@@ -1127,3 +1127,21 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(tau2[:, 0], taur, decimal=4)
         nt.assert_array_almost_equal(tau2[:, 1], taur, decimal=4)
         nt.assert_array_almost_equal(tau3, taur, decimal=4)
+
+    def test_itorque(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        qdd = [1, 2, 3, 1, 2, 3]
+
+        tauir = [3.1500, 9.4805, 3.6189, 0.1901, 0.3519, 0.5823]
+
+        taui0 = puma.itorque(qdd, q)
+        taui1 = puma.itorque(np.c_[qdd, qdd], np.c_[q, q])
+        taui2 = puma.itorque(qdd)
+
+        nt.assert_array_almost_equal(taui0, tauir, decimal=4)
+        nt.assert_array_almost_equal(taui1[:, 0], tauir, decimal=4)
+        nt.assert_array_almost_equal(taui1[:, 1], tauir, decimal=4)
+        nt.assert_array_almost_equal(taui2, tauir, decimal=4)
