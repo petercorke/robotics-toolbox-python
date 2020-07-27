@@ -252,6 +252,7 @@ class DefaultJoint:
                 raise ValueError("Joint length must be greater than 0")
 
             box_midpoint = vector(length / 2, 0, 0)
+            box_tooltip = vector(length, 0, 0)
 
             # Create a box along the +x axis, with the origin (point of rotation) at (0, 0, 0)
             graphic_obj = box(
@@ -263,7 +264,7 @@ class DefaultJoint:
             )
 
             # Set the boxes new origin
-            graphic_obj = compound([graphic_obj], origin=vector(0, 0, 0), axis=x_axis_vector, up=y_axis_vector)
+            graphic_obj = compound([graphic_obj], origin=box_tooltip, axis=x_axis_vector, up=y_axis_vector)
 
             return graphic_obj
         else:
