@@ -1,3 +1,12 @@
+![PyPI - Downloads](https://img.shields.io/pypi/dm/ropy)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![PyPI version](https://badge.fury.io/py/ropy.svg)](https://badge.fury.io/py/ropy)
+[![Build Status](https://github.com/jhavl/ropy/workflows/build/badge.svg?branch=master)](https://github.com/jhavl/ropy/actions?query=workflow%3Abuild)
+[![Coverage](https://codecov.io/gh/jhavl/spatialmath-python/branch/master/graph/badge.svg)](https://codecov.io/gh/jhavl/spatialmath-python)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/jhavl/ropy/graphs/commit-activity)
+[![GitHub stars](https://img.shields.io/github/stars/petercorke/spatialmath-python.svg?style=social&label=Star)](https://GitHub.com/jhavl/ropy/stargazers/)
+
 # ropy
 A robotics library for Python
 
