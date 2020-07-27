@@ -250,7 +250,9 @@ class TestLink(unittest.TestCase):
         l3 = rp.Revolute()
 
         r0 = rp.SerialLink([l0, l1])
+        r1 = rp.SerialLink([l1, l2, l3])
         r3 = r0 + l2 + l3
+        r4 = l0 + r1
 
         q = np.array([1, 2, 3, 4])
 
@@ -262,6 +264,7 @@ class TestLink(unittest.TestCase):
         ])
 
         nt.assert_array_almost_equal(r3.fkine(q).A, T1)
+        nt.assert_array_almost_equal(r4.fkine(q).A, T1)
 
     def test_add_error(self):
         l0 = rp.Prismatic()

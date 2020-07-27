@@ -15,7 +15,7 @@ import unittest
 class TestLink(unittest.TestCase):
 
     def test_link(self):
-        l0 = rp.Link()
+        rp.Link()
 
     def test_qlim(self):
         l0 = rp.Link(qlim=[-1, 1])
@@ -156,3 +156,9 @@ class TestLink(unittest.TestCase):
         self.assertEqual(l0.sigma, 1)
         with self.assertRaises(ValueError):
             l0.d = 1
+
+    def test_setB(self):
+        l0 = rp.Prismatic()
+
+        with self.assertRaises(TypeError):
+            l0.B = [1, 2]
