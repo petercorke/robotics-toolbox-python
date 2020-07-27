@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+from functools import wraps
 from ropy.robot.Link import Link
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
@@ -151,6 +152,7 @@ class SerialLink(object):
         self._rne_ob = init(self.n, self.mdh, L, self.gravity[:, 0])
 
     def _check_rne(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             if not args[0]._rne_init or args[0]._rne_changed:
                 args[0]._init_rne()
@@ -160,6 +162,7 @@ class SerialLink(object):
         return wrapper
 
     def _listen_rne(func):
+        @wraps(func)
         def wrapper(*args):
             args[0]._rne_changed = True
             return func(*args)
@@ -2716,10 +2719,10 @@ class SerialLink(object):
              W=[Fx Fy Fz Mx My Mz]
         :type fext: float ndarray(6)
 
-        Notes:
-        - The torque computed contains a contribution due to armature inertia
-          and joint friction.
-        - If a model has no dynamic parameters set the result is zero.
+        :notes:
+            - The torque computed contains a contribution due to armature
+              inertia and joint friction.
+            - If a model has no dynamic parameters set the result is zero.
 
         """
 

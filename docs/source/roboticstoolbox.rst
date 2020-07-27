@@ -11,5 +11,5 @@ SerialLink
    :show-inheritance:
    :inherited-members:
    :special-members:
-   :exclude-members: count, index, sort, remove, __dict__, __weakref__
+   :exclude-members: count, index, sort, remove, __dict__, __weakref__, __add__, __init__
    
