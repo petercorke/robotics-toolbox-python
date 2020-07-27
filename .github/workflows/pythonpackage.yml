@@ -56,8 +56,7 @@ jobs:
     - name: Run coverage
       run: |
         pip install .
-        # coverage run --source=roboticstoolbox -m pytest
-        pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
+        pytest --cov=ropy --cov-report xml:coverage.xml
         coverage report
         cat .coverage
     - name: upload coverage to Codecov
