@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-Created on August 1 2019
-@author: Jesse Haviland
+@author Jesse Haviland
 """
 
 import numpy as np
@@ -21,48 +20,30 @@ class SerialLink(object):
     described by a Link-class object using Denavit-Hartenberg parameters
     (standard or modified).
 
+    :param L: Series of links which define the robot
+    :type L: list(n)
     :param name: Name of the robot
     :type name: string
     :param manufacturer: Manufacturer of the robot
     :type manufacturer: string
     :param base: Locaation of the base
-    :type base: float np.ndarray(4,4)
+    :type base: float ndarray(4,4)
     :param tool: Location of the tool
-    :type tool: float np.ndarray(4,4)
-    :param links: Series of links which define the robot
-    :type links: List[n]
-    :param mdh: 0 if standard D&H, else 1
-    :type mdh: int
-    :param n: Number of joints in the robot
-    :type n: int
-    :param T: The current pose of the robot
-    :type T: float np.ndarray(4,4)
-    :param q: The current joint angles of the robot
-    :type q: float np.ndarray(1,n)
+    :type tool: float ndarray(4,4)
+    :param gravity: The gravity vector
+    :type n: ndarray(3)
 
-    Note: Link subclass elements passed in must be all standard, or all
+    :notes:
+        - Link subclass elements passed in must be all standard, or all
           modified, DH parameters.
 
-    Examples
-    --------
-    >>> L[0] = Revolute('d', 0, 'a', a1, 'alpha', np.pi/2)
+    :references:
+        - Robotics, Vision & Control, Chaps 7-9,
+          P. Corke, Springer 2011.
 
-    >>> L[1] = Revolute('d', 0, 'a', a2, 'alpha', 0)
+        - Robot, Modeling & Control,
+          M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
 
-    >>> twolink = SerialLink(L, 'name', 'two link')
-
-    See Also
-    --------
-    ropy.robot.ets : A superclass which represents the kinematics of a
-                     serial-link manipulator
-    ropy.robot.Link : A link superclass for all link types
-    ropy.robot.Revolute : A revolute link class
-
-    Reference::
-    - Robotics, Vision & Control, Chaps 7-9,
-      P. Corke, Springer 2011.
-    - Robot, Modeling & Control,
-      M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
     """
 
     def __init__(
@@ -72,7 +53,7 @@ class SerialLink(object):
             manufacturer='',
             base=SE3(),
             tool=SE3(),
-            gravity=np.array([[0], [0], [9.81]])
+            gravity=np.array([0, 0, 9.81])
             ):
 
         self.name = name
@@ -183,12 +164,6 @@ class SerialLink(object):
             args[0]._rne_changed = True
             return func(*args)
         return wrapper
-
-    def delete_rne(self):
-        delete(self._rne_ob)
-        self._rne_init = False
-        self._rne_changed = False
-        self._rne_ob = None
 
     @property
     def name(self):
@@ -313,14 +288,15 @@ class SerialLink(object):
         :type joints: int, tuple or 2 element list
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(1,n)
+        :type q: float ndarray(1,n)
 
         :return T: The transform between link 0 and joints or joints[0]
             and joints[1]
         :rtype T: SE3
 
-        Notes:
-        - Base and tool transforms are not applied.
+        :notes:
+            - Base and tool transforms are not applied.
+
         """
 
         if not isscalar(joints):
@@ -360,11 +336,12 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return v: is a vector of boolean values, one per joint, False if q[i]
             is within the joint limits, else True
         :rtype v: bool list
+
         """
 
         if q is None:
@@ -387,6 +364,7 @@ class SerialLink(object):
 
         :return: True if spherical wrist
         :rtype: bool
+
         """
         if self.n < 3:
             return False
@@ -420,7 +398,8 @@ class SerialLink(object):
         :param m: mass (kg)
         :type m: float
         :param p: position in end-effector frame
-        :type p: float np.ndarray(3,1)
+        :type p: float ndarray(3,1)
+
         """
 
         p = getvector(p, 3, out='col')
@@ -443,9 +422,10 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
         :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(n)
+        :type qd: float ndarray(n)
+
         """
 
         # TODO a tf object implementation?
@@ -461,6 +441,7 @@ class SerialLink(object):
         :return: a list of bool variables, one per joint, true if
             the corresponding joint is prismatic, otherwise false.
         :rtype: bool list
+
         """
 
         p = []
@@ -480,6 +461,7 @@ class SerialLink(object):
         :return: a list of bool variables, one per joint, true if
             the corresponding joint is revolute, otherwise false.
         :rtype: bool list
+
         """
 
         p = []
@@ -500,13 +482,14 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return: a vector of joint coordinates where those elements
             corresponding to revolute joints are converted from radians to
             degrees. Elements corresponding to prismatic joints are copied
             unchanged.
-        :rtype: float np.ndarray(n)
+        :rtype: float ndarray(n)
+
         """
 
         if q is None:
@@ -526,13 +509,14 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Not optional,
             stored q is always radians)
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return: a vector of joint coordinates where those elements
             corresponding to revolute joints are converted from degrees to
             radians. Elements corresponding to prismatic joints are copied
             unchanged.
-        :rtype: float np.ndarray(n)
+        :rtype: float ndarray(n)
+
         """
 
         qrad = getvector(q, self.n)
@@ -555,12 +539,13 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return tw: a vector of Twist objects
-        :rtype tw: float np.ndarray(n,)
+        :rtype tw: float ndarray(n,)
         :return T0: Represents the pose of the tool
         :rtype T0: SE3
+
         """
 
         if q is None:
@@ -586,16 +571,17 @@ class SerialLink(object):
             the rows are interpreted as the generalized joint coordinates
             for a sequence of points along a trajectory. q(j,i) is the
             j'th joint parameter for the i'th trajectory point.
-        :type q: float np.ndarray(n) or (nxm)
+        :type q: float ndarray(n) or (nxm)
 
         :return T: Homogeneous transformation matrix or trajectory
         :rtype T: SE3 or SE3 list
 
-        Note:
-        - The robot's base or tool transform, if present, are incorporated
-            into the result.
-        - Joint offsets, if defined, are added to q before the forward
-            kinematics are computed.
+        :notes:
+            - The robot's base or tool transform, if present, are incorporated
+              into the result.
+            - Joint offsets, if defined, are added to q before the forward
+              kinematics are computed.
+
         '''
 
         cols = 0
@@ -639,16 +625,17 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
 
-        Notes:
-        - The robot's base or tool transform, if present, are incorporated
-            into the result.
-        - Joint offsets, if defined, are added to q before the forward
-            kinematics are computed.
+        :notes:
+            - The robot's base or tool transform, if present, are incorporated
+              into the result.
+            - Joint offsets, if defined, are added to q before the forward
+              kinematics are computed.
+
         '''
 
         if q is None:
@@ -679,10 +666,11 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return J: The manipulator Jacobian in ee frame
-        :rtype: float np.ndarray(6,n)
+        :rtype: float ndarray(6,n)
+
         """
 
         if q is None:
@@ -733,10 +721,11 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return J: The manipulator Jacobian in ee frame
-        :rtype: float np.ndarray(6,n)
+        :rtype: float ndarray(6,n)
+
         """
 
         if q is None:
@@ -759,10 +748,11 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :returns J: The velocity Jacobian in 0 frame
-        :rtype J: float np.ndarray(6,n)
+        :rtype J: float ndarray(6,n)
+
         """
 
         if q is None:
@@ -789,10 +779,11 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :returns J: The velocity Jacobian in ee frame
-        :rtype J: float np.ndarray(6,n)
+        :rtype J: float ndarray(6,n)
+
         """
 
         if q is None:
@@ -824,29 +815,31 @@ class SerialLink(object):
         q, qd, torque.
 
         :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(n)
+        :type qd: float ndarray(n)
         :param torque: The joint torques of the robot
-        :type torque: float np.ndarray(n)
+        :type torque: float ndarray(n)
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return qdd: The joint accelerations of the robot
-        :rtype qdd: float np.ndarray(n)
+        :rtype qdd: float ndarray(n)
 
-        Notes:
-        - Useful for simulation of manipulator dynamics, in
-          conjunction with a numerical integration function.
-        - Uses the method 1 of Walker and Orin to compute the forward dynamics.
-        - Featherstone's method is more efficient for robots with large numbers
-          of joints.
-        - Joint friction is considered.
+        :notes:
+            - Useful for simulation of manipulator dynamics, in
+              conjunction with a numerical integration function.
+            - Uses the method 1 of Walker and Orin to compute the forward
+              dynamics.
+            - Featherstone's method is more efficient for robots with large
+              numbers of joints.
+            - Joint friction is considered.
 
-        References:
-        - Efficient dynamic computer simulation of robotic mechanisms,
-          M. W. Walker and D. E. Orin,
-          ASME Journa of Dynamic Systems, Measurement and Control, vol.
-          104, no. 3, pp. 205-211, 1982.
+        :references:
+            - Efficient dynamic computer simulation of robotic mechanisms,
+              M. W. Walker and D. E. Orin,
+              ASME Journa of Dynamic Systems, Measurement and Control, vol.
+              104, no. 3, pp. 205-211, 1982.
+
         """
 
         trajn = 1
@@ -905,6 +898,7 @@ class SerialLink(object):
 
         :return: A copy of the robot with modified friction
         :rtype: SerialLink
+
         """
 
         L = []
@@ -940,25 +934,28 @@ class SerialLink(object):
 
         :param W: A wrench vector applied at the end effector,
             W = [Fx Fy Fz Mx My Mz]
-        :type q: float np.ndarray(1,n)
+        :type q: float ndarray(1,n)
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(1,n)
+        :type q: float ndarray(1,n)
         :param J: The manipulator Jacobian (Optional, if not supplied will
             use the q value).
-        :type J: float np.ndarray(1,n)
+        :type J: float ndarray(1,n)
         :param frame: The frame in which to torques are expressed in when J
             is not supplied. 0 means base frame of the robot, 1 means end-
             effector frame
         :type frame: int
 
         :return tau: The joint forces/torques due to w
-        :rtype tau: float np.ndarray(1,n)
+        :rtype tau: float ndarray(1,n)
 
-        Notes:
-        - Wrench vector and Jacobian must be from the same reference frame.
-        - Tool transforms are taken into consideration when F = 'e'.
-        - Must have a constant wrench - no trajectory support for this yet.
+        :notes:
+            - Wrench vector and Jacobian must be from the same reference
+              frame.
+            - Tool transforms are taken into consideration when F = 'e'.
+            - Must have a constant wrench - no trajectory support for this
+              yet.
+
         """
 
         try:
@@ -1015,29 +1012,32 @@ class SerialLink(object):
         forces/torques for the robot moving with joint velocities qd.
 
         The friction model includes:
+
         - Viscous friction which is a linear function of velocity.
         - Coulomb friction which is proportional to sign(qd).
 
         :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(n)
+        :type qd: float ndarray(n)
 
         :return: The joint friction forces.torques for the robot
-        :rtype: float np.ndarray(n,)
+        :rtype: float ndarray(n,)
 
-        Notes:
-        - The friction value should be added to the motor output torque, it
-          has a negative value when qd>0.
-        - The returned friction value is referred to the output of the
-          gearbox.
-        - The friction parameters in the Link object are referred to the
-          motor.
-        - Motor viscous friction is scaled up by G^2.
-        - Motor Coulomb friction is scaled up by G.
-        - The appropriate Coulomb friction value to use in the non-symmetric
-          case depends on the sign of the joint velocity, not the motor
-          velocity.
-        - The absolute value of the gear ratio is used. Negative gear ratios
-          are tricky: the Puma560 has negative gear ratio for joints 1 and 3.
+        :notes:
+            - The friction value should be added to the motor output torque,
+              it has a negative value when qd>0.
+            - The returned friction value is referred to the output of the
+              gearbox.
+            - The friction parameters in the Link object are referred to the
+              motor.
+            - Motor viscous friction is scaled up by G^2.
+            - Motor Coulomb friction is scaled up by G.
+            - The appropriate Coulomb friction value to use in the
+              non-symmetric case depends on the sign of the joint velocity,
+              not the motor velocity.
+            - The absolute value of the gear ratio is used. Negative gear
+              ratios are tricky: the Puma560 has negative gear ratio for
+              joints 1 and 3.
+
         """
 
         qd = getvector(qd, self.n)
@@ -1063,10 +1063,11 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return M: The inertia matrix
-        :rtype M: float np.ndarray(n,n)
+        :rtype M: float ndarray(n,n)
+
         """
 
         trajn = 1
@@ -1110,18 +1111,19 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return I: The inertia matrix
-        :rtype I: float np.ndarray(n,n)
+        :rtype I: float ndarray(n,n)
 
-        Notes:
-        - The diagonal elements I(J,J) are the inertia seen by joint actuator
-          J.
-        - The off-diagonal elements I(J,K) are coupling inertias that relate
-          acceleration on joint J to force/torque on joint K.
-        - The diagonal terms include the motor inertia reflected through the
-          gear ratio.
+        :notes:
+            - The diagonal elements I(J,J) are the inertia seen by joint
+              actuator J.
+            - The off-diagonal elements I(J,K) are coupling inertias that
+              relate acceleration on joint J to force/torque on joint K.
+            - The diagonal terms include the motor inertia reflected through
+              the gear ratio.
+
         """
 
         trajn = 1
@@ -1168,18 +1170,19 @@ class SerialLink(object):
         each plane corresponds to a row of q and qd.
 
         :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(n)
+        :type qd: float ndarray(n)
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return C: The Coriolis/centripetal matrix
-        :rtype C: float np.ndarray(n,n)
+        :rtype C: float ndarray(n,n)
 
-        Notes:
-        - Joint viscous friction is also a joint force proportional to
-            velocity but it is eliminated in the computation of this value.
-        - Computationally slow, involves n^2/2 invocations of RNE.
+        :notes:
+            - Joint viscous friction is also a joint force proportional to
+              velocity but it is eliminated in the computation of this value.
+            - Computationally slow, involves n^2/2 invocations of RNE.
+
         """
 
         trajn = 1
@@ -1252,17 +1255,18 @@ class SerialLink(object):
         corresponding joint torques.
 
         :param qdd: The joint accelerations of the robot
-        :type qdd: float np.ndarray(n)
+        :type qdd: float ndarray(n)
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
 
         :return taui: The inertia torque vector
-        :rtype tai: float np.ndarray(n)
+        :rtype tai: float ndarray(n)
 
-        Note:
-        - If the robot model contains non-zero motor inertia then this will
-          included in the result.
+        :notes:
+            - If the robot model contains non-zero motor inertia then this
+              will included in the result.
+
         """
 
         trajn = 1
@@ -1306,19 +1310,20 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
         :param grav: The gravity vector (Optional, if not supplied will
             use the stored gravity values).
-        :type grav: float np.ndarray(3,)
+        :type grav: float ndarray(3,)
 
         :return tau: The generalised joint force/torques due to gravity
-        :rtype tau: float np.ndarray(n,)
+        :rtype tau: float ndarray(n,)
 
-        Notes:
-        - The gravity vector is defined by the SerialLink property if not
-            explicitly given.
-        - Does not use inverse dynamics function RNE.
-        - Faster than computing gravity and Jacobian separately.
+        :notes:
+            - The gravity vector is defined by the SerialLink property if not
+              explicitly given.
+            - Does not use inverse dynamics function RNE.
+            - Faster than computing gravity and Jacobian separately.
+
         """
 
         if grav is None:
@@ -1430,13 +1435,14 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
         :param grav: The gravity vector (Optional, if not supplied will
             use the stored gravity values).
-        :type grav: float np.ndarray(3)
+        :type grav: float ndarray(3)
 
         :return taug: The generalised joint force/torques due to gravity
-        :rtype taug: float np.ndarray(n)
+        :rtype taug: float ndarray(n)
+
         """
 
         trajn = 1
@@ -1492,25 +1498,27 @@ class SerialLink(object):
         :param T: The desired end-effector pose
         :type T: SE3 or SE3 trajectory
         :param q0: initial joint configuration (default all zeros)
-        :type q0: float np.ndarray(n) (default all zeros)
+        :type q0: float ndarray(n) (default all zeros)
 
         :retrun q: The calculated joint values
-        :rtype q: float np.ndarray(n)
+        :rtype q: float ndarray(n)
         :retrun success: IK solved (True) or failed (False)
         :rtype success: bool
         :retrun error: Final pose error
         :rtype error: float
 
-        Notes:
-        - Joint limits are considered in this solution.
-        - Can be used for robots with arbitrary degrees of freedom.
-        - In the case of multiple feasible solutions, the solution returned
-          depends on the initial choice of q0.
-        - Works by minimizing the error between the forward kinematics of the
-          joint angle solution and the end-effector frame as an optimisation.
-          The objective function (error) is described as:
-                  sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-          Where omega is some gain matrix, currently not modifiable.
+        :notes:
+            - Joint limits are considered in this solution.
+            - Can be used for robots with arbitrary degrees of freedom.
+            - In the case of multiple feasible solutions, the solution
+              returned depends on the initial choice of q0.
+            - Works by minimizing the error between the forward kinematics
+              of the joint angle solution and the end-effector frame as an
+              optimisation.
+            - The objective function (error) is described as:
+              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+              Where omega is some gain matrix, currently not modifiable.
+
         """
 
         if not isinstance(T, SE3):
@@ -1601,9 +1609,9 @@ class SerialLink(object):
         :type Ymin: float (default 0)
         :param mask: mask vector that correspond to translation in X, Y and Z
             and rotation about X, Y and Z respectively.
-        :type mask: float np.ndarray(6)
+        :type mask: float ndarray(6)
         :param q0: initial joint configuration (default all zeros)
-        :type q0: float np.ndarray(n) (default all zeros)
+        :type q0: float ndarray(n) (default all zeros)
         :param search: search over all configurations
         :type search: bool
         :param slimit: maximum number of search attempts
@@ -1613,16 +1621,16 @@ class SerialLink(object):
         :type transpose: float
 
         :retrun q: The calculated joint values
-        :rtype q: float np.ndarray(n)
+        :rtype q: float ndarray(n)
         :retrun success: IK solved (True) or failed (False)
         :rtype success: bool
         :retrun error: If failed, what went wrong
         :rtype error: List of String
 
         Underactuated robots:
-        For the case where the manipulator has fewer than 6 DOF the solution
-        space has more dimensions than can be spanned by the manipulator joint
-        coordinates.
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
 
         In this case we specify the 'mask' option where the mask vector (1x6)
         specifies the Cartesian DOF (in the wrist coordinate frame) that will
@@ -1639,32 +1647,35 @@ class SerialLink(object):
         orientation is specified by T in world coordinates and the achievable
         orientations are a function of the tool position.
 
-        References:
-        - Robotics, Vision & Control, P. Corke, Springer 2011, Section 8.4.
+        :notes:
+            - Solution is computed iteratively.
+            - Implements a Levenberg-Marquadt variable step size solver.
+            - The tolerance is computed on the norm of the error between
+              current and desired tool pose.  This norm is computed from
+              distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+              depends on the initial guess q0 (defaults to 0).
+            - The default value of q0 is zero which is a poor choice for most
+              manipulators (eg. puma560, twolink) since it corresponds to a
+              kinematic singularity.
+            - Such a solution is completely general, though much less
+              efficient than specific inverse kinematic solutions derived
+              symbolically, like ikine6s or ikine3.
+            - This approach allows a solution to be obtained at a singularity,
+              but the joint angles within the null space are arbitrarily
+              assigned.
+            - Joint offsets, if defined, are added to the inverse kinematics
+              to generate q.
+            - Joint limits are not considered in this solution.
+            - The 'search' option peforms a brute-force search with initial
+              conditions chosen from the entire configuration space.
+            - If the search option is used any prismatic joint must have
+              joint limits defined.
 
-        Notes:
-        - Solution is computed iteratively.
-        - Implements a Levenberg-Marquadt variable step size solver.
-        - The tolerance is computed on the norm of the error between current
-          and desired tool pose.  This norm is computed from distances
-          and angles without any kind of weighting.
-        - The inverse kinematic solution is generally not unique, and
-          depends on the initial guess q0 (defaults to 0).
-        - The default value of q0 is zero which is a poor choice for most
-          manipulators (eg. puma560, twolink) since it corresponds to a
-          kinematic singularity.
-        - Such a solution is completely general, though much less efficient
-          than specific inverse kinematic solutions derived symbolically,
-          like ikine6s or ikine3.
-        - This approach allows a solution to be obtained at a singularity, but
-          the joint angles within the null space are arbitrarily assigned.
-        - Joint offsets, if defined, are added to the inverse kinematics to
-          generate q.
-        - Joint limits are not considered in this solution.
-        - The 'search' option peforms a brute-force search with initial
-          conditions chosen from the entire configuration space.
-        - If the search option is used any prismatic joint must have joint
-          limits defined.
+        :references:
+            - Robotics, Vision & Control, P. Corke, Springer 2011,
+              Section 8.4.
+
         """
 
         if not isinstance(T, SE3):
@@ -1863,19 +1874,20 @@ class SerialLink(object):
         :type elbow_up: bool
 
         :retrun q: The calculated joint values
-        :rtype q: float np.ndarray(n)
+        :rtype q: float ndarray(n)
 
-        Notes::
-        - The same as IKINE6S without the wrist.
-        - The inverse kinematic solution is generally not unique, and
-          depends on the configuration string.
-        - Joint offsets, if defined, are added to the inverse kinematics to
-          generate q.
+        :notes:
+            - The same as IKINE6S without the wrist.
+            - The inverse kinematic solution is generally not unique, and
+              depends on the configuration string.
+            - Joint offsets, if defined, are added to the inverse kinematics
+              to generate q.
 
-        Reference:
-        Inverse kinematics for a PUMA 560 based on the equations by Paul and
-        Zhang. From The International Journal of Robotics Research
-        Vol. 5, No. 2, Summer 1986, p. 32-44
+        :reference:
+            - Inverse kinematics for a PUMA 560 based on the equations by Paul
+              and Zhang. From The International Journal of Robotics Research
+              Vol. 5, No. 2, Summer 1986, p. 32-44
+
         """
 
         if not self.n == 3:
@@ -2003,32 +2015,33 @@ class SerialLink(object):
         :type wrist_flip: bool
 
         :return q: The calculated joint values
-        :rtype q: float np.ndarray(n)
+        :rtype q: float ndarray(n)
         :return err: Any errors encountered
         :rtype err: list String
 
-        Notes:
-        - Treats a number of specific cases:
-        - Robot with no shoulder offset
-        - Robot with a shoulder offset (has lefty/righty configuration)
-        - Robot with a shoulder offset and a prismatic third joint (like
-            Stanford arm)
-        - The Puma 560 arms with shoulder and elbow offsets (4 lengths
-            parameters)
-        - The Kuka KR5 with many offsets (7 length parameters)
-        - The inverse kinematics for the various cases determined using
-            ikine_sym.
-        - The inverse kinematic solution is generally not unique, and
-            depends on the configuration string.
-        - Joint offsets, if defined, are added to the inverse kinematics to
-            generate q.
-        - Only applicable for standard Denavit-Hartenberg parameters
+        :notes:
+            - Treats a number of specific cases:
+                - Robot with no shoulder offset
+                - Robot with a shoulder offset (has lefty/righty configuration)
+                - Robot with a shoulder offset and a prismatic third joint
+                  (like Stanford arm)
+            - The Puma 560 arms with shoulder and elbow offsets (4 lengths
+              parameters)
+            - The Kuka KR5 with many offsets (7 length parameters)
+            - The inverse kinematics for the various cases determined using
+              ikine_sym.
+            - The inverse kinematic solution is generally not unique, and
+              depends on the configuration string.
+            - Joint offsets, if defined, are added to the inverse kinematics
+              to generate q.
+            - Only applicable for standard Denavit-Hartenberg parameters
 
-        Reference:
-        - Inverse kinematics for a PUMA 560,
-        Paul and Zhang,
-        The International Journal of Robotics Research,
-        Vol. 5, No. 2, Summer 1986, p. 32-44
+        :reference:
+            - Inverse kinematics for a PUMA 560,
+              Paul and Zhang,
+              The International Journal of Robotics Research,
+              Vol. 5, No. 2, Summer 1986, p. 32-44
+
         """
 
         if not self.n == 6:
@@ -2478,36 +2491,40 @@ class SerialLink(object):
         :type nolm: bool
 
         :retrun q: The calculated joint values
-        :rtype q: float np.ndarray(n)
+        :rtype q: float ndarray(n)
         :retrun success: IK solved (True) or failed (False)
         :rtype success: bool
         :retrun error: Final pose error
         :rtype error: float
 
-        Notes:
-        - PROTOTYPE CODE UNDER DEVELOPMENT, intended to do numerical inverse
-          kinematics with joint limits
-        - The inverse kinematic solution is generally not unique, and
-          depends on the initial guess q0 (defaults to 0).
-        - The function to be minimized is highly nonlinear and the solution is
-          often trapped in a local minimum, adjust q0 if this happens.
-        - The default value of q0 is zero which is a poor choice for most
-          manipulators (eg. puma560, twolink) since it corresponds to a
-          kinematic singularity.
-        - Such a solution is completely general, though much less efficient
-          than specific inverse kinematic solutions derived symbolically, like
-          ikine6s or ikine3.
-        - Uses Levenberg-Marquadt minimizer LMFsolve if it can be found,
-          if 'nolm' is not given, and 'qlimits' false
-        - The error function to be minimized is computed on the norm of the
-          error between current and desired tool pose.  This norm is computed
-          from distances and angles and 'pweight' can be used to scale the
-          position error norm to be congruent with rotation error norm.
-        - This approach allows a solution to obtained at a singularity, but
-          the joint angles within the null space are arbitrarily assigned.
-        - Joint offsets, if defined, are added to the inverse kinematics to
-          generate q.
-        - Joint limits become explicit contraints if 'qlimits' is set.
+        :notes:
+            - PROTOTYPE CODE UNDER DEVELOPMENT, intended to do numerical
+              inverse kinematics with joint limits
+            - The inverse kinematic solution is generally not unique, and
+              depends on the initial guess q0 (defaults to 0).
+            - The function to be minimized is highly nonlinear and the
+              solution is often trapped in a local minimum, adjust q0 if this
+              happens.
+            - The default value of q0 is zero which is a poor choice for most
+              manipulators (eg. puma560, twolink) since it corresponds to a
+              kinematic singularity.
+            - Such a solution is completely general, though much less
+              efficient than specific inverse kinematic solutions derived
+              symbolically, like ikine6s or ikine3.
+            - Uses Levenberg-Marquadt minimizer LMFsolve if it can be found,
+              if 'nolm' is not given, and 'qlimits' false
+            - The error function to be minimized is computed on the norm of
+              the error between current and desired tool pose.  This norm is
+              computed from distances and angles and 'pweight' can be used to
+              scale the position error norm to be congruent with rotation
+              error norm.
+            - This approach allows a solution to obtained at a singularity,
+              but the joint angles within the null space are arbitrarily
+              assigned.
+            - Joint offsets, if defined, are added to the inverse kinematics
+              to generate q.
+            - Joint limits become explicit contraints if 'qlimits' is set.
+
         """
 
         if not isinstance(T, SE3):
@@ -2607,22 +2624,24 @@ class SerialLink(object):
         :type ilimit: bool
 
         :retrun q: The calculated joint values
-        :rtype q: float np.ndarray(n)
+        :rtype q: float ndarray(n)
         :retrun success: IK solved (True) or failed (False)
         :rtype success: bool
         :retrun error: Final pose error
         :rtype error: float
 
-        Notes:
-        - Joint limits are not considered in this solution.
-        - Can be used for robots with arbitrary degrees of freedom.
-        - In the case of multiple feasible solutions, the solution returned
-          depends on the initial choice of q0
-        - Works by minimizing the error between the forward kinematics of the
-          joint angle solution and the end-effector frame as an optimisation.
-          The objective function (error) is described as:
-                  sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-          Where omega is some gain matrix, currently not modifiable.
+        :notes:
+            - Joint limits are not considered in this solution.
+            - Can be used for robots with arbitrary degrees of freedom.
+            - In the case of multiple feasible solutions, the solution
+              returned depends on the initial choice of q0
+            - Works by minimizing the error between the forward kinematics of
+              the joint angle solution and the end-effector frame as an
+              optimisation.
+            - The objective function (error) is described as:
+              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+              Where omega is some gain matrix, currently not modifiable.
+
         """
 
         if not isinstance(T, SE3):
@@ -2685,22 +2704,23 @@ class SerialLink(object):
         trajectory step.
 
         :param qdd: The joint accelerations of the robot
-        :type qdd: float np.ndarray(n)
+        :type qdd: float ndarray(n)
         :param qd: The joint velocities of the robot
-        :type qd: float np.ndarray(n)
+        :type qd: float ndarray(n)
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float np.ndarray(n)
+        :type q: float ndarray(n)
         :param grav: Gravity vector to overwrite robots gravity value
-        :type grav: float np.ndarray(6)
+        :type grav: float ndarray(6)
         :param fext: Specify wrench acting on the end-effector
              W=[Fx Fy Fz Mx My Mz]
-        :type fext: float np.ndarray(6)
+        :type fext: float ndarray(6)
 
         Notes:
         - The torque computed contains a contribution due to armature inertia
           and joint friction.
         - If a model has no dynamic parameters set the result is zero.
+
         """
 
         trajn = 1
@@ -2741,3 +2761,14 @@ class SerialLink(object):
             return tau[:, 0]
         else:
             return tau
+
+    def delete_rne(self):
+        """
+        Frees the memory holding the robot object in c if the robot object
+        has been initialised in c.
+        """
+        if self._rne_init:
+            delete(self._rne_ob)
+            self._rne_init = False
+            self._rne_changed = False
+            self._rne_ob = None

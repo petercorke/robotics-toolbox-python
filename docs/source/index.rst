@@ -4,10 +4,11 @@
    contain the root `toctree` directive.
 
 Robotics Toolbox for Python
-========================
+===========================
 
    
 .. toctree::
    :maxdepth: 2
 
    intro
+   roboticstoolbox
