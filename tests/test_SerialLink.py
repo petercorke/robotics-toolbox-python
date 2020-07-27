@@ -940,12 +940,12 @@ class TestLink(unittest.TestCase):
         q1, success, _ = puma.ikinem(T.A, qlimits=False)
         q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
 
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[:, 0]).A, np.zeros((4, 4)), decimal=1)
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[:, 1]).A, np.zeros((4, 4)), decimal=1)
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=1)
+        self.assertTrue(
+            np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)) < 0.1)
+        self.assertTrue(
+            np.sum(np.abs(T.A - puma.fkine(q0[:, 1]).A)) < 0.1)
+        self.assertTrue(
+            np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.1)
 
     def test_ikunc(self):
         puma = rp.Puma560()
