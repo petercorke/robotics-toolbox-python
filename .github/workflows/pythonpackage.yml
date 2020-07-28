@@ -99,7 +99,7 @@ jobs:
         git add .
         git commit -m "Update documentation" -a || true
         # The above command will fail if no changes were present, so we ignore
-        # that.
+        # that. 
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
