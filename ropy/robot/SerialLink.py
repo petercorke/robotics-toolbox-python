@@ -2744,3 +2744,25 @@ class SerialLink(object):
             self._rne_init = False
             self._rne_changed = False
             self._rne_ob = None
+
+    def paycap(self, w, f, tlim):
+        """
+        Static payload capacity of a robot
+
+        wmax, J = paycap(q, w, f, tlim) returns the maximum permissible
+        payload wrench WMAX (1x6) applied at the end-effector, and the index
+        of the joint J which hits its force/torque limit at that wrench. q (n)
+        is the manipulator pose, w the payload wrench (6), f the wrench
+        reference frame and tlim (nx2) is a matrix of joint forces/torques
+        (first row is maximum, second row minimum).
+
+        Trajectory operation:
+        In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are the
+        results at the pose given by corresponding row of Q.
+
+        :notes:
+            - Wrench vector and Jacobian must be from the same reference frame
+            - Tool transforms are taken into consideration for F = 'e'.
+        """
+
+        pass
