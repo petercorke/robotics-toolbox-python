@@ -77,9 +77,11 @@ g_canvas.grid_visibility(False)
 ```
 Now that the scene is created, a robot must be created to be displayed.
 
-At anytime you can clear the scene of all objects (The grid will remain if visible). Note: This will note delete the objects,
+At anytime you can clear the scene of all robots (The grid will remain if visible). Note: This will note delete the objects,
 they still exist, and can be rendered visible afterwards. However, overwriting/deleting the variables will free the memory.
 If an object is overwritten/deleted while still visible, the objects will remain in the scene.
+
+Isolated joint objects will not be cleared. Only robots in the scene.
 ```python
 g_canvas.clear_scene()
 ```
