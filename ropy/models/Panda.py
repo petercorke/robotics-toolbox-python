@@ -41,34 +41,31 @@ class Panda(ETS):
 
         et_list = [
             ET.Ttz(0.333),
-            ET.TRz(joint=1),
+            ET.TRz(),
             ET.TRx(-90*deg),
-            ET.TRz(joint=2),
+            ET.TRz(),
             ET.TRx(90*deg),
             ET.Ttz(0.316),
-            ET.TRz(joint=3),
+            ET.TRz(),
             ET.Ttx(0.0825),
             ET.TRx(90*deg),
-            ET.TRz(joint=4),
+            ET.TRz(),
             ET.Ttx(-0.0825),
             ET.TRx(-90*deg),
             ET.Ttz(0.384),
-            ET.TRz(joint=5),
+            ET.TRz(),
             ET.TRx(90*deg),
-            ET.TRz(joint=6),
+            ET.TRz(),
             ET.Ttx(0.088),
             ET.TRx(90*deg),
             ET.Ttz(0.107),
-            ET.TRz(joint=7),
+            ET.TRz(),
         ]
-
-        q_idx = [1, 3, 6, 9, 13, 15, 19]
 
         tool = transl(0, 0, tool_offset) @  trotz(-np.pi/4)
 
         super(Panda, self).__init__(
             et_list,
-            q_idx,
             name='Panda',
             manufacturer='Franka Emika',
             tool=tool)

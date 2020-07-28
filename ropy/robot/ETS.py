@@ -40,7 +40,6 @@ class ETS(object):
     def __init__(
             self,
             et_list,
-            q_idx,
             name='noname',
             manufacturer='',
             base=SE3(),
@@ -50,7 +49,7 @@ class ETS(object):
         # self._name = name
         # self._manuf = manufacturer
         self._ets = et_list
-        self._q_idx = q_idx
+        self._q_idx = []
         # self._base = base
         # self._tool = tool
         # self._T = np.eye(4)
@@ -60,11 +59,18 @@ class ETS(object):
         # Number of transforms in the ETS
         self._M = len(self._ets)
 
+        # Initialise joints
+        for i in range(self.M):
+            if et_list[i].jtype is not et_list[i].STATIC:
+                et_list[i].j = len(self._q_idx)
+                self._q_idx.append(i)
+
+
         # Number of joints in the robot
         self._n = len(self._q_idx)
 
         # Current joint angles of the robot
-        self._q = np.zeros((self._n,))
+        self.q = np.zeros(self._n)
 
         self.name = name
         self.manuf = manufacturer
@@ -169,10 +175,6 @@ class ETS(object):
         return self._M
 
     @property
-    def ets(self):
-        return self._ets
-
-    @property
     def q_idx(self):
         return self._q_idx
 
@@ -233,7 +235,7 @@ class ETS(object):
         trans = SE3()
 
         for i in range(self.M):
-            if self.ets[i]._type == 1:
+            if self.ets[i].jtype == self.ets[i].VARIABLE:
                 T = self.ets[i].T(q[j])
                 j += 1
             else:
@@ -264,7 +266,7 @@ class ETS(object):
         else:
             q = getvector(q, self.n)
 
-        T = self.fkine(q)
+        T = self.fkine(q).A
         U = np.eye(4)
         j = 0
         J = np.zeros((6, self.n))
@@ -272,10 +274,10 @@ class ETS(object):
         for i in range(self.M):
 
             if i != self.q_idx[j]:
-                U = U @ self.ets[i].T()
+                U = U @ self.ets[i].T().A
             else:
                 if self.ets[i]._axis == 'Rz':
-                    U = U @ self.ets[i].T(q[j])
+                    U = U @ self.ets[i].T(q[j]).A
                     Tu = np.linalg.inv(U) @ T
 
                     n = U[:3, 0]
@@ -289,7 +291,7 @@ class ETS(object):
 
                     j += 1
                 elif self.ets[i]._axis == 'tx':
-                    U = U @ self.ets[i].T(q[j])
+                    U = U @ self.ets[i].T(q[j]).A
                     n = U[:3, 0]
 
                     J[:3, j] = n
@@ -297,7 +299,7 @@ class ETS(object):
 
                     j += 1
                 elif self.ets[i]._axis == 'ty':
-                    U = U @ self.ets[i].T(q[j])
+                    U = U @ self.ets[i].T(q[j]).A
                     o = U[:3, 1]
 
                     J[:3, j] = o
@@ -305,7 +307,7 @@ class ETS(object):
 
                     j += 1
                 elif self.ets[i]._axis == 'tz':
-                    U = U @ self.ets[i].T(q[j])
+                    U = U @ self.ets[i].T(q[j]).A
                     a = U[:3, 2]
 
                     J[:3, j] = a
@@ -446,10 +448,10 @@ class ETS(object):
         """
         axes = ''
 
-        for i in range(self._n):
+        for i in range(self.n):
             axes += self.ets[self.q_idx[i]].axis
 
-        rpy = sp.base.tr2rpy(self.tool, unit='deg')
+        rpy = sp.base.tr2rpy(self.tool.A, unit='deg')
 
         for i in range(3):
             if rpy[i] == 0:
@@ -461,8 +463,8 @@ class ETS(object):
             'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
                 self.name, self.manuf, self.n, axes,
                 self.ets,
-                self.tool[0, 3], self.tool[1, 3],
-                self.tool[2, 3], rpy[0], rpy[1], rpy[2]
+                self.tool.A[0, 3], self.tool.A[1, 3],
+                self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
             )
 
         return model

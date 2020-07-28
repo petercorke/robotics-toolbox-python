@@ -36,13 +36,13 @@ class ET(object):
         self._axis = axis
 
         if self.eta is not None:
-            self._type = self.STATIC
+            self._jtype = self.STATIC
             self._T = axis_func(eta)
         else:
-            self._type = self.VARIABLE
+            self._jtype = self.VARIABLE
             self.j = joint
 
-        if self._type is self.STATIC and self.axis[0] == 'R':
+        if self._jtype is self.STATIC and self.axis[0] == 'R':
             self._eta_deg = self.eta * (180 / np.pi)
 
     @property
@@ -65,6 +65,10 @@ class ET(object):
     def j(self):
         return self._j
 
+    @property
+    def jtype(self):
+        return self._jtype
+
     @j.setter
     def j(self, j_new):
         self._j = j_new
@@ -79,7 +83,7 @@ class ET(object):
         :rtype: SE3
 
         """
-        if self._type is self.STATIC:
+        if self.jtype is self.STATIC:
             return self._T
         else:
             return self.axis_func(q)
@@ -92,7 +96,7 @@ class ET(object):
         :rtype: str
 
         """
-        if self._type is self.STATIC:
+        if self.jtype is self.STATIC:
             if self.axis[0] == 'R':
                 return '%s(%g)' % (self.axis, self.eta_deg)
             else:
