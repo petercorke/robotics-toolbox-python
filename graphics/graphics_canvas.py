@@ -3,7 +3,7 @@ from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid
 
 
-class GraphicsCanvas:
+class GraphicsCanvas3D:
     """
     Set up the scene with initial conditions.
         - White background

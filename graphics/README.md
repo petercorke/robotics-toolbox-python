@@ -50,16 +50,22 @@ Any use of VPython objects requires a scene.
 To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
 
 Different attributes can be supplied to the function for some customisation. The display width, height, title, and caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
+
+Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D capabilities)
 ```python
 # Create a default canvas (1000*500, with grid displayed, no title or caption)
-g_canvas = gph.GraphicsCanvas()
+g_canvas = gph.GraphicsCanvas3D()
+g_canvas = gph.GraphicsCanvas2D()
 
 # Alternatively create a grid with specified parameters
-g_canvas = gph.GraphicsCanvas(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
 ``` 
 
 The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
 The same functionality can be done in code as will be mentioned.
+
+3D options:
  * Choose which robot to edit
  * Toggle robot/frame visibility
  * Change robot opacity
@@ -68,6 +74,9 @@ The same functionality can be done in code as will be mentioned.
  * Clear all robots visuals from the scene
  * Toggle camera lock
  * Toggle grid dynamic/static positioning
+
+2D options:
+ * TBA
 
 \
 The GraphicsGrid object has functions to toggle grid visibility.
