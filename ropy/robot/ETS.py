@@ -7,6 +7,7 @@ Created on Tue Apr 24 15:48:52 2020
 
 import numpy as np
 import spatialmath as sp
+from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 # from roboticstoolbox.robot.ET import ET
 
@@ -27,12 +28,13 @@ class ETS(object):
     :param manufacturer: Manufacturer of the robot
     :type manufacturer: str, optional
     :param base: Location of the base is the world frame
-    :type base: float np.ndarray(4,4), optional
+    :type base: SE3, optional
     :param tool: Offset of the flange of the robot to the end-effector
-    :type tool: float np.ndarray(4,4), optional
+    :type tool: SE3, optional
 
-    References: Kinematic Derivatives using the Elementary Transform Sequence,
-        J. Haviland and P. Corke
+    :references: 
+        - Kinematic Derivatives using the Elementary Transform Sequence,
+          J. Haviland and P. Corke
     """
 
     def __init__(
@@ -41,16 +43,17 @@ class ETS(object):
             q_idx,
             name='noname',
             manufacturer='',
-            base=np.eye(4, 4),
-            tool=np.eye(4, 4)):
+            base=SE3(),
+            tool=SE3(),
+            gravity=np.array([0, 0, 9.81])):
 
-        self._name = name
-        self._manuf = manufacturer
+        # self._name = name
+        # self._manuf = manufacturer
         self._ets = et_list
         self._q_idx = q_idx
-        self._base = base
-        self._tool = tool
-        self._T = np.eye(4)
+        # self._base = base
+        # self._tool = tool
+        # self._T = np.eye(4)
 
         super(ETS, self).__init__()
 
@@ -62,6 +65,15 @@ class ETS(object):
 
         # Current joint angles of the robot
         self._q = np.zeros((self._n,))
+
+        self.name = name
+        self.manuf = manufacturer
+        self.base = base
+        self.tool = tool
+        self.gravity = gravity
+
+        # Current joint angles of the robot
+        self.q = np.zeros(self.n)
 
     # @classmethod
     # def dh_to_ets(cls, robot):
@@ -129,6 +141,10 @@ class ETS(object):
         return self._q
 
     @property
+    def ets(self):
+        return self._ets
+
+    @property
     def name(self):
         return self._name
 
@@ -160,18 +176,38 @@ class ETS(object):
     def q_idx(self):
         return self._q_idx
 
+    @property
+    def gravity(self):
+        return self._gravity
+
+    @name.setter
+    def name(self, name_new):
+        self._name = name_new
+
+    @manuf.setter
+    def manuf(self, manuf_new):
+        self._manuf = manuf_new
+
+    @gravity.setter
+    def gravity(self, gravity_new):
+        self._gravity = getvector(gravity_new, 3, 'col')
+
     @q.setter
     def q(self, q_new):
         q_new = getvector(q_new, self.n)
         self._q = q_new
 
     @base.setter
-    def base(self, base_new):
-        if isinstance(base_new, sp.SE3):
-            self._base = base_new.A
-        else:
-            verifymatrix(base_new, (4, 4))
-            self._base = base_new
+    def base(self, T):
+        if not isinstance(T, SE3):
+            T = SE3(T)
+        self._base = T
+
+    @tool.setter
+    def tool(self, T):
+        if not isinstance(T, SE3):
+            T = SE3(T)
+        self._tool = T
 
     def fkine(self, q=None):
         '''
@@ -194,18 +230,18 @@ class ETS(object):
             q = getvector(q, self.n)
 
         j = 0
-        trans = np.eye(4)
+        trans = SE3()
 
         for i in range(self.M):
-            if self._ets[i]._type == 1:
-                T = self._ets[i].T(q[j])
+            if self.ets[i]._type == 1:
+                T = self.ets[i].T(q[j])
                 j += 1
             else:
-                T = self._ets[i].T()
+                T = self.ets[i].T()
 
-            trans = trans @ T
+            trans = trans * T
 
-        trans = trans @ self.tool
+        trans = trans * self.tool
 
         return trans
 

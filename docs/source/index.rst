@@ -11,4 +11,5 @@ Robotics Toolbox for Python
    :maxdepth: 2
 
    intro
-   roboticstoolbox
+   arm_dh
+   arm_ets

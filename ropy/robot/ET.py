@@ -4,25 +4,26 @@
 """
 
 import numpy as np
+from spatialmath import SE3
 
 
 class ET(object):
-    """This class implements a single elementary transform (ET)
+    """
+    This class implements a single elementary transform (ET)
 
-    :param axis_func: The function which calculated the values of the ET.
+    :param axis_func: The function which calculates the transform of the ET.
     :type axis_func: static et.T__ function
     :param eta: The coordinate of the ET. If not supplied the ET corresponds
         to a variable ET which is a joint
     :type eta: float, optional
-    :param i: If this ET corresponds to a joint, i corresponds to the joint
-        number within the robot
-    :type i: int, optional
-    :param axis: The axis in which the ET is oriented. One of 'Rx', 'Ry',
-    'Rz', 'tx', 'ty', 'tz'.
-    :type axis_s: str
+    :param joint: If this ET corresponds to a joint, this corresponds to the
+        joint number within the robot
+    :type joint: int, optional
 
-    References: Kinematic Derivatives using the Elementary Transform Sequence,
-        J. Haviland and P. Corke
+    :references: 
+        - Kinematic Derivatives using the Elementary Transform Sequence,
+          J. Haviland and P. Corke
+
     """
     def __init__(self, axis_func, axis, eta=None, joint=None):
 
@@ -39,7 +40,7 @@ class ET(object):
             self._T = axis_func(eta)
         else:
             self._type = self.VARIABLE
-            self._j = joint
+            self.j = joint
 
         if self._type is self.STATIC and self.axis[0] == 'R':
             self._eta_deg = self.eta * (180 / np.pi)
@@ -64,6 +65,10 @@ class ET(object):
     def j(self):
         return self._j
 
+    @j.setter
+    def j(self, j_new):
+        self._j = j_new
+
     def T(self, q=None):
         """
         Calculates the transformation matrix of the ET
@@ -71,7 +76,8 @@ class ET(object):
         :param q: Is used if this ET is variable (a joint)
         :type q: float (radians), required for variable ET's
         :return: The transformation matrix of the ET
-        :rtype: float np.ndarray(4,4)
+        :rtype: SE3
+
         """
         if self._type is self.STATIC:
             return self._T
@@ -84,6 +90,7 @@ class ET(object):
 
         :return: The transformation matrix of the ET
         :rtype: str
+
         """
         if self._type is self.STATIC:
             if self.axis[0] == 'R':
@@ -96,181 +103,184 @@ class ET(object):
     def __repr__(self):
         return str(self)
 
-    @staticmethod
-    def _check_args(eta, joint):
-        if eta is None and joint is None:
-            raise ValueError(
-                'One of eta (the elementary transform parameter), '
-                'or joint (the joint number) must be supplied')
+    # @staticmethod
+    # def _check_args(eta, joint):
+    #     if eta is None and joint is None:
+    #         raise ValueError(
+    #             'One of eta (the elementary transform parameter), '
+    #             'or joint (the joint number) must be supplied')
 
     @classmethod
-    def TRx(cls, eta=None, joint=None):
+    def TRx(cls, eta=None):
         """
-        An elementary transform (ET). A pure rotation of eta about the x-axis
+        An elementary transform (ET). A pure rotation of eta about the x-axis.
+
+        l = TRx(eta) will instantiate an ET object which represents a pure
+        rotation about the x-axis by amount eta.
+
+        l = TRx() as above except this ET representation a variable
+        rotation, i.e. a joint
 
         :param eta: The amount of rotation about the x-axis
         :type eta: float (radians)
         :param joint: The joint number within the robot
         :type joint: int
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
+        :return: An ET object
+        :rtype: ET
+
         """
 
-        cls._check_args(eta, joint)
-
         def axis_func(eta):
-            return np.array([
+            return SE3(np.array([
                 [1, 0, 0, 0],
                 [0, np.cos(eta), -np.sin(eta), 0],
                 [0, np.sin(eta), np.cos(eta), 0],
                 [0, 0, 0, 1]
-            ])
+            ]))
 
-        return cls(axis_func, axis='Rx', eta=eta, joint=joint)
+        return cls(axis_func, axis='Rx', eta=eta)
 
     @classmethod
-    def TRy(cls, eta=None, joint=None):
+    def TRy(cls, eta=None):
+        """
+        An elementary transform (ET). A pure rotation of eta about the y-axis.
 
-        cls._check_args(eta, joint)
+        l = TRy(eta) will instantiate an ET object which represents a pure
+        rotation about the y-axis by amount eta.
+
+        l = TRy() as above except this ET representation a variable
+        rotation, i.e. a joint
+
+        :param eta: The amount of rotation about the y-axis
+        :type eta: float (radians)
+        :param joint: The joint number within the robot
+        :type joint: int
+        :return: An ET object
+        :rtype: ET
+
+        """
 
         def axis_func(eta):
-            return np.array([
+            return SE3(np.array([
                 [np.cos(eta), 0, np.sin(eta), 0],
                 [0, 1, 0, 0],
                 [-np.sin(eta), 0, np.cos(eta), 0],
                 [0, 0, 0, 1]
-            ])
+            ]))
 
-        return cls(axis_func, axis='Ry', eta=eta, joint=joint)
+        return cls(axis_func, axis='Ry', eta=eta)
 
     @classmethod
-    def TRz(cls, eta=None, joint=None):
+    def TRz(cls, eta=None):
+        """
+        An elementary transform (ET). A pure rotation of eta about the z-axis.
 
-        cls._check_args(eta, joint)
+        l = TRz(eta) will instantiate an ET object which represents a pure
+        rotation about the z-axis by amount eta.
+
+        l = TRz() as above except this ET representation a variable
+        rotation, i.e. a joint
+
+        :param eta: The amount of rotation about the z-axis
+        :type eta: float (radians)
+        :return: An ET object
+        :rtype: ET
+
+        """
 
         def axis_func(eta):
-            return np.array([
+            return SE3(np.array([
                 [np.cos(eta), -np.sin(eta), 0, 0],
                 [np.sin(eta), np.cos(eta), 0, 0],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
-            ])
+            ]))
 
-        return cls(axis_func, axis='Rz', eta=eta, joint=joint)
-
-    # @staticmethod
-    # def TRx(q):
-    #     """
-    #     An elementary transform (ET). A pure rotation of q about the x-axis
-
-    #     :param q: The amount of rotation about the x-axis
-    #     :type q: float (radians)
-    #     :return: The transformation matrix which is in SE(3)
-    #     :rtype: float np.ndarray(4,4)
-    #     """
-    #     return np.array([
-    #         [1, 0,          0,         0],
-    #         [0, np.cos(q), -np.sin(q), 0],
-    #         [0, np.sin(q),  np.cos(q), 0],
-    #         [0, 0,          0,         1]
-    #     ])
-
-    # @staticmethod
-    # def TRy(q):
-    #     """
-    #     An elementary transform (ET). A pure rotation of q about the y-axis
-
-    #     :param q: The amount of rotation about the y-axis
-    #     :type q: float (radians)
-    #     :return: The transformation matrix which is in SE(3)
-    #     :rtype: float np.ndarray(4,4)
-    #     """
-    #     return np.array([
-    #         [np.cos(q),  0, np.sin(q), 0],
-    #         [0,          1, 0,         0],
-    #         [-np.sin(q), 0, np.cos(q), 0],
-    #         [0,          0, 0,         1]
-    #     ])
-
-    # @staticmethod
-    # def TRz(q):
-    #     """
-    #     An elementary transform (ET). A pure rotation of q about the z-axis
-
-    #     :param q: The amount of rotation about the z-axis
-    #     :type q: float (radians)
-    #     :return: The transformation matrix which is in SE(3)
-    #     :rtype: float np.ndarray(4,4)
-    #     """
-    #     return np.array([
-    #         [np.cos(q), -np.sin(q), 0, 0],
-    #         [np.sin(q),  np.cos(q), 0, 0],
-    #         [0,          0,         1, 0],
-    #         [0,          0,         0, 1]
-    #     ])
+        return cls(axis_func, axis='Rz', eta=eta)
 
     @classmethod
-    def Ttx(cls, eta=None, joint=None):
+    def Ttx(cls, eta=None):
         """
-        An elementary transform (ET). A pure translation of q along the x-axis
+        An elementary transform (ET). A pure translation of eta along the
+        x-axis
 
-        :param q: The amount of translation along the x-axis
-        :type q: float (metres)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
+        l = Ttx(eta) will instantiate an ET object which represents a pure
+        translation along the x-axis by amount eta.
+
+        l = Ttx() as above except this ET representation a variable
+        translation, i.e. a joint
+
+        :param eta: The amount of translation along the x-axis
+        :type eta: float (metres)
+        :return: An ET object
+        :rtype: ET
+
         """
-        cls._check_args(eta, joint)
 
         def axis_func(eta):
-            return np.array([
+            return SE3(np.array([
                 [1, 0, 0, eta],
                 [0, 1, 0, 0],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
-            ])
+            ]))
 
-        return cls(axis_func, axis='tx', eta=eta, joint=joint)
+        return cls(axis_func, axis='tx', eta=eta)
 
     @classmethod
-    def Tty(cls, eta=None, joint=None):
+    def Tty(cls, eta=None):
         """
-        An elementary transform (ET). A pure translation of q along the x-axis
+        An elementary transform (ET). A pure translation of eta along the
+        x-axis
 
-        :param q: The amount of translation along the x-axis
-        :type q: float (metres)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
+        l = Tty(eta) will instantiate an ET object which represents a pure
+        translation along the y-axis by amount eta.
+
+        l = Tty() as above except this ET representation a variable
+        translation, i.e. a joint
+
+        :param eta: The amount of translation along the x-axis
+        :type eta: float (metres)
+        :return: An ET object
+        :rtype: ET
+
         """
-        cls._check_args(eta, joint)
 
         def axis_func(eta):
-            return np.array([
+            return SE3(np.array([
                 [1, 0, 0, 0],
                 [0, 1, 0, eta],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
-            ])
+            ]))
 
-        return cls(axis_func, axis='ty', eta=eta, joint=joint)
+        return cls(axis_func, axis='ty', eta=eta)
 
     @classmethod
-    def Ttz(cls, eta=None, joint=None):
+    def Ttz(cls, eta=None):
         """
-        An elementary transform (ET). A pure translation of q along the x-axis
+        An elementary transform (ET). A pure translation of eta along the
+        z-axis
 
-        :param q: The amount of translation along the x-axis
-        :type q: float (metres)
-        :return: The transformation matrix which is in SE(3)
-        :rtype: float np.ndarray(4,4)
+        l = Ttz(eta) will instantiate an ET object which represents a pure
+        translation along the z-axis by amount eta.
+
+        l = Ttz() as above except this ET representation a variable
+        translation, i.e. a joint
+
+        :param eta: The amount of translation along the x-axis
+        :type eta: float (metres)
+        :return: An ET object
+        :rtype: ET
+
         """
-        cls._check_args(eta, joint)
 
         def axis_func(eta):
-            return np.array([
+            return SE3(np.array([
                 [1, 0, 0, 0],
                 [0, 1, 0, 0],
                 [0, 0, 1, eta],
                 [0, 0, 0, 1]
-            ])
+            ]))
 
-        return cls(axis_func, axis='tz', eta=eta, joint=joint)
+        return cls(axis_func, axis='tz', eta=eta)

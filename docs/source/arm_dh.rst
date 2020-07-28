@@ -1,5 +1,5 @@
-Classes and functions
-=====================
+Arm Type Robots - DH
+===================================================
 
 .. codeauthor:: Jesse Haviland
 
