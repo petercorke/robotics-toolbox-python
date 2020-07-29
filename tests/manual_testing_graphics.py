@@ -329,6 +329,21 @@ def test_multiple_canvases():
     robot2.append_link('r', SE3().Rand(), 1.0)
 
 
+def test_2d_draw_path():
+    g_canvas2 = gph.GraphicsCanvas2D()
+
+    path = [
+        [0, 0],
+        [1, 1],
+        [2, 2],
+        [2, 3],
+        [3, 3],
+        [3, 4],
+        [4, 4]
+    ]
+    g_canvas2.draw_path(path, colour=[1, 0, 0])
+
+
 if __name__ == "__main__":
     # run the Puma demo by default
     test_puma560_angle_change()
