@@ -20,7 +20,7 @@ class ET(object):
         joint number within the robot
     :type joint: int, optional
 
-    :references: 
+    :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
 

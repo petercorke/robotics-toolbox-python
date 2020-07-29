@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
@@ -19,10 +18,7 @@ class ETS(object):
 
     :param et_list: List of elementary transforms which represent the robot
         kinematics
-    :type et_list: list of etb.robot.et
-    :param q_idx: List of indexes within the ets_list which correspond to
-        joints
-    :type q_idx: list of int
+    :type et_list: ET list
     :param name: Name of the robot
     :type name: str, optional
     :param manufacturer: Manufacturer of the robot
@@ -32,7 +28,7 @@ class ETS(object):
     :param tool: Offset of the flange of the robot to the end-effector
     :type tool: SE3, optional
 
-    :references: 
+    :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
     """
@@ -46,13 +42,8 @@ class ETS(object):
             tool=SE3(),
             gravity=np.array([0, 0, 9.81])):
 
-        # self._name = name
-        # self._manuf = manufacturer
         self._ets = et_list
         self._q_idx = []
-        # self._base = base
-        # self._tool = tool
-        # self._T = np.eye(4)
 
         super(ETS, self).__init__()
 
@@ -64,7 +55,6 @@ class ETS(object):
             if et_list[i].jtype is not et_list[i].STATIC:
                 et_list[i].j = len(self._q_idx)
                 self._q_idx.append(i)
-
 
         # Number of joints in the robot
         self._n = len(self._q_idx)
@@ -216,14 +206,16 @@ class ETS(object):
         Evaluates the forward kinematics of a robot based on its ETS and
         joint angles q.
 
-        :param q: The joint coordinates of the robot
-        :type q: float np.ndarray(n,)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
         :return: The transformation matrix representing the pose of the
             end-effector
-        :rtype: float np.ndarray(4,4)
+        :rtype: SE3
 
-        References: Kinematic Derivatives using the Elementary Transform
-            Sequence, J. Haviland and P. Corke
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
         '''
 
         if q is None:
@@ -249,16 +241,23 @@ class ETS(object):
 
     def jacob0(self, q=None):
         """
-        The manipulator Jacobian matrix maps joint velocity to end-effector
-        spatial velocity, expressed in the world-coordinate frame.
+        J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity. v = J0*qd in the
+        base frame.
 
-        :param q: The joint coordinates of the robot
-        :type q: float np.ndarray(n,)
-        :return: The manipulator Jacobian in 0 frame
-        :rtype: float np.ndarray(6,n)
+        J0 = jacob0() as above except uses the stored q value of the
+        robot object.
 
-        References: Kinematic Derivatives using the Elementary Transform
-            Sequence, J. Haviland and P. Corke
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :return J: The manipulator Jacobian in ee frame
+        :rtype: float ndarray(6,n)
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
         """
 
         if q is None:
@@ -317,6 +316,33 @@ class ETS(object):
 
         return J
 
+    def jacobe(self, q=None):
+        """
+        Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity. v = Je*qd in the
+        end-effector frame.
+
+        Je = jacobe() as above except uses the stored q value of the
+        robot object.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :return J: The manipulator Jacobian in ee frame
+        :rtype: float ndarray(6,n)
+
+        """
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        J0 = self.jacob0(q)
+        Je = self.jacobev(q) @ J0
+        return Je
+
     def hessian0(self, q=None, J0=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
@@ -324,15 +350,17 @@ class ETS(object):
         function calulcates this based on the ETS of the robot. One of J0 or q
         is required. Supply J0 if already calculated to save computation time
 
-        :param q: The joint coordinates of the robot
-        :type q: float np.ndarray(n,)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
         :param J0: The manipulator Jacobian in the 0 frame
-        :type J0: float np.ndarray(6,n)
+        :type J0: float ndarray(6,n)
         :return: The manipulator Hessian in 0 frame
-        :rtype: float np.ndarray(6,n,n)
+        :rtype: float ndarray(6,n,n)
 
-        References: Kinematic Derivatives using the Elementary Transform
-            Sequence, J. Haviland and P. Corke
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
         """
 
         if J0 is None:
@@ -368,17 +396,20 @@ class ETS(object):
         singularity. One of J or q is required. Supply J if already
         calculated to save computation time
 
-        :param q: The joint coordinates of the robot
-        :type q: float np.ndarray(n,)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
         :param J: The manipulator Jacobian in any frame
-        :type J: float np.ndarray(6,n)
+        :type J: float ndarray(6,n)
         :return: The manipulability index
         :rtype: float
 
-        References: Analysis and control of robot manipulators with redundancy,
-        T. Yoshikawa,
-        Robotics Research: The First International Symposium (M. Brady and
-        R. Paul, eds.), pp. 735-747, The MIT press, 1984.
+        :references:
+            - Analysis and control of robot manipulators with redundancy,
+              T. Yoshikawa,
+            - Robotics Research: The First International Symposium (M. Brady
+              and R. Paul, eds.), pp. 735-747, The MIT press, 1984.
+
         """
 
         if J is None:
@@ -400,17 +431,19 @@ class ETS(object):
         One of J or q is required. Supply J and H if already calculated to
         save computation time
 
-        :param q: The joint coordinates of the robot
-        :type q: float np.ndarray(n,)
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
         :param J: The manipulator Jacobian in any frame
-        :type J: float np.ndarray(6,n)
+        :type J: float ndarray(6,n)
         :param H: The manipulator Hessian in any frame
-        :type H: float np.ndarray(6,n,n)
+        :type H: float ndarray(6,n,n)
         :return: The manipulability Jacobian
-        :rtype: float np.ndarray(n,1)
+        :rtype: float ndarray(n)
 
-        References: Maximising Manipulability in Resolved-Rate Motion Control,
-            J. Haviland and P. Corke
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
         """
 
         if J is None:
@@ -469,31 +502,24 @@ class ETS(object):
 
         return model
 
-    """
-    The spatial velocity Jacobian which relates the velocity in base
-    frame to velocity in the end-effector frame.
+    def jacobev(self, q=None):
+        """
+        Jv = jacobev(q) is the spatial velocity Jacobian, at joint
+        configuration q, which relates the velocity in the base frame to the
+        velocity in the end-effector frame.
 
-    Parameters
-    ----------
-    q : float np.ndarray(1,n)
-        The joint angles/configuration of the robot
-    Returns
-    -------
-    J : float np.ndarray(6,n)
-        The velocity Jacobian in ee frame
-    Examples
-    --------
-    >>> J = panda.jacobev(np.array([1,1,1,1,1,1,1]))
-    >>> J = panda.Jev
+        Jv = jacobev() as above except uses the stored q value of the
+        robot object.
 
-    See Also
-    --------
-    ropy.robot.hessian0 : Calculates the kinematic Hessian in the world frame
-    ropy.robot.m : Calculates the manipulability index of the robot
-    ropy.robot.Jm : Calculates the manipiulability Jacobian
-    ropy.robot.fkine : Calculates the forward kinematics of a robot
-    """
-    def jacobev(self, q):
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :returns J: The velocity Jacobian in ee frame
+        :rtype J: float ndarray(6,6)
+
+        """
+
         r = self.fkine(q)[0:3, 0:3]
         r = np.linalg.inv(r)
 
@@ -503,18 +529,24 @@ class ETS(object):
 
         return Jv
 
-    def jacobe(self, q=None):
-
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
-
-        J0 = self.jacob0(q)
-        Je = self.jacobev(q) @ J0
-        return Je
-
     def jacob0v(self, q):
+        """
+        Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
+        configuration q, which relates the velocity in the end-effector frame
+        to velocity in the base frame
+
+        Jv = jacob0v() as above except uses the stored q value of the
+        robot object.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :returns J: The velocity Jacobian in 0 frame
+        :rtype J: float ndarray(6,6)
+
+        """
+
         r = self.fkine(q)[0:3, 0:3]
 
         Jv = np.zeros((6, 6))

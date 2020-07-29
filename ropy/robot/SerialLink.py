@@ -660,7 +660,7 @@ class SerialLink(object):
         velocity to end-effector spatial velocity. v = Je*qd in the
         end-effector frame.
 
-        Je = jacobe(q) as above except uses the stored q value of the
+        Je = jacobe() as above except uses the stored q value of the
         robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
@@ -715,7 +715,7 @@ class SerialLink(object):
         velocity to end-effector spatial velocity. v = J0*qd in the
         base frame.
 
-        J0 = jacob0(q) as above except uses the stored q value of the
+        J0 = jacob0() as above except uses the stored q value of the
         robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
@@ -742,7 +742,7 @@ class SerialLink(object):
         configuration q, which relates the velocity in the end-effector frame
         to velocity in the base frame
 
-        Jv = jacob0v(q) as above except uses the stored q value of the
+        Jv = jacob0v() as above except uses the stored q value of the
         robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
@@ -750,7 +750,7 @@ class SerialLink(object):
         :type q: float ndarray(n)
 
         :returns J: The velocity Jacobian in 0 frame
-        :rtype J: float ndarray(6,n)
+        :rtype J: float ndarray(6,6)
 
         """
 
@@ -773,7 +773,7 @@ class SerialLink(object):
         configuration q, which relates the velocity in the base frame to the
         velocity in the end-effector frame.
 
-        Jv = jacobev(q) as above except uses the stored q value of the
+        Jv = jacobev() as above except uses the stored q value of the
         robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,
@@ -781,7 +781,7 @@ class SerialLink(object):
         :type q: float ndarray(n)
 
         :returns J: The velocity Jacobian in ee frame
-        :rtype J: float ndarray(6,n)
+        :rtype J: float ndarray(6,6)
 
         """
 
