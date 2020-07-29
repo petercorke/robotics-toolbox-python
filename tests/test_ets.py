@@ -342,6 +342,31 @@ class TestETS(unittest.TestCase):
             ValueError, panda.jacobm, [1, 3], panda.jacob0(q1),
             np.array([1, 2, 3]))
 
+    def test_jacobev(self):
+        pdh = rp.PandaMDH()
+        panda = rp.Panda()
+        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        panda.q = q1
+
+        nt.assert_array_almost_equal(panda.jacobev(), pdh.jacobev(q1))
+
+    def test_jacob0v(self):
+        pdh = rp.PandaMDH()
+        panda = rp.Panda()
+        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        panda.q = q1
+
+        nt.assert_array_almost_equal(panda.jacob0v(), pdh.jacob0v(q1))
+
+    def test_jacobe(self):
+        pdh = rp.PandaMDH()
+        panda = rp.Panda()
+        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        panda.q = q1
+
+        nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
+        nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
+
 
 if __name__ == '__main__':
 

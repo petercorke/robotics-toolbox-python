@@ -522,7 +522,7 @@ class ETS(object):
 
         """
 
-        r = self.fkine(q)[0:3, 0:3]
+        r = self.fkine(q).R
         r = np.linalg.inv(r)
 
         Jv = np.zeros((6, 6))
@@ -531,7 +531,7 @@ class ETS(object):
 
         return Jv
 
-    def jacob0v(self, q):
+    def jacob0v(self, q=None):
         """
         Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the end-effector frame
@@ -549,7 +549,7 @@ class ETS(object):
 
         """
 
-        r = self.fkine(q)[0:3, 0:3]
+        r = self.fkine(q).R
 
         Jv = np.zeros((6, 6))
         Jv[:3, :3] = r
