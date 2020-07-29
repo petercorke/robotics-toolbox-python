@@ -535,7 +535,9 @@ class GraphicsCanvas2D:
         self.__graphics_grid = GraphicsGrid(self.scene)
         # Toggle grid to 2D
         self.__graphics_grid.toggle_2d_3d()
-
+        # Lock the grid
+        self.__graphics_grid.set_relative(False)
+        # Turn off grid if applicable
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
