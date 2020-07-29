@@ -27,6 +27,8 @@ class ETS(object):
     :type base: SE3, optional
     :param tool: Offset of the flange of the robot to the end-effector
     :type tool: SE3, optional
+    :param gravity: The gravity vector
+    :type n: ndarray(3)
 
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,

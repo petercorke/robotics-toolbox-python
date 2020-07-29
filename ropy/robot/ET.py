@@ -119,10 +119,10 @@ class ET(object):
         """
         An elementary transform (ET). A pure rotation of eta about the x-axis.
 
-        l = TRx(eta) will instantiate an ET object which represents a pure
+        L = TRx(eta) will instantiate an ET object which represents a pure
         rotation about the x-axis by amount eta.
 
-        l = TRx() as above except this ET representation a variable
+        L = TRx() as above except this ET representation a variable
         rotation, i.e. a joint
 
         :param eta: The amount of rotation about the x-axis
@@ -149,10 +149,10 @@ class ET(object):
         """
         An elementary transform (ET). A pure rotation of eta about the y-axis.
 
-        l = TRy(eta) will instantiate an ET object which represents a pure
+        L = TRy(eta) will instantiate an ET object which represents a pure
         rotation about the y-axis by amount eta.
 
-        l = TRy() as above except this ET representation a variable
+        L = TRy() as above except this ET representation a variable
         rotation, i.e. a joint
 
         :param eta: The amount of rotation about the y-axis
@@ -179,10 +179,10 @@ class ET(object):
         """
         An elementary transform (ET). A pure rotation of eta about the z-axis.
 
-        l = TRz(eta) will instantiate an ET object which represents a pure
+        L = TRz(eta) will instantiate an ET object which represents a pure
         rotation about the z-axis by amount eta.
 
-        l = TRz() as above except this ET representation a variable
+        L = TRz() as above except this ET representation a variable
         rotation, i.e. a joint
 
         :param eta: The amount of rotation about the z-axis
@@ -208,10 +208,10 @@ class ET(object):
         An elementary transform (ET). A pure translation of eta along the
         x-axis
 
-        l = Ttx(eta) will instantiate an ET object which represents a pure
+        L = Ttx(eta) will instantiate an ET object which represents a pure
         translation along the x-axis by amount eta.
 
-        l = Ttx() as above except this ET representation a variable
+        L = Ttx() as above except this ET representation a variable
         translation, i.e. a joint
 
         :param eta: The amount of translation along the x-axis
@@ -237,10 +237,10 @@ class ET(object):
         An elementary transform (ET). A pure translation of eta along the
         x-axis
 
-        l = Tty(eta) will instantiate an ET object which represents a pure
+        L = Tty(eta) will instantiate an ET object which represents a pure
         translation along the y-axis by amount eta.
 
-        l = Tty() as above except this ET representation a variable
+        L = Tty() as above except this ET representation a variable
         translation, i.e. a joint
 
         :param eta: The amount of translation along the x-axis
@@ -266,10 +266,10 @@ class ET(object):
         An elementary transform (ET). A pure translation of eta along the
         z-axis
 
-        l = Ttz(eta) will instantiate an ET object which represents a pure
+        L = Ttz(eta) will instantiate an ET object which represents a pure
         translation along the z-axis by amount eta.
 
-        l = Ttz() as above except this ET representation a variable
+        L = Ttz() as above except this ET representation a variable
         translation, i.e. a joint
 
         :param eta: The amount of translation along the x-axis

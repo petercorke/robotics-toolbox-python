@@ -1,10 +1,8 @@
-# MODEL: Unimation, Puma560, dynamics, 6DOF, standard_DH
-
+#!/usr/bin/env python
 """
 @author: Peter Corke
 @author: Jesse Haviland
 """
-# Copyright (C) 1993-2017, by Peter I. Corke
 
 # 2/8/95  changed D3 to 150.05mm which is closer to data from Lee, AKB86 and
 # Tarn fixed errors in COG for links 2 and 3
@@ -25,10 +23,10 @@ import numpy as np
 
 class Puma560(SerialLink):
     """
-    MDL_PUMA560 Create model of Puma 560 manipulator
+    Create model of Puma 560 manipulator
 
-    MDL_PUMA560 is a script that creates the workspace variable p560 which
-    describes the kinematic and dynamic characteristics of a Unimation Puma
+    puma = Puma560() is a script which creates a puma SerialLink object
+    describing the kinematic and dynamic characteristics of a Unimation Puma
     560 manipulator using standard DH conventions.
 
     Also define some joint configurations:
@@ -37,25 +35,25 @@ class Puma560(SerialLink):
     - qs, arm is stretched out in the X direction
     - qn, arm is at a nominal non-singular configuration
 
-    Notes:
-    - SI units are used.
-    - The model includes armature inertia and gear ratios.
-    - the value of m1 is given as 0 here.  Armstrong found no value for it
-      and it does not appear in the equation for tau1 after the substituion
-      is made to inertia about link frame rather than COG frame.
-    - gravity load torque is the motor torque necessary
-      to keep the joint static, and is thus -ve of the gravity
-      caused torque.
+    :notes:
+        - SI units are used.
+        - The model includes armature inertia and gear ratios.
+        - The value of m1 is given as 0 here.  Armstrong found no value for it
+          and it does not appear in the equation for tau1 after the
+          substituion is made to inertia about link frame rather than COG
+          frame.
+        - Gravity load torque is the motor torque necessary to keep the joint
+          static, and is thus -ve of the gravity caused torque.
 
-    References:
-    - "A search for consensus among model parameters reported for the PUMA 560
-        robot",
-       P. Corke and B. Armstrong-Helouvry,
-       Proc. IEEE Int. Conf. Robotics and Automation, (San Diego),
-       pp. 1608-1613, May 1994. (for kinematic and dynamic parameters)
-    - "A combined optimization method for solving the inverse kinematics
-        problem",
-        Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-. (for joint angle limits)
+    :references:
+        - "A search for consensus among model parameters reported for the PUMA
+          560 robot", P. Corke and B. Armstrong-Helouvry,
+          Proc. IEEE Int. Conf. Robotics and Automation, (San Diego),
+          pp. 1608-1613, May 1994. (for kinematic and dynamic parameters)
+        - "A combined optimization method for solving the inverse kinematics
+           problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
+           (for joint angle limits)
+
     """
 
     def __init__(self):
@@ -137,9 +135,6 @@ class Puma560(SerialLink):
             L,
             name="Puma 560",
             manufacturer="Unimation")
-            # comment="viscous friction; params of 8/95",
-            # meshdir="UNIMATE/puma560",
-        # )
 
     @property
     def qz(self):

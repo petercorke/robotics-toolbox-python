@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Fri May 1 14:04:04 2020
 @author: Jesse Haviland
@@ -21,6 +20,8 @@ class TestETS(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.qr, qr)
         nt.assert_array_almost_equal(panda.qz, qz)
+        nt.assert_array_almost_equal(
+            panda.gravity, np.array([[0], [0], [9.81]]))
 
     def test_q(self):
         panda = rp.Panda()
@@ -83,7 +84,8 @@ class TestETS(unittest.TestCase):
             [0.,           0.,          0.,          1.]
         ])
 
-        nt.assert_array_almost_equal(panda.fkine(q1).A, ans)
+        panda.q = q1
+        nt.assert_array_almost_equal(panda.fkine().A, ans)
         nt.assert_array_almost_equal(panda.fkine(q2).A, ans)
         nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
         nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
@@ -117,7 +119,8 @@ class TestETS(unittest.TestCase):
                 7.48247732e-01]
         ])
 
-        nt.assert_array_almost_equal(panda.jacob0(q1), ans)
+        panda.q = q1
+        nt.assert_array_almost_equal(panda.jacob0(), ans)
         nt.assert_array_almost_equal(panda.jacob0(q2), ans)
         nt.assert_array_almost_equal(panda.jacob0(q3), ans)
         nt.assert_array_almost_equal(panda.jacob0(q4), ans)
@@ -271,7 +274,8 @@ class TestETS(unittest.TestCase):
             ]
         ])
 
-        nt.assert_array_almost_equal(panda.hessian0(q1), ans)
+        panda.q = q1
+        nt.assert_array_almost_equal(panda.hessian0(), ans)
         nt.assert_array_almost_equal(panda.hessian0(q2), ans)
         nt.assert_array_almost_equal(panda.hessian0(q3), ans)
         nt.assert_array_almost_equal(panda.hessian0(q4), ans)
@@ -294,7 +298,8 @@ class TestETS(unittest.TestCase):
 
         ans = 0.006559178039088341
 
-        nt.assert_array_almost_equal(panda.manipulability(q1), ans)
+        panda.q = q1
+        nt.assert_array_almost_equal(panda.manipulability(), ans)
         nt.assert_array_almost_equal(panda.manipulability(q2), ans)
         nt.assert_array_almost_equal(panda.manipulability(q3), ans)
         nt.assert_array_almost_equal(panda.manipulability(q4), ans)
@@ -321,7 +326,8 @@ class TestETS(unittest.TestCase):
             [0.00000000e+00]
         ])
 
-        nt.assert_array_almost_equal(panda.jacobm(q1), ans)
+        panda.q = q1
+        nt.assert_array_almost_equal(panda.jacobm(), ans)
         nt.assert_array_almost_equal(panda.jacobm(q2), ans)
         nt.assert_array_almost_equal(panda.jacobm(q3), ans)
         nt.assert_array_almost_equal(panda.jacobm(q4), ans)
