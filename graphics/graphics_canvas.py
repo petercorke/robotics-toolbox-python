@@ -80,6 +80,9 @@ class GraphicsCanvas3D:
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
+    #######################################
+    #  Canvas Management
+    #######################################
     def clear_scene(self):
         """
         This function will clear the screen of all objects
@@ -135,6 +138,9 @@ class GraphicsCanvas3D:
         self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots)-1
         self.__selected_robot = len(self.__robots)-1
 
+    #######################################
+    #  UI Management
+    #######################################
     def __del_robot(self):
         """
         Remove a robot from the scene and the UI controls
@@ -477,7 +483,6 @@ class GraphicsCanvas3D:
         """
         if len(self.__robots) > 0:
             self.__robots[self.__selected_robot].set_transparency(s.value)
-    #######################################
 
 
 class GraphicsCanvas2D:
@@ -548,9 +553,9 @@ class GraphicsCanvas2D:
         self.__reset_camera()
         self.__graphics_grid.update_grid()
 
-    ############################
+    #######################################
     #  Canvas Management
-    ############################
+    #######################################
     # TODO
     def clear_scene(self):
         pass
@@ -564,9 +569,9 @@ class GraphicsCanvas2D:
         """
         self.__graphics_grid.set_visibility(is_visible)
 
-    ############################
+    #######################################
     #  UI Management
-    ############################
+    #######################################
     # TODO
     def __setup_ui_controls(self):
         pass
@@ -697,9 +702,9 @@ class GraphicsCanvas2D:
         self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
         self.scene.up = y_axis_vector
 
-    ############################
+    #######################################
     #  Drawing Functions
-    ############################
+    #######################################
     def draw_path(self, xy_path, colour=None, thickness=0.05):
         """
         Draw a line from point to point in the 2D path
@@ -730,6 +735,15 @@ class GraphicsCanvas2D:
             p2 = vector(x2, y2, 0)
 
             create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+
+    def add_object(self, obj):
+        """
+        Add an object into the scene.
+
+        :param obj: The object to be added
+        :type obj: class:`graphics.object2d`
+        """
+        pass
 
 
 def convert_grid_to_z_up(scene):
