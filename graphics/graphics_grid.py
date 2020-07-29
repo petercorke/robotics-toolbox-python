@@ -317,7 +317,7 @@ class GraphicsGrid:
     #     self.__scene.waitfor("draw_complete")
 
 
-def create_line(pos1, pos2, scene, colour=None):
+def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
     """
     Create a line from position 1 to position 2.
 
@@ -329,7 +329,10 @@ def create_line(pos1, pos2, scene, colour=None):
     :type pos2: class:`vpython.vector`
     :param colour: RGB list to colour the line to
     :type colour: `list`
+    :param thickness: Thickness of the line
+    :type thickness: `float`
     :raises ValueError: RGB colour must be normalised between 0->1
+    :raises ValueError: Thickness must be greater than 0
     :return: A box resembling a line
     :rtype: class:`vpython.box`
     """
@@ -342,6 +345,9 @@ def create_line(pos1, pos2, scene, colour=None):
        colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
         raise ValueError("RGB values must be normalised between 0 and 1")
 
+    if thickness < 0.0:
+        raise ValueError("Thickness must be greater than 0")
+
     # Length of the line using the magnitude
     line_len = mag(pos2-pos1)
 
@@ -352,7 +358,7 @@ def create_line(pos1, pos2, scene, colour=None):
     axis_dir = pos2 - pos1
 
     # Return a box of thin width and height to resemble a line
-    thickness = 0.01
+    # thickness = 0.01
     return box(canvas=scene,
                pos=position,
                axis=axis_dir,

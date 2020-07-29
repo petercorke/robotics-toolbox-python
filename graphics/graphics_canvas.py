@@ -700,9 +700,16 @@ class GraphicsCanvas2D:
     ############################
     #  Drawing Functions
     ############################
-    def draw_path(self, xy_path, colour=None):
+    def draw_path(self, xy_path, colour=None, thickness=0.05):
         """
+        Draw a line from point to point in the 2D path
 
+        :param xy_path: The path to draw on the canvas
+        :type xy_path: `list`
+        :param colour: RGB list to colour the line to
+        :type colour: `list`
+        :param thickness: Thickness of the line
+        :type thickness: `float`
         """
         # Default colour to black
         if colour is None:
@@ -722,7 +729,7 @@ class GraphicsCanvas2D:
             y2 = xy_path[point+1][1]
             p2 = vector(x2, y2, 0)
 
-            create_line(p1, p2, self.scene, colour=colour)
+            create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
 
 
 def convert_grid_to_z_up(scene):
