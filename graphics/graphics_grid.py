@@ -15,6 +15,7 @@ class GraphicsGrid:
 
         # Save the scene the grid is placed in
         self.__scene = scene
+        self.__is_3d = True
 
         # Save the current camera settings
         self.camera_pos = self.__scene.camera.pos
@@ -238,6 +239,28 @@ class GraphicsGrid:
                                 self.__num_squares,
                                 self.__scene)
 
+    def toggle_2d_3d(self):
+        """
+        Toggle the grid between 2D and 3D options.
+        2D - XY Plane
+        3D - XY, XZ, YZ Planes
+        """
+        # Set the new visibility
+        self.__is_3d = not self.__is_3d
+
+        # Toggle it for XZ, YZ planes
+        self.grid_object[self.__planes_idx][self.__xz_plane_idx].visible = self.__is_3d
+        self.grid_object[self.__planes_idx][self.__yz_plane_idx].visible = self.__is_3d
+
+        # Toggle it for Z plane numbers
+        # Index start = (num_squares + 1) (11 numbers shown for 10 squares) * 2 axes + 2 letters for axes
+        z_label_start = (self.__num_squares + 1) * 2 + 2
+        # Index end = end of labels array
+        z_label_end = len(self.grid_object[self.__labels_idx])
+        # Toggle
+        for idx in range(z_label_start, z_label_end):
+            self.grid_object[self.__labels_idx][idx].visible = self.__is_3d
+
     def set_visibility(self, is_visible):
         """
         Set the visibility of the grid
@@ -245,10 +268,16 @@ class GraphicsGrid:
         :param is_visible: Boolean of whether to display the grid
         :type is_visible: `bool`
         """
+        # Modify all graphics
         for plane in self.grid_object[self.__planes_idx]:
             plane.visible = is_visible
         for number in self.grid_object[self.__labels_idx]:
             number.visible = is_visible
+        # If 3D, changes are made
+        # If 2D and setting off, changes are made
+        # If 2D and setting on, toggle the 3D graphics (are turned on)
+        if self.__is_3d is False and is_visible is True:
+            self.toggle_2d_3d()
 
     def set_relative(self, is_relative):
         """

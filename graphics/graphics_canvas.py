@@ -3,7 +3,7 @@ from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid
 
 
-class GraphicsCanvas:
+class GraphicsCanvas3D:
     """
     Set up the scene with initial conditions.
         - White background
@@ -181,6 +181,9 @@ class GraphicsCanvas:
 
         Q = roll left (rotate)
         E = roll right (rotate)
+
+        space = move up (pan)
+        shift = move down (pan)
 
         ctrl + LMB = rotate (Default Vpython)
         """
@@ -475,6 +478,218 @@ class GraphicsCanvas:
         if len(self.__robots) > 0:
             self.__robots[self.__selected_robot].set_transparency(s.value)
     #######################################
+
+
+class GraphicsCanvas2D:
+    """
+        Set up the scene with initial conditions.
+            - White background
+            - Width, height
+            - Title, caption
+            - Axes drawn (if applicable)
+
+        :param height: Height of the canvas on screen (Pixels), defaults to 500.
+        :type height: `int`, optional
+        :param width: Width of the canvas on screen (Pixels), defaults to 1000.
+        :type width: `int`, optional
+        :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
+        :type title: `str`, optional
+        :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
+        :type caption: `str`, optional
+        :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
+        :type grid: `bool`, optional
+        """
+
+    def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+
+        # Create a new independent scene
+        self.scene = canvas()
+
+        # Apply the settings
+        self.scene.background = color.white
+        self.scene.width = width
+        self.scene.height = height
+        self.scene.autoscale = False
+
+        # Disable default controls
+        self.scene.userpan = False  # Remove shift+mouse panning (key overwritten)
+        self.scene.userzoom = True  # Keep zoom controls (scrollwheel)
+        self.scene.userspin = False  # Remove ctrl+mouse enabled to rotate
+
+        self.__grid_visibility = grid
+        self.__camera_lock = False
+
+        # Apply HTML title/caption
+        if title != '':
+            self.scene.title = title
+
+        self.__default_caption = caption
+        if caption != '':
+            self.scene.caption = caption
+
+        # Rotate the camera
+        # convert_grid_to_z_up(self.scene)
+
+        # Any time a key or mouse is held down, run the callback function
+        rate(30)  # 30Hz
+        self.scene.bind('keydown', self.__handle_keyboard_inputs)
+
+        # Create the grid, and display if wanted
+        self.__graphics_grid = GraphicsGrid(self.scene)
+        # Toggle grid to 2D
+        self.__graphics_grid.toggle_2d_3d()
+        # Lock the grid
+        self.__graphics_grid.set_relative(False)
+        # Turn off grid if applicable
+        if not self.__grid_visibility:
+            self.__graphics_grid.set_visibility(False)
+
+        # Reset the camera to known spot
+        self.__reset_camera()
+        self.__graphics_grid.update_grid()
+
+    # TODO
+    def clear_scene(self):
+        pass
+
+    def grid_visibility(self, is_visible):
+        """
+        Update the grid visibility in the scene
+
+        :param is_visible: Whether the grid should be visible or not
+        :type is_visible: `bool`
+        """
+        self.__graphics_grid.set_visibility(is_visible)
+
+    # TODO
+    def __setup_ui_controls(self):
+        pass
+
+    def __handle_keyboard_inputs(self):
+        """
+        Pans amount dependent on distance between camera and focus point.
+        Closer = smaller pan amount
+
+        A = move left (pan)
+        D = move right (pan)
+        W = move forward (pan)
+        S = move backward (pan)
+
+        <- = rotate left along camera axes (rotate)
+        -> = rotate right along camera axes (rotate)
+        ^ = rotate up along camera axes (rotate)
+        V = rotate down along camera axes (rotate)
+
+        Q = roll left (rotate)
+        E = roll right (rotate)
+
+        space = move up (pan)
+        shift = move down (pan)
+
+        ctrl + LMB = rotate (Default Vpython)
+        """
+        # If camera lock, just skip the function
+        if self.__camera_lock:
+            return
+
+        # Constants
+        pan_amount = 0.02  # units
+        rot_amount = 1.0  # deg
+
+        # Current settings
+        cam_distance = self.scene.camera.axis.mag
+        cam_pos = vector(self.scene.camera.pos)
+        cam_focus = vector(self.scene.center)
+
+        # Weird manipulation to get correct vector directions. (scene.camera.up always defaults to world up)
+        cam_axis = (vector(self.scene.camera.axis))  # X
+        cam_side_axis = self.scene.camera.up.cross(cam_axis)  # Y
+        cam_up = cam_axis.cross(cam_side_axis)  # Z
+
+        cam_up.mag = cam_axis.mag
+
+        # Get a list of keys
+        keys = keysdown()
+
+        # Userspin uses ctrl, so skip this check to avoid changing camera pose while ctrl is held
+        if 'ctrl' in keys:
+            return
+
+        ################################################################################################################
+        # PANNING
+        # Check if the keys are pressed, update vectors as required
+        # Changing camera position updates the scene center to follow same changes
+        if 'w' in keys:
+            cam_pos = cam_pos + cam_axis * pan_amount
+        if 's' in keys:
+            cam_pos = cam_pos - cam_axis * pan_amount
+        if 'a' in keys:
+            cam_pos = cam_pos + cam_side_axis * pan_amount
+        if 'd' in keys:
+            cam_pos = cam_pos - cam_side_axis * pan_amount
+        if ' ' in keys:
+            cam_pos = cam_pos + cam_up * pan_amount
+        if 'shift' in keys:
+            cam_pos = cam_pos - cam_up * pan_amount
+
+        # Update camera position before rotation (to keep pan and rotate separate)
+        self.scene.camera.pos = cam_pos
+
+        ################################################################################################################
+        # Camera Roll
+        # If only one rotation key is pressed
+        if 'q' in keys and 'e' not in keys:
+            # Rotate camera up
+            cam_up = cam_up.rotate(angle=-radians(rot_amount), axis=cam_axis)
+            # Set magnitude as it went to inf
+            cam_up.mag = cam_axis.mag
+            # Set
+            self.scene.up = cam_up
+
+        # If only one rotation key is pressed
+        if 'e' in keys and 'q' not in keys:
+            # Rotate camera up
+            cam_up = cam_up.rotate(angle=radians(rot_amount), axis=cam_axis)
+            # Set magnitude as it went to inf
+            cam_up.mag = cam_axis.mag
+            # Set
+            self.scene.up = cam_up
+
+        ################################################################################################################
+        # CAMERA ROTATION
+        d = cam_distance
+        move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))  # SAS Cosine
+
+        # If only left not right key
+        if 'left' in keys and 'right' not in keys:
+            # Calculate distance to translate
+            cam_pos = cam_pos + norm(cam_side_axis) * move_dist
+            # Calculate new camera axis
+            cam_axis = -(cam_pos - cam_focus)
+        if 'right' in keys and 'left' not in keys:
+            cam_pos = cam_pos - norm(cam_side_axis) * move_dist
+            cam_axis = -(cam_pos - cam_focus)
+        if 'up' in keys and 'down' not in keys:
+            cam_pos = cam_pos + norm(cam_up) * move_dist
+            cam_axis = -(cam_pos - cam_focus)
+        if 'down' in keys and 'up' not in keys:
+            cam_pos = cam_pos - norm(cam_up) * move_dist
+            cam_axis = -(cam_pos - cam_focus)
+
+        # Update camera position and axis
+        self.scene.camera.pos = cam_pos
+        self.scene.camera.axis = cam_axis
+
+    def __reset_camera(self):
+        """
+        Reset the camera to a known position
+        """
+        # Reset Camera
+        self.scene.camera.pos = vector(5, 5, 12)  # Hover above (5, 5, 0)
+        # Ever so slightly off focus, to ensure grid is rendered in the right region
+        # (if directly at, draws numbers wrong spots)
+        self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
+        self.scene.up = y_axis_vector
 
 
 def convert_grid_to_z_up(scene):

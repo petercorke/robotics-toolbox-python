@@ -19,7 +19,7 @@ import graphics as gph
 
 
 # Create a canvas on import, to allow clearing between function calls
-g_canvas = gph.GraphicsCanvas()
+g_canvas = gph.GraphicsCanvas3D()
 
 
 def clear():
@@ -321,7 +321,7 @@ def test_multiple_canvases():
 
     sleep(5)
 
-    g_canvas2 = gph.GraphicsCanvas(title='Scene B')
+    g_canvas2 = gph.GraphicsCanvas3D(title='Scene B')
 
     robot2 = gph.GraphicalRobot(g_canvas2, 'Robot B1')
     robot2.append_link('r', SE3().Rand(), 1.0)
