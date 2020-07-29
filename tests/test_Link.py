@@ -146,11 +146,11 @@ class TestLink(unittest.TestCase):
         s1 = l1.__repr__()
 
         self.assertEqual(
-            s0, "Prismatic  theta=0.00  d=0.00  a=0.00  "
-                "alpha=0.00  offset=0.00")
+            s0, "Prismatic  theta= 0.00  d= 0.00  a= 0.00  "
+                "alpha= 0.00  offset= 0.00")
         self.assertEqual(
-            s1, "Revolute   theta=0.00  d=0.00  a=0.00  "
-                "alpha=0.00  offset=0.00")
+            s1, "Revolute   theta= 0.00  d= 0.00  a= 0.00  "
+                "alpha= 0.00  offset= 0.00")
 
     def test_dyn(self):
         puma = rp.Puma560()

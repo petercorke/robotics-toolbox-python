@@ -126,12 +126,12 @@ class Link(object):
     def __str__(self):
 
         if not self.sigma:
-            s = "Revolute   theta={:.2f}  d={:.2f}  a={:.2f}  alpha={:.2f}  " \
-                "offset={:.2f}".format(
+            s = "Revolute   theta={: .2f}  d={: .2f}  a={: .2f}  " \
+                "alpha={: .2f}  offset={: .2f}".format(
                     self.theta, self.d, self.a, self.alpha, self.offset)
         else:
-            s = "Prismatic  theta={:.2f}  d={:.2f}  a={:.2f}  alpha={:.2f}  " \
-                "offset={:.2f}".format(
+            s = "Prismatic  theta={: .2f}  d={: .2f}  a={: .2f}  " \
+                "alpha={: .2f}  offset={: .2f}".format(
                     self.theta, self.d, self.a, self.alpha, self.offset)
 
         return s

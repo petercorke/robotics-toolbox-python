@@ -96,6 +96,47 @@ class SerialLink(object):
         self._rne_ob = None
         self._rne_changed = False
 
+    def __str__(self):
+        """
+        Pretty prints the DH Model of the robot. Will output angles in degrees
+
+        :return: Pretty print of the robot model
+        :rtype: str
+        """
+        axes = ''
+        L = ''
+
+        for i in range(self.n):
+            L += str(self.links[i]) + '\n'
+
+            if not self.links[i].sigma:
+                axes += 'R'
+            else:
+                axes += 'P'
+
+        if not self.mdh:
+            dh = 'std DH'
+        else:
+            dh = 'mod DH'
+
+        rpy = self.tool.rpy
+
+        for i in range(3):
+            if rpy[i] == 0:
+                rpy[i] = 0
+
+        model = '\n%s (%s): %d axis, %s, %s\n'\
+            'Parameters:\n'\
+            '%s\n'\
+            'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
+                self.name, self.manuf, self.n, axes, dh,
+                L,
+                self.tool.A[0, 3], self.tool.A[1, 3],
+                self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
+            )
+
+        return model
+
     def __add__(self, L):
         nlinks = []
 

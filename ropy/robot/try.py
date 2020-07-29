@@ -9,11 +9,16 @@ import time
 
 
 puma = rp.Puma560()
-puma.q = puma.qn
-qd = [1, 2, 3, 1, 2, 3]
+panda = rp.PandaMDH()
+
+print(puma)
+print(panda)
+
+# puma.q = puma.qn
+# qd = [1, 2, 3, 1, 2, 3]
 
 
-print(puma.links[0].dyn())
+# print(puma.links[0].dyn())
 # print(puma.links)
 
 # z = np.zeros(6)

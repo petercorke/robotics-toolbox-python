@@ -1149,3 +1149,25 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(taui1[:, 0], tauir, decimal=4)
         nt.assert_array_almost_equal(taui1[:, 1], tauir, decimal=4)
         nt.assert_array_almost_equal(taui2, tauir, decimal=4)
+
+    def test_str(self):
+        puma = rp.Puma560()
+
+        res = (
+            "\nPuma 560 (Unimation): 6 axis, RRRRRR, std DH\n"
+            "Parameters:\n"
+            "Revolute   theta= 0.00  d= 0.00  a= 0.00"
+            "  alpha= 1.57  offset= 0.00\n"
+            "Revolute   theta= 0.00  d= 0.00  a= 0.43"
+            "  alpha= 0.00  offset= 0.00\n"
+            "Revolute   theta= 0.00  d= 0.15  a= 0.02"
+            "  alpha=-1.57  offset= 0.00\n"
+            "Revolute   theta= 0.00  d= 0.43  a= 0.00"
+            "  alpha= 1.57  offset= 0.00\n"
+            "Revolute   theta= 0.00  d= 0.00  a= 0.00"
+            "  alpha=-1.57  offset= 0.00\n"
+            "Revolute   theta= 0.00  d= 0.00  a= 0.00"
+            "  alpha= 0.00  offset= 0.00\n\n"
+            "tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg")
+
+        self.assertEqual(str(puma), res)
