@@ -1,6 +1,6 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
-from graphics.graphics_grid import GraphicsGrid
+from graphics.graphics_grid import GraphicsGrid, create_line
 
 
 class GraphicsCanvas3D:
@@ -548,6 +548,9 @@ class GraphicsCanvas2D:
         self.__reset_camera()
         self.__graphics_grid.update_grid()
 
+    ############################
+    #  Canvas Management
+    ############################
     # TODO
     def clear_scene(self):
         pass
@@ -561,6 +564,9 @@ class GraphicsCanvas2D:
         """
         self.__graphics_grid.set_visibility(is_visible)
 
+    ############################
+    #  UI Management
+    ############################
     # TODO
     def __setup_ui_controls(self):
         pass
@@ -690,6 +696,33 @@ class GraphicsCanvas2D:
         # (if directly at, draws numbers wrong spots)
         self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
         self.scene.up = y_axis_vector
+
+    ############################
+    #  Drawing Functions
+    ############################
+    def draw_path(self, xy_path, colour=None):
+        """
+
+        """
+        # Default colour to black
+        if colour is None:
+            colour = [0, 0, 0]
+
+        if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+                colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+            raise ValueError("RGB values must be normalised between 0 and 1")
+
+        # For every point in the list, draw a line to the next one (excluding last point)
+        for point in range(0, len(xy_path)-1):
+            x1 = xy_path[point][0]
+            y1 = xy_path[point][1]
+            p1 = vector(x1, y1, 0)
+
+            x2 = xy_path[point+1][0]
+            y2 = xy_path[point+1][1]
+            p2 = vector(x2, y2, 0)
+
+            create_line(p1, p2, self.scene, colour=colour)
 
 
 def convert_grid_to_z_up(scene):
