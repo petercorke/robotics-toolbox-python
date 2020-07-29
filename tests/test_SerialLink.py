@@ -1152,6 +1152,9 @@ class TestLink(unittest.TestCase):
 
     def test_str(self):
         puma = rp.Puma560()
+        l0 = rp.Prismatic(mdh=1)
+        r0 = rp.SerialLink([l0, l0, l0])
+        str(r0)
 
         res = (
             "\nPuma 560 (Unimation): 6 axis, RRRRRR, std DH\n"

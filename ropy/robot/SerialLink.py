@@ -2798,8 +2798,8 @@ class SerialLink(object):
         (first row is maximum, second row minimum).
 
         Trajectory operation:
-        In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are the
-        results at the pose given by corresponding row of Q.
+        In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
+        the results at the pose given by corresponding row of q.
 
         :notes:
             - Wrench vector and Jacobian must be from the same reference frame
