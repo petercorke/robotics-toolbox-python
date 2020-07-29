@@ -182,6 +182,9 @@ class GraphicsCanvas3D:
         Q = roll left (rotate)
         E = roll right (rotate)
 
+        space = move up (pan)
+        shift = move down (pan)
+
         ctrl + LMB = rotate (Default Vpython)
         """
         # If camera lock, just skip the function
@@ -509,9 +512,9 @@ class GraphicsCanvas2D:
         self.scene.autoscale = False
 
         # Disable default controls
-        self.scene.userpan = False  # Remove shift+mouse panning (not very good controls)
+        self.scene.userpan = False  # Remove shift+mouse panning (key overwritten)
         self.scene.userzoom = True  # Keep zoom controls (scrollwheel)
-        self.scene.userspin = True  # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
+        self.scene.userspin = False  # Remove ctrl+mouse enabled to rotate
 
         self.__grid_visibility = grid
         self.__camera_lock = False
@@ -525,7 +528,7 @@ class GraphicsCanvas2D:
             self.scene.caption = caption
 
         # Rotate the camera
-        convert_grid_to_z_up(self.scene)
+        # convert_grid_to_z_up(self.scene)
 
         # Any time a key or mouse is held down, run the callback function
         rate(30)  # 30Hz
@@ -540,6 +543,10 @@ class GraphicsCanvas2D:
         # Turn off grid if applicable
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
+
+        # Reset the camera to known spot
+        self.__reset_camera()
+        self.__graphics_grid.update_grid()
 
     # TODO
     def clear_scene(self):
@@ -575,6 +582,9 @@ class GraphicsCanvas2D:
 
         Q = roll left (rotate)
         E = roll right (rotate)
+
+        space = move up (pan)
+        shift = move down (pan)
 
         ctrl + LMB = rotate (Default Vpython)
         """
@@ -669,6 +679,17 @@ class GraphicsCanvas2D:
         # Update camera position and axis
         self.scene.camera.pos = cam_pos
         self.scene.camera.axis = cam_axis
+
+    def __reset_camera(self):
+        """
+        Reset the camera to a known position
+        """
+        # Reset Camera
+        self.scene.camera.pos = vector(5, 5, 12)  # Hover above (5, 5, 0)
+        # Ever so slightly off focus, to ensure grid is rendered in the right region
+        # (if directly at, draws numbers wrong spots)
+        self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
+        self.scene.up = y_axis_vector
 
 
 def convert_grid_to_z_up(scene):
