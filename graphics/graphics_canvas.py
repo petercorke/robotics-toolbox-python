@@ -532,8 +532,10 @@ class GraphicsCanvas2D:
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        # TODO
-        # self.__graphics_grid = GraphicsGrid(self.scene)
+        self.__graphics_grid = GraphicsGrid(self.scene)
+        # Toggle grid to 2D
+        self.__graphics_grid.toggle_2d_3d()
+
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 

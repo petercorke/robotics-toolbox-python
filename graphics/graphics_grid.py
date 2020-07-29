@@ -238,6 +238,28 @@ class GraphicsGrid:
                                 self.__num_squares,
                                 self.__scene)
 
+    def toggle_2d_3d(self):
+        """
+        Toggle the grid between 2D and 3D options.
+        2D - XY Plane
+        3D - XY, XZ, YZ Planes
+        """
+        # Get the current visibility
+        current_visibility = self.grid_object[self.__planes_idx][self.__xz_plane_idx].visible
+
+        # Toggle it for XZ, YZ planes
+        self.grid_object[self.__planes_idx][self.__xz_plane_idx].visible = not current_visibility
+        self.grid_object[self.__planes_idx][self.__yz_plane_idx].visible = not current_visibility
+
+        # Toggle it for Z plane numbers
+        # Index start = (num_squares + 1) (11 numbers shown for 10 squares) * 2 axes + 2 letters for axes
+        z_label_start = (self.__num_squares + 1) * 2 + 2
+        # Index end = end of labels array
+        z_label_end = len(self.grid_object[self.__labels_idx])
+        # Toggle
+        for idx in range(z_label_start, z_label_end):
+            self.grid_object[self.__labels_idx][idx].visible = not current_visibility
+
     def set_visibility(self, is_visible):
         """
         Set the visibility of the grid
