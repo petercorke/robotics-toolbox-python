@@ -17,7 +17,7 @@ frne = Extension(
 setup(
     name='ropy',
 
-    version='0.2.1',
+    version='0.3.1',
 
     description='A Python library for robot control',
 
