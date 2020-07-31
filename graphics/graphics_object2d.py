@@ -1,4 +1,4 @@
-from vpython import shapes, paths, extrusion, vector
+from vpython import shapes, arrow, extrusion, vector
 
 
 class Object2D:
@@ -55,28 +55,38 @@ class Object2D:
         # Circle
         if self.__shape == 'c':
             # 2D coords of the circle boundary
-            circ = shapes.circle(pos=[0, 0], radius=0.5)
-            # Display the shape
-            obj = extrusion(path=[vector(1, 1, 0.001), vector(1, 1, -0.001)], shape=circ, shininess=0)
+            shape_path = shapes.circle(radius=0.5)
         elif self.__shape == 's':
-            raise NotImplementedError()
+            # 2D coords of the square boundary
+            shape_path = shapes.rectangle(width=1, height=1)
         elif self.__shape == 't':
-            raise NotImplementedError()
+            # 2D coords of the triangle boundary
+            shape_path = shapes.triangle(length=1)
         elif self.__shape == 'p':
-            raise NotImplementedError()
-        elif self.__shape == 'o':
-            raise NotImplementedError()
+            # 2D coords of the pentagon boundary
+            shape_path =shapes.pentagon(length=1)
         elif self.__shape == 'h':
-            raise NotImplementedError()
+            # 2D coords of the hexagon boundary
+            shape_path = shapes.hexagon(length=1)
+        elif self.__shape == 'o':
+            # 2D coords of the octagon boundary
+            shape_path = shapes.octagon(length=1)
         elif self.__shape == 'a':
-            raise NotImplementedError()
+            # Create an arrow object and return it
+            obj = arrow(pos=vector(1, 1, 0), axis=vector(1, 1, 0), shaftwidth=0.01)
+            return obj
         elif self.__shape == 'r':
-            raise NotImplementedError()
+            # 2D coords of the circle boundary (with thickness = 0.1*r)
+            shape_path = shapes.circle(radius=0.5, thickness=0.1)
         elif self.__shape == '*':
-            raise NotImplementedError()
+            # 2D coords of the star boundary
+            shape_path = shapes.star(radius=0.5, n=6)
         elif self.__shape == '+':
-            raise NotImplementedError()
+            # 2D coords of the cross boundary
+            shape_path = shapes.cross(width=5, thickness=1)
         else:
             raise ValueError("Invalid shape given")
 
+        # Create the shape
+        obj = extrusion(path=[vector(1, 1, 0.001), vector(1, 1, -0.001)], shape=shape_path, shininess=0)
         return obj
