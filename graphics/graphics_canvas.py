@@ -736,14 +736,15 @@ class GraphicsCanvas2D:
 
             create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
 
-    def add_object(self, obj):
-        """
-        Add an object into the scene.
-
-        :param obj: The object to be added
-        :type obj: class:`graphics.object2d`
-        """
-        pass
+    # MAY NOT BE REQUIRED
+    # def add_object(self, obj):
+    #     """
+    #     Add an object into the scene.
+    #
+    #     :param obj: The object to be added
+    #     :type obj: class:`graphics.object2d`
+    #     """
+    #     pass
 
 
 def convert_grid_to_z_up(scene):
