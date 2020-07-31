@@ -22,11 +22,12 @@ class GraphicsCanvas3D:
     :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
     :type grid: `bool`, optional
     """
+
     def __init__(self, height=500, width=1000, title='', caption='', grid=True):
-        
+
         # Create a new independent scene
         self.scene = canvas()
-        
+
         # Apply the settings
         self.scene.background = color.white
         self.scene.width = width
@@ -135,8 +136,8 @@ class GraphicsCanvas3D:
         # Add robot to list
         self.__robots.append(robot)
         # Set it as selected
-        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots)-1
-        self.__selected_robot = len(self.__robots)-1
+        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
+        self.__selected_robot = len(self.__robots) - 1
 
     #######################################
     #  UI Management
@@ -338,7 +339,8 @@ class GraphicsCanvas3D:
         self.scene.append_to_caption('\n')
 
         # Checkbox for grid visibility
-        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility", checked=self.__grid_visibility)
+        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
+                               checked=self.__grid_visibility)
         self.scene.append_to_caption('\t')
 
         # Checkbox for reference frame visibilities
@@ -383,7 +385,8 @@ class GraphicsCanvas3D:
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
 
-        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
+        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
+                btn_clr]
 
     #######################################
     # UI CALLBACKS
@@ -760,13 +763,13 @@ class GraphicsCanvas2D:
             raise ValueError("RGB values must be normalised between 0 and 1")
 
         # For every point in the list, draw a line to the next one (excluding last point)
-        for point in range(0, len(xy_path)-1):
+        for point in range(0, len(xy_path) - 1):
             x1 = xy_path[point][0]
             y1 = xy_path[point][1]
             p1 = vector(x1, y1, 0)
 
-            x2 = xy_path[point+1][0]
-            y2 = xy_path[point+1][1]
+            x2 = xy_path[point + 1][0]
+            y2 = xy_path[point + 1][1]
             p2 = vector(x2, y2, 0)
 
             create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
@@ -780,8 +783,61 @@ class GraphicsCanvas2D:
         :param options: A string of options to plot with
         :type options: `str`
         """
+        # Verify options given (and save settings to be applied)
+        self.__verify_plot_options(options)
+
+        # Check if coordinates is more than 1 pair
+
+        # Plot the lines
+
         # TODO
         #  add options for line width, marker size
+        pass
+
+    def __verify_plot_options(self, options_str):
+        """
+        Verify that the given options are usable
+
+        :param options_str: The given options from the plot command to verify user input
+        :type options_str: `str`
+        :returns:
+        :rtype:
+        """
+        # Split str into chars list
+        options_split = list(options_str)
+        # If 0, set defaults and return early
+        if len(options_split) == 0:
+            # TODO
+            raise NotImplementedError()
+        # If line_style given, join the first two options if applicable (some types have 2 characters)
+        if options_split[0] == '-' and len(options_split) > 1:
+            if options_split[1] == '-' or options_split[1] == '.':
+                options_split[0] = options_split[0] + options_split[1]
+                for idx in range(2, len(options_split)):
+                    options_split[idx - 1] = options_split[idx]
+                options_split.pop()
+        # If any unknown, throw error
+        for option in options_split:
+            if option not in self.__line_styles and \
+                    option not in self.__marker_styles and \
+                    option not in self.__colour_styles:
+                error_string = "Unknown character entered: '{0}'"
+                raise ValueError(error_string.format(option))
+
+        # Verify Line Style
+        # If none, set as solid
+        # If one, set as given
+        # Else, return error: More than one option given
+
+        # Verify Marker Style
+        # If none, set as nothing
+        # If one, set as given
+        # Else, return error: More than one option given
+
+        # Verify Colour Style
+        # If none, set as black
+        # If one, set as given
+        # Else, return error: More than one option given
         pass
 
     # MAY NOT BE REQUIRED
