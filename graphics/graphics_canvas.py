@@ -784,7 +784,7 @@ class GraphicsCanvas2D:
         :type options: `str`
         """
         # Verify options given (and save settings to be applied)
-        self.__verify_plot_options(options)
+        verified_options = self.__verify_plot_options(options)
 
         # Check if coordinates is more than 1 pair
 
@@ -792,7 +792,7 @@ class GraphicsCanvas2D:
 
         # TODO
         #  add options for line width, marker size
-        pass
+        return verified_options
 
     def __verify_plot_options(self, options_str):
         """
@@ -800,16 +800,24 @@ class GraphicsCanvas2D:
 
         :param options_str: The given options from the plot command to verify user input
         :type options_str: `str`
-        :returns:
-        :rtype:
+        :raises ValueError: Unknown character entered
+        :raises ValueError: Too many line segments used
+        :raises ValueError: Too many marker segments used
+        :raises ValueError: Too many colour segments used
+        :returns: List of options to plot with
+        :rtype: `list`
         """
+        default_line = '-'
+        default_marker = ''
+        default_colour = 'k'
+
         # Split str into chars list
         options_split = list(options_str)
         # If 0, set defaults and return early
         if len(options_split) == 0:
-            # TODO
-            raise NotImplementedError()
+            return [default_line, default_marker, default_colour]
         # If line_style given, join the first two options if applicable (some types have 2 characters)
+        # TODO maybe modify this to check for '--' (eg) anywhere in the string i.e. 'or--'
         if options_split[0] == '-' and len(options_split) > 1:
             if options_split[1] == '-' or options_split[1] == '.':
                 options_split[0] = options_split[0] + options_split[1]
@@ -825,20 +833,60 @@ class GraphicsCanvas2D:
                 raise ValueError(error_string.format(option))
 
         # Verify Line Style
+        line_style_count = 0  # Count of options used
+        line_style_index = 0  # Index position of index used (only used when count == 1)
+        for option in options_split:
+            if option in self.__line_styles:
+                line_style_count = line_style_count + 1
+                line_style_index = self.__line_styles.index(option)
+
+        # If more than one, throw error
+        if line_style_count > 1:
+            raise ValueError("Too many line style arguments given. Only one allowed")
         # If none, set as solid
+        elif line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
+            output_line = default_line
         # If one, set as given
-        # Else, return error: More than one option given
+        else:
+            output_line = self.__line_styles[line_style_index]
 
         # Verify Marker Style
-        # If none, set as nothing
+        marker_style_count = 0  # Count of options used
+        marker_style_index = 0  # Index position of index used (only used when count == 1)
+        for option in options_split:
+            if option in self.__marker_styles:
+                marker_style_count = marker_style_count + 1
+                marker_style_index = self.__marker_styles.index(option)
+
+        # If more than one, throw error
+        if marker_style_count > 1:
+            raise ValueError("Too many marker style arguments given. Only one allowed")
+        # If none, set as solid
+        elif marker_style_count == 0 or not any(item in options_split for item in self.__marker_styles):
+            output_marker = default_line
         # If one, set as given
-        # Else, return error: More than one option given
+        else:
+            output_marker = self.__marker_styles[marker_style_index]
 
         # Verify Colour Style
-        # If none, set as black
+        colour_style_count = 0  # Count of options used
+        colour_style_index = 0  # Index position of index used (only used when count == 1)
+        for option in options_split:
+            if option in self.__colour_styles:
+                colour_style_count = colour_style_count + 1
+                colour_style_index = self.__colour_styles.index(option)
+
+        # If more than one, throw error
+        if colour_style_count > 1:
+            raise ValueError("Too many colour style arguments given. Only one allowed")
+        # If none, set as solid
+        elif colour_style_count == 0 or not any(item in options_split for item in self.__colour_styles):
+            output_colour = default_line
         # If one, set as given
-        # Else, return error: More than one option given
-        pass
+        else:
+            output_colour = self.__colour_styles[colour_style_index]
+
+        return [output_line, output_marker, output_colour]
 
     # MAY NOT BE REQUIRED
     # def add_object(self, obj):
