@@ -763,7 +763,8 @@ class GraphicsCanvas2D:
 
         # For every point in the list, draw a line to the next one (excluding last point)
         for point in range(0, len(xy_path)):
-            if point == len(xy_path):
+            # If at end / only coordinate - draw a marker
+            if point == len(xy_path) - 1:
                 create_marker()
                 return
 
@@ -781,9 +782,6 @@ class GraphicsCanvas2D:
             else:
                 pass
 
-    def __draw_coordinate(self, xy, opt_line, opt_marker, opt_colour, thickness=0.05):
-        pass
-
     def plot(self, coordinates, options):
         """
         Given a 2D coordinate (or list of), use the given options to plot accordingly
@@ -793,16 +791,19 @@ class GraphicsCanvas2D:
         :param options: A string of options to plot with
         :type options: `str`
         """
+        # TODO
+        #  add options for line width, marker size
+
         # Verify options given (and save settings to be applied)
         verified_options = self.__verify_plot_options(options)
 
-        # Check if coordinates is more than 1 pair
-            # If one pair, draw at location
-            # If more, draw a path
-
-        # TODO
-        #  add options for line width, marker size
-        return verified_options
+        # Draw plot
+        self.__draw_path(
+            coordinates,
+            verified_options[0],  # Line
+            verified_options[1],  # Marker
+            verified_options[2],  # Colour
+        )
 
     def __verify_plot_options(self, options_str):
         """
