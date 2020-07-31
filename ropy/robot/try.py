@@ -9,13 +9,21 @@ import time
 
 
 puma = rp.Puma560()
-panda = rp.PandaMDH()
+# panda = rp.PandaMDH()
 
-print(puma)
-print(panda)
+# print(puma)
+# print(panda)
 
-# puma.q = puma.qn
+puma.q = puma.qn
 # qd = [1, 2, 3, 1, 2, 3]
+
+q = puma.qn
+w = [1, 2, 1, 2, 1, 2]
+tauR = np.ones((6,2))
+tauR[:,1] = -1
+
+
+print(puma.paycap(w, tauR, q=q, frame=0))
 
 
 # print(puma.links[0].dyn())

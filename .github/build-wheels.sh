@@ -10,6 +10,7 @@ function repair_wheel {
     fi
 }
 
+cd ./io
 
 # Compile wheels
 for PYBIN in /opt/python/cp3[5-8]*/bin; do

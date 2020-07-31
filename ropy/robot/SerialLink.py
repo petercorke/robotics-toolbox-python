@@ -974,25 +974,25 @@ class SerialLink(object):
 
         :param W: A wrench vector applied at the end effector,
             W = [Fx Fy Fz Mx My Mz]
-        :type q: float ndarray(1,n)
+        :type W: float ndarray(6)
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float ndarray(1,n)
+        :type q: float ndarray(n)
         :param J: The manipulator Jacobian (Optional, if not supplied will
             use the q value).
-        :type J: float ndarray(1,n)
+        :type J: float ndarray(6,n)
         :param frame: The frame in which to torques are expressed in when J
             is not supplied. 0 means base frame of the robot, 1 means end-
             effector frame
         :type frame: int
 
         :return tau: The joint forces/torques due to w
-        :rtype tau: float ndarray(1,n)
+        :rtype tau: float ndarray(n)
 
         :notes:
             - Wrench vector and Jacobian must be from the same reference
               frame.
-            - Tool transforms are taken into consideration when F = 'e'.
+            - Tool transforms are taken into consideration when frame=1.
             - Must have a constant wrench - no trajectory support for this
               yet.
 
@@ -2786,24 +2786,92 @@ class SerialLink(object):
             self._rne_changed = False
             self._rne_ob = None
 
-    def paycap(self, w, f, tlim):
+    def paycap(self, w, tauR, frame=1, q=None):
         """
         Static payload capacity of a robot
 
-        wmax, J = paycap(q, w, f, tlim) returns the maximum permissible
-        payload wrench WMAX (1x6) applied at the end-effector, and the index
-        of the joint J which hits its force/torque limit at that wrench. q (n)
-        is the manipulator pose, w the payload wrench (6), f the wrench
-        reference frame and tlim (nx2) is a matrix of joint forces/torques
-        (first row is maximum, second row minimum).
+        wmax, joint = paycap(q, w, f, tauR) returns the maximum permissible
+        payload wrench wmax (6) applied at the end-effector, and the index
+        of the joint (zero indexed) which hits its force/torque limit at that
+        wrench. q (n) is the manipulator pose, w the payload wrench (6), f the
+        wrench reference frame and tauR (nx2) is a matrix of joint
+        forces/torques (first col is maximum, second col minimum).
 
         Trajectory operation:
         In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
         the results at the pose given by corresponding row of q.
 
+        :param w: The payload wrench
+        :type w: float ndarray(n)
+        :param tauR: Joint torque matrix minimum and maximums
+        :type tauR: float ndarray(n,2)
+        :param frame: The frame in which to torques are expressed in when J
+            is not supplied. 0 means base frame of the robot, 1 means end-
+            effector frame
+        :type frame: int
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :retrun wmax: The maximum permissible payload wrench
+        :rtype wmax: float ndarray(6)
+        :retrun joint: The joint index (zero indexed) which hits its
+            force/torque limit
+        :rtype joint: int
+
         :notes:
             - Wrench vector and Jacobian must be from the same reference frame
-            - Tool transforms are taken into consideration for F = 'e'.
+            - Tool transforms are taken into consideration for frame=1.
         """
 
-        pass
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+            w = getvector(w, 6, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
+            verifymatrix(w, (6, trajn))
+
+        verifymatrix(tauR, (self.n, 2))
+
+        wmax = np.zeros((6, trajn))
+        joint = np.zeros(trajn, dtype=np.int)
+
+        for i in range(trajn):
+            tauB = self.gravload(q[:, i])
+
+            # tauP = self.rne(
+            #     np.zeros(self.n), np.zeros(self.n),
+            #     q, grav=[0, 0, 0], fext=w/np.linalg.norm(w))
+
+            tauP = self.pay(
+                w[:, i]/np.linalg.norm(w[:, i]), q=q[:, i], frame=frame)
+
+            M = tauP > 0
+            m = tauP <= 0
+
+            TAUm = np.ones(self.n)
+            TAUM = np.ones(self.n)
+
+            for c in range(self.n):
+                TAUM[c] = tauR[c, 0]
+                TAUm[c] = tauR[c, 1]
+
+            WM = np.zeros(self.n)
+            WM[M] = (TAUM[M] - tauB[M]) / tauP[M]
+            WM[m] = (TAUm[m] - tauB[m]) / tauP[m]
+
+            WM[WM == np.NINF] = np.Inf
+
+            wmax[:, i] = WM
+            joint[i] = np.argmin(WM)
+
+        if trajn == 1:
+            return wmax[:, 0], joint[0]
+        else:
+            return wmax, joint
