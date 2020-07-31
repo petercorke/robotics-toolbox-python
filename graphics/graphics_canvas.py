@@ -544,6 +544,16 @@ class GraphicsCanvas2D:
             'k',  # Black (default)
             'w',  # White
         ]
+        self.__colour_dictionary = {
+            'r': color.red.value,
+            'g': color.green.value,
+            'b': color.blue.value,
+            'c': color.cyan.value,
+            'y': color.yellow.value,
+            'm': color.magenta.value,
+            'k': color.black.value,
+            'w': color.white.value
+        }
 
         # Create a new independent scene
         self.scene = canvas()
@@ -901,9 +911,14 @@ class GraphicsCanvas2D:
 
     def __get_colour_from_string(self, colour_string):
         """
-
+        Using the colour plot string input, return an rgb array of the colour selected
+        :param colour_string: The colour string option
+        :type colour_string: `str`
+        :returns: List of RGB values for the representative colour
+        :rtype: `list`
         """
-        pass
+        # Return the RGB list (black if not in dictionary)
+        return self.__colour_dictionary.get(colour_string, color.black.value)
 
     # MAY NOT BE REQUIRED
     # def add_object(self, obj):
