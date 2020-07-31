@@ -7,6 +7,10 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# Get the release/version string
+with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
+    release = f.read()
+
 frne = Extension(
         'frne',
         sources=[
@@ -17,11 +21,12 @@ frne = Extension(
 setup(
     name='ropy',
 
-    version='0.3.1',
+    version=release,
 
     description='A Python library for robot control',
 
     long_description=long_description,
+
     long_description_content_type='text/markdown',
 
     url='https://github.com/jhavl/ropy',
