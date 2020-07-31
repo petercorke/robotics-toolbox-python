@@ -507,6 +507,40 @@ class GraphicsCanvas2D:
 
     def __init__(self, height=500, width=1000, title='', caption='', grid=True):
 
+        # Private lists
+        self.__line_styles = [
+            '-',  # Solid (default)
+            # TODO NEED TO CREATE THE LINE DRAWING FUNCTIONS FOR THESE
+            #  '--',  # Dashes
+            #  '.',  # Dotted
+            #  '-.',  # Dash-dot
+        ]
+        self.__marker_styles = [
+            '+',  # Plus
+            'o',  # Circle
+            '*',  # Star
+            '.',  # Dot
+            'x',  # Cross
+            's',  # Square
+            'd',  # Diamond
+            '^',  # Up triangle
+            'v',  # Down triangle
+            '<',  # Left triangle
+            '>',  # Right triangle
+            'p',  # Pentagon
+            'h',  # Hexagon
+        ]
+        self.__colour_styles = [
+            'r',  # Red
+            'g',  # Green
+            'b',  # Blue
+            'y',  # Yellow
+            'c',  # Cyan
+            'm',  # Magenta
+            'k',  # Black (default)
+            'w',  # White
+        ]
+
         # Create a new independent scene
         self.scene = canvas()
 
@@ -735,6 +769,19 @@ class GraphicsCanvas2D:
             p2 = vector(x2, y2, 0)
 
             create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+
+    def plot(self, coordinates, options):
+        """
+        Given a 2D coordinate (or list of), use the given options to plot accordingly
+
+        :param coordinates: List of 2D coordinates, or singular coordinates
+        :type coordinates: `list`
+        :param options: A string of options to plot with
+        :type options: `str`
+        """
+        # TODO
+        #  add options for line width, marker size
+        pass
 
     # MAY NOT BE REQUIRED
     # def add_object(self, obj):
