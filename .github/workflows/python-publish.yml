@@ -3,14 +3,22 @@
 
 name: Upload Python Package
 
+# on:
+#   release:
+#     types: [created]
+
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
 
 jobs:
   deploy:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 2
+      matrix:
+        os: [macos-latest, windows-latest]
+        python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -28,4 +36,5 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         python setup.py sdist bdist_wheel
-        twine upload dist/*
+        ls ./dist/*.whl
+        twine upload dist/*.whl
