@@ -366,3 +366,7 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
                width=thickness,
                height=thickness,
                color=vector(colour[0], colour[1], colour[2]))
+
+
+def create_marker():
+    pass

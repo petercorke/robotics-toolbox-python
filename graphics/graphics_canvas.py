@@ -1,6 +1,6 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
-from graphics.graphics_grid import GraphicsGrid, create_line
+from graphics.graphics_grid import GraphicsGrid, create_line, create_marker
 
 
 class GraphicsCanvas3D:
@@ -743,27 +743,30 @@ class GraphicsCanvas2D:
     #######################################
     #  Drawing Functions
     #######################################
-    def draw_path(self, xy_path, colour=None, thickness=0.05):
+    def __draw_path(self, xy_path, opt_line, opt_marker, opt_colour, thickness=0.05):
         """
         Draw a line from point to point in the 2D path
 
         :param xy_path: The path to draw on the canvas
         :type xy_path: `list`
-        :param colour: RGB list to colour the line to
-        :type colour: `list`
+        :param opt_line: The line option argument
+        :type opt_line: `str`
+        :param opt_marker: The marker option argument
+        :type opt_marker: `str`
+        :param opt_colour: The colour option argument
+        :type opt_colour: `str`
         :param thickness: Thickness of the line
         :type thickness: `float`
         """
-        # Default colour to black
-        if colour is None:
-            colour = [0, 0, 0]
-
-        if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
-                colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
-            raise ValueError("RGB values must be normalised between 0 and 1")
+        # Get colour
+        colour = self.__get_colour_from_string(opt_colour)
 
         # For every point in the list, draw a line to the next one (excluding last point)
-        for point in range(0, len(xy_path) - 1):
+        for point in range(0, len(xy_path)):
+            if point == len(xy_path):
+                create_marker()
+                return
+
             x1 = xy_path[point][0]
             y1 = xy_path[point][1]
             p1 = vector(x1, y1, 0)
@@ -772,7 +775,14 @@ class GraphicsCanvas2D:
             y2 = xy_path[point + 1][1]
             p2 = vector(x2, y2, 0)
 
-            create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+            if opt_line == '-':
+                create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+                create_marker()
+            else:
+                pass
+
+    def __draw_coordinate(self, xy, opt_line, opt_marker, opt_colour, thickness=0.05):
+        pass
 
     def plot(self, coordinates, options):
         """
@@ -787,8 +797,8 @@ class GraphicsCanvas2D:
         verified_options = self.__verify_plot_options(options)
 
         # Check if coordinates is more than 1 pair
-
-        # Plot the lines
+            # If one pair, draw at location
+            # If more, draw a path
 
         # TODO
         #  add options for line width, marker size
@@ -887,6 +897,12 @@ class GraphicsCanvas2D:
             output_colour = self.__colour_styles[colour_style_index]
 
         return [output_line, output_marker, output_colour]
+
+    def __get_colour_from_string(self, colour_string):
+        """
+
+        """
+        pass
 
     # MAY NOT BE REQUIRED
     # def add_object(self, obj):
