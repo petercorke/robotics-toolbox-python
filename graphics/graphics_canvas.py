@@ -519,7 +519,8 @@ class GraphicsCanvas2D:
             '+',  # Plus
             'o',  # Circle
             '*',  # Star
-            '.',  # Dot
+            # DEPRECATED
+            # '.',  # Dot
             'x',  # Cross
             's',  # Square
             'd',  # Diamond
