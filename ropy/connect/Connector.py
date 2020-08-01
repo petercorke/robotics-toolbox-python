@@ -1,9 +1,14 @@
+#!/usr/bin/env python
+"""
+@author Jesse Haviland
+"""
+
 from abc import ABC, abstractmethod
 
 
 class Connector(ABC):
 
-    def __init__(self, value):
+    def __init__(self):
         super().__init__()
 
     #

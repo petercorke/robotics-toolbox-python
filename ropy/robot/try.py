@@ -14,37 +14,38 @@ import time
 # T1.plot(frame='1')
 
 
+a = rp.PyPlot()
 
 
 
-puma = rp.Puma560()
-# # panda = rp.PandaMDH()
+# puma = rp.Puma560()
+# # # panda = rp.PandaMDH()
 
-# # print(puma)
-# # print(panda)
+# # # print(puma)
+# # # print(panda)
 
-puma.q = puma.qn
-# # qd = [1, 2, 3, 1, 2, 3]
+# puma.q = puma.qn
+# # # qd = [1, 2, 3, 1, 2, 3]
 
-# q = puma.qn
-# w = [1, 2, 1, 2, 1, 2]
-# tauR = np.ones((6,2))
-# tauR[:,1] = -1
-
-
-# print(puma.paycap(w, tauR, q=q, frame=0))
+# # q = puma.qn
+# # w = [1, 2, 1, 2, 1, 2]
+# # tauR = np.ones((6,2))
+# # tauR[:,1] = -1
 
 
-# print(puma.links[0].dyn())
-# print(puma.links)
+# # print(puma.paycap(w, tauR, q=q, frame=0))
 
-z = np.zeros(6)
-o = np.ones(6)
-fext = [1, 2, 3, 1, 2, 3]
 
-# t0 = puma.rne(z, z, puma.qn)
-t1 = puma.rne(z, o, q=puma.qn, fext=fext)
-print(t1)
+# # print(puma.links[0].dyn())
+# # print(puma.links)
+
+# z = np.zeros(6)
+# o = np.ones(6)
+# fext = [1, 2, 3, 1, 2, 3]
+
+# # t0 = puma.rne(z, z, puma.qn)
+# t1 = puma.rne(z, o, q=puma.qn, fext=fext)
+# print(t1)
 
 # print(puma._rne_changed)
 # puma.gravity = [0, 0, 9.81]
