@@ -974,11 +974,12 @@ class TestLink(unittest.TestCase):
 
         z = np.zeros(6)
         o = np.ones(6)
+        fext = [1, 2, 3, 1, 2, 3]
 
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
         tr1 = [29.1421, 56.5044, 16.3528, 1.2645, 1.1239, 0.5196]
         tr2 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
-        # tr3 = [32.2416, 59.2850, 16.7723, 2.8687, 0.2991, 1.7138]
+        tr3 = [29.7849, 53.9511, 15.0208,  4.0929, -0.8761, 3.5196]
 
         t0 = puma.rne(z, z, puma.qn)
         t1 = puma.rne(z, o, puma.qn)
@@ -986,15 +987,13 @@ class TestLink(unittest.TestCase):
         puma.gravity = [0, 0, 9.81]
         t2 = puma.rne(o, o, puma.qn)
         t3 = puma.rne(z, z, grav=[0, 0, 9.81])
-        puma.rne(z, z, q=puma.qn, fext=o)
+        t4 = puma.rne(z, o, q=puma.qn, fext=fext)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
         nt.assert_array_almost_equal(t1, tr1, decimal=4)
         nt.assert_array_almost_equal(t2, tr2, decimal=4)
         nt.assert_array_almost_equal(t3, tr0, decimal=4)
-
-        # TODO Debug fext
-        # nt.assert_array_almost_equal(t4, tr3, decimal=4)
+        nt.assert_array_almost_equal(t4, tr3, decimal=4)
 
     def test_rne_traj(self):
         puma = rp.Puma560()
@@ -1174,3 +1173,20 @@ class TestLink(unittest.TestCase):
             "tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg")
 
         self.assertEqual(str(puma), res)
+
+    def test_paycap(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        w = [1, 2, 1, 2, 1, 2]
+        tauR = np.ones((6, 2))
+        tauR[:, 1] = -1
+
+        res0 = [
+            1.15865438e+00, -3.04790052e+02, -5.00870095e+01,  6.00479950e+15,
+            3.76356072e+00, 1.93649167e+00]
+
+        wmax, joint = puma.paycap(w, tauR, q=q, frame=0)
+
+        nt.assert_allclose(wmax, res0)
