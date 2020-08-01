@@ -119,7 +119,10 @@ class SerialLink(object):
         else:
             dh = 'mod DH'
 
-        rpy = self.tool.rpy()
+        rpy = self.tool.rpy
+
+        # TODO Update this on next spatialmaths release
+        # rpy = self.tool.rpy()
 
         for i in range(3):
             if rpy[i] == 0:
