@@ -1187,6 +1187,12 @@ class TestLink(unittest.TestCase):
             1.15865438e+00, -3.04790052e+02, -5.00870095e+01,  6.00479950e+15,
             3.76356072e+00, 1.93649167e+00]
 
-        wmax, joint = puma.paycap(w, tauR, q=q, frame=0)
+        wmax0, joint = puma.paycap(w, tauR, q=q, frame=0)
+        wmax1, _ = puma.paycap(np.c_[w, w], tauR, q=np.c_[q, q], frame=0)
+        wmax2, _ = puma.paycap(w, tauR, frame=0)
 
-        nt.assert_allclose(wmax, res0)
+        nt.assert_allclose(wmax0, res0)
+        self.assertEqual(joint, 1)
+        nt.assert_allclose(wmax1[:, 0], res0)
+        nt.assert_allclose(wmax1[:, 1], res0)
+        nt.assert_allclose(wmax2, res0)

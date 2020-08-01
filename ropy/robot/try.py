@@ -8,22 +8,22 @@ import matplotlib.pyplot as plt
 
 import time
 
-T1 = sm.SE3.Tx(1)
-plt.figure() # create a new figure
-sm.SE3().plot(frame='0', dims=[-3,3], color='black')
-T1.plot(frame='1')
+# T1 = sm.SE3.Tx(1)
+# plt.figure() # create a new figure
+# sm.SE3().plot(frame='0', dims=[-3,3], color='black')
+# T1.plot(frame='1')
 
 
 
 
 
-# puma = rp.Puma560()
+puma = rp.Puma560()
 # # panda = rp.PandaMDH()
 
 # # print(puma)
 # # print(panda)
 
-# puma.q = puma.qn
+puma.q = puma.qn
 # # qd = [1, 2, 3, 1, 2, 3]
 
 # q = puma.qn
@@ -38,11 +38,13 @@ T1.plot(frame='1')
 # print(puma.links[0].dyn())
 # print(puma.links)
 
-# z = np.zeros(6)
-# o = np.ones(6)
+z = np.zeros(6)
+o = np.ones(6)
+fext = [1, 2, 3, 1, 2, 3]
 
 # t0 = puma.rne(z, z, puma.qn)
-# t1 = puma.rne(z, o, puma.qn)
+t1 = puma.rne(z, o, q=puma.qn, fext=fext)
+print(t1)
 
 # print(puma._rne_changed)
 # puma.gravity = [0, 0, 9.81]
