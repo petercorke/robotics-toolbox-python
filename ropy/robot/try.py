@@ -4,26 +4,35 @@ import spatialmath as sm
 import numpy as np
 import ctypes
 import frne
+import matplotlib.pyplot as plt
 
 import time
 
-
-puma = rp.Puma560()
-# panda = rp.PandaMDH()
-
-# print(puma)
-# print(panda)
-
-puma.q = puma.qn
-# qd = [1, 2, 3, 1, 2, 3]
-
-q = puma.qn
-w = [1, 2, 1, 2, 1, 2]
-tauR = np.ones((6,2))
-tauR[:,1] = -1
+T1 = sm.SE3.Tx(1)
+plt.figure() # create a new figure
+sm.SE3().plot(frame='0', dims=[-3,3], color='black')
+T1.plot(frame='1')
 
 
-print(puma.paycap(w, tauR, q=q, frame=0))
+
+
+
+# puma = rp.Puma560()
+# # panda = rp.PandaMDH()
+
+# # print(puma)
+# # print(panda)
+
+# puma.q = puma.qn
+# # qd = [1, 2, 3, 1, 2, 3]
+
+# q = puma.qn
+# w = [1, 2, 1, 2, 1, 2]
+# tauR = np.ones((6,2))
+# tauR[:,1] = -1
+
+
+# print(puma.paycap(w, tauR, q=q, frame=0))
 
 
 # print(puma.links[0].dyn())
