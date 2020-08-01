@@ -4,6 +4,18 @@
 """
 
 from ropy.connect.Connector import Connector
+import matplotlib
+import matplotlib.pyplot as plt
+
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+plt.style.use('ggplot')
+matplotlib.rcParams['font.size'] = 7
+matplotlib.rcParams['lines.linewidth'] = 0.5
+matplotlib.rcParams['xtick.major.size'] = 1.5
+matplotlib.rcParams['ytick.major.size'] = 1.5
+matplotlib.rcParams['axes.labelpad'] = 1
+plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 
 class PyPlot(Connector):
@@ -14,12 +26,32 @@ class PyPlot(Connector):
 
     def launch(self):
         '''
-        env = launch(args) launch the external program with an empty or
-        specific scene as defined by args
+        env = launch() launchs a blank 3D matplotlib figure
 
         '''
 
-        pass
+        super().launch()
+
+        projection = 'ortho'
+        labels = ['X', 'Y', 'Z']
+
+        self.fig = plt.figure()
+        self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
+        # fig = plt.gcf()
+
+        # Create a 3D axes
+        self.ax = self.fig.add_subplot(
+            111, projection='3d', proj_type=projection)
+        self.ax.set_facecolor('white')
+        self.ax.autoscale(enable=True, axis='both')
+
+        self.ax.set_xlabel(labels[0])
+        self.ax.set_ylabel(labels[1])
+        self.ax.set_zlabel(labels[2])
+
+        plt.ion()
+        plt.show()
+        plt.pause(0.001)
 
     def step(self):
         '''
@@ -36,7 +68,7 @@ class PyPlot(Connector):
 
         '''
 
-        pass
+        super().step()
 
     def reset(self):
         '''
@@ -45,7 +77,7 @@ class PyPlot(Connector):
 
         '''
 
-        pass
+        super().reset()
 
     def restart(self):
         '''
@@ -54,7 +86,7 @@ class PyPlot(Connector):
 
         '''
 
-        pass
+        super().restart()
 
     def close(self):
         '''
@@ -62,7 +94,8 @@ class PyPlot(Connector):
 
         '''
 
-        pass
+        super().close()
+        plt.close(self.fig)
 
     #
     #  Methods to interface with the robots created in other environemnts
@@ -76,7 +109,7 @@ class PyPlot(Connector):
 
         '''
 
-        pass
+        super().add()
 
     def remove(self):
         '''
@@ -84,4 +117,4 @@ class PyPlot(Connector):
 
         '''
 
-        pass
+        super().remove()

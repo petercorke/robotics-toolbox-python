@@ -12,7 +12,7 @@ import spatialmath as sm
 import unittest
 
 
-class TestLink(unittest.TestCase):
+class TestSerialLink(unittest.TestCase):
 
     def test_seriallink(self):
         l0 = rp.Link()

@@ -15,6 +15,8 @@ import time
 
 
 a = rp.PyPlot()
+a.launch()
+a.close()
 
 
 
