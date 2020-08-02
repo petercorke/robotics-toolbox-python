@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Fri May 1 14:04:04 2020
 @author: Jesse Haviland
 """
 
