@@ -69,12 +69,14 @@ html_theme = 'alabaster'
 #html_theme = 'pyramid'
 #html_theme = 'sphinxdoc'
 
+
 html_theme_options = {
     'logo': '../../../../figs/icon.png',
     'github_user': 'jhavl',
     'github_repo': 'ropy',
     'logo_name': False,
-    'description': 'Robotics Toolbox for Python'
+    'description': 'Robotics Toolbox for Python',
+    'analytics_id': 'UA-102222819-3'
     }
 
 show_authors = True

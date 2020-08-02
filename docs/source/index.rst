@@ -10,6 +10,5 @@ Robotics Toolbox for Python
 .. toctree::
    :maxdepth: 2
 
-   intro
    arm_dh
    arm_ets
