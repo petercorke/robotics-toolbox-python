@@ -23,5 +23,4 @@ class TestPyPlot(unittest.TestCase):
         env.reset()
         env.step()
         env.restart()
-        env.add()
         env.remove()

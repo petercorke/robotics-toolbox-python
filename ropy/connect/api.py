@@ -1,6 +1,6 @@
 import zerorpc
 import ropy as rp
-import numpy as np
+# import numpy as np
 
 
 panda = rp.PandaMDH()

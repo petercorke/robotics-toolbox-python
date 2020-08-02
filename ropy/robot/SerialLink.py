@@ -591,10 +591,12 @@ class SerialLink(object):
 
         """
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        pass
+
+        # if q is None:
+        #     q = np.copy(self.q)
+        # else:
+        #     q = getvector(q, self.n)
 
         # TODO Implement this
 
@@ -1974,19 +1976,24 @@ class SerialLink(object):
 
             # default configuration
             n1 = -1    # L
-            n2 = -1    # U
+            # n2 = -1    # U
 
             if not left:
                 n1 = 1
 
-            if elbow_up and n1 == 1:
-                n2 = 1
+            # if elbow_up and n1 == 1:
+            #     n2 = 1
 
             if not elbow_up:
                 if n1 == 1:
                     n2 = -1
                 else:
                     n2 = 1
+            else:
+                if n1 == 1:
+                    n2 = 1
+                else:
+                    n2 = -1
 
             # Solve for theta[0]
             # based on the configuration parameter n1

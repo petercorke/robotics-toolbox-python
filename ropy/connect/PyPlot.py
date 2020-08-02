@@ -3,6 +3,7 @@
 @author Jesse Haviland
 """
 
+import ropy as rp
 from ropy.connect.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
@@ -90,7 +91,7 @@ class PyPlot(Connector):
 
     def close(self):
         '''
-        state = close() triggers the external program to gracefully close
+        close() closes the plot
 
         '''
 
@@ -101,7 +102,7 @@ class PyPlot(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self):
+    def add(self, ob):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -110,6 +111,8 @@ class PyPlot(Connector):
         '''
 
         super().add()
+
+        # if isinstance(ob, rp.SerialLink)
 
     def remove(self):
         '''

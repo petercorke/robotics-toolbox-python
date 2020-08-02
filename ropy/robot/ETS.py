@@ -5,9 +5,10 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 import numpy as np
-import spatialmath as sp
+# import spatialmath as sp
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
+from spatialmath.base import tr2rpy
 # from roboticstoolbox.robot.ET import ET
 
 
@@ -486,7 +487,7 @@ class ETS(object):
         for i in range(self.n):
             axes += self.ets[self.q_idx[i]].axis
 
-        rpy = sp.base.tr2rpy(self.tool.A, unit='deg')
+        rpy = tr2rpy(self.tool.A, unit='deg')
 
         for i in range(3):
             if rpy[i] == 0:

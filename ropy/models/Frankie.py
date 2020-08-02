@@ -40,37 +40,34 @@ class Frankie(ETS):
         tool_offset = (103)*mm
 
         et_list = [
-            ET.TRz(joint=1),
-            ET.Ttx(joint=2),
+            ET.TRz(),
+            ET.Ttx(),
             ET.Ttz(0.333),
-            ET.TRz(joint=3),
+            ET.TRz(),
             ET.TRx(-90*deg),
-            ET.TRz(joint=4),
+            ET.TRz(),
             ET.TRx(90*deg),
             ET.Ttz(0.316),
-            ET.TRz(joint=5),
+            ET.TRz(),
             ET.Ttx(0.0825),
             ET.TRx(90*deg),
-            ET.TRz(joint=6),
+            ET.TRz(),
             ET.Ttx(-0.0825),
             ET.TRx(-90*deg),
             ET.Ttz(0.384),
-            ET.TRz(joint=7),
+            ET.TRz(),
             ET.TRx(90*deg),
-            ET.TRz(joint=8),
+            ET.TRz(),
             ET.Ttx(0.088),
             ET.TRx(90*deg),
             ET.Ttz(0.107),
-            ET.TRz(joint=9),
+            ET.TRz(),
         ]
-
-        q_idx = [0, 1, 3, 5, 8, 11, 15, 17, 21]
 
         tool = transl(0, 0, tool_offset) @  trotz(-np.pi/4)
 
         super(Frankie, self).__init__(
             et_list,
-            q_idx,
             name='mm',
             manufacturer='Franka Emika, Omron',
             tool=tool)
