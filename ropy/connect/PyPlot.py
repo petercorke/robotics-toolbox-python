@@ -5,6 +5,7 @@
 
 import ropy as rp
 import numpy as np
+import spatialmath as sm
 from ropy.connect.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
@@ -160,12 +161,31 @@ class PyPlot(Connector):
         loc = np.zeros([3, robot.n + 1])
         loc[:, 0] = robot.base.t
 
+        joints = np.zeros((3, robot.n))
+
+        Tj = sm.SE3.Tz(0.1)
+
         for i in range(robot.n):
             loc[:, i + 1] = T[i].t
+
+            Tji = T[i] * Tj
+            joints[:, i] = Tji.t
+
+
 
         # plot.set_xdata(loc[0, :])
         # plot.set_ydata(loc[1, :])
         # plot.set_3d_properties(loc[2, :])
+
+        for i in range(robot.n):
+            self.ax.plot(
+                [loc[0, i+1], joints[0, i]],
+                [loc[1, i+1],  joints[1, i]],
+                [loc[2, i+1],  joints[2, i]],
+                linewidth=2,
+                color='#71d0eb')
+
+
 
         robot_ob[1] = self.ax.plot(
             loc[0, :], loc[1, :], loc[2, :], linewidth=5)
