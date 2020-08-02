@@ -512,11 +512,11 @@ class GraphicsCanvas2D:
 
         # Private lists
         self.__line_styles = [
+            '',  # None
             '-',  # Solid (default)
-            # TODO NEED TO CREATE THE LINE DRAWING FUNCTIONS FOR THESE
-            #  '--',  # Dashes
-            #  '.',  # Dotted
-            #  '-.',  # Dash-dot
+            '--',  # Dashes
+            ':',  # Dotted
+            '-.',  # Dash-dot
         ]
         self.__marker_styles = [
             '+',  # Plus
@@ -787,7 +787,9 @@ class GraphicsCanvas2D:
             y2 = xy_path[point + 1][1]
             p2 = vector(x2, y2, 0)
 
-            if opt_line == '-':
+            if opt_line == '':
+                create_marker()
+            elif opt_line == '-':
                 create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
                 create_marker()
             else:
@@ -803,22 +805,42 @@ class GraphicsCanvas2D:
         :type options: `str`
         """
         # TODO
+        #  Split coords into x and y params
         #  add options for line width, marker size
 
         # Verify options given (and save settings to be applied)
         verified_options = self.__verify_plot_options(options)
 
         # Draw plot
-        self.__draw_path(
-            coordinates,
-            verified_options[0],  # Line
-            verified_options[1],  # Marker
-            verified_options[2],  # Colour
-        )
+        # self.__draw_path(
+        #     coordinates,
+        #     verified_options[0],  # Line
+        #     verified_options[1],  # Marker
+        #     verified_options[2],  # Colour
+        # )
 
     def __verify_plot_options(self, options_str):
         """
-        Verify that the given options are usable
+        Verify that the given options are usable.
+
+        SAME AS MATLAB FORMAT
+
+        If you do not specify a marker type, plot uses no marker.
+        If you do not specify a line style, plot uses a solid line.
+
+            b     blue          .     point              -     solid
+            g     green         o     circle             :     dotted
+            r     red           x     x-mark             -.    dashdot
+            c     cyan          +     plus               --    dashed
+            m     magenta       *     star             (none)  no line
+            y     yellow        s     square
+            k     black         d     diamond
+            w     white         v     triangle (down)
+                                ^     triangle (up)
+                                <     triangle (left)
+                                >     triangle (right)
+                                p     pentagram
+                                h     hexagram
 
         :param options_str: The given options from the plot command to verify user input
         :type options_str: `str`
@@ -839,13 +861,19 @@ class GraphicsCanvas2D:
         if len(options_split) == 0:
             return [default_line, default_marker, default_colour]
         # If line_style given, join the first two options if applicable (some types have 2 characters)
-        # TODO maybe modify this to check for '--' (eg) anywhere in the string i.e. 'or--'
-        if options_split[0] == '-' and len(options_split) > 1:
-            if options_split[1] == '-' or options_split[1] == '.':
-                options_split[0] = options_split[0] + options_split[1]
-                for idx in range(2, len(options_split)):
-                    options_split[idx - 1] = options_split[idx]
-                options_split.pop()
+        for char in range(0, len(options_split)-1):
+            # If char is '-' (only leading character in double length option)
+            if options_split[char] == '-' and len(options_split) > 1:
+                # If one of the leading characters is valid
+                if options_split[char+1] == '-' or options_split[char+1] == '.':
+                    # Join the two into the first
+                    options_split[char] = options_split[char] + options_split[char+1]
+                    # Shuffle down the rest
+                    for idx in range(char+2, len(options_split)):
+                        options_split[idx - 1] = options_split[idx]
+                    # Remove duplicate extra
+                    options_split.pop()
+
         # If any unknown, throw error
         for option in options_split:
             if option not in self.__line_styles and \
@@ -883,12 +911,15 @@ class GraphicsCanvas2D:
         # If more than one, throw error
         if marker_style_count > 1:
             raise ValueError("Too many marker style arguments given. Only one allowed")
-        # If none, set as solid
+        # If none, set as no-marker
         elif marker_style_count == 0 or not any(item in options_split for item in self.__marker_styles):
-            output_marker = default_line
+            output_marker = default_marker
         # If one, set as given
         else:
             output_marker = self.__marker_styles[marker_style_index]
+            # If marker set and no line given, turn line to no-line
+            if line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
+                output_line = ''
 
         # Verify Colour Style
         colour_style_count = 0  # Count of options used
@@ -901,9 +932,9 @@ class GraphicsCanvas2D:
         # If more than one, throw error
         if colour_style_count > 1:
             raise ValueError("Too many colour style arguments given. Only one allowed")
-        # If none, set as solid
+        # If none, set as black
         elif colour_style_count == 0 or not any(item in options_split for item in self.__colour_styles):
-            output_colour = default_line
+            output_colour = default_colour
         # If one, set as given
         else:
             output_colour = self.__colour_styles[colour_style_index]
