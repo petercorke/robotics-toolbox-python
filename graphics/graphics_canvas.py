@@ -826,6 +826,7 @@ class GraphicsCanvas2D:
         :type y_coords: `list`, `str`, optional
         :param options: A string of options to plot with
         :type options: `str`, optional
+        :raises ValueError: Number of X and Y coordinates must be equal
         """
         # TODO
         #  add options for line width, marker size
@@ -838,6 +839,10 @@ class GraphicsCanvas2D:
         # Set y-vector to default if None
         if y_coords is None:
             y_coords = [*range(0, len(x_coords))]
+
+        # Verify x, y coords have same length
+        if len(x_coords) != len(y_coords):
+            raise ValueError("Number of X coordinates does not equal number of Y coordinates.")
 
         # Verify options given (and save settings to be applied)
         verified_options = self.__verify_plot_options(options)
@@ -869,9 +874,11 @@ class GraphicsCanvas2D:
 
         # Split str into chars list
         options_split = list(options_str)
+
         # If 0, set defaults and return early
         if len(options_split) == 0:
             return [default_line, default_marker, default_colour]
+
         # If line_style given, join the first two options if applicable (some types have 2 characters)
         for char in range(0, len(options_split)-1):
             # If char is '-' (only leading character in double length option)
@@ -894,7 +901,9 @@ class GraphicsCanvas2D:
                 error_string = "Unknown character entered: '{0}'"
                 raise ValueError(error_string.format(option))
 
+        ##############################
         # Verify Line Style
+        ##############################
         line_style_count = 0  # Count of options used
         line_style_index = 0  # Index position of index used (only used when count == 1)
         for option in options_split:
@@ -911,8 +920,11 @@ class GraphicsCanvas2D:
         # If one, set as given
         else:
             output_line = self.__line_styles[line_style_index]
+        ##############################
 
+        ##############################
         # Verify Marker Style
+        ##############################
         marker_style_count = 0  # Count of options used
         marker_style_index = 0  # Index position of index used (only used when count == 1)
         for option in options_split:
@@ -932,8 +944,11 @@ class GraphicsCanvas2D:
             # If marker set and no line given, turn line to no-line
             if line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
                 output_line = ''
+        ##############################
 
+        ##############################
         # Verify Colour Style
+        ##############################
         colour_style_count = 0  # Count of options used
         colour_style_index = 0  # Index position of index used (only used when count == 1)
         for option in options_split:
@@ -950,6 +965,7 @@ class GraphicsCanvas2D:
         # If one, set as given
         else:
             output_colour = self.__colour_styles[colour_style_index]
+        ##############################
 
         return [output_line, output_marker, output_colour]
 
