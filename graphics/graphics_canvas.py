@@ -795,36 +795,14 @@ class GraphicsCanvas2D:
             else:
                 pass
 
-    def plot(self, coordinates, options):
+    def plot(self, x_coords, y_coords=None, options=''):
         """
-        Given a 2D coordinate (or list of), use the given options to plot accordingly
+        Same usage as MATLAB's plot.
 
-        :param coordinates: List of 2D coordinates, or singular coordinates
-        :type coordinates: `list`
-        :param options: A string of options to plot with
-        :type options: `str`
-        """
-        # TODO
-        #  Split coords into x and y params
-        #  add options for line width, marker size
+        If given one list of coordinates, plots against index
+        If given two lists of coordinates, plots both (1st = x, 2nd = y)
 
-        # Verify options given (and save settings to be applied)
-        verified_options = self.__verify_plot_options(options)
-
-        # Draw plot
-        # self.__draw_path(
-        #     coordinates,
-        #     verified_options[0],  # Line
-        #     verified_options[1],  # Marker
-        #     verified_options[2],  # Colour
-        # )
-
-    def __verify_plot_options(self, options_str):
-        """
-        Verify that the given options are usable.
-
-        SAME AS MATLAB FORMAT
-
+        Options string is identical to MATLAB's input string
         If you do not specify a marker type, plot uses no marker.
         If you do not specify a line style, plot uses a solid line.
 
@@ -841,6 +819,40 @@ class GraphicsCanvas2D:
                                 >     triangle (right)
                                 p     pentagram
                                 h     hexagram
+
+        :param x_coords: The first plane of coordinates to plot
+        :type x_coords: `list`
+        :param y_coords: The second plane of coordinates to plot with.
+        :type y_coords: `list`, `str`, optional
+        :param options: A string of options to plot with
+        :type options: `str`, optional
+        """
+        # TODO
+        #  add options for line width, marker size
+
+        # If y-vector is str, then only x vector given
+        if isinstance(y_coords, str):
+            options = y_coords
+            y_coords = None
+
+        # Set y-vector to default if None
+        if y_coords is None:
+            y_coords = [*range(0, len(x_coords))]
+
+        # Verify options given (and save settings to be applied)
+        verified_options = self.__verify_plot_options(options)
+
+        # Draw plot
+        # self.__draw_path(
+        #     coordinates,
+        #     verified_options[0],  # Line
+        #     verified_options[1],  # Marker
+        #     verified_options[2],  # Colour
+        # )
+
+    def __verify_plot_options(self, options_str):
+        """
+        Verify that the given options are usable.
 
         :param options_str: The given options from the plot command to verify user input
         :type options_str: `str`
