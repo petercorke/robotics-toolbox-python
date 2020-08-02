@@ -13,8 +13,11 @@ import unittest
 class TestPyPlot(unittest.TestCase):
 
     def test_PyPlot(self):
+        panda = rp.PandaMDH()
         env = rp.PyPlot()
         env.launch()
+        env.add(panda)
+        env._plot_handler(None, None)
         env.close()
 
     def test_unimplemented(self):

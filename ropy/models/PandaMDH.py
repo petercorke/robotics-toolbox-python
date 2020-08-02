@@ -40,7 +40,7 @@ class PandaMDH(SerialLink):
 
     def __init__(self):
 
-        # deg = np.pi/180
+        deg = np.pi/180
         mm = 1e-3
         tool_offset = (103)*mm
 

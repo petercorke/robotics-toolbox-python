@@ -4,9 +4,11 @@
 """
 
 import ropy as rp
+import numpy as np
 from ropy.connect.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
+import signal
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -24,6 +26,8 @@ class PyPlot(Connector):
     def __init__(self):
 
         super(PyPlot, self).__init__()
+
+        self.robots = []
 
     def launch(self):
         '''
@@ -44,7 +48,10 @@ class PyPlot(Connector):
         self.ax = self.fig.add_subplot(
             111, projection='3d', proj_type=projection)
         self.ax.set_facecolor('white')
-        self.ax.autoscale(enable=True, axis='both')
+
+        self.ax.set_xbound(-0.5, 0.5)
+        self.ax.set_ybound(-0.5, 0.5)
+        self.ax.set_zbound(0.0, 0.5)
 
         self.ax.set_xlabel(labels[0])
         self.ax.set_ylabel(labels[1])
@@ -52,7 +59,10 @@ class PyPlot(Connector):
 
         plt.ion()
         plt.show()
-        plt.pause(0.001)
+
+        # Set the signal handler and a 0.1 second plot updater
+        signal.signal(signal.SIGALRM, self._plot_handler)
+        signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
 
     def step(self):
         '''
@@ -96,6 +106,8 @@ class PyPlot(Connector):
         '''
 
         super().close()
+
+        signal.setitimer(signal.ITIMER_REAL, 0)
         plt.close(self.fig)
 
     #
@@ -112,7 +124,15 @@ class PyPlot(Connector):
 
         super().add()
 
-        # if isinstance(ob, rp.SerialLink)
+        if isinstance(ob, rp.SerialLink):
+            self.robots.append([
+                ob,
+                []
+            ])
+
+            self._draw_robot(self.robots[0])
+
+        self._set_axes_equal()
 
     def remove(self):
         '''
@@ -121,3 +141,64 @@ class PyPlot(Connector):
         '''
 
         super().remove()
+
+    def hold(self):
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        plt.ioff()
+        plt.show()
+
+    #
+    #  Provate methods
+    #
+
+    def _draw_robot(self, robot_ob):
+
+        robot = robot_ob[0]
+
+        T = robot.allfkine()
+
+        loc = np.zeros([3, robot.n + 1])
+        loc[:, 0] = robot.base.t
+
+        for i in range(robot.n):
+            loc[:, i + 1] = T[i].t
+
+        # plot.set_xdata(loc[0, :])
+        # plot.set_ydata(loc[1, :])
+        # plot.set_3d_properties(loc[2, :])
+
+        robot_ob[1] = self.ax.plot(
+            loc[0, :], loc[1, :], loc[2, :], linewidth=5)
+
+    def _plot_handler(self, sig, frame):
+        plt.pause(0.001)
+
+    def _set_axes_equal(self):
+        '''
+        Make axes of 3D plot have equal scale so that spheres appear as
+        spheres, cubes as cubes, etc..  This is one possible solution to
+        Matplotlib's ax.set_aspect('equal') and ax.axis('equal') not
+        working for 3D.
+
+        '''
+
+        self.ax.autoscale(enable=True, axis='both', tight=False)
+
+        x_limits = self.ax.get_xlim3d()
+        y_limits = self.ax.get_ylim3d()
+        z_limits = self.ax.get_zlim3d()
+
+        x_range = abs(x_limits[1] - x_limits[0])
+        x_middle = np.mean(x_limits)
+        y_range = abs(y_limits[1] - y_limits[0])
+        y_middle = np.mean(y_limits)
+        z_range = abs(z_limits[1] - z_limits[0])
+        # z_middle = np.mean(z_limits)
+
+        # The plot bounding box is a sphere in the sense of the infinity
+        # norm, hence I call half the max range the plot radius.
+        plot_radius = 0.5*max([x_range, y_range, z_range])
+
+        self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+        self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+        self.ax.set_zlim3d([0.0, 2 * plot_radius])
