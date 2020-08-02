@@ -30,8 +30,7 @@ class Object2D:
             '+',  # Plus
             'o',  # Circle
             '*',  # Star
-            # DEPRECATED
-            # '.',  # Dot
+            '.',  # Dot
             'x',  # Cross
             's',  # Square
             'd',  # Diamond
@@ -65,9 +64,8 @@ class Object2D:
         elif self.__shape == '*':
             # 2D coords of the star boundary
             shape_path = shapes.star(radius=0.5, n=6)
-        # DEPRECATED
-        # elif self.__shape == '.':
-        #     raise NotImplementedError()
+        elif self.__shape == '.':
+            raise NotImplementedError()
         elif self.__shape == 'x':
             raise NotImplementedError()
         elif self.__shape == 's':

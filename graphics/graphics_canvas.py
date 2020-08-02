@@ -522,8 +522,7 @@ class GraphicsCanvas2D:
             '+',  # Plus
             'o',  # Circle
             '*',  # Star
-            # DEPRECATED
-            # '.',  # Dot
+            '.',  # Dot
             'x',  # Cross
             's',  # Square
             'd',  # Diamond
@@ -778,10 +777,12 @@ class GraphicsCanvas2D:
                 create_marker()
                 return
 
+            # Get point 1
             x1 = xy_path[point][0]
             y1 = xy_path[point][1]
             p1 = vector(x1, y1, 0)
 
+            # Get point 2
             x2 = xy_path[point + 1][0]
             y2 = xy_path[point + 1][1]
             p2 = vector(x2, y2, 0)
