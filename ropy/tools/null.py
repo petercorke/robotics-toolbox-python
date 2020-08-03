@@ -4,8 +4,6 @@
 """
 
 import numpy as np
-from spatialmath.base.argcheck import \
-    getvector, ismatrix, verifymatrix
 
 
 def null(A, atol=1e-13, rtol=0):

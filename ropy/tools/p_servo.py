@@ -1,54 +1,49 @@
 #!/usr/bin/env python
 
 import numpy as np
-import transforms3d as t3
+from spatialmath import SE3
 
 
-def p_servo(wTe, wTep, gain = 3, threshold = 0.1):
-    """
-    Position-based servoing. Returns the end-effector velocity which will cause
-    the robot to approach the desired pose.
-    
-    Parameters
-    ----------
-    wTe : numpy.ndarray((4, 4))
-        The current pose of the end-effecor in the base frame. Homogeneous 
-        transform (SE3)
-    wTep : numpy.ndarray((4, 4))
-        The desired pose of the end-effecor in the base frame. Homogeneous 
-        transform (SE3)
-    gain : float
-        The gain for the controller
-    threshold : float
-        The threshold or tolerance of the final error between the robot's pose
-        and desired pose
+def p_servo(wTe, wTep, gain=2, threshold=0.1):
+    '''
+    Position-based servoing.
 
-    Returns
-    -------
-    v : numpy.ndarray((7, 1))
-        The velocity of the end-effecotr which will casue the robot to approach 
-        wTep
-    arrived : bool
-        True if the robot is within the threshold of the final pose
+    Returns the end-effector velocity which will cause the robot to approach
+    the desired pose.
 
-    Examples
-    --------
-    >>> v, arrived = p_servo(wTe, wTep, 3)
-    
-    See Also
-    --------
-    ropy.tools.relative_yaw_to_trans : Returns the relative yaw to b, 
-        from a
-    """
+    :param wTe: The current pose of the end-effecor in the base frame.
+    :type wTe: SE3
+    :param wTep: The desired pose of the end-effecor in the base frame.
+    :type wTep: SE3
+    :param gain: The gain for the controller
+    :type gain: float
+    :param threshold: The threshold or tolerance of the final error between
+        the robot's pose and desired pose
+    :type threshold: float
+
+    :returns v: The velocity of the end-effecotr which will casue the robot
+        to approach wTep
+    :rtype v: ndarray(6)
+    :returns arrived: True if the robot is within the threshold of the final
+        pose
+    :rtype arrived: bool
+
+    '''
+
+    if not isinstance(wTe, SE3):
+        wTe = SE3(wTe)
+
+    if not isinstance(wTep, SE3):
+        wTep = SE3(wTep)
 
     # Pose difference
-    eTep = np.linalg.inv(wTe) @ wTep
+    eTep = wTe.inv * wTep
 
     # Translational velocity error
-    ev = eTep[0:3,-1]
+    ev = eTep.t
 
     # Angular velocity error
-    ew = t3.euler.mat2euler(eTep[0:3, 0:3])
+    ew = eTep.rpy * np.pi/180
 
     # Form error vector
     e = np.expand_dims(np.concatenate((ev, ew)), axis=1)
@@ -57,7 +52,7 @@ def p_servo(wTe, wTep, gain = 3, threshold = 0.1):
     v = gain * e
 
     if np.sum(np.abs(e)) < threshold:
-        arrived = True 
+        arrived = True
     else:
         arrived = False
 
