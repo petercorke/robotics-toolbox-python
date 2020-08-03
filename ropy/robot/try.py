@@ -14,15 +14,27 @@ import ropy as rp
 # T1.plot(frame='1')
 
 
-# env = rp.PyPlot()
+# env1 = rp.PyPlot()
+# env2 = rp.ROS()
 # env.launch()
 
-puma = rp.Puma560()
-# puma.q = puma.qn
+puma = rp.PandaMDH()
+puma.q = puma.qr
 
-# env.add(puma)
+# puma.q = [0, -1.57079632679490, -1.57079632679490, 1.57079632679490, 0, -1.57079632679490, 1.57079632679490]
+
+puma.qmincon()
+
+# env1.add(puma, 'vis')
+# env2.add(puma)
+
+# while q:
+#     delay(x)
+#     env.Step()
 
 # env.hold()
+
+# puma.q
 
 # puma.jacob_dot(puma.qr, puma.qr)
 

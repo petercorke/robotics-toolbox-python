@@ -6,11 +6,12 @@
 import numpy as np
 from functools import wraps
 from ropy.robot.Link import Link
+from ropy.tools.null import null
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
 from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3
-from scipy.optimize import minimize, Bounds
+from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 
 
@@ -173,6 +174,26 @@ class SerialLink(object):
         for i in range(self.n):
             if not self.links[i].mdh == self.mdh:
                 raise ValueError('Robot has mixed D&H links conventions.')
+
+    def _copy(self):
+        L = []
+
+        for i in range(self.n):
+            L.append(self.links[i]._copy())
+
+        r2 = SerialLink(
+            L,
+            name=self.name,
+            manufacturer=self.manuf,
+            base=self.base,
+            tool=self.tool,
+            gravity=self.gravity)
+
+        r2.q = self.q
+        r2.qd = self.qd
+        r2.qdd = self.qdd
+
+        return r2
 
     def _init_rne(self):
         # Compress link data into a 1D array
@@ -3058,7 +3079,6 @@ class SerialLink(object):
         [m, CI] = maniplty(q, OPTIONS) as above, but for the case of the Asada
         measure returns the Cartesian inertia matrix CI.
 
-
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
@@ -3189,22 +3209,83 @@ class SerialLink(object):
 
         return r2
 
-    def _copy(self):
-        L = []
+    def qmincon(self, q=None):
+        '''
+        qs, success, err = qmincon(q) exploits null space motion and returns
+        a set of joint angles qs (n) that result in the same end-effector
+        pose but are away from the joint coordinate limits. n is the number
+        of robot joints. Success retruns True for successful optimisation.
+        err which is the scalar final value of the objective function.
 
-        for i in range(self.n):
-            L.append(self.links[i]._copy())
+        Trajectory operation:
+        In all cases if q is nxm it is taken as a pose sequence and qmincon()
+        returns the adjusted joint coordinates (nxm) corresponding to each of
+        the poses in the sequence.
 
-        r2 = SerialLink(
-            L,
-            name=self.name,
-            manufacturer=self.manuf,
-            base=self.base,
-            tool=self.tool,
-            gravity=self.gravity)
+        err and success are also m and indicate the results of optimisation
+        for the corresponding trajectory step.
 
-        r2.q = self.q
-        r2.qd = self.qd
-        r2.qdd = self.qdd
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
 
-        return r2
+        :retrun qs: The calculated joint values
+        :rtype qs: float ndarray(n)
+        :retrun success: Optimisation solved (True) or failed (False)
+        :rtype success: bool
+        :retrun err: Final value of the objective function
+        :rtype err: float
+
+        :notes:
+            - Robot must be redundant.
+
+        '''
+
+        def sumsqr(A):
+            return np.sum(A**2)
+
+        def cost(x, ub, lb, qm, N):
+            return sumsqr(
+                (2 * (N @ x + qm) - ub - lb) / (ub - lb))
+
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+
+        qstar = np.zeros((self.n, trajn))
+        error = np.zeros(trajn)
+        success = np.zeros(trajn)
+
+        lb = self.qlim[0, :]
+        ub = self.qlim[1, :]
+
+        for i in range(trajn):
+
+            qm = q[:, i]
+            J = self.jacobe(qm)
+
+            N = null(J)
+
+            x0 = np.zeros(N.shape[1])
+            A = np.r_[N, -N]
+            b = np.expand_dims(np.r_[ub - qm, qm - lb], axis=1).reshape(14,)
+
+            con = LinearConstraint(A, -np.inf, b)
+
+            res = minimize(
+                lambda x: cost(x, ub, lb, qm, N),
+                x0, constraints=con)
+
+            qstar[:, i] = qm + N @ res.x
+            error[i] = res.fun
+            success[i] = res.success
+
+        if trajn == 1:
+            return qstar[:, 0], success[0], error[0]
+        else:
+            return qstar, success, error
