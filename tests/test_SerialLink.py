@@ -1208,3 +1208,90 @@ class TestSerialLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(j0, res, decimal=4)
         nt.assert_array_almost_equal(j1, res, decimal=4)
+
+    def test_yoshi(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        m0 = puma.maniplty()
+        m1 = puma.maniplty(q)
+        m2 = puma.maniplty(np.c_[q, q])
+        m3 = puma.maniplty(q, axes=[1, 1, 1, 0, 0, 0])
+        m4 = puma.maniplty(q, axes=[0, 0, 0, 1, 1, 1])
+
+        a0 = 0.0786
+        a2 = 0.111181
+        a3 = 2.44949
+
+        nt.assert_almost_equal(m0, a0, decimal=4)
+        nt.assert_almost_equal(m1, a0, decimal=4)
+        nt.assert_almost_equal(m2[0], a0, decimal=4)
+        nt.assert_almost_equal(m2[1], a0, decimal=4)
+        nt.assert_almost_equal(m3, a2, decimal=4)
+        nt.assert_almost_equal(m4, a3, decimal=4)
+
+    def test_asada(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+        q = puma.qn
+
+        m0, mx0 = puma.maniplty(method='asada')
+        m1, mx1 = puma.maniplty(q, method='asada')
+        m2, mx2 = puma.maniplty(np.c_[q, q], method='asada')
+        m3, mx3 = puma.maniplty(q, axes=[1, 1, 1, 0, 0, 0], method='asada')
+        m4, mx4 = puma.maniplty(q, axes=[0, 0, 0, 1, 1, 1], method='asada')
+        m5, mx5 = puma.maniplty(puma.qz, method='asada')
+
+        a0 = 0.0044
+        a2 = 0.2094
+        a3 = 0.1716
+        a4 = 0.0
+
+        ax0 = np.array([
+            [17.2954, -2.7542, -9.6233, -0.0000,  0.2795, -0.0000],
+            [-2.7542, 12.1909,  1.2459, -0.3254, -0.0703, -0.9652],
+            [-9.6233,  1.2459, 13.3348, -0.0000,  0.2767,  0.0000],
+            [-0.0000, -0.3254, -0.0000,  0.1941,  0.0000,  0.1941],
+            [0.2795, -0.0703,  0.2767,  0.0000,  0.1713,  0.0000],
+            [-0.0000, -0.9652,  0.0000,  0.1941,  0.0000,  0.5791]
+        ])
+
+        ax1 = np.array([
+            [17.2954, -2.7542, -9.6233],
+            [-2.7542, 12.1909,  1.2459],
+            [-9.6233,  1.2459, 13.3348]
+        ])
+
+        ax2 = np.array([
+            [0.1941, 0.0000, 0.1941],
+            [0.0000, 0.1713, 0.0000],
+            [0.1941, 0.0000, 0.5791]
+        ])
+
+        ax3 = np.zeros((6, 6))
+
+        nt.assert_almost_equal(m0, a0, decimal=4)
+        nt.assert_array_almost_equal(mx0, ax0, decimal=4)
+        nt.assert_almost_equal(m1, a0, decimal=4)
+        nt.assert_array_almost_equal(mx1, ax0, decimal=4)
+        nt.assert_almost_equal(m2[0], a0, decimal=4)
+        nt.assert_array_almost_equal(mx2[:, :, 0], ax0, decimal=4)
+        nt.assert_almost_equal(m2[1], a0, decimal=4)
+        nt.assert_array_almost_equal(mx2[:, :, 1], ax0, decimal=4)
+
+        nt.assert_almost_equal(m3, a2, decimal=4)
+        nt.assert_array_almost_equal(mx3, ax1, decimal=4)
+
+        nt.assert_almost_equal(m4, a3, decimal=4)
+        nt.assert_array_almost_equal(mx4, ax2, decimal=4)
+
+        nt.assert_almost_equal(m5, a4, decimal=4)
+        nt.assert_array_almost_equal(mx5, ax3, decimal=4)
+
+    def test_maniplty_fail(self):
+        puma = rp.Puma560()
+        puma.q = puma.qn
+
+        with self.assertRaises(ValueError):
+            puma.maniplty(method='notamethod')
