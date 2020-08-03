@@ -310,6 +310,28 @@ class Link(object):
     def G(self, G_new):
         self._G = G_new
 
+    def _copy(self):
+        # Copy the Link
+        link = Link(
+            d=self.d,
+            alpha=self.alpha,
+            theta=self.theta,
+            a=self.a,
+            sigma=self.sigma,
+            mdh=self.mdh,
+            offset=self.offset,
+            qlim=self.qlim,
+            flip=self.flip,
+            m=self.m,
+            r=self.r,
+            I=self.I,
+            Jm=self.Jm,
+            B=self.B,
+            Tc=self.Tc,
+            G=self.G)
+
+        return link
+
     def dyn(self):
         """
         Show inertial properties of link
@@ -465,23 +487,7 @@ class Link(object):
         """
 
         # Copy the Link
-        link = Link(
-            d=self.d,
-            alpha=self.alpha,
-            theta=self.theta,
-            a=self.a,
-            sigma=self.sigma,
-            mdh=self.mdh,
-            offset=self.offset,
-            qlim=self.qlim,
-            flip=self.flip,
-            m=self.m,
-            r=self.r,
-            I=self.I,
-            Jm=self.Jm,
-            B=self.B,
-            Tc=self.Tc,
-            G=self.G)
+        link = self._copy()
 
         if viscous:
             link.B = 0.0
