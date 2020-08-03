@@ -364,7 +364,7 @@ The object initialiser takes in an SE2 pose, the scene to draw in, it's shape an
 ```python
 # Position at (1, 1)
 se2 = SE2(x=1, y=1, theta=0)
-colour = vector(0, 0, 0)  # Black
+colour = [0, 0, 0]  # Black
 shape = '*'
 
 my_object = gph.Object2D(se2, g_canvas.scene, shape, colour)

@@ -12,7 +12,7 @@ class Object2D:
     :param shape: The shape of the object
     :type shape: `str`
     :param colour: The colour of the shape
-    :type colour: class:`vpython.vector`
+    :type colour: `list`
     :raises ValueError: The shape must be in the list of possible shapes
     """
 
@@ -26,7 +26,10 @@ class Object2D:
         self.__se2 = se2
         self.__scene = scene
         self.__shape = shape
-        self.__colour = colour
+        if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+                colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+            raise ValueError("RGB values must be normalised between 0 and 1")
+        self.__colour = vector(colour[0], colour[1], colour[2])
 
         self.__marker_size = 0.2
 
