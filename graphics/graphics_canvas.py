@@ -1,6 +1,6 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
-from graphics.graphics_grid import GraphicsGrid, create_line
+from graphics.graphics_grid import GraphicsGrid, create_line, create_marker
 
 
 class GraphicsCanvas3D:
@@ -22,11 +22,12 @@ class GraphicsCanvas3D:
     :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
     :type grid: `bool`, optional
     """
+
     def __init__(self, height=500, width=1000, title='', caption='', grid=True):
-        
+
         # Create a new independent scene
         self.scene = canvas()
-        
+
         # Apply the settings
         self.scene.background = color.white
         self.scene.width = width
@@ -80,6 +81,9 @@ class GraphicsCanvas3D:
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
+    #######################################
+    #  Canvas Management
+    #######################################
     def clear_scene(self):
         """
         This function will clear the screen of all objects
@@ -132,9 +136,12 @@ class GraphicsCanvas3D:
         # Add robot to list
         self.__robots.append(robot)
         # Set it as selected
-        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots)-1
-        self.__selected_robot = len(self.__robots)-1
+        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
+        self.__selected_robot = len(self.__robots) - 1
 
+    #######################################
+    #  UI Management
+    #######################################
     def __del_robot(self):
         """
         Remove a robot from the scene and the UI controls
@@ -332,7 +339,8 @@ class GraphicsCanvas3D:
         self.scene.append_to_caption('\n')
 
         # Checkbox for grid visibility
-        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility", checked=self.__grid_visibility)
+        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
+                               checked=self.__grid_visibility)
         self.scene.append_to_caption('\t')
 
         # Checkbox for reference frame visibilities
@@ -377,7 +385,8 @@ class GraphicsCanvas3D:
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
 
-        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
+        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
+                btn_clr]
 
     #######################################
     # UI CALLBACKS
@@ -477,7 +486,6 @@ class GraphicsCanvas3D:
         """
         if len(self.__robots) > 0:
             self.__robots[self.__selected_robot].set_transparency(s.value)
-    #######################################
 
 
 class GraphicsCanvas2D:
@@ -501,6 +509,50 @@ class GraphicsCanvas2D:
         """
 
     def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+
+        # Private lists
+        self.__line_styles = [
+            '',  # None
+            '-',  # Solid (default)
+            '--',  # Dashes
+            ':',  # Dotted
+            '-.',  # Dash-dot
+        ]
+        self.__marker_styles = [
+            '+',  # Plus
+            'o',  # Circle
+            '*',  # Star
+            '.',  # Dot
+            'x',  # Cross
+            's',  # Square
+            'd',  # Diamond
+            '^',  # Up triangle
+            'v',  # Down triangle
+            '<',  # Left triangle
+            '>',  # Right triangle
+            'p',  # Pentagon
+            'h',  # Hexagon
+        ]
+        self.__colour_styles = [
+            'r',  # Red
+            'g',  # Green
+            'b',  # Blue
+            'y',  # Yellow
+            'c',  # Cyan
+            'm',  # Magenta
+            'k',  # Black (default)
+            'w',  # White
+        ]
+        self.__colour_dictionary = {
+            'r': color.red.value,
+            'g': color.green.value,
+            'b': color.blue.value,
+            'c': color.cyan.value,
+            'y': color.yellow.value,
+            'm': color.magenta.value,
+            'k': color.black.value,
+            'w': color.white.value
+        }
 
         # Create a new independent scene
         self.scene = canvas()
@@ -548,9 +600,9 @@ class GraphicsCanvas2D:
         self.__reset_camera()
         self.__graphics_grid.update_grid()
 
-    ############################
+    #######################################
     #  Canvas Management
-    ############################
+    #######################################
     # TODO
     def clear_scene(self):
         pass
@@ -564,9 +616,9 @@ class GraphicsCanvas2D:
         """
         self.__graphics_grid.set_visibility(is_visible)
 
-    ############################
+    #######################################
     #  UI Management
-    ############################
+    #######################################
     # TODO
     def __setup_ui_controls(self):
         pass
@@ -697,39 +749,261 @@ class GraphicsCanvas2D:
         self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
         self.scene.up = y_axis_vector
 
-    ############################
+    #######################################
     #  Drawing Functions
-    ############################
-    def draw_path(self, xy_path, colour=None, thickness=0.05):
+    #######################################
+    def __draw_path(self, x_path, y_path, opt_line, opt_marker, opt_colour, thickness=0.05):
         """
         Draw a line from point to point in the 2D path
 
         :param xy_path: The path to draw on the canvas
         :type xy_path: `list`
-        :param colour: RGB list to colour the line to
-        :type colour: `list`
+        :param opt_line: The line option argument
+        :type opt_line: `str`
+        :param opt_marker: The marker option argument
+        :type opt_marker: `str`
+        :param opt_colour: The colour option argument
+        :type opt_colour: `str`
         :param thickness: Thickness of the line
         :type thickness: `float`
         """
-        # Default colour to black
-        if colour is None:
-            colour = [0, 0, 0]
-
-        if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
-                colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
-            raise ValueError("RGB values must be normalised between 0 and 1")
+        # Get colour
+        colour = self.__get_colour_from_string(opt_colour)
 
         # For every point in the list, draw a line to the next one (excluding last point)
-        for point in range(0, len(xy_path)-1):
-            x1 = xy_path[point][0]
-            y1 = xy_path[point][1]
+        for point in range(0, len(x_path)):
+            # Get point 1
+            x1 = x_path[point]
+            y1 = y_path[point]
             p1 = vector(x1, y1, 0)
 
-            x2 = xy_path[point+1][0]
-            y2 = xy_path[point+1][1]
+            # If at end / only coordinate - draw a marker
+            if point == len(x_path) - 1:
+                create_marker(self.scene, x1, y1, opt_marker, colour)
+                return
+
+            # Get point 2
+            x2 = x_path[point + 1]
+            y2 = y_path[point + 1]
             p2 = vector(x2, y2, 0)
 
-            create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+            if opt_line == '':
+                # Only one marker to avoid double-ups
+                create_marker(self.scene, x1, y1, opt_marker, colour)
+            elif opt_line == '-':
+                create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+                # Only one marker to avoid double-ups
+                create_marker(self.scene, x1, y1, opt_marker, colour)
+            else:
+                raise NotImplementedError("Other line types not implemented")
+
+    def plot(self, x_coords, y_coords=None, options=''):
+        """
+        Same usage as MATLAB's plot.
+
+        If given one list of coordinates, plots against index
+        If given two lists of coordinates, plots both (1st = x, 2nd = y)
+
+        Options string is identical to MATLAB's input string
+        If you do not specify a marker type, plot uses no marker.
+        If you do not specify a line style, plot uses a solid line.
+
+            b     blue          .     point              -     solid
+            g     green         o     circle             :     dotted
+            r     red           x     x-mark             -.    dashdot
+            c     cyan          +     plus               --    dashed
+            m     magenta       *     star             (none)  no line
+            y     yellow        s     square
+            k     black         d     diamond
+            w     white         v     triangle (down)
+                                ^     triangle (up)
+                                <     triangle (left)
+                                >     triangle (right)
+                                p     pentagram
+                                h     hexagram
+
+        :param x_coords: The first plane of coordinates to plot
+        :type x_coords: `list`
+        :param y_coords: The second plane of coordinates to plot with.
+        :type y_coords: `list`, `str`, optional
+        :param options: A string of options to plot with
+        :type options: `str`, optional
+        :raises ValueError: Number of X and Y coordinates must be equal
+        """
+        # TODO
+        #  add options for line width, marker size
+
+        # If y-vector is str, then only x vector given
+        if isinstance(y_coords, str):
+            options = y_coords
+            y_coords = None
+
+        one_set_data = False
+        # Set y-vector to default if None
+        if y_coords is None:
+            one_set_data = True
+            y_coords = [*range(0, len(x_coords))]
+
+        # Verify x, y coords have same length
+        if len(x_coords) != len(y_coords):
+            raise ValueError("Number of X coordinates does not equal number of Y coordinates.")
+
+        # Verify options given (and save settings to be applied)
+        verified_options = self.__verify_plot_options(options)
+
+        if one_set_data:
+            # Draw plot for one list of data
+            self.__draw_path(
+                y_coords,  # Y is default x-coords in one data set
+                x_coords,  # User input
+                verified_options[0],  # Line
+                verified_options[1],  # Marker
+                verified_options[2],  # Colour
+            )
+        else:
+            # Draw plot for two lists of data
+            self.__draw_path(
+                x_coords,  # User input
+                y_coords,  # User input
+                verified_options[0],  # Line
+                verified_options[1],  # Marker
+                verified_options[2],  # Colour
+            )
+
+    def __verify_plot_options(self, options_str):
+        """
+        Verify that the given options are usable.
+
+        :param options_str: The given options from the plot command to verify user input
+        :type options_str: `str`
+        :raises ValueError: Unknown character entered
+        :raises ValueError: Too many line segments used
+        :raises ValueError: Too many marker segments used
+        :raises ValueError: Too many colour segments used
+        :returns: List of options to plot with
+        :rtype: `list`
+        """
+        default_line = '-'
+        default_marker = ''
+        default_colour = 'k'
+
+        # Split str into chars list
+        options_split = list(options_str)
+
+        # If 0, set defaults and return early
+        if len(options_split) == 0:
+            return [default_line, default_marker, default_colour]
+
+        # If line_style given, join the first two options if applicable (some types have 2 characters)
+        for char in range(0, len(options_split)-1):
+            # If char is '-' (only leading character in double length option)
+            if options_split[char] == '-' and len(options_split) > 1:
+                # If one of the leading characters is valid
+                if options_split[char+1] == '-' or options_split[char+1] == '.':
+                    # Join the two into the first
+                    options_split[char] = options_split[char] + options_split[char+1]
+                    # Shuffle down the rest
+                    for idx in range(char+2, len(options_split)):
+                        options_split[idx - 1] = options_split[idx]
+                    # Remove duplicate extra
+                    options_split.pop()
+
+        # If any unknown, throw error
+        for option in options_split:
+            if option not in self.__line_styles and \
+                    option not in self.__marker_styles and \
+                    option not in self.__colour_styles:
+                error_string = "Unknown character entered: '{0}'"
+                raise ValueError(error_string.format(option))
+
+        ##############################
+        # Verify Line Style
+        ##############################
+        line_style_count = 0  # Count of options used
+        line_style_index = 0  # Index position of index used (only used when count == 1)
+        for option in options_split:
+            if option in self.__line_styles:
+                line_style_count = line_style_count + 1
+                line_style_index = self.__line_styles.index(option)
+
+        # If more than one, throw error
+        if line_style_count > 1:
+            raise ValueError("Too many line style arguments given. Only one allowed")
+        # If none, set as solid
+        elif line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
+            output_line = default_line
+        # If one, set as given
+        else:
+            output_line = self.__line_styles[line_style_index]
+        ##############################
+
+        ##############################
+        # Verify Marker Style
+        ##############################
+        marker_style_count = 0  # Count of options used
+        marker_style_index = 0  # Index position of index used (only used when count == 1)
+        for option in options_split:
+            if option in self.__marker_styles:
+                marker_style_count = marker_style_count + 1
+                marker_style_index = self.__marker_styles.index(option)
+
+        # If more than one, throw error
+        if marker_style_count > 1:
+            raise ValueError("Too many marker style arguments given. Only one allowed")
+        # If none, set as no-marker
+        elif marker_style_count == 0 or not any(item in options_split for item in self.__marker_styles):
+            output_marker = default_marker
+        # If one, set as given
+        else:
+            output_marker = self.__marker_styles[marker_style_index]
+            # If marker set and no line given, turn line to no-line
+            if line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
+                output_line = ''
+        ##############################
+
+        ##############################
+        # Verify Colour Style
+        ##############################
+        colour_style_count = 0  # Count of options used
+        colour_style_index = 0  # Index position of index used (only used when count == 1)
+        for option in options_split:
+            if option in self.__colour_styles:
+                colour_style_count = colour_style_count + 1
+                colour_style_index = self.__colour_styles.index(option)
+
+        # If more than one, throw error
+        if colour_style_count > 1:
+            raise ValueError("Too many colour style arguments given. Only one allowed")
+        # If none, set as black
+        elif colour_style_count == 0 or not any(item in options_split for item in self.__colour_styles):
+            output_colour = default_colour
+        # If one, set as given
+        else:
+            output_colour = self.__colour_styles[colour_style_index]
+        ##############################
+
+        return [output_line, output_marker, output_colour]
+
+    def __get_colour_from_string(self, colour_string):
+        """
+        Using the colour plot string input, return an rgb array of the colour selected
+        :param colour_string: The colour string option
+        :type colour_string: `str`
+        :returns: List of RGB values for the representative colour
+        :rtype: `list`
+        """
+        # Return the RGB list (black if not in dictionary)
+        return self.__colour_dictionary.get(colour_string, color.black.value)
+
+    # MAY NOT BE REQUIRED
+    # def add_object(self, obj):
+    #     """
+    #     Add an object into the scene.
+    #
+    #     :param obj: The object to be added
+    #     :type obj: class:`graphics.object2d`
+    #     """
+    #     pass
 
 
 def convert_grid_to_z_up(scene):

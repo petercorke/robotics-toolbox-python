@@ -13,7 +13,7 @@ Alternatively, executing this file will run the test_puma560_angle_change() func
 """
 from time import sleep
 from numpy import array
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 from roboticstoolbox import Puma560
 import graphics as gph
 
@@ -342,6 +342,12 @@ def test_2d_draw_path():
         [4, 4]
     ]
     g_canvas2.draw_path(path, colour=[1, 0, 0])
+
+
+def test_2d_create_object():
+    g_canvas2 = gph.GraphicsCanvas2D()
+
+    obj = gph.Object2D(SE2(), g_canvas2.scene, 'c')
 
 
 if __name__ == "__main__":
