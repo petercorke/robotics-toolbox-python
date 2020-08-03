@@ -1295,3 +1295,33 @@ class TestSerialLink(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             puma.maniplty(method='notamethod')
+
+    def test_perterb(self):
+        puma = rp.Puma560()
+        p2 = puma.perterb()
+        p3 = puma.perterb(0.8)
+
+        resI0 = np.zeros(puma.n)
+        resm0 = np.zeros(puma.n)
+        resI1 = np.zeros(puma.n)
+        resm1 = np.zeros(puma.n)
+
+        for i in range(puma.n):
+            resI0[i] = np.abs(np.nanmax(
+                (puma.links[i].I - p2.links[i].I) / puma.links[i].I))
+
+            resm0[i] = np.abs(np.divide(
+                (puma.links[i].m - p2.links[i].m),
+                puma.links[i].m))
+
+            resI1[i] = np.abs(np.nanmax(
+                (puma.links[i].I - p3.links[i].I) / puma.links[i].I))
+
+            resm1[i] = np.abs(np.divide(
+                (puma.links[i].m - p3.links[i].m),
+                puma.links[i].m))
+
+            self.assertTrue(resI0[i] < 0.1)
+            self.assertTrue(resm0[i] < 0.1 or np.isnan(resm0[i]))
+            self.assertTrue(resI1[i] < 0.8)
+            self.assertTrue(resm1[i] < 0.8 or np.isnan(resm1[i]))
