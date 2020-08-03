@@ -3026,3 +3026,130 @@ class SerialLink(object):
         Jdot = v[:, 0]
 
         return Jdot
+
+    def maniplty(self, q=None, method='yoshikawa', axes=[1, 1, 1, 1, 1, 1]):
+        '''
+        m = maniplty(q) is the yoshikawa manipulability index (scalar) for the
+        robot at the joint configuration q (n) where n is the number of robot
+        joints.  It indicates dexterity, that is, how isotropic the robot's
+        motion is with respect to the 6 degrees of Cartesian motion. The
+        measure is high when the manipulator is capable of equal motion in all
+        directions and low when the manipulator is close to a singularity.
+        Yoshikawa's manipulability measure is based on the shape of the
+        velocity ellipsoid and depends only on kinematic parameters.
+
+        m = maniplty(q, method='asada') as above except computes the asada
+        manipulability measure. Asada's manipulability measure is based on the
+        shape of the acceleration ellipsoid which in turn is a function of the
+        Cartesian inertia matrix and the dynamic parameters. The scalar
+        measure computed here is the ratio of the smallest/largest ellipsoid
+        axis. Ideally the ellipsoid would be spherical, giving a ratio of 1,
+        but in practice will be less than 1.
+
+        m = maniplty(q, method, axes) as above except axes specity which of
+        the 6 degrees-of-freedom to concider in the measurement. For example
+        set axes=[1, 1, 1, 0, 0, 0] to consider only translation or
+        axes=[0, 0, 0, 1, 1, 1] to consider only rotation. Defaults to all
+        motion.
+
+        If q is a matrix (nxm) then m (mx1) is a vector of manipulability
+        indices for each joint configuration specified by a row of q.
+
+        [m, CI] = maniplty(q, OPTIONS) as above, but for the case of the Asada
+        measure returns the Cartesian inertia matrix CI.
+
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param method: Which method to use, 'yoshikawa' (default) or 'asada'
+        :type method: string
+        :param axes: The degrees-of-freedom to be included for manipulability
+        "type axes: int list
+
+        :notes:
+            - The 'all' option includes rotational and translational
+              dexterity, but this involves adding different units. It can be
+              more useful to look at the translational and rotational
+              manipulability separately.
+            - Examples in the RVC book (1st edition) can be replicated by
+              using the 'all' option
+
+        :references:
+            - Analysis and control of robot manipulators with redundancy,
+              T. Yoshikawa,
+              Robotics Research: The First International Symposium
+              (M. Brady and R. Paul, eds.),
+              pp. 735-747, The MIT press, 1984.
+            - A geometrical representation of manipulator dynamics and its
+              application to arm design, H. Asada,
+              Journal of Dynamic Systems, Measurement, and Control,
+              vol. 105, p. 131, 1983.
+            - Robotics, Vision & Control, P. Corke, Springer 2011.
+        '''
+
+        def yoshi(robot, q, axes):
+            J = robot.jacob0(q)
+            J = J[axes, :]
+            m2 = np.linalg.det(J @ J.T)
+            m2 = np.maximum(0.0, m2)  # clip it to positive
+            m = np.sqrt(m2)
+            return m
+
+        def asada(robot, q, axes, dof):
+            J = robot.jacob0(q)
+
+            if np.linalg.matrix_rank(J) < 6:
+                return 0, np.zeros((dof, dof))
+
+            Ji = np.linalg.pinv(J)
+            M = robot.inertia(q)
+            Mx = Ji.T @ M @ Ji
+            d = np.where(axes)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = np.linalg.eig(Mx)
+            m = np.min(e) / np.max(e)
+
+            return m, Mx
+
+        axes = getvector(axes, 6)
+        axes = axes > 0
+
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
+
+        w = np.zeros(trajn)
+
+        if method == 'yoshikawa':
+            for i in range(trajn):
+                w[i] = yoshi(self, q[:, i], axes)
+
+            if trajn == 1:
+                return w[0]
+            else:
+                return w
+
+        elif method == 'asada':
+            dof = np.sum(axes)
+            mx = np.zeros((dof, dof, trajn))
+
+            for i in range(trajn):
+                w[i], mx[:, :, i] = asada(self, q[:, i], axes, dof)
+
+            if trajn == 1:
+                return w[0], mx[:, :, 0]
+            else:
+                return w, mx
+
+        else:
+            raise ValueError(
+                'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
