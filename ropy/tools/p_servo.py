@@ -46,7 +46,7 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
     ew = eTep.rpy * np.pi/180
 
     # Form error vector
-    e = np.expand_dims(np.concatenate((ev, ew)), axis=1)
+    e = np.r_[ev, ew]
 
     # Desired end-effector velocity
     v = gain * e

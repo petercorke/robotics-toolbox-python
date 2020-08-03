@@ -52,3 +52,20 @@ class Testtools(unittest.TestCase):
         nt.assert_array_almost_equal(r0, ans0, decimal=4)
         nt.assert_array_almost_equal(r1, ans1, decimal=4)
         nt.assert_array_almost_equal(r2, ans2, decimal=4)
+
+    def test_p_servo(self):
+        a = sm.SE3()
+        b = sm.SE3.Rx(0.7) * sm.SE3.Tx(1)
+        c = sm.SE3.Tz(0.59)
+
+        v0, arrived0 = rp.p_servo(a, b)
+        v1, _ = rp.p_servo(a.A, b.A)
+        _, arrived1 = rp.p_servo(a, c, threshold=0.6)
+
+        ans = np.array([2, 0, 0, 1.4, -0,  0])
+
+        nt.assert_array_almost_equal(v0, ans, decimal=4)
+        nt.assert_array_almost_equal(v1, ans, decimal=4)
+
+        self.assertFalse(arrived0)
+        self.assertTrue(arrived1)
