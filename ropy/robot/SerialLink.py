@@ -956,10 +956,8 @@ class SerialLink(object):
 
         :param coulomb: if True, will set the coulomb friction to 0
         :type coulomb: bool
-        :param viscous: if True, will set the viscous friction to 0
-        :type viscous: bool
 
-        :return: A copy of the robot with modified friction
+        :return: A copy of the robot with dynamic parameters perturbed
         :rtype: SerialLink
 
         """
@@ -3029,6 +3027,8 @@ class SerialLink(object):
 
     def maniplty(self, q=None, method='yoshikawa', axes=[1, 1, 1, 1, 1, 1]):
         '''
+        Manipulability measure
+
         m = maniplty(q) is the yoshikawa manipulability index (scalar) for the
         robot at the joint configuration q (n) where n is the number of robot
         joints.  It indicates dexterity, that is, how isotropic the robot's
@@ -3086,6 +3086,7 @@ class SerialLink(object):
               Journal of Dynamic Systems, Measurement, and Control,
               vol. 105, p. 131, 1983.
             - Robotics, Vision & Control, P. Corke, Springer 2011.
+
         '''
 
         def yoshi(robot, q, axes):
@@ -3153,3 +3154,57 @@ class SerialLink(object):
         else:
             raise ValueError(
                 'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
+
+    def perterb(self, p=0.1):
+        '''
+        Perturb robot parameters
+
+        rp = perturb(p) is a new robot object in which the dynamic parameters
+        (link mass and inertia) have been perturbed. The perturbation is
+        multiplicative so that values are multiplied by random numbers in the
+        interval (1-p) to (1+p). The name string of the perturbed robot is
+        prefixed by 'P/'.
+
+        Useful for investigating the robustness of various model-based control
+        schemes. For example to vary parameters in the range +/- 10 percent
+        is: r2 = puma.perturb(0.1)
+
+        :param p: The percent (+/-) to be perturbed. Default 10%
+        :type p: float
+
+        :return: A copy of the robot with dynamic parameters perturbed
+        :rtype: SerialLink
+
+        '''
+
+        r2 = self._copy()
+        r2.name = 'P/' + self.name
+
+        for i in range(self.n):
+            s = (2 * np.random.random() - 1) * p + 1
+            r2.links[i].m = r2.links[i].m * s
+
+            s = (2 * np.random.random() - 1) * p + 1
+            r2.links[i].I = r2.links[i].I * s
+
+        return r2
+
+    def _copy(self):
+        L = []
+
+        for i in range(self.n):
+            L.append(self.links[i]._copy())
+
+        r2 = SerialLink(
+            L,
+            name=self.name,
+            manufacturer=self.manuf,
+            base=self.base,
+            tool=self.tool,
+            gravity=self.gravity)
+
+        r2.q = self.q
+        r2.qd = self.qd
+        r2.qdd = self.qdd
+
+        return r2

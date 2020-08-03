@@ -18,7 +18,7 @@ import ropy as rp
 # env.launch()
 
 puma = rp.Puma560()
-puma.q = puma.qn
+# puma.q = puma.qn
 
 # env.add(puma)
 
@@ -26,7 +26,4 @@ puma.q = puma.qn
 
 # puma.jacob_dot(puma.qr, puma.qr)
 
-a = puma.maniplty()
-
-print(a)
-# print(b)
+# a = puma.maniplty()
