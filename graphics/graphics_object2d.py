@@ -1,5 +1,4 @@
 from vpython import shapes, radians, extrusion, vector
-from spatialmath import SE2
 
 class Object2D:
     """
@@ -12,6 +11,8 @@ class Object2D:
     :type scene: class:`vpython.canvas`
     :param shape: The shape of the object
     :type shape: `str`
+    :param colour: The colour of the shape
+    :type colour: class:`vpython.vector`
     :raises ValueError: The shape must be in the list of possible shapes
     """
 
@@ -20,13 +21,15 @@ class Object2D:
     #  Have option to set size, colour, etc
     #  Have funcs that update pose, texture/colours, visibility
 
-    def __init__(self, se2, scene, shape):
+    def __init__(self, se2, scene, shape, colour):
         # Save inputs
         self.__se2 = se2
         self.__scene = scene
         self.__shape = shape
+        self.__colour = colour
 
         marker_styles = [
+            '',  # None
             '+',  # Plus
             'o',  # Circle
             '*',  # Star
@@ -55,7 +58,10 @@ class Object2D:
         :returns: The graphical entity
         :rtype: class:`vpython.baseobj`
         """
-        if self.__shape == '+':
+        if self.__shape == '':
+            # 2D coords of the circle boundary
+            shape_path = shapes.circle(radius=0.5)
+        elif self.__shape == '+':
             # 2D coords of the cross boundary
             shape_path = shapes.cross(width=5, thickness=1)
         elif self.__shape == 'o':
@@ -105,5 +111,13 @@ class Object2D:
             raise ValueError("Invalid shape given")
 
         # Create the shape
-        obj = extrusion(path=[vector(1, 1, 0.001), vector(1, 1, -0.001)], shape=shape_path, shininess=0)
+        x = self.__se2.t[0]
+        y = self.__se2.t[1]
+        obj = extrusion(scene=self.__scene,
+                        path=[vector(x, y, 0.001), vector(x, y, -0.001)],
+                        shape=shape_path,
+                        color=self.__colour,
+                        shininess=0)
+        if self.__shape == '':
+            obj.visible = False
         return obj
