@@ -564,7 +564,7 @@ class GraphicsCanvas2D:
         self.scene.autoscale = False
 
         # Disable default controls
-        self.scene.userpan = False  # Remove shift+mouse panning (key overwritten)
+        self.scene.userpan = True  # Keep shift+mouse panning (key overwritten)
         self.scene.userzoom = True  # Keep zoom controls (scrollwheel)
         self.scene.userspin = False  # Remove ctrl+mouse enabled to rotate
 
@@ -630,8 +630,8 @@ class GraphicsCanvas2D:
 
         A = move left (pan)
         D = move right (pan)
-        W = move forward (pan)
-        S = move backward (pan)
+        W = move up (pan)
+        S = move down (pan)
 
         <- = rotate left along camera axes (rotate)
         -> = rotate right along camera axes (rotate)
@@ -640,9 +640,6 @@ class GraphicsCanvas2D:
 
         Q = roll left (rotate)
         E = roll right (rotate)
-
-        space = move up (pan)
-        shift = move down (pan)
 
         ctrl + LMB = rotate (Default Vpython)
         """
@@ -669,8 +666,8 @@ class GraphicsCanvas2D:
         # Get a list of keys
         keys = keysdown()
 
-        # Userspin uses ctrl, so skip this check to avoid changing camera pose while ctrl is held
-        if 'ctrl' in keys:
+        # Userpan uses ctrl, so skip this check to avoid changing camera pose while shift is held
+        if 'shift' in keys:
             return
 
         ################################################################################################################
@@ -678,17 +675,13 @@ class GraphicsCanvas2D:
         # Check if the keys are pressed, update vectors as required
         # Changing camera position updates the scene center to follow same changes
         if 'w' in keys:
-            cam_pos = cam_pos + cam_axis * pan_amount
+            cam_pos = cam_pos + cam_up * pan_amount
         if 's' in keys:
-            cam_pos = cam_pos - cam_axis * pan_amount
+            cam_pos = cam_pos - cam_up * pan_amount
         if 'a' in keys:
             cam_pos = cam_pos + cam_side_axis * pan_amount
         if 'd' in keys:
             cam_pos = cam_pos - cam_side_axis * pan_amount
-        if ' ' in keys:
-            cam_pos = cam_pos + cam_up * pan_amount
-        if 'shift' in keys:
-            cam_pos = cam_pos - cam_up * pan_amount
 
         # Update camera position before rotation (to keep pan and rotate separate)
         self.scene.camera.pos = cam_pos
