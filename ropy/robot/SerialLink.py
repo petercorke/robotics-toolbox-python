@@ -87,6 +87,8 @@ class SerialLink(object):
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
+        self.qd = np.zeros(self.n)
+        self.qdd = np.zeros(self.n)
 
         # Check the DH convention
         self._check_dh()
@@ -248,6 +250,14 @@ class SerialLink(object):
         return self._q
 
     @property
+    def qd(self):
+        return self._qd
+
+    @property
+    def qdd(self):
+        return self._qdd
+
+    @property
     def d(self):
         v = []
         for i in range(self.n):
@@ -317,6 +327,14 @@ class SerialLink(object):
     @q.setter
     def q(self, q_new):
         self._q = getvector(q_new, self.n)
+
+    @qd.setter
+    def qd(self, qd_new):
+        self._qd = getvector(qd_new, self.n)
+
+    @qdd.setter
+    def qdd(self, qdd_new):
+        self._qdd = getvector(qdd_new, self.n)
 
     def A(self, joints, q=None):
         """
@@ -2885,3 +2903,116 @@ class SerialLink(object):
             return wmax[:, 0], joint[0]
         else:
             return wmax, joint
+
+    def jacob_dot(self, q=None, qd=None):
+        '''
+        Jqd = jacob_dot(q, qd) is the product (6) of the derivative of the
+        manipulator Jacobian (in the world frame) and the joint rates.
+
+        :notes:
+            - This term appears in the formulation for operational space
+              control xdd = J(q)qdd + Jdot(q)qd
+            - Written as per the reference and not very efficient.
+
+        :references:
+            - Fundamentals of Robotics Mechanical Systems (2nd ed)
+              J. Angleles, Springer 2003.
+            - A unified approach for motion and force control of robot
+              manipulators: The operational space formulation
+              O Khatib, IEEE Journal on Robotics and Automation, 1987.
+
+        '''
+
+        if q is None:
+            q = self.q
+
+        if qd is None:
+            qd = self.qd
+
+        q = getvector(q, self.n)
+        qd = getvector(qd, self.n)
+
+        # Using the notation of Angeles:
+        #   [Q,a] ~ [R,t] the per link transformation
+        #   P ~ R   the cumulative rotation t2r(Tj) in world frame
+        #   e       the last column of P, the local frame z axis in world
+        #           coordinates
+        #   w       angular velocity in base frame
+        #   ed      deriv of e
+        #   r       is distance from final frame
+        #   rd      deriv of r
+        #   ud      ??
+
+        Q = np.zeros((3, 3, self.n))
+        a = np.zeros((3, self.n))
+        P = np.zeros((3, 3, self.n))
+        e = np.zeros((3, self.n))
+        w = np.zeros((3, self.n))
+        ed = np.zeros((3, self.n))
+        rd = np.zeros((3, self.n))
+        r = np.zeros((3, self.n))
+        ud = np.zeros((3, self.n))
+        v = np.zeros((6, self.n))
+
+        for i in range(self.n):
+            T = self.links[i].A(q[i])
+            Q[:, :, i] = T.R
+            a[:, i] = T.t
+
+        P[:, :, 0] = Q[:, :, 0]
+        e[:, 0] = [0, 0, 1]
+
+        for i in range(1, self.n):
+            P[:, :, i] = P[:, :, i - 1] @ Q[:, :, i]
+            e[:, i] = P[:, 2, i]
+
+        # Step 1
+        w[:, 0] = qd[0] * e[:, 0]
+
+        for i in range(self.n - 1):
+            w[:, i + 1] = (
+                qd[i + 1] *
+                np.array([0, 0, 1]) +
+                Q[:, :, i].T @ w[:, i])
+
+        # Step 2
+        ed[:, 0] = np.array([0, 0, 1])
+
+        for i in range(1, self.n):
+            ed[:, i] = np.cross(w[:, i], e[:, i])
+
+        # Step 3
+        rd[:, self.n - 1] = np.cross(w[:, self.n - 1], a[:, self.n - 1])
+
+        for i in range(self.n - 2, -1, -1):
+            rd[:, i] = np.cross(w[:, i], a[:, i]) + Q[:, :, i] @ rd[:, i + 1]
+
+        r[:, self.n - 1] = a[:, self.n - 1]
+
+        for i in range(self.n - 2, -1, -1):
+            r[:, i] = a[:, i] + Q[:, :, i] @ r[:, i + 1]
+
+        ud[:, 0] = np.cross(e[:, 0], rd[:, 0])
+
+        for i in range(1, self.n):
+            ud[:, i] = \
+                np.cross(ed[:, i], r[:, i]) + np.cross(e[:, i], rd[:, i])
+
+        # Step 4
+        # Swap ud and ed
+        v[:, self.n - 1] = \
+            qd[self.n - 1] * np.r_[ud[:, self.n - 1], ed[:, self.n - 1]]
+
+        for i in range(self.n - 2, -1, -1):
+            Ui = np.r_[
+                np.c_[Q[:, :, i], np.zeros((3, 3))],
+                np.c_[np.zeros((3, 3)), Q[:, :, i]]]
+
+            v[:, i] = (
+                qd[i] *
+                np.r_[ud[:, i], ed[:, i]] +
+                Ui @ v[:, i + 1])
+
+        Jdot = v[:, 0]
+
+        return Jdot
