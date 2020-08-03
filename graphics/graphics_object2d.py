@@ -28,6 +28,8 @@ class Object2D:
         self.__shape = shape
         self.__colour = colour
 
+        self.__marker_size = 0.2
+
         marker_styles = [
             '',  # None
             '+',  # Plus
@@ -60,46 +62,48 @@ class Object2D:
         """
         if self.__shape == '':
             # 2D coords of the circle boundary
-            shape_path = shapes.circle(radius=0.5)
+            shape_path = shapes.circle(radius=self.__marker_size/2)
         elif self.__shape == '+':
             # 2D coords of the cross boundary
-            shape_path = shapes.cross(width=5, thickness=1)
+            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size/5)
         elif self.__shape == 'o':
             # 2D coords of the circle boundary
-            shape_path = shapes.circle(radius=0.5)
+            shape_path = shapes.circle(radius=self.__marker_size/2)
         elif self.__shape == '*':
             # 2D coords of the star boundary
-            shape_path = shapes.star(radius=0.5, n=6)
+            shape_path = shapes.star(radius=self.__marker_size/2, n=6)
         elif self.__shape == '.':
             # 2D coords of the square boundary
-            shape_path = shapes.rectangle(width=1, height=1)
+            shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size)
         elif self.__shape == 'x':
             # 2D coords of the cross boundary
-            shape_path = shapes.cross(width=5, thickness=1, rotate=radians(45))
+            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size/5, rotate=radians(45))
         elif self.__shape == 's':
             # 2D coords of the square boundary
-            shape_path = shapes.rectangle(width=1, height=1, thickness=0.1)
+            shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
+                                          thickness=self.__marker_size/10)
         elif self.__shape == 'd':
             # 2D coords of the diamond boundary
-            shape_path = shapes.rectangle(width=1, height=1, thickness=0.1, rotate=radians(45))
+            shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
+                                          thickness=self.__marker_size/10, rotate=radians(45))
         elif self.__shape == '^':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=1)
+            shape_path = shapes.triangle(length=self.__marker_size)
         elif self.__shape == 'v':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=1, rotate=radians(180))
+            shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(180))
         elif self.__shape == '<':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=1, rotate=radians(90))
+            shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(90))
         elif self.__shape == '>':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=1, rotate=radians(-90))
+            shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(-90))
         elif self.__shape == 'p':
             # 2D coords of the pentagon boundary
-            shape_path = shapes.pentagon(length=1)
+            shape_path = shapes.pentagon(length=self.__marker_size)
         elif self.__shape == 'h':
             # 2D coords of the hexagon boundary
-            shape_path = shapes.hexagon(length=1)
+            shape_path = shapes.hexagon(length=self.__marker_size)
         # CURRENTLY UNUSED
         # elif self.__shape == 'o':
         #     # 2D coords of the octagon boundary
