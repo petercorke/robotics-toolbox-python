@@ -1194,3 +1194,17 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_allclose(wmax1[:, 0], res0)
         nt.assert_allclose(wmax1[:, 1], res0)
         nt.assert_allclose(wmax2, res0)
+
+    def test_jacob_dot(self):
+        puma = rp.Puma560()
+        puma.q = puma.qr
+        puma.qd = puma.qr
+        q = puma.qr
+
+        j0 = puma.jacob_dot(q, q)
+        j1 = puma.jacob_dot()
+
+        res = [-0.0000, -1.0654, -0.3702,  2.4674, 0, 0]
+
+        nt.assert_array_almost_equal(j0, res, decimal=4)
+        nt.assert_array_almost_equal(j1, res, decimal=4)

@@ -14,12 +14,16 @@ import ropy as rp
 # T1.plot(frame='1')
 
 
-env = rp.PyPlot()
-env.launch()
+# env = rp.PyPlot()
+# env.launch()
 
-puma = rp.PandaMDH()
+puma = rp.Puma560()
 puma.q = puma.qr
 
-env.add(puma)
+# env.add(puma)
 
-env.hold()
+# env.hold()
+
+puma.jacob_dot(puma.qr, puma.qr)
+
+
