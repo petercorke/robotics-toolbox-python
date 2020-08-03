@@ -158,7 +158,7 @@ class SerialLink:
         if jointconfig.size == self.length:
             poses = self.fkine(jointconfig, unit, alltout=True)
 
-            g_canvas = gph.GraphicsCanvas()
+            g_canvas = gph.GraphicsCanvas3D()
             print("canvas created")
 
             roplot = gph.GraphicalRobot(g_canvas, self.name)
