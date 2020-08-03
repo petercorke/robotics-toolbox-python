@@ -752,7 +752,7 @@ class GraphicsCanvas2D:
     #######################################
     #  Drawing Functions
     #######################################
-    def __draw_path(self, xy_path, opt_line, opt_marker, opt_colour, thickness=0.05):
+    def __draw_path(self, x_path, y_path, opt_line, opt_marker, opt_colour, thickness=0.05):
         """
         Draw a line from point to point in the 2D path
 
@@ -771,29 +771,31 @@ class GraphicsCanvas2D:
         colour = self.__get_colour_from_string(opt_colour)
 
         # For every point in the list, draw a line to the next one (excluding last point)
-        for point in range(0, len(xy_path)):
-            # If at end / only coordinate - draw a marker
-            if point == len(xy_path) - 1:
-                create_marker()
-                return
-
+        for point in range(0, len(x_path)):
             # Get point 1
-            x1 = xy_path[point][0]
-            y1 = xy_path[point][1]
+            x1 = x_path[point]
+            y1 = y_path[point]
             p1 = vector(x1, y1, 0)
 
+            # If at end / only coordinate - draw a marker
+            if point == len(x_path) - 1:
+                create_marker(self.scene, x1, y1, opt_marker, colour)
+                return
+
             # Get point 2
-            x2 = xy_path[point + 1][0]
-            y2 = xy_path[point + 1][1]
+            x2 = x_path[point + 1]
+            y2 = y_path[point + 1]
             p2 = vector(x2, y2, 0)
 
             if opt_line == '':
-                create_marker()
+                # Only one marker to avoid double-ups
+                create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == '-':
                 create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
-                create_marker()
+                # Only one marker to avoid double-ups
+                create_marker(self.scene, x1, y1, opt_marker, colour)
             else:
-                pass
+                raise NotImplementedError("Other line types not implemented")
 
     def plot(self, x_coords, y_coords=None, options=''):
         """
@@ -836,8 +838,10 @@ class GraphicsCanvas2D:
             options = y_coords
             y_coords = None
 
+        one_set_data = False
         # Set y-vector to default if None
         if y_coords is None:
+            one_set_data = True
             y_coords = [*range(0, len(x_coords))]
 
         # Verify x, y coords have same length
@@ -847,13 +851,24 @@ class GraphicsCanvas2D:
         # Verify options given (and save settings to be applied)
         verified_options = self.__verify_plot_options(options)
 
-        # Draw plot
-        # self.__draw_path(
-        #     coordinates,
-        #     verified_options[0],  # Line
-        #     verified_options[1],  # Marker
-        #     verified_options[2],  # Colour
-        # )
+        if one_set_data:
+            # Draw plot for one list of data
+            self.__draw_path(
+                y_coords,  # Y is default x-coords in one data set
+                x_coords,  # User input
+                verified_options[0],  # Line
+                verified_options[1],  # Marker
+                verified_options[2],  # Colour
+            )
+        else:
+            # Draw plot for two lists of data
+            self.__draw_path(
+                x_coords,  # User input
+                y_coords,  # User input
+                verified_options[0],  # Line
+                verified_options[1],  # Marker
+                verified_options[2],  # Colour
+            )
 
     def __verify_plot_options(self, options_str):
         """
