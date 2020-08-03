@@ -3,6 +3,7 @@ Instructions on how to use the graphical section of the toolbox below.
 (Pictures to come)
 
 # Scene Controls
+3D Controls
  * Pan
    * W -> Forward
    * A -> Left
@@ -11,15 +12,30 @@ Instructions on how to use the graphical section of the toolbox below.
    * SPACE -> Up
    * SHIFT -> Down
  * Spin
-   * Mouse
-     * CTRL + LMB -> Free spin
-   * Keyboard
-     * Left -> Left
-     * Right -> Right
-     * Up -> Up 
-     * Down -> Down
-     * Q -> Roll Left
-     * E -> Roll Right
+   * CTRL + LMB -> Free spin
+   * Left -> Left
+   * Right -> Right
+   * Up -> Up 
+   * Down -> Down
+   * Q -> Roll Left
+   * E -> Roll Right
+ * Zoom
+   * Scrollwheel
+   
+2D Controls
+ * Pan
+   * SHIFT + LMB -> Free pan
+   * W -> Up
+   * A -> Left
+   * S -> Down
+   * D -> Right
+ * Spin
+   * Left -> Left
+   * Right -> Right
+   * Up -> Up 
+   * Down -> Down
+   * Q -> Roll Left
+   * E -> Roll Right
  * Zoom
    * Scrollwheel
    
@@ -95,6 +111,7 @@ Isolated joint objects will not be cleared. Only robots in the scene.
 g_canvas.clear_scene()
 ```
 
+# 3D Functionality
 ## Creating Robots
 If you want to use the example puma560 robot, simply call the creation function that will return a `GraphicalRobot` object.
 It will be displayed in the scene that is provided.
@@ -283,4 +300,72 @@ Lastly, a print function `print_joint_poses()` will print out the current poses 
 ```python
 # Print joint poses
 my_graphical_robot.print_joint_poses()
+```
+
+# 2D Functionality
+## Plotting
+Plotting lines in 2D works the same way as it does in MATLAB plotting.
+If you are familiar with the plot syntax, you can effectively skip this part.
+
+The `plot()` function takes in lists of axis values, and an optional string for plot options.
+
+If given one axis of data, it will plot along the Y axis, with respect to index on the X axis.
+If given two axes of data, it will plot first list (X) by second list (Y).
+
+The string option input is the same as MATLAB's plot options.
+The string can contain up to three options (one of each): 
+1. Line type
+2. Marker type
+3. Colour
+
+        
+      Colour                Marker Type           Line Type
+    b     blue          .     point              -     solid
+    g     green         o     circle             :     dotted
+    r     red           x     x-mark             -.    dashdot
+    c     cyan          +     plus               --    dashed
+    m     magenta       *     star             (none)  no line
+    y     yellow        s     square
+    k     black         d     diamond
+    w     white         v     triangle (down)
+                        ^     triangle (up)
+                        <     triangle (left)
+                        >     triangle (right)
+                        p     pentagram
+                        h     hexagram
+                      (none)  no marker
+
+Notes:
+* If you do not specify a marker type, plot uses no marker.
+* If you do not specify a line style, plot uses a solid line (unless a marker type is given, then no line).
+* Options can be in any order
+
+```python
+# Plot a list of values in default options
+g_canvas.plot([1, 2, 3, 4])
+
+# Plot a list of values in red dashed lines
+g_canvas.plot([1, 2, 3, 4], 'r--')  # '--r' is also valid
+
+# Plot a list of values with no line between, and diamond markers in blue
+g_canvas.plot([1, 2, 3, 4], 'bd')  # 'db' is also valid
+
+# Plot X by Y, in green, with cross markers, dashdot line, in yellow
+g_canvas.plot([3, 5, 2, 7], [6, 2, 8, 4], 'gx-.')  # 'x-.g' (etc) is also valid
+```
+
+## 2D Objects
+Similar to a robot in the 3D scene, you can create a 2D object to move around the scene.
+Currently, only shapes are supported for the 2D object, but future additions will allow STLs.
+Object position/graphic update functions to come.
+
+The object initialiser takes in an SE2 pose, the scene to draw in, it's shape and colour.
+
+```python
+# Position at (1, 1)
+se2 = SE2(x=1, y=1, theta=0)
+colour = [0, 0, 0]  # Black
+shape = '*'
+
+my_object = gph.Object2D(se2, g_canvas.scene, shape, colour)
 ```

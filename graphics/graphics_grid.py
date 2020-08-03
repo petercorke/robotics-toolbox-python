@@ -383,7 +383,7 @@ def create_marker(scene, x, y, shape, colour=None):
     :param shape: The shape of the object to draw
     :type shape: `str`
     :param colour: The colour of the object
-    :type colour: class:`vpython.vector`
+    :type colour: `list`
     :returns: A 2D object that has been drawn
     :rtype: class:`graphics.graphics_object2d.Object2D`
     """
@@ -392,12 +392,8 @@ def create_marker(scene, x, y, shape, colour=None):
     if colour is None:
         colour = [0, 0, 0]
 
-    if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
-            colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
-        raise ValueError("RGB values must be normalised between 0 and 1")
-
     # Create an SE2 for the object
     obj_se2 = SE2(x=x, y=y, theta=0)
 
     # Create the object and return it
-    return Object2D(obj_se2, scene, shape, vector(colour[0], colour[1], colour[2]))
+    return Object2D(obj_se2, scene, shape, colour)
