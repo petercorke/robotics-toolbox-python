@@ -2909,6 +2909,16 @@ class SerialLink(object):
         Jqd = jacob_dot(q, qd) is the product (6) of the derivative of the
         manipulator Jacobian (in the world frame) and the joint rates.
 
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param qd: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored qd values).
+        :type qd: float ndarray(n)
+
+        :retrun Jdot: The derivative of the manipulator Jacobian
+        :rtype Jdot: float ndarray(n)
+
         :notes:
             - This term appears in the formulation for operational space
               control xdd = J(q)qdd + Jdot(q)qd
