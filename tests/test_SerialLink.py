@@ -1307,19 +1307,27 @@ class TestSerialLink(unittest.TestCase):
         resm1 = np.zeros(puma.n)
 
         for i in range(puma.n):
-            resI0[i] = np.abs(np.nanmax(
-                (puma.links[i].I - p2.links[i].I) / puma.links[i].I))
+            resI0[i] = np.divide(
+                np.sum(np.abs(puma.links[i].I - p2.links[i].I)),
+                np.sum(np.abs(puma.links[i].I)))
 
-            resm0[i] = np.abs(np.divide(
-                (puma.links[i].m - p2.links[i].m),
-                puma.links[i].m))
+            if puma.links[i].m - p2.links[i].m != 0.0:
+                resm0[i] = np.abs(np.divide(
+                    (puma.links[i].m - p2.links[i].m),
+                    puma.links[i].m))
+            else:
+                resm0[i] = 0
 
-            resI1[i] = np.abs(np.nanmax(
-                (puma.links[i].I - p3.links[i].I) / puma.links[i].I))
+            resI1[i] = np.divide(
+                np.sum(np.abs(puma.links[i].I - p3.links[i].I)),
+                np.sum(np.abs(puma.links[i].I)))
 
-            resm1[i] = np.abs(np.divide(
-                (puma.links[i].m - p3.links[i].m),
-                puma.links[i].m))
+            if puma.links[i].m - p3.links[i].m != 0.0:
+                resm1[i] = np.abs(np.divide(
+                    (puma.links[i].m - p3.links[i].m),
+                    puma.links[i].m))
+            else:
+                resm1[i] = 0
 
             self.assertTrue(resI0[i] < 0.1)
             self.assertTrue(resm0[i] < 0.1 or np.isnan(resm0[i]))
