@@ -3065,7 +3065,7 @@ class SerialLink(object):
         :param method: Which method to use, 'yoshikawa' (default) or 'asada'
         :type method: string
         :param axes: The degrees-of-freedom to be included for manipulability
-        "type axes: int list
+        :type axes: int list
 
         :notes:
             - The 'all' option includes rotational and translational
