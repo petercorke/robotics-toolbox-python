@@ -3273,7 +3273,7 @@ class SerialLink(object):
 
             x0 = np.zeros(N.shape[1])
             A = np.r_[N, -N]
-            b = np.expand_dims(np.r_[ub - qm, qm - lb], axis=1).reshape(14,)
+            b = np.r_[ub - qm, qm - lb].reshape(A.shape[0],)
 
             con = LinearConstraint(A, -np.inf, b)
 
