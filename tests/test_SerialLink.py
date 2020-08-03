@@ -1325,3 +1325,21 @@ class TestSerialLink(unittest.TestCase):
             self.assertTrue(resm0[i] < 0.1 or np.isnan(resm0[i]))
             self.assertTrue(resI1[i] < 0.8)
             self.assertTrue(resm1[i] < 0.8 or np.isnan(resm1[i]))
+
+    def test_qmincon(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+
+        q = panda.qr
+        qt = np.c_[q, q]
+
+        q0, s0, _ = panda.qmincon()
+        q1, s1, _ = panda.qmincon(q)
+        q2, _, _ = panda.qmincon(qt)
+
+        qres = [-0.0969, -0.3000, 0.0870, -2.2000, 0.0297, 2.0000, 0.7620]
+
+        nt.assert_array_almost_equal(q0, qres, decimal=4)
+        nt.assert_array_almost_equal(q1, qres, decimal=4)
+        nt.assert_array_almost_equal(q2[:, 0], qres, decimal=4)
+        nt.assert_array_almost_equal(q2[:, 1], qres, decimal=4)
