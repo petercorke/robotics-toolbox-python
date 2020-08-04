@@ -1,6 +1,6 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
-from graphics.graphics_grid import GraphicsGrid, create_line, create_marker
+from graphics.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
 
 
 class GraphicsCanvas3D:
@@ -749,8 +749,10 @@ class GraphicsCanvas2D:
         """
         Draw a line from point to point in the 2D path
 
-        :param xy_path: The path to draw on the canvas
-        :type xy_path: `list`
+        :param x_path: The x path to draw on the canvas
+        :type x_path: `list`
+        :param y_path: The y path to draw on the canvas
+        :type y_path: `list`
         :param opt_line: The line option argument
         :type opt_line: `str`
         :param opt_marker: The marker option argument
@@ -759,6 +761,7 @@ class GraphicsCanvas2D:
         :type opt_colour: `str`
         :param thickness: Thickness of the line
         :type thickness: `float`
+        :raises ValueError: Invalid line type given
         """
         # Get colour
         colour = self.__get_colour_from_string(opt_colour)
@@ -787,8 +790,18 @@ class GraphicsCanvas2D:
                 create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
-            else:
+            elif opt_line == '--':
+                create_segmented_line(p1, p2, self.scene, 0.3, colour=colour, thickness=thickness)
+                # Only one marker to avoid double-ups
+                create_marker(self.scene, x1, y1, opt_marker, colour)
+            elif opt_line == ':':
+                create_segmented_line(p1, p2, self.scene, 0.05, colour=colour, thickness=thickness)
+                # Only one marker to avoid double-ups
+                create_marker(self.scene, x1, y1, opt_marker, colour)
+            elif opt_line == '-.':
                 raise NotImplementedError("Other line types not implemented")
+            else:
+                raise ValueError("Invalid line type given")
 
     def plot(self, x_coords, y_coords=None, options=''):
         """
