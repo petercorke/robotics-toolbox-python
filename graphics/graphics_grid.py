@@ -428,12 +428,19 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
             break
 
     for xyz in dash_positions:
+        length = segment_len
+        # If the box will surpass the end point
+        len_to_end = (pos2-xyz).mag
+        if len_to_end < segment_len / 2:
+            # Length is equal to dist to the end * 2 (as pos is middle of box)
+            length = len_to_end * 2
+
         boxes.append(
             box(
                 canvas=scene,
                 pos=xyz,
                 axis=axis_dir,
-                length=segment_len,
+                length=length,
                 width=thickness,
                 height=thickness,
                 color=vector(colour[0], colour[1], colour[2])
