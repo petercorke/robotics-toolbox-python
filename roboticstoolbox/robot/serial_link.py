@@ -191,13 +191,14 @@ class SerialLink:
                     length = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1))
 
                     # add joint to robot
-                    self.roplot.append_link(self.links[i-1].jointtype, poses[i], length, axis_through=array([1, 0, 0]))
+                    self.roplot.append_link(self.links[i-1].jointtype, poses[i], length, )
 
                 return
         else:
             # Move existing plot
             self.roplot.set_joint_poses(poses[1:4])
             return
+
     def animate(self, q1, q2, unit='rad', frames=10, fps=5):
         """
         animates an existing plot.

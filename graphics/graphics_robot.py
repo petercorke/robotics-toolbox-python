@@ -562,7 +562,7 @@ class GraphicalRobot:
         self.joints.append(joint)
         self.num_joints += 1
 
-    def append_link(self, typeof, pose, structure, axis_through=array([0, 1, 0])):
+    def append_link(self, typeof, pose, structure, axis_through=array([1, 0, 0])):
         """
         Append a joint to the end of the robot.
 
