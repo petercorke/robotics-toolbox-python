@@ -13,7 +13,7 @@ L.append(Link(a=1.0, jointtype='R'))
 L.append(Link(a=0.5, jointtype='R'))
 
 
-qz = [pi/4,0,-pi/3]
+qz = [0,0,-pi/3]
 
 arm = SerialLink(L, name='Upright Arm')
 
