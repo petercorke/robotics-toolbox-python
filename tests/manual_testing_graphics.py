@@ -13,13 +13,13 @@ Alternatively, executing this file will run the test_puma560_angle_change() func
 """
 from time import sleep
 from numpy import array
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 from roboticstoolbox import Puma560
 import graphics as gph
 
 
 # Create a canvas on import, to allow clearing between function calls
-g_canvas = gph.GraphicsCanvas()
+g_canvas = gph.GraphicsCanvas3D()
 
 
 def clear():
@@ -94,23 +94,15 @@ def test_graphical_robot_creation():
     """
     p = SE3()
 
-    p1 = p
-    p2 = p.Tx(1)
-    p3 = p.Tx(2)
+    p1 = p.Tx(1)
+    p2 = p.Tx(2)
+    p3 = p.Tx(3)
 
     robot = gph.GraphicalRobot(g_canvas, 'test_3_link_robot')
 
-    robot.append_link('r', p1, 1.0)
-    robot.append_link('R', p2, 1.0)
-    robot.append_link('r', p3, 1.0)
-
-    arr = array([
-        [0, 0, 1, 0],
-        [0, 1, 0, 0],
-        [1, 0, 0, 0],
-        [0, 0, 0, 1]
-    ])
-    new_p1 = SE3(arr)
+    robot.append_link('r', p1, 1.0, axis_through=array([1, 0, 0]))
+    robot.append_link('R', p2, 1.0, axis_through=array([1, 0, 0]))
+    robot.append_link('r', p3, 1.0, axis_through=array([1, 0, 0]))
 
     arr = array([
         [0, 0, 1, 0],
@@ -118,12 +110,20 @@ def test_graphical_robot_creation():
         [1, 0, 0, 1],
         [0, 0, 0, 1]
     ])
-    new_p2 = SE3(arr)
+    new_p1 = SE3(arr)
 
     arr = array([
         [0, 0, 1, 0],
         [0, 1, 0, 0],
         [1, 0, 0, 2],
+        [0, 0, 0, 1]
+    ])
+    new_p2 = SE3(arr)
+
+    arr = array([
+        [0, 0, 1, 0],
+        [0, 1, 0, 0],
+        [1, 0, 0, 3],
         [0, 0, 0, 1]
     ])
     new_p3 = SE3(arr)
@@ -321,12 +321,33 @@ def test_multiple_canvases():
 
     sleep(5)
 
-    g_canvas2 = gph.GraphicsCanvas(title='Scene B')
+    g_canvas2 = gph.GraphicsCanvas3D(title='Scene B')
 
     robot2 = gph.GraphicalRobot(g_canvas2, 'Robot B1')
     robot2.append_link('r', SE3().Rand(), 1.0)
     robot2.append_link('R', SE3().Rand(), 1.0)
     robot2.append_link('r', SE3().Rand(), 1.0)
+
+
+def test_2d_draw_path():
+    g_canvas2 = gph.GraphicsCanvas2D()
+
+    path = [
+        [0, 0],
+        [1, 1],
+        [2, 2],
+        [2, 3],
+        [3, 3],
+        [3, 4],
+        [4, 4]
+    ]
+    g_canvas2.draw_path(path, colour=[1, 0, 0])
+
+
+def test_2d_create_object():
+    g_canvas2 = gph.GraphicsCanvas2D()
+
+    obj = gph.Object2D(SE2(), g_canvas2.scene, 'c')
 
 
 if __name__ == "__main__":

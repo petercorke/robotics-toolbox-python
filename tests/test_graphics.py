@@ -33,7 +33,7 @@ class TestCommonFunctions(unittest.TestCase):
 
     def test_vpython_to_se3(self):
         # Create a scene
-        scene = canvas.GraphicsCanvas(title="TEST VPYTHON TO SE3")
+        scene = canvas.GraphicsCanvas3D(title="TEST VPYTHON TO SE3")
 
         # Create a basic entity
         # pos = 1, 2, 3
@@ -83,7 +83,7 @@ class TestCommonFunctions(unittest.TestCase):
 class TestCanvas(unittest.TestCase):
     def test_graphics_canvas_init(self):
         # Create a canvas with all options being used (different to defaults)
-        scene = canvas.GraphicsCanvas(
+        scene = canvas.GraphicsCanvas3D(
             height=360,
             width=480,
             title="Test Graphics Canvas Creation",
@@ -99,7 +99,7 @@ class TestCanvas(unittest.TestCase):
 
     def test_grid_visibility(self):
         # Create a scene, with grid=True (default)
-        scene = canvas.GraphicsCanvas(title="Test Grid Visibility", grid=True)
+        scene = canvas.GraphicsCanvas3D(title="Test Grid Visibility", grid=True)
 
         # Check all objects in scene are visible (default scene will just have grid, assuming init has grid=True)
         self.assertGreater(len(scene.scene.objects), 0)
@@ -113,7 +113,7 @@ class TestCanvas(unittest.TestCase):
 
     def test_add_robot(self):
         # Create a scene (no grid visible)
-        scene = canvas.GraphicsCanvas(title="Test Add Robot", grid=False)
+        scene = canvas.GraphicsCanvas3D(title="Test Add Robot", grid=False)
 
         # Save number of objects
         num_objs = len(scene.scene.objects)
@@ -131,7 +131,7 @@ class TestCanvas(unittest.TestCase):
 
     def test_draw_reference_axes(self):
         # Create a scene, no grid
-        scene = canvas.GraphicsCanvas(title="Test Draw Reference Frame", grid=False)
+        scene = canvas.GraphicsCanvas3D(title="Test Draw Reference Frame", grid=False)
 
         # Check objects is empty
         self.assertEqual(len(scene.scene.objects), 0)
@@ -171,7 +171,7 @@ class TestCanvas(unittest.TestCase):
 class TestGrid(unittest.TestCase):
     def test_grid_init(self):
         # Create a scene
-        scene = canvas.GraphicsCanvas(title="Test Grid Init", grid=False)
+        scene = canvas.GraphicsCanvas3D(title="Test Grid Init", grid=False)
 
         # Create a (technically second) graphics grid for the scene
         grid = canvas.GraphicsGrid(scene.scene)
@@ -179,7 +179,7 @@ class TestGrid(unittest.TestCase):
 
 class TestRobot(unittest.TestCase):
     def setUp(self):
-        self.scene = canvas.GraphicsCanvas()
+        self.scene = canvas.GraphicsCanvas3D()
 
         #    0.707107 -0.707107  0         0
         #    0.707107  0.707107  0         1
@@ -509,14 +509,14 @@ class TestRobot(unittest.TestCase):
         robot1.print_joint_poses()
 
         # Create a new scene
-        scene2 = canvas.GraphicsCanvas(title="Test Robot Append Made Link 2")
+        scene2 = canvas.GraphicsCanvas3D(title="Test Robot Append Made Link 2")
 
         # Create a new robot in new scene
         robot2 = robot.GraphicalRobot(scene2, "Robot 2")
 
         # Add other joint to new scene
         # Expecting an error (can't add joint to robot in different scene
-        self.assertRaises(ReferenceError, robot2.append_made_link, joint2)
+        self.assertRaises(RuntimeError, robot2.append_made_link, joint2)
 
     def test_robot_append_link(self):
         # Update scene
@@ -730,7 +730,7 @@ class TestRobot(unittest.TestCase):
 class TestStl(unittest.TestCase):
     def test_import_object(self):
         # Update Scene
-        scene = canvas.GraphicsCanvas(title="Test Import Object")
+        scene = canvas.GraphicsCanvas3D(title="Test Import Object")
         scene.grid_visibility(False)
 
         # Check num objects
@@ -756,7 +756,7 @@ class TestText(unittest.TestCase):
 class TestPuma(unittest.TestCase):
     def test_import_puma560(self):
         # Create scene
-        scene = canvas.GraphicsCanvas(title="Test Import Puma560")
+        scene = canvas.GraphicsCanvas3D(title="Test Import Puma560")
 
         # Import puma560
         robot1 = mdl_puma.import_puma_560(scene)

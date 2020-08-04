@@ -171,9 +171,9 @@ class Link(list):
             conv = 'mod'
 
         if self.jointtype == 'R':
-            return "Revolute("+conv+") joint with attributes: " + \
-                f"d={self.d:.3g}, a={self.a:.3g}, alpha={self.alpha:.3g}, qlim=({self.qlim[0]:.3g}, {self.qlim[1]:.3g})"
-                   #str(self.d)+", a = "+str(self.a)+", alpha = "+str(self.alpha)+", qlim = "+str(self.qlim)
+            return "Revolute("+conv+") joint with attributes: d=" + \
+                    str(self.d)+", a = "+str(self.a)+", alpha = "+str(self.alpha)+", qlim = ("+str(self.qlim[0])+", "+str(self.qlim[0])+")"
+                    #f"d={self.d:.3g}, a={self.a:.3g}, alpha={self.alpha:.3g}, qlim=({self.qlim[0]:.3g}, {self.qlim[1]:.3g})"
         elif self.jointtype == 'P':
             return "Prismatic("+conv+") joint with attributes: theta = "+\
                    str(self.theta)+", a = "+str(self.a)+", alpha = "+str(self.alpha)+", qlim = "+str(self.qlim)

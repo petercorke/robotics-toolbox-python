@@ -1,32 +1,42 @@
 """
-NOT A UNIT TEST
-Simple Example for Serial_link plot function
-Starts by creating a robot arm.
-uncomment and copy code to console as needed
+Manual Test
+Example tests for serial link to show functionality
+
 """
 
-from roboticstoolbox.robot.serial_link import *
+# creates a simple three link robot
+from time import sleep
+from roboticstoolbox.robot.threelink import *
+from roboticstoolbox.robot.uprighttl import *
 
-L = []
+def test_threelink_animate():
+    # add a new joint configuration
+    q1 = [0.1,0.1,0.1]
+    q2 = [pi/2,pi/2,pi/2]
 
-# create links
-L.append(Link('a', 0.1, 'd', 1, 'alpha', pi/2, 'type', 'revolute'))
-L.append(Link('a', 1, 'type', 'revolute'))
-L.append(Link('a', 0.5, 'type', 'revolute'))
+    # plot robot
+    tl.plot(q1)
 
-# create initial joint array to be passed into plot as joint configuration
-qz = [pi/4,0,-pi/3]
+    for i in range(5):
+        # repeat for visual confirmation
+        tl.animate(q1,q2, frames=50, fps=25)
+        sleep(1)
+        tl.animate(q2,q1, frames=50, fps=25)
 
-# create serial link robot
-arm = SerialLink(L, name='Upright Arm')
+def test_upright_animate():
+    # add a new joint configuration
+    q1 = [0,0,-pi/3]
+    q2 = [pi/4,pi/4,0]
 
-# plot robot
-plotbot = arm.plot(qz)
+    # plot robot
+    arm.plot(q1)
 
-## Use this code to change the joint angles
-## lift arm
-# plotbot.set_joint_angle(1, -pi/2)
+    for i in range(5):
+        # repeat for visual confirmation
+        arm.animate(q1,q2, frames=50, fps=25)
+        sleep(0.5)
+        arm.animate(q2,q1, frames=50, fps=25)
 
-## rotate base:
-# plotbot.set_joint_angle(0, pi/2)
-
+if __name__ == "__main__":
+    # run the animate robot test by default
+    test_threelink_animate()
