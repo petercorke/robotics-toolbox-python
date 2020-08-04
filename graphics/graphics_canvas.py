@@ -1,6 +1,6 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
-from graphics.graphics_grid import GraphicsGrid, create_line, create_dashed_line, create_dotted_line, create_marker
+from graphics.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
 
 
 class GraphicsCanvas3D:
@@ -791,11 +791,11 @@ class GraphicsCanvas2D:
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == '--':
-                create_dashed_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+                create_segmented_line(p1, p2, self.scene, 0.3, colour=colour, thickness=thickness)
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == ':':
-                create_dotted_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+                create_segmented_line(p1, p2, self.scene, 0.05, colour=colour, thickness=thickness)
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == '-.':
