@@ -17,8 +17,8 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from roboticstoolbox import SerialLink
-from roboticstoolbox import Revolute
+from roboticstoolbox.robot.serial_link import *
+from roboticstoolbox.robot.Link import RevoluteDH
 from math import pi
 import numpy as np
 
@@ -62,7 +62,7 @@ class Puma560(SerialLink):
 
         deg = pi/180
 
-        L0 = Revolute(
+        L0 = RevoluteDH(
             d=0,          # link length (Dennavit-Hartenberg notation)
             a=0,          # link offset (Dennavit-Hartenberg notation)
             alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
@@ -80,7 +80,7 @@ class Puma560(SerialLink):
                                  # direction [-,+] (measured at the motor)
             qlim=[-160*deg, 160*deg])    # minimum and maximum joint angle
 
-        L1 = Revolute(
+        L1 = RevoluteDH(
             d=0, a=0.4318, alpha=0,
             I=[0.13, 0.524, 0.539, 0, 0, 0],
             r=[-0.3638, 0.006, 0.2275],
@@ -88,7 +88,7 @@ class Puma560(SerialLink):
             B=.817e-3, Tc=[0.126, -0.071],
             qlim=[-45*deg, 225*deg])
 
-        L2 = Revolute(
+        L2 = RevoluteDH(
             d=0.15005, a=0.0203, alpha=-pi/2,
             I=[0.066, 0.086, 0.0125, 0, 0, 0],
             r=[-0.0203, -0.0141, 0.070],
@@ -96,7 +96,7 @@ class Puma560(SerialLink):
             B=1.38e-3, Tc=[0.132, -0.105],
             qlim=[-225*deg, 45*deg])
 
-        L3 = Revolute(
+        L3 = RevoluteDH(
             d=0.4318, a=0, alpha=pi/2,
             I=[1.8e-3, 1.3e-3, 1.8e-3, 0, 0, 0],
             r=[0, 0.019, 0],
@@ -104,7 +104,7 @@ class Puma560(SerialLink):
             B=71.2e-6, Tc=[11.2e-3, -16.9e-3],
             qlim=[-110*deg, 170*deg])
 
-        L4 = Revolute(
+        L4 = RevoluteDH(
             d=0, a=0, alpha=-pi/2,
             I=[0.3e-3, 0.4e-3, 0.3e-3, 0, 0, 0],
             r=[0, 0, 0], m=0.34,
@@ -112,7 +112,7 @@ class Puma560(SerialLink):
             Tc=[9.26e-3, -14.5e-3],
             qlim=[-100*deg, 100*deg])
 
-        L5 = Revolute(
+        L5 = RevoluteDH(
             d=0, a=0, alpha=0,
             I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
             r=[0, 0, 0.032], m=0.09, Jm=33e-6,
