@@ -425,7 +425,6 @@ def create_dashed_line(pos1, pos2, scene, colour=None, thickness=0.01):
         # If the axis between points changes, then the line has surpassed the end point. The line is done
         check_dir = pos2-pos1
         check_dir.mag = 1.0
-        print(axis_dir, check_dir)
         if not vectors_approx_equal(axis_dir, check_dir):
             break
 
@@ -436,6 +435,80 @@ def create_dashed_line(pos1, pos2, scene, colour=None, thickness=0.01):
                 pos=xyz,
                 axis=axis_dir,
                 length=dash_len,
+                width=thickness,
+                height=thickness,
+                color=vector(colour[0], colour[1], colour[2])
+            )
+        )
+
+    return compound(boxes)
+
+
+def create_dotted_line(pos1, pos2, scene, colour=None, thickness=0.01):
+    """
+    Create a dotted line from position 1 to position 2.
+
+    :param scene: The scene in which to draw the object
+    :type scene: class:`vpython.canvas`
+    :param pos1: 3D position of one end of the line.
+    :type pos1: class:`vpython.vector`
+    :param pos2: 3D position of the other end of the line.
+    :type pos2: class:`vpython.vector`
+    :param colour: RGB list to colour the line to
+    :type colour: `list`
+    :param thickness: Thickness of the line
+    :type thickness: `float`
+    :raises ValueError: RGB colour must be normalised between 0->1
+    :raises ValueError: Thickness must be greater than 0
+    :return: A box resembling a line
+    :rtype: class:`vpython.box`
+    """
+    # Set default colour
+    # Stops a warning about mutable parameter
+    if colour is None:
+        colour = [0, 0, 0]
+
+    if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+       colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+        raise ValueError("RGB values must be normalised between 0 and 1")
+
+    if thickness < 0.0:
+        raise ValueError("Thickness must be greater than 0")
+
+    # Length of the line using the magnitude
+    line_len = mag(pos2-pos1)
+
+    # Length of one dash
+    dot_len = thickness
+
+    # Axis direction of the line (to align the box (line) to intersect the two points)
+    axis_dir = pos2 - pos1
+    axis_dir.mag = 1.0
+
+    # Return a compound of boxes of thin width and height to resemble a dashed line
+    dot_positions = []
+    boxes = []
+    pos1 = pos1 + (axis_dir * dot_len/2)  # Translate centre pos to centre of where dashes will originate from
+
+    # Range = number of dashes (vis and invis)
+    for idx in range(0,  int(ceil(line_len / (dot_len / axis_dir.mag)))):
+        # Add every even point (zeroth, second...) to skip gaps between boxes
+        if idx % 2 == 0:
+            dot_positions.append(pos1)
+        pos1 = (pos1 + axis_dir * dot_len)
+        # If the axis between points changes, then the line has surpassed the end point. The line is done
+        check_dir = pos2-pos1
+        check_dir.mag = 1.0
+        if not vectors_approx_equal(axis_dir, check_dir):
+            break
+
+    for xyz in dot_positions:
+        boxes.append(
+            box(
+                canvas=scene,
+                pos=xyz,
+                axis=axis_dir,
+                length=dot_len,
                 width=thickness,
                 height=thickness,
                 color=vector(colour[0], colour[1], colour[2])
