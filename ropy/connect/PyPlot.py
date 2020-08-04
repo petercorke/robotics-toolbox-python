@@ -24,9 +24,12 @@ plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 class RobotPlot(object):
 
-    def __init__(self, robot, ax):
+    def __init__(self, robot, ax, readonly):
 
         super(RobotPlot, self).__init__()
+
+        # Readonly - True for this robot is for displaying only
+        self.readonly = readonly
 
         self.robot = robot
         self.ax = ax
@@ -52,10 +55,68 @@ class RobotPlot(object):
     def draw(self):
         if not self.drawn:
             self.init()
+            return
 
-        # plot.set_xdata(loc[0, :])
-        # plot.set_ydata(loc[1, :])
-        # plot.set_3d_properties(loc[2, :])
+        # Joint and ee poses
+        T = self.robot.allfkine()
+        Te = self.robot.fkine()
+        Tb = self.robot.base
+
+        # Joint and ee position matrix
+        loc = np.zeros([3, self.robot.n + 2])
+        loc[:, 0] = Tb.t
+        loc[:, self.robot.n + 1] = Te.t
+
+        # Joint axes position matrix
+        joints = np.zeros((3, self.robot.n))
+
+        # Axes arrow transforms
+        Tjx = sm.SE3.Tx(0.06)
+        Tjy = sm.SE3.Ty(0.06)
+        Tjz = sm.SE3.Tz(0.06)
+
+        # ee axes arrows
+        Tex = Te * Tjx
+        Tey = Te * Tjy
+        Tez = Te * Tjz
+
+        # Joint axes arrow calcs
+        for i in range(self.robot.n):
+            loc[:, i + 1] = T[i].t
+            Tji = T[i] * Tjz
+            joints[:, i] = Tji.t
+
+        # Remove old ee coordinate frame
+        self.ee_axes[0].remove()
+        self.ee_axes[1].remove()
+        self.ee_axes[2].remove()
+
+        # Remove oldjoint z coordinates
+        for i in range(self.robot.n):
+            self.joints[i].remove()
+
+        # Plot ee coordinate frame
+        self.ee_axes[0] = \
+            self._plot_quiver(loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2)
+        self.ee_axes[1] = \
+            self._plot_quiver(loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2)
+        self.ee_axes[2] = \
+            self._plot_quiver(loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2)
+
+        # Plot joint z coordinates
+        for i in range(self.robot.n):
+            self.joints[i] = \
+                self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
+
+        # Update the robot links
+        self.links[0].set_xdata(loc[0, :])
+        self.links[0].set_ydata(loc[1, :])
+        self.links[0].set_3d_properties(loc[2, :])
+
+        # Update the shadow of the robot links
+        self.sh_links[0].set_xdata(loc[0, :])
+        self.sh_links[0].set_ydata(loc[1, :])
+        self.sh_links[0].set_3d_properties(0)
 
     def init(self):
 
@@ -135,7 +196,7 @@ class PyPlot(Connector):
         super(PyPlot, self).__init__()
         self.robots = []
 
-    def launch(self):
+    def launch(self, name=None):
         '''
         env = launch() launchs a blank 3D matplotlib figure
 
@@ -146,7 +207,11 @@ class PyPlot(Connector):
         projection = 'ortho'
         labels = ['X', 'Y', 'Z']
 
-        self.fig = plt.figure()
+        if name is not None:
+            self.fig = plt.figure(name)
+        else:
+            self.fig = plt.figure()
+
         self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
         # fig = plt.gcf()
 
@@ -170,7 +235,7 @@ class PyPlot(Connector):
         signal.signal(signal.SIGALRM, self._plot_handler)
         signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
 
-    def step(self):
+    def step(self, dt=50):
         '''
         state = step(args) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
@@ -186,6 +251,15 @@ class PyPlot(Connector):
         '''
 
         super().step()
+
+        self._step_robots(dt)
+
+        plt.ioff()
+        self._draw_robots()
+        self._set_axes_equal()
+        plt.ion()
+
+        self._update_robots()
 
     def reset(self):
         '''
@@ -220,7 +294,7 @@ class PyPlot(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob):
+    def add(self, ob, readonly=False):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -231,12 +305,8 @@ class PyPlot(Connector):
         super().add()
 
         if isinstance(ob, rp.SerialLink):
-
-            self.robots.append(RobotPlot(ob, self.ax))
-
-            self.robots[0].draw()
-
-            # self._draw_robot(self.robots[0])
+            self.robots.append(RobotPlot(ob, self.ax, readonly))
+            self.robots[len(self.robots) - 1].draw()
 
         self._set_axes_equal()
 
@@ -254,11 +324,37 @@ class PyPlot(Connector):
         plt.show()
 
     #
-    #  Provate methods
+    #  Private methods
     #
 
-    def _draw_robot(self, robot_ob):
+    def _step_robots(self, dt):
+
+        for rpl in self.robots:
+            robot = rpl.robot
+
+            if rpl.readonly or robot.control_type == 'p':
+                pass
+
+            elif robot.control_type == 'v':
+
+                for i in range(robot.n):
+                    robot.q[i] += robot.qd[i] * (dt / 1000)
+
+            elif robot.control_type == 'a':
+                pass
+
+            else:
+                raise ValueError(
+                    'Invalid robot.control_type. '
+                    'Must be one of \'p\', \'v\', or \'a\'')
+
+    def _update_robots(self):
         pass
+
+    def _draw_robots(self):
+
+        for i in range(len(self.robots)):
+            self.robots[i].draw()
 
     def _plot_handler(self, sig, frame):
         plt.pause(0.001)
@@ -292,6 +388,3 @@ class PyPlot(Connector):
         self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         self.ax.set_zlim3d([0.0, 2 * plot_radius])
-
-
-

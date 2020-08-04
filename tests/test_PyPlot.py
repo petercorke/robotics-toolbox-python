@@ -17,6 +17,7 @@ class TestPyPlot(unittest.TestCase):
         env = rp.PyPlot()
         env.launch()
         env.add(panda)
+        env.step()
         env._plot_handler(None, None)
         env.close()
 
@@ -24,6 +25,6 @@ class TestPyPlot(unittest.TestCase):
         # TODO remove these as implemented
         env = rp.PyPlot()
         env.reset()
-        env.step()
+        
         env.restart()
         env.remove()

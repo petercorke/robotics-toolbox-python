@@ -91,6 +91,8 @@ class SerialLink(object):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
 
+        self.control_type = 'v'
+
         # Check the DH convention
         self._check_dh()
 
@@ -279,6 +281,10 @@ class SerialLink(object):
         return self._qdd
 
     @property
+    def control_type(self):
+        return self._control_type
+
+    @property
     def d(self):
         v = []
         for i in range(self.n):
@@ -323,6 +329,14 @@ class SerialLink(object):
     @manuf.setter
     def manuf(self, manuf_new):
         self._manuf = manuf_new
+
+    @control_type.setter
+    def control_type(self, cn):
+        if cn == 'p' or cn == 'v' or cn == 'a':
+            self._control_type = cn
+        else:
+            raise ValueError(
+                'Control type must be one of \'p\', \'v\', or \'a\'')
 
     @gravity.setter
     @_listen_rne

@@ -1,42 +1,32 @@
 
 import ropy as rp
 import spatialmath as sm
-# import numpy as np
-# import ctypes
-# import frne
-# import matplotlib.pyplot as plt
-
-# import time
-
-# T1 = sm.SE3.Tx(1)
-# plt.figure() # create a new figure
-# sm.SE3().plot(frame='0', dims=[-3,3], color='black')
-# T1.plot(frame='1')
-
+import numpy as np
+import time
 
 env = rp.PyPlot()
-# env2 = rp.ROS()
-env.launch()
+env.launch('Panda Resolved-Rate Motion Control Example')
 
-puma = rp.PandaMDH()
-puma.base = sm.SE3.Rz(0.4)
-puma.q = puma.qr
+panda = rp.PandaMDH()
+panda.q = panda.qr
 
-# puma.q = [0, -1.57079632679490, -1.57079632679490, 1.57079632679490, 0, -1.57079632679490, 1.57079632679490]
+Tep = sm.SE3(np.copy(panda.fkine().A))
+Tep = Tep * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
 
-puma.qmincon()
+arrived = False
+env.add(panda)
 
-env.add(puma)
-# env2.add(puma)
+dt = 0.05
 
-# while q:
-#     delay(x)
-#     env.Step()
+while not arrived:
+
+    start = time.time()
+    v, arrived = rp.p_servo(panda.fkine(), Tep, 0.1)
+    panda.qd = np.linalg.pinv(panda.jacobe()) @ v
+    env.step()
+    stop = time.time()
+
+    if stop - start < dt:
+        time.sleep(dt - (stop - start))
 
 env.hold()
-
-# puma.q
-
-# puma.jacob_dot(puma.qr, puma.qr)
-
-# a = puma.maniplty()
