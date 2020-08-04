@@ -22,12 +22,117 @@ matplotlib.rcParams['axes.labelpad'] = 1
 plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 
+class RobotPlot(object):
+
+    def __init__(self, robot, ax):
+
+        super(RobotPlot, self).__init__()
+
+        self.robot = robot
+        self.ax = ax
+
+        # Line plot of robot links
+        self.links = None
+
+        # Z-axis Coordinate frame (quiver) of joints
+        self.joints = []
+
+        # Text of the robots name
+        self.name = None
+
+        # Shadow of the the line plot on the x-y axis
+        self.sh_links = None
+
+        # Coordinate frame of the ee (three quivers)
+        self.ee_axes = []
+
+        # Robot has been drawn
+        self.drawn = False
+
+    def draw(self):
+        if not self.drawn:
+            self.init()
+
+        # plot.set_xdata(loc[0, :])
+        # plot.set_ydata(loc[1, :])
+        # plot.set_3d_properties(loc[2, :])
+
+    def init(self):
+
+        self.drawn = True
+
+        # Joint and ee poses
+        T = self.robot.allfkine()
+        Te = self.robot.fkine()
+        Tb = self.robot.base
+
+        # Joint and ee position matrix
+        loc = np.zeros([3, self.robot.n + 2])
+        loc[:, 0] = Tb.t
+        loc[:, self.robot.n + 1] = Te.t
+
+        # Joint axes position matrix
+        joints = np.zeros((3, self.robot.n))
+
+        # Axes arrow transforms
+        Tjx = sm.SE3.Tx(0.06)
+        Tjy = sm.SE3.Ty(0.06)
+        Tjz = sm.SE3.Tz(0.06)
+
+        # ee axes arrows
+        Tex = Te * Tjx
+        Tey = Te * Tjy
+        Tez = Te * Tjz
+
+        # Joint axes arrow calcs
+        for i in range(self.robot.n):
+            loc[:, i + 1] = T[i].t
+            Tji = T[i] * Tjz
+            joints[:, i] = Tji.t
+
+        # Plot robot name
+        self.name = self.ax.text(
+            0.05, 0, 0.05, self.robot.name, (Tb.t[0], Tb.t[1], 0))
+
+        # Plot ee coordinate frame
+        self.ee_axes.append(
+            self._plot_quiver(loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2))
+        self.ee_axes.append(
+            self._plot_quiver(loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2))
+        self.ee_axes.append(
+            self._plot_quiver(loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2))
+
+        # Plot joint z coordinates
+        for i in range(self.robot.n):
+            self.joints.append(
+                self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2))
+
+        # Plot the robot links
+        self.links = self.ax.plot(
+            loc[0, :], loc[1, :], loc[2, :], linewidth=5, color='#E16F6D')
+
+        # Plot the shadow of the robot links
+        self.sh_links = self.ax.plot(
+            loc[0, :], loc[1, :], zs=0, zdir='z', linewidth=3, color='#464646')
+
+    def _plot_quiver(self, p0, p1, col, width):
+        qv = self.ax.quiver(
+            p0[0], p0[1], p0[2],
+            p1[0] - p0[0],
+            p1[1] - p0[1],
+            p1[2] - p0[2],
+            linewidth=width,
+            color=col
+        )
+
+        return qv
+
+
 class PyPlot(Connector):
 
     def __init__(self):
 
         super(PyPlot, self).__init__()
-
         self.robots = []
 
     def launch(self):
@@ -126,12 +231,12 @@ class PyPlot(Connector):
         super().add()
 
         if isinstance(ob, rp.SerialLink):
-            self.robots.append([
-                ob,
-                []
-            ])
 
-            self._draw_robot(self.robots[0])
+            self.robots.append(RobotPlot(ob, self.ax))
+
+            self.robots[0].draw()
+
+            # self._draw_robot(self.robots[0])
 
         self._set_axes_equal()
 
@@ -153,42 +258,7 @@ class PyPlot(Connector):
     #
 
     def _draw_robot(self, robot_ob):
-
-        robot = robot_ob[0]
-
-        T = robot.allfkine()
-
-        loc = np.zeros([3, robot.n + 1])
-        loc[:, 0] = robot.base.t
-
-        joints = np.zeros((3, robot.n))
-
-        Tj = sm.SE3.Tz(0.1)
-
-        for i in range(robot.n):
-            loc[:, i + 1] = T[i].t
-
-            Tji = T[i] * Tj
-            joints[:, i] = Tji.t
-
-
-
-        # plot.set_xdata(loc[0, :])
-        # plot.set_ydata(loc[1, :])
-        # plot.set_3d_properties(loc[2, :])
-
-        for i in range(robot.n):
-            self.ax.plot(
-                [loc[0, i+1], joints[0, i]],
-                [loc[1, i+1],  joints[1, i]],
-                [loc[2, i+1],  joints[2, i]],
-                linewidth=2,
-                color='#71d0eb')
-
-
-
-        robot_ob[1] = self.ax.plot(
-            loc[0, :], loc[1, :], loc[2, :], linewidth=5)
+        pass
 
     def _plot_handler(self, sig, frame):
         plt.pause(0.001)
@@ -222,3 +292,6 @@ class PyPlot(Connector):
         self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         self.ax.set_zlim3d([0.0, 2 * plot_radius])
+
+
+

@@ -1,6 +1,6 @@
 
 import ropy as rp
-# import spatialmath as sm
+import spatialmath as sm
 # import numpy as np
 # import ctypes
 # import frne
@@ -14,25 +14,26 @@ import ropy as rp
 # T1.plot(frame='1')
 
 
-# env1 = rp.PyPlot()
+env = rp.PyPlot()
 # env2 = rp.ROS()
-# env.launch()
+env.launch()
 
 puma = rp.PandaMDH()
+puma.base = sm.SE3.Rz(0.4)
 puma.q = puma.qr
 
 # puma.q = [0, -1.57079632679490, -1.57079632679490, 1.57079632679490, 0, -1.57079632679490, 1.57079632679490]
 
 puma.qmincon()
 
-# env1.add(puma, 'vis')
+env.add(puma)
 # env2.add(puma)
 
 # while q:
 #     delay(x)
 #     env.Step()
 
-# env.hold()
+env.hold()
 
 # puma.q
 
