@@ -1,5 +1,5 @@
 from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
-from roboticstoolbox import Puma560
+from roboticstoolbox.models import Puma560
 from spatialmath import SE3
 
 
