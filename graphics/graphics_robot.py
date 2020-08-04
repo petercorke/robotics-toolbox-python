@@ -23,7 +23,7 @@ class DefaultJoint:
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
 
         if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
@@ -403,7 +403,7 @@ class RotationalJoint(DefaultJoint):
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
         # Call super init function
         super().__init__(initial_se3, structure, scene, axis_through)
         self.rotation_axis = z_axis_vector
@@ -450,7 +450,7 @@ class PrismaticJoint(DefaultJoint):
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
-    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
         super().__init__(initial_se3, structure, scene, axis_through)
         self.min_translation = None
         self.max_translation = None
@@ -484,7 +484,7 @@ class StaticJoint(DefaultJoint):
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
         super().__init__(initial_se3, structure, scene, axis_through)
 
     def get_joint_type(self):
@@ -512,7 +512,7 @@ class Gripper(DefaultJoint):
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([0, 1, 0])):
+    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
         super().__init__(initial_se3, structure, scene, axis_through)
 
     # TODO close/open gripper
