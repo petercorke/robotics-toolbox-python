@@ -1,5 +1,5 @@
-from vpython import vector, compound, mag, box, color
-from numpy import sign
+from vpython import vector, compound, mag, box
+from numpy import sign, ceil
 from graphics.graphics_text import update_grid_numbers
 from graphics.graphics_object2d import Object2D
 from spatialmath import SE2
@@ -370,6 +370,81 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
                color=vector(colour[0], colour[1], colour[2]))
 
 
+def create_dashed_line(pos1, pos2, scene, colour=None, thickness=0.01):
+    """
+    Create a dashed line from position 1 to position 2.
+
+    :param scene: The scene in which to draw the object
+    :type scene: class:`vpython.canvas`
+    :param pos1: 3D position of one end of the line.
+    :type pos1: class:`vpython.vector`
+    :param pos2: 3D position of the other end of the line.
+    :type pos2: class:`vpython.vector`
+    :param colour: RGB list to colour the line to
+    :type colour: `list`
+    :param thickness: Thickness of the line
+    :type thickness: `float`
+    :raises ValueError: RGB colour must be normalised between 0->1
+    :raises ValueError: Thickness must be greater than 0
+    :return: A box resembling a line
+    :rtype: class:`vpython.box`
+    """
+    # Set default colour
+    # Stops a warning about mutable parameter
+    if colour is None:
+        colour = [0, 0, 0]
+
+    if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+       colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+        raise ValueError("RGB values must be normalised between 0 and 1")
+
+    if thickness < 0.0:
+        raise ValueError("Thickness must be greater than 0")
+
+    # Length of the line using the magnitude
+    line_len = mag(pos2-pos1)
+
+    # Length of one dash
+    dash_len = 0.3
+
+    # Axis direction of the line (to align the box (line) to intersect the two points)
+    axis_dir = pos2 - pos1
+    axis_dir.mag = 1.0
+
+    # Return a compound of boxes of thin width and height to resemble a dashed line
+    dash_positions = []
+    boxes = []
+    pos1 = pos1 + (axis_dir * dash_len/2)  # Translate centre pos to centre of where dashes will originate from
+
+    # Range = number of dashes (vis and invis)
+    for idx in range(0,  int(ceil(line_len / (dash_len / axis_dir.mag)))):
+        # Add every even point (zeroth, second...) to skip gaps between boxes
+        if idx % 2 == 0:
+            dash_positions.append(pos1)
+        pos1 = (pos1 + axis_dir * dash_len)
+        # If the axis between points changes, then the line has surpassed the end point. The line is done
+        check_dir = pos2-pos1
+        check_dir.mag = 1.0
+        print(axis_dir, check_dir)
+        if not vectors_approx_equal(axis_dir, check_dir):
+            break
+
+    for xyz in dash_positions:
+        boxes.append(
+            box(
+                canvas=scene,
+                pos=xyz,
+                axis=axis_dir,
+                length=dash_len,
+                width=thickness,
+                height=thickness,
+                color=vector(colour[0], colour[1], colour[2])
+            )
+        )
+
+    return compound(boxes)
+
+
 def create_marker(scene, x, y, shape, colour=None):
     """
     Draw the shape at the given position
@@ -397,3 +472,18 @@ def create_marker(scene, x, y, shape, colour=None):
 
     # Create the object and return it
     return Object2D(obj_se2, scene, shape, colour)
+
+
+def vectors_approx_equal(v1, v2):
+    """
+    Check whether the vectors are approximately equal.
+    This is used where there is VERY minor floating point differences that can occur in VPython.
+
+    :param v1: Vector 1
+    :type v1: class:`vpython.vector`
+    :param v2: Vector 2
+    :type v2: class:`vpython.vector`
+    :returns: True if vectors are within tolerance
+    :rtype: `bool`
+    """
+    return abs(v1.x - v2.x < 0.001) and abs(v1.y - v2.y < 0.001) and abs(v1.z - v2.z < 0.001)
