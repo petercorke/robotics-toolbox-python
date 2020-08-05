@@ -17,7 +17,7 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from roboticstoolbox.robot.serial_link import *
+from roboticstoolbox.robot.serial_link import SerialLink
 from roboticstoolbox.robot.Link import RevoluteDH
 from math import pi
 import numpy as np
