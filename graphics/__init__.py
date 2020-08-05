@@ -5,4 +5,4 @@ from graphics.graphics_robot import GraphicalRobot, RotationalJoint, PrismaticJo
 from graphics.graphics_object2d import Object2D
 from graphics.graphics_stl import import_object_from_numpy_stl
 # from graphics.graphics_text import  # None needed as of yet
-from graphics.model_puma560 import import_puma_560  # Temp exclusion (may be moved)
+# from graphics.model_puma560 import import_puma_560  # Deprecated, file moved

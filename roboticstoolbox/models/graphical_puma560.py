@@ -1,5 +1,5 @@
 from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
-from roboticstoolbox.models import Puma560
+from roboticstoolbox.models.Puma560 import Puma560
 from spatialmath import SE3
 
 
@@ -24,16 +24,16 @@ def import_puma_560(g_canvas):
 
     # Get the poses for a zero-position
     puma = Puma560()
-    poses = puma.fkine(puma.config('qz'), alltout=True)
+    poses = puma.fkine(puma.qz, alltout=True)
 
     puma560.set_joint_poses([
-        SE3(),  # 0 (Base doesn't change)
-        poses[0],  # 1
-        poses[1],  # 2
-        poses[2],  # 3
-        poses[3],  # 4
-        poses[4],  # 5
-        poses[5]   # 6
+        poses[0],
+        poses[1],
+        poses[2],
+        poses[3],
+        poses[4],
+        poses[5],
+        poses[6]
     ])
 
     return puma560

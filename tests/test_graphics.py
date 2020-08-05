@@ -12,7 +12,7 @@ import graphics.common_functions as common
 import graphics.graphics_canvas as canvas
 import graphics.graphics_robot as robot
 import graphics.graphics_stl as stl
-import graphics.model_puma560 as mdl_puma
+from roboticstoolbox.models.graphical_puma560 import import_puma_560
 
 
 class TestCommonFunctions(unittest.TestCase):
@@ -759,21 +759,21 @@ class TestPuma(unittest.TestCase):
         scene = canvas.GraphicsCanvas3D(title="Test Import Puma560")
 
         # Import puma560
-        robot1 = mdl_puma.import_puma_560(scene)
+        robot1 = import_puma_560(scene)
 
         # Check all joints are added
         self.assertEqual(len(robot1.joints), 7)
 
         # For each joint, check it's in the right pose
         puma = Puma560()
-        correct_poses = puma.fkine(puma.config('qz'), alltout=True)
+        correct_poses = puma.fkine(puma.qz, alltout=True)
 
         # Initial doesn't have an SE3 in correct_poses
         self.assertEqual(common.vpython_to_se3(robot1.joints[0].get_graphic_object()), SE3())
 
         # As the base doesn't have a correct pose, need to offset the check indices
         for idx in range(len(correct_poses)):
-            self.assertEqual(common.vpython_to_se3(robot1.joints[idx+1].get_graphic_object()), correct_poses[idx])
+            self.assertEqual(common.vpython_to_se3(robot1.joints[idx].get_graphic_object()), correct_poses[idx])
 
 
 if __name__ == '__main__':

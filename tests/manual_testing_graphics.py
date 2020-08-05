@@ -14,8 +14,8 @@ Alternatively, executing this file will run the test_puma560_angle_change() func
 from time import sleep
 from numpy import array
 from spatialmath import SE3, SE2
-from roboticstoolbox import Puma560
 import graphics as gph
+from roboticstoolbox.models.graphical_puma560 import import_puma_560, Puma560
 
 
 # Create a canvas on import, to allow clearing between function calls
@@ -67,7 +67,7 @@ def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
     """
-    puma560 = gph.import_puma_560(g_canvas)
+    puma560 = import_puma_560(g_canvas)
     puma560.print_joint_poses()
 
 
@@ -142,25 +142,25 @@ def test_puma560_angle_change():
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
-    puma560 = gph.import_puma_560(g_canvas)
+    puma560 = import_puma_560(g_canvas)
 
     print("Prior Poses")
     puma560.print_joint_poses()
 
-    # Get the poses for a ready-position
-    puma = Puma560()
-    poses = puma.fkine(puma.config('qr'), alltout=True)
-
     sleep(2)
 
+    # Get the poses for a ready-position
+    puma = Puma560()
+    poses = puma.fkine(puma.qr, alltout=True)
+
     puma560.set_joint_poses([
-        SE3(),  # 0 (Base doesn't change)
-        poses[0],  # 1
-        poses[1],  # 2
-        poses[2],  # 3
-        poses[3],  # 4
-        poses[4],  # 5
-        poses[5]  # 6
+        poses[0],
+        poses[1],
+        poses[2],
+        poses[3],
+        poses[4],
+        poses[5],
+        poses[6]
     ])
 
     print("Final Poses")
@@ -171,7 +171,7 @@ def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560(g_canvas)
+    puma560 = import_puma_560(g_canvas)
     puma560.set_reference_visibility(True)
 
     sleep(2)
@@ -184,22 +184,22 @@ def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = gph.import_puma_560(g_canvas)
-
-    # Get the poses for a ready-position
-    puma = Puma560()
-    poses = puma.fkine(puma.config('qr'), alltout=True)
+    puma560 = import_puma_560(g_canvas)
 
     sleep(2)
 
+    # Get the poses for a ready-position
+    puma = Puma560()
+    poses = puma.fkine(puma.qr, alltout=True)
+
     puma560.set_joint_poses([
-        SE3(),  # 0 (Base doesn't change)
-        poses[0],  # 1
-        poses[1],  # 2
-        poses[2],  # 3
-        poses[3],  # 4
-        poses[4],  # 5
-        poses[5]  # 6
+        poses[0],
+        poses[1],
+        poses[2],
+        poses[3],
+        poses[4],
+        poses[5],
+        poses[6]
     ])
 
     sleep(2)
@@ -341,13 +341,15 @@ def test_2d_draw_path():
         [3, 4],
         [4, 4]
     ]
-    g_canvas2.draw_path(path, colour=[1, 0, 0])
+    # g_canvas2.draw_path(path, colour=[1, 0, 0])
+    raise NotImplementedError()
 
 
 def test_2d_create_object():
     g_canvas2 = gph.GraphicsCanvas2D()
 
-    obj = gph.Object2D(SE2(), g_canvas2.scene, 'c')
+    # obj = gph.Object2D(SE2(), g_canvas2.scene, 'c')
+    raise NotImplementedError()
 
 
 if __name__ == "__main__":
