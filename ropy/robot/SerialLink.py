@@ -2025,15 +2025,10 @@ class SerialLink(object):
             # used and how many solutions are determined which have values
             # of -1 or +1.
 
-            # default configuration
-            n1 = -1    # L
-            # n2 = -1    # U
-
-            if not left:
+            if left:
+                n1 = -1
+            else:
                 n1 = 1
-
-            # if elbow_up and n1 == 1:
-            #     n2 = 1
 
             if not elbow_up:
                 if n1 == 1:
@@ -2051,7 +2046,7 @@ class SerialLink(object):
 
             r = np.sqrt(Px**2 + Py**2)
 
-            if (n1 == 1):
+            if n1 == 1:
                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
             else:
                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
