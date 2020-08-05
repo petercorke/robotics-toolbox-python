@@ -72,11 +72,11 @@ html_theme = 'sphinx_rtd_theme'
 
 
 html_theme_options = {
-    'logo': '../../../../figs/icon.png',
-    'github_user': 'jhavl',
-    'github_repo': 'ropy',
-    'logo_name': False,
-    'description': 'Robotics Toolbox for Python',
+    # 'logo': '../../../../figs/icon.png',
+    # 'github_user': 'jhavl',
+    # 'github_repo': 'ropy',
+    # 'logo_name': False,
+    # 'description': 'Robotics Toolbox for Python',
     'analytics_id': 'UA-102222819-3'
     }
 
