@@ -6,6 +6,8 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/petercorke/robotics-toolbox-python/graphs/commit-activity)
 [![GitHub stars](https://img.shields.io/github/stars/petercorke/robotics-toolbox-python.svg?style=social&label=Star)](https://GitHub.com/petercorke/spatialmath-python/stargazers/)
 
+*This is a work in progress and the aim is to have a workable version by end of year.  Watch this space*
+
 # Robotics Toolbox for Python
 
 ## Work in progress
