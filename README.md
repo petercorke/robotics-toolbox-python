@@ -90,8 +90,7 @@ wTe = panda.fkine()
 
 # The desired pose of the robot
 # = Current pose offset 20cm in the x-axis
-wTep = sm.SE3(wTe)
-wTep[0, 3] += 0.2
+wTep = wTe * sm.SE3.Tx(0.2)
 
 # Gain term (lambda) for control minimisation
 Y = 0.005
@@ -146,8 +145,7 @@ wTe = panda.fkine()
 
 # The desired pose of the robot
 # = Current pose offset 20cm in the x-axis
-wTep = sm.SE3(wTe)
-wTep[0, 3] += 0.2
+wTep = wTe * sm.SE3.Tx(0.2)
 
 arrived = False
 while not arrived:
