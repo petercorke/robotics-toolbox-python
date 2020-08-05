@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+"""
+@author Jesse Haviland
+"""
 
 import ropy as rp
 import spatialmath as sm

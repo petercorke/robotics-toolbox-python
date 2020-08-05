@@ -29,9 +29,9 @@ class SerialLink(object):
     :param manufacturer: Manufacturer of the robot
     :type manufacturer: string
     :param base: Locaation of the base
-    :type base: float ndarray(4,4)
+    :type base: SE3
     :param tool: Location of the tool
-    :type tool: float ndarray(4,4)
+    :type tool: SE3
     :param gravity: The gravity vector
     :type n: ndarray(3)
 
