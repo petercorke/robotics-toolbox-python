@@ -8,13 +8,13 @@ import numpy as np
 from matplotlib.widgets import Slider
 
 
-def _mpl_teach(robot, block):
+def _mpl_teach(robot, block, order='xyz'):
 
     # Add text to the plots
     def text_trans(text):
         T = robot.fkine()
         t = np.round(T.t, 3)
-        r = np.round(T.rpy(), 3)
+        r = np.round(T.rpy, 3)
         text[0].set_text("x: {0}".format(t[0]))
         text[1].set_text("y: {0}".format(t[1]))
         text[2].set_text("z: {0}".format(t[2]))
@@ -61,7 +61,7 @@ def _mpl_teach(robot, block):
     # Set the pose text
     T = robot.fkine()
     t = np.round(T.t, 3)
-    r = np.round(T.rpy(unit='deg'), 3)
+    r = np.round(T.rpy, 3)
 
     fig.text(
         0.02,  1 - ym + 0.25, "End-effector Pose",
@@ -102,3 +102,5 @@ def _mpl_teach(robot, block):
     # Keep the plot open
     if block:
         env.hold()
+
+    return env
