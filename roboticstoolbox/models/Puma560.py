@@ -17,8 +17,9 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from roboticstoolbox.robot.serial_link import SerialLink
+from roboticstoolbox.robot.serial_link import *
 from roboticstoolbox.robot.Link import RevoluteDH
+from roboticstoolbox.models.graphical_puma560 import *
 from math import pi
 import numpy as np
 
@@ -137,6 +138,41 @@ class Puma560(SerialLink):
             L,
             name="Puma 560",
             manufacturer="Unimation")
+
+    def plot(self, jointconfig, unit='rad'):
+        """
+        Creates a 3D plot of the robot in your web browser
+        :param jointconfig: takes an array or list of joint angles
+        :param unit: unit of angles. radians if not defined
+        :return: a vpython robot object.
+        """
+
+        if type(jointconfig) == list:
+            jointconfig = argcheck.getvector(jointconfig)
+        if unit == 'deg':
+            jointconfig = jointconfig * pi / 180
+        if jointconfig.size == self.length:
+            poses = self.fkine(jointconfig, unit, alltout=True)
+
+        if self.roplot is None:
+            # No current plot, create robot plot
+
+            self.g_canvas = gph.GraphicsCanvas3D()
+            print("canvas created")
+
+            self.roplot = gph.GraphicalRobot(self.g_canvas, self.name)
+
+            self.roplot.append_made_link(create_link_0(self.g_canvas.scene))
+            self.roplot.append_made_link(create_link_1(self.g_canvas.scene))
+            self.roplot.append_made_link(create_link_2(self.g_canvas.scene))
+            self.roplot.append_made_link(create_link_3(self.g_canvas.scene))
+            self.roplot.append_made_link(create_link_4(self.g_canvas.scene))
+            self.roplot.append_made_link(create_link_5(self.g_canvas.scene))
+            self.roplot.append_made_link(create_link_6(self.g_canvas.scene))
+
+        # Move plot
+        self.roplot.set_joint_poses(poses)
+        return
 
     @property
     def qz(self):

@@ -1,42 +1,42 @@
 from graphics.graphics_robot import GraphicalRobot, RotationalJoint, StaticJoint, Gripper
-from roboticstoolbox.models.Puma560 import Puma560
+# from roboticstoolbox.models.Puma560 import Puma560
 from spatialmath import SE3
 
 
-def import_puma_560(g_canvas):
-    """
-    Create a Robot class object based on the puma560 robot
-
-    :param g_canvas: The canvas to display the robot in
-    :type g_canvas: class:`graphics.graphics_canvas.GraphicsCanvas`
-    :return: Puma560 robot
-    :rtype: class:`graphics.graphics_robot.GraphicalRobot`
-    """
-    puma560 = GraphicalRobot(g_canvas, 'Puma560')
-
-    puma560.append_made_link(create_link_0(g_canvas.scene))
-    puma560.append_made_link(create_link_1(g_canvas.scene))
-    puma560.append_made_link(create_link_2(g_canvas.scene))
-    puma560.append_made_link(create_link_3(g_canvas.scene))
-    puma560.append_made_link(create_link_4(g_canvas.scene))
-    puma560.append_made_link(create_link_5(g_canvas.scene))
-    puma560.append_made_link(create_link_6(g_canvas.scene))
-
-    # Get the poses for a zero-position
-    puma = Puma560()
-    poses = puma.fkine(puma.qz, alltout=True)
-
-    puma560.set_joint_poses([
-        poses[0],
-        poses[1],
-        poses[2],
-        poses[3],
-        poses[4],
-        poses[5],
-        poses[6]
-    ])
-
-    return puma560
+# def import_puma_560(g_canvas):
+#     """
+#     Create a Robot class object based on the puma560 robot
+#
+#     :param g_canvas: The canvas to display the robot in
+#     :type g_canvas: class:`graphics.graphics_canvas.GraphicsCanvas`
+#     :return: Puma560 robot
+#     :rtype: class:`graphics.graphics_robot.GraphicalRobot`
+#     """
+#     puma560 = GraphicalRobot(g_canvas, 'Puma560')
+#
+#     puma560.append_made_link(create_link_0(g_canvas.scene))
+#     puma560.append_made_link(create_link_1(g_canvas.scene))
+#     puma560.append_made_link(create_link_2(g_canvas.scene))
+#     puma560.append_made_link(create_link_3(g_canvas.scene))
+#     puma560.append_made_link(create_link_4(g_canvas.scene))
+#     puma560.append_made_link(create_link_5(g_canvas.scene))
+#     puma560.append_made_link(create_link_6(g_canvas.scene))
+#
+#     # Get the poses for a zero-position
+#     puma = Puma560()
+#     poses = puma.fkine(puma.qz, alltout=True)
+#
+#     puma560.set_joint_poses([
+#         poses[0],
+#         poses[1],
+#         poses[2],
+#         poses[3],
+#         poses[4],
+#         poses[5],
+#         poses[6]
+#     ])
+#
+#     return puma560
 
 
 def create_link_0(scene):

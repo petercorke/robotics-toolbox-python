@@ -113,7 +113,7 @@ class SerialLink:
                 qk = jointconfig[k, :]
                 jointpose = SE3(self.base)
                 if alltout:
-                    armpose = []
+                    armpose = [jointpose]
                 for i in range(self.length):
                     jointpose *= self.links[i].A(qk[i])
                     if alltout:
@@ -179,6 +179,7 @@ class SerialLink:
 
                 self.roplot = gph.GraphicalRobot(self.g_canvas, self.name)
 
+                self.roplot.append_link('S', poses[0], 0.001)
                 for i in range(1, len(poses)):
 
                     # calculate length of joint
@@ -196,7 +197,7 @@ class SerialLink:
                 return
         else:
             # Move existing plot
-            self.roplot.set_joint_poses(poses[1:4])
+            self.roplot.set_joint_poses(poses)
             return
 
     def animate(self, q1, q2, unit='rad', frames=10, fps=5):
