@@ -22,6 +22,15 @@ matplotlib.rcParams['axes.labelpad'] = 1
 plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 
+# class Ellipse(object):
+
+#     def __init__(self, ax):
+
+#         super(Ellipse, self).__init__()
+
+#         self.ax = ax
+
+
 class RobotPlot(object):
 
     def __init__(self, robot, ax, readonly):
