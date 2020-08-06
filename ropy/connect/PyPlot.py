@@ -318,7 +318,7 @@ class PyPlot(Connector):
 
         super().remove()
 
-    def hold(self):
+    def hold(self):           # pragma: no cover
         signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
         plt.show()
@@ -333,7 +333,7 @@ class PyPlot(Connector):
             robot = rpl.robot
 
             if rpl.readonly or robot.control_type == 'p':
-                pass
+                pass            # pragma: no cover
 
             elif robot.control_type == 'v':
 
@@ -343,7 +343,8 @@ class PyPlot(Connector):
             elif robot.control_type == 'a':
                 pass
 
-            else:
+            else:            # pragma: no cover
+                # Should be impossible to reach
                 raise ValueError(
                     'Invalid robot.control_type. '
                     'Must be one of \'p\', \'v\', or \'a\'')
