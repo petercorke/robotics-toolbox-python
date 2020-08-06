@@ -3341,12 +3341,12 @@ class SerialLink(object):
         if q is not None:
             self.q = q
 
-        try:
-            return _mpl_teach(self, block)
-        except ModuleNotFoundError:
-            print(
-                'Could not find matplotlib.'
-                ' Matplotlib required for this function')
+        # try:
+        return _mpl_teach(self, block)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')
 
     def plot(self, block=True, q=None, dt=50):
         '''
@@ -3381,9 +3381,9 @@ class SerialLink(object):
 
         '''
 
-        try:
-            return _plot(self, block, q, dt)
-        except ModuleNotFoundError:
-            print(
-                'Could not find matplotlib.'
-                ' Matplotlib required for this function')
+        # try:
+        return _plot(self, block, q, dt)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')

@@ -1355,4 +1355,28 @@ class TestSerialLink(unittest.TestCase):
     def test_teach(self):
         panda = rp.PandaMDH()
         panda.q = panda.qr
-        panda.teach(False)
+        e = panda.teach(block=False)
+        e.close()
+
+        e2 = panda.teach(block=False, q=panda.qr)
+        e2.close()
+
+    def test_plot(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.plot(block=False)
+        e.close()
+
+    def test_plot_traj(self):
+        panda = rp.PandaMDH()
+        q = np.random.rand(7, 3)
+        e = panda.plot(block=False, q=q, dt=0)
+        e.close()
+
+    def test_control_type(self):
+        panda = rp.PandaMDH()
+
+        panda.control_type = 'p'
+
+        with self.assertRaises(ValueError):
+            panda.control_type = 'z'
