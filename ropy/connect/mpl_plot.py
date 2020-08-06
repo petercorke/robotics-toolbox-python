@@ -41,7 +41,7 @@ def _plot(robot, block, q, dt):
             time.sleep(dt/1000)
 
     # Keep the plot open
-    if block:
+    if block:           # pragma: no cover
         env.hold()
 
     return env

@@ -11,7 +11,7 @@ from matplotlib.widgets import Slider
 def _mpl_teach(robot, block, order='xyz'):
 
     # Add text to the plots
-    def text_trans(text):
+    def text_trans(text):  # pragma: no cover
         T = robot.fkine()
         t = np.round(T.t, 3)
         r = np.round(T.rpy, 3)
@@ -23,7 +23,7 @@ def _mpl_teach(robot, block, order='xyz'):
         text[5].set_text("y: {0}".format(r[2]))
 
     # Update the robot state in mpl and the text
-    def update(val, text):
+    def update(val, text):  # pragma: no cover
         for i in range(robot.n):
             robot.q[i] = sjoint[i].val * np.pi/180
 
@@ -54,7 +54,7 @@ def _mpl_teach(robot, block, order='xyz'):
 
     qlim = np.copy(robot.qlim) * 180/np.pi
 
-    if not np.all(qlim != 0):
+    if np.all(qlim == 0):
         qlim[0, :] = -180
         qlim[1, :] = 180
 
@@ -100,7 +100,7 @@ def _mpl_teach(robot, block, order='xyz'):
         sjoint[i].on_changed(lambda x: update(x, text))
 
     # Keep the plot open
-    if block:
+    if block:           # pragma: no cover
         env.hold()
 
     return env
