@@ -14,6 +14,7 @@ from spatialmath import SE3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 from ropy.connect.mpl_teach import _mpl_teach
+from ropy.connect.mpl_plot import _plot
 
 
 class SerialLink(object):
@@ -3237,7 +3238,7 @@ class SerialLink(object):
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-
+        :type q: float ndarray(n)
         :retrun qs: The calculated joint values
         :rtype qs: float ndarray(n)
         :retrun success: Optimisation solved (True) or failed (False)
@@ -3300,10 +3301,88 @@ class SerialLink(object):
         else:
             return qstar, success, error
 
-    def teach(self, block=True):
+    def teach(self, block=True, q=None):
+        '''
+        Graphical teach pendant
+
+        env = teach() creates a matplotlib plot which allows the user to
+        "drive" a graphical robot using a graphical slider panel. The
+        robot's inital joint configuration is robot.q. This will block the
+        programs execution.
+
+        env = teach(q) as above except the robot's initial configuration is
+        set to q.
+
+        env = teach(block=False) as avove except the plot is non-blocking. Note
+        that the plot will exit when the python script finishes executing.
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            milliseconds between frames
+        :type dt: int
+
+        :retrun: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        :notes:
+            - The slider limits are derived from the joint limit properties.
+              If not set then
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+
+        '''
+
+        if q is not None:
+            self.q = q
 
         try:
-            _mpl_teach(self, block)
+            return _mpl_teach(self, block)
+        except ModuleNotFoundError:
+            print(
+                'Could not find matplotlib.'
+                ' Matplotlib required for this function')
+
+    def plot(self, block=True, q=None, dt=50):
+        '''
+        Graphical display and animation
+
+        env = plot() displays a graphical view of a robot based on the
+        kinematic model, at it's stored q value. A stick figure polyline
+        joins the origins of the link coordinate frames. This method will be
+        blocking.
+
+        env = plot(q) as above except the robot is plotted with joint angles q
+
+        env = plot(block=False) as avove except the plot in non-blocking. Note
+        that the plot will exit when the python script finishes executing.
+
+        env = plot(q, dt) as above except q is an nxm trajectory of joint
+        angles. This creates an animation of the robot moving through the
+        trajectories with a gap dt milliseconds in between.
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            milliseconds between frames
+        :type dt: int
+
+        :retrun: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        '''
+
+        try:
+            return _plot(self, block, q, dt)
         except ModuleNotFoundError:
             print(
                 'Could not find matplotlib.'
