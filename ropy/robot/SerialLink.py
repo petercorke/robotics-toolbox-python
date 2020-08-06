@@ -13,6 +13,7 @@ from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
+from ropy.connect.mpl_teach import _mpl_teach
 
 
 class SerialLink(object):
@@ -3298,3 +3299,12 @@ class SerialLink(object):
             return qstar[:, 0], success[0], error[0]
         else:
             return qstar, success, error
+
+    def teach(self, block=True):
+
+        try:
+            _mpl_teach(self, block)
+        except ModuleNotFoundError:
+            print(
+                'Could not find matplotlib.'
+                ' Matplotlib required for this function')

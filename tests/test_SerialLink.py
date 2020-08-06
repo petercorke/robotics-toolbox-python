@@ -1351,3 +1351,8 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(q1, qres, decimal=4)
         nt.assert_array_almost_equal(q2[:, 0], qres, decimal=4)
         nt.assert_array_almost_equal(q2[:, 1], qres, decimal=4)
+
+    def test_teach(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        panda.teach(False)
