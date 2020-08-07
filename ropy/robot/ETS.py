@@ -9,8 +9,8 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 from spatialmath.base import tr2rpy
-from ropy.connect.mpl_teach import _mpl_teach
-from ropy.connect.mpl_plot import _plot
+from ropy.backend.PyPlot.teach import _mpl_teach
+from ropy.backend.PyPlot.plot import _plot
 
 
 class ETS(object):

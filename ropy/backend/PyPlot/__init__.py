@@ -1,4 +1,4 @@
-from ropy.connect.PyPlot import PyPlot
+from ropy.backend.PyPlot.PyPlot import PyPlot
 # from ropy.connect.PyPlot2 import PyPlot2
 
 __all__ = [

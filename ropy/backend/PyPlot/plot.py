@@ -11,7 +11,7 @@ from spatialmath.base.argcheck import getvector, verifymatrix
 def _plot(robot, block, q, dt):
 
     # Make an empty 3D figure
-    env = rp.PyPlot()
+    env = rp.backend.PyPlot()
 
     trajn = 1
 

@@ -14,7 +14,7 @@ class TestPyPlot(unittest.TestCase):
 
     def test_PyPlot(self):
         panda = rp.PandaMDH()
-        env = rp.PyPlot()
+        env = rp.backend.PyPlot()
         env.launch()
         env.add(panda)
         env.step()
@@ -23,7 +23,7 @@ class TestPyPlot(unittest.TestCase):
 
     def test_unimplemented(self):
         # TODO remove these as implemented
-        env = rp.PyPlot()
+        env = rp.backend.PyPlot()
         env.reset()
         
         env.restart()

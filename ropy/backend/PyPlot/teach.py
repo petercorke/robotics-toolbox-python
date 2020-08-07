@@ -33,7 +33,7 @@ def _mpl_teach(robot, block, order='xyz'):
         env.step(0)
 
     # Make an empty 3D figure
-    env = rp.PyPlot()
+    env = rp.backend.PyPlot()
 
     # Add the robot to the figure in readonly mode
     env.launch('Teach ' + robot.name)

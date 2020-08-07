@@ -13,8 +13,8 @@ from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
-from ropy.connect.mpl_teach import _mpl_teach
-from ropy.connect.mpl_plot import _plot
+from ropy.backend.PyPlot.teach import _mpl_teach
+from ropy.backend.PyPlot.plot import _plot
 
 
 class SerialLink(object):

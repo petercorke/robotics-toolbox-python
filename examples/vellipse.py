@@ -6,10 +6,10 @@
 import ropy as rp
 import numpy as np
 import spatialmath as sm
-from ropy.connect.PyPlot import Ellipse
+from ropy.backend.PyPlot.PyPlot import Ellipse
 import time
 
-env = rp.PyPlot()
+env = rp.backend.PyPlot()
 env.launch('Panda Resolved-Rate Motion Control Example')
 
 panda = rp.PandaMDH()
@@ -37,7 +37,6 @@ while not arrived:
     stop = time.time()
 
     if stop - start < dt:
-        print("Hello")
         time.sleep(dt - (stop - start))
 
 env.hold()
