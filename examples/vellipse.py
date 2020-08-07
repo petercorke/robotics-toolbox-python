@@ -6,12 +6,10 @@
 import ropy as rp
 import numpy as np
 import spatialmath as sm
-# from ropy.backend.PyPlot.PyPlot import Ellipse
 import time
 
 panda = rp.PandaMDH()
 panda.q = panda.qr
-# panda.q = [0, -3, 0, -2.3, 0, 2, 0]
 
 vell = panda.vellipse(centre='ee')
 
@@ -29,10 +27,6 @@ dt = 0.05
 
 while not arrived:
     start = time.time()
-
-    # A = panda.jacobe()[3:, 3:] @ np.transpose(panda.jacobe()[3:, 3:])
-    # ell.make_ellipsoid(A, centre=panda.fkine().t)
-    # ell.draw_ellipsoid(env.ax)
 
     v, arrived = rp.p_servo(panda.fkine(), Tep, 0.5)
     panda.qd = np.linalg.pinv(panda.jacobe()) @ v
