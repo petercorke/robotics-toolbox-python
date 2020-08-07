@@ -22,7 +22,7 @@ Tep = panda.fkine() * sm.SE3.Tx(-0.4) * sm.SE3.Tz(0.4) * sm.SE3.Rz(np.pi)
 
 arrived = False
 
-env.add(panda, display=True)
+env.add(panda)
 env.add(vell)
 
 dt = 0.05

@@ -14,11 +14,10 @@ class EllipsePlot(object):
         super(EllipsePlot, self).__init__()
 
         try:
-            print(centre)
             centre = getvector(centre, 3)
         except TypeError:
             if centre != 'ee':
-                ValueError(
+                raise ValueError(
                     'Centre must be a three vector or \'ee\' meaning'
                     'end-effector')
 

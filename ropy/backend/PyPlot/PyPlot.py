@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import signal
 from ropy.backend.PyPlot.RobotPlot import RobotPlot
 from ropy.backend.PyPlot.EllipsePlot import EllipsePlot
-from spatialmath.base.argcheck import getvector, verifymatrix
+from spatialmath.base.argcheck import getvector
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -42,10 +42,7 @@ class PyPlot(Connector):
 
         self.limits = limits
         if limits is not None:
-            # try:
             self.limits = getvector(limits, 6)
-            # except ValueError:
-            #     verifymatrix()
 
         projection = 'ortho'
         labels = ['X', 'Y', 'Z']
@@ -142,7 +139,7 @@ class PyPlot(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob, readonly=False, display=False):
+    def add(self, ob, readonly=False, display=True):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of

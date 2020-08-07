@@ -21,10 +21,19 @@ class TestPyPlot(unittest.TestCase):
         env._plot_handler(None, None)
         env.close()
 
+    def test_PyPlot_invisible(self):
+        panda = rp.PandaMDH()
+        env = rp.backend.PyPlot()
+        env.launch()
+        env.add(panda, display=False)
+        env.step()
+        env._plot_handler(None, None)
+        env.close()
+
     def test_unimplemented(self):
         # TODO remove these as implemented
         env = rp.backend.PyPlot()
         env.reset()
-        
+
         env.restart()
         env.remove()

@@ -1387,3 +1387,21 @@ class TestSerialLink(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             panda.control_type = 'z'
+
+    def test_plot_vellipse(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+
+        e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+        e.close()
+
+        e = panda.plot_vellipse(
+            block=False, q=panda.qr, centre='ee', opt='rot')
+        e.step(0)
+        e.close()
+
+        with self.assertRaises(TypeError):
+            panda.plot_vellipse(vellipse=10)
+
+        with self.assertRaises(ValueError):
+            panda.plot_vellipse(centre='ff')

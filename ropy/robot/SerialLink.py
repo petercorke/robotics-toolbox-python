@@ -3476,6 +3476,6 @@ class SerialLink(object):
             self.q = q
 
         if vellipse is None:
-            vell = self.vellipse(q=q, opt=opt, centre=centre)
+            vellipse = self.vellipse(q=q, opt=opt, centre=centre)
 
-        return _plot_vellipse(vell, block, limits)
+        return _plot_vellipse(vellipse, block, limits)
