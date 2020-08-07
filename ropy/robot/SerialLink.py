@@ -3391,7 +3391,7 @@ class SerialLink(object):
 
     def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
         '''
-        Creare velocity ellipsoid object for plotting
+        Create velocity ellipsoid object for plotting
 
         env = vellipse() creates a velocity ellipsoid for the robot at
         pose robot.q. The ellipsoid is centered at the origin.
