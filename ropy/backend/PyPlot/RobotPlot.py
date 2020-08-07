@@ -9,12 +9,16 @@ import spatialmath as sm
 
 class RobotPlot(object):
 
-    def __init__(self, robot, ax, readonly):
+    def __init__(self, robot, ax, readonly, display=True):
 
         super(RobotPlot, self).__init__()
 
         # Readonly - True for this robot is for displaying only
         self.readonly = readonly
+
+        # To show to robot in the plot or not
+        # If not displayed, the robot is still simulated
+        self.display = display
 
         self.robot = robot
         self.ax = ax
@@ -38,6 +42,9 @@ class RobotPlot(object):
         self.drawn = False
 
     def draw(self):
+        if not self.display:
+            return
+
         if not self.drawn:
             self.init()
             return

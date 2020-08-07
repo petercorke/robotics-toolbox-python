@@ -10,7 +10,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import signal
 from ropy.backend.PyPlot.RobotPlot import RobotPlot
-from ropy.backend.PyPlot.Ellipse import Ellipse
+from ropy.backend.PyPlot.EllipsePlot import EllipsePlot
+from spatialmath.base.argcheck import getvector, verifymatrix
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -31,13 +32,20 @@ class PyPlot(Connector):
         self.robots = []
         self.ellipses = []
 
-    def launch(self, name=None):
+    def launch(self, name=None, limits=None):
         '''
         env = launch() launchs a blank 3D matplotlib figure
 
         '''
 
         super().launch()
+
+        self.limits = limits
+        if limits is not None:
+            # try:
+            self.limits = getvector(limits, 6)
+            # except ValueError:
+            #     verifymatrix()
 
         projection = 'ortho'
         labels = ['X', 'Y', 'Z']
@@ -61,6 +69,11 @@ class PyPlot(Connector):
         self.ax.set_xlabel(labels[0])
         self.ax.set_ylabel(labels[1])
         self.ax.set_zlabel(labels[2])
+
+        if limits is not None:
+            self.ax.set_xlim3d([limits[0], limits[1]])
+            self.ax.set_ylim3d([limits[2], limits[3]])
+            self.ax.set_zlim3d([limits[4], limits[5]])
 
         plt.ion()
         plt.show()
@@ -89,6 +102,7 @@ class PyPlot(Connector):
         self._step_robots(dt)
 
         plt.ioff()
+        self._draw_ellipses()
         self._draw_robots()
         self._set_axes_equal()
         plt.ion()
@@ -128,7 +142,7 @@ class PyPlot(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob, readonly=False):
+    def add(self, ob, readonly=False, display=False):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -139,8 +153,13 @@ class PyPlot(Connector):
         super().add()
 
         if isinstance(ob, rp.SerialLink):
-            self.robots.append(RobotPlot(ob, self.ax, readonly))
+            self.robots.append(RobotPlot(ob, self.ax, readonly, display))
             self.robots[len(self.robots) - 1].draw()
+
+        elif isinstance(ob, EllipsePlot):
+            ob.ax = self.ax
+            self.ellipses.append(ob)
+            self.ellipses[len(self.ellipses) - 1].draw()
 
         self._set_axes_equal()
 
@@ -191,6 +210,11 @@ class PyPlot(Connector):
         for i in range(len(self.robots)):
             self.robots[i].draw()
 
+    def _draw_ellipses(self):
+
+        for i in range(len(self.ellipses)):
+            self.ellipses[i].draw()
+
     def _plot_handler(self, sig, frame):
         plt.pause(0.001)
 
@@ -203,6 +227,9 @@ class PyPlot(Connector):
 
         '''
 
+        if self.limits is not None:
+            return
+
         self.ax.autoscale(enable=True, axis='both', tight=False)
 
         x_limits = self.ax.get_xlim3d()
@@ -214,7 +241,7 @@ class PyPlot(Connector):
         y_range = abs(y_limits[1] - y_limits[0])
         y_middle = np.mean(y_limits)
         z_range = abs(z_limits[1] - z_limits[0])
-        # z_middle = np.mean(z_limits)
+        z_middle = np.mean(z_limits)
 
         # The plot bounding box is a sphere in the sense of the infinity
         # norm, hence I call half the max range the plot radius.
@@ -222,4 +249,4 @@ class PyPlot(Connector):
 
         self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-        self.ax.set_zlim3d([0.0, 2 * plot_radius])
+        self.ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
