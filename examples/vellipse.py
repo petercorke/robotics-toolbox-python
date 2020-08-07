@@ -16,7 +16,7 @@ vell = panda.vellipse(centre='ee')
 env = rp.backend.PyPlot()
 env.launch('Panda Velocity Ellipse Example')
 
-Tep = panda.fkine() * sm.SE3.Tx(-0.4) * sm.SE3.Tz(0.4) * sm.SE3.Rz(np.pi)
+Tep = panda.fkine() * sm.SE3.Tx(-0.3) * sm.SE3.Tz(0.3) * sm.SE3.Rz(np.pi)
 
 arrived = False
 
