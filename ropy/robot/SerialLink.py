@@ -15,6 +15,7 @@ from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 from ropy.backend.PyPlot.teach import _mpl_teach
 from ropy.backend.PyPlot.plot import _plot
+from ropy.backend.PyPlot.vellipse import _vellipse, _plot_vellipse
 
 
 class SerialLink(object):
@@ -3308,7 +3309,7 @@ class SerialLink(object):
         env = teach() creates a matplotlib plot which allows the user to
         "drive" a graphical robot using a graphical slider panel. The
         robot's inital joint configuration is robot.q. This will block the
-        programs execution.
+        programs execution. The plot will autoscale with an aspect ratio of 1.
 
         env = teach(q) as above except the robot's initial configuration is
         set to q.
@@ -3355,7 +3356,7 @@ class SerialLink(object):
         env = plot() displays a graphical view of a robot based on the
         kinematic model, at it's stored q value. A stick figure polyline
         joins the origins of the link coordinate frames. This method will be
-        blocking.
+        blocking. The plot will autoscale with an aspect ratio of 1.
 
         env = plot(q) as above except the robot is plotted with joint angles q
 
@@ -3387,3 +3388,94 @@ class SerialLink(object):
         #     print(
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
+
+    def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+        '''
+        Creare velocity ellipsoid object for plotting
+
+        env = vellipse() creates a velocity ellipsoid for the robot at
+        pose robot.q. The ellipsoid is centered at the origin.
+
+        env = vellipse(q) as above except the robot is plotted with joint
+        angles q
+
+        env = vellipse(opt) as above except opt is 'trans' or 'rot' will
+        plot either the translational or rotational velocity ellipsoid.
+
+        env = vellipse(centre) as above except centre is either a 3
+        vector or 'ee' which is the centre location of the ellipsoid
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational velocity ellipsoid
+        :type opt: string
+        :param centre:
+        :type centre: list or str('ee')
+
+        :retrun: An EllipsePlot object
+        :rtype: EllipsePlot
+
+        '''
+
+        return _vellipse(self, q=q, opt=opt, centre=centre)
+
+    def plot_vellipse(
+            self, block=True, q=None, vellipse=None,
+            limits=None, opt='trans', centre=[0, 0, 0]):
+        '''
+        Plot the velocity ellipsoid for seriallink manipulator
+
+        env = plot_vellipse() displays the velocity ellipsoid for the robot at
+        pose robot.q. The ellipsoid is centered at the origin. This method
+        will be blocking. The plot will autoscale with an aspect ratio of 1.
+
+        env = plot_vellipse(block=False) as avove except the plot in
+        non-blocking. Note that the plot will exit when the python script
+        finishes executing.
+
+        env = plot_vellipse(q) as above except the robot is plotted with joint
+        angles q
+
+        env = plot_vellipse(vellipse) specifies a custon ellipse to plot. If
+        not supplied this function calculates the vellipse based on q
+
+        env = plot_vellipse(limits) as above except the view limits of the
+        plot are set by limits.
+
+        env = plot_vellipse(opt) as above except opt is 'trans' or 'rot' will
+        plot either the translational or rotational velocity ellipsoid.
+
+        env = plot_vellipse(centre) as above except centre is either a 3
+        vector or 'ee' which is the centre location of the ellipsoid
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param vellipse: the vellocity ellipsoid to plot
+        :type vellipse: EllipsePlot
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale
+        :type limits: ndarray(6)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational velocity ellipsoid
+        :type opt: string
+        :param centre:
+        :type centre: list or str('ee')
+
+        :retrun: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        '''
+
+        if q is not None:
+            self.q = q
+
+        if vellipse is None:
+            vell = self.vellipse(q=q, opt=opt, centre=centre)
+
+        return _plot_vellipse(vell, block, limits)
