@@ -15,7 +15,7 @@ from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 from ropy.backend.PyPlot.teach import _mpl_teach
 from ropy.backend.PyPlot.plot import _plot
-from ropy.backend.PyPlot.vellipse import _vellipse, _plot_vellipse
+from ropy.backend.PyPlot.functions import _fellipse, _vellipse, _plot_ellipse
 
 
 class SerialLink(object):
@@ -3436,7 +3436,7 @@ class SerialLink(object):
 
     def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
         '''
-        Create velocity ellipsoid object for plotting
+        Create a velocity ellipsoid object for plotting
 
         env = vellipse() creates a velocity ellipsoid for the robot at
         pose robot.q. The ellipsoid is centered at the origin.
@@ -3465,6 +3465,38 @@ class SerialLink(object):
         '''
 
         return _vellipse(self, q=q, opt=opt, centre=centre)
+
+    def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+        '''
+        Create a force ellipsoid object for plotting
+
+        env = fellipse() creates a force ellipsoid for the robot at
+        pose robot.q. The ellipsoid is centered at the origin.
+
+        env = fellipse(q) as above except the robot is plotted with joint
+        angles q
+
+        env = fellipse(opt) as above except opt is 'trans' or 'rot' will
+        plot either the translational or rotational force ellipsoid.
+
+        env = fellipse(centre) as above except centre is either a 3
+        vector or 'ee' which is the centre location of the ellipsoid
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational force ellipsoid
+        :type opt: string
+        :param centre:
+        :type centre: list or str('ee')
+
+        :retrun: An EllipsePlot object
+        :rtype: EllipsePlot
+
+        '''
+
+        return _fellipse(self, q=q, opt=opt, centre=centre)
 
     def plot_vellipse(
             self, block=True, q=None, vellipse=None,
@@ -3538,6 +3570,82 @@ class SerialLink(object):
         if vellipse is None:
             vellipse = self.vellipse(q=q, opt=opt, centre=centre)
 
-        return _plot_vellipse(
+        return _plot_ellipse(
             vellipse, block, limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+    def plot_fellipse(
+            self, block=True, q=None, fellipse=None,
+            limits=None, opt='trans', centre=[0, 0, 0],
+            jointaxes=True, eeframe=True, shadow=True, name=True):
+        '''
+        Plot the force ellipsoid for seriallink manipulator
+
+        env = plot_fellipse() displays the force ellipsoid for the robot at
+        pose robot.q. The ellipsoid is centered at the origin. This method
+        will be blocking. The plot will autoscale with an aspect ratio of 1.
+
+        env = plot_fellipse(block=False) as avove except the plot in
+        non-blocking. Note that the plot will exit when the python script
+        finishes executing.
+
+        env = plot_fellipse(q) as above except the robot is plotted with joint
+        angles q
+
+        env = plot_fellipse(fellipse) specifies a custon ellipse to plot. If
+        not supplied this function calculates the fellipse based on q
+
+        env = plot_fellipse(limits) as above except the view limits of the
+        plot are set by limits.
+
+        env = plot_fellipse(opt) as above except opt is 'trans' or 'rot' will
+        plot either the translational or rotational force ellipsoid.
+
+        env = plot_fellipse(centre) as above except centre is either a 3
+        vector or 'ee' which is the centre location of the ellipsoid
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param fellipse: the vellocity ellipsoid to plot
+        :type fellipse: EllipsePlot
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational force ellipsoid
+        :type opt: string
+        :param centre: The coordinates to plot the fellipse [x, y, z] or 'ee'
+            to plot at the end-effector location
+        :type centre: list or str('ee')
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :retrun: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        '''
+
+        if q is not None:
+            self.q = q
+
+        if fellipse is None:
+            fellipse = self.fellipse(q=q, opt=opt, centre=centre)
+
+        return _plot_ellipse(
+            fellipse, block, limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)

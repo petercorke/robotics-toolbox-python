@@ -42,6 +42,10 @@ def _plot(
         vell = robot.vellipse(centre='ee')
         env.add(vell)
 
+    if fellipse:
+        fell = robot.fellipse(centre='ee')
+        env.add(fell)
+
     if trajn != 1:
         for i in range(trajn):
             robot.q = q[:, i]

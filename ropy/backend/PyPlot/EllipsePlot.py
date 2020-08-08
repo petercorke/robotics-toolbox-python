@@ -9,7 +9,7 @@ from spatialmath.base.argcheck import getvector
 
 class EllipsePlot(object):
 
-    def __init__(self, robot, opt='trans', centre=[0, 0, 0], scale=0.1):
+    def __init__(self, robot, etype, opt='trans', centre=[0, 0, 0], scale=0.1):
 
         super(EllipsePlot, self).__init__()
 
@@ -27,6 +27,13 @@ class EllipsePlot(object):
         self.centre = centre
         self.ax = None
         self.scale = scale
+
+        if etype == 'v':
+            self.vell = True
+            self.name = 'Velocity Ellipse'
+        elif etype == 'f':
+            self.vell = False
+            self.name = 'Force Ellipse'
 
     def draw(self):
         self.make_ellipsoid()
@@ -50,6 +57,10 @@ class EllipsePlot(object):
         elif self.opt == 'rot':
             J = self.robot.jacobe()[:3, :]
             A = J @ J.T
+
+        if not self.vell:
+            # Do the extra step for the force ellipse
+            A = np.linalg.inv(A)
 
         if isinstance(self.centre, str) and self.centre == 'ee':
             centre = self.robot.fkine().t
