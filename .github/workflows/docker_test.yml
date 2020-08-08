@@ -1,0 +1,25 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+    - uses: actions/checkout@v2
+    - name: Install docker
+      run: |
+        sudo apt install docker
+        sudo docker run -e PLAT=manylinux2010_x86_64 -v ./:/io quay.io/pypa/manylinux2010_x86_64 ls
