@@ -22,4 +22,4 @@ jobs:
     - name: Install docker
       run: |
         sudo apt install docker
-        sudo docker run -e PLAT=manylinux2010_x86_64 -v ./:/io quay.io/pypa/manylinux2010_x86_64 ls
+        docker run -e PLAT=manylinux2010_x86_64 -v ./:/io quay.io/pypa/manylinux2010_x86_64 ls
