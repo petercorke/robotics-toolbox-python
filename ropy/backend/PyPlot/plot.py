@@ -10,6 +10,7 @@ from spatialmath.base.argcheck import getvector, verifymatrix
 
 def _plot(
         robot, block, q, dt, limits=None,
+        vellipse=False, fellipse=False,
         jointaxes=True, eeframe=True, shadow=True, name=True):
 
     # Make an empty 3D figure
@@ -36,6 +37,10 @@ def _plot(
     env.add(
         robot, readonly=True,
         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+    if vellipse:
+        vell = robot.vellipse(centre='ee')
+        env.add(vell)
 
     if trajn != 1:
         for i in range(trajn):

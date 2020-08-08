@@ -16,4 +16,4 @@ panda.q = panda.qr
 q = np.random.rand(7, 100)
 
 # Plot the joint trajectory with a 50ms delay between configurations
-panda.plot(q=q, dt=50)
+panda.plot(q=q, dt=50, vellipse=True)

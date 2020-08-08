@@ -3368,6 +3368,7 @@ class SerialLink(object):
 
     def plot(
             self, block=True, q=None, dt=50, limits=None,
+            vellipse=False, fellipse=False,
             jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Graphical display and animation
@@ -3397,6 +3398,12 @@ class SerialLink(object):
         :param limits: Custom view limits for the plot. If not supplied will
             autoscale, [x1, x2, y1, y2, z1, z2]
         :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
             which the joint revolves around(revolute joint) or translates
             along (prosmatic joint)
@@ -3420,6 +3427,7 @@ class SerialLink(object):
         # try:
         return _plot(
             self, block, q, dt, limits,
+            vellipse=vellipse, fellipse=fellipse,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
         # except ModuleNotFoundError:
         #     print(
@@ -3501,7 +3509,8 @@ class SerialLink(object):
         :param opt: 'trans' or 'rot' will plot either the translational or
             rotational velocity ellipsoid
         :type opt: string
-        :param centre:
+        :param centre: The coordinates to plot the vellipse [x, y, z] or 'ee'
+            to plot at the end-effector location
         :type centre: list or str('ee')
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
             which the joint revolves around(revolute joint) or translates

@@ -14,7 +14,9 @@ panda.q = panda.qr
 vell = panda.vellipse(centre='ee')
 
 env = rp.backend.PyPlot()
-env.launch('Panda Velocity Ellipse Example')
+env.launch(
+    'Panda Velocity Ellipse Example',
+    limits=[-0.2, 0.6, -0.4, 0.4, 0, 0.8])
 
 Tep = panda.fkine() * sm.SE3.Tx(-0.3) * sm.SE3.Tz(0.3) * sm.SE3.Rz(np.pi)
 
