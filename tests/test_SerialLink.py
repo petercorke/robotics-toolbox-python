@@ -1405,3 +1405,33 @@ class TestSerialLink(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             panda.plot_vellipse(centre='ff')
+
+    def test_plot_fellipse(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+
+        e = panda.plot_fellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+        e.close()
+
+        e = panda.plot_fellipse(
+            block=False, q=panda.qr, centre='ee', opt='rot')
+        e.step(0)
+        e.close()
+
+        with self.assertRaises(TypeError):
+            panda.plot_fellipse(fellipse=10)
+
+        with self.assertRaises(ValueError):
+            panda.plot_fellipse(centre='ff')
+
+    def test_plot_with_vellipse(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.plot(block=False, vellipse=True)
+        e.close()
+
+    def test_plot_with_fellipse(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.plot(block=False, fellipse=True)
+        e.close()
