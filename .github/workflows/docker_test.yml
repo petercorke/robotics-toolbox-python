@@ -21,4 +21,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install docker
       run: |
-        docker run -e PLAT=manylinux2010_x86_64 quay.io/pypa/manylinux2010_x86_64 ls
+        docker run -e PLAT=manylinux2010_x86_64 -v ${{GITHUB_WORKSPACE}}:/io quay.io/pypa/manylinux2010_x86_64 ls /io
