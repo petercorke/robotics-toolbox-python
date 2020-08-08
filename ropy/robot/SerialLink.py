@@ -3302,7 +3302,9 @@ class SerialLink(object):
         else:
             return qstar, success, error
 
-    def teach(self, block=True, q=None):
+    def teach(
+            self, block=True, q=None, limits=None,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Graphical teach pendant
 
@@ -3322,9 +3324,22 @@ class SerialLink(object):
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
         :retrun: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -3343,13 +3358,17 @@ class SerialLink(object):
             self.q = q
 
         # try:
-        return _mpl_teach(self, block)
+        return _mpl_teach(
+            self, block, limits=limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
         # except ModuleNotFoundError:
         #     print(
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
 
-    def plot(self, block=True, q=None, dt=50):
+    def plot(
+            self, block=True, q=None, dt=50, limits=None,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Graphical display and animation
 
@@ -3375,6 +3394,22 @@ class SerialLink(object):
         :param dt: if q is a trajectory, this describes the delay in
             milliseconds between frames
         :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
         :retrun: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -3383,7 +3418,9 @@ class SerialLink(object):
         '''
 
         # try:
-        return _plot(self, block, q, dt)
+        return _plot(
+            self, block, q, dt, limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
         # except ModuleNotFoundError:
         #     print(
         #         'Could not find matplotlib.'
@@ -3423,7 +3460,8 @@ class SerialLink(object):
 
     def plot_vellipse(
             self, block=True, q=None, vellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0]):
+            limits=None, opt='trans', centre=[0, 0, 0],
+            jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Plot the velocity ellipsoid for seriallink manipulator
 
@@ -3458,13 +3496,26 @@ class SerialLink(object):
         :param vellipse: the vellocity ellipsoid to plot
         :type vellipse: EllipsePlot
         :param limits: Custom view limits for the plot. If not supplied will
-            autoscale
+            autoscale, [x1, x2, y1, y2, z1, z2]
         :type limits: ndarray(6)
         :param opt: 'trans' or 'rot' will plot either the translational or
             rotational velocity ellipsoid
         :type opt: string
         :param centre:
         :type centre: list or str('ee')
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
         :retrun: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -3478,4 +3529,6 @@ class SerialLink(object):
         if vellipse is None:
             vellipse = self.vellipse(q=q, opt=opt, centre=centre)
 
-        return _plot_vellipse(vellipse, block, limits)
+        return _plot_vellipse(
+            vellipse, block, limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)

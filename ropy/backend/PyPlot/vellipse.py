@@ -13,7 +13,9 @@ def _vellipse(robot, q=None, opt='trans', centre=[0, 0, 0]):
     return ell
 
 
-def _plot_vellipse(ellipse, block=True, limits=None):
+def _plot_vellipse(
+        ellipse, block=True, limits=None,
+        jointaxes=True, eeframe=True, shadow=True, name=True):
 
     if not isinstance(ellipse, EllipsePlot):
         raise TypeError(
@@ -24,7 +26,9 @@ def _plot_vellipse(ellipse, block=True, limits=None):
     # Add the robot to the figure in readonly mode
     env.launch(ellipse.robot.name + ' Velocity Ellipse', limits=limits)
 
-    env.add(ellipse)
+    env.add(
+        ellipse,
+        jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     # Keep the plot open
     if block:           # pragma: no cover

@@ -8,7 +8,9 @@ import time
 from spatialmath.base.argcheck import getvector, verifymatrix
 
 
-def _plot(robot, block, q, dt):
+def _plot(
+        robot, block, q, dt, limits=None,
+        jointaxes=True, eeframe=True, shadow=True, name=True):
 
     # Make an empty 3D figure
     env = rp.backend.PyPlot()
@@ -27,16 +29,17 @@ def _plot(robot, block, q, dt):
 
     # Add the robot to the figure in readonly mode
     if trajn == 1:
-        env.launch(robot.name + ' Plot')
+        env.launch(robot.name + ' Plot', limits)
     else:
-        env.launch(robot.name + ' Trajectory Plot')
+        env.launch(robot.name + ' Trajectory Plot', limits)
 
-    env.add(robot, readonly=True)
+    env.add(
+        robot, readonly=True,
+        jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     if trajn != 1:
         for i in range(trajn):
             robot.q = q[:, i]
-            print(robot.q)
             env.step()
             time.sleep(dt/1000)
 

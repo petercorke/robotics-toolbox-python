@@ -8,7 +8,9 @@ import numpy as np
 from matplotlib.widgets import Slider
 
 
-def _mpl_teach(robot, block, order='xyz'):
+def _mpl_teach(
+        robot, block, order='xyz', limits=None,
+        jointaxes=True, eeframe=True, shadow=True, name=True):
 
     # Add text to the plots
     def text_trans(text):  # pragma: no cover
@@ -36,8 +38,10 @@ def _mpl_teach(robot, block, order='xyz'):
     env = rp.backend.PyPlot()
 
     # Add the robot to the figure in readonly mode
-    env.launch('Teach ' + robot.name)
-    env.add(robot, readonly=True)
+    env.launch('Teach ' + robot.name, limits=limits)
+    env.add(
+        robot, readonly=True,
+        jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     fig = env.fig
 

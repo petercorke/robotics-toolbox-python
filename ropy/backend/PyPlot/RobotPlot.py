@@ -9,7 +9,9 @@ import spatialmath as sm
 
 class RobotPlot(object):
 
-    def __init__(self, robot, ax, readonly, display=True):
+    def __init__(
+            self, robot, ax, readonly, display=True,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
 
         super(RobotPlot, self).__init__()
 
@@ -40,6 +42,12 @@ class RobotPlot(object):
 
         # Robot has been drawn
         self.drawn = False
+
+        # Display options
+        self.eeframe = eeframe
+        self.jointaxes = jointaxes
+        self.shadow = shadow
+        self.showname = name
 
     def draw(self):
         if not self.display:
@@ -79,26 +87,31 @@ class RobotPlot(object):
             joints[:, i] = Tji.t
 
         # Remove old ee coordinate frame
-        self.ee_axes[0].remove()
-        self.ee_axes[1].remove()
-        self.ee_axes[2].remove()
+        if self.eeframe:
+            self.ee_axes[0].remove()
+            self.ee_axes[1].remove()
+            self.ee_axes[2].remove()
+
+            # Plot ee coordinate frame
+            self.ee_axes[0] = \
+                self._plot_quiver(
+                    loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2)
+            self.ee_axes[1] = \
+                self._plot_quiver(
+                    loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2)
+            self.ee_axes[2] = \
+                self._plot_quiver(
+                    loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2)
 
         # Remove oldjoint z coordinates
-        for i in range(self.robot.n):
-            self.joints[i].remove()
+        if self.jointaxes:
+            for i in range(self.robot.n):
+                self.joints[i].remove()
 
-        # Plot ee coordinate frame
-        self.ee_axes[0] = \
-            self._plot_quiver(loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2)
-        self.ee_axes[1] = \
-            self._plot_quiver(loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2)
-        self.ee_axes[2] = \
-            self._plot_quiver(loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2)
-
-        # Plot joint z coordinates
-        for i in range(self.robot.n):
-            self.joints[i] = \
-                self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
+            # Plot joint z coordinates
+            for i in range(self.robot.n):
+                self.joints[i] = \
+                    self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
 
         # Update the robot links
         self.links[0].set_xdata(loc[0, :])
@@ -106,9 +119,10 @@ class RobotPlot(object):
         self.links[0].set_3d_properties(loc[2, :])
 
         # Update the shadow of the robot links
-        self.sh_links[0].set_xdata(loc[0, :])
-        self.sh_links[0].set_ydata(loc[1, :])
-        self.sh_links[0].set_3d_properties(0)
+        if self.shadow:
+            self.sh_links[0].set_xdata(loc[0, :])
+            self.sh_links[0].set_ydata(loc[1, :])
+            self.sh_links[0].set_3d_properties(0)
 
     def init(self):
 
@@ -144,29 +158,37 @@ class RobotPlot(object):
             joints[:, i] = Tji.t
 
         # Plot robot name
-        self.name = self.ax.text(
-            0.05, 0, 0.05, self.robot.name, (Tb.t[0], Tb.t[1], 0))
+        if self.showname:
+            self.name = self.ax.text(
+                0.05, 0, 0.05, self.robot.name, (Tb.t[0], Tb.t[1], 0))
 
         # Plot ee coordinate frame
-        self.ee_axes.append(
-            self._plot_quiver(loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2))
-        self.ee_axes.append(
-            self._plot_quiver(loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2))
-        self.ee_axes.append(
-            self._plot_quiver(loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2))
+        if self.eeframe:
+            self.ee_axes.append(
+                self._plot_quiver(
+                    loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2))
+            self.ee_axes.append(
+                self._plot_quiver(
+                    loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2))
+            self.ee_axes.append(
+                self._plot_quiver(
+                    loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2))
 
         # Plot joint z coordinates
-        for i in range(self.robot.n):
-            self.joints.append(
-                self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2))
+        if self.jointaxes:
+            for i in range(self.robot.n):
+                self.joints.append(
+                    self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2))
 
         # Plot the robot links
         self.links = self.ax.plot(
             loc[0, :], loc[1, :], loc[2, :], linewidth=5, color='#E16F6D')
 
         # Plot the shadow of the robot links
-        self.sh_links = self.ax.plot(
-            loc[0, :], loc[1, :], zs=0, zdir='z', linewidth=3, color='#464646')
+        if self.shadow:
+            self.sh_links = self.ax.plot(
+                loc[0, :], loc[1, :], zs=0, zdir='z',
+                linewidth=3, color='#464646')
 
     def _plot_quiver(self, p0, p1, col, width):
         qv = self.ax.quiver(

@@ -139,7 +139,9 @@ class PyPlot(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob, readonly=False, display=True):
+    def add(
+            self, ob, readonly=False, display=True,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -150,7 +152,10 @@ class PyPlot(Connector):
         super().add()
 
         if isinstance(ob, rp.SerialLink):
-            self.robots.append(RobotPlot(ob, self.ax, readonly, display))
+            self.robots.append(
+                RobotPlot(
+                    ob, self.ax, readonly, display,
+                    jointaxes, eeframe, shadow, name))
             self.robots[len(self.robots) - 1].draw()
 
         elif isinstance(ob, EllipsePlot):
