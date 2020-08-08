@@ -13,9 +13,8 @@ from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
-from ropy.backend.PyPlot.teach import _mpl_teach
-from ropy.backend.PyPlot.plot import _plot
-from ropy.backend.PyPlot.functions import _fellipse, _vellipse, _plot_ellipse
+from ropy.backend.PyPlot.functions import \
+    _plot, _teach, _fellipse, _vellipse, _plot_ellipse
 
 
 class SerialLink(object):
@@ -3358,7 +3357,7 @@ class SerialLink(object):
             self.q = q
 
         # try:
-        return _mpl_teach(
+        return _teach(
             self, block, limits=limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
         # except ModuleNotFoundError:
