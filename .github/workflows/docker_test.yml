@@ -21,4 +21,4 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install docker
       run: |
-        docker run -e PLAT=manylinux2010_x86_64 -v ${{ github.workspace }}:/io quay.io/pypa/manylinux2010_x86_64 sudo /io/.github/build-wheels.sh
+        sudo docker run -e PLAT=manylinux2010_x86_64 -v ${{ github.workspace }}:/io quay.io/pypa/manylinux2010_x86_64 /io/.github/build-wheels.sh
