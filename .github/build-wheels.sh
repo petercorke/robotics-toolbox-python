@@ -29,3 +29,5 @@ for PYBIN in /opt/python/cp3[5-8]*/bin/; do
     "${PYBIN}/pip" install ropy --no-index -f /io/wheelhouse
     ("${PYBIN}/pytest")
 done
+
+ls ./wheelhouse
