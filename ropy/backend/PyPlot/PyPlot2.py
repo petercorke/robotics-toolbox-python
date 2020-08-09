@@ -1,395 +1,204 @@
-# #!/usr/bin/env python
-# """
-# @author Jesse Haviland
-# """
+#!/usr/bin/env python
+"""
+@author Jesse Haviland
+"""
 
-# import ropy as rp
-# import numpy as np
-# import spatialmath as sm
-# from ropy.connect.Connector import Connector
-# import matplotlib
-# import matplotlib.pyplot as plt
-# import signal
+import ropy as rp
+import numpy as np
+import spatialmath as sm
+from ropy.backend.Connector import Connector
+import matplotlib
+import matplotlib.pyplot as plt
+import signal
+from ropy.backend.PyPlot.RobotPlot2 import RobotPlot2
+# from ropy.backend.PyPlot.EllipsePlot import EllipsePlot
 
-# matplotlib.rcParams['pdf.fonttype'] = 42
-# matplotlib.rcParams['ps.fonttype'] = 42
-# plt.style.use('ggplot')
-# matplotlib.rcParams['font.size'] = 7
-# matplotlib.rcParams['lines.linewidth'] = 0.5
-# matplotlib.rcParams['xtick.major.size'] = 1.5
-# matplotlib.rcParams['ytick.major.size'] = 1.5
-# matplotlib.rcParams['axes.labelpad'] = 1
-# plt.rc('grid', linestyle="-", color='#dbdbdb')
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+plt.style.use('ggplot')
+matplotlib.rcParams['font.size'] = 7
+matplotlib.rcParams['lines.linewidth'] = 0.5
+matplotlib.rcParams['xtick.major.size'] = 1.5
+matplotlib.rcParams['ytick.major.size'] = 1.5
+matplotlib.rcParams['axes.labelpad'] = 1
+plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 
-# # class Ellipse(object):
+class PyPlot2(Connector):
 
-# #     def __init__(self, ax):
+    def __init__(self):
 
-# #         super(Ellipse, self).__init__()
+        super(PyPlot2, self).__init__()
+        self.robots = []
 
-# #         self.ax = ax
+    def launch(self, name=None, limits=None):
+        '''
+        env = launch() launchs a blank 2D matplotlib figure
 
+        '''
 
-# class RobotPlot(object):
+        super().launch()
 
-#     def __init__(self, robot, ax, readonly):
+        labels = ['X', 'Y']
 
-#         super(RobotPlot, self).__init__()
+        if name is not None:
+            self.fig = plt.figure(name)
+        else:
+            self.fig = plt.figure()
 
-#         # Readonly - True for this robot is for displaying only
-#         self.readonly = readonly
+        # Create a 3D axes
+        self.ax = self.fig.add_subplot()
+        self.ax.set_facecolor('white')
 
-#         self.robot = robot
-#         self.ax = ax
+        self.ax.set_xbound(-0.5, 0.5)
+        self.ax.set_ybound(-0.5, 0.5)
 
-#         # Line plot of robot links
-#         self.links = None
+        self.ax.set_xlabel(labels[0])
+        self.ax.set_ylabel(labels[1])
 
-#         # Z-axis Coordinate frame (quiver) of joints
-#         self.joints = []
+        self.ax.autoscale(enable=True, axis='both', tight=False)
+        self.ax.axis('equal')
 
-#         # Text of the robots name
-#         self.name = None
+        if limits is not None:
+            self.ax.set_xlim3d([limits[0], limits[1]])
+            self.ax.set_ylim3d([limits[2], limits[3]])
 
-#         # Shadow of the the line plot on the x-y axis
-#         self.sh_links = None
+        plt.ion()
+        plt.show()
 
-#         # Coordinate frame of the ee (three quivers)
-#         self.ee_axes = []
+        # Set the signal handler and a 0.1 second plot updater
+        signal.signal(signal.SIGALRM, self._plot_handler)
+        signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
 
-#         # Robot has been drawn
-#         self.drawn = False
+    def step(self, dt=50):
+        '''
+        state = step(args) triggers the external program to make a time step
+        of defined time updating the state of the environment as defined by
+        the robot's actions.
 
-#     def draw(self):
-#         if not self.drawn:
-#             self.init()
-#             return
+        The will go through each robot in the list and make them act based on
+        their control type (position, velocity, acceleration, or torque). Upon
+        acting, the other three of the four control types will be updated in
+        the internal state of the robot object. The control type is defined
+        by the robot object, and not all robot objects support all control
+        types.
 
-#         # Joint and ee poses
-#         T = self.robot.allfkine()
-#         Te = self.robot.fkine()
-#         Tb = self.robot.base
-
-#         # Joint and ee position matrix
-#         loc = np.zeros([3, self.robot.n + 2])
-#         loc[:, 0] = Tb.t
-#         loc[:, self.robot.n + 1] = Te.t
-
-#         # Joint axes position matrix
-#         joints = np.zeros((3, self.robot.n))
-
-#         # Axes arrow transforms
-#         Tjx = sm.SE3.Tx(0.06)
-#         Tjy = sm.SE3.Ty(0.06)
-#         Tjz = sm.SE3.Tz(0.06)
-
-#         # ee axes arrows
-#         Tex = Te * Tjx
-#         Tey = Te * Tjy
-#         Tez = Te * Tjz
-
-#         # Joint axes arrow calcs
-#         for i in range(self.robot.n):
-#             loc[:, i + 1] = T[i].t
-#             Tji = T[i] * Tjz
-#             joints[:, i] = Tji.t
-
-#         # Remove old ee coordinate frame
-#         self.ee_axes[0].remove()
-#         self.ee_axes[1].remove()
-#         self.ee_axes[2].remove()
-
-#         # Remove oldjoint z coordinates
-#         for i in range(self.robot.n):
-#             self.joints[i].remove()
-
-#         # Plot ee coordinate frame
-#         self.ee_axes[0] = \
-#             self._plot_quiver(loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2)
-#         self.ee_axes[1] = \
-#             self._plot_quiver(loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2)
-#         self.ee_axes[2] = \
-#             self._plot_quiver(loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2)
-
-#         # Plot joint z coordinates
-#         for i in range(self.robot.n):
-#             self.joints[i] = \
-#                 self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
-
-#         # Update the robot links
-#         self.links[0].set_xdata(loc[0, :])
-#         self.links[0].set_ydata(loc[1, :])
-#         self.links[0].set_3d_properties(loc[2, :])
-
-#         # Update the shadow of the robot links
-#         self.sh_links[0].set_xdata(loc[0, :])
-#         self.sh_links[0].set_ydata(loc[1, :])
-#         self.sh_links[0].set_3d_properties(0)
-
-#     def init(self):
-
-#         self.drawn = True
+        '''
 
-#         # Joint and ee poses
-#         T = self.robot.allfkine()
-#         Te = self.robot.fkine()
-#         Tb = self.robot.base
-
-#         # Joint and ee position matrix
-#         loc = np.zeros([3, self.robot.n + 2])
-#         loc[:, 0] = Tb.t
-#         loc[:, self.robot.n + 1] = Te.t
-
-#         # Joint axes position matrix
-#         joints = np.zeros((3, self.robot.n))
-
-#         # Axes arrow transforms
-#         Tjx = sm.SE3.Tx(0.06)
-#         Tjy = sm.SE3.Ty(0.06)
-#         Tjz = sm.SE3.Tz(0.06)
-
-#         # ee axes arrows
-#         Tex = Te * Tjx
-#         Tey = Te * Tjy
-#         Tez = Te * Tjz
-
-#         # Joint axes arrow calcs
-#         for i in range(self.robot.n):
-#             loc[:, i + 1] = T[i].t
-#             Tji = T[i] * Tjz
-#             joints[:, i] = Tji.t
-
-#         # Plot robot name
-#         self.name = self.ax.text(
-#             0.05, 0, 0.05, self.robot.name, (Tb.t[0], Tb.t[1], 0))
+        super().step()
 
-#         # Plot ee coordinate frame
-#         self.ee_axes.append(
-#             self._plot_quiver(loc[:, self.robot.n + 1], Tex.t, '#EE9494', 2))
-#         self.ee_axes.append(
-#             self._plot_quiver(loc[:, self.robot.n + 1], Tey.t, '#93E7B0', 2))
-#         self.ee_axes.append(
-#             self._plot_quiver(loc[:, self.robot.n + 1], Tez.t, '#54AEFF', 2))
+        self._step_robots(dt)
 
-#         # Plot joint z coordinates
-#         for i in range(self.robot.n):
-#             self.joints.append(
-#                 self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2))
+        plt.ioff()
+        self._draw_ellipses()
+        self._draw_robots()
+        plt.ion()
 
-#         # Plot the robot links
-#         self.links = self.ax.plot(
-#             loc[0, :], loc[1, :], loc[2, :], linewidth=5, color='#E16F6D')
+        self._update_robots()
 
-#         # Plot the shadow of the robot links
-#         self.sh_links = self.ax.plot(
-#             loc[0, :], loc[1, :], zs=0, zdir='z', linewidth=3, color='#464646')
+    def reset(self):
+        '''
+        state = reset() triggers the external program to reset to the
+        original state defined by launch
 
-#     def _plot_quiver(self, p0, p1, col, width):
-#         qv = self.ax.quiver(
-#             p0[0], p0[1], p0[2],
-#             p1[0] - p0[0],
-#             p1[1] - p0[1],
-#             p1[2] - p0[2],
-#             linewidth=width,
-#             color=col
-#         )
+        '''
 
-#         return qv
+        super().reset()
 
+    def restart(self):
+        '''
+        state = restart() triggers the external program to close and relaunch
+        to thestate defined by launch
 
-# class PyPlot2(Connector):
+        '''
 
-#     def __init__(self):
+        super().restart()
 
-#         super(PyPlot2, self).__init__()
-#         self.robots = []
+    def close(self):
+        '''
+        close() closes the plot
 
-#     def launch(self, name=None):
-#         '''
-#         env = launch() launchs a blank 3D matplotlib figure
+        '''
 
-#         '''
+        super().close()
 
-#         super().launch()
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        plt.close(self.fig)
 
-#         labels = ['X', 'Y']
+    #
+    #  Methods to interface with the robots created in other environemnts
+    #
 
-#         if name is not None:
-#             self.fig = plt.figure(name)
-#         else:
-#             self.fig = plt.figure()
+    def add(
+            self, ob, readonly=False, display=True,
+            eeframe=True, name=False):
+        '''
+        id = add(robot) adds the robot to the external environment. robot must
+        be of an appropriate class. This adds a robot object to a list of
+        robots which will act upon the step() method being called.
 
-#         # Create a 3D axes
-#         self.ax = self.fig.add_subplot()
-#         self.ax.set_facecolor('white')
+        '''
 
-#         self.ax.set_xbound(-0.5, 0.5)
-#         self.ax.set_ybound(-0.5, 0.5)
+        super().add()
 
-#         self.ax.set_xlabel(labels[0])
-#         self.ax.set_ylabel(labels[1])
+        if isinstance(ob, rp.SerialLink) or isinstance(ob, rp.ETS):
+            self.robots.append(
+                RobotPlot2(
+                    ob, self.ax, readonly, display,
+                    eeframe, name))
+            self.robots[len(self.robots) - 1].draw2()
 
-#         plt.ion()
-#         plt.show()
+        # elif isinstance(ob, EllipsePlot):
+        #     ob.ax = self.ax
+        #     self.ellipses.append(ob)
+        #     self.ellipses[len(self.ellipses) - 1].draw()
 
-#         # Set the signal handler and a 0.1 second plot updater
-#         signal.signal(signal.SIGALRM, self._plot_handler)
-#         signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
+    def remove(self):
+        '''
+        id = remove(robot) removes the robot to the external environment.
 
-#     def step(self, dt=50):
-#         '''
-#         state = step(args) triggers the external program to make a time step
-#         of defined time updating the state of the environment as defined by
-#         the robot's actions.
+        '''
 
-#         The will go through each robot in the list and make them act based on
-#         their control type (position, velocity, acceleration, or torque). Upon
-#         acting, the other three of the four control types will be updated in
-#         the internal state of the robot object. The control type is defined
-#         by the robot object, and not all robot objects support all control
-#         types.
+        super().remove()
 
-#         '''
+    def hold(self):           # pragma: no cover
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        plt.ioff()
+        plt.show()
 
-#         super().step()
+    #
+    #  Private methods
+    #
 
-#         self._step_robots(dt)
+    def _step_robots(self, dt):
 
-#         plt.ioff()
-#         self._draw_robots()
-#         self._set_axes_equal()
-#         plt.ion()
+        for rpl in self.robots:
+            robot = rpl.robot
 
-#         self._update_robots()
+            if rpl.readonly or robot.control_type == 'p':
+                pass            # pragma: no cover
 
-#     def reset(self):
-#         '''
-#         state = reset() triggers the external program to reset to the
-#         original state defined by launch
+            elif robot.control_type == 'v':
 
-#         '''
+                for i in range(robot.n):
+                    robot.q[i] += robot.qd[i] * (dt / 1000)
 
-#         super().reset()
+            elif robot.control_type == 'a':
+                pass
 
-#     def restart(self):
-#         '''
-#         state = restart() triggers the external program to close and relaunch
-#         to thestate defined by launch
+            else:            # pragma: no cover
+                # Should be impossible to reach
+                raise ValueError(
+                    'Invalid robot.control_type. '
+                    'Must be one of \'p\', \'v\', or \'a\'')
 
-#         '''
+    def _update_robots(self):
+        pass
 
-#         super().restart()
+    def _draw_robots(self):
 
-#     def close(self):
-#         '''
-#         close() closes the plot
+        for i in range(len(self.robots)):
+            self.robots[i].draw()
 
-#         '''
-
-#         super().close()
-
-#         signal.setitimer(signal.ITIMER_REAL, 0)
-#         plt.close(self.fig)
-
-#     #
-#     #  Methods to interface with the robots created in other environemnts
-#     #
-
-#     def add(self, ob, readonly=False):
-#         '''
-#         id = add(robot) adds the robot to the external environment. robot must
-#         be of an appropriate class. This adds a robot object to a list of
-#         robots which will act upon the step() method being called.
-
-#         '''
-
-#         super().add()
-
-#         if isinstance(ob, rp.SerialLink):
-#             self.robots.append(RobotPlot(ob, self.ax, readonly))
-#             self.robots[len(self.robots) - 1].draw()
-
-#         self._set_axes_equal()
-
-#     def remove(self):
-#         '''
-#         id = remove(robot) removes the robot to the external environment.
-
-#         '''
-
-#         super().remove()
-
-#     def hold(self):           # pragma: no cover
-#         signal.setitimer(signal.ITIMER_REAL, 0)
-#         plt.ioff()
-#         plt.show()
-
-#     #
-#     #  Private methods
-#     #
-
-#     def _step_robots(self, dt):
-
-#         for rpl in self.robots:
-#             robot = rpl.robot
-
-#             if rpl.readonly or robot.control_type == 'p':
-#                 pass            # pragma: no cover
-
-#             elif robot.control_type == 'v':
-
-#                 for i in range(robot.n):
-#                     robot.q[i] += robot.qd[i] * (dt / 1000)
-
-#             elif robot.control_type == 'a':
-#                 pass
-
-#             else:            # pragma: no cover
-#                 # Should be impossible to reach
-#                 raise ValueError(
-#                     'Invalid robot.control_type. '
-#                     'Must be one of \'p\', \'v\', or \'a\'')
-
-#     def _update_robots(self):
-#         pass
-
-#     def _draw_robots(self):
-
-#         for i in range(len(self.robots)):
-#             self.robots[i].draw()
-
-#     def _plot_handler(self, sig, frame):
-#         plt.pause(0.001)
-
-#     def _set_axes_equal(self):
-#         '''
-#         Make axes of 3D plot have equal scale so that spheres appear as
-#         spheres, cubes as cubes, etc..  This is one possible solution to
-#         Matplotlib's ax.set_aspect('equal') and ax.axis('equal') not
-#         working for 3D.
-
-#         '''
-
-#         pass
-
-#         # self.ax.autoscale(enable=True, axis='both', tight=False)
-
-#         # x_limits = self.ax.get_xlim3d()
-#         # y_limits = self.ax.get_ylim3d()
-#         # z_limits = self.ax.get_zlim3d()
-
-#         # x_range = abs(x_limits[1] - x_limits[0])
-#         # x_middle = np.mean(x_limits)
-#         # y_range = abs(y_limits[1] - y_limits[0])
-#         # y_middle = np.mean(y_limits)
-#         # z_range = abs(z_limits[1] - z_limits[0])
-#         # # z_middle = np.mean(z_limits)
-
-#         # # The plot bounding box is a sphere in the sense of the infinity
-#         # # norm, hence I call half the max range the plot radius.
-#         # plot_radius = 0.5*max([x_range, y_range, z_range])
-
-#         # self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
-#         # self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-#         # self.ax.set_zlim3d([0.0, 2 * plot_radius])
+    def _plot_handler(self, sig, frame):
+        plt.pause(0.001)
