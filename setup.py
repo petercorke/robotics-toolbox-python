@@ -35,7 +35,7 @@ setup(
 
     license='MIT',
 
-    python_requires='>=3.2',
+    python_requires='>=3.5',
 
     ext_modules=[frne],
 
@@ -43,6 +43,10 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['numpy', 'spatialmath-python', 'scipy', 'matplotlib']
+    install_requires=[
+        'numpy',
+        'spatialmath-python>=0.7.1',
+        'scipy',
+        'matplotlib']
 
 )
