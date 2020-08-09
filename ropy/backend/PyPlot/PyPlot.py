@@ -151,7 +151,7 @@ class PyPlot(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.SerialLink):
+        if isinstance(ob, rp.SerialLink) or isinstance(ob, rp.ETS):
             self.robots.append(
                 RobotPlot(
                     ob, self.ax, readonly, display,

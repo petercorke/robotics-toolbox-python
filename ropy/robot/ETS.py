@@ -638,14 +638,16 @@ class ETS(object):
 
         return Jv
 
-    def teach(self, block=True, q=None):
+    def teach(
+            self, block=True, q=None, limits=None,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Graphical teach pendant
 
         env = teach() creates a matplotlib plot which allows the user to
         "drive" a graphical robot using a graphical slider panel. The
         robot's inital joint configuration is robot.q. This will block the
-        programs execution.
+        programs execution. The plot will autoscale with an aspect ratio of 1.
 
         env = teach(q) as above except the robot's initial configuration is
         set to q.
@@ -658,9 +660,22 @@ class ETS(object):
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
         :retrun: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -679,20 +694,25 @@ class ETS(object):
             self.q = q
 
         # try:
-        return _teach(self, block)
+        return _teach(
+            self, block, limits=limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
         # except ModuleNotFoundError:
         #     print(
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
 
-    def plot(self, block=True, q=None, dt=50):
+    def plot(
+            self, block=True, q=None, dt=50, limits=None,
+            vellipse=False, fellipse=False,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Graphical display and animation
 
         env = plot() displays a graphical view of a robot based on the
         kinematic model, at it's stored q value. A stick figure polyline
         joins the origins of the link coordinate frames. This method will be
-        blocking.
+        blocking. The plot will autoscale with an aspect ratio of 1.
 
         env = plot(q) as above except the robot is plotted with joint angles q
 
@@ -711,6 +731,28 @@ class ETS(object):
         :param dt: if q is a trajectory, this describes the delay in
             milliseconds between frames
         :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
         :retrun: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -719,7 +761,10 @@ class ETS(object):
         '''
 
         # try:
-        return _plot(self, block, q, dt)
+        return _plot(
+            self, block, q, dt, limits,
+            vellipse=vellipse, fellipse=fellipse,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
         # except ModuleNotFoundError:
         #     print(
         #         'Could not find matplotlib.'
