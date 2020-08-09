@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+import ropy as rp
 import spatialmath as sm
 
 
@@ -83,7 +84,20 @@ class RobotPlot(object):
         # Joint axes arrow calcs
         for i in range(self.robot.n):
             loc[:, i + 1] = T[i].t
-            Tji = T[i] * Tjz
+
+            if isinstance(self.robot, rp.SerialLink) \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'Rz' \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'tz':
+                Tji = T[i] * Tjz
+
+            elif self.robot.ets[self.robot.q_idx[i]].axis == 'Ry' \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'ty':
+                Tji = T[i] * Tjy
+
+            elif self.robot.ets[self.robot.q_idx[i]].axis == 'Rx' \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'tx':
+                Tji = T[i] * Tjx
+
             joints[:, i] = Tji.t
 
         # Remove old ee coordinate frame
@@ -154,7 +168,20 @@ class RobotPlot(object):
         # Joint axes arrow calcs
         for i in range(self.robot.n):
             loc[:, i + 1] = T[i].t
-            Tji = T[i] * Tjz
+
+            if isinstance(self.robot, rp.SerialLink) \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'Rz' \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'tz':
+                Tji = T[i] * Tjz
+
+            elif self.robot.ets[self.robot.q_idx[i]].axis == 'Ry' \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'ty':
+                Tji = T[i] * Tjy
+
+            elif self.robot.ets[self.robot.q_idx[i]].axis == 'Rx' \
+                    or self.robot.ets[self.robot.q_idx[i]].axis == 'tx':
+                Tji = T[i] * Tjx
+
             joints[:, i] = Tji.t
 
         # Plot robot name

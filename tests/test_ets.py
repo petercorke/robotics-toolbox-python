@@ -16,7 +16,7 @@ class TestETS(unittest.TestCase):
     def test_panda(self):
         panda = rp.Panda()
         qz = np.array([0, 0, 0, 0, 0, 0, 0])
-        qr = np.array([0, -90, -90, 90, 0, -90, 90]) * np.pi/180
+        qr = panda.qr
 
         nt.assert_array_almost_equal(panda.qr, qr)
         nt.assert_array_almost_equal(panda.qz, qz)
@@ -399,6 +399,35 @@ class TestETS(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
         nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
+
+    def test_plot(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+        e = panda.plot(block=False)
+        e.close()
+
+    def test_plot_complex(self):
+        l0 = rp.ET.TRz()
+        l1 = rp.ET.Ttx()
+        l2 = rp.ET.TRy()
+        l3 = rp.ET.Ttz(1)
+        l4 = rp.ET.TRx()
+
+        E = rp.ETS([l0, l1, l2, l3, l4])
+        e = E.plot(block=False)
+        e.step(0)
+        e.close()
+
+    def test_teach(self):
+        l0 = rp.ET.TRz()
+        l1 = rp.ET.Ttx()
+        l2 = rp.ET.TRy()
+        l3 = rp.ET.Ttz(1)
+        l4 = rp.ET.TRx()
+
+        E = rp.ETS([l0, l1, l2, l3, l4])
+        e = E.teach(block=False, q=[1, 2, 3, 4])
+        e.close()
 
 
 if __name__ == '__main__':

@@ -76,6 +76,10 @@ class ETS(object):
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
+        self.qd = np.zeros(self.n)
+        self.qdd = np.zeros(self.n)
+
+        self.control_type = 'v'
 
     # @classmethod
     # def dh_to_ets(cls, robot):
@@ -143,6 +147,18 @@ class ETS(object):
         return self._q
 
     @property
+    def qd(self):
+        return self._qd
+
+    @property
+    def qdd(self):
+        return self._qdd
+
+    @property
+    def control_type(self):
+        return self._control_type
+
+    @property
     def ets(self):
         return self._ets
 
@@ -194,6 +210,22 @@ class ETS(object):
     def q(self, q_new):
         q_new = getvector(q_new, self.n)
         self._q = q_new
+
+    @qd.setter
+    def qd(self, qd_new):
+        self._qd = getvector(qd_new, self.n)
+
+    @qdd.setter
+    def qdd(self, qdd_new):
+        self._qdd = getvector(qdd_new, self.n)
+
+    @control_type.setter
+    def control_type(self, cn):
+        if cn == 'p' or cn == 'v' or cn == 'a':
+            self._control_type = cn
+        else:
+            raise ValueError(
+                'Control type must be one of \'p\', \'v\', or \'a\'')
 
     @base.setter
     def base(self, T):

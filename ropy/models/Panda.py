@@ -59,7 +59,7 @@ class Panda(ETS):
             tool=tool)
 
         self._qz = np.array([0, 0, 0, 0, 0, 0, 0])
-        self._qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
+        self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
     @property
     def qz(self):
