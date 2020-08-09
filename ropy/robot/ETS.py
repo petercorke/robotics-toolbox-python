@@ -236,6 +236,7 @@ class ETS(object):
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
+
         '''
 
         trajn = 1
@@ -270,6 +271,56 @@ class ETS(object):
                 t.append(tr)
 
         return t
+
+    def allfkine(self, q=None):
+        '''
+        Tall = allfkine(q) evaluates fkine for each joint within a robot and
+        returns a trajecotry of poses.
+
+        Tall = allfkine() as above except uses the stored q value of the
+        robot object.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :return T: Homogeneous transformation trajectory
+        :rtype T: SE3 list
+
+        :notes:
+            - The robot's base transform, if present, are incorporated
+              into the result.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        '''
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        t = self.base
+        Tall = SE3()
+        j = 0
+
+        for i in range(self.M):
+
+            if self.ets[i].jtype == self.ets[i].VARIABLE:
+                t *= self.ets[i].T(q[j])
+
+                if j == 0:
+                    Tall = t
+                else:
+                    Tall.append(t)
+
+                j += 1
+            else:
+                t *= self.ets[i].T()
+
+        return Tall
 
     def jacob0(self, q=None):
         """

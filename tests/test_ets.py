@@ -109,6 +109,21 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(TT[2].A, ans)
         nt.assert_array_almost_equal(TT[3].A, ans)
 
+    def test_allfkine(self):
+        pm = rp.PandaMDH()
+        p = rp.Panda()
+        q = [1, 2, 3, 4, 5, 6, 7]
+        p.q = q
+        pm.q = q
+
+        r0 = p.allfkine()
+        r1 = p.allfkine(q)
+        r2 = pm.allfkine()
+
+        for i in range(7):
+            nt.assert_array_almost_equal(r0[i].A, r2[i].A)
+            nt.assert_array_almost_equal(r1[i].A, r2[i].A)
+
     def test_jacob0(self):
         panda = rp.Panda()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
