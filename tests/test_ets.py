@@ -91,6 +91,24 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
         self.assertRaises(TypeError, panda.fkine, 'Wfgsrth')
 
+    def test_fkine_traj(self):
+        panda = rp.Panda()
+        q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        qq = np.c_[q, q, q, q]
+
+        ans = np.array([
+            [-0.50827907, -0.57904589,  0.63746234,  0.44682295],
+            [0.83014553,  -0.52639462,  0.18375824,  0.16168396],
+            [0.22915229,   0.62258699,  0.74824773,  0.96798113],
+            [0.,           0.,          0.,          1.]
+        ])
+
+        TT = panda.fkine(qq)
+        nt.assert_array_almost_equal(TT[0].A, ans)
+        nt.assert_array_almost_equal(TT[1].A, ans)
+        nt.assert_array_almost_equal(TT[2].A, ans)
+        nt.assert_array_almost_equal(TT[3].A, ans)
+
     def test_jacob0(self):
         panda = rp.Panda()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])

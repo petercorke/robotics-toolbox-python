@@ -9,7 +9,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 from spatialmath.base import tr2rpy
-from ropy.backend.PyPlot.functions import _plot
+from ropy.backend.PyPlot.functions import _plot, _teach
 
 
 class ETS(object):
@@ -212,6 +212,16 @@ class ETS(object):
         Evaluates the forward kinematics of a robot based on its ETS and
         joint angles q.
 
+        T = fkine(q) evaluates forward kinematics for the robot at joint
+        configuration q.
+
+        T = fkine() as above except uses the stored q value of the
+        robot object.
+
+        Trajectory operation:
+        Calculates fkine for each point on a trajectory of joints q where
+        q is (nxm) and the returning SE3 in (m)
+
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
@@ -219,31 +229,47 @@ class ETS(object):
             end-effector
         :rtype: SE3
 
+        :notes:
+            - The robot's base or tool transform, if present, are incorporated
+              into the result.
+
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
         '''
 
+        trajn = 1
+
         if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+            q = self.q
 
-        j = 0
-        trans = SE3()
+        try:
+            q = getvector(q, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
 
-        for i in range(self.M):
-            if self.ets[i].jtype == self.ets[i].VARIABLE:
-                T = self.ets[i].T(q[j])
-                j += 1
+        for i in range(trajn):
+            j = 0
+            tr = self.base
+
+            for k in range(self.M):
+                if self.ets[k].jtype == self.ets[i].VARIABLE:
+                    T = self.ets[k].T(q[j, i])
+                    j += 1
+                else:
+                    T = self.ets[k].T()
+
+                tr = tr * T
+
+            tr = tr * self.tool
+
+            if i == 0:
+                t = SE3(tr)
             else:
-                T = self.ets[i].T()
+                t.append(tr)
 
-            trans = trans * T
-
-        trans = trans * self.tool
-
-        return trans
+        return t
 
     def jacob0(self, q=None):
         """
@@ -602,7 +628,7 @@ class ETS(object):
             self.q = q
 
         # try:
-        return _mpl_teach(self, block)
+        return _teach(self, block)
         # except ModuleNotFoundError:
         #     print(
         #         'Could not find matplotlib.'
