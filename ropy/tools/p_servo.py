@@ -37,13 +37,13 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
         wTep = SE3(wTep)
 
     # Pose difference
-    eTep = wTe.inv * wTep
+    eTep = wTe.inv() * wTep
 
     # Translational velocity error
     ev = eTep.t
 
     # Angular velocity error
-    ew = eTep.rpy * np.pi/180
+    ew = eTep.rpy() * np.pi/180
 
     # Form error vector
     e = np.r_[ev, ew]

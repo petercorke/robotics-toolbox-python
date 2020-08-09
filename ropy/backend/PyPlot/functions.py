@@ -119,7 +119,7 @@ def _teach(
     # Set the pose text
     T = robot.fkine()
     t = np.round(T.t, 3)
-    r = np.round(T.rpy, 3)
+    r = np.round(T.rpy(), 3)
 
     fig.text(
         0.02,  1 - ym + 0.25, "End-effector Pose",
