@@ -4,8 +4,6 @@
 """
 
 import numpy as np
-import ropy as rp
-import spatialmath as sm
 from ropy.backend.PyPlot.RobotPlot import RobotPlot
 
 

@@ -4,8 +4,6 @@
 """
 
 import ropy as rp
-import numpy as np
-import spatialmath as sm
 from ropy.backend.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
@@ -90,7 +88,7 @@ class PyPlot2(Connector):
         self._step_robots(dt)
 
         plt.ioff()
-        self._draw_ellipses()
+        # self._draw_ellipses()
         self._draw_robots()
         plt.ion()
 
@@ -198,7 +196,7 @@ class PyPlot2(Connector):
     def _draw_robots(self):
 
         for i in range(len(self.robots)):
-            self.robots[i].draw()
+            self.robots[i].draw2()
 
     def _plot_handler(self, sig, frame):
         plt.pause(0.001)

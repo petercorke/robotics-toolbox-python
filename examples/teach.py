@@ -12,4 +12,4 @@ panda = rp.PandaMDH()
 panda.q = panda.qr
 
 # Open a plot with the teach panel
-e = panda.teach()
+e = panda.teach2()

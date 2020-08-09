@@ -160,10 +160,10 @@ class RobotPlot(object):
 
             # Plot ee coordinate frame
             self.ee_axes[0] = \
-                self._plot_quiver(
+                self._plot_quiver2(
                     loc[:, self.robot.n + 1], ee[0].t, '#EE9494', 2)
             self.ee_axes[1] = \
-                self._plot_quiver(
+                self._plot_quiver2(
                     loc[:, self.robot.n + 1], ee[1].t, '#93E7B0', 2)
 
         # Update the robot links
@@ -227,7 +227,7 @@ class RobotPlot(object):
         # Plot robot name
         if self.showname:
             self.name = self.ax.text(
-                0.05, 0, self.robot.name, (Tb.t[0], Tb.t[1], 0))
+                0.05, 0, self.robot.name, (Tb.t[0], Tb.t[1]))
 
         # Plot ee coordinate frame
         if self.eeframe:

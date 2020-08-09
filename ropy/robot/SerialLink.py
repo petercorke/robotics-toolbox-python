@@ -14,7 +14,8 @@ from spatialmath import SE3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 from ropy.backend.PyPlot.functions import \
-    _plot, _teach, _fellipse, _vellipse, _plot_ellipse
+    _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
+    _plot2, _teach2
 
 
 class SerialLink(object):
@@ -3648,3 +3649,122 @@ class SerialLink(object):
         return _plot_ellipse(
             fellipse, block, limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+    def plot2(
+            self, block=True, q=None, dt=50, limits=None,
+            vellipse=False, fellipse=False,
+            eeframe=True, name=False):
+        '''
+        2D Graphical display and animation
+
+        env = plot2() displays a 2D graphical view of a robot based on the
+        kinematic model, at it's stored q value. A stick figure polyline
+        joins the origins of the link coordinate frames. This method will be
+        blocking. The plot will autoscale with an aspect ratio of 1.
+
+        env = plot2(q) as above except the robot is plotted with joint angles q
+
+        env = plot2(block=False) as avove except the plot in non-blocking. Note
+        that the plot will exit when the python script finishes executing.
+
+        env = plot2(q, dt) as above except q is an nxm trajectory of joint
+        angles. This creates an animation of the robot moving through the
+        trajectories with a gap dt milliseconds in between.
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            milliseconds between frames
+        :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :retrun: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        '''
+
+        # try:
+        return _plot2(
+            self, block, q, dt, limits,
+            vellipse=vellipse, fellipse=fellipse,
+            eeframe=eeframe, name=name)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')
+
+    def teach2(
+            self, block=True, q=None, limits=None,
+            eeframe=True, name=False):
+        '''
+        2D Graphical teach pendant
+
+        env = teach2() creates a 2D matplotlib plot which allows the user to
+        "drive" a graphical robot using a graphical slider panel. The
+        robot's inital joint configuration is robot.q. This will block the
+        programs execution. The plot will autoscale with an aspect ratio of 1.
+
+        env = teach2(q) as above except the robot's initial configuration is
+        set to q.
+
+        env = teach2(block=False) as avove except the plot is non-blocking.
+        Note that the plot will exit when the python script finishes
+        executing.
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :retrun: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        :notes:
+            - The slider limits are derived from the joint limit properties.
+              If not set then
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+
+        '''
+
+        if q is not None:
+            self.q = q
+
+        # try:
+        return _teach2(
+            self, block, limits=limits,
+            eeframe=eeframe, name=name)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')

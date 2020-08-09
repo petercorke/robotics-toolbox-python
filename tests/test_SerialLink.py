@@ -1435,3 +1435,22 @@ class TestSerialLink(unittest.TestCase):
         panda.q = panda.qr
         e = panda.plot(block=False, fellipse=True)
         e.close()
+
+    def test_plot2(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.plot2(block=False)
+        e.close()
+
+    def test_plot2_traj(self):
+        panda = rp.PandaMDH()
+        q = np.random.rand(7, 3)
+        e = panda.plot2(block=False, q=q, dt=0)
+        e.close()
+
+    def test_teach2_basic(self):
+        l0 = rp.Link(d=2)
+        r0 = rp.SerialLink([l0, l0])
+        e = r0.teach2(False)
+        e.step()
+        e.close()
