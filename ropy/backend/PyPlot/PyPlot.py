@@ -48,7 +48,7 @@ class PyPlot(Connector):
         labels = ['X', 'Y', 'Z']
 
         if name is not None:
-            self.fig = plt.figure(name)
+            self.fig = plt.figure()
         else:
             self.fig = plt.figure()
 

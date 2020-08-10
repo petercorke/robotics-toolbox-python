@@ -46,7 +46,7 @@ class PyPlot2(Connector):
             self.fig = plt.figure()
 
         # Create a 3D axes
-        self.ax = self.fig.add_subplot()
+        self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_facecolor('white')
 
         self.ax.set_xbound(-0.5, 0.5)
