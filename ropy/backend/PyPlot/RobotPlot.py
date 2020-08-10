@@ -181,7 +181,7 @@ class RobotPlot(object):
         # Plot robot name
         if self.showname:
             self.name = self.ax.text(
-                0.05, 0, 0.05, self.robot.name, (Tb.t[0], Tb.t[1], 0))
+                Tb.t[0], Tb.t[1], 0.05, self.robot.name)
 
         # Plot ee coordinate frame
         if self.eeframe:
