@@ -37,6 +37,19 @@ class TestETS(unittest.TestCase):
         panda.q = q3
         nt.assert_array_almost_equal(np.expand_dims(panda.q, 0), q3)
 
+    def test_getters(self):
+        panda = rp.Panda()
+
+        panda.qdd = np.ones((7, 1))
+        panda.qd = np.ones((1, 7))
+        panda.qdd = panda.qd
+        panda.qd = panda.qdd
+
+    def test_control_type(self):
+        panda = rp.Panda()
+        panda.control_type = 'v'
+        self.assertEqual(panda.control_type, 'v')
+
     def test_base(self):
         panda = rp.Panda()
 
@@ -428,6 +441,89 @@ class TestETS(unittest.TestCase):
         E = rp.ETS([l0, l1, l2, l3, l4])
         e = E.teach(block=False, q=[1, 2, 3, 4])
         e.close()
+
+    def test_plot_traj(self):
+        panda = rp.Panda()
+        q = np.random.rand(7, 3)
+        e = panda.plot(block=False, q=q, dt=0)
+        e.close()
+
+    def test_control_type2(self):
+        panda = rp.Panda()
+
+        panda.control_type = 'p'
+
+        with self.assertRaises(ValueError):
+            panda.control_type = 'z'
+
+    def test_plot_vellipse(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+
+        e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+        e.close()
+
+        e = panda.plot_vellipse(
+            block=False, q=panda.qr, centre='ee', opt='rot')
+        e.step(0)
+        e.close()
+
+        with self.assertRaises(TypeError):
+            panda.plot_vellipse(vellipse=10)
+
+        with self.assertRaises(ValueError):
+            panda.plot_vellipse(centre='ff')
+
+    def test_plot_fellipse(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+
+        e = panda.plot_fellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+        e.close()
+
+        e = panda.plot_fellipse(
+            block=False, q=panda.qr, centre='ee', opt='rot')
+        e.step(0)
+        e.close()
+
+        with self.assertRaises(TypeError):
+            panda.plot_fellipse(fellipse=10)
+
+        with self.assertRaises(ValueError):
+            panda.plot_fellipse(centre='ff')
+
+    def test_plot_with_vellipse(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+        e = panda.plot(block=False, vellipse=True)
+        e.close()
+
+    def test_plot_with_fellipse(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+        e = panda.plot(block=False, fellipse=True)
+        e.close()
+
+    def test_plot2(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+        e = panda.plot2(block=False, name=True)
+        e.close()
+
+    def test_plot2_traj(self):
+        panda = rp.Panda()
+        q = np.random.rand(7, 3)
+        e = panda.plot2(block=False, q=q, dt=0)
+        e.close()
+
+    def test_teach2(self):
+        panda = rp.Panda()
+        panda.q = panda.qr
+        e = panda.teach(block=False)
+        e.close()
+
+        e2 = panda.teach2(block=False, q=panda.qr)
+        e2.close()
 
 
 if __name__ == '__main__':
