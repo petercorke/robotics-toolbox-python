@@ -9,7 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import signal
 from ropy.backend.PyPlot.RobotPlot2 import RobotPlot2
-# from ropy.backend.PyPlot.EllipsePlot import EllipsePlot
+from ropy.backend.PyPlot.EllipsePlot import EllipsePlot
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -28,6 +28,7 @@ class PyPlot2(Connector):
 
         super(PyPlot2, self).__init__()
         self.robots = []
+        self.ellipses = []
 
     def launch(self, name=None, limits=None):
         '''
@@ -58,8 +59,8 @@ class PyPlot2(Connector):
         self.ax.axis('equal')
 
         if limits is not None:
-            self.ax.set_xlim3d([limits[0], limits[1]])
-            self.ax.set_ylim3d([limits[2], limits[3]])
+            self.ax.set_xlim([limits[0], limits[1]])
+            self.ax.set_ylim([limits[2], limits[3]])
 
         plt.ion()
         plt.show()
@@ -88,7 +89,7 @@ class PyPlot2(Connector):
         self._step_robots(dt)
 
         plt.ioff()
-        # self._draw_ellipses()
+        self._draw_ellipses()
         self._draw_robots()
         plt.ion()
 
@@ -146,10 +147,10 @@ class PyPlot2(Connector):
                     eeframe, name))
             self.robots[len(self.robots) - 1].draw2()
 
-        # elif isinstance(ob, EllipsePlot):
-        #     ob.ax = self.ax
-        #     self.ellipses.append(ob)
-        #     self.ellipses[len(self.ellipses) - 1].draw()
+        elif isinstance(ob, EllipsePlot):
+            ob.ax = self.ax
+            self.ellipses.append(ob)
+            self.ellipses[len(self.ellipses) - 1].draw2()
 
     def remove(self):
         '''
@@ -181,7 +182,7 @@ class PyPlot2(Connector):
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt / 1000)
 
-            elif robot.control_type == 'a':
+            elif robot.control_type == 'a':  # pragma: no cover
                 pass
 
             else:            # pragma: no cover
@@ -197,6 +198,11 @@ class PyPlot2(Connector):
 
         for i in range(len(self.robots)):
             self.robots[i].draw2()
+
+    def _draw_ellipses(self):
+
+        for i in range(len(self.ellipses)):
+            self.ellipses[i].draw2()
 
     def _plot_handler(self, sig, frame):
         plt.pause(0.001)
