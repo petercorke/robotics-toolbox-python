@@ -1439,7 +1439,7 @@ class TestSerialLink(unittest.TestCase):
     def test_plot2(self):
         panda = rp.PandaMDH()
         panda.q = panda.qr
-        e = panda.plot2(block=False)
+        e = panda.plot2(block=False, name=True)
         e.close()
 
     def test_plot2_traj(self):
@@ -1454,3 +1454,37 @@ class TestSerialLink(unittest.TestCase):
         e = r0.teach2(False)
         e.step()
         e.close()
+
+    def test_teach2(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.teach(block=False)
+        e.close()
+
+        e2 = panda.teach2(block=False, q=panda.qr)
+        e2.close()
+
+    def test_plot_with_vellipse2(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.plot2(block=False, vellipse=True, limits=[1, 2, 1, 2])
+        e.step()
+        e.close()
+
+    def test_plot_with_fellipse2(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = panda.plot2(block=False, fellipse=True)
+        e.close()
+
+    def test_plot_with_vellipse2_fail(self):
+        panda = rp.PandaMDH()
+        panda.q = panda.qr
+        e = rp.backend.PyPlot2()
+        e.launch()
+        e.add(panda.fellipse(
+                q=panda.qr, centre=[0, 1]))
+
+        with self.assertRaises(ValueError):
+            e.add(panda.fellipse(
+                q=panda.qr, centre='ee', opt='rot'))
