@@ -170,11 +170,6 @@ class RobotPlot(object):
         self.links[0].set_xdata(loc[0, :])
         self.links[0].set_ydata(loc[1, :])
 
-        # Update the shadow of the robot links
-        if self.shadow:
-            self.sh_links[0].set_xdata(loc[0, :])
-            self.sh_links[0].set_ydata(loc[1, :])
-
     def init(self):
 
         self.drawn = True
@@ -227,7 +222,7 @@ class RobotPlot(object):
         # Plot robot name
         if self.showname:
             self.name = self.ax.text(
-                0.05, 0, self.robot.name, (Tb.t[0], Tb.t[1]))
+                Tb.t[0] + 0.05, Tb.t[1], self.robot.name)
 
         # Plot ee coordinate frame
         if self.eeframe:
