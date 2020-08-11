@@ -12,7 +12,7 @@
     <link name="${ns}_hand">
       <visual>
         <geometry>
-          <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
+          <mesh filename="../meshes/visual/hand.dae"/>
         </geometry>
       </visual>
       <collision>
@@ -55,7 +55,7 @@
     <link name="${ns}_leftfinger">
       <visual>
         <geometry>
-          <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
+          <mesh filename="../meshes/visual/finger.dae"/>
         </geometry>
       </visual>
     </link>
@@ -63,7 +63,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
-          <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
+          <mesh filename="../meshes/visual/finger.dae"/>
         </geometry>
       </visual>
    </link>

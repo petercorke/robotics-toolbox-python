@@ -97,5 +97,10 @@ env.hold()
 
 ###########################################
 
+f = 'ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro'
+a = xacro.main(f)
+print(a)
+
+rob = rp.backend.URDF.loadstr(a, f)
 
 # xacro.main('ropy/models/xarco/panda/panda_arm_hand.urdf.xacro')

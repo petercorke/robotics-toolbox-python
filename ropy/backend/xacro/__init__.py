@@ -1070,8 +1070,10 @@ def main(filename):   # pragma: no cover
         return
 
     # write output
-    out.write(doc.toprettyxml(indent='  ', **encoding))
-    print()
+    # out.write(doc.toprettyxml(indent='  ', **encoding))
+    # print()
     # only close output file, but not stdout
     if opts["output"]:
         out.close()
+
+    return doc.toprettyxml(indent='  ', **encoding)
