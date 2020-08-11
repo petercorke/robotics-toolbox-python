@@ -7,8 +7,8 @@ class Object2D:
 
     :param se2: The SE2 object representing position and orientation
     :type se2: class:`spatialmath.se2`
-    :param g_canvas: The canvas in which to add the link
-    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
+    :param scene: The scene in which to add the link
+    :type scene: class:`vpython.canvas`
     :param shape: The shape of the object
     :type shape: `str`
     :param colour: The colour of the shape
@@ -21,10 +21,10 @@ class Object2D:
     #  Have option to set size, colour, etc
     #  Have funcs that update pose, texture/colours, visibility
 
-    def __init__(self, se2, g_canvas, shape, colour):
+    def __init__(self, se2, scene, shape, colour):
         # Save inputs
         self.__se2 = se2
-        self.__scene = g_canvas.scene
+        self.__scene = scene
         self.__shape = shape
         if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
                 colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
@@ -84,11 +84,11 @@ class Object2D:
         elif self.__shape == 's':
             # 2D coords of the square boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
-                                          thickness=self.__marker_size/10)
+                                          thickness=self.__marker_size)
         elif self.__shape == 'd':
             # 2D coords of the diamond boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
-                                          thickness=self.__marker_size/10, rotate=radians(45))
+                                          thickness=self.__marker_size, rotate=radians(45))
         elif self.__shape == '^':
             # 2D coords of the triangle boundary
             shape_path = shapes.triangle(length=self.__marker_size)
