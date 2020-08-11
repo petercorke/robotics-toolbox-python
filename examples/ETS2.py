@@ -4,70 +4,82 @@
 """
 
 import ropy as rp
-import spatialmath as sm
-import numpy as np
-import time
-import qpsolvers as qp
+from ropy.backend import xacro
 
-env = rp.backend.PyPlot()
-env.launch('Panda Resolved-Rate Motion Control Example', limits=[-0.75, 0.75, -0.75, 0.75, 0, 1.5])
 
-gPanda = rp.Panda()
-gPanda.name = "Null"
-gPanda.q = gPanda.qr
+# import spatialmath as sm
+# import numpy as np
+# import time
+# import qpsolvers as qp
 
-qPanda = rp.Panda()
-qPanda.name = "Quad"
-qPanda.q = gPanda.q
+# env = rp.backend.PyPlot()
+# env.launch('Panda Resolved-Rate Motion Control Example', limits=[-0.75, 0.75, -0.75, 0.75, 0, 1.5])
 
-eTep = sm.SE3.Tx(-0.3) * sm.SE3.Ty(0.1) * sm.SE3.Tz(0.3)
+# gPanda = rp.Panda()
+# gPanda.name = "Null"
+# gPanda.q = gPanda.qr
 
-gPanda.base = sm.SE3(0, 0.5, 0)
-qPanda.base = sm.SE3(0, -0.5, 0)
+# qPanda = rp.Panda()
+# qPanda.name = "Quad"
+# qPanda.q = gPanda.q
 
-gTep = gPanda.fkine() * eTep
-qTep = qPanda.fkine() * eTep
+# eTep = sm.SE3.Tx(-0.3) * sm.SE3.Ty(0.1) * sm.SE3.Tz(0.3)
 
-# Gain term (lambda) for control minimisation
-Y = 0.0005
+# gPanda.base = sm.SE3(0, 0.5, 0)
+# qPanda.base = sm.SE3(0, -0.5, 0)
 
-# Quadratic component of objective function
-Q = Y * np.eye(7)
+# gTep = gPanda.fkine() * eTep
+# qTep = qPanda.fkine() * eTep
 
-arrived1 = False
-arrived2 = False
-env.add(gPanda)
-env.add(qPanda)
-env.add(gPanda.vellipse(centre='ee'))
-env.add(qPanda.vellipse(centre='ee'))
+# # Gain term (lambda) for control minimisation
+# Y = 0.0005
 
-dt = 0.01
+# # Quadratic component of objective function
+# Q = Y * np.eye(7)
 
-while not arrived1 and not arrived2:
+# arrived1 = False
+# arrived2 = False
+# env.add(gPanda)
+# env.add(qPanda)
+# env.add(gPanda.vellipse(centre='ee'))
+# env.add(qPanda.vellipse(centre='ee'))
 
-    start = time.time()
-    v1, arrived1 = rp.p_servo(gPanda.fkine(), gTep, 1)
-    v2, arrived2 = rp.p_servo(qPanda.fkine(), qTep, 1)
+# dt = 0.01
 
-    null = np.linalg.pinv(gPanda.jacobe()) @ gPanda.jacobe() @  gPanda.jacobm()
-    null2 = np.linalg.pinv(qPanda.jacobe()) @ qPanda.jacobe() @  qPanda.jacobm()
+# while not arrived1 and not arrived2:
 
-    gPanda.qd = np.linalg.pinv(gPanda.jacobe()) @ v1 + null.flatten()
+#     start = time.time()
+#     v1, arrived1 = rp.p_servo(gPanda.fkine(), gTep, 1)
+#     v2, arrived2 = rp.p_servo(qPanda.fkine(), qTep, 1)
 
-    Aeq = qPanda.jacobe()
-    beq = v2.reshape((6,))
-    c = -qPanda.jacobm().reshape((7,))
-    qPanda.qd = qp.solve_qp(Q, c, None, None, Aeq, beq) + null2.flatten()
+#     null = np.linalg.pinv(gPanda.jacobe()) @ gPanda.jacobe() @  gPanda.jacobm()
+#     null2 = np.linalg.pinv(qPanda.jacobe()) @ qPanda.jacobe() @  qPanda.jacobm()
 
-    env.step(dt * 1000)
-    stop = time.time()
+#     gPanda.qd = np.linalg.pinv(gPanda.jacobe()) @ v1 + null.flatten()
 
-    # if stop - start < dt:
-    #     time.sleep(dt - (stop - start))
+#     Aeq = qPanda.jacobe()
+#     beq = v2.reshape((6,))
+#     c = -qPanda.jacobm().reshape((7,))
+#     qPanda.qd = qp.solve_qp(Q, c, None, None, Aeq, beq) + null2.flatten()
 
-    print("gm: {0}".format(np.round(gPanda.manipulability(), 4)))
-    print("qm: {0}".format(np.round(qPanda.manipulability(), 4)))
-    print()
+#     env.step(dt * 1000)
+#     stop = time.time()
 
-# Uncomment to stop the plot from closing
-env.hold()
+#     # if stop - start < dt:
+#     #     time.sleep(dt - (stop - start))
+
+#     print("gm: {0}".format(np.round(gPanda.manipulability(), 4)))
+#     print("qm: {0}".format(np.round(qPanda.manipulability(), 4)))
+#     print()
+
+# # Uncomment to stop the plot from closing
+# env.hold()
+
+
+
+
+
+###########################################
+
+
+xacro.main('ropy/models/xarco/panda/panda_arm_hand.urdf.xacro')

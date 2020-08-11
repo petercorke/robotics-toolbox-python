@@ -1,0 +1,3 @@
+<a xmlns:xacro="http://www.ros.org/xacro">
+    <xacro:foo/>
+</a>

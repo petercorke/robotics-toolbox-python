@@ -1,0 +1,4 @@
+these static imports were grabbed from public repositories on 18 december 2014,
+to try to have larger test cases. The idea is to compare the "golden" macro
+expansions saved here against the proposed changes to xacro, to make sure that
+at least we don't break the behavior of xacro as new features are added.
