@@ -117,7 +117,8 @@ If you want to use the example puma560 robot, simply call the creation function 
 It will be displayed in the scene that is provided.
 ```python
 # Import the puma560 models and return a GraphicalRobot object
-puma560 = gph.import_puma_560(g_canvas.scene)
+from roboticstoolbox.models.graphical_puma560 import import_puma_560
+puma560 = import_puma_560(g_canvas)
 ```
 Otherwise, robots can be manually created using the `GraphicalRobot` class.
 The joints for the robot can be manually or automatically created.
@@ -175,8 +176,8 @@ WARNING: The joint must be in the same scene as the robot.
 
 ```python
 # Create two basic rotational links
-link1 = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene, axis_through=array([1, 0, 0]))
-link2 = gph.RotationalJoint(SE3(), 1.4, g_canvas.scene)
+link1 = gph.RotationalJoint(SE3(), 1.0, g_canvas, axis_through=array([1, 0, 0]))
+link2 = gph.RotationalJoint(SE3(), 1.4, g_canvas)
 
 # Add to the robot
 my_robot.append_made_link(link1)
@@ -204,7 +205,7 @@ Not supplying a colour will set it to white (default).
 the image is stretched to the next larger width or height that is a power of 2.
 
 ```python
-new_rot = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene)
+new_rot = gph.RotationalJoint(SE3(), 1.0, g_canvas)
 
 # Load a sample texture
 new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
@@ -244,7 +245,7 @@ This method is part of all joint types. It takes two 3D coordinates representing
 For example, if an STL object loads in and the origin is below (-z axis) where it should be, and the origin is at the bottom of the object, the following code will translate it up and set the origin.
 ```python
 # Load the mesh in the link
-link = gph.RotationalLink(SE3(), './path/to/file.stl', g_canvas.scene)
+link = gph.RotationalLink(SE3(), './path/to/file.stl', g_canvas)
 
 # Obtain the graphical object to help with coordinates
 # May not be necessary if you already know the 3D coordinates
@@ -367,5 +368,5 @@ se2 = SE2(x=1, y=1, theta=0)
 colour = [0, 0, 0]  # Black
 shape = '*'
 
-my_object = gph.Object2D(se2, g_canvas.scene, shape, colour)
+my_object = gph.Object2D(se2, g_canvas, shape, colour)
 ```
