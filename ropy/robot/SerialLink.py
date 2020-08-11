@@ -3217,7 +3217,7 @@ class SerialLink(object):
             r2.links[i].m = r2.links[i].m * s
 
             s = (2 * np.random.random() - 1) * p + 1
-            r2.links[i].I = r2.links[i].I * s
+            r2.links[i].I = r2.links[i].I * s    # noqa
 
         return r2
 
