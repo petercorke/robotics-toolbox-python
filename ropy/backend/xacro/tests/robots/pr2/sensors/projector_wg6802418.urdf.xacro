@@ -4,7 +4,7 @@
       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
       xmlns:xacro="http://ros.org/wiki/xacro">
   
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/projector_wg6802418.gazebo.xacro" />
+  <xacro:include filename="projector_wg6802418.gazebo.xacro" />
 
   <xacro:macro name="projector_wg6802418_v0" params="name parent *origin">
     <joint name="${name}_frame_joint" type="fixed">

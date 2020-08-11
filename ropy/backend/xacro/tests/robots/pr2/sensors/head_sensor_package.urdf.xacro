@@ -9,9 +9,9 @@
        prosilica
        double stereo camera
   -->
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/head_sensor_package.gazebo.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/double_stereo_camera.urdf.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/prosilica_gc2450_camera.urdf.xacro" />
+  <xacro:include filename="head_sensor_package.gazebo.xacro" />
+  <xacro:include filename="double_stereo_camera.urdf.xacro" />
+  <xacro:include filename="prosilica_gc2450_camera.urdf.xacro" />
 
   <!-- Made by Kevin for A2 sensor package -->
   <!-- Origin is center mount screw on sensor plate mount -->

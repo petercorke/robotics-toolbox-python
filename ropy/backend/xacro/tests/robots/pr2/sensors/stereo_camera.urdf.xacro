@@ -6,9 +6,9 @@
        xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- stereo camera macro uses wge100_camera macros -->
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/wge100_camera.urdf.xacro" />
+  <xacro:include filename="wge100_camera.urdf.xacro" />
 
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/stereo_camera.gazebo.xacro" />
+  <xacro:include filename="stereo_camera.gazebo.xacro" />
 
   <xacro:property name="stereo_dx" value="0.00" />
   <xacro:property name="stereo_dy" value="-0.09" /> <!-- +y to the left -->

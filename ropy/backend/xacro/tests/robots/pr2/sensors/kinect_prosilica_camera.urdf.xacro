@@ -4,7 +4,7 @@
       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
       xmlns:xacro="http://ros.org/wiki/xacro">
   
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/kinect_prosilica_camera.gazebo.xacro" />
+  <xacro:include filename="kinect_prosilica_camera.gazebo.xacro" />
 
   <xacro:property name="ir_depth_rgb_offset_y" value="0.01"/> <!-- FIXME: what is this offset? -->
 

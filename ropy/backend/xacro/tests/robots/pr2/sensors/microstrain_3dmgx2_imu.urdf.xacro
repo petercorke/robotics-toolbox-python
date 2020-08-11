@@ -2,7 +2,7 @@
 
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/microstrain_3dmgx2_imu.gazebo.xacro" />
+  <xacro:include filename="microstrain_3dmgx2_imu.gazebo.xacro" />
 
   <xacro:macro name="microstrain_3dmgx2_imu_v0" params="name parent *origin imu_topic update_rate stdev">
     <joint name="${name}_joint" type="fixed">

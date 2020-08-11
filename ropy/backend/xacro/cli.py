@@ -32,10 +32,10 @@
 
 import textwrap
 from optparse import OptionParser, IndentedHelpFormatter
-from .color import colorize, warning, message
+from .color import colorize, message
 
 
-class ColoredOptionParser(OptionParser):
+class ColoredOptionParser(OptionParser):   # pragma: no cover
     def error(self, message):
         msg = colorize(message, 'red')
         OptionParser.error(self, msg)
@@ -44,14 +44,14 @@ class ColoredOptionParser(OptionParser):
 _original_wrap = textwrap.wrap
 
 
-def wrap_with_newlines(text, width, **kwargs):
+def wrap_with_newlines(text, width, **kwargs):  # pragma: no cover
     result = []
     for paragraph in text.split('\n'):
         result.extend(_original_wrap(paragraph, width, **kwargs))
     return result
 
 
-class IndentedHelpFormatterWithNL(IndentedHelpFormatter):
+class IndentedHelpFormatterWithNL(IndentedHelpFormatter):  # pragma: no cover
     def __init__(self, *args, **kwargs):
         IndentedHelpFormatter.__init__(self, *args, **kwargs)
 
@@ -62,22 +62,24 @@ class IndentedHelpFormatterWithNL(IndentedHelpFormatter):
         return result
 
 
-def process_args(argv, require_input=True):
+def process_args(argv, require_input=True):   # pragma: no cover
     parser = ColoredOptionParser(usage="usage: %prog [options] <input>",
                                  formatter=IndentedHelpFormatterWithNL())
     parser.add_option("-o", dest="output", metavar="FILE",
                       help="write output to FILE instead of stdout")
     parser.add_option("--deps", action="store_true", dest="just_deps",
                       help="print file dependencies")
-    parser.add_option("--inorder", "-i", action="store_true", dest="in_order",
-                      help="processing in read order (default, can be omitted)")
+    parser.add_option(
+        "--inorder", "-i", action="store_true", dest="in_order",
+        help="processing in read order (default, can be omitted)")
 
     # verbosity options
     parser.add_option("-q", action="store_const", dest="verbosity", const=0,
                       help="quiet operation, suppressing warnings")
     parser.add_option("-v", action="count", dest="verbosity",
                       help="increase verbosity")
-    parser.add_option("--verbosity", metavar='level', dest="verbosity", type='int',
+    parser.add_option("--verbosity", metavar='level', dest="verbosity",
+                      type='int',
                       help=textwrap.dedent("""\
                       set verbosity level
                       0: quiet, suppressing warnings
@@ -92,7 +94,9 @@ def process_args(argv, require_input=True):
     parser.set_defaults(just_deps=False, just_includes=False, verbosity=1)
     (options, pos_args) = parser.parse_args(filtered_args)
     if options.in_order:
-        message("xacro: in-order processing became default in ROS Melodic. You can drop the option.")
+        message(
+            "xacro: in-order processing became default in ROS Melodic. "
+            "You can drop the option.")
     options.in_order = True
 
     if len(pos_args) != 1:

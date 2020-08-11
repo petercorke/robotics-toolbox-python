@@ -4,9 +4,9 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/hokuyo_lx30_laser.urdf.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/base_v0/base.gazebo.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/base_v0/base.transmission.xacro" />
+  <xacro:include filename="../sensors/hokuyo_lx30_laser.urdf.xacro" />
+  <xacro:include filename="base.gazebo.xacro" />
+  <xacro:include filename="base.transmission.xacro" />
 
   <!-- DATA SOURCES -->
   <!-- all link offsets, CG, limits are obtained from Function Engineering spreadsheet 090224_link_data.xls unless stated otherwise -->

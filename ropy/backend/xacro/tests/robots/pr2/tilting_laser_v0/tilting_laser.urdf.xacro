@@ -5,9 +5,9 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find xacro)/test/robots/pr2/tilting_laser_v0/tilting_laser.gazebo.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/tilting_laser_v0/tilting_laser.transmission.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/hokuyo_lx30_laser.urdf.xacro" />
+  <xacro:include filename="tilting_laser.gazebo.xacro" />
+  <xacro:include filename="tilting_laser.transmission.xacro" />
+  <xacro:include filename="../sensors/hokuyo_lx30_laser.urdf.xacro" />
 
   <xacro:macro name="pr2_tilting_laser_v0" params="name parent laser_calib_ref *origin">
 

@@ -5,8 +5,8 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find xacro)/test/robots/pr2/head_v0/head.gazebo.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/head_v0/head.transmission.xacro" />
+  <xacro:include filename="head.gazebo.xacro" />
+  <xacro:include filename="head.transmission.xacro" />
 
   <xacro:property name="M_PI" value="3.1415926535897931" />
 

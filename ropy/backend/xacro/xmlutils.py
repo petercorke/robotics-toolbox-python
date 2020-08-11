@@ -103,13 +103,14 @@ def reqd_attrs(tag, attrs):
     result = opt_attrs(tag, attrs)
     for (res, name) in zip(result, attrs):
         if res is None:
-            raise RuntimeError("%s: missing attribute '%s'" % (tag.nodeName, name))
+            raise RuntimeError("%s: missing attribute '%s'" % (tag.nodeName, name))   # pragma: no cover # noqa
     return result
 
 
 # Better pretty printing of xml
-# Taken from http://ronrothman.com/public/leftbraned/xml-dom-minidom-toprettyxml-and-silly-whitespace/
-def fixed_writexml(self, writer, indent="", addindent="", newl=""):
+# Taken from
+# http://ronrothman.com/public/leftbraned/xml-dom-minidom-toprettyxml-and-silly-whitespace/ # noqa
+def fixed_writexml(self, writer, indent="", addindent="", newl=""):   # pragma: no cover # noqa
     # indent = current indentation
     # addindent = indentation to add to higher levels
     # newl = newline string

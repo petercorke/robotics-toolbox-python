@@ -8,9 +8,9 @@
 
   <!-- Things that are needed only for Gazebo (not the physical robot).  These include
        sensor and controller plugin specifications -->
-  <xacro:include filename="$(find xacro)/test/robots/pr2/upper_arm_v0/upper_arm.gazebo.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/upper_arm_v0/upper_arm.transmission.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/common.xacro" />
+  <xacro:include filename="upper_arm.gazebo.xacro" />
+  <xacro:include filename="upper_arm.transmission.xacro" />
+  <xacro:include filename="../common.xacro" />
 
   <!-- Inertial properties differ slightly for left vs right arm -->
   <xacro:property name="uar_xyz1" value= "0.21398" />

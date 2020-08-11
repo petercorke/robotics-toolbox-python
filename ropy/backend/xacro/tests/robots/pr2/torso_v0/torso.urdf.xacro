@@ -4,9 +4,9 @@
        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
        xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find xacro)/test/robots/pr2/torso_v0/torso.gazebo.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/torso_v0/torso.transmission.xacro" />
-  <xacro:include filename="$(find xacro)/test/robots/pr2/sensors/microstrain_3dmgx2_imu.urdf.xacro" />
+  <xacro:include filename="torso.gazebo.xacro" />
+  <xacro:include filename="torso.transmission.xacro" />
+  <xacro:include filename="../sensors/microstrain_3dmgx2_imu.urdf.xacro" />
 
   <xacro:macro name="pr2_torso_v0" params="name parent *origin">
     <joint name="${name}_joint" type="prismatic">
