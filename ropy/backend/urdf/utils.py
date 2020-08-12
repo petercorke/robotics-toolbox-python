@@ -2,7 +2,7 @@
 """
 import os
 
-from lxml import etree as ET
+from xml import etree as ET
 import numpy as np
 import trimesh
 
