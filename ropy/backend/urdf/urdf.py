@@ -3,14 +3,14 @@
 @author Matthew Matl, github: mmatl
 """
 
+import numpy as np
 from collections import OrderedDict
 import copy
 import os
-import time
-
-import spatialmath as sm
-
 import xml.etree.ElementTree as ET
+import spatialmath as sm
+from io import BytesIO
+
 import networkx as nx
 import numpy as np
 import PIL
@@ -287,7 +287,6 @@ class Box(URDFType):
 
     def __init__(self, size):
         self.size = size
-        self._meshes = []
 
     @property
     def size(self):
@@ -298,16 +297,6 @@ class Box(URDFType):
     @size.setter
     def size(self, value):
         self._size = np.asanyarray(value).astype(np.float64)
-        self._meshes = []
-
-    @property
-    def meshes(self):
-        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
-        that represent this object.
-        """
-        if len(self._meshes) == 0:
-            self._meshes = [trimesh.creation.box(extents=self.size)]
-        return self._meshes
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -347,7 +336,6 @@ class Cylinder(URDFType):
     def __init__(self, radius, length):
         self.radius = radius
         self.length = length
-        self._meshes = None
 
     @property
     def radius(self):
@@ -358,7 +346,6 @@ class Cylinder(URDFType):
     @radius.setter
     def radius(self, value):
         self._radius = float(value)
-        self._meshes = None
 
     @property
     def length(self):
@@ -369,18 +356,6 @@ class Cylinder(URDFType):
     @length.setter
     def length(self, value):
         self._length = float(value)
-        self._meshes = None
-
-    @property
-    def meshes(self):
-        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
-        that represent this object.
-        """
-        if len(self._meshes) == 0:
-            self._meshes = [trimesh.creation.cylinder(
-                radius=self.radius, height=self.length
-            )]
-        return self._mesh
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -397,7 +372,8 @@ class Cylinder(URDFType):
             scale = 1.0
         if isinstance(scale, (list, np.ndarray)):
             if scale[0] != scale[1]:
-                raise ValueError('Cannot rescale cylinder geometry with asymmetry in x/y')
+                raise ValueError(
+                    'Cannot rescale cylinder geometry with asymmetry in x/y')
             c = Cylinder(
                 radius=self.radius * scale[0],
                 length=self.length * scale[2],
@@ -424,7 +400,6 @@ class Sphere(URDFType):
 
     def __init__(self, radius):
         self.radius = radius
-        self._meshes = []
 
     @property
     def radius(self):
@@ -435,16 +410,6 @@ class Sphere(URDFType):
     @radius.setter
     def radius(self, value):
         self._radius = float(value)
-        self._meshes = []
-
-    @property
-    def meshes(self):
-        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
-        that represent this object.
-        """
-        if len(self._meshes) == 0:
-            self._meshes = [trimesh.creation.icosphere(radius=self.radius)]
-        return self._meshes
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -479,11 +444,6 @@ class Mesh(URDFType):
     scale : (3,) float, optional
         The scaling value for the mesh along the XYZ axes.
         If ``None``, assumes no scale is applied.
-    meshes : list of :class:`~trimesh.base.Trimesh`
-        A list of meshes that compose this mesh.
-        The list of meshes is useful for visual geometries that
-        might be composed of separate trimesh objects.
-        If not specified, the mesh is loaded from the file using trimesh.
     """
     _ATTRIBS = {
         'filename': (str, True),
@@ -491,12 +451,9 @@ class Mesh(URDFType):
     }
     _TAG = 'mesh'
 
-    def __init__(self, filename, scale=None, meshes=None):
-        if meshes is None:
-            meshes = load_meshes(filename)
+    def __init__(self, filename, scale=None):
         self.filename = filename
         self.scale = scale
-        self.meshes = meshes
 
     @property
     def filename(self):
@@ -520,61 +477,12 @@ class Mesh(URDFType):
             value = np.asanyarray(value).astype(np.float64)
         self._scale = value
 
-    @property
-    def meshes(self):
-        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
-        that represent this object.
-        """
-        return self._meshes
-
-    @meshes.setter
-    def meshes(self, value):
-        if isinstance(value, str):
-            value = load_meshes(value)
-        elif isinstance(value, (list, tuple, set, np.ndarray)):
-            value = list(value)
-            if len(value) == 0:
-                raise ValueError('Mesh must have at least one trimesh.Trimesh')
-            for m in value:
-                if not isinstance(m, trimesh.Trimesh):
-                    raise TypeError('Mesh requires a trimesh.Trimesh or a '
-                                    'list of them')
-        elif isinstance(value, trimesh.Trimesh):
-            value = [value]
-        else:
-            raise TypeError('Mesh requires a trimesh.Trimesh')
-        self._meshes = value
-
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
-
-        # Load the mesh, combining collision geometry meshes but keeping
-        # visual ones separate to preserve colors and textures
-        fn = get_filename(path, kwargs['filename'])
-        combine = False
-        meshes = load_meshes(fn)
-        if combine:
-            # Delete visuals for simplicity
-            for m in meshes:
-                m.visual = trimesh.visual.ColorVisuals(mesh=m)
-            meshes = [meshes[0] + meshes[1:]]
-        kwargs['meshes'] = meshes
-
         return Mesh(**kwargs)
 
     def _to_xml(self, parent, path):
-        # Get the filename
-        fn = get_filename(path, self.filename, makedirs=True)
-
-        # Export the meshes as a single file
-        meshes = self.meshes
-        if len(meshes) == 1:
-            meshes = meshes[0]
-        elif os.path.splitext(fn)[1] == '.glb':
-            meshes = trimesh.scene.Scene(geometry=meshes)
-        trimesh.exchange.export.export_mesh(meshes, fn)
-
         # Unparse the node
         node = self._unparse(path)
         return node
@@ -590,21 +498,17 @@ class Mesh(URDFType):
         :class:`.Sphere`
             A deep copy.
         """
-        meshes = [m.copy() for m in self.meshes]
         if scale is not None:
-            sm = np.eye(4)
+            sm1 = np.eye(4)
             if isinstance(scale, (list, np.ndarray)):
-                sm[:3,:3] = np.diag(scale)
+                sm1[:3, :3] = np.diag(scale)
             else:
-                sm[:3,:3] = np.diag(np.repeat(scale, 3))
-            for i, m in enumerate(meshes):
-                meshes[i] = m.apply_transform(sm)
+                sm1[:3, :3] = np.diag(np.repeat(scale, 3))
         base, fn = os.path.split(self.filename)
         fn = '{}{}'.format(prefix, self.filename)
         m = Mesh(
             filename=os.path.join(base, fn),
-            scale=(self.scale.copy() if self.scale is not None else None),
-            meshes=meshes
+            scale=(self.scale.copy() if self.scale is not None else None)
         )
         return m
 
@@ -705,13 +609,6 @@ class Geometry(URDFType):
             return self.mesh
         return None
 
-    @property
-    def meshes(self):
-        """list of :class:`~trimesh.base.Trimesh` : The geometry's triangular
-        mesh representation(s).
-        """
-        return self.geometry.meshes
-
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
         Parameters
@@ -724,10 +621,18 @@ class Geometry(URDFType):
             A deep copy.
         """
         v = Geometry(
-            box=(self.box.copy(prefix=prefix, scale=scale) if self.box else None),
-            cylinder=(self.cylinder.copy(prefix=prefix, scale=scale) if self.cylinder else None),
-            sphere=(self.sphere.copy(prefix=prefix, scale=scale) if self.sphere else None),
-            mesh=(self.mesh.copy(prefix=prefix, scale=scale) if self.mesh else None),
+            box=(
+                self.box.copy(prefix=prefix, scale=scale)
+                if self.box else None),
+            cylinder=(
+                self.cylinder.copy(prefix=prefix, scale=scale)
+                if self.cylinder else None),
+            sphere=(
+                self.sphere.copy(prefix=prefix, scale=scale)
+                if self.sphere else None),
+            mesh=(
+                self.mesh.copy(prefix=prefix, scale=scale)
+                if self.mesh else None),
         )
         return v
 
@@ -865,7 +770,8 @@ class Material(URDFType):
         # Extract the color -- it's weirdly an attribute of a subelement
         color = node.find('color')
         if color is not None:
-            color = np.fromstring(color.attrib['rgba'], sep=' ', dtype=np.float64)
+            color = np.fromstring(
+                color.attrib['rgba'], sep=' ', dtype=np.float64)
         kwargs['color'] = color
 
         return Material(**kwargs)
@@ -987,11 +893,11 @@ class Collision(URDFType):
         :class:`.Visual`
             A deep copy of the visual.
         """
-        origin=self.origin.copy()
+        origin = self.origin.copy()
         if scale is not None:
             if not isinstance(scale, (list, np.ndarray)):
                 scale = np.repeat(scale, 3)
-            origin[:3,3] *= scale
+            origin[:3, 3] *= scale
         return Collision(
             name='{}{}'.format(prefix, self.name),
             origin=origin,
@@ -1097,16 +1003,18 @@ class Visual(URDFType):
         :class:`.Visual`
             A deep copy of the visual.
         """
-        origin=self.origin.copy()
+        origin = self.origin.copy()
         if scale is not None:
             if not isinstance(scale, (list, np.ndarray)):
                 scale = np.repeat(scale, 3)
-            origin[:3,3] *= scale
+            origin[:3, 3] *= scale
         return Visual(
             geometry=self.geometry.copy(prefix=prefix, scale=scale),
             name='{}{}'.format(prefix, self.name),
             origin=origin,
-            material=(self.material.copy(prefix=prefix) if self.material else None),
+            material=(
+                self.material.copy(prefix=prefix)
+                if self.material else None),
         )
 
 
@@ -1187,12 +1095,12 @@ class Inertial(URDFType):
         mass.attrib['value'] = str(self.mass)
         node.append(mass)
         inertia = ET.Element('inertia')
-        inertia.attrib['ixx'] = str(self.inertia[0,0])
-        inertia.attrib['ixy'] = str(self.inertia[0,1])
-        inertia.attrib['ixz'] = str(self.inertia[0,2])
-        inertia.attrib['iyy'] = str(self.inertia[1,1])
-        inertia.attrib['iyz'] = str(self.inertia[1,2])
-        inertia.attrib['izz'] = str(self.inertia[2,2])
+        inertia.attrib['ixx'] = str(self.inertia[0, 0])
+        inertia.attrib['ixy'] = str(self.inertia[0, 1])
+        inertia.attrib['ixz'] = str(self.inertia[0, 2])
+        inertia.attrib['iyy'] = str(self.inertia[1, 1])
+        inertia.attrib['iyz'] = str(self.inertia[1, 2])
+        inertia.attrib['izz'] = str(self.inertia[2, 2])
         node.append(inertia)
         return node
 
@@ -2203,7 +2111,9 @@ class Joint(URDFType):
                 cfg = 0.0
             else:
                 cfg = float(cfg)
-            R = trimesh.transformations.rotation_matrix(cfg, self.axis)
+            R = sm.SO3().A
+            # TODO fis this
+            # R = trimesh.transformations.rotation_matrix(cfg, self.axis)
             return self.origin.dot(R)
         elif self.joint_type == 'prismatic':
             if cfg is None:
@@ -2211,7 +2121,7 @@ class Joint(URDFType):
             else:
                 cfg = float(cfg)
             translation = np.eye(4, dtype=np.float64)
-            translation[:3,3] = self.axis * cfg
+            translation[:3, 3] = self.axis * cfg
             return self.origin.dot(translation)
         elif self.joint_type == 'planar':
             if cfg is None:
@@ -2223,7 +2133,7 @@ class Joint(URDFType):
                     '(2,) float configuration required for planar joints'
                 )
             translation = np.eye(4, dtype=np.float64)
-            translation[:3,3] = self.origin[:3,:2].dot(cfg)
+            translation[:3, 3] = self.origin[:3, :2].dot(cfg)
             return self.origin.dot(translation)
         elif self.joint_type == 'floating':
             if cfg is None:
@@ -2237,8 +2147,9 @@ class Joint(URDFType):
             raise ValueError('Invalid configuration')
 
     def get_child_poses(self, cfg, n_cfgs):
-        """Computes the child pose relative to a parent pose for a given set of 
-        configuration values.
+        """
+        Computes the child pose relative to a parent pose for a
+        given set of configuration values.
         Parameters
         ----------
         cfg : (n,) float or None
@@ -2263,12 +2174,13 @@ class Joint(URDFType):
         elif self.joint_type in ['revolute', 'continuous']:
             if cfg is None:
                 cfg = np.zeros(n_cfgs)
-            return np.matmul(self.origin, self._rotation_matrices(cfg, self.axis))
+            return np.matmul(
+                self.origin, self._rotation_matrices(cfg, self.axis))
         elif self.joint_type == 'prismatic':
             if cfg is None:
                 cfg = np.zeros(n_cfgs)
             translation = np.tile(np.eye(4), (n_cfgs, 1, 1))
-            translation[:,:3,3] = self.axis * cfg[:,np.newaxis]
+            translation[:, :3, 3] = self.axis * cfg[:, np.newaxis]
             return np.matmul(self.origin, translation)
         elif self.joint_type == 'planar':
             raise NotImplementedError()
@@ -2323,14 +2235,14 @@ class Joint(URDFType):
         sina = np.sin(angles)
         cosa = np.cos(angles)
         M = np.tile(np.eye(4), (len(angles), 1, 1))
-        M[:,0,0] = cosa
-        M[:,1,1] = cosa
-        M[:,2,2] = cosa
-        M[:,:3,:3] += (
+        M[:, 0, 0] = cosa
+        M[:, 1, 1] = cosa
+        M[:, 2, 2] = cosa
+        M[:, :3, :3] += (
             np.tile(np.outer(axis, axis), (len(angles), 1, 1)) *
             (1.0 - cosa)[:, np.newaxis, np.newaxis]
         )
-        M[:,:3,:3] += np.tile(np.array([
+        M[:, :3, :3] += np.tile(np.array([
             [0.0, -axis[2], axis[1]],
             [axis[2], 0.0, -axis[0]],
             [-axis[1], axis[0], 0.0]]
@@ -2352,7 +2264,7 @@ class Joint(URDFType):
         if scale is not None:
             if not isinstance(scale, (list, np.ndarray)):
                 scale = np.repeat(scale, 3)
-            origin[:3,3] *= scale
+            origin[:3, 3] *= scale
         cpy = Joint(
             name='{}{}'.format(prefix, self.name),
             joint_type=self.joint_type,
@@ -2361,11 +2273,18 @@ class Joint(URDFType):
             axis=self.axis.copy(),
             origin=origin,
             limit=(self.limit.copy(prefix, scale) if self.limit else None),
-            dynamics=(self.dynamics.copy(prefix,scale) if self.dynamics else None),
-            safety_controller=(self.safety_controller.copy(prefix, scale) if
-                               self.safety_controller else None),
-            calibration=(self.calibration.copy(prefix, scale) if self.calibration else None),
-            mimic=(self.mimic.copy(prefix=prefix, scale=scale) if self.mimic else None)
+            dynamics=(
+                self.dynamics.copy(prefix, scale)
+                if self.dynamics else None),
+            safety_controller=(
+                self.safety_controller.copy(prefix, scale)
+                if self.safety_controller else None),
+            calibration=(
+                self.calibration.copy(prefix, scale)
+                if self.calibration else None),
+            mimic=(
+                self.mimic.copy(prefix=prefix, scale=scale)
+                if self.mimic else None)
         )
         return cpy
 
@@ -2585,7 +2504,8 @@ class URDF(URDFType):
 
         # for x in self._links:
         #     if x.name in self._link_map:
-        #         raise ValueError('Two links with name {} found'.format(x.name))
+        #         raise ValueError(
+        #           'Two links with name {} found'.format(x.name))
         #     self._link_map[x.name] = x
 
         # for x in self._joints:
@@ -2639,7 +2559,8 @@ class URDF(URDFType):
         # # Cache the reverse topological order (useful for speeding up FK,
         # # as we want to start at the base and work outward to cache
         # # computation.
-        # self._reverse_topo = list(reversed(list(nx.topological_sort(self._G))))
+        # self._reverse_topo = list(
+        #   reversed(list(nx.topological_sort(self._G))))
 
     @property
     def name(self):
