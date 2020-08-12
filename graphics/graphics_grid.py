@@ -22,6 +22,11 @@ class GraphicsGrid:
         # Save the current camera settings
         self.camera_pos = self.__scene.camera.pos
         self.camera_axes = self.__scene.camera.axis
+        self.__focal_point = [
+            round(self.__scene.center.x),
+            round(self.__scene.center.y),
+            round(self.__scene.center.z)
+        ]
 
         self.__relative_cam = True
         self.__num_squares = 10
@@ -51,7 +56,7 @@ class GraphicsGrid:
         self.grid_object[self.__planes_idx] = the_grid
 
         # Update the labels instead of recreating them
-        update_grid_numbers(self.grid_object[self.__labels_idx], self.__relative_cam, self.__num_squares, self.__scene)
+        update_grid_numbers(self.__focal_point, self.grid_object[self.__labels_idx], self.__num_squares, self.__scene)
 
     def __create_grid_objects(self):
         """
@@ -71,8 +76,11 @@ class GraphicsGrid:
             x_origin, y_origin, z_origin = round(self.__scene.center.x),\
                                            round(self.__scene.center.y),\
                                            round(self.__scene.center.z)
+            self.__focal_point = [x_origin, y_origin, z_origin]
         else:
-            x_origin, y_origin, z_origin = 0, 0, 0
+            x_origin, y_origin, z_origin = self.__focal_point[0], \
+                                           self.__focal_point[1], \
+                                           self.__focal_point[2]
 
         #   CAMERA AXES |  DISPLAYED GRID | XZ PLANE | XY PLANE | YZ PLANE
         #      x,y,z    |      x,y,z      |   x,z    |    x,y   |    y,z
@@ -165,11 +173,14 @@ class GraphicsGrid:
         camera_axes = self.camera_axes
         # Locate centre of axes
         if self.__relative_cam:
-            x_origin, y_origin, z_origin = round(self.__scene.center.x),\
-                                           round(self.__scene.center.y),\
+            x_origin, y_origin, z_origin = round(self.__scene.center.x), \
+                                           round(self.__scene.center.y), \
                                            round(self.__scene.center.z)
+            self.__focal_point = [x_origin, y_origin, z_origin]
         else:
-            x_origin, y_origin, z_origin = 0, 0, 0
+            x_origin, y_origin, z_origin = self.__focal_point[0], \
+                                           self.__focal_point[1], \
+                                           self.__focal_point[2]
 
         #   CAMERA AXES |  DISPLAYED GRID | XZ PLANE | XY PLANE | YZ PLANE
         #      x,y,z    |      x,y,z      |   x,z    |    x,y   |    y,z
@@ -236,8 +247,8 @@ class GraphicsGrid:
 
             # Update grid
             self.__move_grid_objects()
-            update_grid_numbers(self.grid_object[self.__labels_idx],
-                                self.__relative_cam,
+            update_grid_numbers(self.__focal_point,
+                                self.grid_object[self.__labels_idx],
                                 self.__num_squares,
                                 self.__scene)
 

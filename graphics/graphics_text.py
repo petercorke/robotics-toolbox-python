@@ -90,14 +90,14 @@ def draw_text(label_text, label_position, scene):
     return the_label
 
 
-def update_grid_numbers(numbers_list, bool_camera_relative, num_squares, scene):
+def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
     """
     Draw the grid numbers along the xyz axes.
 
+    :param focal_point: The focus point of the camera to draw the grid about
+    :type focal_point: `list`
     :param numbers_list: A reference to a list of the labels that gets updated.
     :type numbers_list: `list`
-    :param bool_camera_relative: Whether to draw the axes at the camera focus point or at (0, 0, 0).
-    :type bool_camera_relative: `bool`
     :param num_squares: How many unit squares to draw along the axis.
     :type num_squares: `int`
     :param scene: The scene in which to draw the object
@@ -108,10 +108,7 @@ def update_grid_numbers(numbers_list, bool_camera_relative, num_squares, scene):
     padding = 0.25  # Padding to not draw numbers on top of lines.
     camera_axes = scene.camera.axis
     # Locate center of the axes
-    if bool_camera_relative:
-        x_origin, y_origin, z_origin = round(scene.center.x), round(scene.center.y), round(scene.center.z)
-    else:
-        x_origin, y_origin, z_origin = 0, 0, 0
+    x_origin, y_origin, z_origin = focal_point[0], focal_point[1], focal_point[2]
 
     #   CAMERA AXES |  DISPLAYED GRID | XZ PLANE | XY PLANE | YZ PLANE
     #      x,y,z    |      x,y,z      |   x,z    |    x,y   |    y,z
