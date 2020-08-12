@@ -287,6 +287,7 @@ class Box(URDFType):
 
     def __init__(self, size):
         self.size = size
+        self._meshes = []
 
     @property
     def size(self):
@@ -297,6 +298,16 @@ class Box(URDFType):
     @size.setter
     def size(self, value):
         self._size = np.asanyarray(value).astype(np.float64)
+        self._meshes = []
+
+    @property
+    def meshes(self):
+        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
+        that represent this object.
+        """
+        if len(self._meshes) == 0:
+            self._meshes = [trimesh.creation.box(extents=self.size)]
+        return self._meshes
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -336,6 +347,7 @@ class Cylinder(URDFType):
     def __init__(self, radius, length):
         self.radius = radius
         self.length = length
+        self._meshes = None
 
     @property
     def radius(self):
@@ -346,6 +358,7 @@ class Cylinder(URDFType):
     @radius.setter
     def radius(self, value):
         self._radius = float(value)
+        self._meshes = None
 
     @property
     def length(self):
@@ -356,6 +369,18 @@ class Cylinder(URDFType):
     @length.setter
     def length(self, value):
         self._length = float(value)
+        self._meshes = None
+
+    @property
+    def meshes(self):
+        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
+        that represent this object.
+        """
+        if len(self._meshes) == 0:
+            self._meshes = [trimesh.creation.cylinder(
+                radius=self.radius, height=self.length
+            )]
+        return self._mesh
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -372,8 +397,7 @@ class Cylinder(URDFType):
             scale = 1.0
         if isinstance(scale, (list, np.ndarray)):
             if scale[0] != scale[1]:
-                raise ValueError(
-                    'Cannot rescale cylinder geometry with asymmetry in x/y')
+                raise ValueError('Cannot rescale cylinder geometry with asymmetry in x/y')
             c = Cylinder(
                 radius=self.radius * scale[0],
                 length=self.length * scale[2],
@@ -400,6 +424,7 @@ class Sphere(URDFType):
 
     def __init__(self, radius):
         self.radius = radius
+        self._meshes = []
 
     @property
     def radius(self):
@@ -410,6 +435,16 @@ class Sphere(URDFType):
     @radius.setter
     def radius(self, value):
         self._radius = float(value)
+        self._meshes = []
+
+    @property
+    def meshes(self):
+        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
+        that represent this object.
+        """
+        if len(self._meshes) == 0:
+            self._meshes = [trimesh.creation.icosphere(radius=self.radius)]
+        return self._meshes
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -434,6 +469,146 @@ class Sphere(URDFType):
         return s
 
 
+class Mesh(URDFType):
+    """A triangular mesh object.
+    Parameters
+    ----------
+    filename : str
+        The path to the mesh that contains this object. This can be
+        relative to the top-level URDF or an absolute path.
+    scale : (3,) float, optional
+        The scaling value for the mesh along the XYZ axes.
+        If ``None``, assumes no scale is applied.
+    meshes : list of :class:`~trimesh.base.Trimesh`
+        A list of meshes that compose this mesh.
+        The list of meshes is useful for visual geometries that
+        might be composed of separate trimesh objects.
+        If not specified, the mesh is loaded from the file using trimesh.
+    """
+    _ATTRIBS = {
+        'filename': (str, True),
+        'scale': (np.ndarray, False)
+    }
+    _TAG = 'mesh'
+
+    def __init__(self, filename, scale=None, meshes=None):
+        if meshes is None:
+            meshes = load_meshes(filename)
+        self.filename = filename
+        self.scale = scale
+        self.meshes = meshes
+
+    @property
+    def filename(self):
+        """str : The path to the mesh file for this object.
+        """
+        return self._filename
+
+    @filename.setter
+    def filename(self, value):
+        self._filename = value
+
+    @property
+    def scale(self):
+        """(3,) float : A scaling for the mesh along its local XYZ axes.
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, value):
+        if value is not None:
+            value = np.asanyarray(value).astype(np.float64)
+        self._scale = value
+
+    @property
+    def meshes(self):
+        """list of :class:`~trimesh.base.Trimesh` : The triangular meshes
+        that represent this object.
+        """
+        return self._meshes
+
+    @meshes.setter
+    def meshes(self, value):
+        if isinstance(value, str):
+            value = load_meshes(value)
+        elif isinstance(value, (list, tuple, set, np.ndarray)):
+            value = list(value)
+            if len(value) == 0:
+                raise ValueError('Mesh must have at least one trimesh.Trimesh')
+            for m in value:
+                if not isinstance(m, trimesh.Trimesh):
+                    raise TypeError('Mesh requires a trimesh.Trimesh or a '
+                                    'list of them')
+        elif isinstance(value, trimesh.Trimesh):
+            value = [value]
+        else:
+            raise TypeError('Mesh requires a trimesh.Trimesh')
+        self._meshes = value
+
+    @classmethod
+    def _from_xml(cls, node, path):
+        kwargs = cls._parse(node, path)
+
+        # Load the mesh, combining collision geometry meshes but keeping
+        # visual ones separate to preserve colors and textures
+        fn = get_filename(path, kwargs['filename'])
+        combine = False
+        meshes = load_meshes(fn)
+        if combine:
+            # Delete visuals for simplicity
+            for m in meshes:
+                m.visual = trimesh.visual.ColorVisuals(mesh=m)
+            meshes = [meshes[0] + meshes[1:]]
+        kwargs['meshes'] = meshes
+
+        return Mesh(**kwargs)
+
+    def _to_xml(self, parent, path):
+        # Get the filename
+        fn = get_filename(path, self.filename, makedirs=True)
+
+        # Export the meshes as a single file
+        meshes = self.meshes
+        if len(meshes) == 1:
+            meshes = meshes[0]
+        elif os.path.splitext(fn)[1] == '.glb':
+            meshes = trimesh.scene.Scene(geometry=meshes)
+        trimesh.exchange.export.export_mesh(meshes, fn)
+
+        # Unparse the node
+        node = self._unparse(path)
+        return node
+
+    def copy(self, prefix='', scale=None):
+        """Create a deep copy with the prefix applied to all names.
+        Parameters
+        ----------
+        prefix : str
+            A prefix to apply to all names.
+        Returns
+        -------
+        :class:`.Sphere`
+            A deep copy.
+        """
+        meshes = [m.copy() for m in self.meshes]
+        if scale is not None:
+            sm = np.eye(4)
+            if isinstance(scale, (list, np.ndarray)):
+                sm[:3,:3] = np.diag(scale)
+            else:
+                sm[:3,:3] = np.diag(np.repeat(scale, 3))
+            for i, m in enumerate(meshes):
+                meshes[i] = m.apply_transform(sm)
+        base, fn = os.path.split(self.filename)
+        fn = '{}{}'.format(prefix, self.filename)
+        m = Mesh(
+            filename=os.path.join(base, fn),
+            scale=(self.scale.copy() if self.scale is not None else None),
+            meshes=meshes
+        )
+        return m
+
+
 class Geometry(URDFType):
     """A wrapper for all geometry types.
     Only one of the following values can be set, all others should be set
@@ -446,22 +621,26 @@ class Geometry(URDFType):
         Cylindrical geometry.
     sphere : :class:`.Sphere`
         Spherical geometry.
+    mesh : :class:`.Mesh`
+        Mesh geometry.
     """
 
     _ELEMENTS = {
         'box': (Box, False, False),
         'cylinder': (Cylinder, False, False),
-        'sphere': (Sphere, False, False)
+        'sphere': (Sphere, False, False),
+        'mesh': (Mesh, False, False),
     }
     _TAG = 'geometry'
 
-    def __init__(self, box=None, cylinder=None, sphere=None):
+    def __init__(self, box=None, cylinder=None, sphere=None, mesh=None):
         if (box is None and cylinder is None and
-                sphere is None):
+                sphere is None and mesh is None):
             raise ValueError('At least one geometry element must be set')
         self.box = box
         self.cylinder = cylinder
         self.sphere = sphere
+        self.mesh = mesh
 
     @property
     def box(self):
@@ -500,10 +679,21 @@ class Geometry(URDFType):
         self._sphere = value
 
     @property
-    def geometry(self):
+    def mesh(self):
+        """:class:`.Mesh` : Mesh geometry.
         """
-        :class:`.Box`, :class:`.Cylinder`, :class:`.Sphere`
-        : The valid geometry element.
+        return self._mesh
+
+    @mesh.setter
+    def mesh(self, value):
+        if value is not None and not isinstance(value, Mesh):
+            raise TypeError('Expected Mesh type')
+        self._mesh = value
+
+    @property
+    def geometry(self):
+        """:class:`.Box`, :class:`.Cylinder`, :class:`.Sphere`, or
+        :class:`.Mesh` : The valid geometry element.
         """
         if self.box is not None:
             return self.box
@@ -511,7 +701,16 @@ class Geometry(URDFType):
             return self.cylinder
         if self.sphere is not None:
             return self.sphere
+        if self.mesh is not None:
+            return self.mesh
         return None
+
+    @property
+    def meshes(self):
+        """list of :class:`~trimesh.base.Trimesh` : The geometry's triangular
+        mesh representation(s).
+        """
+        return self.geometry.meshes
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -525,17 +724,185 @@ class Geometry(URDFType):
             A deep copy.
         """
         v = Geometry(
-            box=(
-                self.box.copy(prefix=prefix, scale=scale)
-                if self.box else None),
-            cylinder=(
-                self.cylinder.copy(prefix=prefix, scale=scale)
-                if self.cylinder else None),
-            sphere=(
-                self.sphere.copy(prefix=prefix, scale=scale)
-                if self.sphere else None)
+            box=(self.box.copy(prefix=prefix, scale=scale) if self.box else None),
+            cylinder=(self.cylinder.copy(prefix=prefix, scale=scale) if self.cylinder else None),
+            sphere=(self.sphere.copy(prefix=prefix, scale=scale) if self.sphere else None),
+            mesh=(self.mesh.copy(prefix=prefix, scale=scale) if self.mesh else None),
         )
         return v
+
+
+class Texture(URDFType):
+    """An image-based texture.
+    Parameters
+    ----------
+    filename : str
+        The path to the image that contains this texture. This can be
+        relative to the top-level URDF or an absolute path.
+    image : :class:`PIL.Image.Image`, optional
+        The image for the texture.
+        If not specified, it is loaded automatically from the filename.
+    """
+
+    _ATTRIBS = {
+        'filename': (str, True)
+    }
+    _TAG = 'texture'
+
+    def __init__(self, filename, image=None):
+        self.filename = filename
+        self.image = image
+
+    @property
+    def filename(self):
+        """str : Path to the image for this texture.
+        """
+        return self._filename
+
+    @filename.setter
+    def filename(self, value):
+        self._filename = str(value)
+
+    @classmethod
+    def _from_xml(cls, node, path):
+        kwargs = cls._parse(node, path)
+
+        return Texture(**kwargs)
+
+    def _to_xml(self, parent, path):
+        # Save the image
+        filepath = get_filename(path, self.filename, makedirs=True)
+        self.image.save(filepath)
+
+        return self._unparse(path)
+
+    def copy(self, prefix='', scale=None):
+        """Create a deep copy with the prefix applied to all names.
+        Parameters
+        ----------
+        prefix : str
+            A prefix to apply to all names.
+        Returns
+        -------
+        :class:`.Texture`
+            A deep copy.
+        """
+        v = Texture(
+            filename=self.filename
+        )
+        return v
+
+
+class Material(URDFType):
+    """A material for some geometry.
+    Parameters
+    ----------
+    name : str
+        The name of the material.
+    color : (4,) float, optional
+        The RGBA color of the material in the range [0,1].
+    texture : :class:`.Texture`, optional
+        A texture for the material.
+    """
+    _ATTRIBS = {
+        'name': (str, True)
+    }
+    _ELEMENTS = {
+        'texture': (Texture, False, False),
+    }
+    _TAG = 'material'
+
+    def __init__(self, name, color=None, texture=None):
+        self.name = name
+        self.color = color
+        self.texture = texture
+
+    @property
+    def name(self):
+        """str : The name of the material.
+        """
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = str(value)
+
+    @property
+    def color(self):
+        """(4,) float : The RGBA color of the material, in the range [0,1].
+        """
+        return self._color
+
+    @color.setter
+    def color(self, value):
+        if value is not None:
+            value = np.asanyarray(value).astype(np.float)
+            value = np.clip(value, 0.0, 1.0)
+            if value.shape != (4,):
+                raise ValueError('Color must be a (4,) float')
+        self._color = value
+
+    @property
+    def texture(self):
+        """:class:`.Texture` : The texture for the material.
+        """
+        return self._texture
+
+    @texture.setter
+    def texture(self, value):
+        if value is not None:
+            if isinstance(value, str):
+                value = Texture(filename=value)
+            elif not isinstance(value, Texture):
+                raise ValueError('Invalid type for texture -- expect path to '
+                                 'image or Texture')
+        self._texture = value
+
+    @classmethod
+    def _from_xml(cls, node, path):
+        kwargs = cls._parse(node, path)
+
+        # Extract the color -- it's weirdly an attribute of a subelement
+        color = node.find('color')
+        if color is not None:
+            color = np.fromstring(color.attrib['rgba'], sep=' ', dtype=np.float64)
+        kwargs['color'] = color
+
+        return Material(**kwargs)
+
+    def _to_xml(self, parent, path):
+        # Simplify materials by collecting them at the top level.
+
+        # For top-level elements, save the full material specification
+        if parent.tag == 'robot':
+            node = self._unparse(path)
+            if self.color is not None:
+                color = ET.Element('color')
+                color.attrib['rgba'] = np.array2string(self.color)[1:-1]
+                node.append(color)
+
+        # For non-top-level elements just save the material with a name
+        else:
+            node = ET.Element('material')
+            node.attrib['name'] = self.name
+        return node
+
+    def copy(self, prefix='', scale=None):
+        """Create a deep copy of the material with the prefix applied to all names.
+        Parameters
+        ----------
+        prefix : str
+            A prefix to apply to all joint and link names.
+        Returns
+        -------
+        :class:`.Material`
+            A deep copy of the material.
+        """
+        return Material(
+            name='{}{}'.format(prefix, self.name),
+            color=self.color,
+            texture=self.texture
+        )
 
 
 class Collision(URDFType):
@@ -620,11 +987,11 @@ class Collision(URDFType):
         :class:`.Visual`
             A deep copy of the visual.
         """
-        origin = self.origin.copy()
+        origin=self.origin.copy()
         if scale is not None:
             if not isinstance(scale, (list, np.ndarray)):
                 scale = np.repeat(scale, 3)
-            origin[:3, 3] *= scale
+            origin[:3,3] *= scale
         return Collision(
             name='{}{}'.format(prefix, self.name),
             origin=origin,
@@ -643,19 +1010,23 @@ class Visual(URDFType):
     origin : (4,4) float, optional
         The pose of the visual element relative to the link frame.
         Defaults to identity.
+    material : :class:`.Material`, optional
+        The material of the element.
     """
     _ATTRIBS = {
         'name': (str, False)
     }
     _ELEMENTS = {
         'geometry': (Geometry, True, False),
+        'material': (Material, False, False),
     }
     _TAG = 'visual'
 
-    def __init__(self, geometry, name=None, origin=None):
+    def __init__(self, geometry, name=None, origin=None, material=None):
         self.geometry = geometry
         self.name = name
         self.origin = origin
+        self.material = material
 
     @property
     def geometry(self):
@@ -691,6 +1062,19 @@ class Visual(URDFType):
     def origin(self, value):
         self._origin = configure_origin(value)
 
+    @property
+    def material(self):
+        """:class:`.Material` : The material for this element.
+        """
+        return self._material
+
+    @material.setter
+    def material(self, value):
+        if value is not None:
+            if not isinstance(value, Material):
+                raise TypeError('Must set material with Material object')
+        self._material = value
+
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
@@ -713,15 +1097,16 @@ class Visual(URDFType):
         :class:`.Visual`
             A deep copy of the visual.
         """
-        origin = self.origin.copy()
+        origin=self.origin.copy()
         if scale is not None:
             if not isinstance(scale, (list, np.ndarray)):
                 scale = np.repeat(scale, 3)
-            origin[:3, 3] *= scale
+            origin[:3,3] *= scale
         return Visual(
             geometry=self.geometry.copy(prefix=prefix, scale=scale),
             name='{}{}'.format(prefix, self.name),
-            origin=origin
+            origin=origin,
+            material=(self.material.copy(prefix=prefix) if self.material else None),
         )
 
 
@@ -802,12 +1187,12 @@ class Inertial(URDFType):
         mass.attrib['value'] = str(self.mass)
         node.append(mass)
         inertia = ET.Element('inertia')
-        inertia.attrib['ixx'] = str(self.inertia[0, 0])
-        inertia.attrib['ixy'] = str(self.inertia[0, 1])
-        inertia.attrib['ixz'] = str(self.inertia[0, 2])
-        inertia.attrib['iyy'] = str(self.inertia[1, 1])
-        inertia.attrib['iyz'] = str(self.inertia[1, 2])
-        inertia.attrib['izz'] = str(self.inertia[2, 2])
+        inertia.attrib['ixx'] = str(self.inertia[0,0])
+        inertia.attrib['ixy'] = str(self.inertia[0,1])
+        inertia.attrib['ixz'] = str(self.inertia[0,2])
+        inertia.attrib['iyy'] = str(self.inertia[1,1])
+        inertia.attrib['iyz'] = str(self.inertia[1,2])
+        inertia.attrib['izz'] = str(self.inertia[2,2])
         node.append(inertia)
         return node
 
@@ -1818,9 +2203,7 @@ class Joint(URDFType):
                 cfg = 0.0
             else:
                 cfg = float(cfg)
-            print("NEED SE3 HERE")
-            R = sm.SO3().A
-            # R = trimesh.transformations.rotation_matrix(cfg, self.axis)
+            R = trimesh.transformations.rotation_matrix(cfg, self.axis)
             return self.origin.dot(R)
         elif self.joint_type == 'prismatic':
             if cfg is None:
@@ -1828,7 +2211,7 @@ class Joint(URDFType):
             else:
                 cfg = float(cfg)
             translation = np.eye(4, dtype=np.float64)
-            translation[:3, 3] = self.axis * cfg
+            translation[:3,3] = self.axis * cfg
             return self.origin.dot(translation)
         elif self.joint_type == 'planar':
             if cfg is None:
@@ -1840,7 +2223,7 @@ class Joint(URDFType):
                     '(2,) float configuration required for planar joints'
                 )
             translation = np.eye(4, dtype=np.float64)
-            translation[:3, 3] = self.origin[:3, :2].dot(cfg)
+            translation[:3,3] = self.origin[:3,:2].dot(cfg)
             return self.origin.dot(translation)
         elif self.joint_type == 'floating':
             if cfg is None:
@@ -1854,9 +2237,8 @@ class Joint(URDFType):
             raise ValueError('Invalid configuration')
 
     def get_child_poses(self, cfg, n_cfgs):
-        """
-        Computes the child pose relative to a parent pose for a
-        given set of configuration values.
+        """Computes the child pose relative to a parent pose for a given set of 
+        configuration values.
         Parameters
         ----------
         cfg : (n,) float or None
@@ -1881,14 +2263,12 @@ class Joint(URDFType):
         elif self.joint_type in ['revolute', 'continuous']:
             if cfg is None:
                 cfg = np.zeros(n_cfgs)
-            return np.matmul(
-                self.origin,
-                self._rotation_matrices(cfg, self.axis))
+            return np.matmul(self.origin, self._rotation_matrices(cfg, self.axis))
         elif self.joint_type == 'prismatic':
             if cfg is None:
                 cfg = np.zeros(n_cfgs)
             translation = np.tile(np.eye(4), (n_cfgs, 1, 1))
-            translation[:, :3, 3] = self.axis * cfg[:, np.newaxis]
+            translation[:,:3,3] = self.axis * cfg[:,np.newaxis]
             return np.matmul(self.origin, translation)
         elif self.joint_type == 'planar':
             raise NotImplementedError()
@@ -1943,14 +2323,14 @@ class Joint(URDFType):
         sina = np.sin(angles)
         cosa = np.cos(angles)
         M = np.tile(np.eye(4), (len(angles), 1, 1))
-        M[:, 0, 0] = cosa
-        M[:, 1, 1] = cosa
-        M[:, 2, 2] = cosa
-        M[:, :3, :3] += (
+        M[:,0,0] = cosa
+        M[:,1,1] = cosa
+        M[:,2,2] = cosa
+        M[:,:3,:3] += (
             np.tile(np.outer(axis, axis), (len(angles), 1, 1)) *
             (1.0 - cosa)[:, np.newaxis, np.newaxis]
         )
-        M[:, :3, :3] += np.tile(np.array([
+        M[:,:3,:3] += np.tile(np.array([
             [0.0, -axis[2], axis[1]],
             [axis[2], 0.0, -axis[0]],
             [-axis[1], axis[0], 0.0]]
@@ -1972,7 +2352,7 @@ class Joint(URDFType):
         if scale is not None:
             if not isinstance(scale, (list, np.ndarray)):
                 scale = np.repeat(scale, 3)
-            origin[:3, 3] *= scale
+            origin[:3,3] *= scale
         cpy = Joint(
             name='{}{}'.format(prefix, self.name),
             joint_type=self.joint_type,
@@ -1981,18 +2361,11 @@ class Joint(URDFType):
             axis=self.axis.copy(),
             origin=origin,
             limit=(self.limit.copy(prefix, scale) if self.limit else None),
-            dynamics=(
-                self.dynamics.copy(prefix, scale)
-                if self.dynamics else None),
-            safety_controller=(
-                self.safety_controller.copy(prefix, scale)
-                if self.safety_controller else None),
-            calibration=(
-                self.calibration.copy(prefix, scale)
-                if self.calibration else None),
-            mimic=(
-                self.mimic.copy(prefix=prefix, scale=scale)
-                if self.mimic else None)
+            dynamics=(self.dynamics.copy(prefix,scale) if self.dynamics else None),
+            safety_controller=(self.safety_controller.copy(prefix, scale) if
+                               self.safety_controller else None),
+            calibration=(self.calibration.copy(prefix, scale) if self.calibration else None),
+            mimic=(self.mimic.copy(prefix=prefix, scale=scale) if self.mimic else None)
         )
         return cpy
 
@@ -2088,6 +2461,31 @@ class Link(URDFType):
                     raise ValueError('Expected list of Collision objects')
         self._collisions = value
 
+    @property
+    def collision_mesh(self):
+        """:class:`~trimesh.base.Trimesh` : A single collision mesh for
+        the link, specified in the link frame, or None if there isn't one.
+        """
+        if len(self.collisions) == 0:
+            return None
+        if self._collision_mesh is None:
+            meshes = []
+            for c in self.collisions:
+                for m in c.geometry.meshes:
+                    m = m.copy()
+                    pose = c.origin
+                    if c.geometry.mesh is not None:
+                        if c.geometry.mesh.scale is not None:
+                            S = np.eye(4)
+                            S[:3, :3] = np.diag(c.geometry.mesh.scale)
+                            pose = pose.dot(S)
+                    m.apply_transform(pose)
+                    meshes.append(m)
+            if len(meshes) == 0:
+                return None
+            self._collision_mesh = (meshes[0] + meshes[1:])
+        return self._collision_mesh
+
     def copy(self, prefix='', scale=None, collision_only=False):
         """Create a deep copy of the link.
         Parameters
@@ -2103,13 +2501,13 @@ class Link(URDFType):
         cm = self._collision_mesh
         if scale is not None:
             if self.collision_mesh is not None and self.inertial is not None:
-                sm = np.eye(4)
+                sm1 = np.eye(4)
                 if not isinstance(scale, (list, np.ndarray)):
                     scale = np.repeat(scale, 3)
-                sm[:3, :3] = np.diag(scale)
+                sm1[:3, :3] = np.diag(scale)
                 cm = self.collision_mesh.copy()
                 cm.density = self.inertial.mass / cm.volume
-                cm.apply_transform(sm)
+                cm.apply_transform(sm1)
                 cmm = np.eye(4)
                 cmm[:3, 3] = cm.center_mass
                 inertial = Inertial(mass=cm.mass, inertia=cm.moment_inertia,
