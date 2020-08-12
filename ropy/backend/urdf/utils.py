@@ -4,7 +4,7 @@ import os
 
 from xml import etree as ET
 import numpy as np
-import trimesh
+# import trimesh
 
 
 def rpy_to_matrix(coords):
@@ -189,37 +189,37 @@ def get_filename(base_path, file_path, makedirs=False):
     return fn
 
 
-def load_meshes(filename):
-    """Loads triangular meshes from a file.
-    Parameters
-    ----------
-    filename : str
-        Path to the mesh file.
-    Returns
-    -------
-    meshes : list of :class:`~trimesh.base.Trimesh`
-        The meshes loaded from the file.
-    """
-    meshes = trimesh.load(filename)
+# def load_meshes(filename):
+#     """Loads triangular meshes from a file.
+#     Parameters
+#     ----------
+#     filename : str
+#         Path to the mesh file.
+#     Returns
+#     -------
+#     meshes : list of :class:`~trimesh.base.Trimesh`
+#         The meshes loaded from the file.
+#     """
+#     meshes = trimesh.load(filename)
 
-    # If we got a scene, dump the meshes
-    if isinstance(meshes, trimesh.Scene):
-        meshes = list(meshes.dump())
-        meshes = [g for g in meshes if isinstance(g, trimesh.Trimesh)]
+#     # If we got a scene, dump the meshes
+#     if isinstance(meshes, trimesh.Scene):
+#         meshes = list(meshes.dump())
+#         meshes = [g for g in meshes if isinstance(g, trimesh.Trimesh)]
 
-    if isinstance(meshes, (list, tuple, set)):
-        meshes = list(meshes)
-        if len(meshes) == 0:
-            raise ValueError('At least one mesh must be pmeshesent in file')
-        for r in meshes:
-            if not isinstance(r, trimesh.Trimesh):
-                raise TypeError('Could not load meshes from file')
-    elif isinstance(meshes, trimesh.Trimesh):
-        meshes = [meshes]
-    else:
-        raise ValueError('Unable to load mesh from file')
+#     if isinstance(meshes, (list, tuple, set)):
+#         meshes = list(meshes)
+#         if len(meshes) == 0:
+#             raise ValueError('At least one mesh must be pmeshesent in file')
+#         for r in meshes:
+#             if not isinstance(r, trimesh.Trimesh):
+#                 raise TypeError('Could not load meshes from file')
+#     elif isinstance(meshes, trimesh.Trimesh):
+#         meshes = [meshes]
+#     else:
+#         raise ValueError('Unable to load mesh from file')
 
-    return meshes
+#     return meshes
 
 
 def configure_origin(value):
