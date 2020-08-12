@@ -16,8 +16,7 @@ import numpy as np
 import PIL
 import trimesh
 
-from .utils import (parse_origin, unparse_origin, get_filename,
-                    configure_origin)
+from .utils import (parse_origin, configure_origin)
 
 
 class URDFType(object):
@@ -43,7 +42,7 @@ class URDFType(object):
     _ELEMENTS = {}  # Map from element name to (type, required, multiple)
     _TAG = ''       # XML tag for this element
 
-    def __init__(self):
+    def __init__(self):  # pragma nocover
         pass
 
     @classmethod
@@ -86,7 +85,7 @@ class URDFType(object):
             if r:
                 try:
                     v = cls._parse_attrib(t, node.attrib[a])
-                except Exception:
+                except Exception:   # pragma nocover
                     raise ValueError(
                         'Missing required attribute {} when parsing an object '
                         'of type {}'.format(a, cls.__name__)
@@ -124,7 +123,7 @@ class URDFType(object):
                     v = t._from_xml(v, path)
             else:
                 vs = node.findall(t._TAG)
-                if len(vs) == 0 and r:
+                if len(vs) == 0 and r:   # pragma nocover
                     raise ValueError(
                         'Missing required subelement(s) of type {} when '
                         'parsing an object of type {}'.format(
@@ -172,99 +171,6 @@ class URDFType(object):
             An instance of this class parsed from the node.
         """
         return cls(**cls._parse(node, path))
-
-    def _unparse_attrib(self, val_type, val):
-        """Convert a Python value into a string for storage in an
-        XML attribute.
-        Parameters
-        ----------
-        val_type : :class:`type`
-            The type of the Python object.
-        val : :class:`object`
-            The actual value.
-        Returns
-        -------
-        s : str
-            The attribute string.
-        """
-        if val_type == np.ndarray:
-            val = np.array2string(val)[1:-1]
-        else:
-            val = str(val)
-        return val
-
-    def _unparse_simple_attribs(self, node):
-        """Convert all Python types from the _ATTRIBS array back into attributes
-        for an XML node.
-        Parameters
-        ----------
-        node : :class:`object`
-            The XML node to add the attributes to.
-        """
-        for a in self._ATTRIBS:
-            t, r = self._ATTRIBS[a]
-            v = getattr(self, a, None)
-            if r or v is not None:
-                node.attrib[a] = self._unparse_attrib(t, v)
-
-    def _unparse_simple_elements(self, node, path):
-        """Unparse all Python types from the _ELEMENTS array back into child
-        nodes of an XML node.
-        Parameters
-        ----------
-        node : :class:`object`
-            The XML node for this object. Elements will be added as children
-            of this node.
-        path : str
-            The string path where the XML file is being written to (used for
-            writing out meshes and image files).
-        """
-        for a in self._ELEMENTS:
-            t, r, m = self._ELEMENTS[a]
-            v = getattr(self, a, None)
-            if not m:
-                if r or v is not None:
-                    node.append(v._to_xml(node, path))
-            else:
-                vs = v
-                for v in vs:
-                    node.append(v._to_xml(node, path))
-
-    def _unparse(self, path):
-        """Create a node for this object and unparse all elements and
-        attributes in the class arrays.
-        Parameters
-        ----------
-        path : str
-            The string path where the XML file is being written to (used for
-            writing out meshes and image files).
-        Returns
-        -------
-        node : :class:`lxml.etree.Element`
-            The newly-created node.
-        """
-        node = ET.Element(self._TAG)
-        self._unparse_simple_attribs(node)
-        self._unparse_simple_elements(node, path)
-        return node
-
-    def _to_xml(self, parent, path):
-        """Create and return an XML node for this object.
-        Parameters
-        ----------
-        parent : :class:`lxml.etree.Element`
-            The parent node that this element will eventually be added to.
-            This base implementation doesn't use this information, but
-            classes that override this function may use it.
-        path : str
-            The string path where the XML file is being written to (used for
-            writing out meshes and image files).
-        Returns
-        -------
-        node : :class:`lxml.etree.Element`
-            The newly-created node.
-        """
-        return self._unparse(path)
 
 
 ###############################################################################
@@ -482,10 +388,10 @@ class Mesh(URDFType):
         kwargs = cls._parse(node, path)
         return Mesh(**kwargs)
 
-    def _to_xml(self, parent, path):
-        # Unparse the node
-        node = self._unparse(path)
-        return node
+    # def _to_xml(self, parent, path):
+    #     # Unparse the node
+    #     node = self._unparse(path)
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -539,7 +445,7 @@ class Geometry(URDFType):
 
     def __init__(self, box=None, cylinder=None, sphere=None, mesh=None):
         if (box is None and cylinder is None and
-                sphere is None and mesh is None):
+                sphere is None and mesh is None):   # pragma nocover
             raise ValueError('At least one geometry element must be set')
         self.box = box
         self.cylinder = cylinder
@@ -554,7 +460,7 @@ class Geometry(URDFType):
 
     @box.setter
     def box(self, value):
-        if value is not None and not isinstance(value, Box):
+        if value is not None and not isinstance(value, Box):   # pragma nocover
             raise TypeError('Expected Box type')
         self._box = value
 
@@ -674,12 +580,12 @@ class Texture(URDFType):
 
         return Texture(**kwargs)
 
-    def _to_xml(self, parent, path):
-        # Save the image
-        filepath = get_filename(path, self.filename, makedirs=True)
-        self.image.save(filepath)
+    # def _to_xml(self, parent, path):
+    #     # Save the image
+    #     filepath = get_filename(path, self.filename, makedirs=True)
+    #     self.image.save(filepath)
 
-        return self._unparse(path)
+    #     return self._unparse(path)
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -743,7 +649,7 @@ class Material(URDFType):
         if value is not None:
             value = np.asanyarray(value).astype(np.float)
             value = np.clip(value, 0.0, 1.0)
-            if value.shape != (4,):
+            if value.shape != (4,):   # pragma nocover
                 raise ValueError('Color must be a (4,) float')
         self._color = value
 
@@ -758,7 +664,7 @@ class Material(URDFType):
         if value is not None:
             if isinstance(value, str):
                 value = Texture(filename=value)
-            elif not isinstance(value, Texture):
+            elif not isinstance(value, Texture):  # pragma nocover
                 raise ValueError('Invalid type for texture -- expect path to '
                                  'image or Texture')
         self._texture = value
@@ -776,22 +682,22 @@ class Material(URDFType):
 
         return Material(**kwargs)
 
-    def _to_xml(self, parent, path):
-        # Simplify materials by collecting them at the top level.
+    # def _to_xml(self, parent, path):
+    #     # Simplify materials by collecting them at the top level.
 
-        # For top-level elements, save the full material specification
-        if parent.tag == 'robot':
-            node = self._unparse(path)
-            if self.color is not None:
-                color = ET.Element('color')
-                color.attrib['rgba'] = np.array2string(self.color)[1:-1]
-                node.append(color)
+    #     # For top-level elements, save the full material specification
+    #     if parent.tag == 'robot':
+    #         node = self._unparse(path)
+    #         if self.color is not None:
+    #             color = ET.Element('color')
+    #             color.attrib['rgba'] = np.array2string(self.color)[1:-1]
+    #             node.append(color)
 
-        # For non-top-level elements just save the material with a name
-        else:
-            node = ET.Element('material')
-            node.attrib['name'] = self.name
-        return node
+    #     # For non-top-level elements just save the material with a name
+    #     else:
+    #         node = ET.Element('material')
+    #         node.attrib['name'] = self.name
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the material with the prefix applied to all names.
@@ -877,10 +783,10 @@ class Collision(URDFType):
         kwargs['origin'] = parse_origin(node)
         return Collision(**kwargs)
 
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        node.append(unparse_origin(self.origin))
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = self._unparse(path)
+    #     node.append(unparse_origin(self.origin))
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the visual with the prefix applied to all names.
@@ -987,10 +893,10 @@ class Visual(URDFType):
         kwargs['origin'] = parse_origin(node)
         return Visual(**kwargs)
 
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        node.append(unparse_origin(self.origin))
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = self._unparse(path)
+    #     node.append(unparse_origin(self.origin))
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the visual with the prefix applied to all names.
@@ -1088,21 +994,21 @@ class Inertial(URDFType):
         ], dtype=np.float64)
         return Inertial(mass=mass, inertia=inertia, origin=origin)
 
-    def _to_xml(self, parent, path):
-        node = ET.Element('inertial')
-        node.append(unparse_origin(self.origin))
-        mass = ET.Element('mass')
-        mass.attrib['value'] = str(self.mass)
-        node.append(mass)
-        inertia = ET.Element('inertia')
-        inertia.attrib['ixx'] = str(self.inertia[0, 0])
-        inertia.attrib['ixy'] = str(self.inertia[0, 1])
-        inertia.attrib['ixz'] = str(self.inertia[0, 2])
-        inertia.attrib['iyy'] = str(self.inertia[1, 1])
-        inertia.attrib['iyz'] = str(self.inertia[1, 2])
-        inertia.attrib['izz'] = str(self.inertia[2, 2])
-        node.append(inertia)
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = ET.Element('inertial')
+    #     node.append(unparse_origin(self.origin))
+    #     mass = ET.Element('mass')
+    #     mass.attrib['value'] = str(self.mass)
+    #     node.append(mass)
+    #     inertia = ET.Element('inertia')
+    #     inertia.attrib['ixx'] = str(self.inertia[0, 0])
+    #     inertia.attrib['ixy'] = str(self.inertia[0, 1])
+    #     inertia.attrib['ixz'] = str(self.inertia[0, 2])
+    #     inertia.attrib['iyy'] = str(self.inertia[1, 1])
+    #     inertia.attrib['iyz'] = str(self.inertia[1, 2])
+    #     inertia.attrib['izz'] = str(self.inertia[2, 2])
+    #     node.append(inertia)
+    #     return node
 
     def copy(self, prefix='', mass=None, origin=None, inertia=None):
         """Create a deep copy of the visual with the prefix applied to all names.
@@ -1613,18 +1519,18 @@ class Actuator(URDFType):
         kwargs['hardwareInterfaces'] = hi
         return Actuator(**kwargs)
 
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        if self.mechanicalReduction is not None:
-            mr = ET.Element('mechanicalReduction')
-            mr.text = str(self.mechanicalReduction)
-            node.append(mr)
-        if len(self.hardwareInterfaces) > 0:
-            for hi in self.hardwareInterfaces:
-                h = ET.Element('hardwareInterface')
-                h.text = hi
-                node.append(h)
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = self._unparse(path)
+    #     if self.mechanicalReduction is not None:
+    #         mr = ET.Element('mechanicalReduction')
+    #         mr.text = str(self.mechanicalReduction)
+    #         node.append(mr)
+    #     if len(self.hardwareInterfaces) > 0:
+    #         for hi in self.hardwareInterfaces:
+    #             h = ET.Element('hardwareInterface')
+    #             h.text = hi
+    #             node.append(h)
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the visual with the prefix applied to all names.
@@ -1697,14 +1603,14 @@ class TransmissionJoint(URDFType):
         kwargs['hardwareInterfaces'] = hi
         return TransmissionJoint(**kwargs)
 
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        if len(self.hardwareInterfaces) > 0:
-            for hi in self.hardwareInterfaces:
-                h = ET.Element('hardwareInterface')
-                h.text = hi
-                node.append(h)
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = self._unparse(path)
+    #     if len(self.hardwareInterfaces) > 0:
+    #         for hi in self.hardwareInterfaces:
+    #             h = ET.Element('hardwareInterface')
+    #             h.text = hi
+    #             node.append(h)
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -1822,12 +1728,12 @@ class Transmission(URDFType):
         kwargs['trans_type'] = node.find('type').text
         return Transmission(**kwargs)
 
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        ttype = ET.Element('type')
-        ttype.text = self.trans_type
-        node.append(ttype)
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = self._unparse(path)
+    #     ttype = ET.Element('type')
+    #     ttype.text = self.trans_type
+    #     node.append(ttype)
+    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -2202,21 +2108,21 @@ class Joint(URDFType):
         kwargs['origin'] = parse_origin(node)
         return Joint(**kwargs)
 
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        parent = ET.Element('parent')
-        parent.attrib['link'] = self.parent
-        node.append(parent)
-        child = ET.Element('child')
-        child.attrib['link'] = self.child
-        node.append(child)
-        if self.axis is not None:
-            axis = ET.Element('axis')
-            axis.attrib['xyz'] = np.array2string(self.axis)[1:-1]
-            node.append(axis)
-        node.append(unparse_origin(self.origin))
-        node.attrib['type'] = self.joint_type
-        return node
+    # def _to_xml(self, parent, path):
+    #     node = self._unparse(path)
+    #     parent = ET.Element('parent')
+    #     parent.attrib['link'] = self.parent
+    #     node.append(parent)
+    #     child = ET.Element('child')
+    #     child.attrib['link'] = self.child
+    #     node.append(child)
+    #     if self.axis is not None:
+    #         axis = ET.Element('axis')
+    #         axis.attrib['xyz'] = np.array2string(self.axis)[1:-1]
+    #         node.append(axis)
+    #     node.append(unparse_origin(self.origin))
+    #     node.attrib['type'] = self.joint_type
+    #     return node
 
     def _rotation_matrices(self, angles, axis):
         """Compute rotation matrices from angle/axis representations.
@@ -2385,25 +2291,26 @@ class Link(URDFType):
         """:class:`~trimesh.base.Trimesh` : A single collision mesh for
         the link, specified in the link frame, or None if there isn't one.
         """
-        if len(self.collisions) == 0:
-            return None
-        if self._collision_mesh is None:
-            meshes = []
-            for c in self.collisions:
-                for m in c.geometry.meshes:
-                    m = m.copy()
-                    pose = c.origin
-                    if c.geometry.mesh is not None:
-                        if c.geometry.mesh.scale is not None:
-                            S = np.eye(4)
-                            S[:3, :3] = np.diag(c.geometry.mesh.scale)
-                            pose = pose.dot(S)
-                    m.apply_transform(pose)
-                    meshes.append(m)
-            if len(meshes) == 0:
-                return None
-            self._collision_mesh = (meshes[0] + meshes[1:])
-        return self._collision_mesh
+        return None
+        # if len(self.collisions) == 0:
+        #     return None
+        # if self._collision_mesh is None:
+        #     meshes = []
+        #     for c in self.collisions:
+        #         for m in c.geometry.meshes:
+        #             m = m.copy()
+        #             pose = c.origin
+        #             if c.geometry.mesh is not None:
+        #                 if c.geometry.mesh.scale is not None:
+        #                     S = np.eye(4)
+        #                     S[:3, :3] = np.diag(c.geometry.mesh.scale)
+        #                     pose = pose.dot(S)
+        #             m.apply_transform(pose)
+        #             meshes.append(m)
+        #     if len(meshes) == 0:
+        #         return None
+        #     self._collision_mesh = (meshes[0] + meshes[1:])
+        # return self._collision_mesh
 
     def copy(self, prefix='', scale=None, collision_only=False):
         """Create a deep copy of the link.
@@ -3355,29 +3262,29 @@ class URDF(URDFType):
             other_xml=self.other_xml
         )
 
-    def save(self, file_obj):
-        """Save this URDF to a file.
-        Parameters
-        ----------
-        file_obj : str or file-like object
-            The file to save the URDF to. Should be the path to the
-            ``.urdf`` XML file. Any paths in the URDF should be specified
-            as relative paths to the ``.urdf`` file instead of as ROS
-            resources.
-        Returns
-        -------
-        urdf : :class:`.URDF`
-            The parsed URDF.
-        """
-        if isinstance(file_obj, str):
-            path, _ = os.path.split(file_obj)
-        else:
-            path, _ = os.path.split(os.path.realpath(file_obj.name))
+    # def save(self, file_obj):
+    #     """Save this URDF to a file.
+    #     Parameters
+    #     ----------
+    #     file_obj : str or file-like object
+    #         The file to save the URDF to. Should be the path to the
+    #         ``.urdf`` XML file. Any paths in the URDF should be specified
+    #         as relative paths to the ``.urdf`` file instead of as ROS
+    #         resources.
+    #     Returns
+    #     -------
+    #     urdf : :class:`.URDF`
+    #         The parsed URDF.
+    #     """
+    #     if isinstance(file_obj, str):
+    #         path, _ = os.path.split(file_obj)
+    #     else:
+    #         path, _ = os.path.split(os.path.realpath(file_obj.name))
 
-        node = self._to_xml(None, path)
-        tree = ET.ElementTree(node)
-        tree.write(file_obj, pretty_print=True,
-                   xml_declaration=True, encoding='utf-8')
+    #     node = self._to_xml(None, path)
+    #     tree = ET.ElementTree(node)
+    #     tree.write(file_obj, pretty_print=True,
+    #                xml_declaration=True, encoding='utf-8')
 
     def join(self, other, link, origin=None, name=None, prefix=''):
         """Join another URDF to this one by rigidly fixturing the two at a link.
@@ -3671,11 +3578,3 @@ class URDF(URDFType):
         data = ET.tostring(extra_xml_node)
         kwargs['other_xml'] = data
         return URDF(**kwargs)
-
-    def _to_xml(self, parent, path):
-        node = self._unparse(path)
-        if self.other_xml:
-            extra_tree = ET.fromstring(self.other_xml)
-            for child in extra_tree:
-                node.append(child)
-        return node
