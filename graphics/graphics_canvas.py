@@ -11,9 +11,9 @@ class GraphicsCanvas3D:
         - Title, caption
         - Axes drawn (if applicable)
 
-    :param height: Height of the canvas on screen (Pixels), defaults to 500.
+    :param height: Height of the canvas on screen (Pixels), defaults to 360.
     :type height: `int`, optional
-    :param width: Width of the canvas on screen (Pixels), defaults to 1000.
+    :param width: Width of the canvas on screen (Pixels), defaults to 640.
     :type width: `int`, optional
     :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
     :type title: `str`, optional
@@ -23,7 +23,7 @@ class GraphicsCanvas3D:
     :type grid: `bool`, optional
     """
 
-    def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+    def __init__(self, height=360, width=640, title='', caption='', grid=True):
 
         # Create a new independent scene
         self.scene = canvas()
@@ -496,9 +496,9 @@ class GraphicsCanvas2D:
             - Title, caption
             - Axes drawn (if applicable)
 
-        :param height: Height of the canvas on screen (Pixels), defaults to 500.
+        :param height: Height of the canvas on screen (Pixels), defaults to 360.
         :type height: `int`, optional
-        :param width: Width of the canvas on screen (Pixels), defaults to 1000.
+        :param width: Width of the canvas on screen (Pixels), defaults to 640.
         :type width: `int`, optional
         :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
         :type title: `str`, optional
@@ -508,7 +508,7 @@ class GraphicsCanvas2D:
         :type grid: `bool`, optional
         """
 
-    def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+    def __init__(self, height=360, width=640, title='', caption='', grid=True):
 
         # Private lists
         self.__line_styles = [

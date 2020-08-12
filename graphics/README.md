@@ -69,7 +69,7 @@ Different attributes can be supplied to the function for some customisation. The
 
 Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D capabilities)
 ```python
-# Create a default canvas (1000*500, with grid displayed, no title or caption)
+# Create a default canvas (360*640, with grid displayed, no title or caption)
 g_canvas = gph.GraphicsCanvas3D()
 g_canvas = gph.GraphicsCanvas2D()
 
