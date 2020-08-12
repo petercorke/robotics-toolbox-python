@@ -2111,7 +2111,7 @@ class Joint(URDFType):
                 cfg = 0.0
             else:
                 cfg = float(cfg)
-            R = sm.SO3().A
+            R = sm.SE3().A
             # TODO fis this
             # R = trimesh.transformations.rotation_matrix(cfg, self.axis)
             return self.origin.dot(R)
@@ -2496,71 +2496,71 @@ class URDF(URDFType):
         self._transmissions = list(transmissions)
         self._materials = list(materials)
 
-        # # Set up private helper maps from name to value
-        # self._link_map = {}
-        # self._joint_map = {}
-        # self._transmission_map = {}
-        # self._material_map = {}
+        # Set up private helper maps from name to value
+        self._link_map = {}
+        self._joint_map = {}
+        self._transmission_map = {}
+        self._material_map = {}
 
-        # for x in self._links:
-        #     if x.name in self._link_map:
-        #         raise ValueError(
-        #           'Two links with name {} found'.format(x.name))
-        #     self._link_map[x.name] = x
+        for x in self._links:
+            if x.name in self._link_map:
+                raise ValueError(
+                  'Two links with name {} found'.format(x.name))
+            self._link_map[x.name] = x
 
-        # for x in self._joints:
-        #     if x.name in self._joint_map:
-        #         raise ValueError('Two joints with name {} '
-        #                          'found'.format(x.name))
-        #     self._joint_map[x.name] = x
+        for x in self._joints:
+            if x.name in self._joint_map:
+                raise ValueError('Two joints with name {} '
+                                 'found'.format(x.name))
+            self._joint_map[x.name] = x
 
-        # for x in self._transmissions:
-        #     if x.name in self._transmission_map:
-        #         raise ValueError('Two transmissions with name {} '
-        #                          'found'.format(x.name))
-        #     self._transmission_map[x.name] = x
+        for x in self._transmissions:
+            if x.name in self._transmission_map:
+                raise ValueError('Two transmissions with name {} '
+                                 'found'.format(x.name))
+            self._transmission_map[x.name] = x
 
-        # for x in self._materials:
-        #     if x.name in self._material_map:
-        #         raise ValueError('Two materials with name {} '
-        #                          'found'.format(x.name))
-        #     self._material_map[x.name] = x
+        for x in self._materials:
+            if x.name in self._material_map:
+                raise ValueError('Two materials with name {} '
+                                 'found'.format(x.name))
+            self._material_map[x.name] = x
 
-        # # Synchronize materials between links and top-level set
-        # self._merge_materials()
+        # Synchronize materials between links and top-level set
+        self._merge_materials()
 
-        # # Validate the joints and transmissions
-        # actuated_joints = self._validate_joints()
-        # self._validate_transmissions()
+        # Validate the joints and transmissions
+        actuated_joints = self._validate_joints()
+        self._validate_transmissions()
 
-        # # Create the link graph and base link/end link sets
-        # self._G = nx.DiGraph()
+        # Create the link graph and base link/end link sets
+        self._G = nx.DiGraph()
 
-        # # Add all links
-        # for link in self.links:
-        #     self._G.add_node(link)
+        # Add all links
+        for link in self.links:
+            self._G.add_node(link)
 
-        # # Add all edges from CHILDREN TO PARENTS, with joints as their object
-        # for joint in self.joints:
-        #     parent = self._link_map[joint.parent]
-        #     child = self._link_map[joint.child]
-        #     self._G.add_edge(child, parent, joint=joint)
+        # Add all edges from CHILDREN TO PARENTS, with joints as their object
+        for joint in self.joints:
+            parent = self._link_map[joint.parent]
+            child = self._link_map[joint.child]
+            self._G.add_edge(child, parent, joint=joint)
 
-        # # Validate the graph and get the base and end links
-        # self._base_link, self._end_links = self._validate_graph()
+        # Validate the graph and get the base and end links
+        self._base_link, self._end_links = self._validate_graph()
 
-        # # Cache the paths to the base link
-        # self._paths_to_base = nx.shortest_path(
-        #     self._G, target=self._base_link
-        # )
+        # Cache the paths to the base link
+        self._paths_to_base = nx.shortest_path(
+            self._G, target=self._base_link
+        )
 
-        # self._actuated_joints = self._sort_joints(actuated_joints)
+        self._actuated_joints = self._sort_joints(actuated_joints)
 
-        # # Cache the reverse topological order (useful for speeding up FK,
-        # # as we want to start at the base and work outward to cache
-        # # computation.
-        # self._reverse_topo = list(
-        #   reversed(list(nx.topological_sort(self._G))))
+        # Cache the reverse topological order (useful for speeding up FK,
+        # as we want to start at the base and work outward to cache
+        # computation.
+        self._reverse_topo = list(
+          reversed(list(nx.topological_sort(self._G))))
 
     @property
     def name(self):
@@ -3464,14 +3464,13 @@ class URDF(URDFType):
         """
         if isinstance(file_obj, str):
             if os.path.isfile(file_obj):
-                parser = ET.XMLParser(remove_comments=True,
-                                      remove_blank_text=True)
+                parser = ET.XMLParser()
                 tree = ET.parse(file_obj, parser=parser)
                 path, _ = os.path.split(file_obj)
             else:
                 raise ValueError('{} is not a file'.format(file_obj))
         else:
-            parser = ET.XMLParser(remove_comments=True, remove_blank_text=True)
+            parser = ET.XMLParser()
             tree = ET.parse(file_obj, parser=parser)
             path, _ = os.path.split(file_obj.name)
 
