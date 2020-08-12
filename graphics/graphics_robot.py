@@ -17,20 +17,20 @@ class DefaultJoint:
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
-    :param scene: The scene in which to add the link
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
+    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
 
         if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
                         "or a file path to an STL (str)"
             raise TypeError(error_str.format(float, str, type(structure)))
 
-        self.__scene = scene
+        self.__scene = g_canvas.scene
         self.__pose = initial_se3
 
         # Set the graphic
@@ -393,8 +393,8 @@ class RotationalJoint(DefaultJoint):
     """
     A rotational joint based off the default joint class
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
@@ -403,9 +403,9 @@ class RotationalJoint(DefaultJoint):
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
+    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
         # Call super init function
-        super().__init__(initial_se3, structure, scene, axis_through)
+        super().__init__(initial_se3, structure, g_canvas, axis_through)
         self.rotation_axis = z_axis_vector
         # self.rotation_angle = radians(0)
 
@@ -441,8 +441,8 @@ class PrismaticJoint(DefaultJoint):
     """
     A prismatic joint based from the default joint class
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
@@ -450,8 +450,8 @@ class PrismaticJoint(DefaultJoint):
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, scene, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, axis_through)
         self.min_translation = None
         self.max_translation = None
 
@@ -474,8 +474,8 @@ class StaticJoint(DefaultJoint):
     This class represents a static joint (one that doesn't translate or rotate on it's own).
     It has no extra functions to utilise.
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
@@ -484,8 +484,8 @@ class StaticJoint(DefaultJoint):
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, scene, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, axis_through)
 
     def get_joint_type(self):
         """
@@ -502,8 +502,8 @@ class Gripper(DefaultJoint):
     This class represents a gripper joint with a moving gripper (To Be Implemented).
     Usually the end joint of a robot.
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
@@ -512,8 +512,8 @@ class Gripper(DefaultJoint):
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, scene, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, axis_through)
 
     # TODO close/open gripper
 

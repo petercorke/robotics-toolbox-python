@@ -7,7 +7,7 @@ class Object2D:
 
     :param se2: The SE2 object representing position and orientation
     :type se2: class:`spatialmath.se2`
-    :param scene: The scene in which to draw the object
+    :param scene: The scene in which to add the link
     :type scene: class:`vpython.canvas`
     :param shape: The shape of the object
     :type shape: `str`
@@ -84,11 +84,11 @@ class Object2D:
         elif self.__shape == 's':
             # 2D coords of the square boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
-                                          thickness=self.__marker_size/10)
+                                          thickness=self.__marker_size)
         elif self.__shape == 'd':
             # 2D coords of the diamond boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
-                                          thickness=self.__marker_size/10, rotate=radians(45))
+                                          thickness=self.__marker_size, rotate=radians(45))
         elif self.__shape == '^':
             # 2D coords of the triangle boundary
             shape_path = shapes.triangle(length=self.__marker_size)

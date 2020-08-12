@@ -8,7 +8,7 @@ def import_puma_560(g_canvas):
     Create a Robot class object based on the puma560 robot
 
     :param g_canvas: The canvas to display the robot in
-    :type g_canvas: class:`graphics.graphics_canvas.GraphicsCanvas`
+    :type g_canvas: class:`graphics.graphics_canvas.GraphicsCanvas3D`
     :return: Puma560 robot
     :rtype: class:`graphics.graphics_robot.GraphicalRobot`
     """
