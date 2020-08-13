@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+import ropy as rp
 from collections import OrderedDict
 import copy
 import os
@@ -2225,8 +2226,6 @@ class Link(URDFType):
         self.visuals = visuals
         self.collisions = collisions
 
-        self._collision_mesh = None
-
     @property
     def name(self):
         """str : The name of this link.
@@ -2286,32 +2285,6 @@ class Link(URDFType):
                     raise ValueError('Expected list of Collision objects')
         self._collisions = value
 
-    @property
-    def collision_mesh(self):
-        """:class:`~trimesh.base.Trimesh` : A single collision mesh for
-        the link, specified in the link frame, or None if there isn't one.
-        """
-        return None
-        # if len(self.collisions) == 0:
-        #     return None
-        # if self._collision_mesh is None:
-        #     meshes = []
-        #     for c in self.collisions:
-        #         for m in c.geometry.meshes:
-        #             m = m.copy()
-        #             pose = c.origin
-        #             if c.geometry.mesh is not None:
-        #                 if c.geometry.mesh.scale is not None:
-        #                     S = np.eye(4)
-        #                     S[:3, :3] = np.diag(c.geometry.mesh.scale)
-        #                     pose = pose.dot(S)
-        #             m.apply_transform(pose)
-        #             meshes.append(m)
-        #     if len(meshes) == 0:
-        #         return None
-        #     self._collision_mesh = (meshes[0] + meshes[1:])
-        # return self._collision_mesh
-
     def copy(self, prefix='', scale=None, collision_only=False):
         """Create a deep copy of the link.
         Parameters
@@ -2324,20 +2297,6 @@ class Link(URDFType):
             A deep copy of the Link.
         """
         inertial = self.inertial.copy() if self.inertial is not None else None
-        cm = self._collision_mesh
-        if scale is not None:
-            if self.collision_mesh is not None and self.inertial is not None:
-                sm1 = np.eye(4)
-                if not isinstance(scale, (list, np.ndarray)):
-                    scale = np.repeat(scale, 3)
-                sm1[:3, :3] = np.diag(scale)
-                cm = self.collision_mesh.copy()
-                cm.density = self.inertial.mass / cm.volume
-                cm.apply_transform(sm1)
-                cmm = np.eye(4)
-                cmm[:3, 3] = cm.center_mass
-                inertial = Inertial(mass=cm.mass, inertia=cm.moment_inertia,
-                                    origin=cmm)
 
         visuals = None
         if not collision_only:
@@ -2351,7 +2310,6 @@ class Link(URDFType):
             collisions=[
                 v.copy(prefix=prefix, scale=scale) for v in self.collisions],
         )
-        cpy._collision_mesh = cm
         return cpy
 
 
@@ -2432,6 +2390,41 @@ class URDF(URDFType):
                 raise ValueError('Two materials with name {} '
                                  'found'.format(x.name))
             self._material_map[x.name] = x
+
+        j = self.joints[4]
+
+        for k in range(len(self.joints)):
+            found = False
+            for i in range(len(self.joints)):
+                if self.joints[i].child == j.parent:
+                    j = self.joints[i]
+                    found = True
+                    break  # Found link above j
+            if not found:
+                break  # No link above j was found, we have the base joint
+
+        self._base_link = j.parent
+        self._base_joint = j
+
+        # js = [j]
+
+        # for i in range(len(self.joints)):
+        #     for j in range(len(js)):
+
+        #         link = js[ii].child
+
+        #         for k in range(len(self.joints)):
+        #             if self.joints[i].parent == link:
+        #                 j = self.joints[ii]
+
+        #         print(j.name)
+
+
+
+
+        # for joint in self.joints:
+        #     print(joint.name)
+
 
         # Synchronize materials between links and top-level set
         self._merge_materials()

@@ -14,7 +14,7 @@ import spatialmath as sp
 class TestETS(unittest.TestCase):
 
     def test_panda(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         qz = np.array([0, 0, 0, 0, 0, 0, 0])
         qr = panda.qr
 
@@ -24,7 +24,7 @@ class TestETS(unittest.TestCase):
             panda.gravity, np.array([[0], [0], [9.81]]))
 
     def test_q(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
 
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
@@ -38,7 +38,7 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(np.expand_dims(panda.q, 0), q3)
 
     def test_getters(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
 
         panda.qdd = np.ones((7, 1))
         panda.qd = np.ones((1, 7))
@@ -46,12 +46,12 @@ class TestETS(unittest.TestCase):
         panda.qd = panda.qdd
 
     def test_control_type(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         panda.control_type = 'v'
         self.assertEqual(panda.control_type, 'v')
 
     def test_base(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
 
         pose = sp.SE3()
 
@@ -61,31 +61,31 @@ class TestETS(unittest.TestCase):
         panda.base = pose
         nt.assert_array_almost_equal(np.eye(4), panda.base.A)
 
-    def test_str(self):
-        panda = rp.Panda()
+    # def test_str(self):
+    #     panda = rp.PandaETree()
 
-        ans = '\nPanda (Franka Emika): 7 axis, RzRzRzRzRzRzRz, ETS\n'\
-            'Elementary Transform Sequence:\n'\
-            '[tz(0.333), Rz(q0), Rx(-90), Rz(q1), Rx(90), tz(0.316), '\
-            'Rz(q2), tx(0.0825), Rx(90), Rz(q3), tx(-0.0825), Rx(-90), '\
-            'tz(0.384), Rz(q4), Rx(90), Rz(q5), tx(0.088), Rx(90), '\
-            'tz(0.107), Rz(q6)]\n'\
-            'tool:  t = (0, 0, 0.103),  RPY/xyz = (0, 0, -45) deg'
+    #     ans = '\nPanda (Franka Emika): 7 axis, RzRzRzRzRzRzRz, ETS\n'\
+    #         'Elementary Transform Sequence:\n'\
+    #         '[tz(0.333), Rz(q0), Rx(-90), Rz(q1), Rx(90), tz(0.316), '\
+    #         'Rz(q2), tx(0.0825), Rx(90), Rz(q3), tx(-0.0825), Rx(-90), '\
+    #         'tz(0.384), Rz(q4), Rx(90), Rz(q5), tx(0.088), Rx(90), '\
+    #         'tz(0.107), Rz(q6)]\n'\
+    #         'tool:  t = (0, 0, 0.103),  RPY/xyz = (0, 0, -45) deg'
 
-        self.assertEqual(str(panda), ans)
+    #     self.assertEqual(str(panda), ans)
 
-    def test_str_ets(self):
-        panda = rp.Panda()
+    # def test_str_ets(self):
+    #     panda = rp.Panda()
 
-        ans = '[tz(0.333), Rz(q0), Rx(-90), Rz(q1), Rx(90), tz(0.316), '\
-            'Rz(q2), tx(0.0825), Rx(90), Rz(q3), tx(-0.0825), Rx(-90), '\
-            'tz(0.384), Rz(q4), Rx(90), Rz(q5), tx(0.088), Rx(90), '\
-            'tz(0.107), Rz(q6)]'
+    #     ans = '[tz(0.333), Rz(q0), Rx(-90), Rz(q1), Rx(90), tz(0.316), '\
+    #         'Rz(q2), tx(0.0825), Rx(90), Rz(q3), tx(-0.0825), Rx(-90), '\
+    #         'tz(0.384), Rz(q4), Rx(90), Rz(q5), tx(0.088), Rx(90), '\
+    #         'tz(0.107), Rz(q6)]'
 
-        self.assertEqual(str(panda.ets), ans)
+    #     self.assertEqual(str(panda.ets), ans)
 
     def test_fkine(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
         q3 = np.expand_dims(q1, 0)
@@ -105,7 +105,7 @@ class TestETS(unittest.TestCase):
         self.assertRaises(TypeError, panda.fkine, 'Wfgsrth')
 
     def test_fkine_traj(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         qq = np.c_[q, q, q, q]
 
@@ -124,7 +124,7 @@ class TestETS(unittest.TestCase):
 
     def test_allfkine(self):
         pm = rp.PandaMDH()
-        p = rp.Panda()
+        p = rp.PandaETree()
         q = [1, 2, 3, 4, 5, 6, 7]
         p.q = q
         pm.q = q
@@ -138,7 +138,7 @@ class TestETS(unittest.TestCase):
             nt.assert_array_almost_equal(r1[i].A, r2[i].A)
 
     def test_jacob0(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
         q3 = np.expand_dims(q1, 0)
@@ -173,7 +173,7 @@ class TestETS(unittest.TestCase):
         self.assertRaises(TypeError, panda.jacob0, 'Wfgsrth')
 
     def test_hessian0(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
         q3 = np.expand_dims(q1, 0)
@@ -336,7 +336,7 @@ class TestETS(unittest.TestCase):
         self.assertRaises(TypeError, panda.hessian0, [1, 3], 'qwe')
 
     def test_manipulability(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
         q3 = np.expand_dims(q1, 0)
@@ -356,7 +356,7 @@ class TestETS(unittest.TestCase):
         self.assertRaises(TypeError, panda.manipulability, [1, 3], 'qwe')
 
     def test_jacobm(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
         q3 = np.expand_dims(q1, 0)
@@ -390,7 +390,7 @@ class TestETS(unittest.TestCase):
 
     def test_jacobev(self):
         pdh = rp.PandaMDH()
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         panda.q = q1
 
@@ -398,7 +398,7 @@ class TestETS(unittest.TestCase):
 
     def test_jacob0v(self):
         pdh = rp.PandaMDH()
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         panda.q = q1
 
@@ -406,124 +406,124 @@ class TestETS(unittest.TestCase):
 
     def test_jacobe(self):
         pdh = rp.PandaMDH()
-        panda = rp.Panda()
+        panda = rp.PandaETree()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         panda.q = q1
 
         nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
         nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
 
-    def test_plot(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False)
-        e.close()
+    # def test_plot(self):
+    #     panda = rp.PandaETree()
+    #     panda.q = panda.qr
+    #     e = panda.plot(block=False)
+    #     e.close()
 
-    def test_plot_complex(self):
-        l0 = rp.ET.TRz()
-        l1 = rp.ET.Ttx()
-        l2 = rp.ET.TRy()
-        l3 = rp.ET.Ttz(1)
-        l4 = rp.ET.TRx()
+    # def test_plot_complex(self):
+    #     l0 = rp.ET.TRz()
+    #     l1 = rp.ET.Ttx()
+    #     l2 = rp.ET.TRy()
+    #     l3 = rp.ET.Ttz(1)
+    #     l4 = rp.ET.TRx()
 
-        E = rp.ETS([l0, l1, l2, l3, l4])
-        e = E.plot(block=False)
-        e.step(0)
-        e.close()
+    #     E = rp.ETS([l0, l1, l2, l3, l4])
+    #     e = E.plot(block=False)
+    #     e.step(0)
+    #     e.close()
 
-    def test_teach(self):
-        l0 = rp.ET.TRz()
-        l1 = rp.ET.Ttx()
-        l2 = rp.ET.TRy()
-        l3 = rp.ET.Ttz(1)
-        l4 = rp.ET.TRx()
+    # def test_teach(self):
+    #     l0 = rp.ET.TRz()
+    #     l1 = rp.ET.Ttx()
+    #     l2 = rp.ET.TRy()
+    #     l3 = rp.ET.Ttz(1)
+    #     l4 = rp.ET.TRx()
 
-        E = rp.ETS([l0, l1, l2, l3, l4])
-        e = E.teach(block=False, q=[1, 2, 3, 4])
-        e.close()
+    #     E = rp.ETS([l0, l1, l2, l3, l4])
+    #     e = E.teach(block=False, q=[1, 2, 3, 4])
+    #     e.close()
 
-    def test_plot_traj(self):
-        panda = rp.Panda()
-        q = np.random.rand(7, 3)
-        e = panda.plot(block=False, q=q, dt=0)
-        e.close()
+    # def test_plot_traj(self):
+    #     panda = rp.PandaETree()
+    #     q = np.random.rand(7, 3)
+    #     e = panda.plot(block=False, q=q, dt=0)
+    #     e.close()
 
     def test_control_type2(self):
-        panda = rp.Panda()
+        panda = rp.PandaETree()
 
         panda.control_type = 'p'
 
         with self.assertRaises(ValueError):
             panda.control_type = 'z'
 
-    def test_plot_vellipse(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
+    # def test_plot_vellipse(self):
+    #     panda = rp.PandaETree()
+    #     panda.q = panda.qr
 
-        e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
-        e.close()
+    #     e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+    #     e.close()
 
-        e = panda.plot_vellipse(
-            block=False, q=panda.qr, centre='ee', opt='rot')
-        e.step(0)
-        e.close()
+    #     e = panda.plot_vellipse(
+    #         block=False, q=panda.qr, centre='ee', opt='rot')
+    #     e.step(0)
+    #     e.close()
 
-        with self.assertRaises(TypeError):
-            panda.plot_vellipse(vellipse=10)
+    #     with self.assertRaises(TypeError):
+    #         panda.plot_vellipse(vellipse=10)
 
-        with self.assertRaises(ValueError):
-            panda.plot_vellipse(centre='ff')
+    #     with self.assertRaises(ValueError):
+    #         panda.plot_vellipse(centre='ff')
 
-    def test_plot_fellipse(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
+    # def test_plot_fellipse(self):
+    #     panda = rp.Panda()
+    #     panda.q = panda.qr
 
-        e = panda.plot_fellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
-        e.close()
+    #     e = panda.plot_fellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+    #     e.close()
 
-        e = panda.plot_fellipse(
-            block=False, q=panda.qr, centre='ee', opt='rot')
-        e.step(0)
-        e.close()
+    #     e = panda.plot_fellipse(
+    #         block=False, q=panda.qr, centre='ee', opt='rot')
+    #     e.step(0)
+    #     e.close()
 
-        with self.assertRaises(TypeError):
-            panda.plot_fellipse(fellipse=10)
+    #     with self.assertRaises(TypeError):
+    #         panda.plot_fellipse(fellipse=10)
 
-        with self.assertRaises(ValueError):
-            panda.plot_fellipse(centre='ff')
+    #     with self.assertRaises(ValueError):
+    #         panda.plot_fellipse(centre='ff')
 
-    def test_plot_with_vellipse(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False, vellipse=True)
-        e.close()
+    # def test_plot_with_vellipse(self):
+    #     panda = rp.Panda()
+    #     panda.q = panda.qr
+    #     e = panda.plot(block=False, vellipse=True)
+    #     e.close()
 
-    def test_plot_with_fellipse(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False, fellipse=True)
-        e.close()
+    # def test_plot_with_fellipse(self):
+    #     panda = rp.Panda()
+    #     panda.q = panda.qr
+    #     e = panda.plot(block=False, fellipse=True)
+    #     e.close()
 
-    def test_plot2(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, name=True)
-        e.close()
+    # def test_plot2(self):
+    #     panda = rp.Panda()
+    #     panda.q = panda.qr
+    #     e = panda.plot2(block=False, name=True)
+    #     e.close()
 
-    def test_plot2_traj(self):
-        panda = rp.Panda()
-        q = np.random.rand(7, 3)
-        e = panda.plot2(block=False, q=q, dt=0)
-        e.close()
+    # def test_plot2_traj(self):
+    #     panda = rp.Panda()
+    #     q = np.random.rand(7, 3)
+    #     e = panda.plot2(block=False, q=q, dt=0)
+    #     e.close()
 
-    def test_teach2(self):
-        panda = rp.Panda()
-        panda.q = panda.qr
-        e = panda.teach(block=False)
-        e.close()
+    # def test_teach2(self):
+    #     panda = rp.Panda()
+    #     panda.q = panda.qr
+    #     e = panda.teach(block=False)
+    #     e.close()
 
-        e2 = panda.teach2(block=False, q=panda.qr)
-        e2.close()
+    #     e2 = panda.teach2(block=False, q=panda.qr)
+    #     e2.close()
 
 
 if __name__ == '__main__':

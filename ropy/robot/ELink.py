@@ -45,6 +45,7 @@ class ELink(object):
     def __init__(
             self,
             ET_list=[],
+            name='',
             qlim=np.zeros(2),
             m=0.0,
             r=np.zeros(3),
@@ -55,6 +56,9 @@ class ELink(object):
             G=1.0):
 
         super(ELink, self).__init__()
+
+        self.STATIC = 0
+        self.VARIABLE = 1
 
         self._ets = ET_list
         self._q_idx = []
@@ -72,8 +76,10 @@ class ELink(object):
             raise ValueError(
                 "An elementary link can only have one joint variable")
         elif len(self._q_idx) == 0:
+            self._jtype = self.STATIC
             self._q_idx = None
         else:
+            self._jtype = self.VARIABLE
             self._q_idx = self._q_idx[0]
 
         self.qlim = qlim
@@ -86,6 +92,10 @@ class ELink(object):
         self.B = B
         self.Tc = Tc
         self.G = G
+
+    @property
+    def jtype(self):
+        return self._jtype
 
     @property
     def ets(self):

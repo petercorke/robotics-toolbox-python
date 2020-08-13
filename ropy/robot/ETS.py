@@ -9,6 +9,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 from spatialmath.base import tr2rpy
+from ropy.robot.ELink import ELink
 from ropy.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
@@ -40,25 +41,39 @@ class ETS(object):
 
     def __init__(
             self,
-            et_list,
+            L,
             name='noname',
             manufacturer='',
             base=SE3(),
             tool=SE3(),
             gravity=np.array([0, 0, 9.81])):
 
-        self._ets = et_list
+        super(ETS, self).__init__()
+
+        # Verify L
+        if not isinstance(L, list):
+            raise TypeError('The links L must be stored in a list.')
+
+        length = len(L)
+        self._ets = L
+        self._links = []
+        self._n = 0
         self._q_idx = []
 
-        super(ETS, self).__init__()
+        for i in range(length):
+            if isinstance(L[i], ELink):
+                self._links.append(L[i])
+                self._n += 1
+            else:
+                raise TypeError("Input can be only ELink")
 
         # Number of transforms in the ETS
         self._M = len(self._ets)
 
         # Initialise joints
-        for i in range(self.M):
-            if et_list[i].jtype is not et_list[i].STATIC:
-                et_list[i].j = len(self._q_idx)
+        for i in range(len(L)):
+            if L[i].jtype is not L[i].STATIC:
+                L[i].j = len(self._q_idx)
                 self._q_idx.append(i)
 
         # Number of joints in the robot
@@ -72,9 +87,6 @@ class ETS(object):
         self.base = base
         self.tool = tool
         self.gravity = gravity
-
-        # TODO implement qlim
-        self.qlim = np.zeros((2, self.n))
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -290,10 +302,10 @@ class ETS(object):
 
             for k in range(self.M):
                 if self.ets[k].jtype == self.ets[i].VARIABLE:
-                    T = self.ets[k].T(q[j, i])
+                    T = self.ets[k].A(q[j, i])
                     j += 1
                 else:
-                    T = self.ets[k].T()
+                    T = self.ets[k].A()
 
                 tr = tr * T
 
@@ -343,7 +355,7 @@ class ETS(object):
         for i in range(self.M):
 
             if self.ets[i].jtype == self.ets[i].VARIABLE:
-                t *= self.ets[i].T(q[j])
+                t *= self.ets[i].A(q[j])
 
                 if j == 0:
                     Tall = t
@@ -352,7 +364,7 @@ class ETS(object):
 
                 j += 1
             else:
-                t *= self.ets[i].T()
+                t *= self.ets[i].A()
 
         return Tall
 
@@ -389,47 +401,49 @@ class ETS(object):
 
         for i in range(self.M):
 
-            if i != self.q_idx[j]:
-                U = U @ self.ets[i].T().A
-            else:
-                if self.ets[i]._axis == 'Rz':
-                    U = U @ self.ets[i].T(q[j]).A
-                    Tu = np.linalg.inv(U) @ T
+            for k in range(self.ets[i].M):
 
-                    n = U[:3, 0]
-                    o = U[:3, 1]
-                    a = U[:3, 2]
-                    y = Tu[1, 3]
-                    x = Tu[0, 3]
+                if k != self.ets[i].q_idx:
+                    U = U @ self.ets[i].ets[k].T().A
+                else:
+                    if self.ets[i].ets[k]._axis == 'Rz':
+                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                        Tu = np.linalg.inv(U) @ T
 
-                    J[:3, j] = (o * x) - (n * y)
-                    J[3:, j] = a
+                        n = U[:3, 0]
+                        o = U[:3, 1]
+                        a = U[:3, 2]
+                        y = Tu[1, 3]
+                        x = Tu[0, 3]
 
-                    j += 1
-                elif self.ets[i]._axis == 'tx':
-                    U = U @ self.ets[i].T(q[j]).A
-                    n = U[:3, 0]
+                        J[:3, j] = (o * x) - (n * y)
+                        J[3:, j] = a
 
-                    J[:3, j] = n
-                    J[3:, j] = np.array([0, 0, 0])
+                        j += 1
+                    elif self.ets[i].ets[k]._axis == 'tx':
+                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                        n = U[:3, 0]
 
-                    j += 1
-                elif self.ets[i]._axis == 'ty':
-                    U = U @ self.ets[i].T(q[j]).A
-                    o = U[:3, 1]
+                        J[:3, j] = n
+                        J[3:, j] = np.array([0, 0, 0])
 
-                    J[:3, j] = o
-                    J[3:, j] = np.array([0, 0, 0])
+                        j += 1
+                    elif self.ets[i].ets[k]._axis == 'ty':
+                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                        o = U[:3, 1]
 
-                    j += 1
-                elif self.ets[i]._axis == 'tz':
-                    U = U @ self.ets[i].T(q[j]).A
-                    a = U[:3, 2]
+                        J[:3, j] = o
+                        J[3:, j] = np.array([0, 0, 0])
 
-                    J[:3, j] = a
-                    J[3:, j] = np.array([0, 0, 0])
+                        j += 1
+                    elif self.ets[i].ets[k]._axis == 'tz':
+                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                        a = U[:3, 2]
 
-                    j += 1
+                        J[:3, j] = a
+                        J[3:, j] = np.array([0, 0, 0])
+
+                        j += 1
 
         return J
 

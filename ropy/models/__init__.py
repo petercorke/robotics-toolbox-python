@@ -5,12 +5,14 @@
 # from ropy.models.mdl_mico import Mico
 # from ropy.models.mdl_test import Test
 from ropy.models.Panda import Panda
+from ropy.models.PandaETree import PandaETree
 from ropy.models.PandaMDH import PandaMDH
 from ropy.models.Frankie import Frankie
 from ropy.models.Puma560 import Puma560
 
 __all__ = [
     'Panda',
+    'PandaETree',
     'PandaMDH',
     'Frankie',
     # 'LBR7',
