@@ -46,6 +46,8 @@ class ELink(object):
             self,
             ET_list=[],
             name='',
+            parent=None,
+            child=None,
             qlim=np.zeros(2),
             m=0.0,
             r=np.zeros(3),
@@ -62,6 +64,10 @@ class ELink(object):
 
         self._ets = ET_list
         self._q_idx = []
+
+        self._name = name
+        self._parent = parent
+        self._child = child
 
         # Number of transforms in the ETS
         self._M = len(self._ets)
@@ -100,6 +106,18 @@ class ELink(object):
     @property
     def ets(self):
         return self._ets
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @property
+    def child(self):
+        return self._child
 
     @property
     def M(self):

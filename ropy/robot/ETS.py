@@ -60,6 +60,18 @@ class ETS(object):
         self._n = 0
         self._q_idx = []
 
+        self.eee = {}
+
+        for i in range(len(L)):
+            self.eee[L[i].name] = L[i]
+            if L[i].parent is None:
+                self.base_link = L[i]
+
+        lnk = self.base_link
+        while 1:
+            print(lnk.name)
+            lnk = self.eee[lnk.child]
+
         for i in range(length):
             if isinstance(L[i], ELink):
                 self._links.append(L[i])

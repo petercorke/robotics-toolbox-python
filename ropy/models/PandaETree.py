@@ -20,6 +20,7 @@ class PandaETree(ETS):
     :references:
         - Kinematic Derivatives using the Elementary Transform
           Sequence, J. Haviland and P. Corke
+
     """
     def __init__(self):
 
@@ -29,42 +30,50 @@ class PandaETree(ETS):
 
         l0 = ELink(
             [ET.Ttz(0.333), ET.TRz()],
-            name='link0'
+            name='link0',
+            parent=None, child='link1'
         )
 
         l1 = ELink(
             [ET.TRx(-90*deg), ET.TRz()],
-            name='link1'
+            name='link1',
+            parent='link0', child='link2'
         )
 
         l2 = ELink(
             [ET.TRx(90*deg), ET.Ttz(0.316), ET.TRz()],
-            name='link2'
+            name='link2',
+            parent='link1', child='link3'
         )
 
         l3 = ELink(
             [ET.Ttx(0.0825), ET.TRx(90*deg), ET.TRz()],
-            name='link3'
+            name='link3',
+            parent='link2', child='link4'
         )
 
         l4 = ELink(
             [ET.Ttx(-0.0825), ET.TRx(-90*deg), ET.Ttz(0.384), ET.TRz()],
-            name='link4'
+            name='link4',
+            parent='link3', child='link5'
         )
 
         l5 = ELink(
             [ET.TRx(90*deg), ET.TRz()],
-            name='link5'
+            name='link5',
+            parent='link4', child='link6'
         )
 
         l6 = ELink(
             [ET.Ttx(0.088), ET.TRx(90*deg), ET.Ttz(0.107), ET.TRz()],
-            name='link6'
+            name='link6',
+            parent='link5', child='ee'
         )
 
         ee = ELink(
             [ET.Ttz(tool_offset), ET.TRz(-np.pi/4)],
-            name='ee'
+            name='ee',
+            parent='ee', child=None
         )
 
         ETlist = [l0, l1, l2, l3, l4, l5, l6, ee]
