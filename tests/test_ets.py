@@ -104,73 +104,73 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
         self.assertRaises(TypeError, panda.fkine, 'Wfgsrth')
 
-    # def test_fkine_traj(self):
-    #     panda = rp.Panda()
-    #     q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-    #     qq = np.c_[q, q, q, q]
+    def test_fkine_traj(self):
+        panda = rp.Panda()
+        q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        qq = np.c_[q, q, q, q]
 
-    #     ans = np.array([
-    #         [-0.50827907, -0.57904589,  0.63746234,  0.44682295],
-    #         [0.83014553,  -0.52639462,  0.18375824,  0.16168396],
-    #         [0.22915229,   0.62258699,  0.74824773,  0.96798113],
-    #         [0.,           0.,          0.,          1.]
-    #     ])
+        ans = np.array([
+            [-0.50827907, -0.57904589,  0.63746234,  0.44682295],
+            [0.83014553,  -0.52639462,  0.18375824,  0.16168396],
+            [0.22915229,   0.62258699,  0.74824773,  0.96798113],
+            [0.,           0.,          0.,          1.]
+        ])
 
-    #     TT = panda.fkine(qq)
-    #     nt.assert_array_almost_equal(TT[0].A, ans)
-    #     nt.assert_array_almost_equal(TT[1].A, ans)
-    #     nt.assert_array_almost_equal(TT[2].A, ans)
-    #     nt.assert_array_almost_equal(TT[3].A, ans)
+        TT = panda.fkine(qq)
+        nt.assert_array_almost_equal(TT[0].A, ans)
+        nt.assert_array_almost_equal(TT[1].A, ans)
+        nt.assert_array_almost_equal(TT[2].A, ans)
+        nt.assert_array_almost_equal(TT[3].A, ans)
 
-    # def test_allfkine(self):
-    #     pm = rp.PandaMDH()
-    #     p = rp.Panda()
-    #     q = [1, 2, 3, 4, 5, 6, 7]
-    #     p.q = q
-    #     pm.q = q
+    def test_allfkine(self):
+        pm = rp.PandaMDH()
+        p = rp.Panda()
+        q = [1, 2, 3, 4, 5, 6, 7]
+        p.q = q
+        pm.q = q
 
-    #     r0 = p.allfkine()
-    #     r1 = p.allfkine(q)
-    #     r2 = pm.allfkine()
+        r0 = p.allfkine()
+        r1 = p.allfkine(q)
+        r2 = pm.allfkine()
 
-    #     for i in range(7):
-    #         nt.assert_array_almost_equal(r0[i].A, r2[i].A)
-    #         nt.assert_array_almost_equal(r1[i].A, r2[i].A)
+        for i in range(7):
+            nt.assert_array_almost_equal(r0[i].A, r2[i].A)
+            nt.assert_array_almost_equal(r1[i].A, r2[i].A)
 
-    # def test_jacob0(self):
-    #     panda = rp.Panda()
-    #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-    #     q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
-    #     q3 = np.expand_dims(q1, 0)
-    #     q4 = np.expand_dims(q1, 1)
+    def test_jacob0(self):
+        panda = rp.Panda()
+        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
+        q3 = np.expand_dims(q1, 0)
+        q4 = np.expand_dims(q1, 1)
 
-    #     ans = np.array([
-    #         [-1.61683957e-01,  1.07925929e-01, -3.41453006e-02,
-    #             3.35029257e-01, -1.07195463e-02,  1.03187865e-01,
-    #             0.00000000e+00],
-    #         [4.46822947e-01,  6.25741987e-01,  4.16474664e-01,
-    #             -8.04745724e-02,  7.78257566e-02, -1.17720983e-02,
-    #             0.00000000e+00],
-    #         [0.00000000e+00, -2.35276631e-01, -8.20187641e-02,
-    #             -5.14076923e-01, -9.98040745e-03, -2.02626953e-01,
-    #             0.00000000e+00],
-    #         [1.29458954e-16, -9.85449730e-01,  3.37672585e-02,
-    #             -6.16735653e-02,  6.68449878e-01, -1.35361558e-01,
-    #             6.37462344e-01],
-    #         [9.07021273e-18,  1.69967143e-01,  1.95778638e-01,
-    #             9.79165111e-01,  1.84470262e-01,  9.82748279e-01,
-    #             1.83758244e-01],
-    #         [1.00000000e+00, -2.26036604e-17,  9.80066578e-01,
-    #             -1.93473657e-01,  7.20517510e-01, -1.26028049e-01,
-    #             7.48247732e-01]
-    #     ])
+        ans = np.array([
+            [-1.61683957e-01,  1.07925929e-01, -3.41453006e-02,
+                3.35029257e-01, -1.07195463e-02,  1.03187865e-01,
+                0.00000000e+00],
+            [4.46822947e-01,  6.25741987e-01,  4.16474664e-01,
+                -8.04745724e-02,  7.78257566e-02, -1.17720983e-02,
+                0.00000000e+00],
+            [0.00000000e+00, -2.35276631e-01, -8.20187641e-02,
+                -5.14076923e-01, -9.98040745e-03, -2.02626953e-01,
+                0.00000000e+00],
+            [1.29458954e-16, -9.85449730e-01,  3.37672585e-02,
+                -6.16735653e-02,  6.68449878e-01, -1.35361558e-01,
+                6.37462344e-01],
+            [9.07021273e-18,  1.69967143e-01,  1.95778638e-01,
+                9.79165111e-01,  1.84470262e-01,  9.82748279e-01,
+                1.83758244e-01],
+            [1.00000000e+00, -2.26036604e-17,  9.80066578e-01,
+                -1.93473657e-01,  7.20517510e-01, -1.26028049e-01,
+                7.48247732e-01]
+        ])
 
-    #     panda.q = q1
-    #     nt.assert_array_almost_equal(panda.jacob0(), ans)
-    #     nt.assert_array_almost_equal(panda.jacob0(q2), ans)
-    #     nt.assert_array_almost_equal(panda.jacob0(q3), ans)
-    #     nt.assert_array_almost_equal(panda.jacob0(q4), ans)
-    #     self.assertRaises(TypeError, panda.jacob0, 'Wfgsrth')
+        panda.q = q1
+        nt.assert_array_almost_equal(panda.jacob0(), ans)
+        nt.assert_array_almost_equal(panda.jacob0(q2), ans)
+        nt.assert_array_almost_equal(panda.jacob0(q3), ans)
+        nt.assert_array_almost_equal(panda.jacob0(q4), ans)
+        self.assertRaises(TypeError, panda.jacob0, 'Wfgsrth')
 
     # def test_hessian0(self):
     #     panda = rp.Panda()
