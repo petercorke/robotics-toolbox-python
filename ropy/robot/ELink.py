@@ -47,7 +47,6 @@ class ELink(object):
             ET_list=[],
             name='',
             parent=None,
-            child=None,
             qlim=np.zeros(2),
             m=0.0,
             r=np.zeros(3),
@@ -66,8 +65,16 @@ class ELink(object):
         self._q_idx = []
 
         self._name = name
+
+        if isinstance(parent, ELink):
+            parent = [parent]
+        elif parent is None:
+            parent = []
+        elif not isinstance(parent, list):
+            TypeError('The parent link must be of type ELink or list of Elink')
+            
         self._parent = parent
-        self._child = child
+        self._child = []
 
         # Number of transforms in the ETS
         self._M = len(self._ets)
@@ -110,6 +117,14 @@ class ELink(object):
     @property
     def name(self):
         return self._name
+
+    # @property
+    # def parent_name(self):
+    #     return self._parent_name
+
+    # @property
+    # def child_name(self):
+    #     return self._child_name
 
     @property
     def parent(self):
