@@ -380,34 +380,6 @@ class ETS(object):
 
         return t
 
-        # try:
-        #     q = getvector(q, self.n, 'col')
-        # except ValueError:
-        #     trajn = q.shape[1]
-        #     verifymatrix(q, (self.n, trajn))
-
-        # for i in range(trajn):
-        #     j = 0
-        #     tr = self.base
-
-        #     for k in range(self.M):
-        #         if self.ets[k].jtype == self.ets[i].VARIABLE:
-        #             T = self.ets[k].A(q[j, i])
-        #             j += 1
-        #         else:
-        #             T = self.ets[k].A()
-
-        #         tr = tr * T
-
-        #     tr = tr * self.tool
-
-        #     if i == 0:
-        #         t = SE3(tr)
-        #     else:
-        #         t.append(tr)
-
-        # return t
-
     def allfkine(self, q=None):
         '''
         Tall = allfkine(q) evaluates fkine for each joint within a robot and
