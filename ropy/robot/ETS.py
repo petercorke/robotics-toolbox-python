@@ -442,10 +442,10 @@ class ETS(object):
         Tall = SE3()
         j = 0
 
-        for i in range(self.M):
+        for link in self._fkpath:
 
-            if self.ets[i].jtype == self.ets[i].VARIABLE:
-                t *= self.ets[i].A(q[j])
+            if link.jtype == link.VARIABLE:
+                t *= link.A(q[j])
 
                 if j == 0:
                     Tall = t
@@ -454,7 +454,7 @@ class ETS(object):
 
                 j += 1
             else:
-                t *= self.ets[i].A()
+                t *= link.A()
 
         return Tall
 
@@ -489,15 +489,15 @@ class ETS(object):
         j = 0
         J = np.zeros((6, self.n))
 
-        for i in range(self.M):
+        for link in self._fkpath:
 
-            for k in range(self.ets[i].M):
+            for k in range(link.M):
 
-                if k != self.ets[i].q_idx:
-                    U = U @ self.ets[i].ets[k].T().A
+                if k != link.q_idx:
+                    U = U @ link.ets[k].T().A
                 else:
-                    if self.ets[i].ets[k]._axis == 'Rz':
-                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                    if link.ets[k]._axis == 'Rz':
+                        U = U @ link.ets[k].T(q[j]).A
                         Tu = np.linalg.inv(U) @ T
 
                         n = U[:3, 0]
@@ -510,24 +510,24 @@ class ETS(object):
                         J[3:, j] = a
 
                         j += 1
-                    elif self.ets[i].ets[k]._axis == 'tx':
-                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                    elif link.ets[k]._axis == 'tx':
+                        U = U @ link.ets[k].T(q[j]).A
                         n = U[:3, 0]
 
                         J[:3, j] = n
                         J[3:, j] = np.array([0, 0, 0])
 
                         j += 1
-                    elif self.ets[i].ets[k]._axis == 'ty':
-                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                    elif link.ets[k]._axis == 'ty':
+                        U = U @ link.ets[k].T(q[j]).A
                         o = U[:3, 1]
 
                         J[:3, j] = o
                         J[3:, j] = np.array([0, 0, 0])
 
                         j += 1
-                    elif self.ets[i].ets[k]._axis == 'tz':
-                        U = U @ self.ets[i].ets[k].T(q[j]).A
+                    elif link.ets[k]._axis == 'tz':
+                        U = U @ link.ets[k].T(q[j]).A
                         a = U[:3, 2]
 
                         J[:3, j] = a
