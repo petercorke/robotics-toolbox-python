@@ -41,7 +41,9 @@ class ETS(object):
 
     def __init__(
             self,
-            L,
+            elinks,
+            base_link=None,
+            ee_link=None,
             name='noname',
             manufacturer='',
             base=SE3(),
@@ -50,49 +52,63 @@ class ETS(object):
 
         super(ETS, self).__init__()
 
-        # Verify L
-        if not isinstance(L, list):
-            raise TypeError('The links L must be stored in a list.')
+        # Verify elinks
+        if not isinstance(elinks, list):
+            raise TypeError('The links must be stored in a list.')
 
-        length = len(L)
-        self._ets = L
-        self._links = []
+        self._ets = []
         self._n = 0
+        self._M = 0
         self._q_idx = []
 
-        self.eee = {}
+        # Set up a dictionary for looking up links by name
+        for link in elinks:
+            if isinstance(link, ELink):
+                self._M += 1
 
-        for i in range(len(L)):
-            self.eee[L[i].name] = L[i]
-            if L[i].parent is None:
-                self.base_link = L[i]
-
-        lnk = self.base_link
-        while 1:
-            print(lnk.name)
-            lnk = self.eee[lnk.child]
-
-        for i in range(length):
-            if isinstance(L[i], ELink):
-                self._links.append(L[i])
-                self._n += 1
             else:
                 raise TypeError("Input can be only ELink")
+            
 
-        # Number of transforms in the ETS
-        self._M = len(self._ets)
+        # Set up references between links, a bi-directional linked list
+        # Also find the top of the tree
+        self.root = []
+        self.end = []
+        for link in elinks:
+            for li in link.parent:
+                li._child.append(link)
+            
+            if len(link.parent) == 0:
+                self.root.append(link)
 
-        # Initialise joints
-        for i in range(len(L)):
-            if L[i].jtype is not L[i].STATIC:
-                L[i].j = len(self._q_idx)
-                self._q_idx.append(i)
+        # Find the bottom of the tree
+        for link in elinks:
+            if len(link.child) == 0:
+                self.end.append(link)
 
-        # Number of joints in the robot
+        # If the base link is not defined, use the root of the tree
+        if base_link is None:
+            self.base_link = self.root[0]
+
+        # If the ee link is not defined, use the bottom of the tree
+        if ee_link is None:
+            self.ee_link = self.end[-1]
+
+
+        def add_links(link, lst, q_idx):
+
+            if link.jtype == link.VARIABLE:
+                q_idx.append(len(lst))
+
+            lst.append(link)
+
+        # Figure out the order of links with resepect to joint variables
+        self.bfs_link(
+            lambda link: add_links(link, self._ets, self._q_idx))
         self._n = len(self._q_idx)
 
-        # Current joint angles of the robot
-        self.q = np.zeros(self._n)
+        # Pre-calculate the forward kinematics path
+        self._fkpath = self.dfs_path(self.base_link, self.ee_link)
 
         self.name = name
         self.manuf = manufacturer
@@ -104,8 +120,42 @@ class ETS(object):
         self.q = np.zeros(self.n)
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
-
         self.control_type = 'v'
+
+    def bfs_link(self, func):
+        queue = self.root
+
+        for li in queue:
+            func(li)
+
+        def vis_children(link):
+            for li in link.child:
+                if not li in queue:
+                    queue.append(li)
+                    func(li)
+
+        while len(queue) > 0:
+            link = queue.pop(0)
+            vis_children(link)
+
+    def dfs_path(self, l1, l2):
+        path = []
+        visited = [l1]
+
+        def vis_children(link):
+            visited.append(link)
+
+            for li in link.child:
+                if not li in visited:
+
+                    if li == l2 or vis_children(li):
+                        path.append(li)
+                        return True
+
+        vis_children(l1)
+        path.append(l1)
+        path.reverse()
+        return path
 
     # @classmethod
     # def dh_to_ets(cls, robot):
@@ -312,12 +362,12 @@ class ETS(object):
             j = 0
             tr = self.base
 
-            for k in range(self.M):
-                if self.ets[k].jtype == self.ets[i].VARIABLE:
-                    T = self.ets[k].A(q[j, i])
+            for link in self._fkpath:
+                if link.jtype == link.VARIABLE:
+                    T = link.A(q[j, i])
                     j += 1
                 else:
-                    T = self.ets[k].A()
+                    T = link.A()
 
                 tr = tr * T
 
@@ -329,6 +379,34 @@ class ETS(object):
                 t.append(tr)
 
         return t
+
+        # try:
+        #     q = getvector(q, self.n, 'col')
+        # except ValueError:
+        #     trajn = q.shape[1]
+        #     verifymatrix(q, (self.n, trajn))
+
+        # for i in range(trajn):
+        #     j = 0
+        #     tr = self.base
+
+        #     for k in range(self.M):
+        #         if self.ets[k].jtype == self.ets[i].VARIABLE:
+        #             T = self.ets[k].A(q[j, i])
+        #             j += 1
+        #         else:
+        #             T = self.ets[k].A()
+
+        #         tr = tr * T
+
+        #     tr = tr * self.tool
+
+        #     if i == 0:
+        #         t = SE3(tr)
+        #     else:
+        #         t.append(tr)
+
+        # return t
 
     def allfkine(self, q=None):
         '''
