@@ -2393,37 +2393,108 @@ class URDF(URDFType):
 
         j = self.joints[4]
 
-        for k in range(len(self.joints)):
-            found = False
-            for i in range(len(self.joints)):
-                if self.joints[i].child == j.parent:
-                    j = self.joints[i]
-                    found = True
-                    break  # Found link above j
-            if not found:
-                break  # No link above j was found, we have the base joint
+        # for k in range(len(self.joints)):
+        #     found = False
+        #     for i in range(len(self.joints)):
+        #         if self.joints[i].child == j.parent:
+        #             j = self.joints[i]
+        #             found = True
+        #             break  # Found link above j
+        #     if not found:
+        #         break  # No link above j was found, we have the base joint
 
-        self._base_link = j.parent
-        self._base_joint = j
+        # self._base_link = j.parent
+        # self._base_joint = j
 
-        # js = [j]
+        links = []
 
-        # for i in range(len(self.joints)):
-        #     for j in range(len(js)):
+        for j in self.joints:
 
-        #         link = js[ii].child
+            ets = []
+            T = sm.SE3(j.origin)
+            trans = T.t
+            rot = T.rpy(unit='rad')
 
-        #         for k in range(len(self.joints)):
-        #             if self.joints[i].parent == link:
-        #                 j = self.joints[ii]
+            if trans[0] != 0:
+                ets.append(rp.ET.Ttx(trans[0]))
 
-        #         print(j.name)
+            if trans[1] != 0:
+                ets.append(rp.ET.Tty(trans[1]))
 
+            if trans[2] != 0:
+                ets.append(rp.ET.Ttz(trans[2]))
 
+            if rot[0] != 0:
+                ets.append(rp.ET.TRx(rot[0]))
 
+            if rot[1] != 0:
+                ets.append(rp.ET.TRy(rot[1]))
 
-        # for joint in self.joints:
-        #     print(joint.name)
+            if rot[2] != 0:
+                ets.append(rp.ET.TRz(rot[2]))
+
+            if j.joint_type == 'revolute':
+                if j.axis[0] == 1:
+                    ets.append(rp.ET.TRx())
+                elif j.axis[0] == -1:
+                    ets.append(rp.ET.TRy(np.pi))
+                    ets.append(rp.ET.TRx())
+                elif j.axis[1] == 1:
+                    ets.append(rp.ET.TRy())
+                elif j.axis[1] == -1:
+                    ets.append(rp.ET.TRz(np.pi))
+                    ets.append(rp.ET.TRy())
+                elif j.axis[2] == 1:
+                    ets.append(rp.ET.TRz())
+                elif j.axis[2] == -1:
+                    ets.append(rp.ET.TRx(np.pi))
+                    ets.append(rp.ET.TRz())
+            elif j.joint_type == 'prismatic':
+                if j.axis[0] == 1:
+                    ets.append(rp.ET.Ttx())
+                elif j.axis[0] == -1:
+                    ets.append(rp.ET.TRy(np.pi))
+                    ets.append(rp.ET.Ttx())
+                elif j.axis[1] == 1:
+                    ets.append(rp.ET.Tty())
+                elif j.axis[1] == -1:
+                    ets.append(rp.ET.TRz(np.pi))
+                    ets.append(rp.ET.Tty())
+                elif j.axis[2] == 1:
+                    ets.append(rp.ET.Ttz())
+                elif j.axis[2] == -1:
+                    ets.append(rp.ET.TRx(np.pi))
+                    ets.append(rp.ET.Ttz())
+
+            try:
+                qlim = [j.limit.lower, j.limit.upper]
+            except AttributeError:
+                qlim = [0, 0]
+
+            links.append(
+                rp.ELink(
+                    ets,
+                    name=j.name,
+                    qlim=qlim
+                )
+            )
+        
+        for i in range(len(links)):
+            for j in range(len(links)):
+                if i != j:
+                    if self.joints[i].parent == self.joints[j].child:
+                        links[i]._parent.append(links[j])
+
+        panda = rp.ETS(
+            links,
+            base_link=links[0],
+            ee_link=links[8],
+            name=self.name
+        )
+
+        for link in self.links:
+            print(link.visuals[0].origin)
+
 
 
         # Synchronize materials between links and top-level set
@@ -2432,35 +2503,6 @@ class URDF(URDFType):
         # Validate the joints and transmissions
         # actuated_joints = self._validate_joints()
         self._validate_transmissions()
-
-        # # Create the link graph and base link/end link sets
-        # self._G = nx.DiGraph()
-
-        # # Add all links
-        # for link in self.links:
-        #     self._G.add_node(link)
-
-        # # Add all edges from CHILDREN TO PARENTS, with joints as their object
-        # for joint in self.joints:
-        #     parent = self._link_map[joint.parent]
-        #     child = self._link_map[joint.child]
-        #     self._G.add_edge(child, parent, joint=joint)
-
-        # # Validate the graph and get the base and end links
-        # self._base_link, self._end_links = self._validate_graph()
-
-        # # Cache the paths to the base link
-        # self._paths_to_base = nx.shortest_path(
-        #     self._G, target=self._base_link
-        # )
-
-        # self._actuated_joints = self._sort_joints(actuated_joints)
-
-        # # Cache the reverse topological order (useful for speeding up FK,
-        # # as we want to start at the base and work outward to cache
-        # # computation.
-        # self._reverse_topo = list(
-        #   reversed(list(nx.topological_sort(self._G))))
 
     @property
     def name(self):

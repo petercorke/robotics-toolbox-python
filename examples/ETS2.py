@@ -17,6 +17,7 @@ import qpsolvers as qp
 # env.launch('Panda Resolved-Rate Motion Control Example', limits=[-0.75, 0.75, -0.75, 0.75, 0, 1.5])
 
 # gPanda = rp.Panda()
+# print(gPanda.fkine())
 # gPanda.name = "Null"
 # gPanda.q = gPanda.qr
 
@@ -97,7 +98,8 @@ import qpsolvers as qp
 
 ###########################################
 
-# f = 'ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro'
+# f = 'ro
+# py/models/xarco/panda/robots/panda_arm_hand.urdf.xacro'
 # a = xacro.main(f)
 # print(a)
 

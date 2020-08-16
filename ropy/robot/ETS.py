@@ -89,11 +89,14 @@ class ETS(object):
         # If the base link is not defined, use the root of the tree
         if base_link is None:
             self.base_link = self.root[0]
+        else:
+            self.base_link = base_link
 
         # If the ee link is not defined, use the bottom of the tree
         if ee_link is None:
             self.ee_link = self.end[-1]
-
+        else:
+            self.ee_link = ee_link
 
         def add_links(link, lst, q_idx):
 
