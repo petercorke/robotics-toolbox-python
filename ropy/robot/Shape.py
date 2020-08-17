@@ -3,7 +3,6 @@
 @author: Jesse Haviland
 """
 
-import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 
@@ -76,65 +75,81 @@ class Shape(object):
             T = SE3(T)
         self._base = T
 
+    @classmethod
+    def Box(cls, scale, base=None):
+        return cls(True, base=base, scale=scale)
 
-class Mesh(Shape):
-    """
-    A mesh object.
+    @classmethod
+    def Cylinder(cls, radius, length, base=None):
+        return cls(True, base=base, radius=radius, length=length)
 
-    :param filename: The path to the mesh that contains this object.
-        This is the absolute path.
-    :type filename: str
-    :param scale: The scaling value for the mesh along the XYZ axes. If
-        ``None``, assumes no scale is applied.
-    :type scale: list (3) float, optional
+    @classmethod
+    def Sphere(cls, radius, base=None):
+        return cls(True, base=base, radius=radius)
 
-    """
-
-    def __init__(self, filename, base=None, scale=None):
-        super(Box, self).__init__(
-            False, filename=filename, base=base, scale=scale)
+    @classmethod
+    def Mesh(cls, filename, base=None, scale=None):
+        return cls(False, filename=filename, base=base, scale=scale)
 
 
-class Cylinder(Shape):
-    """A cylinder whose center is at the local origin.
-    Parameters
-    ----------
-    :param radius: The radius of the cylinder in meters.
-    :type radius: float
-        The radius of the cylinder in meters.
-    :param length: The length of the cylinder in meters.
-    :type length: float
+# class Mesh(Shape):
+#     """
+#     A mesh object.
 
-    """
+#     :param filename: The path to the mesh that contains this object.
+#         This is the absolute path.
+#     :type filename: str
+#     :param scale: The scaling value for the mesh along the XYZ axes. If
+#         ``None``, assumes no scale is applied.
+#     :type scale: list (3) float, optional
 
-    def __init__(self, radius, length, base=None):
-        super(Box, self).__init__(
-            
-            True, base=base, radius=radius, length=length)
+#     """
 
-
-class Sphere(Shape):
-    """
-    A sphere whose center is at the local origin.
-
-    :param radius: The radius of the sphere in meters.
-    :type radius: float
-
-    """
-
-    def __init__(self, radius, base=None):
-        super(Box, self).__init__(True, base=base, radius=radius)
+#     def __init__(self, filename, base=None, scale=None):
+#         super(Box, self).__init__(
+#             False, filename=filename, base=base, scale=scale)
 
 
-class Box(Shape):
-    """
-    A rectangular prism whose center is at the local origin.
+# class Cylinder(Shape):
+#     """A cylinder whose center is at the local origin.
+#     Parameters
+#     ----------
+#     :param radius: The radius of the cylinder in meters.
+#     :type radius: float
+#         The radius of the cylinder in meters.
+#     :param length: The length of the cylinder in meters.
+#     :type length: float
 
-    :param scale: The length, width, and height of the box in meters.
-    :type scale: list (3) float
+#     """
 
-    """
+#     def __init__(self, radius, length, base=None):
+#         super(Box, self).__init__(
 
-    def __init__(self, scale, base=None):
+#             True, base=base, radius=radius, length=length)
 
-        super(Box, self).__init__(True, base=base, scale=scale)
+
+# class Sphere(Shape):
+#     """
+#     A sphere whose center is at the local origin.
+
+#     :param radius: The radius of the sphere in meters.
+#     :type radius: float
+
+#     """
+
+#     def __init__(self, radius, base=None):
+#         super(Box, self).__init__(True, base=base, radius=radius)
+
+
+# class Box(Shape):
+#     """
+#     A rectangular prism whose center is at the local origin.
+
+#     :param scale: The length, width, and height of the box in meters.
+#     :type scale: list (3) float
+
+#     """
+
+#     def __init__(self, scale, base=None):
+
+#         super(Box, self).__init__(True, base=base, scale=scale)
