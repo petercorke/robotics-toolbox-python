@@ -4,6 +4,7 @@ Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
+from os.path import splitext
 import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
@@ -13,6 +14,8 @@ from ropy.robot.ELink import ELink
 from ropy.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
+from ropy.backend import xacro
+from ropy.backend import URDF
 
 
 class ETS(object):
@@ -42,9 +45,9 @@ class ETS(object):
     def __init__(
             self,
             elinks,
+            name='noname',
             base_link=None,
             ee_link=None,
-            name='noname',
             manufacturer='',
             base=SE3(),
             tool=SE3(),
@@ -65,10 +68,8 @@ class ETS(object):
         for link in elinks:
             if isinstance(link, ELink):
                 self._M += 1
-
             else:
                 raise TypeError("Input can be only ELink")
-            
 
         # Set up references between links, a bi-directional linked list
         # Also find the top of the tree
@@ -77,7 +78,7 @@ class ETS(object):
         for link in elinks:
             for li in link.parent:
                 li._child.append(link)
-            
+
             if len(link.parent) == 0:
                 self.root.append(link)
 
@@ -88,15 +89,15 @@ class ETS(object):
 
         # If the base link is not defined, use the root of the tree
         if base_link is None:
-            self.base_link = self.root[0]
+            self._base_link = self.root[0]   # Needs to be private attrib
         else:
-            self.base_link = base_link
+            self._base_link = base_link      # Needs to be private attrib
 
         # If the ee link is not defined, use the bottom of the tree
         if ee_link is None:
-            self.ee_link = self.end[-1]
+            self._ee_link = self.end[-1]
         else:
-            self.ee_link = ee_link
+            self._ee_link = ee_link
 
         def add_links(link, lst, q_idx):
 
@@ -110,9 +111,7 @@ class ETS(object):
             lambda link: add_links(link, self._ets, self._q_idx))
         self._n = len(self._q_idx)
 
-        # Pre-calculate the forward kinematics path
-        self._fkpath = self.dfs_path(self.base_link, self.ee_link)
-
+        self._reset_fk_path()
         self.name = name
         self.manuf = manufacturer
         self.base = base
@@ -125,6 +124,10 @@ class ETS(object):
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
 
+    def _reset_fk_path(self):
+        # Pre-calculate the forward kinematics path
+        self._fkpath = self.dfs_path(self.base_link, self.ee_link)
+
     def bfs_link(self, func):
         queue = self.root
 
@@ -133,7 +136,7 @@ class ETS(object):
 
         def vis_children(link):
             for li in link.child:
-                if not li in queue:
+                if li not in queue:
                     queue.append(li)
                     func(li)
 
@@ -149,16 +152,62 @@ class ETS(object):
             visited.append(link)
 
             for li in link.child:
-                if not li in visited:
+                if li not in visited:
 
                     if li == l2 or vis_children(li):
                         path.append(li)
                         return True
-
         vis_children(l1)
         path.append(l1)
         path.reverse()
         return path
+
+    def to_dict(self):
+        ob = {
+            'links': [],
+            'name': self.name,
+            'n': self.n,
+            'M': self.M,
+            'q_idx': self.q_idx
+        }
+
+        for link in self.ets:
+            li = {
+                'axis': [],
+                'eta': [],
+                'q': link.q_idx
+            }
+
+            for et in link.ets:
+                li['axis'].append(et.axis)
+                li['eta'].append(et.eta)
+
+            ob['links'].append(li)
+
+        return ob
+
+    @classmethod
+    def urdf_to_ets(cls, file_path):
+        name, ext = splitext(file_path)
+
+        if ext == '.xacro':
+            urdf_string = xacro.main(file_path)
+            urdf = URDF.loadstr(urdf_string, file_path)
+
+        return ETS(
+            urdf.elinks,
+            name=urdf.name
+        )
+
+    @staticmethod
+    def urdf_to_ets_args(file_path):
+        name, ext = splitext(file_path)
+
+        if ext == '.xacro':
+            urdf_string = xacro.main(file_path)
+            urdf = URDF.loadstr(urdf_string, file_path)
+
+        return urdf.elinks, urdf.name
 
     # @classmethod
     # def dh_to_ets(cls, robot):
@@ -220,6 +269,14 @@ class ETS(object):
     #         robot.manuf,
     #         robot.base,
     #         robot.tool)
+
+    @property
+    def base_link(self):
+        return self._base_link
+
+    @property
+    def ee_link(self):
+        return self._ee_link
 
     @property
     def q(self):
@@ -317,6 +374,22 @@ class ETS(object):
         if not isinstance(T, SE3):
             T = SE3(T)
         self._tool = T
+
+    @base_link.setter
+    def base_link(self, link):
+        if isinstance(link, ELink):
+            self._base_link = link
+        else:
+            self._base_link = self.ets[link]
+        self._reset_fk_path()
+
+    @ee_link.setter
+    def ee_link(self, link):
+        if isinstance(link, ELink):
+            self._ee_link = link
+        else:
+            self._ee_link = self.ets[link]
+        self._reset_fk_path()
 
     def fkine(self, q=None):
         '''
