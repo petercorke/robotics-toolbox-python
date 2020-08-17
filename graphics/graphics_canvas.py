@@ -505,7 +505,18 @@ class GraphicsCanvas3D:
         """
 
         """
-        print(s.value)
+        # Get all angles
+        angles = []
+        for joint_slider in self.__teachpanel:
+            angles.append(joint_slider.value)
+
+        # Run fkine
+        poses = self.__robots[self.__selected_robot].fkine(angles)
+        poses = poses[1:len(poses)]  # Ignore the first item
+
+        # Update joints
+        self.__robots[self.__selected_robot].set_joint_poses(poses)
+
 
 
 class GraphicsCanvas2D:

@@ -571,17 +571,18 @@ class GraphicalRobot:
         self.__scene = graphics_canvas
 
         self.angles = []
+        self.seriallink = seriallink
 
         # If seriallink given, create the robot
-        if seriallink is not None:
+        if self.seriallink is not None:
             # Update name
-            self.name = seriallink.name
+            self.name = self.seriallink.name
             # Get initial poses
-            zero_angles = [0] * len(seriallink.links)
-            all_poses = seriallink.fkine(zero_angles, alltout=True)
+            zero_angles = [0] * len(self.seriallink.links)
+            all_poses = self.seriallink.fkine(zero_angles, alltout=True)
             # Create the joints
             i = 0
-            for link in seriallink.links:
+            for link in self.seriallink.links:
                 # Get info
                 j_type = link.jointtype  # Type of
                 pose = all_poses[i + 1]  # Pose
@@ -763,6 +764,17 @@ class GraphicalRobot:
             # If drawing takes longer than frame frequency, this while is skipped
             while t_stop - t_start < f:
                 t_stop = perf_counter()
+
+    def fkine(self, joint_angles):
+        """
+
+        """
+        # If seriallink object, run it's fkine
+        if self.seriallink is not None:
+            return self.seriallink.fkine(joint_angles, alltout=True)
+        # Else TODO
+        else:
+            pass
 
     def set_joint_angle(self, link_num, new_angle):
         """
