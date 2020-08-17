@@ -389,11 +389,6 @@ class Mesh(URDFType):
         kwargs = cls._parse(node, path)
         return Mesh(**kwargs)
 
-    # def _to_xml(self, parent, path):
-    #     # Unparse the node
-    #     node = self._unparse(path)
-    #     return node
-
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
         Parameters
@@ -544,178 +539,154 @@ class Geometry(URDFType):
         return v
 
 
-class Texture(URDFType):
-    """An image-based texture.
-    Parameters
-    ----------
-    filename : str
-        The path to the image that contains this texture. This can be
-        relative to the top-level URDF or an absolute path.
-    image : :class:`PIL.Image.Image`, optional
-        The image for the texture.
-        If not specified, it is loaded automatically from the filename.
-    """
+# class Texture(URDFType):
+#     """An image-based texture.
+#     Parameters
+#     ----------
+#     filename : str
+#         The path to the image that contains this texture. This can be
+#         relative to the top-level URDF or an absolute path.
+#     image : :class:`PIL.Image.Image`, optional
+#         The image for the texture.
+#         If not specified, it is loaded automatically from the filename.
+#     """
 
-    _ATTRIBS = {
-        'filename': (str, True)
-    }
-    _TAG = 'texture'
+#     _ATTRIBS = {
+#         'filename': (str, True)
+#     }
+#     _TAG = 'texture'
 
-    def __init__(self, filename, image=None):
-        self.filename = filename
-        self.image = image
+#     def __init__(self, filename, image=None):
+#         self.filename = filename
+#         self.image = image
 
-    @property
-    def filename(self):
-        """str : Path to the image for this texture.
-        """
-        return self._filename
+#     @property
+#     def filename(self):
+#         """str : Path to the image for this texture.
+#         """
+#         return self._filename
 
-    @filename.setter
-    def filename(self, value):
-        self._filename = str(value)
+#     @filename.setter
+#     def filename(self, value):
+#         self._filename = str(value)
 
-    @classmethod
-    def _from_xml(cls, node, path):
-        kwargs = cls._parse(node, path)
+#     @classmethod
+#     def _from_xml(cls, node, path):
+#         kwargs = cls._parse(node, path)
 
-        return Texture(**kwargs)
+#         return Texture(**kwargs)
 
-    # def _to_xml(self, parent, path):
-    #     # Save the image
-    #     filepath = get_filename(path, self.filename, makedirs=True)
-    #     self.image.save(filepath)
-
-    #     return self._unparse(path)
-
-    def copy(self, prefix='', scale=None):
-        """Create a deep copy with the prefix applied to all names.
-        Parameters
-        ----------
-        prefix : str
-            A prefix to apply to all names.
-        Returns
-        -------
-        :class:`.Texture`
-            A deep copy.
-        """
-        v = Texture(
-            filename=self.filename
-        )
-        return v
+#     def copy(self, prefix='', scale=None):
+#         """Create a deep copy with the prefix applied to all names.
+#         Parameters
+#         ----------
+#         prefix : str
+#             A prefix to apply to all names.
+#         Returns
+#         -------
+#         :class:`.Texture`
+#             A deep copy.
+#         """
+#         v = Texture(
+#             filename=self.filename
+#         )
+#         return v
 
 
-class Material(URDFType):
-    """A material for some geometry.
-    Parameters
-    ----------
-    name : str
-        The name of the material.
-    color : (4,) float, optional
-        The RGBA color of the material in the range [0,1].
-    texture : :class:`.Texture`, optional
-        A texture for the material.
-    """
-    _ATTRIBS = {
-        'name': (str, True)
-    }
-    _ELEMENTS = {
-        'texture': (Texture, False, False),
-    }
-    _TAG = 'material'
+# class Material(URDFType):
+#     """A material for some geometry.
+#     Parameters
+#     ----------
+#     name : str
+#         The name of the material.
+#     color : (4,) float, optional
+#         The RGBA color of the material in the range [0,1].
+#     texture : :class:`.Texture`, optional
+#         A texture for the material.
+#     """
+#     _ATTRIBS = {
+#         'name': (str, True)
+#     }
+#     _ELEMENTS = {
+#         'texture': (Texture, False, False),
+#     }
+#     _TAG = 'material'
 
-    def __init__(self, name, color=None, texture=None):
-        self.name = name
-        self.color = color
-        self.texture = texture
+#     def __init__(self, name, color=None, texture=None):
+#         self.name = name
+#         self.color = color
+#         self.texture = texture
 
-    @property
-    def name(self):
-        """str : The name of the material.
-        """
-        return self._name
+#     @property
+#     def name(self):
+#         """str : The name of the material.
+#         """
+#         return self._name
 
-    @name.setter
-    def name(self, value):
-        self._name = str(value)
+#     @name.setter
+#     def name(self, value):
+#         self._name = str(value)
 
-    @property
-    def color(self):
-        """(4,) float : The RGBA color of the material, in the range [0,1].
-        """
-        return self._color
+#     @property
+#     def color(self):
+#         """(4,) float : The RGBA color of the material, in the range [0,1].
+#         """
+#         return self._color
 
-    @color.setter
-    def color(self, value):
-        if value is not None:
-            value = np.asanyarray(value).astype(np.float)
-            value = np.clip(value, 0.0, 1.0)
-            if value.shape != (4,):   # pragma nocover
-                raise ValueError('Color must be a (4,) float')
-        self._color = value
+#     @color.setter
+#     def color(self, value):
+#         if value is not None:
+#             value = np.asanyarray(value).astype(np.float)
+#             value = np.clip(value, 0.0, 1.0)
+#             if value.shape != (4,):   # pragma nocover
+#                 raise ValueError('Color must be a (4,) float')
+#         self._color = value
 
-    @property
-    def texture(self):
-        """:class:`.Texture` : The texture for the material.
-        """
-        return self._texture
+#     @property
+#     def texture(self):
+#         """:class:`.Texture` : The texture for the material.
+#         """
+#         return self._texture
 
-    @texture.setter
-    def texture(self, value):
-        if value is not None:
-            if isinstance(value, str):
-                value = Texture(filename=value)
-            elif not isinstance(value, Texture):  # pragma nocover
-                raise ValueError('Invalid type for texture -- expect path to '
-                                 'image or Texture')
-        self._texture = value
+#     @texture.setter
+#     def texture(self, value):
+#         if value is not None:
+#             if isinstance(value, str):
+#                 value = Texture(filename=value)
+#             elif not isinstance(value, Texture):  # pragma nocover
+#                 raise ValueError('Invalid type for texture -- expect path to '
+#                                  'image or Texture')
+#         self._texture = value
 
-    @classmethod
-    def _from_xml(cls, node, path):
-        kwargs = cls._parse(node, path)
+#     @classmethod
+#     def _from_xml(cls, node, path):
+#         kwargs = cls._parse(node, path)
 
-        # Extract the color -- it's weirdly an attribute of a subelement
-        color = node.find('color')
-        if color is not None:
-            color = np.fromstring(
-                color.attrib['rgba'], sep=' ', dtype=np.float64)
-        kwargs['color'] = color
+#         # Extract the color -- it's weirdly an attribute of a subelement
+#         color = node.find('color')
+#         if color is not None:
+#             color = np.fromstring(
+#                 color.attrib['rgba'], sep=' ', dtype=np.float64)
+#         kwargs['color'] = color
 
-        return Material(**kwargs)
+#         return Material(**kwargs)
 
-    # def _to_xml(self, parent, path):
-    #     # Simplify materials by collecting them at the top level.
-
-    #     # For top-level elements, save the full material specification
-    #     if parent.tag == 'robot':
-    #         node = self._unparse(path)
-    #         if self.color is not None:
-    #             color = ET.Element('color')
-    #             color.attrib['rgba'] = np.array2string(self.color)[1:-1]
-    #             node.append(color)
-
-    #     # For non-top-level elements just save the material with a name
-    #     else:
-    #         node = ET.Element('material')
-    #         node.attrib['name'] = self.name
-    #     return node
-
-    def copy(self, prefix='', scale=None):
-        """Create a deep copy of the material with the prefix applied to all names.
-        Parameters
-        ----------
-        prefix : str
-            A prefix to apply to all joint and link names.
-        Returns
-        -------
-        :class:`.Material`
-            A deep copy of the material.
-        """
-        return Material(
-            name='{}{}'.format(prefix, self.name),
-            color=self.color,
-            texture=self.texture
-        )
+#     def copy(self, prefix='', scale=None):
+#         """Create a deep copy of the material with the prefix applied to all names.
+#         Parameters
+#         ----------
+#         prefix : str
+#             A prefix to apply to all joint and link names.
+#         Returns
+#         -------
+#         :class:`.Material`
+#             A deep copy of the material.
+#         """
+#         return Material(
+#             name='{}{}'.format(prefix, self.name),
+#             color=self.color,
+#             texture=self.texture
+#         )
 
 
 class Collision(URDFType):
@@ -784,11 +755,6 @@ class Collision(URDFType):
         kwargs['origin'] = parse_origin(node)
         return Collision(**kwargs)
 
-    # def _to_xml(self, parent, path):
-    #     node = self._unparse(path)
-    #     node.append(unparse_origin(self.origin))
-    #     return node
-
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the visual with the prefix applied to all names.
         Parameters
@@ -831,7 +797,7 @@ class Visual(URDFType):
     }
     _ELEMENTS = {
         'geometry': (Geometry, True, False),
-        'material': (Material, False, False),
+        # 'material': (Material, False, False),
     }
     _TAG = 'visual'
 
@@ -875,29 +841,24 @@ class Visual(URDFType):
     def origin(self, value):
         self._origin = configure_origin(value)
 
-    @property
-    def material(self):
-        """:class:`.Material` : The material for this element.
-        """
-        return self._material
+    # @property
+    # def material(self):
+    #     """:class:`.Material` : The material for this element.
+    #     """
+    #     return self._material
 
-    @material.setter
-    def material(self, value):
-        if value is not None:
-            if not isinstance(value, Material):
-                raise TypeError('Must set material with Material object')
-        self._material = value
+    # @material.setter
+    # def material(self, value):
+    #     if value is not None:
+    #         if not isinstance(value, Material):
+    #             raise TypeError('Must set material with Material object')
+    #     self._material = value
 
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
         kwargs['origin'] = parse_origin(node)
         return Visual(**kwargs)
-
-    # def _to_xml(self, parent, path):
-    #     node = self._unparse(path)
-    #     node.append(unparse_origin(self.origin))
-    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the visual with the prefix applied to all names.
@@ -994,22 +955,6 @@ class Inertial(URDFType):
             [xz, yz, zz]
         ], dtype=np.float64)
         return Inertial(mass=mass, inertia=inertia, origin=origin)
-
-    # def _to_xml(self, parent, path):
-    #     node = ET.Element('inertial')
-    #     node.append(unparse_origin(self.origin))
-    #     mass = ET.Element('mass')
-    #     mass.attrib['value'] = str(self.mass)
-    #     node.append(mass)
-    #     inertia = ET.Element('inertia')
-    #     inertia.attrib['ixx'] = str(self.inertia[0, 0])
-    #     inertia.attrib['ixy'] = str(self.inertia[0, 1])
-    #     inertia.attrib['ixz'] = str(self.inertia[0, 2])
-    #     inertia.attrib['iyy'] = str(self.inertia[1, 1])
-    #     inertia.attrib['iyz'] = str(self.inertia[1, 2])
-    #     inertia.attrib['izz'] = str(self.inertia[2, 2])
-    #     node.append(inertia)
-    #     return node
 
     def copy(self, prefix='', mass=None, origin=None, inertia=None):
         """Create a deep copy of the visual with the prefix applied to all names.
@@ -1520,19 +1465,6 @@ class Actuator(URDFType):
         kwargs['hardwareInterfaces'] = hi
         return Actuator(**kwargs)
 
-    # def _to_xml(self, parent, path):
-    #     node = self._unparse(path)
-    #     if self.mechanicalReduction is not None:
-    #         mr = ET.Element('mechanicalReduction')
-    #         mr.text = str(self.mechanicalReduction)
-    #         node.append(mr)
-    #     if len(self.hardwareInterfaces) > 0:
-    #         for hi in self.hardwareInterfaces:
-    #             h = ET.Element('hardwareInterface')
-    #             h.text = hi
-    #             node.append(h)
-    #     return node
-
     def copy(self, prefix='', scale=None):
         """Create a deep copy of the visual with the prefix applied to all names.
         Parameters
@@ -1603,15 +1535,6 @@ class TransmissionJoint(URDFType):
             hi = [h.text for h in hi]
         kwargs['hardwareInterfaces'] = hi
         return TransmissionJoint(**kwargs)
-
-    # def _to_xml(self, parent, path):
-    #     node = self._unparse(path)
-    #     if len(self.hardwareInterfaces) > 0:
-    #         for hi in self.hardwareInterfaces:
-    #             h = ET.Element('hardwareInterface')
-    #             h.text = hi
-    #             node.append(h)
-    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -1728,13 +1651,6 @@ class Transmission(URDFType):
         kwargs = cls._parse(node, path)
         kwargs['trans_type'] = node.find('type').text
         return Transmission(**kwargs)
-
-    # def _to_xml(self, parent, path):
-    #     node = self._unparse(path)
-    #     ttype = ET.Element('type')
-    #     ttype.text = self.trans_type
-    #     node.append(ttype)
-    #     return node
 
     def copy(self, prefix='', scale=None):
         """Create a deep copy with the prefix applied to all names.
@@ -2109,22 +2025,6 @@ class Joint(URDFType):
         kwargs['origin'] = parse_origin(node)
         return Joint(**kwargs)
 
-    # def _to_xml(self, parent, path):
-    #     node = self._unparse(path)
-    #     parent = ET.Element('parent')
-    #     parent.attrib['link'] = self.parent
-    #     node.append(parent)
-    #     child = ET.Element('child')
-    #     child.attrib['link'] = self.child
-    #     node.append(child)
-    #     if self.axis is not None:
-    #         axis = ET.Element('axis')
-    #         axis.attrib['xyz'] = np.array2string(self.axis)[1:-1]
-    #         node.append(axis)
-    #     node.append(unparse_origin(self.origin))
-    #     node.attrib['type'] = self.joint_type
-    #     return node
-
     def _rotation_matrices(self, angles, axis):
         """Compute rotation matrices from angle/axis representations.
         Parameters
@@ -2391,22 +2291,7 @@ class URDF(URDFType):
                                  'found'.format(x.name))
             self._material_map[x.name] = x
 
-        j = self.joints[4]
-
-        # for k in range(len(self.joints)):
-        #     found = False
-        #     for i in range(len(self.joints)):
-        #         if self.joints[i].child == j.parent:
-        #             j = self.joints[i]
-        #             found = True
-        #             break  # Found link above j
-        #     if not found:
-        #         break  # No link above j was found, we have the base joint
-
-        # self._base_link = j.parent
-        # self._base_joint = j
-
-        links = []
+        elinks = []
 
         for j in self.joints:
 
@@ -2471,31 +2356,25 @@ class URDF(URDFType):
             except AttributeError:
                 qlim = [0, 0]
 
-            links.append(
+            elinks.append(
                 rp.ELink(
                     ets,
                     name=j.name,
                     qlim=qlim
                 )
             )
-        
-        for i in range(len(links)):
-            for j in range(len(links)):
+
+        for i in range(len(elinks)):
+            for j in range(len(elinks)):
                 if i != j:
                     if self.joints[i].parent == self.joints[j].child:
-                        links[i]._parent.append(links[j])
+                        elinks[i]._parent.append(elinks[j])
 
-        panda = rp.ETS(
-            links,
-            base_link=links[0],
-            ee_link=links[8],
-            name=self.name
-        )
+        self.elinks = elinks
 
-        for link in self.links:
-            print(link.visuals[0].origin)
-
-
+        # for link in self.links:
+        #     for vis in link.visuals:
+        #         print(vis.geometry.mesh.filename)
 
         # Synchronize materials between links and top-level set
         self._merge_materials()
@@ -2503,6 +2382,7 @@ class URDF(URDFType):
         # Validate the joints and transmissions
         # actuated_joints = self._validate_joints()
         self._validate_transmissions()
+
 
     @property
     def name(self):
@@ -3458,24 +3338,6 @@ class URDF(URDFType):
         # Do a depth-first search
         return actuated_joints
 
-    def _sort_joints(self, joints):
-        """Sort joints by ascending distance from the base link (topologically).
-        Parameters
-        ----------
-        joints : list of :class:`.Joint`
-            The joints to sort.
-        Returns
-        -------
-        joints : list of :class:`.Joint`
-            The sorted joints.
-        """
-        lens = []
-        for joint in joints:
-            child_link = self._link_map[joint.child]
-            lens.append(len(self._paths_to_base[child_link]))
-        order = np.argsort(lens)
-        return np.array(joints)[order].tolist()
-
     def _validate_transmissions(self):
         """Raise an exception of any transmissions are invalidly specified.
         Checks for the following:
@@ -3486,54 +3348,6 @@ class URDF(URDFType):
                 if joint.name not in self._joint_map:
                     raise ValueError('Transmission {} has invalid joint name '
                                      '{}'.format(t.name, joint.name))
-
-    # def _validate_graph(self):
-    #     """Raise an exception if the link-joint structure is invalid.
-    #     Checks for the following:
-    #     - The graph is connected in the undirected sense.
-    #     - The graph is acyclic in the directed sense.
-    #     - The graph has only one base link.
-    #     Returns
-    #     -------
-    #     base_link : :class:`.Link`
-    #         The base link of the URDF.
-    #     end_links : list of :class:`.Link`
-    #         The end links of the URDF.
-    #     """
-
-    #     # Check that the link graph is weakly connected
-    #     if not nx.is_weakly_connected(self._G):
-    #         link_clusters = []
-    #         for cc in nx.weakly_connected_components(self._G):
-    #             cluster = []
-    #             for n in cc:
-    #                 cluster.append(n.name)
-    #             link_clusters.append(cluster)
-    #         message = ('Links are not all connected. '
-    #                    'Connected components are:')
-    #         for lc in link_clusters:
-    #             message += '\n\t'
-    #             for n in lc:
-    #                 message += ' {}'.format(n)
-    #         raise ValueError(message)
-
-    #     # Check that link graph is acyclic
-    #     if not nx.is_directed_acyclic_graph(self._G):
-    #         raise ValueError('There are cycles in the link graph')
-
-    #     # Ensure that there is exactly one base link, which has no parent
-    #     base_link = None
-    #     end_links = []
-    #     for n in self._G:
-    #         if len(nx.descendants(self._G, n)) == 0:
-    #             if base_link is None:
-    #                 base_link = n
-    #             else:
-    #                 raise ValueError('Links {} and {} are both base links!'
-    #                                  .format(n.name, base_link.name))
-    #         if len(nx.ancestors(self._G, n)) == 0:
-    #             end_links.append(n)
-    #     return base_link, end_links
 
     def _process_cfg(self, cfg):
         """Process a joint configuration spec into a dictionary mapping

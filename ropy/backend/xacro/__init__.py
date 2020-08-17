@@ -1039,7 +1039,7 @@ def main(filename):   # pragma: no cover
         'output': None,
         'just_deps': False,
         'in_order': True,
-        'verbosity': 4,
+        'verbosity': 1,
         'just_includes': False,
         'mappings': {}
     }

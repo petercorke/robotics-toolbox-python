@@ -9,7 +9,7 @@ from ropy.backend.urdf.urdf import (
 
 __all__ = [
     'URDFType', 'Box', 'Cylinder', 'Sphere', 'Mesh', 'Geometry',
-    'Texture', 'Material', 'Collision', 'Visual', 'Inertial',
+    'Collision', 'Visual', 'Inertial',
     'JointCalibration', 'JointDynamics', 'JointLimit', 'JointMimic',
     'SafetyController', 'Actuator', 'TransmissionJoint',
     'Transmission', 'Joint', 'Link', 'URDF'
