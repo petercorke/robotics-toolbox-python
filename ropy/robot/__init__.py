@@ -5,6 +5,7 @@ from ropy.robot.Prismatic import Prismatic
 from ropy.robot.ETS import ETS
 from ropy.robot.ELink import ELink
 from ropy.robot.ET import ET
+from ropy.robot.Shape import Shape
 
 __all__ = [
     'SerialLink',
@@ -13,5 +14,6 @@ __all__ = [
     'Prismatic',
     'ETS',
     'ELink',
-    'ET'
+    'ET',
+    'Shape'
 ]
