@@ -9,7 +9,7 @@ import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
-from spatialmath.base import tr2rpy
+from spatialmath.base import tr2rpy, r2q
 from ropy.robot.ELink import ELink
 from ropy.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
@@ -163,26 +163,56 @@ class ETS(object):
         return path
 
     def to_dict(self):
+        self.q = self.qr
         ob = {
             'links': [],
             'name': self.name,
             'n': self.n,
             'M': self.M,
-            'q_idx': self.q_idx
+            'q_idx': self.q_idx,
+            'poses': {
+                't': [],
+                'q': []
+            }
         }
+
+        Tall = self.allfkine()
 
         for link in self.ets:
             li = {
                 'axis': [],
                 'eta': [],
-                'q': link.q_idx
+                'q': link.q_idx,
+                'geometry': []
             }
 
             for et in link.ets:
                 li['axis'].append(et.axis)
                 li['eta'].append(et.eta)
 
+            for gi in link.geometry:
+                li['geometry'].append({
+                    'filename': gi.filename,
+                    'scale': gi.scale
+                })
+
             ob['links'].append(li)
+
+        # ob['poses'].append(self.base.A.flatten().tolist())
+        ob['poses']['q'].append(r2q(self.base.R).tolist())
+        ob['poses']['t'].append(self.base.t.tolist())
+
+        # ob['poses']['t'].append(self.base.t.tolist())
+        # ob['poses']['R'].append((SE3.Rx(np.pi/2) * self.base).rpy(unit='rad').tolist())
+
+        for T in Tall:
+            # print(T)
+            ob['poses']['t'].append(T.t.tolist())
+            ob['poses']['q'].append(r2q(T.R).tolist())
+            # ob['poses']['t'].append(T.t.tolist())
+            # ob['poses']['R'].append((SE3.Rx(np.pi/2) * T).rpy(unit='rad').tolist())
+            # ob['links'][i]['R'] = (SE3.Rx(np.pi/2) * Tall[i]).rpy(unit='rad').tolist()
+            # ob['links'][i]['R'] = Tall[i].rpy(unit='rad').tolist()
 
         return ob
 

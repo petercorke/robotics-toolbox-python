@@ -8,7 +8,7 @@ from subprocess import call, Popen
 from ropy.backend.Connector import Connector
 import zerorpc
 import ropy as rp
-# # import numpy as np
+import numpy as np
 
 
 class Sim(Connector):
@@ -16,10 +16,7 @@ class Sim(Connector):
     def __init__(self):
         super(Sim, self).__init__()
 
-        # print(os.environ['SIM_ROOT'])
-
-        Popen(['npm', 'start', '--prefix', os.environ['SIM_ROOT']])
-        print("HELLO")
+        # Popen(['npm', 'start', '--prefix', os.environ['SIM_ROOT']])
 
     #
     #  Basic methods to do with the state of the external program
@@ -35,7 +32,7 @@ class Sim(Connector):
         super().launch()
 
         self.sim = zerorpc.Client()
-        self.sim.connect("tcp://127.0.0.1:4242")
+        self.sim.connect("tcp://127.0.0.1:4243")
 
     def step(self):
         '''
@@ -84,7 +81,7 @@ class Sim(Connector):
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self):
+    def add(self, ob):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -94,7 +91,12 @@ class Sim(Connector):
 
         super().add()
 
-        
+        if isinstance(ob, rp.ETS):
+            robot = ob.to_dict()
+            return self.sim.robot(robot)
+
+
+
 
 
 

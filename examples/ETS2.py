@@ -98,11 +98,11 @@ import qpsolvers as qp
 
 ###########################################
 
-# f = 'ro
-# py/models/xarco/panda/robots/panda_arm_hand.urdf.xacro'
-# a = xacro.main(f)
-# print(a)
+panda = rp.PandaURDF()
+# print(panda.fkine(panda.qz))
 
-# rob = rp.backend.URDF.loadstr(a, f)
+# for l in panda.ets:
+    # for gi in l.geometry:
+        # print(gi.filename)
 
 # xacro.main('ropy/models/xarco/panda/panda_arm_hand.urdf.xacro')
