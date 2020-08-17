@@ -1,6 +1,12 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
+from enum import Enum
+
+
+class UImode(Enum):
+    CANVASCONTROL = 1
+    TEACHPANEL = 2
 
 
 class GraphicsCanvas3D:
@@ -60,6 +66,12 @@ class GraphicsCanvas3D:
         self.__grid_relative = True
 
         # Create the UI
+        self.__ui_mode = UImode.CANVASCONTROL
+        self.__toggle_button = None
+        self.__toggle_button_text_dict = {
+            UImode.CANVASCONTROL: "Canvas Controls",
+            UImode.TEACHPANEL: "Robot Controls"
+        }
         self.__ui_controls = self.__setup_ui_controls([])
         # Indices to easily identify entities
         self.__idx_btn_reset = 0  # Camera Reset Button
@@ -154,10 +166,21 @@ class GraphicsCanvas3D:
         # Set it as selected
         self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
 
-
     #######################################
     #  UI Management
     #######################################
+    def __add_mode_button(self):
+        """
+
+        """
+        btn_text = self.__toggle_button_text_dict.get(self.__ui_mode, "Unknown Mode Set")
+
+        self.scene.append_to_caption('\n')
+        btn_toggle = button(bind=self.__toggle_mode, text=btn_text)
+        self.scene.append_to_caption('\n\n')
+
+        return btn_toggle
+
     def __del_robot(self):
         """
         Remove a robot from the scene and the UI controls
@@ -178,14 +201,14 @@ class GraphicsCanvas3D:
         # Add the new one
         del new_list[self.__selected_robot]
         del self.__robots[self.__selected_robot]
+        del self.__teachpanel[self.__selected_robot]
 
+        self.__selected_robot = 0
+        # Update UI
+        self.__reload_caption(new_list)
         # Select the top item
         if len(self.__ui_controls[self.__idx_menu_robots].choices) > 0:
             self.__ui_controls[self.__idx_menu_robots].index = 0
-            self.__selected_robot = len(self.__robots) - 1
-
-        # Update UI
-        self.__reload_caption(new_list)
 
     def __handle_keyboard_inputs(self):
         """
@@ -315,8 +338,19 @@ class GraphicsCanvas3D:
         # Restore the caption
         self.scene.caption = self.__default_caption
         # Create the updated caption.
-        self.__ui_controls = self.__setup_ui_controls(new_list)
-        self.__setup_joint_sliders()
+        self.__toggle_button = self.__add_mode_button()
+        self.__load_mode_ui(new_list)
+
+    def __load_mode_ui(self, new_list):
+        """
+
+        """
+        if self.__ui_mode == UImode.CANVASCONTROL:
+            self.__ui_controls = self.__setup_ui_controls(new_list)
+        elif self.__ui_mode == UImode.TEACHPANEL:
+            self.__setup_joint_sliders()
+        else:
+            self.scene.append_to_caption("UNKNOWN MODE ENTERED\n")
 
     def __setup_ui_controls(self, list_of_names):
         """
@@ -326,28 +360,19 @@ class GraphicsCanvas3D:
         :type list_of_names: `list`
         """
         # Button to reset camera
-        self.scene.append_to_caption('\n')
         btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
         self.scene.append_to_caption('\t')
 
         chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
-        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
-        self.scene.append_to_caption('''
-            <script type="text/javascript">
-                $(document).keyup(function(event) {
-                    if(event.which === 32) {
-                        event.preventDefault();
-                    }
-                });
-            </script>''')
-        # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
         self.scene.append_to_caption('\t')
 
         chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
-        self.scene.append_to_caption('\n')
+        self.scene.append_to_caption('\n\n')
 
         # Drop down for robots / joints in frame
         menu_robots = menu(bind=self.__menu_item_chosen, choices=list_of_names)
+        if not len(list_of_names) == 0:
+            menu_robots.index = self.__selected_robot
         self.scene.append_to_caption('\t')
 
         # Button to delete the selected robot
@@ -356,7 +381,7 @@ class GraphicsCanvas3D:
 
         # Button to clear the robots in screen
         btn_clr = button(bind=self.clear_scene, text="Clear Scene")
-        self.scene.append_to_caption('\n')
+        self.scene.append_to_caption('\n\n')
 
         # Checkbox for grid visibility
         chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
@@ -377,7 +402,7 @@ class GraphicsCanvas3D:
         else:
             chk = self.__robots[self.__selected_robot].rob_shown
             chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=chk)
-        self.scene.append_to_caption('\n')
+        self.scene.append_to_caption('\n\n')
 
         # Slider for robot opacity
         self.scene.append_to_caption('Opacity:')
@@ -386,7 +411,18 @@ class GraphicsCanvas3D:
         else:
             opc = self.__robots[self.__selected_robot].opacity
             sld_opc = slider(bind=self.__opacity_slider, value=opc)
-        self.scene.append_to_caption('\n')
+        # self.scene.append_to_caption('\n\n')
+
+        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
+        self.scene.append_to_caption('''
+                    <script type="text/javascript">
+                        $(document).keyup(function(event) {
+                            if(event.which === 32) {
+                                event.preventDefault();
+                            }
+                        });
+                    </script>''')
+        # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
 
         # Control manual
         controls_str = '<br><b>Controls</b><br>' \
@@ -412,7 +448,10 @@ class GraphicsCanvas3D:
         """
 
         """
+        i = 1
         for joint in self.__teachpanel[self.__selected_robot]:
+            self.scene.append_to_caption('Joint {0}:\t'.format(i))
+            i += 1
             s = slider(
                 bind=self.__joint_slider,
                 min=joint[self.__idx_qlim_min],
@@ -420,10 +459,29 @@ class GraphicsCanvas3D:
                 value=joint[self.__idx_theta]
             )
             self.__teachpanel_sliders.append(s)
+            self.scene.append_to_caption('\n\n')
 
     #######################################
     # UI CALLBACKS
     #######################################
+    def __toggle_mode(self):
+        """
+
+        """
+        # Update text
+        self.__ui_mode = {
+            UImode.CANVASCONTROL: UImode.TEACHPANEL,
+            UImode.TEACHPANEL: UImode.CANVASCONTROL
+        }.get(self.__ui_mode, UImode.CANVASCONTROL)  # Update mode, default canvas controls
+
+        # Update UI
+        # get list of robots
+        new_list = []
+        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+            new_list.append(name)
+
+        self.__reload_caption(new_list)
+
     def __reset_camera(self):
         """
         Reset the camera to a default position and orientation
@@ -447,10 +505,10 @@ class GraphicsCanvas3D:
         self.__selected_robot = m.index
 
         # Load settings for that robot and update UI
-        for item in self.__teachpanel_sliders:
-            item.delete()
-        self.__teachpanel_sliders = []
-        self.__setup_joint_sliders()
+        # for item in self.__teachpanel_sliders:
+        #     item.delete()
+        # self.__teachpanel_sliders = []
+        # self.__setup_joint_sliders()
 
         self.__ui_controls[self.__idx_chkbox_ref].checked = \
             self.__robots[self.__selected_robot].ref_shown
