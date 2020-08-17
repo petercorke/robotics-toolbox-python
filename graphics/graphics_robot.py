@@ -1,4 +1,4 @@
-from vpython import box, compound, color, arrow
+from vpython import box, compound, color, sqrt
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -535,16 +535,41 @@ class GraphicalRobot:
     :type graphics_canvas: class:`GraphicsCanvas`
     :param name: The name of the robot to identify it
     :type name: `str`
+    :param seriallink: A serial link object to create a robot on
+    :type seriallink: class:`roboticstoolbox.robot.serial_link.SerialLink`
     """
-    def __init__(self, graphics_canvas, name):
+    def __init__(self, graphics_canvas, name, seriallink=None):
         self.joints = []
         self.num_joints = 0
         self.rob_shown = True
         self.ref_shown = True
         self.opacity = 1
         self.name = name
-        # Add the robot to the canvas
-        self.__scene = graphics_canvas.scene
+        self.__scene = graphics_canvas
+
+        # If seriallink given, create the robot
+        if seriallink is not None:
+            # Update name
+            self.name = seriallink.name
+            # Get initial poses
+            zero_angles = [0, 0, 0]
+            all_poses = seriallink.fkine(zero_angles, alltout=True)
+            # Create the joints
+            i = 0
+            for link in seriallink.links:
+                # Get info
+                j_type = link.jointtype  # Type of
+                pose = all_poses[i + 1]  # Pose
+                x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
+                y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
+                z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
+                length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                angle_lims = link.qlim  # Angle limits
+                theta = link.theta  # Current angle
+                i += 1
+                self.append_link(j_type, pose, length)
+
+        # Add the robot to the canvas UI
         graphics_canvas.add_robot(self)
 
     def append_made_link(self, joint):
@@ -556,7 +581,7 @@ class GraphicalRobot:
         class:`graphics.graphics_robot.StaticJoint`, class:`graphics.graphics_robot.Gripper`
         :raises RuntimeError: Ensure the link is in the same scene as the robot
         """
-        if joint.get_scene() != self.__scene:
+        if joint.get_scene() != self.__scene.scene:
             raise RuntimeError("The given made link is not in the same scene as the robot is.")
 
         self.joints.append(joint)
@@ -697,7 +722,7 @@ class GraphicalRobot:
 
             self.set_joint_poses(poses)  # Validation done in set_joint_poses
             # Wait for scene to finish drawing
-            self.__scene.waitfor("draw_complete")
+            self.__scene.scene.waitfor("draw_complete")
 
             # Get current time
             t_stop = perf_counter()
