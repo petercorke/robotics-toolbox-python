@@ -19,16 +19,23 @@ class DefaultJoint:
     :type structure: `float`, `str`
     :param g_canvas: The canvas in which to add the link
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
 
         if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
                         "or a file path to an STL (str)"
             raise TypeError(error_str.format(float, str, type(structure)))
+
+        self.qlim = qlim
+        self.theta = theta
 
         self.__scene = g_canvas.scene
         self.__pose = initial_se3
@@ -399,13 +406,17 @@ class RotationalJoint(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
         # Call super init function
-        super().__init__(initial_se3, structure, g_canvas, axis_through)
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
         self.rotation_axis = z_axis_vector
         # self.rotation_angle = radians(0)
 
@@ -447,11 +458,15 @@ class PrismaticJoint(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
-    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, g_canvas, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
         self.min_translation = None
         self.max_translation = None
 
@@ -480,12 +495,16 @@ class StaticJoint(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, g_canvas, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
 
     def get_joint_type(self):
         """
@@ -508,12 +527,16 @@ class Gripper(DefaultJoint):
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, g_canvas, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, g_canvas, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
 
     # TODO close/open gripper
 
@@ -547,12 +570,14 @@ class GraphicalRobot:
         self.name = name
         self.__scene = graphics_canvas
 
+        self.angles = []
+
         # If seriallink given, create the robot
         if seriallink is not None:
             # Update name
             self.name = seriallink.name
             # Get initial poses
-            zero_angles = [0, 0, 0]
+            zero_angles = [0] * len(seriallink.links)
             all_poses = seriallink.fkine(zero_angles, alltout=True)
             # Create the joints
             i = 0
@@ -567,7 +592,7 @@ class GraphicalRobot:
                 angle_lims = link.qlim  # Angle limits
                 theta = link.theta  # Current angle
                 i += 1
-                self.append_link(j_type, pose, length)
+                self.append_link(j_type, pose, angle_lims, theta, length)
 
         # Add the robot to the canvas UI
         graphics_canvas.add_robot(self)
@@ -586,8 +611,9 @@ class GraphicalRobot:
 
         self.joints.append(joint)
         self.num_joints += 1
+        self.angles.append(joint.theta)
 
-    def append_link(self, typeof, pose, structure, axis_through=array([1, 0, 0])):
+    def append_link(self, typeof, pose, structure, qlim, theta, axis_through=array([1, 0, 0])):
         """
         Append a joint to the end of the robot.
 
@@ -597,6 +623,10 @@ class GraphicalRobot:
         :type pose: class:`spatialmath.pose3d.SE3`
         :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
         :type structure: `float`, `str`
+        :param qlim: A list of the angle limits for the joint
+        :type qlim: `list`
+        :param theta: The current angle of the joint in radians
+        :type theta: `float`
         :param axis_through: The axis that the longest side goes through
         :type axis_through: class:`numpy.ndarray`
         :raises ValueError: typeof must be a valid character
@@ -605,13 +635,13 @@ class GraphicalRobot:
         typeof = typeof.upper()
 
         if typeof == 'R':
-            link = RotationalJoint(pose, structure, self.__scene, axis_through)
+            link = RotationalJoint(pose, structure, self.__scene, qlim, theta, axis_through)
         elif typeof == 'P':
-            link = PrismaticJoint(pose, structure, self.__scene, axis_through)
+            link = PrismaticJoint(pose, structure, self.__scene, qlim, theta, axis_through)
         elif typeof == 'S':
-            link = StaticJoint(pose, structure, self.__scene, axis_through)
+            link = StaticJoint(pose, structure, self.__scene, qlim, theta, axis_through)
         elif typeof == 'G':
-            link = Gripper(pose, structure, self.__scene, axis_through)
+            link = Gripper(pose, structure, self.__scene, qlim, theta, axis_through)
         else:
             raise ValueError("typeof should be (case-insensitive) either 'R' (Rotational), 'P' (Prismatic), "
                              "'S' (Static), or 'G' (Gripper)")
@@ -619,6 +649,7 @@ class GraphicalRobot:
         # Append the joint to the robot
         self.joints.append(link)
         self.num_joints += 1
+        self.angles.append(theta)
 
     def detach_link(self):
         """
@@ -636,8 +667,9 @@ class GraphicalRobot:
         # Ensure deletion
         self.joints[self.num_joints - 1] = None
 
-        # Resize list
+        # Resize lists
         self.joints = self.joints[0:self.num_joints - 1]
+        self.angles = self.angles[0:self.num_joints - 1]
         self.num_joints -= 1
 
     def set_robot_visibility(self, is_visible):
