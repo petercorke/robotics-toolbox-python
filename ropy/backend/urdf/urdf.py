@@ -443,10 +443,22 @@ class Geometry(URDFType):
         if (box is None and cylinder is None and
                 sphere is None and mesh is None):   # pragma nocover
             raise ValueError('At least one geometry element must be set')
-        self.box = box
-        self.cylinder = cylinder
-        self.sphere = sphere
-        self.mesh = mesh
+
+        if box is not None:
+            self.box = box
+            self.ob = rp.Shape.Box(box.size)
+
+        if cylinder is not None:
+            self.cylinder = cylinder
+            self.ob = rp.Shape.Cylinder(cylinder.radius, cylinder.length)
+
+        if sphere is not None:
+            self.sphere = sphere
+            self.ob = rp.Shape.Sphere(sphere.radius)
+
+        if mesh is not None:
+            self.mesh = mesh
+            self.ob = rp.Shape.Mesh(mesh.filename, scale=mesh.scale)
 
     @property
     def box(self):
@@ -2372,6 +2384,17 @@ class URDF(URDFType):
 
         self.elinks = elinks
 
+        # Store the visuals
+        for i in range(len(joints)):
+            link = self._link_map[joints[i].parent]
+
+            try:
+                for visual in link.visuals:
+                    elinks[i].geometry.append(visual.geometry.ob)
+
+            except AttributeError:
+                print("None")
+
         # for link in self.links:
         #     for vis in link.visuals:
         #         print(vis.geometry.mesh.filename)
@@ -2382,7 +2405,6 @@ class URDF(URDFType):
         # Validate the joints and transmissions
         # actuated_joints = self._validate_joints()
         self._validate_transmissions()
-
 
     @property
     def name(self):

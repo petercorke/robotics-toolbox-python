@@ -54,7 +54,8 @@ class ELink(object):
             Jm=0.0,
             B=0.0,
             Tc=np.zeros(2),
-            G=1.0):
+            G=1.0,
+            geometry=[]):
 
         super(ELink, self).__init__()
 
@@ -96,6 +97,7 @@ class ELink(object):
             self._q_idx = self._q_idx[0]
 
         self.qlim = qlim
+        self.geometry = geometry
 
         # Dynamic Parameters
         self.m = m
@@ -105,6 +107,10 @@ class ELink(object):
         self.B = B
         self.Tc = Tc
         self.G = G
+
+    @property
+    def geometry(self):
+        return self._geometry
 
     @property
     def jtype(self):
@@ -173,6 +179,23 @@ class ELink(object):
     @property
     def q_idx(self):
         return self._q_idx
+
+    @geometry.setter
+    def geometry(self, geom):
+        new_geom = []
+
+        if isinstance(geom, list):
+            for gi in geom:
+                if isinstance(gi, rp.Shape):
+                    new_geom.append(gi)
+                else:
+                    raise TypeError('Geometry must be of Shape class')
+        elif isinstance(geom, rp.Shape):
+            new_geom.append(gi)
+        else:
+            raise TypeError('Geometry must be of Shape class or list of Shape')
+
+        self._geometry = new_geom
 
     @qlim.setter
     def qlim(self, qlim_new):
