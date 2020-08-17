@@ -69,6 +69,9 @@ class GraphicsCanvas3D:
         self.__idx_btn_del = 8  # Delete button
         self.__idx_btn_clr = 9  # Clear button
 
+        # List of joint sliders
+        self.__teachpanel = []
+
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
 
@@ -138,6 +141,9 @@ class GraphicsCanvas3D:
         # Set it as selected
         self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
         self.__selected_robot = len(self.__robots) - 1
+
+        for joint in robot.joints:
+            self.__add_joint_slider(joint.qlim, joint.theta)
 
     #######################################
     #  UI Management
@@ -388,6 +394,14 @@ class GraphicsCanvas3D:
         return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
                 btn_clr]
 
+    def __add_joint_slider(self, qlim, theta):
+        """
+
+        """
+        s = slider(bind=self.__joint_slider, min=qlim[0], max=qlim[1], value=theta)
+        self.scene.append_to_caption('\n')
+        self.__teachpanel.append(s)
+
     #######################################
     # UI CALLBACKS
     #######################################
@@ -486,6 +500,12 @@ class GraphicsCanvas3D:
         """
         if len(self.__robots) > 0:
             self.__robots[self.__selected_robot].set_transparency(s.value)
+
+    def __joint_slider(self, s):
+        """
+
+        """
+        print(s.value)
 
 
 class GraphicsCanvas2D:

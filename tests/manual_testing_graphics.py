@@ -16,6 +16,7 @@ from numpy import array
 from spatialmath import SE3, SE2
 import graphics as gph
 from roboticstoolbox.models.graphical_puma560 import import_puma_560, Puma560
+from roboticstoolbox.robot.serial_link import SerialLink, Link
 
 
 # Create a canvas on import, to allow clearing between function calls
@@ -346,6 +347,18 @@ def test_2d_create_object():
 
     # obj = gph.Object2D(SE2(), g_canvas2, 'c')
     raise NotImplementedError()
+
+
+def test_seriallink():
+    L = []
+
+    L.append(Link(a=1, jointtype='R'))
+    L.append(Link(a=1, jointtype='R'))
+    L.append(Link(a=1, jointtype='R'))
+
+    tl = SerialLink(L, name='Simple three link')
+
+    robot = gph.GraphicalRobot(g_canvas, '', seriallink=tl)
 
 
 if __name__ == "__main__":

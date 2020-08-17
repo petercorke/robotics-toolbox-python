@@ -592,7 +592,7 @@ class GraphicalRobot:
                 angle_lims = link.qlim  # Angle limits
                 theta = link.theta  # Current angle
                 i += 1
-                self.append_link(j_type, pose, angle_lims, theta, length)
+                self.append_link(j_type, pose, length, angle_lims, theta)
 
         # Add the robot to the canvas UI
         graphics_canvas.add_robot(self)
