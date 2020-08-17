@@ -351,14 +351,23 @@ def test_2d_create_object():
 
 def test_seriallink():
     L = []
+    L2 = []
 
     L.append(Link(a=1, jointtype='R'))
     L.append(Link(a=1, jointtype='R'))
     L.append(Link(a=1, jointtype='R'))
 
-    tl = SerialLink(L, name='Simple three link')
+    L2.append(Link(a=1, jointtype='R'))
+    L2.append(Link(a=1, jointtype='R'))
+    L2.append(Link(a=1, jointtype='R'))
+
+    tl = SerialLink(L, name='R1')
+    tl2 = SerialLink(L, name='R2')
 
     robot = gph.GraphicalRobot(g_canvas, '', seriallink=tl)
+    robot2 = gph.GraphicalRobot(g_canvas, '', seriallink=tl2)
+
+
 
 
 if __name__ == "__main__":

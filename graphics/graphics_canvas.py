@@ -50,6 +50,10 @@ class GraphicsCanvas3D:
         # List of robots currently in the scene
         self.__robots = []
         self.__selected_robot = 0
+        # List of joint sliders per robot
+        self.__teachpanel = []  # 3D, robot -> joint -> options
+        self.__teachpanel_sliders = []
+        self.__idx_qlim_min, self.__idx_qlim_max, self.__idx_theta = 0, 1, 2
         # Checkbox states
         self.__grid_visibility = grid
         self.__camera_lock = False
@@ -68,9 +72,6 @@ class GraphicsCanvas3D:
         self.__idx_sld_opc = 7  # Opacity Slider
         self.__idx_btn_del = 8  # Delete button
         self.__idx_btn_clr = 9  # Clear button
-
-        # List of joint sliders
-        self.__teachpanel = []
 
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
@@ -134,16 +135,25 @@ class GraphicsCanvas3D:
         # Add the new one
         new_list.append(robot.name)
 
-        self.__reload_caption(new_list)
-
         # Add robot to list
         self.__robots.append(robot)
-        # Set it as selected
-        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
         self.__selected_robot = len(self.__robots) - 1
 
+        num_options = 3
+        self.__teachpanel.append([[0] * num_options] * robot.num_joints)  # Add spot for current robot settings
+
+        # Add robot joint sliders
+        i = 0
         for joint in robot.joints:
-            self.__add_joint_slider(joint.qlim, joint.theta)
+            self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1], joint.theta]
+            i += 1
+
+        # Refresh the caption
+        self.__reload_caption(new_list)
+
+        # Set it as selected
+        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
+
 
     #######################################
     #  UI Management
@@ -299,10 +309,14 @@ class GraphicsCanvas3D:
         # Remove all UI elements
         for item in self.__ui_controls:
             item.delete()
+        for item in self.__teachpanel_sliders:
+            item.delete()
+        self.__teachpanel_sliders = []
         # Restore the caption
         self.scene.caption = self.__default_caption
         # Create the updated caption.
         self.__ui_controls = self.__setup_ui_controls(new_list)
+        self.__setup_joint_sliders()
 
     def __setup_ui_controls(self, list_of_names):
         """
@@ -394,13 +408,18 @@ class GraphicsCanvas3D:
         return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
                 btn_clr]
 
-    def __add_joint_slider(self, qlim, theta):
+    def __setup_joint_sliders(self):
         """
 
         """
-        s = slider(bind=self.__joint_slider, min=qlim[0], max=qlim[1], value=theta)
-        self.scene.append_to_caption('\n')
-        self.__teachpanel.append(s)
+        for joint in self.__teachpanel[self.__selected_robot]:
+            s = slider(
+                bind=self.__joint_slider,
+                min=joint[self.__idx_qlim_min],
+                max=joint[self.__idx_qlim_max],
+                value=joint[self.__idx_theta]
+            )
+            self.__teachpanel_sliders.append(s)
 
     #######################################
     # UI CALLBACKS
@@ -428,6 +447,11 @@ class GraphicsCanvas3D:
         self.__selected_robot = m.index
 
         # Load settings for that robot and update UI
+        for item in self.__teachpanel_sliders:
+            item.delete()
+        self.__teachpanel_sliders = []
+        self.__setup_joint_sliders()
+
         self.__ui_controls[self.__idx_chkbox_ref].checked = \
             self.__robots[self.__selected_robot].ref_shown
 
@@ -505,9 +529,14 @@ class GraphicsCanvas3D:
         """
 
         """
+        # Save the values for updating later
+        for slider_num in range(0, len(self.__teachpanel_sliders)):
+            self.__teachpanel[self.__selected_robot][slider_num][self.__idx_theta] = \
+                    self.__teachpanel_sliders[slider_num].value
+
         # Get all angles
         angles = []
-        for joint_slider in self.__teachpanel:
+        for joint_slider in self.__teachpanel_sliders:
             angles.append(joint_slider.value)
 
         # Run fkine
@@ -516,7 +545,6 @@ class GraphicsCanvas3D:
 
         # Update joints
         self.__robots[self.__selected_robot].set_joint_poses(poses)
-
 
 
 class GraphicsCanvas2D:
