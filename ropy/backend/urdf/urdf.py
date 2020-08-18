@@ -2379,23 +2379,47 @@ class URDF(URDFType):
             )
 
         for i in range(len(elinks)):
+            found = False
             for j in range(len(elinks)):
                 if i != j:
                     if self.joints[i].parent == self.joints[j].child:
                         elinks[i]._parent.append(elinks[j])
+                        found = True
 
+            if not found:
+                link = self._link_map[self.joints[i].parent]
+                base_link = rp.ELink(
+                        [],
+                        name=link.name)
+                elinks[i]._parent.append(base_link)
+                try:
+                    for visual in link.visuals:
+                        base_link.geometry.append(visual.geometry.ob)
+                except AttributeError:
+                    pass
+
+        elinks.append(base_link)
         self.elinks = elinks
 
         # Store the visuals
         for i in range(len(joints)):
-            link = self._link_map[joints[i].parent]
+            link = self._link_map[joints[i].child]
 
             try:
                 for visual in link.visuals:
                     elinks[i].geometry.append(visual.geometry.ob)
 
             except AttributeError:
-                print("None")
+                pass
+
+        # for j in self.joints:
+        #     print(j.parent + ' <- ' + j.name + ' -> ' + j.child)
+
+        # for link in elinks:
+        #     # for p in link.parent:
+        #     #     print(p.name + ' -> ' + link.name)
+        #     for g in link.geometry:
+        #         print(link.name + ' -> ' + g.filename)
 
         # for link in self.links:
         #     for vis in link.visuals:
