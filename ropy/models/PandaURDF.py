@@ -4,6 +4,8 @@ import numpy as np
 import os
 from ropy.robot.ETS import ETS
 
+import spatialmath as sm
+
 
 class PandaURDF(ETS):
 
@@ -19,7 +21,7 @@ class PandaURDF(ETS):
             name=args[1])
 
         self.manufacturer = 'Franka Emika'
-        # self.ee_link = self.ets[6]
+        self.ee_link = self.ets[9]
 
         self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
         self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0])

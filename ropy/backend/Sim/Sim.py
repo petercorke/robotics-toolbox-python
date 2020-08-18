@@ -31,10 +31,12 @@ class Sim(Connector):
 
         super().launch()
 
+        self.robots = []
+
         self.sim = zerorpc.Client()
         self.sim.connect("tcp://127.0.0.1:4243")
 
-    def step(self):
+    def step(self, dt=50):
         '''
         state = step(args) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
@@ -50,6 +52,13 @@ class Sim(Connector):
         '''
 
         super().step
+
+        self._step_robots(dt)
+
+        # self._draw_ellipses()
+        self._draw_robots()
+
+        # self._update_robots()
 
     def reset(self):
         '''
@@ -93,12 +102,9 @@ class Sim(Connector):
 
         if isinstance(ob, rp.ETS):
             robot = ob.to_dict()
-            return self.sim.robot(robot)
-
-
-
-
-
+            id = self.sim.robot(robot)
+            self.robots.append(ob)
+            return id
 
     def remove(self):
         '''
@@ -107,3 +113,35 @@ class Sim(Connector):
         '''
 
         super().remove()
+
+
+    def _step_robots(self, dt):
+
+        for robot in self.robots:
+
+            # if rpl.readonly or robot.control_type == 'p':
+            #     pass            # pragma: no cover
+
+            if robot.control_type == 'v':
+
+                for i in range(robot.n):
+                    robot.q[i] += robot.qd[i] * (dt / 1000)
+
+                    if np.any(robot.qlim[:, i] != 0):
+                        robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
+                        robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
+
+            elif robot.control_type == 'a':
+                pass
+
+            else:            # pragma: no cover
+                # Should be impossible to reach
+                raise ValueError(
+                    'Invalid robot.control_type. '
+                    'Must be one of \'p\', \'v\', or \'a\'')
+
+    def _draw_robots(self):
+
+        for i in range(len(self.robots)):
+            self.robots[i].allfkine()
+            self.sim.poses([i, self.robots[i].fk_dict()])

@@ -55,6 +55,14 @@ class ETS(object):
 
         super(ETS, self).__init__()
 
+        if base is None:
+            self.base = SE3()
+        else:
+            self.base = base
+
+        self.tool = SE3()
+        self.gravity = gravity
+
         # Verify elinks
         if not isinstance(elinks, list):
             raise TypeError('The links must be stored in a list.')
@@ -114,9 +122,6 @@ class ETS(object):
         self._reset_fk_path()
         self.name = name
         self.manuf = manufacturer
-        self.base = SE3()
-        self.tool = SE3()
-        self.gravity = gravity
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -163,21 +168,15 @@ class ETS(object):
         return path
 
     def to_dict(self):
-        self.q = self.qr
         ob = {
             'links': [],
             'name': self.name,
             'n': self.n,
             'M': self.M,
-            'q_idx': self.q_idx,
-            'poses': {
-                't': [],
-                'q': []
-            }
+            'q_idx': self.q_idx
         }
 
         self.allfkine()
-        # print(Tall)
 
         for link in self.ets:
             li = {
@@ -201,13 +200,23 @@ class ETS(object):
 
             ob['links'].append(li)
 
-        # ob['poses']['q'].append(r2q(self.base.R).tolist())
-        # ob['poses']['t'].append(self.base.t.tolist())
+        return ob
 
-        # for T in Tall:
-        #     # print(T)
-        #     ob['poses']['t'].append(T.t.tolist())
-        #     ob['poses']['q'].append(r2q(T.R).tolist())
+    def fk_dict(self):
+        ob = {
+            'links': []
+        }
+
+        self.allfkine()
+        # print(Tall)
+
+        for link in self.ets:
+            li = {
+                't': link._fk.t.tolist(),
+                'q': r2q(link._fk.R).tolist()
+            }
+
+            ob['links'].append(li)
 
         return ob
 
@@ -294,6 +303,18 @@ class ETS(object):
     #         robot.manuf,
     #         robot.base,
     #         robot.tool)
+
+    @property
+    def qlim(self):
+        v = np.zeros((2, self.n))
+        j = 0
+
+        for i in range(self.M):
+            if self.ets[i].jtype == self.ets[i].VARIABLE:
+                v[:, j] = self.ets[i].qlim
+                j += 1
+
+        return v
 
     @property
     def base_link(self):

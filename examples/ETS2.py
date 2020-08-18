@@ -13,38 +13,37 @@ import numpy as np
 import time
 import qpsolvers as qp
 
-# env = rp.backend.PyPlot()
-# env.launch('Panda Resolved-Rate Motion Control Example', limits=[-0.75, 0.75, -0.75, 0.75, 0, 1.5])
 
-# gPanda = rp.Panda()
-# print(gPanda.fkine())
-# gPanda.name = "Null"
-# gPanda.q = gPanda.qr
 
-# qPanda = rp.Panda()
-# qPanda.name = "Quad"
-# qPanda.q = gPanda.q
+env = rp.backend.Sim()
+env.launch()
 
-# eTep = sm.SE3.Tx(-0.3) * sm.SE3.Ty(0.1) * sm.SE3.Tz(0.3)
+pQuad = rp.PandaURDF()
+pProj = rp.PandaURDF()
+pQuad.q = pQuad.qr
+pProj.q = pQuad.qr
+pQuad.base = sm.SE3.Ty(0.4)
+pProj.base = sm.SE3.Ty(-0.4)
 
-# gPanda.base = sm.SE3(0, 0.5, 0)
-# qPanda.base = sm.SE3(0, -0.5, 0)
+Tep = pQuad.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.4) * sm.SE3.Rx(0.6)* sm.SE3.Ry(0.6)
+Tep2 = pProj.fkine() * sm.SE3.Tx(0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(-0.4) * sm.SE3.Rx(0.6)* sm.SE3.Ry(0.6)
 
-# gTep = gPanda.fkine() * eTep
-# qTep = qPanda.fkine() * eTep
+arrived = False
+env.add(pQuad)
+env.add(pProj)
+time.sleep(1)
 
-# # Gain term (lambda) for control minimisation
-# Y = 0.0005
+dt = 0.05
 
-# # Quadratic component of objective function
-# Q = Y * np.eye(7)
+while not arrived:
 
-# arrived1 = False
-# arrived2 = False
-# env.add(gPanda)
-# env.add(qPanda)
-# env.add(gPanda.vellipse(centre='ee'))
-# env.add(qPanda.vellipse(centre='ee'))
+    start = time.time()
+    v, arrived = rp.p_servo(pQuad.fkine(), Tep, 1)
+    v2, _ = rp.p_servo(pProj.fkine(), Tep2, 1)
+    pQuad.qd = np.linalg.pinv(pQuad.jacobe()) @ v
+    pProj.qd = np.linalg.pinv(pProj.jacobe()) @ v
+    env.step(dt * 1000)
+    stop = time.time()
 
 # dt = 0.01
 
