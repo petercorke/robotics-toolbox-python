@@ -19,7 +19,7 @@ class PandaURDF(ETS):
             name=args[1])
 
         self.manufacturer = 'Franka Emika'
-        self.ee_link = self.ets[8]
+        # self.ee_link = self.ets[6]
 
         self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
         self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0])
@@ -28,6 +28,8 @@ class PandaURDF(ETS):
             for gi in link.geometry:
                 if gi.filename[0] != '/':
                     gi.filename = abspath + gi.filename
+            # print(link.name)
+            # print(link.geometry)
 
     @property
     def qz(self):

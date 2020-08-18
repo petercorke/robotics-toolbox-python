@@ -49,8 +49,8 @@ class ETS(object):
             base_link=None,
             ee_link=None,
             manufacturer='',
-            base=SE3(),
-            tool=SE3(),
+            base=None,
+            tool=None,
             gravity=np.array([0, 0, 9.81])):
 
         super(ETS, self).__init__()
@@ -114,8 +114,8 @@ class ETS(object):
         self._reset_fk_path()
         self.name = name
         self.manuf = manufacturer
-        self.base = base
-        self.tool = tool
+        self.base = SE3()
+        self.tool = SE3()
         self.gravity = gravity
 
         # Current joint angles of the robot
@@ -176,14 +176,17 @@ class ETS(object):
             }
         }
 
-        Tall = self.allfkine()
+        self.allfkine()
+        # print(Tall)
 
         for link in self.ets:
             li = {
                 'axis': [],
                 'eta': [],
                 'q': link.q_idx,
-                'geometry': []
+                'geometry': [],
+                't': link._fk.t.tolist(),
+                'q': r2q(link._fk.R).tolist()
             }
 
             for et in link.ets:
@@ -198,21 +201,13 @@ class ETS(object):
 
             ob['links'].append(li)
 
-        # ob['poses'].append(self.base.A.flatten().tolist())
-        ob['poses']['q'].append(r2q(self.base.R).tolist())
-        ob['poses']['t'].append(self.base.t.tolist())
-
+        # ob['poses']['q'].append(r2q(self.base.R).tolist())
         # ob['poses']['t'].append(self.base.t.tolist())
-        # ob['poses']['R'].append((SE3.Rx(np.pi/2) * self.base).rpy(unit='rad').tolist())
 
-        for T in Tall:
-            # print(T)
-            ob['poses']['t'].append(T.t.tolist())
-            ob['poses']['q'].append(r2q(T.R).tolist())
-            # ob['poses']['t'].append(T.t.tolist())
-            # ob['poses']['R'].append((SE3.Rx(np.pi/2) * T).rpy(unit='rad').tolist())
-            # ob['links'][i]['R'] = (SE3.Rx(np.pi/2) * Tall[i]).rpy(unit='rad').tolist()
-            # ob['links'][i]['R'] = Tall[i].rpy(unit='rad').tolist()
+        # for T in Tall:
+        #     # print(T)
+        #     ob['poses']['t'].append(T.t.tolist())
+        #     ob['poses']['q'].append(r2q(T.R).tolist())
 
         return ob
 
@@ -516,25 +511,25 @@ class ETS(object):
         else:
             q = getvector(q, self.n)
 
-        t = self.base
-        Tall = SE3()
+        # t = self.base
+        # Tall = SE3()
         j = 0
 
-        for link in self._fkpath:
+        if self.ets[0].jtype == self.ets[0].VARIABLE:
+            self.ets[0]._fk = self.base * link.A(q[j])
+            j += 1
+        else:
+            self.ets[0]._fk = self.base * self.ets[0].A()
 
-            if link.jtype == link.VARIABLE:
-                t *= link.A(q[j])
-
-                if j == 0:
-                    Tall = t
-                else:
-                    Tall.append(t)
-
+        for i in range(1, self.M):
+            if self.ets[i].jtype == self.ets[i].VARIABLE:
+                t = self.ets[i].A(q[j])
                 j += 1
             else:
-                t *= link.A()
+                t = self.ets[i].A()
+            
+            self.ets[i]._fk = self.ets[i].parent[0]._fk * t
 
-        return Tall
 
     def jacob0(self, q=None):
         """
