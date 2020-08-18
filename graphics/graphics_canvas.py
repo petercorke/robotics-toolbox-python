@@ -171,7 +171,10 @@ class GraphicsCanvas3D:
     #######################################
     def __add_mode_button(self):
         """
+        Adds a button to the UI that toggles the UI mode
 
+        :returns: A button
+        :rtype: class:`vpython.button`
         """
         btn_text = self.__toggle_button_text_dict.get(self.__ui_mode, "Unknown Mode Set")
 
@@ -198,7 +201,7 @@ class GraphicsCanvas3D:
         new_list = []
         for name in self.__ui_controls[self.__idx_menu_robots].choices:
             new_list.append(name)
-        # Add the new one
+
         del new_list[self.__selected_robot]
         del self.__robots[self.__selected_robot]
         del self.__teachpanel[self.__selected_robot]
@@ -446,12 +449,14 @@ class GraphicsCanvas3D:
 
     def __setup_joint_sliders(self):
         """
-
+        Display the Teachpanel mode of the UI
         """
         i = 1
         for joint in self.__teachpanel[self.__selected_robot]:
+            # Add a title
             self.scene.append_to_caption('Joint {0}:\t'.format(i))
             i += 1
+            # Add the slider, with the correct joint variables
             s = slider(
                 bind=self.__joint_slider,
                 min=joint[self.__idx_qlim_min],
@@ -466,9 +471,9 @@ class GraphicsCanvas3D:
     #######################################
     def __toggle_mode(self):
         """
-
+        Callback for when the toggle mode button is pressed
         """
-        # Update text
+        # Update mode
         self.__ui_mode = {
             UImode.CANVASCONTROL: UImode.TEACHPANEL,
             UImode.TEACHPANEL: UImode.CANVASCONTROL
@@ -504,12 +509,7 @@ class GraphicsCanvas3D:
         # Get selected item
         self.__selected_robot = m.index
 
-        # Load settings for that robot and update UI
-        # for item in self.__teachpanel_sliders:
-        #     item.delete()
-        # self.__teachpanel_sliders = []
-        # self.__setup_joint_sliders()
-
+        # Update the checkboxes/sliders for the selected robot
         self.__ui_controls[self.__idx_chkbox_ref].checked = \
             self.__robots[self.__selected_robot].ref_shown
 
@@ -585,14 +585,17 @@ class GraphicsCanvas3D:
 
     def __joint_slider(self, s):
         """
+        The callback for when a joint slider has changed value
 
+        :param s: The slider object that has been modified
+        :type s: class:`slider`
         """
         # Save the values for updating later
         for slider_num in range(0, len(self.__teachpanel_sliders)):
             self.__teachpanel[self.__selected_robot][slider_num][self.__idx_theta] = \
                     self.__teachpanel_sliders[slider_num].value
 
-        # Get all angles
+        # Get all angles for the robot
         angles = []
         for joint_slider in self.__teachpanel_sliders:
             angles.append(joint_slider.value)
