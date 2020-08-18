@@ -13,29 +13,89 @@ import numpy as np
 import time
 import qpsolvers as qp
 
+def check_limit(robot):
+    limit = False
+    off = 0.00
+    for i in range(n):
+        if robot.q[i] <= (qlim[0, i] + off) or robot.q[i] >= (qlim[1, i] - off):
+            return True
+
+    return limit
+
+
+def mean(fail, m, fm, tot):
+    fq = 0
+    fp = 0
+    mmq = 0.0
+    mmp = 0.0
+    mfmq = 0.0
+    mfmp = 0.0
+    j = 0
+
+    for i in range(tot):
+        if fail[i, 0]:
+            fq += 1
+        if fail[i, 1]:
+            fp += 1
+
+        if not fail[i, 0] and not fail[i, 1]:
+            j += 1
+            mmq += m[i, 0]
+            mfmq += fm[i, 0]
+            mmp += m[i, 1]
+            mfmp += fm[i, 1]
+
+    j = np.max([1, j])
+    mmq = mmq/j
+    mfmq = mfmq/j
+    mmp = mmp/j
+    mfmp = mfmp/j
+
+    print("Quad: fails: {0}, mmean: {1}, mfinal: {2}".format(
+        fq, np.round(mmq, 4), np.round(mfmq, 4)))
+
+    print("Proj: fails: {0}, mmean: {1}, mfinal: {2}".format(
+        fp, np.round(mmp, 4), np.round(mfmp, 4)))
 
 
 env = rp.backend.Sim()
 env.launch()
 
-pQuad = rp.PandaURDF()
-pProj = rp.PandaURDF()
-pQuad.q = pQuad.qr
-pProj.q = pQuad.qr
-pQuad.base = sm.SE3.Ty(0.4)
-pProj.base = sm.SE3.Ty(-0.4)
 
-Tep = pQuad.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.4) * sm.SE3.Rx(0.6)* sm.SE3.Ry(0.6)
-Tep2 = pProj.fkine() * sm.SE3.Tx(0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(-0.4) * sm.SE3.Rx(0.6)* sm.SE3.Ry(0.6)
+arrivedq = False
+arrivedp = False
 
-arrived = False
 env.add(pQuad)
 env.add(pProj)
 time.sleep(1)
 
 dt = 0.05
 
-while not arrived:
+tests = 1000
+
+m = np.zeros((tests, 2))
+fm = np.zeros((tests, 2))
+fail = np.zeros((tests, 2))
+
+for i in range(tests):
+    arrivedq = False
+    arrivedp = False
+    failq = False
+    failp = False
+    it = 0
+    mq = 0
+    mp = 0
+
+    q_init = rand_q()
+
+    pQuad.q = q_init.copy()
+    pProj.q = q_init.copy()
+    pQuad.qd = np.zeros(n)
+    pProj.qd = np.zeros(n)
+    env.step(dt)
+    # time.sleep(2)
+
+    Tq, Tp = find_pose()
 
     start = time.time()
     v, arrived = rp.p_servo(pQuad.fkine(), Tep, 1)
