@@ -767,7 +767,10 @@ class GraphicalRobot:
 
     def fkine(self, joint_angles):
         """
+        Call fkine for the robot. If it is based on a seriallink object, run it's fkine function.
 
+        :param joint_angles: List of the joint angles
+        :type joint_angles: `list`
         """
         # If seriallink object, run it's fkine
         if self.seriallink is not None:

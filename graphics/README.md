@@ -82,6 +82,8 @@ The scene has a GUI underneath the canvas. It gives an interface to toggle graph
 The same functionality can be done in code as will be mentioned.
 
 3D options:
+ * Toggle the UI mode between Canvas Controls, and a Teachpanel
+   * The Teachpanel will have a slider for each joint to rotate between all available angles for that joint
  * Choose which robot to edit
  * Toggle robot/frame visibility
  * Change robot opacity
@@ -124,10 +126,16 @@ Otherwise, robots can be manually created using the `GraphicalRobot` class.
 The joints for the robot can be manually or automatically created.
 Creation takes in the canvas object to be displayed in, as well as a name for the robot.
 
+The `GraphicalRobot` optionally takes in a `SerialLink` object. If given in the initialiser, no joints have
+to be made, they are automatically created. The name clause is also overridden by the name specified in the SerialLink object.
+
 Firstly, create a `GraphicalRobot` object
 ```python
 # Create an empty robot
 my_robot = gph.GraphicalRobot(g_canvas, 'My Robot')
+
+# Create a robot based on a SerialLink object.
+my_robot = gph.GraphicalRobot(g_canvas, '', seriallink=serial_link_obj)
 ```
 Now we can add joints. The joints added to the robot act like a stack. First joints added will be last to be removed (if called to).
 
