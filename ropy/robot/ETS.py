@@ -548,9 +548,8 @@ class ETS(object):
                 j += 1
             else:
                 t = self.ets[i].A()
-            
-            self.ets[i]._fk = self.ets[i].parent[0]._fk * t
 
+            self.ets[i]._fk = self.ets[i].parent[0]._fk * t
 
     def jacob0(self, q=None):
         """
@@ -578,7 +577,7 @@ class ETS(object):
         else:
             q = getvector(q, self.n)
 
-        T = self.fkine(q).A
+        T = (self.base.inv() * self.fkine(q)).A
         U = np.eye(4)
         j = 0
         J = np.zeros((6, self.n))
@@ -835,7 +834,7 @@ class ETS(object):
 
         """
 
-        r = self.fkine(q).R
+        r = (self.base.inv() * self.fkine(q)).R
         r = np.linalg.inv(r)
 
         Jv = np.zeros((6, 6))
@@ -862,7 +861,7 @@ class ETS(object):
 
         """
 
-        r = self.fkine(q).R
+        r = (self.base.inv() * self.fkine(q)).R
 
         Jv = np.zeros((6, 6))
         Jv[:3, :3] = r

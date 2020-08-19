@@ -145,3 +145,8 @@ class Sim(Connector):
         for i in range(len(self.robots)):
             self.robots[i].allfkine()
             self.sim.poses([i, self.robots[i].fk_dict()])
+
+        # self.robots[0].allfkine()
+        # self.robots[1].allfkine()
+        # self.sim.poses([0, self.robots[0].fk_dict()])
+        # self.sim.poses([0, self.robots[0].fk_dict()])
