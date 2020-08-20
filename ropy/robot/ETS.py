@@ -603,6 +603,34 @@ class ETS(object):
                         J[3:, j] = a
 
                         j += 1
+                    if link.ets[k]._axis == 'Ry':
+                        U = U @ link.ets[k].T(q[j]).A
+                        Tu = np.linalg.inv(U) @ T
+
+                        n = U[:3, 0]
+                        o = U[:3, 1]
+                        a = U[:3, 2]
+                        z = Tu[2, 3]
+                        x = Tu[0, 3]
+
+                        J[:3, j] = (n * z) - (a * x)
+                        J[3:, j] = o
+
+                        j += 1
+                    if link.ets[k]._axis == 'Rx':
+                        U = U @ link.ets[k].T(q[j]).A
+                        Tu = np.linalg.inv(U) @ T
+
+                        n = U[:3, 0]
+                        o = U[:3, 1]
+                        a = U[:3, 2]
+                        y = Tu[1, 3]
+                        z = Tu[2, 3]
+
+                        J[:3, j] = (a * y) - (o * z)
+                        J[3:, j] = n
+
+                        j += 1
                     elif link.ets[k]._axis == 'tx':
                         U = U @ link.ets[k].T(q[j]).A
                         n = U[:3, 0]
