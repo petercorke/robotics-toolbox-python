@@ -11,7 +11,7 @@ class UR5(ETS):
 
     def __init__(self):
 
-        fpath = 'ropy/models/xarco/ur/urdf/ur5_robot.urdf.xacro'
+        fpath = 'ropy/models/xarco/ur/urdf/ur5_joint_limited_robot.urdf.xacro'
         abspath = os.getcwd() + '/ropy/models/xarco/ur/urdf/'
 
         args = super(UR5, self).urdf_to_ets_args(fpath)

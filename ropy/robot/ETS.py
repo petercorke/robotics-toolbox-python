@@ -211,6 +211,11 @@ class ETS(object):
         # print(Tall)
 
         for link in self.ets:
+            if (np.trace(link._fk.R) + 1) < 0:
+                print(np.trace(link._fk.R) + 1)
+                print(link._fk)
+
+
             li = {
                 't': link._fk.t.tolist(),
                 'q': r2q(link._fk.R).tolist()
