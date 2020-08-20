@@ -9,12 +9,14 @@ from ropy.models.PandaMDH import PandaMDH
 from ropy.models.PandaURDF import PandaURDF
 from ropy.models.Frankie import Frankie
 from ropy.models.Puma560 import Puma560
+from ropy.models.UR5 import UR5
 
 __all__ = [
     'Panda',
     'PandaMDH',
     'PandaURDF',
     'Frankie',
+    'UR5',
     # 'LBR7',
     # 'Sawyer',
     # 'Mico',

@@ -85,6 +85,8 @@ class URDFType(object):
             t, r = cls._ATTRIBS[a]  # t = type, r = required (bool)
             if r:
                 try:
+                    # print(t)
+                    # print(node.attrib[a])
                     v = cls._parse_attrib(t, node.attrib[a])
                 except Exception:   # pragma nocover
                     raise ValueError(
