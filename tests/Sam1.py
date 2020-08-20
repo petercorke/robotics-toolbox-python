@@ -8,6 +8,8 @@ Example tests for serial link to show functionality
 from time import sleep
 from roboticstoolbox.robot.threelink import *
 from roboticstoolbox.robot.uprighttl import *
+from roboticstoolbox.models.Puma560 import *
+
 
 def test_threelink_animate():
     # add a new joint configuration
@@ -17,11 +19,12 @@ def test_threelink_animate():
     # plot robot
     tl.plot(q1)
 
-    for i in range(5):
+    for i in range(2):
         # repeat for visual confirmation
         tl.animate(q1,q2, frames=50, fps=25)
         sleep(1)
         tl.animate(q2,q1, frames=50, fps=25)
+
 
 def test_upright_animate():
     # add a new joint configuration
@@ -31,12 +34,32 @@ def test_upright_animate():
     # plot robot
     arm.plot(q1)
 
-    for i in range(5):
+    for i in range(2):
         # repeat for visual confirmation
         arm.animate(q1,q2, frames=50, fps=25)
         sleep(0.5)
         arm.animate(q2,q1, frames=50, fps=25)
 
+def test_Puma560_animate():
+
+    puma = Puma560()
+
+    # plot robot
+    puma.plot(puma.qz)
+
+    for i in range(2):
+        # repeat for visual confirmation
+        puma.animate(puma.qz, puma.qr, frames=50, fps=25)
+        sleep(0.5)
+        puma.animate(puma.qr, puma.qz, frames=50, fps=25)
+        sleep(0.5)
+        puma.animate(puma.qz, puma.qs, frames=50, fps=25)
+        sleep(0.5)
+        puma.animate(puma.qs, puma.qn, frames=50, fps=25)
+        sleep(0.5)
+        puma.animate(puma.qn, puma.qz, frames=50, fps=25)
+        sleep(0.5)
+
 if __name__ == "__main__":
     # run the animate robot test by default
-    test_threelink_animate()
+    test_Puma560_animate()

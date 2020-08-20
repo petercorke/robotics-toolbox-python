@@ -17,8 +17,9 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from roboticstoolbox.robot.serial_link import SerialLink
+from roboticstoolbox.robot.serial_link import *
 from roboticstoolbox.robot.Link import RevoluteDH
+from roboticstoolbox.models.graphical_puma560 import *
 from math import pi
 import numpy as np
 
@@ -137,6 +138,56 @@ class Puma560(SerialLink):
             L,
             name="Puma 560",
             manufacturer="Unimation")
+
+    def plot(self, jointconfig, unit='rad'):
+        """
+        Creates a 3D plot of the robot in your web browser
+        :param jointconfig: takes an array or list of joint angles
+        :param unit: unit of angles. radians if not defined
+        :return: a vpython robot object.
+        """
+
+        if type(jointconfig) == list:
+            jointconfig = argcheck.getvector(jointconfig)
+        if unit == 'deg':
+            jointconfig = jointconfig * pi / 180
+        if jointconfig.size == self.length:
+            poses = self.fkine(jointconfig, unit, alltout=True)
+
+        if self.roplot is None:
+            # No current plot, create robot plot
+
+            self.g_canvas = gph.GraphicsCanvas3D()
+            print("canvas created")
+
+            self.roplot = gph.GraphicalRobot(self.g_canvas, self.name)
+
+            colour = {
+                0 : [0.5, 0.5, 0.5],
+                1 : [1, 0, 0],
+                2 : [0, 1, 0],
+                3 : [0, 0, 1],
+                4 : [1, 1, 0],
+                5 : [0, 1, 1]
+            }
+
+            for i in range(len(poses)):
+                stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link' + str(i) + '.stl'
+                if i is 0:
+                    link = StaticJoint(SE3(), stl_obj_path, self.g_canvas, [0,0], 0)
+                elif self.links[i-1].isrevolute():
+                    link = RotationalJoint(SE3(), stl_obj_path, self.g_canvas, self.links[i-1].qlim, jointconfig[i-1])
+                # elif L[i-1].isprismatic():
+                #     link = PrismaticJoint(SE3(), stl_obj_path, self.g_canvas, self.links[i-1].qlim, jointconfig[i-1])
+
+                # Change color
+                link.set_texture(colour=colour[i % 5])
+
+                self.roplot.append_made_link(link)
+
+        # Move plot
+        self.roplot.set_joint_poses(poses)
+        return
 
     @property
     def qz(self):
