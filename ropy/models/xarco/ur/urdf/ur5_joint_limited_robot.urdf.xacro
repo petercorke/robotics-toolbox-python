@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro"
        name="ur5" >
 
-  <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <!-- <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/> -->
 
   <!-- common stuff -->
   <xacro:include filename="./common.gazebo.xacro" />
@@ -18,7 +18,6 @@
     wrist_1_lower_limit="${-pi}" wrist_1_upper_limit="${pi}"
     wrist_2_lower_limit="${-pi}" wrist_2_upper_limit="${pi}"
     wrist_3_lower_limit="${-pi}" wrist_3_upper_limit="${pi}"
-    transmission_hw_interface="$(arg transmission_hw_interface)"
   />
 
   <link name="world" />
