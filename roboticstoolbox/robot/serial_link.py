@@ -177,22 +177,7 @@ class SerialLink:
                 self.g_canvas = gph.GraphicsCanvas3D()
                 print("canvas created")
 
-                self.roplot = gph.GraphicalRobot(self.g_canvas, self.name)
-
-                self.roplot.append_link('S', poses[0], 0.001)
-                for i in range(1, len(poses)):
-
-                    # calculate length of joint
-                    x1 = poses[i-1].t[0]
-                    x2 = poses[i].t[0]
-                    y1 = poses[i-1].t[1]
-                    y2 = poses[i].t[1]
-                    z1 = poses[i-1].t[2]
-                    z2 = poses[i].t[2]
-                    length = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1))
-
-                    # add joint to robot
-                    self.roplot.append_link(self.links[i-1].jointtype, poses[i], length, )
+                self.roplot = gph.GraphicalRobot(self.g_canvas, self.name, self)
 
                 return
         else:

@@ -162,13 +162,28 @@ class Puma560(SerialLink):
 
             self.roplot = gph.GraphicalRobot(self.g_canvas, self.name)
 
-            self.roplot.append_made_link(create_link_0(self.g_canvas.scene))
-            self.roplot.append_made_link(create_link_1(self.g_canvas.scene))
-            self.roplot.append_made_link(create_link_2(self.g_canvas.scene))
-            self.roplot.append_made_link(create_link_3(self.g_canvas.scene))
-            self.roplot.append_made_link(create_link_4(self.g_canvas.scene))
-            self.roplot.append_made_link(create_link_5(self.g_canvas.scene))
-            self.roplot.append_made_link(create_link_6(self.g_canvas.scene))
+            colour = {
+                0 : [0.5, 0.5, 0.5],
+                1 : [1, 0, 0],
+                2 : [0, 1, 0],
+                3 : [0, 0, 1],
+                4 : [1, 1, 0],
+                5 : [0, 1, 1]
+            }
+
+            for i in range(len(poses)):
+                stl_obj_path = './roboticstoolbox/models/meshes/UNIMATE/puma560/link' + str(i) + '.stl'
+                if i is 0:
+                    link = StaticJoint(SE3(), stl_obj_path, self.g_canvas, [0,0], 0)
+                elif self.links[i-1].isrevolute():
+                    link = RotationalJoint(SE3(), stl_obj_path, self.g_canvas, self.links[i-1].qlim, jointconfig[i-1])
+                # elif L[i-1].isprismatic():
+                #     link = PrismaticJoint(SE3(), stl_obj_path, self.g_canvas, self.links[i-1].qlim, jointconfig[i-1])
+
+                # Change color
+                link.set_texture(colour=colour[i % 5])
+
+                self.roplot.append_made_link(link)
 
         # Move plot
         self.roplot.set_joint_poses(poses)
