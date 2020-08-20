@@ -199,64 +199,64 @@ class TestRobot(unittest.TestCase):
     ##################################################
     def test_default_joint_init(self):
         self.scene.scene.title = "Test Default Joint init"
-        joint = robot.DefaultJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.DefaultJoint(self.se3, self.structure, self.scene)
         self.check_obj_pose(joint, self.se3)
 
         # has int not float
-        self.assertRaises(TypeError, robot.DefaultJoint, self.se3, 1, self.scene.scene)
+        self.assertRaises(TypeError, robot.DefaultJoint, self.se3, 1, self.scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.DefaultJoint, 1.0, self.se3, self.scene.scene)
+        self.assertRaises(TypeError, robot.DefaultJoint, 1.0, self.se3, self.scene)
 
     def test_rotational_joint_init(self):
         self.scene.scene.title = "Test Rotational Joint init"
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
         self.check_obj_pose(joint, self.se3)
         self.check_joint_type(joint, "R")
 
         # has int not float
-        self.assertRaises(TypeError, robot.RotationalJoint, self.se3, 1, self.scene.scene)
+        self.assertRaises(TypeError, robot.RotationalJoint, self.se3, 1, self.scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.RotationalJoint, 1.0, self.se3, self.scene.scene)
+        self.assertRaises(TypeError, robot.RotationalJoint, 1.0, self.se3, self.scene)
 
     def test_prismatic_joint_init(self):
         self.scene.scene.title = "Test Prismatic Joint init"
-        joint = robot.PrismaticJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.PrismaticJoint(self.se3, self.structure, self.scene)
         self.check_obj_pose(joint, self.se3)
         self.check_joint_type(joint, "P")
 
         # has int not float
-        self.assertRaises(TypeError, robot.PrismaticJoint, self.se3, 1, self.scene.scene)
+        self.assertRaises(TypeError, robot.PrismaticJoint, self.se3, 1, self.scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.PrismaticJoint, 1.0, self.se3, self.scene.scene)
+        self.assertRaises(TypeError, robot.PrismaticJoint, 1.0, self.se3, self.scene)
 
     def test_static_joint_init(self):
         self.scene.scene.title = "Test Static Joint init"
-        joint = robot.StaticJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.StaticJoint(self.se3, self.structure, self.scene)
         self.check_obj_pose(joint, self.se3)
         self.check_joint_type(joint, "S")
 
         # has int not float
-        self.assertRaises(TypeError, robot.StaticJoint, self.se3, 1, self.scene.scene)
+        self.assertRaises(TypeError, robot.StaticJoint, self.se3, 1, self.scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.StaticJoint, 1.0, self.se3, self.scene.scene)
+        self.assertRaises(TypeError, robot.StaticJoint, 1.0, self.se3, self.scene)
 
     def test_gripper_joint_init(self):
         self.scene.scene.title = "Test Gripper Joint init"
-        joint = robot.Gripper(self.se3, self.structure, self.scene.scene)
+        joint = robot.Gripper(self.se3, self.structure, self.scene)
         self.check_obj_pose(joint, self.se3)
         self.check_joint_type(joint, "G")
 
         # has int not float
-        self.assertRaises(TypeError, robot.Gripper, self.se3, 1, self.scene.scene)
+        self.assertRaises(TypeError, robot.Gripper, self.se3, 1, self.scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.Gripper, 1.0, self.se3, self.scene.scene)
+        self.assertRaises(TypeError, robot.Gripper, 1.0, self.se3, self.scene)
 
     def test_graphical_robot_init(self):
         self.scene.scene.title = "Test Graphical Robot init"
         robot.GraphicalRobot(self.scene, "Robot 1")
 
         # Canvas obj given not scene
-        self.assertRaises(Exception, robot.GraphicalRobot, self.scene.scene, "Robot 2")
+        self.assertRaises(Exception, robot.GraphicalRobot, self.scene, "Robot 2")
 
     ##################################################
     # Joint Functions
@@ -266,7 +266,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Set Joint Position"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Move joint x+3, y, z-2
         joint.update_position(self.se3 * SE3().Tx(3) * SE3().Tz(-2))
@@ -279,7 +279,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Set Joint Orientation"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Rotate joint x+30d, y, z+45d
         joint.update_orientation(self.se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
@@ -292,7 +292,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Set Joint Pose"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Move joint x+30d, y, z-2
         joint.update_pose(self.se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
@@ -306,7 +306,7 @@ class TestRobot(unittest.TestCase):
         self.scene.grid_visibility(False)
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Count num objects
         num_obj_initial = len(self.scene.scene.objects)
@@ -332,7 +332,7 @@ class TestRobot(unittest.TestCase):
         self.scene.grid_visibility(False)
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Count num objects
         num_obj_initial = len(self.scene.scene.objects)
@@ -357,7 +357,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Joint Texture"
 
         # Create joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Apply texture and colour
         joint.set_texture(
@@ -386,7 +386,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Joint Transparency"
 
         # Create joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Apply texture and colour
         opc_val = 0.34
@@ -405,7 +405,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Set Origin"
 
         # Create a joint
-        joint = robot.RotationalJoint(SE3(), self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(SE3(), self.structure, self.scene)
 
         # Save origin pos (copy of)
         first_pos = vector(joint.get_graphic_object().origin)
@@ -428,7 +428,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Get Joint Pose"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Get pose
         pose = joint.get_pose()
@@ -441,7 +441,7 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Get Joint Pose"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Get axis vector
         x_vec = joint.get_axis_vector(common.x_axis_vector)
@@ -461,10 +461,10 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Joint Get Type"
 
         # Create one of each joint
-        r = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
-        p = robot.PrismaticJoint(self.se3, self.structure, self.scene.scene)
-        s = robot.StaticJoint(self.se3, self.structure, self.scene.scene)
-        g = robot.Gripper(self.se3, self.structure, self.scene.scene)
+        r = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        p = robot.PrismaticJoint(self.se3, self.structure, self.scene)
+        s = robot.StaticJoint(self.se3, self.structure, self.scene)
+        g = robot.Gripper(self.se3, self.structure, self.scene)
 
         # Check each is correct
         self.check_joint_type(r, "R")
@@ -478,7 +478,7 @@ class TestRobot(unittest.TestCase):
         self.scene.grid_visibility(False)
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
         joint.draw_reference_frame(False)
 
         # Get graphic obj
@@ -496,8 +496,8 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Robot Append Made Link"
 
         # Create 2 joints
-        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
-        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Create robot
         robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
@@ -624,8 +624,8 @@ class TestRobot(unittest.TestCase):
         self.scene.scene.title = "Test Robot Transparency"
 
         # Create two joints
-        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
-        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene.scene)
+        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene)
 
         # Create robot
         robot1 = robot.GraphicalRobot(self.scene, "Robot 1")

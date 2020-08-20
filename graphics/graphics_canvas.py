@@ -1,6 +1,12 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
 from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
+from enum import Enum
+
+
+class UImode(Enum):
+    CANVASCONTROL = 1
+    TEACHPANEL = 2
 
 
 class GraphicsCanvas3D:
@@ -11,9 +17,9 @@ class GraphicsCanvas3D:
         - Title, caption
         - Axes drawn (if applicable)
 
-    :param height: Height of the canvas on screen (Pixels), defaults to 500.
+    :param height: Height of the canvas on screen (Pixels), defaults to 360.
     :type height: `int`, optional
-    :param width: Width of the canvas on screen (Pixels), defaults to 1000.
+    :param width: Width of the canvas on screen (Pixels), defaults to 640.
     :type width: `int`, optional
     :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
     :type title: `str`, optional
@@ -23,7 +29,7 @@ class GraphicsCanvas3D:
     :type grid: `bool`, optional
     """
 
-    def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+    def __init__(self, height=360, width=640, title='', caption='', grid=True):
 
         # Create a new independent scene
         self.scene = canvas()
@@ -50,12 +56,22 @@ class GraphicsCanvas3D:
         # List of robots currently in the scene
         self.__robots = []
         self.__selected_robot = 0
+        # List of joint sliders per robot
+        self.__teachpanel = []  # 3D, robot -> joint -> options
+        self.__teachpanel_sliders = []
+        self.__idx_qlim_min, self.__idx_qlim_max, self.__idx_theta = 0, 1, 2
         # Checkbox states
         self.__grid_visibility = grid
         self.__camera_lock = False
         self.__grid_relative = True
 
         # Create the UI
+        self.__ui_mode = UImode.CANVASCONTROL
+        self.__toggle_button = None
+        self.__toggle_button_text_dict = {
+            UImode.CANVASCONTROL: "Canvas Controls",
+            UImode.TEACHPANEL: "Robot Controls"
+        }
         self.__ui_controls = self.__setup_ui_controls([])
         # Indices to easily identify entities
         self.__idx_btn_reset = 0  # Camera Reset Button
@@ -131,17 +147,43 @@ class GraphicsCanvas3D:
         # Add the new one
         new_list.append(robot.name)
 
-        self.__reload_caption(new_list)
-
         # Add robot to list
         self.__robots.append(robot)
+        self.__selected_robot = len(self.__robots) - 1
+
+        num_options = 3
+        self.__teachpanel.append([[0] * num_options] * robot.num_joints)  # Add spot for current robot settings
+
+        # Add robot joint sliders
+        i = 0
+        for joint in robot.joints:
+            self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1], joint.theta]
+            i += 1
+
+        # Refresh the caption
+        self.__reload_caption(new_list)
+
         # Set it as selected
         self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
-        self.__selected_robot = len(self.__robots) - 1
 
     #######################################
     #  UI Management
     #######################################
+    def __add_mode_button(self):
+        """
+        Adds a button to the UI that toggles the UI mode
+
+        :returns: A button
+        :rtype: class:`vpython.button`
+        """
+        btn_text = self.__toggle_button_text_dict.get(self.__ui_mode, "Unknown Mode Set")
+
+        self.scene.append_to_caption('\n')
+        btn_toggle = button(bind=self.__toggle_mode, text=btn_text)
+        self.scene.append_to_caption('\n\n')
+
+        return btn_toggle
+
     def __del_robot(self):
         """
         Remove a robot from the scene and the UI controls
@@ -159,17 +201,17 @@ class GraphicsCanvas3D:
         new_list = []
         for name in self.__ui_controls[self.__idx_menu_robots].choices:
             new_list.append(name)
-        # Add the new one
+
         del new_list[self.__selected_robot]
         del self.__robots[self.__selected_robot]
+        del self.__teachpanel[self.__selected_robot]
 
+        self.__selected_robot = 0
+        # Update UI
+        self.__reload_caption(new_list)
         # Select the top item
         if len(self.__ui_controls[self.__idx_menu_robots].choices) > 0:
             self.__ui_controls[self.__idx_menu_robots].index = 0
-            self.__selected_robot = len(self.__robots) - 1
-
-        # Update UI
-        self.__reload_caption(new_list)
 
     def __handle_keyboard_inputs(self):
         """
@@ -293,10 +335,25 @@ class GraphicsCanvas3D:
         # Remove all UI elements
         for item in self.__ui_controls:
             item.delete()
+        for item in self.__teachpanel_sliders:
+            item.delete()
+        self.__teachpanel_sliders = []
         # Restore the caption
         self.scene.caption = self.__default_caption
         # Create the updated caption.
-        self.__ui_controls = self.__setup_ui_controls(new_list)
+        self.__toggle_button = self.__add_mode_button()
+        self.__load_mode_ui(new_list)
+
+    def __load_mode_ui(self, new_list):
+        """
+
+        """
+        if self.__ui_mode == UImode.CANVASCONTROL:
+            self.__ui_controls = self.__setup_ui_controls(new_list)
+        elif self.__ui_mode == UImode.TEACHPANEL:
+            self.__setup_joint_sliders()
+        else:
+            self.scene.append_to_caption("UNKNOWN MODE ENTERED\n")
 
     def __setup_ui_controls(self, list_of_names):
         """
@@ -306,28 +363,19 @@ class GraphicsCanvas3D:
         :type list_of_names: `list`
         """
         # Button to reset camera
-        self.scene.append_to_caption('\n')
         btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
         self.scene.append_to_caption('\t')
 
         chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
-        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
-        self.scene.append_to_caption('''
-            <script type="text/javascript">
-                $(document).keyup(function(event) {
-                    if(event.which === 32) {
-                        event.preventDefault();
-                    }
-                });
-            </script>''')
-        # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
         self.scene.append_to_caption('\t')
 
         chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
-        self.scene.append_to_caption('\n')
+        self.scene.append_to_caption('\n\n')
 
         # Drop down for robots / joints in frame
         menu_robots = menu(bind=self.__menu_item_chosen, choices=list_of_names)
+        if not len(list_of_names) == 0:
+            menu_robots.index = self.__selected_robot
         self.scene.append_to_caption('\t')
 
         # Button to delete the selected robot
@@ -336,7 +384,7 @@ class GraphicsCanvas3D:
 
         # Button to clear the robots in screen
         btn_clr = button(bind=self.clear_scene, text="Clear Scene")
-        self.scene.append_to_caption('\n')
+        self.scene.append_to_caption('\n\n')
 
         # Checkbox for grid visibility
         chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
@@ -357,7 +405,7 @@ class GraphicsCanvas3D:
         else:
             chk = self.__robots[self.__selected_robot].rob_shown
             chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=chk)
-        self.scene.append_to_caption('\n')
+        self.scene.append_to_caption('\n\n')
 
         # Slider for robot opacity
         self.scene.append_to_caption('Opacity:')
@@ -366,7 +414,18 @@ class GraphicsCanvas3D:
         else:
             opc = self.__robots[self.__selected_robot].opacity
             sld_opc = slider(bind=self.__opacity_slider, value=opc)
-        self.scene.append_to_caption('\n')
+        # self.scene.append_to_caption('\n\n')
+
+        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
+        self.scene.append_to_caption('''
+                    <script type="text/javascript">
+                        $(document).keyup(function(event) {
+                            if(event.which === 32) {
+                                event.preventDefault();
+                            }
+                        });
+                    </script>''')
+        # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
 
         # Control manual
         controls_str = '<br><b>Controls</b><br>' \
@@ -388,9 +447,46 @@ class GraphicsCanvas3D:
         return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
                 btn_clr]
 
+    def __setup_joint_sliders(self):
+        """
+        Display the Teachpanel mode of the UI
+        """
+        i = 1
+        for joint in self.__teachpanel[self.__selected_robot]:
+            # Add a title
+            self.scene.append_to_caption('Joint {0}:\t'.format(i))
+            i += 1
+            # Add the slider, with the correct joint variables
+            s = slider(
+                bind=self.__joint_slider,
+                min=joint[self.__idx_qlim_min],
+                max=joint[self.__idx_qlim_max],
+                value=joint[self.__idx_theta]
+            )
+            self.__teachpanel_sliders.append(s)
+            self.scene.append_to_caption('\n\n')
+
     #######################################
     # UI CALLBACKS
     #######################################
+    def __toggle_mode(self):
+        """
+        Callback for when the toggle mode button is pressed
+        """
+        # Update mode
+        self.__ui_mode = {
+            UImode.CANVASCONTROL: UImode.TEACHPANEL,
+            UImode.TEACHPANEL: UImode.CANVASCONTROL
+        }.get(self.__ui_mode, UImode.CANVASCONTROL)  # Update mode, default canvas controls
+
+        # Update UI
+        # get list of robots
+        new_list = []
+        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+            new_list.append(name)
+
+        self.__reload_caption(new_list)
+
     def __reset_camera(self):
         """
         Reset the camera to a default position and orientation
@@ -413,7 +509,7 @@ class GraphicsCanvas3D:
         # Get selected item
         self.__selected_robot = m.index
 
-        # Load settings for that robot and update UI
+        # Update the checkboxes/sliders for the selected robot
         self.__ui_controls[self.__idx_chkbox_ref].checked = \
             self.__robots[self.__selected_robot].ref_shown
 
@@ -487,6 +583,30 @@ class GraphicsCanvas3D:
         if len(self.__robots) > 0:
             self.__robots[self.__selected_robot].set_transparency(s.value)
 
+    def __joint_slider(self, s):
+        """
+        The callback for when a joint slider has changed value
+
+        :param s: The slider object that has been modified
+        :type s: class:`slider`
+        """
+        # Save the values for updating later
+        for slider_num in range(0, len(self.__teachpanel_sliders)):
+            self.__teachpanel[self.__selected_robot][slider_num][self.__idx_theta] = \
+                    self.__teachpanel_sliders[slider_num].value
+
+        # Get all angles for the robot
+        angles = []
+        for joint_slider in self.__teachpanel_sliders:
+            angles.append(joint_slider.value)
+
+        # Run fkine
+        poses = self.__robots[self.__selected_robot].fkine(angles)
+        poses = poses[1:len(poses)]  # Ignore the first item
+
+        # Update joints
+        self.__robots[self.__selected_robot].set_joint_poses(poses)
+
 
 class GraphicsCanvas2D:
     """
@@ -496,9 +616,9 @@ class GraphicsCanvas2D:
             - Title, caption
             - Axes drawn (if applicable)
 
-        :param height: Height of the canvas on screen (Pixels), defaults to 500.
+        :param height: Height of the canvas on screen (Pixels), defaults to 360.
         :type height: `int`, optional
-        :param width: Width of the canvas on screen (Pixels), defaults to 1000.
+        :param width: Width of the canvas on screen (Pixels), defaults to 640.
         :type width: `int`, optional
         :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
         :type title: `str`, optional
@@ -508,7 +628,7 @@ class GraphicsCanvas2D:
         :type grid: `bool`, optional
         """
 
-    def __init__(self, height=500, width=1000, title='', caption='', grid=True):
+    def __init__(self, height=360, width=640, title='', caption='', grid=True):
 
         # Private lists
         self.__line_styles = [
@@ -591,7 +711,7 @@ class GraphicsCanvas2D:
         # Toggle grid to 2D
         self.__graphics_grid.toggle_2d_3d()
         # Lock the grid
-        self.__graphics_grid.set_relative(False)
+        # self.__graphics_grid.set_relative(False)
         # Turn off grid if applicable
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)

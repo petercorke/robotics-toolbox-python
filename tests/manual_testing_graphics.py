@@ -16,6 +16,7 @@ from numpy import array
 from spatialmath import SE3, SE2
 import graphics as gph
 from roboticstoolbox.models.graphical_puma560 import import_puma_560, Puma560
+from roboticstoolbox.robot.serial_link import SerialLink, Link
 
 
 # Create a canvas on import, to allow clearing between function calls
@@ -83,7 +84,7 @@ def test_rotational_link():
     ])
     se3 = SE3(arr)
 
-    rot_link = gph.RotationalJoint(se3, 1.0, g_canvas.scene)
+    rot_link = gph.RotationalJoint(se3, 1.0, g_canvas)
     rot_link.draw_reference_frame(True)
 
 
@@ -240,7 +241,7 @@ def test_robot_decor():
     """
     Test importing textures and changing joint colours
     """
-    new_rot = gph.RotationalJoint(SE3(), 1.0, g_canvas.scene)
+    new_rot = gph.RotationalJoint(SE3(), 1.0, g_canvas)
 
     # Load a sample texture
     new_rot.set_texture(texture_link="https://s3.amazonaws.com/glowscript/textures/flower_texture.jpg")
@@ -332,24 +333,41 @@ def test_multiple_canvases():
 def test_2d_draw_path():
     g_canvas2 = gph.GraphicsCanvas2D()
 
-    path = [
-        [0, 0],
-        [1, 1],
-        [2, 2],
-        [2, 3],
-        [3, 3],
-        [3, 4],
-        [4, 4]
-    ]
-    # g_canvas2.draw_path(path, colour=[1, 0, 0])
-    raise NotImplementedError()
+    x_path = [0, 1, 2, 2, 3, 3, 4]
+    y_path = [0, 1, 2, 3, 3, 4, 4]
+
+    g_canvas2.plot(x_path, y_path, '--rs')
+    g_canvas2.plot(y_path, x_path, 'g')
+    g_canvas2.plot(x_path, 'dg:')
+    g_canvas2.plot(y_path, 'm^')
 
 
 def test_2d_create_object():
     g_canvas2 = gph.GraphicsCanvas2D()
 
-    # obj = gph.Object2D(SE2(), g_canvas2.scene, 'c')
+    # obj = gph.Object2D(SE2(), g_canvas2, 'c')
     raise NotImplementedError()
+
+
+def test_seriallink():
+    L = []
+    L2 = []
+
+    L.append(Link(a=1, jointtype='R'))
+    L.append(Link(a=1, jointtype='R'))
+    L.append(Link(a=1, jointtype='R'))
+
+    L2.append(Link(a=1, jointtype='R'))
+    L2.append(Link(a=1, jointtype='R'))
+    L2.append(Link(a=1, jointtype='R'))
+
+    tl = SerialLink(L, name='R1')
+    tl2 = SerialLink(L, name='R2')
+
+    robot = gph.GraphicalRobot(g_canvas, '', seriallink=tl)
+    robot2 = gph.GraphicalRobot(g_canvas, '', seriallink=tl2)
+
+
 
 
 if __name__ == "__main__":

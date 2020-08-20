@@ -1,4 +1,4 @@
-from vpython import box, compound, color, arrow
+from vpython import box, compound, color, sqrt
 from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
@@ -17,20 +17,27 @@ class DefaultJoint:
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
-    :param scene: The scene in which to add the link
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
 
         if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
                         "or a file path to an STL (str)"
             raise TypeError(error_str.format(float, str, type(structure)))
 
-        self.__scene = scene
+        self.qlim = qlim
+        self.theta = theta
+
+        self.__scene = g_canvas.scene
         self.__pose = initial_se3
 
         # Set the graphic
@@ -393,19 +400,23 @@ class RotationalJoint(DefaultJoint):
     """
     A rotational joint based off the default joint class
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
         # Call super init function
-        super().__init__(initial_se3, structure, scene, axis_through)
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
         self.rotation_axis = z_axis_vector
         # self.rotation_angle = radians(0)
 
@@ -441,17 +452,21 @@ class PrismaticJoint(DefaultJoint):
     """
     A prismatic joint based from the default joint class
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, scene, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
         self.min_translation = None
         self.max_translation = None
 
@@ -474,18 +489,22 @@ class StaticJoint(DefaultJoint):
     This class represents a static joint (one that doesn't translate or rotate on it's own).
     It has no extra functions to utilise.
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, scene, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
 
     def get_joint_type(self):
         """
@@ -502,18 +521,22 @@ class Gripper(DefaultJoint):
     This class represents a gripper joint with a moving gripper (To Be Implemented).
     Usually the end joint of a robot.
 
-    :param scene: The scene in which to add the object
-    :type scene: class:`vpython.canvas`
+    :param g_canvas: The canvas in which to add the link
+    :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
     :param structure: A variable representing the joint length (float) or a file path to an STL (str)
     :type structure: `float`, `str`
+    :param qlim: A list of the angle limits for the joint
+    :type qlim: `list`
+    :param theta: The current angle of the joint in radians
+    :type theta: `float`
     :param axis_through: The axis that the longest side goes through
     :type axis_through: class:`numpy.ndarray`
     """
 
-    def __init__(self, initial_se3, structure, scene, axis_through=array([1, 0, 0])):
-        super().__init__(initial_se3, structure, scene, axis_through)
+    def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
+        super().__init__(initial_se3, structure, g_canvas, qlim, theta, axis_through)
 
     # TODO close/open gripper
 
@@ -535,16 +558,44 @@ class GraphicalRobot:
     :type graphics_canvas: class:`GraphicsCanvas`
     :param name: The name of the robot to identify it
     :type name: `str`
+    :param seriallink: A serial link object to create a robot on
+    :type seriallink: class:`roboticstoolbox.robot.serial_link.SerialLink`
     """
-    def __init__(self, graphics_canvas, name):
+    def __init__(self, graphics_canvas, name, seriallink=None):
         self.joints = []
         self.num_joints = 0
         self.rob_shown = True
         self.ref_shown = True
         self.opacity = 1
         self.name = name
-        # Add the robot to the canvas
-        self.__scene = graphics_canvas.scene
+        self.__scene = graphics_canvas
+
+        self.angles = []
+        self.seriallink = seriallink
+
+        # If seriallink given, create the robot
+        if self.seriallink is not None:
+            # Update name
+            self.name = self.seriallink.name
+            # Get initial poses
+            zero_angles = [0] * len(self.seriallink.links)
+            all_poses = self.seriallink.fkine(zero_angles, alltout=True)
+            # Create the joints
+            i = 0
+            for link in self.seriallink.links:
+                # Get info
+                j_type = link.jointtype  # Type of
+                pose = all_poses[i + 1]  # Pose
+                x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
+                y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
+                z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
+                length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                angle_lims = link.qlim  # Angle limits
+                theta = link.theta  # Current angle
+                i += 1
+                self.append_link(j_type, pose, length, angle_lims, theta)
+
+        # Add the robot to the canvas UI
         graphics_canvas.add_robot(self)
 
     def append_made_link(self, joint):
@@ -556,13 +607,14 @@ class GraphicalRobot:
         class:`graphics.graphics_robot.StaticJoint`, class:`graphics.graphics_robot.Gripper`
         :raises RuntimeError: Ensure the link is in the same scene as the robot
         """
-        if joint.get_scene() != self.__scene:
+        if joint.get_scene() != self.__scene.scene:
             raise RuntimeError("The given made link is not in the same scene as the robot is.")
 
         self.joints.append(joint)
         self.num_joints += 1
+        self.angles.append(joint.theta)
 
-    def append_link(self, typeof, pose, structure, axis_through=array([1, 0, 0])):
+    def append_link(self, typeof, pose, structure, qlim, theta, axis_through=array([1, 0, 0])):
         """
         Append a joint to the end of the robot.
 
@@ -572,6 +624,10 @@ class GraphicalRobot:
         :type pose: class:`spatialmath.pose3d.SE3`
         :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
         :type structure: `float`, `str`
+        :param qlim: A list of the angle limits for the joint
+        :type qlim: `list`
+        :param theta: The current angle of the joint in radians
+        :type theta: `float`
         :param axis_through: The axis that the longest side goes through
         :type axis_through: class:`numpy.ndarray`
         :raises ValueError: typeof must be a valid character
@@ -580,13 +636,13 @@ class GraphicalRobot:
         typeof = typeof.upper()
 
         if typeof == 'R':
-            link = RotationalJoint(pose, structure, self.__scene, axis_through)
+            link = RotationalJoint(pose, structure, self.__scene, qlim, theta, axis_through)
         elif typeof == 'P':
-            link = PrismaticJoint(pose, structure, self.__scene, axis_through)
+            link = PrismaticJoint(pose, structure, self.__scene, qlim, theta, axis_through)
         elif typeof == 'S':
-            link = StaticJoint(pose, structure, self.__scene, axis_through)
+            link = StaticJoint(pose, structure, self.__scene, qlim, theta, axis_through)
         elif typeof == 'G':
-            link = Gripper(pose, structure, self.__scene, axis_through)
+            link = Gripper(pose, structure, self.__scene, qlim, theta, axis_through)
         else:
             raise ValueError("typeof should be (case-insensitive) either 'R' (Rotational), 'P' (Prismatic), "
                              "'S' (Static), or 'G' (Gripper)")
@@ -594,6 +650,7 @@ class GraphicalRobot:
         # Append the joint to the robot
         self.joints.append(link)
         self.num_joints += 1
+        self.angles.append(theta)
 
     def detach_link(self):
         """
@@ -611,8 +668,9 @@ class GraphicalRobot:
         # Ensure deletion
         self.joints[self.num_joints - 1] = None
 
-        # Resize list
+        # Resize lists
         self.joints = self.joints[0:self.num_joints - 1]
+        self.angles = self.angles[0:self.num_joints - 1]
         self.num_joints -= 1
 
     def set_robot_visibility(self, is_visible):
@@ -697,7 +755,7 @@ class GraphicalRobot:
 
             self.set_joint_poses(poses)  # Validation done in set_joint_poses
             # Wait for scene to finish drawing
-            self.__scene.waitfor("draw_complete")
+            self.__scene.scene.waitfor("draw_complete")
 
             # Get current time
             t_stop = perf_counter()
@@ -706,6 +764,20 @@ class GraphicalRobot:
             # If drawing takes longer than frame frequency, this while is skipped
             while t_stop - t_start < f:
                 t_stop = perf_counter()
+
+    def fkine(self, joint_angles):
+        """
+        Call fkine for the robot. If it is based on a seriallink object, run it's fkine function.
+
+        :param joint_angles: List of the joint angles
+        :type joint_angles: `list`
+        """
+        # If seriallink object, run it's fkine
+        if self.seriallink is not None:
+            return self.seriallink.fkine(joint_angles, alltout=True)
+        # Else TODO
+        else:
+            pass
 
     def set_joint_angle(self, link_num, new_angle):
         """
