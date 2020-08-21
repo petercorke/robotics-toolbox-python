@@ -1,7 +1,7 @@
 from vpython import vector, compound, mag, box
 from numpy import sign, ceil
 from graphics.graphics_text import update_grid_numbers
-from graphics.graphics_object2d import Object2D
+from graphics.graphics_object2d import Marker2D
 from spatialmath import SE2
 
 
@@ -496,7 +496,7 @@ def create_marker(scene, x, y, shape, colour=None):
     obj_se2 = SE2(x=x, y=y, theta=0)
 
     # Create the object and return it
-    return Object2D(obj_se2, scene, shape, colour)
+    return Marker2D(obj_se2, scene, shape, colour)
 
 
 def vectors_approx_equal(v1, v2):

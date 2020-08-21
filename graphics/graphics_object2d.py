@@ -1,5 +1,6 @@
 from vpython import shapes, radians, extrusion, vector
 
+
 class Object2D:
     """
     This object will allow the ability to update it's pose in the scene.
@@ -31,6 +32,27 @@ class Object2D:
             raise ValueError("RGB values must be normalised between 0 and 1")
         self.__colour = vector(colour[0], colour[1], colour[2])
 
+    def __create_object(self):
+        pass
+
+
+class Marker2D(Object2D):
+    """
+    This class will place a marker in the given location based on the given marker inputs
+
+    :param se2: The SE2 object representing position and orientation
+    :type se2: class:`spatialmath.se2`
+    :param scene: The scene in which to add the link
+    :type scene: class:`vpython.canvas`
+    :param shape: The shape of the object
+    :type shape: `str`
+    :param colour: The colour of the shape
+    :type colour: `list`
+    :raises ValueError: The shape must be in the list of possible shapes
+    """
+    def __init__(self, se2, scene, shape, colour):
+        super().__init__(se2, scene, shape, colour)
+
         self.__marker_size = 0.2
 
         marker_styles = [
@@ -58,29 +80,29 @@ class Object2D:
 
     def __create_object(self):
         """
-        Create the physical graphical object
+                Create the physical graphical object
 
-        :returns: The graphical entity
-        :rtype: class:`vpython.baseobj`
-        """
+                :returns: The graphical entity
+                :rtype: class:`vpython.baseobj`
+                """
         if self.__shape == '':
             # 2D coords of the circle boundary
-            shape_path = shapes.circle(radius=self.__marker_size/2)
+            shape_path = shapes.circle(radius=self.__marker_size / 2)
         elif self.__shape == '+':
             # 2D coords of the cross boundary
-            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size/5)
+            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size / 5)
         elif self.__shape == 'o':
             # 2D coords of the circle boundary
-            shape_path = shapes.circle(radius=self.__marker_size/2)
+            shape_path = shapes.circle(radius=self.__marker_size / 2)
         elif self.__shape == '*':
             # 2D coords of the star boundary
-            shape_path = shapes.star(radius=self.__marker_size/2, n=6)
+            shape_path = shapes.star(radius=self.__marker_size / 2, n=6)
         elif self.__shape == '.':
             # 2D coords of the square boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size)
         elif self.__shape == 'x':
             # 2D coords of the cross boundary
-            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size/5, rotate=radians(45))
+            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size / 5, rotate=radians(45))
         elif self.__shape == 's':
             # 2D coords of the square boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
