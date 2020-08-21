@@ -30,9 +30,18 @@ class Object2D:
         self.graphic = None
 
     def __create_object(self):
+        """
+        To be overridden by child classes
+        """
         pass
 
     def update_pose(self, new_se2):
+        """
+        Update the pose of the object
+
+        :param new_se2: The SE2 representation of the pose
+        :type new_se2: class:`spatialmath.se2`
+        """
         self.se2 = new_se2
         x = self.se2.t[0]
         y = self.se2.t[1]
@@ -41,15 +50,33 @@ class Object2D:
         self.graphic.axis = vector(0, 1, 0).rotate(t)
 
     def update_colour(self, colour):
+        """
+        Update the colour of the object
+
+        :param colour: The RGB colour
+        :type colour: `list`
+        """
         if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
                 colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
             raise ValueError("RGB values must be normalised between 0 and 1")
         self.graphic.color = vector(colour[0], colour[1], colour[2])
 
     def update_visibility(self, is_visible):
+        """
+        Update the visibility of the object
+
+        :param is_visible: Whether to draw or not
+        :type is_visible: `bool`
+        """
         self.graphic.visible = is_visible
 
     def update_size(self, multiply):
+        """
+        Update the size of the object by a multiple of the original size.
+
+        :param multiply: A number to multiply the original size by
+        :type multiply: `float`, `int`
+        """
         self.graphic.size = self.size * multiply
 
 
@@ -73,6 +100,12 @@ class STL2D(Object2D):
         self.graphic.color = self.__colour
 
     def __create_object(self):
+        """
+        Return a compound of the loaded STL
+
+        :return: A compound object of the triangles in the STL
+        :rtype: class:`vpython.compound`
+        """
         return import_object_from_numpy_stl(self.shape, self.scene)
 
 
