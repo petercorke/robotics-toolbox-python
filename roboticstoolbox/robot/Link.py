@@ -3,6 +3,7 @@ Link object.
 Python implementation by Samuel Drew
 """
 
+from pathlib import PurePath
 from numpy import *
 from spatialmath.pose3d import *
 import argparse
@@ -147,12 +148,17 @@ class Link(list):
         self.B = 0
         self.Tc = [0, 0]
 
+        # Meshes
+        self.mesh = None
+
         # for every passed argument, check if its a valid attribute and then set it
         for name, value in kwargs.items():
 
             # convert angular parameters to radians if required
             if name in ['alpha', 'theta'] and units == 'deg':
                 value *= pi / 180
+            if name == 'mesh':
+                    value = PurePath(__file__).parent.parent / 'models' / 'meshes' / value
 
             if name in self.__dict__:
                 setattr(self, name, value)
