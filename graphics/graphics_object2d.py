@@ -1,4 +1,5 @@
 from vpython import shapes, radians, extrusion, vector
+from graphics.graphics_stl import import_object_from_numpy_stl
 
 
 class Object2D:
@@ -16,24 +17,63 @@ class Object2D:
     :type colour: `list`
     :raises ValueError: The shape must be in the list of possible shapes
     """
-
-    # TODO
-    #  Have options to give stl file, shape, or arrow
-    #  Have option to set size, colour, etc
-    #  Have funcs that update pose, texture/colours, visibility
-
     def __init__(self, se2, scene, shape, colour):
         # Save inputs
-        self.__se2 = se2
-        self.__scene = scene
-        self.__shape = shape
+        self.se2 = se2
+        self.scene = scene
+        self.shape = shape
+        self.size = 0
         if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
                 colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
             raise ValueError("RGB values must be normalised between 0 and 1")
         self.__colour = vector(colour[0], colour[1], colour[2])
+        self.graphic = None
 
     def __create_object(self):
         pass
+
+    def update_pose(self, new_se2):
+        self.se2 = new_se2
+        x = self.se2.t[0]
+        y = self.se2.t[1]
+        t = self.se2.theta
+        self.graphic.pos = vector(x, y, 0)
+        self.graphic.axis = vector(0, 1, 0).rotate(t)
+
+    def update_colour(self, colour):
+        if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
+                colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+            raise ValueError("RGB values must be normalised between 0 and 1")
+        self.graphic.color = vector(colour[0], colour[1], colour[2])
+
+    def update_visibility(self, is_visible):
+        self.graphic.visible = is_visible
+
+    def update_size(self, multiply):
+        self.graphic.size = self.size * multiply
+
+
+class STL2D(Object2D):
+    """
+    This object is for 2D objects that contain an STL.
+
+    :param se2: The SE2 object representing position and orientation
+    :type se2: class:`spatialmath.se2`
+    :param scene: The scene in which to add the link
+    :type scene: class:`vpython.canvas`
+    :param stl_path: The file path to the STL to apply
+    :type stl_path: `str`
+    :param colour: The colour of the shape
+    :type colour: `list`
+    """
+    def __init__(self, se2, scene, stl_path, colour):
+        super().__init__(se2, scene, stl_path, colour)
+        self.graphic = self.__create_object()
+        self.size = self.graphic.size
+        self.graphic.color = self.__colour
+
+    def __create_object(self):
+        return import_object_from_numpy_stl(self.shape, self.scene)
 
 
 class Marker2D(Object2D):
@@ -76,7 +116,7 @@ class Marker2D(Object2D):
             raise ValueError("The shape must be in the list of possible shapes")
 
         # Create the object
-        self.__graphic = self.__create_object()
+        self.graphic = self.__create_object()
 
     def __create_object(self):
         """
@@ -85,48 +125,48 @@ class Marker2D(Object2D):
                 :returns: The graphical entity
                 :rtype: class:`vpython.baseobj`
                 """
-        if self.__shape == '':
+        if self.shape == '':
             # 2D coords of the circle boundary
             shape_path = shapes.circle(radius=self.__marker_size / 2)
-        elif self.__shape == '+':
+        elif self.shape == '+':
             # 2D coords of the cross boundary
             shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size / 5)
-        elif self.__shape == 'o':
+        elif self.shape == 'o':
             # 2D coords of the circle boundary
             shape_path = shapes.circle(radius=self.__marker_size / 2)
-        elif self.__shape == '*':
+        elif self.shape == '*':
             # 2D coords of the star boundary
             shape_path = shapes.star(radius=self.__marker_size / 2, n=6)
-        elif self.__shape == '.':
+        elif self.shape == '.':
             # 2D coords of the square boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size)
-        elif self.__shape == 'x':
+        elif self.shape == 'x':
             # 2D coords of the cross boundary
             shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size / 5, rotate=radians(45))
-        elif self.__shape == 's':
+        elif self.shape == 's':
             # 2D coords of the square boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
                                           thickness=self.__marker_size)
-        elif self.__shape == 'd':
+        elif self.shape == 'd':
             # 2D coords of the diamond boundary
             shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
                                           thickness=self.__marker_size, rotate=radians(45))
-        elif self.__shape == '^':
+        elif self.shape == '^':
             # 2D coords of the triangle boundary
             shape_path = shapes.triangle(length=self.__marker_size)
-        elif self.__shape == 'v':
+        elif self.shape == 'v':
             # 2D coords of the triangle boundary
             shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(180))
-        elif self.__shape == '<':
+        elif self.shape == '<':
             # 2D coords of the triangle boundary
             shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(90))
-        elif self.__shape == '>':
+        elif self.shape == '>':
             # 2D coords of the triangle boundary
             shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(-90))
-        elif self.__shape == 'p':
+        elif self.shape == 'p':
             # 2D coords of the pentagon boundary
             shape_path = shapes.pentagon(length=self.__marker_size)
-        elif self.__shape == 'h':
+        elif self.shape == 'h':
             # 2D coords of the hexagon boundary
             shape_path = shapes.hexagon(length=self.__marker_size)
         # CURRENTLY UNUSED
@@ -140,13 +180,14 @@ class Marker2D(Object2D):
             raise ValueError("Invalid shape given")
 
         # Create the shape
-        x = self.__se2.t[0]
-        y = self.__se2.t[1]
-        obj = extrusion(scene=self.__scene,
+        x = self.se2.t[0]
+        y = self.se2.t[1]
+        obj = extrusion(scene=self.scene,
                         path=[vector(x, y, 0.001), vector(x, y, -0.001)],
                         shape=shape_path,
                         color=self.__colour,
                         shininess=0)
-        if self.__shape == '':
+        self.size = obj.size
+        if self.shape == '':
             obj.visible = False
         return obj
