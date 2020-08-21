@@ -1121,16 +1121,6 @@ class GraphicsCanvas2D:
         # Return the RGB list (black if not in dictionary)
         return self.__colour_dictionary.get(colour_string, color.black.value)
 
-    # MAY NOT BE REQUIRED
-    # def add_object(self, obj):
-    #     """
-    #     Add an object into the scene.
-    #
-    #     :param obj: The object to be added
-    #     :type obj: class:`graphics.object2d`
-    #     """
-    #     pass
-
 
 def convert_grid_to_z_up(scene):
     """

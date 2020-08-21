@@ -310,33 +310,6 @@ class GraphicsGrid:
         """
         self.__relative_cam = is_relative
         self.update_grid()
-        
-    # def clear_scene(self):
-    #     """
-    #     Clear the canvas of all objects (keeping the grid)
-    #
-    #     Due to how VPython operates, there is no 'deletion' of objects directly.
-    #     To 'delete' objects, first they must be rendered invisible.
-    #
-    #     Then: if a new object with the same variable name is used, the previous memory will be freed.
-    #     Or: del variable_name will free its memory.
-    #     If the object wasn't invisible, it would remain visible in the scene.
-    #
-    #     Since the scene doesnt track variable names, the best way to clear the scene is to render all objects invisible,
-    #     and have the user assume they are all deleted. However, all objects can be redisplayed by setting the visibility
-    #     """
-    #     # Save current grid visibility
-    #     grid_visibility = self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible
-    #
-    #     # Set all objects invisible
-    #     for scene_object in self.__scene.objects:
-    #         scene_object.visible = False
-    #
-    #     # Set grid visibility to previous
-    #     self.set_visibility(grid_visibility)
-    #
-    #     # Wait for scene to update
-    #     self.__scene.waitfor("draw_complete")
 
 
 def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
