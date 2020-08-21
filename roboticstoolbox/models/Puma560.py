@@ -79,7 +79,8 @@ class Puma560(SerialLink):
                           # at the motor)
             Tc=[0.395, -0.435],  # actuator Coulomb friction coefficient for
                                  # direction [-,+] (measured at the motor)
-            qlim=[-160*deg, 160*deg])    # minimum and maximum joint angle
+            qlim=[-160*deg, 160*deg],    # minimum and maximum joint angle
+            mesh='UNIMATE/puma560/link0.stl')
 
         L1 = RevoluteDH(
             d=0, a=0.4318, alpha=0,
@@ -87,7 +88,8 @@ class Puma560(SerialLink):
             r=[-0.3638, 0.006, 0.2275],
             m=17.4, Jm=200e-6, G=107.815,
             B=.817e-3, Tc=[0.126, -0.071],
-            qlim=[-45*deg, 225*deg])
+            qlim=[-45*deg, 225*deg],
+            mesh='UNIMATE/puma560/link1.stl')
 
         L2 = RevoluteDH(
             d=0.15005, a=0.0203, alpha=-pi/2,
@@ -95,7 +97,8 @@ class Puma560(SerialLink):
             r=[-0.0203, -0.0141, 0.070],
             m=4.8, Jm=200e-6, G=-53.7063,
             B=1.38e-3, Tc=[0.132, -0.105],
-            qlim=[-225*deg, 45*deg])
+            qlim=[-225*deg, 45*deg],
+            mesh='UNIMATE/puma560/link2.stl')
 
         L3 = RevoluteDH(
             d=0.4318, a=0, alpha=pi/2,
@@ -103,7 +106,8 @@ class Puma560(SerialLink):
             r=[0, 0.019, 0],
             m=0.82, Jm=33e-6, G=76.0364,
             B=71.2e-6, Tc=[11.2e-3, -16.9e-3],
-            qlim=[-110*deg, 170*deg])
+            qlim=[-110*deg, 170*deg],
+            mesh='UNIMATE/puma560/link3.stl')
 
         L4 = RevoluteDH(
             d=0, a=0, alpha=-pi/2,
@@ -111,14 +115,16 @@ class Puma560(SerialLink):
             r=[0, 0, 0], m=0.34,
             Jm=33e-6, G=71.923, B=82.6e-6,
             Tc=[9.26e-3, -14.5e-3],
-            qlim=[-100*deg, 100*deg])
+            qlim=[-100*deg, 100*deg],
+            mesh='UNIMATE/puma560/link4.stl')
 
         L5 = RevoluteDH(
             d=0, a=0, alpha=0,
             I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
             r=[0, 0, 0.032], m=0.09, Jm=33e-6,
             G=76.686, B=36.7e-6, Tc=[3.96e-3, -10.5e-3],
-            qlim=[-266*deg, 266*deg])
+            qlim=[-266*deg, 266*deg],
+            mesh='UNIMATE/puma560/link5.stl')
 
         L = [L0, L1, L2, L3, L4, L5]
 
@@ -136,6 +142,7 @@ class Puma560(SerialLink):
 
         super(Puma560, self).__init__(
             L,
+            toolmesh = "UNIMATE/puma560/link6.stl",
             name="Puma 560",
             manufacturer="Unimation")
 

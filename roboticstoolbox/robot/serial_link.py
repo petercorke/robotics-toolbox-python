@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from pathlib import PurePath
 import numpy as np
 from roboticstoolbox.robot.Link import *
 from spatialmath.pose3d import *
@@ -10,7 +11,7 @@ from roboticstoolbox.robot.trajectory import *
 
 class SerialLink:
 
-    def __init__(self, links, name=None, base=None, tool=None, stl_files=None, q=None, param=None, manufacturer=None, comment=None, meshdir=None, configurations={}):
+    def __init__(self, links, name=None, base=None, tool=None, toolmesh=None, stl_files=None, q=None, param=None, manufacturer=None, comment=None, meshdir=None, configurations={}):
         """
         Creates a SerialLink object.
         :param links: a list of links that will constitute SerialLink object.
@@ -36,6 +37,12 @@ class SerialLink:
         else:
             assert (type(tool) is np.ndarray) and (tool.shape == (4, 4))
             self.tool = tool
+
+        if toolmesh:
+            self.toolmesh = PurePath(__file__).parent.parent / 'models' / 'meshes' / toolmesh
+        else:
+            self.toolmesh = None
+
         # Following arguments initialised by plot function and animate functions only
         if stl_files is None:
             # Default stick figure model code goes here
