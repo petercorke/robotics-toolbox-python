@@ -585,11 +585,14 @@ class GraphicalRobot:
             for link in self.seriallink.links:
                 # Get info
                 j_type = link.jointtype  # Type of
-                pose = all_poses[i + 1]  # Pose
-                x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
-                y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
-                z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
-                length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                pose = all_poses[i]  # Pose
+                if link.mesh is None:
+                    x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
+                    y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
+                    z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
+                    length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                else:
+                    length = str(link.mesh)
                 angle_lims = link.qlim  # Angle limits
                 theta = link.theta  # Current angle
                 i += 1
@@ -722,12 +725,12 @@ class GraphicalRobot:
         if self.num_joints == 0:
             raise UserWarning("Robot has 0 joints. Create some using append_link()")
 
-        if self.num_joints != len(all_poses):
-            err = "Number of given poses {0} does not equal number of joints {1}"
-            raise UserWarning(err.format(len(all_poses), self.num_joints))
+        # if self.num_joints != len(all_poses):
+        #     err = "Number of given poses {0} does not equal number of joints {1}"
+        #     raise UserWarning(err.format(len(all_poses), self.num_joints))
 
         # Update the joints
-        for idx in range(0, self.num_joints):
+        for idx in range(self.num_joints):
             self.joints[idx].update_pose(all_poses[idx])
 
     def animate(self, frame_poses, fps):
