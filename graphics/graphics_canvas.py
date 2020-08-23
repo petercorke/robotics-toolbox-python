@@ -453,6 +453,9 @@ class GraphicsCanvas3D:
         """
         i = 1
         for joint in self.__teachpanel[self.__selected_robot]:
+            if joint[self.__idx_qlim_min] == joint[self.__idx_qlim_max]:
+                # If a slider with (effectively) no values, skip it
+                continue
             # Add a title
             self.scene.append_to_caption('Joint {0}:\t'.format(i))
             i += 1
@@ -597,12 +600,11 @@ class GraphicsCanvas3D:
 
         # Get all angles for the robot
         angles = []
-        for joint_slider in self.__teachpanel_sliders:
-            angles.append(joint_slider.value)
+        for idx in range(len(self.__teachpanel_sliders)):
+            angles.append(self.__teachpanel_sliders[idx].value)
 
         # Run fkine
         poses = self.__robots[self.__selected_robot].fkine(angles)
-        poses = poses[1:len(poses)]  # Ignore the first item
 
         # Update joints
         self.__robots[self.__selected_robot].set_joint_poses(poses)

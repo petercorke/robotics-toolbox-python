@@ -185,17 +185,14 @@ class SerialLink:
 
         if self.roplot is None:
             # No current plot, create robot plot
+            self.g_canvas = gph.GraphicsCanvas3D()
+            print("canvas created")
 
-                self.g_canvas = gph.GraphicsCanvas3D()
-                print("canvas created")
+            self.roplot = gph.GraphicalRobot(self.g_canvas, self.name, self)
 
-                self.roplot = gph.GraphicalRobot(self.g_canvas, self.name, self)
-
-                return
-        else:
-            # Move existing plot
-            self.roplot.set_joint_poses(poses)
-            return
+        # Move existing plot
+        self.roplot.set_joint_poses(poses)
+        return
 
     def animate(self, q1, q2, unit='rad', frames=10, fps=5):
         """

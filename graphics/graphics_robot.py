@@ -580,12 +580,14 @@ class GraphicalRobot:
             # Get initial poses
             zero_angles = [0] * len(self.seriallink.links)
             all_poses = self.seriallink.fkine(zero_angles, alltout=True)
+            # Create the base
+            self.append_link("s", all_poses[0], str(seriallink.basemesh), [0, 0], 0)
             # Create the joints
             i = 0
             for link in self.seriallink.links:
                 # Get info
                 j_type = link.jointtype  # Type of
-                pose = all_poses[i]  # Pose
+                pose = all_poses[i+1]  # Pose
                 if link.mesh is None:
                     x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
                     y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
@@ -725,9 +727,9 @@ class GraphicalRobot:
         if self.num_joints == 0:
             raise UserWarning("Robot has 0 joints. Create some using append_link()")
 
-        # if self.num_joints != len(all_poses):
-        #     err = "Number of given poses {0} does not equal number of joints {1}"
-        #     raise UserWarning(err.format(len(all_poses), self.num_joints))
+        if self.num_joints != len(all_poses):
+            err = "Number of given poses {0} does not equal number of joints {1}"
+            raise UserWarning(err.format(len(all_poses), self.num_joints))
 
         # Update the joints
         for idx in range(self.num_joints):
