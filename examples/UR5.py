@@ -140,7 +140,8 @@ for i in range(tests):
     arrivedr = False
     failq = False
     failr = False
-    it = 0
+    it1 = 0
+    it2 = 0
     mq = 0
     mr = 0
 
@@ -158,20 +159,20 @@ for i in range(tests):
     start = time.time()
 
     while (
-            (not arrivedq or not arrivedr) and 
-            (time.time() - start) < tmax and
-            not failq and not failr):
-
-        mq += urQuad.manipulability()
-        mr += urRrmc.manipulability()
+            (
+                (not arrivedq and not failq) or
+                (not arrivedr and not failr)
+            ) and (time.time() - start) < tmax):
 
         if not arrivedr and not failr:
             try:
+                mq += urQuad.manipulability()
                 if np.linalg.matrix_rank(urRrmc.jacobe()) < 6:
                     s[i, 2] = True
                     failr = True
                 vr, arrivedr = rp.p_servo(urRrmc.fkine(), Tr, 1, threshold=0.1)
                 urRrmc.qd = np.linalg.inv(urRrmc.jacobe()) @ vr
+                it1 += 1
             except np.linalg.LinAlgError:
                 failr = True
                 s[i, 2] = True
@@ -180,6 +181,7 @@ for i in range(tests):
 
         if not arrivedq and not failq:
             try:
+                mr += urRrmc.manipulability()
                 vq, arrivedq = rp.p_servo(urQuad.fkine(), Tq, 1, threshold=0.1)
 
                 eTep = urQuad.fkine().inv() * Tq
@@ -198,6 +200,7 @@ for i in range(tests):
                     urQuad.qd = urQuad.qz
                 else:
                     urQuad.qd = qd[:6]
+                it2 += 1
             except np.linalg.LinAlgError:
                 failq = True
                 s[i, 0] = True
@@ -211,13 +214,12 @@ for i in range(tests):
             failq = True
 
         env.step(dt * 1000)
-        it += 1
 
     fail[i, 0] = not arrivedq
     fail[i, 2] = not arrivedr
 
-    m[i, 0] = mq / it
-    m[i, 2] = mr / it
+    m[i, 0] = mq / it2
+    m[i, 2] = mr / it1
 
     fm[i, 0] = urQuad.manipulability()
     fm[i, 2] = urRrmc.manipulability()
