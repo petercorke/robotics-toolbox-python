@@ -3,6 +3,7 @@ from graphics.graphics_canvas import draw_reference_frame_axes
 from graphics.common_functions import *
 from graphics.graphics_stl import set_stl_origin, import_object_from_numpy_stl
 from time import perf_counter
+from spatialmath import SE3
 
 
 class DefaultJoint:
@@ -474,16 +475,23 @@ class GraphicalRobot:
             # Get initial poses
             zero_angles = [0] * len(self.seriallink.links)
             all_poses = self.seriallink.fkine(zero_angles, alltout=True)
+            # Create the base
+            if seriallink.basemesh is not None:
+                self.append_link("s", all_poses[0], str(seriallink.basemesh), [0, 0], 0)
+            # else: assume no base joint
             # Create the joints
             i = 0
             for link in self.seriallink.links:
                 # Get info
                 j_type = link.jointtype  # Type of
-                pose = all_poses[i + 1]  # Pose
-                x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
-                y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
-                z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
-                length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                pose = all_poses[i+1]  # Pose
+                if link.mesh is None:
+                    x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
+                    y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
+                    z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
+                    length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                else:
+                    length = str(link.mesh)
                 angle_lims = link.qlim  # Angle limits
                 theta = link.theta  # Current angle
                 i += 1
@@ -616,12 +624,20 @@ class GraphicalRobot:
         if self.num_joints == 0:
             raise UserWarning("Robot has 0 joints. Create some using append_link()")
 
+        # If given a base pose, when there isn't one
+        if self.num_joints == len(all_poses) - 1 and all_poses[0] == SE3():
+            # Update the joints
+            for idx in range(self.num_joints):
+                self.joints[idx].update_pose(all_poses[idx+1])
+            return
+
+        # If incorrect number of joints
         if self.num_joints != len(all_poses):
             err = "Number of given poses {0} does not equal number of joints {1}"
             raise UserWarning(err.format(len(all_poses), self.num_joints))
 
         # Update the joints
-        for idx in range(0, self.num_joints):
+        for idx in range(self.num_joints):
             self.joints[idx].update_pose(all_poses[idx])
 
     def animate(self, frame_poses, fps):

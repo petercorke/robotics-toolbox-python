@@ -11,7 +11,7 @@ from roboticstoolbox.robot.trajectory import *
 
 class SerialLink:
 
-    def __init__(self, links, name=None, base=None, tool=None, toolmesh=None, stl_files=None, q=None, param=None, manufacturer=None, comment=None, meshdir=None, configurations={}):
+    def __init__(self, links, name=None, base=None, basemesh=None, tool=None, toolmesh=None, stl_files=None, q=None, param=None, manufacturer=None, comment=None, meshdir=None, configurations={}):
         """
         Creates a SerialLink object.
         :param links: a list of links that will constitute SerialLink object.
@@ -42,6 +42,11 @@ class SerialLink:
             self.toolmesh = PurePath(__file__).parent.parent / 'models' / 'meshes' / toolmesh
         else:
             self.toolmesh = None
+
+        if basemesh:
+            self.basemesh = PurePath(__file__).parent.parent / 'models' / 'meshes' / basemesh
+        else:
+            self.basemesh = None
 
         # Following arguments initialised by plot function and animate functions only
         if stl_files is None:
@@ -180,17 +185,14 @@ class SerialLink:
 
         if self.roplot is None:
             # No current plot, create robot plot
+            self.g_canvas = gph.GraphicsCanvas3D()
+            print("canvas created")
 
-                self.g_canvas = gph.GraphicsCanvas3D()
-                print("canvas created")
+            self.roplot = gph.GraphicalRobot(self.g_canvas, self.name, self)
 
-                self.roplot = gph.GraphicalRobot(self.g_canvas, self.name, self)
-
-                return
-        else:
-            # Move existing plot
-            self.roplot.set_joint_poses(poses)
-            return
+        # Move existing plot
+        self.roplot.set_joint_poses(poses)
+        return
 
     def animate(self, q1, q2, unit='rad', frames=10, fps=5):
         """

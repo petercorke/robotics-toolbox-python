@@ -3,16 +3,13 @@ from roboticstoolbox.robot.serial_link import SerialLink, Link
 from roboticstoolbox.models.Puma560 import Puma560
 
 if __name__ == "__main__":
+
+    puma = Puma560()
+
+    puma.plot(puma.qz)
+
     # canvas = gph.GraphicsCanvas3D()
-
-    # Puma560
-    puma560 = Puma560()
-
-    puma560.plot(puma560.qz)
-
-    # g_puma560 = gph.GraphicalRobot(canvas, '', seriallink=puma560)
-
-    # Two three-joint arms
+    #
     # L = []
     # L2 = []
     #

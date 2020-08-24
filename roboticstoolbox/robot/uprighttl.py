@@ -8,12 +8,13 @@ from roboticstoolbox.robot.serial_link import *
 
 L = []
 
-L.append(Link(a=0.1, d=1, alpha=pi/2, jointtype='R'))
+L.append(Link(a=0.1, alpha=pi/2, jointtype='R'))
+L.append(Link(a=1.0, jointtype='R'))
 L.append(Link(a=1.0, jointtype='R'))
 L.append(Link(a=0.5, jointtype='R'))
 
 
-qz = [0,0,-pi/3]
+qz = [0,0,0,0]
 
 arm = SerialLink(L, name='Upright Arm')
 
