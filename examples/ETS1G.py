@@ -221,13 +221,27 @@ class Exp(object):
         self.rR.name = 'RRMC UR5'
 
         # Set joint limits
-        self.n = 6
+        self.n = self.rQ.n
         self.qlim = self.rQ.qlim.copy()
         self.rang = np.abs(self.qlim[0, :]) + np.abs(self.qlim[1, :])
 
         # Set base locations
         self.rQ.base = sm.SE3.Ty(0.3)
         self.rR.base = sm.SE3.Ty(-0.3)
+
+        # Init robot variables
+        self.rQ.failt = 0
+        self.rR.failt = 0
+        self.rQ.arrivedt = 0
+        self.rR.arrivedt = 0
+        self.rQ.s = False
+        self.rR.s = False
+        self.rQ.st = 0
+        self.rR.st = 0
+        self.rQ.mt = []
+        self.rR.mt = []
+        self.rQ.mft = []
+        self.rR.mft = []
 
         # Launch Sim
         self.env = rp.backend.Sim()
@@ -240,6 +254,7 @@ class Exp(object):
 
         # Timestep
         self.dt = 50
+        self.itmax = 500
 
     def step(self, action):
         # Step the quadratic robot
@@ -255,7 +270,7 @@ class Exp(object):
         # Step the rrmc robot
         if not self.rR.arrived and not self.rR.fail:
             try:
-                self.step_r(self.rR, self.TQ)
+                self.step_r(self.rR, self.TR)
             except np.linalg.LinAlgError:
                 self.rR.fail = True
                 self.rR.s = True
@@ -264,12 +279,52 @@ class Exp(object):
 
         # Step the environment
         self.env.step(self.dt)
+        self.it += 1
 
-        if (self.rQ.arrived or self.rQ.fail) \
-                and (self.rR.arrived or self.rR.fail):
+        if ((self.rQ.arrived or self.rQ.fail)
+                and (self.rR.arrived or self.rR.fail)) \
+                or self.it > self.itmax:
             self.done = True
+            self.finished([self.rQ, self.rR])
+            self.mean([self.rQ, self.rR])
         else:
             self.done = False
+
+    def finished(self, robots):
+
+        rarr = 0
+        for robot in robots:
+            if robot.arrived:
+                robot.arrivedt += 1
+                rarr += 1
+
+            elif robot.fail:
+                robot.failt += 1
+
+            if robot.s:
+                robot.st += 1
+
+            m = robot.m / robot.it
+            mf = robot.manipulability()
+
+            print("{0}: {1}, mean: {2}, final: {3}, singular: {4}".format(
+                robot.name, robot.arrived, np.round(m, 4),
+                np.round(mf, 4), robot.s))
+
+        if rarr == len(robots):
+            for robot in robots:
+                robot.mt.append(robot.m / robot.it)
+                robot.mft.append(robot.manipulability())
+
+    def mean(self, robots):
+
+        for robot in robots:
+            mm = np.sum(robot.mt) / len(robot.mt)
+            mmf = np.sum(robot.mft) / len(robot.mft)
+            print("{0}: fails: {1}, mmean: {2}, mfinal: {3},"
+                  " singulars: {4}".format(
+                      robot.name, robot.failt,
+                      np.round(mm, 4), np.round(mmf, 4), robot.st))
 
     def reset(self):
         # Set initial joint angles
@@ -283,6 +338,7 @@ class Exp(object):
 
         # Robot stats
         self.rQ.it = 0
+        self.rQ.s = False
         self.rQ.m = 0
         self.rQ.arrived = False
         self.rQ.fail = False
@@ -290,16 +346,18 @@ class Exp(object):
         self.rR.m = 0
         self.rR.arrived = False
         self.rR.fail = False
+        self.rR.s = False
 
         self.done = False
+        self.it = 0
 
         # Set desired poses
         self.TQ, self.TR = self._find_pose((self.rQ, self.rR))
 
     def step_q(self, robot, Ts):
 
-        e, m, robot.arrived = self.state(robot, Ts)
-        v, _ = rp.p_servo(robot.fkine(), Ts, 1)
+        e, m, _ = self.state(robot, Ts)
+        v, robot.arrived = rp.p_servo(robot.fkine(), Ts, 1, threshold=0.17)
         Y = 0.01
 
         Q = np.eye(6 + 6)
@@ -324,8 +382,8 @@ class Exp(object):
             robot.fail = True
 
     def step_r(self, robot, Ts):
-        e, m, robot.arrived = self.state(robot, Ts)
-        v, _ = rp.p_servo(robot.fkine(), Ts, 1)
+        e, m, _ = self.state(robot, Ts)
+        v, robot.arrived = rp.p_servo(robot.fkine(), Ts, 1, threshold=0.17)
 
         if np.linalg.matrix_rank(robot.jacobe()) < 6:
             robot.s = True
@@ -381,8 +439,13 @@ def envfun(e):
 
     while not e.done:
         e.step(0)
-        print(e.rR.fail)
-        print(e.rQ.fail)
+        # print()
+        # print(e.rQ.arrived)
+        # print(e.rQ.fail)
+        # print(e.rQ.qd)
+        # print(e.rR.arrived)
+        # print(e.rR.fail)
+        # print(e.rR.qd)
 
 
 if __name__ == '__main__':
@@ -391,4 +454,6 @@ if __name__ == '__main__':
 
     for i in range(1000):
         e.reset()
+        print()
+        print('Interation: {0}'.format(i))
         envfun(e)
