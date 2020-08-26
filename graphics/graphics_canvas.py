@@ -1,4 +1,5 @@
-from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider
+from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider, \
+    wtext, degrees
 from graphics.common_functions import *
 from graphics.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
 from enum import Enum
@@ -59,7 +60,7 @@ class GraphicsCanvas3D:
         # List of joint sliders per robot
         self.__teachpanel = []  # 3D, robot -> joint -> options
         self.__teachpanel_sliders = []
-        self.__idx_qlim_min, self.__idx_qlim_max, self.__idx_theta = 0, 1, 2
+        self.__idx_qlim_min, self.__idx_qlim_max, self.__idx_theta, self.__idx_text = 0, 1, 2, 3
         # Checkbox states
         self.__grid_visibility = grid
         self.__camera_lock = False
@@ -151,13 +152,19 @@ class GraphicsCanvas3D:
         self.__robots.append(robot)
         self.__selected_robot = len(self.__robots) - 1
 
-        num_options = 3
+        num_options = 4
         self.__teachpanel.append([[0] * num_options] * robot.num_joints)  # Add spot for current robot settings
 
         # Add robot joint sliders
         i = 0
         for joint in robot.joints:
-            self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1], joint.theta]
+            if joint.qlim[0] == joint.qlim[1]:
+                self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1],
+                                                               joint.theta, None]
+            else:
+                string = "{:.2f} rad ({:.2f} deg)".format(joint.theta, degrees(joint.theta))
+                self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1],
+                                                               joint.theta, wtext(text=string)]
             i += 1
 
         # Refresh the caption
@@ -451,23 +458,30 @@ class GraphicsCanvas3D:
         """
         Display the Teachpanel mode of the UI
         """
-        i = 1
+        if len(self.__teachpanel) == 0:
+            self.scene.append_to_caption("No robots available\n")
+            return
+        i = 0
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_qlim_min] == joint[self.__idx_qlim_max]:
                 # If a slider with (effectively) no values, skip it
+                i += 1
                 continue
             # Add a title
             self.scene.append_to_caption('Joint {0}:\t'.format(i))
-            i += 1
             # Add the slider, with the correct joint variables
             s = slider(
                 bind=self.__joint_slider,
                 min=joint[self.__idx_qlim_min],
                 max=joint[self.__idx_qlim_max],
-                value=joint[self.__idx_theta]
+                value=joint[self.__idx_theta],
+                id=i
             )
             self.__teachpanel_sliders.append(s)
+            string = "{:.2f} rad ({:.2f} deg)".format(joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
+            joint[self.__idx_text] = wtext(text=string)
             self.scene.append_to_caption('\n\n')
+            i += 1
 
     #######################################
     # UI CALLBACKS
@@ -593,10 +607,8 @@ class GraphicsCanvas3D:
         :param s: The slider object that has been modified
         :type s: class:`slider`
         """
-        # Save the values for updating later
-        for slider_num in range(0, len(self.__teachpanel_sliders)):
-            self.__teachpanel[self.__selected_robot][slider_num][self.__idx_theta] = \
-                    self.__teachpanel_sliders[slider_num].value
+        # Save the value
+        self.__teachpanel[self.__selected_robot][s.id][self.__idx_theta] = s.value
 
         # Get all angles for the robot
         angles = []
@@ -608,6 +620,12 @@ class GraphicsCanvas3D:
 
         # Update joints
         self.__robots[self.__selected_robot].set_joint_poses(poses)
+
+        for joint in self.__teachpanel[self.__selected_robot]:
+            if joint[self.__idx_text] is None:
+                continue
+            string = "{:.2f} rad ({:.2f} deg)".format(joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
+            joint[self.__idx_text].text = string
 
 
 class GraphicsCanvas2D:
@@ -1023,15 +1041,15 @@ class GraphicsCanvas2D:
             return [default_line, default_marker, default_colour]
 
         # If line_style given, join the first two options if applicable (some types have 2 characters)
-        for char in range(0, len(options_split)-1):
+        for char in range(0, len(options_split) - 1):
             # If char is '-' (only leading character in double length option)
             if options_split[char] == '-' and len(options_split) > 1:
                 # If one of the leading characters is valid
-                if options_split[char+1] == '-' or options_split[char+1] == '.':
+                if options_split[char + 1] == '-' or options_split[char + 1] == '.':
                     # Join the two into the first
-                    options_split[char] = options_split[char] + options_split[char+1]
+                    options_split[char] = options_split[char] + options_split[char + 1]
                     # Shuffle down the rest
-                    for idx in range(char+2, len(options_split)):
+                    for idx in range(char + 2, len(options_split)):
                         options_split[idx - 1] = options_split[idx]
                     # Remove duplicate extra
                     options_split.pop()
