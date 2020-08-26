@@ -451,6 +451,9 @@ class GraphicsCanvas3D:
         """
         Display the Teachpanel mode of the UI
         """
+        if len(self.__teachpanel) == 0:
+            self.scene.append_to_caption("No robots available\n")
+            return
         i = 1
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_qlim_min] == joint[self.__idx_qlim_max]:
