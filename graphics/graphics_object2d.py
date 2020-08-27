@@ -26,7 +26,7 @@ class Object2D:
         if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
                 colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
             raise ValueError("RGB values must be normalised between 0 and 1")
-        self.__colour = vector(colour[0], colour[1], colour[2])
+        self.colourVec = vector(colour[0], colour[1], colour[2])
         self.graphic = None
 
     def __create_object(self):
@@ -60,6 +60,7 @@ class Object2D:
                 colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
             raise ValueError("RGB values must be normalised between 0 and 1")
         self.graphic.color = vector(colour[0], colour[1], colour[2])
+        self.colourVec = vector(colour[0], colour[1], colour[2])
 
     def update_visibility(self, is_visible):
         """
@@ -97,7 +98,7 @@ class STL2D(Object2D):
         super().__init__(se2, scene, stl_path, colour)
         self.graphic = self.__create_object()
         self.size = self.graphic.size
-        self.graphic.color = self.__colour
+        self.graphic.color = self.colourVec
 
     def __create_object(self):
         """
@@ -218,7 +219,7 @@ class Marker2D(Object2D):
         obj = extrusion(scene=self.scene,
                         path=[vector(x, y, 0.001), vector(x, y, -0.001)],
                         shape=shape_path,
-                        color=self.__colour,
+                        color=self.colourVec,
                         shininess=0)
         self.size = obj.size
         if self.shape == '':

@@ -299,6 +299,7 @@ class GraphicsGrid:
         # If 2D and setting off, changes are made
         # If 2D and setting on, toggle the 3D graphics (are turned on)
         if self.__is_3d is False and is_visible is True:
+            self.__is_3d = True
             self.toggle_2d_3d()
 
     def set_relative(self, is_relative):
