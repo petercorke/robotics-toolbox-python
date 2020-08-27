@@ -1,5 +1,5 @@
 from vpython import color, label, mag, vector
-from numpy import sign
+from numpy import sign, arange
 
 
 def draw_label(label_text, label_position, scene):
@@ -90,7 +90,7 @@ def draw_text(label_text, label_position, scene):
     return the_label
 
 
-def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
+def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     """
     Draw the grid numbers along the xyz axes.
 
@@ -100,6 +100,8 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
     :type numbers_list: `list`
     :param num_squares: How many unit squares to draw along the axis.
     :type num_squares: `int`
+    :param scale: The scaled length of 1 square unit
+    :type scale: `float`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
     """
@@ -124,14 +126,18 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
     # min = -num_squares or 0, around the default position
     # max = +num_squares or 0, around the default position
     # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-    min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
-    max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2))
+    min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale
+    max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale
 
-    min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
-    max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2))
+    min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale
+    max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale
 
-    min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
-    max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2))
+    min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale
+    max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale
+
+    x_coords = arange(min_x_coord, max_x_coord + scale, scale)
+    y_coords = arange(min_y_coord, max_y_coord + scale, scale)
+    z_coords = arange(min_z_coord, max_z_coord + scale, scale)
 
     # If input is empty, append new, otherwise update current
     append = len(numbers_list) == 0
@@ -139,7 +145,7 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
     index = 0
 
     # X plane
-    for x_pos in range(min_x_coord, max_x_coord + 1):
+    for x_pos in x_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = str(x_pos)
         pos = vector(x_pos + padding, y_origin + padding, z_origin)
@@ -164,7 +170,7 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
         index += 1
 
     # Y plane
-    for y_pos in range(min_y_coord, max_y_coord + 1):
+    for y_pos in y_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = str(y_pos)
         pos = vector(x_origin, y_pos + padding, z_origin + padding)
@@ -189,7 +195,7 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scene):
         index += 1
 
     # Z plane
-    for z_pos in range(min_z_coord, max_z_coord + 1):
+    for z_pos in z_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = str(z_pos)
         pos = vector(x_origin, y_origin - padding, z_pos + padding)

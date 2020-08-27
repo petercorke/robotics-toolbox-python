@@ -1,5 +1,5 @@
 from vpython import vector, compound, mag, box
-from numpy import sign, ceil
+from numpy import sign, ceil, arange
 from graphics.graphics_text import update_grid_numbers
 from graphics.graphics_object2d import Marker2D
 from spatialmath import SE2
@@ -21,6 +21,7 @@ class GraphicsGrid:
 
         self.__relative_cam = True
         self.__num_squares = 10
+        self.__scale = 0.5
 
         # Save the current camera settings
         self.camera_pos = self.__scene.camera.pos
@@ -56,7 +57,8 @@ class GraphicsGrid:
         self.grid_object[self.__planes_idx] = the_grid
 
         # Update the labels instead of recreating them
-        update_grid_numbers(self.__focal_point, self.grid_object[self.__labels_idx], self.__num_squares, self.__scene)
+        update_grid_numbers(self.__focal_point, self.grid_object[self.__labels_idx],
+                            self.__num_squares, self.__scale, self.__scene)
 
     def __create_grid_objects(self):
         """
@@ -96,24 +98,34 @@ class GraphicsGrid:
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
         # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = x_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
-        max_x_coord = x_origin + int((self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
+        min_x_coord = x_origin + int(-(self.__num_squares / 2) +
+                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
+        max_x_coord = x_origin + int((self.__num_squares / 2) +
+                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
 
-        min_y_coord = y_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
-        max_y_coord = y_origin + int((self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
+        min_y_coord = y_origin + int(-(self.__num_squares / 2) +
+                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
+        max_y_coord = y_origin + int((self.__num_squares / 2) +
+                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
 
-        min_z_coord = z_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
-        max_z_coord = z_origin + int((self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
+        min_z_coord = z_origin + int(-(self.__num_squares / 2) +
+                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
+        max_z_coord = z_origin + int((self.__num_squares / 2) +
+                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
+
+        x_coords = arange(min_x_coord, max_x_coord + self.__scale, self.__scale)
+        y_coords = arange(min_y_coord, max_y_coord + self.__scale, self.__scale)
+        z_coords = arange(min_z_coord, max_z_coord + self.__scale, self.__scale)
 
         # XZ plane
-        for x_point in range(min_x_coord, max_x_coord + 1):
+        for x_point in x_coords:
             # Draw a line across for each x coord, along the same y-axis, from min to max z coord
             xz_lines.append(create_line(
                 vector(x_point, y_origin, min_z_coord),
                 vector(x_point, y_origin, max_z_coord),
                 self.__scene
             ))
-        for z_point in range(min_z_coord, max_z_coord + 1):
+        for z_point in z_coords:
             # Draw a line across each z coord, along the same y-axis, from min to max z coord
             xz_lines.append(create_line(
                 vector(min_x_coord, y_origin, z_point),
@@ -122,14 +134,14 @@ class GraphicsGrid:
             ))
 
         # XY plane
-        for x_point in range(min_x_coord, max_x_coord + 1):
+        for x_point in x_coords:
             # Draw a line across each x coord, along the same z-axis, from min to max y coord
             xy_lines.append(create_line(
                 vector(x_point, min_y_coord, z_origin),
                 vector(x_point, max_y_coord, z_origin),
                 self.__scene
             ))
-        for y_point in range(min_y_coord, max_y_coord + 1):
+        for y_point in y_coords:
             # Draw a line across each y coord, along the same z-axis, from min to max x coord
             xy_lines.append(create_line(
                 vector(min_x_coord, y_point, z_origin),
@@ -138,14 +150,14 @@ class GraphicsGrid:
             ))
 
         # YZ plane
-        for y_point in range(min_y_coord, max_y_coord + 1):
+        for y_point in y_coords:
             # Draw a line across each y coord, along the same x-axis, from min to max z coord
             yz_lines.append(create_line(
                 vector(x_origin, y_point, min_z_coord),
                 vector(x_origin, y_point, max_z_coord),
                 self.__scene
             ))
-        for z_point in range(min_z_coord, max_z_coord + 1):
+        for z_point in z_coords:
             # Draw a line across each z coord, along the same x-axis, from min to max y coord
             yz_lines.append(create_line(
                 vector(x_origin, min_y_coord, z_point),
@@ -203,14 +215,20 @@ class GraphicsGrid:
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
         # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = x_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
-        max_x_coord = x_origin + int((self.__num_squares / 2) + (sign(camera_axes.x) * -1) * (self.__num_squares / 2))
+        min_x_coord = x_origin + int(-(self.__num_squares / 2) +
+                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
+        max_x_coord = x_origin + int((self.__num_squares / 2) +
+                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
 
-        min_y_coord = y_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
-        max_y_coord = y_origin + int((self.__num_squares / 2) + (sign(camera_axes.y) * -1) * (self.__num_squares / 2))
+        min_y_coord = y_origin + int(-(self.__num_squares / 2) +
+                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
+        max_y_coord = y_origin + int((self.__num_squares / 2) +
+                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
 
-        min_z_coord = z_origin + int(-(self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
-        max_z_coord = z_origin + int((self.__num_squares / 2) + (sign(camera_axes.z) * -1) * (self.__num_squares / 2))
+        min_z_coord = z_origin + int(-(self.__num_squares / 2) +
+                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
+        max_z_coord = z_origin + int((self.__num_squares / 2) +
+                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
 
         # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
         x_middle = (max_x_coord + min_x_coord) / 2
@@ -257,6 +275,7 @@ class GraphicsGrid:
             update_grid_numbers(self.__focal_point,
                                 self.grid_object[self.__labels_idx],
                                 self.__num_squares,
+                                self.__scale,
                                 self.__scene)
 
     def toggle_2d_3d(self):
