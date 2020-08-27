@@ -2,6 +2,26 @@ from vpython import color, label, mag, vector
 from numpy import sign, arange
 
 
+def get_text_size(scene):
+    """
+
+    """
+    # Distance of camera from focus point to determine text size
+    distance_from_center = mag(scene.center - scene.camera.pos)
+
+    # Eq generated from data (Using 3rd order polynomial)
+    #  D  | size
+    #  0  |   5
+    # 0.5 |   8
+    #  1  |  10
+    #  2  |  12
+    #  3  |  14
+    #  5  |  15
+    val = 0.1114 * distance_from_center**3 - 1.336 * distance_from_center**2 + 5.8666 * distance_from_center + 5.1711
+
+    return min(max(val, 10), 15)  # Return val between 10 and 15
+
+
 def draw_label(label_text, label_position, scene):
     """
     Display a label at a given position, with borders and lines
@@ -54,15 +74,7 @@ def draw_text(label_text, label_position, scene):
     :return: The created label object.
     :rtype: class:`vpython.label`
     """
-
-    # Distance of camera from focus point to determine text size
-    distance_from_center = mag(scene.center - scene.camera.pos)
-
-    # Far away = smaller text, closer = larger text (up to a min (20) and max (40))
-    # Typically 5->20 units away
-    # (eqn and limits modified to suit display better) = -1.3333 * distance_from_center + 46.6667
-    label_height = -1.3333 * distance_from_center + 36.6667  # Calculate label height
-    label_height = max(min(label_height, 35), 10)  # Limit to 10->35
+    label_height = get_text_size(scene)
     label_xoffset = 0
     label_yoffset = 0
     label_space = 0
@@ -151,9 +163,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
         pos = vector(x_pos + padding, y_origin + padding, z_origin)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
+            numbers_list[len(numbers_list)-1].height = get_text_size(scene)
         else:
             numbers_list[index].text = txt
             numbers_list[index].pos = pos
+            numbers_list[index].height = get_text_size(scene)
             index += 1
     # Draw the axis label at either the positive or negative side away from center
     # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
@@ -164,9 +178,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
         pos = vector(min_x_coord - 1, y_origin, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
+        numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
     else:
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
+        numbers_list[index].height = get_text_size(scene)
         index += 1
 
     # Y plane
@@ -176,9 +192,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
         pos = vector(x_origin, y_pos + padding, z_origin + padding)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
+            numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
         else:
             numbers_list[index].text = txt
             numbers_list[index].pos = pos
+            numbers_list[index].height = get_text_size(scene)
             index += 1
     # Draw the axis label at either the positive or negative side away from center
     # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
@@ -189,9 +207,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
         pos = vector(x_origin, min_y_coord - 1, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
+        numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
     else:
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
+        numbers_list[index].height = get_text_size(scene)
         index += 1
 
     # Z plane
@@ -201,9 +221,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
         pos = vector(x_origin, y_origin - padding, z_pos + padding)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
+            numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
         else:
             numbers_list[index].text = txt
             numbers_list[index].pos = pos
+            numbers_list[index].height = get_text_size(scene)
             index += 1
     # Draw the axis label at either the positive or negative side away from center
     # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
@@ -214,7 +236,9 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
         pos = vector(x_origin, y_origin, min_z_coord - 1)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
+        numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
     else:
         numbers_list[index].text = txt
         numbers_list[index].pos = pos
+        numbers_list[index].height = get_text_size(scene)
         index += 1
