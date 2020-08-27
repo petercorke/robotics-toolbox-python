@@ -34,7 +34,7 @@ class Sim(Connector):
         self.robots = []
 
         self.sim = zerorpc.Client()
-        self.sim.connect("tcp://127.0.0.1:4243")
+        self.sim.connect("tcp://127.0.0.1:4242")
 
     def step(self, dt=50):
         '''
