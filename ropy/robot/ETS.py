@@ -182,7 +182,7 @@ class ETS(object):
             li = {
                 'axis': [],
                 'eta': [],
-                'q': link.q_idx,
+                'q_idx': link.q_idx,
                 'geometry': [],
                 't': link._fk.t.tolist(),
                 'q': r2q(link._fk.R).tolist()
@@ -193,9 +193,16 @@ class ETS(object):
                 li['eta'].append(et.eta)
 
             for gi in link.geometry:
+                g_fk = link._fk * gi.base
+                if gi.scale is not None:
+                    scale = gi.scale.tolist()
+                else:
+                    scale = [1, 1, 1]
                 li['geometry'].append({
                     'filename': gi.filename,
-                    'scale': gi.scale
+                    'scale': scale,
+                    't': g_fk.t.tolist(),
+                    'q': r2q(g_fk.R).tolist()
                 })
 
             ob['links'].append(li)
@@ -211,10 +218,6 @@ class ETS(object):
         # print(Tall)
 
         for link in self.ets:
-            if (np.trace(link._fk.R) + 1) < 0:
-                print(np.trace(link._fk.R) + 1)
-                print(link._fk)
-
 
             li = {
                 't': link._fk.t.tolist(),
@@ -542,7 +545,7 @@ class ETS(object):
         j = 0
 
         if self.ets[0].jtype == self.ets[0].VARIABLE:
-            self.ets[0]._fk = self.base * link.A(q[j])
+            self.ets[0]._fk = self.base * self.ets[0].A(q[j])
             j += 1
         else:
             self.ets[0]._fk = self.base * self.ets[0].A()
