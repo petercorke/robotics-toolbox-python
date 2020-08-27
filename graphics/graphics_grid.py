@@ -75,9 +75,9 @@ class GraphicsGrid:
         camera_axes = self.camera_axes
         # Locate centre of axes
         if self.__relative_cam:
-            x_origin, y_origin, z_origin = round(self.__scene.center.x),\
-                                           round(self.__scene.center.y),\
-                                           round(self.__scene.center.z)
+            x_origin, y_origin, z_origin = round(self.__scene.center.x, 2),\
+                                           round(self.__scene.center.y, 2),\
+                                           round(self.__scene.center.z, 2)
             self.__focal_point = [x_origin, y_origin, z_origin]
         else:
             x_origin, y_origin, z_origin = self.__focal_point[0], \
@@ -185,9 +185,9 @@ class GraphicsGrid:
         camera_axes = self.camera_axes
         # Locate centre of axes
         if self.__relative_cam:
-            x_origin, y_origin, z_origin = round(self.__scene.center.x), \
-                                           round(self.__scene.center.y), \
-                                           round(self.__scene.center.z)
+            x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
+                                           round(self.__scene.center.y, 2), \
+                                           round(self.__scene.center.z, 2)
             self.__focal_point = [x_origin, y_origin, z_origin]
             # Convert focal point for 2D rendering. Puts focus point in centre of the view
             if not self.__is_3d:

@@ -147,7 +147,7 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     # X plane
     for x_pos in x_coords:
         # Draw the corresponding unit number at each x coordinate
-        txt = str(x_pos)
+        txt = "{:.2f}".format(x_pos)
         pos = vector(x_pos + padding, y_origin + padding, z_origin)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
@@ -172,7 +172,7 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     # Y plane
     for y_pos in y_coords:
         # Draw the corresponding unit number at each x coordinate
-        txt = str(y_pos)
+        txt = "{:.2f}".format(y_pos)
         pos = vector(x_origin, y_pos + padding, z_origin + padding)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
@@ -197,7 +197,7 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     # Z plane
     for z_pos in z_coords:
         # Draw the corresponding unit number at each x coordinate
-        txt = str(z_pos)
+        txt = "{:.2f}".format(z_pos)
         pos = vector(x_origin, y_origin - padding, z_pos + padding)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
