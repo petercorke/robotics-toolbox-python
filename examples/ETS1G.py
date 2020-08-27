@@ -44,6 +44,8 @@ class Exp(object):
         self.rR.mt = []
         self.rQ.mft = []
         self.rR.mft = []
+        self.rQ.missed = 0
+        self.rR.missed = 0
 
         # Launch Sim
         self.env = rp.backend.Sim()
@@ -106,6 +108,9 @@ class Exp(object):
             if robot.s:
                 robot.st += 1
 
+            if not robot.arrived and not robot.fail:
+                robot.missed += 1
+
             m = robot.m / robot.it
             mf = robot.manipulability()
 
@@ -124,9 +129,10 @@ class Exp(object):
             mm = np.sum(robot.mt) / len(robot.mt)
             mmf = np.sum(robot.mft) / len(robot.mft)
             print("{0}: fails: {1}, mmean: {2}, mfinal: {3},"
-                  " singulars: {4}".format(
+                  " singulars: {4}, missed: {5}".format(
                       robot.name, robot.failt,
-                      np.round(mm, 4), np.round(mmf, 4), robot.st))
+                      np.round(mm, 4), np.round(mmf, 4), robot.st,
+                      robot.missed))
 
     def reset(self):
         # Set initial joint angles
