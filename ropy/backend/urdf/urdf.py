@@ -817,6 +817,7 @@ class Visual(URDFType):
 
     def __init__(self, geometry, name=None, origin=None, material=None):
         self.geometry = geometry
+        geometry.ob.base = origin
         self.name = name
         self.origin = origin
         # self.material = material
