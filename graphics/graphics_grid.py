@@ -58,7 +58,7 @@ class GraphicsGrid:
 
         # Update the labels instead of recreating them
         update_grid_numbers(self.__focal_point, self.grid_object[self.__labels_idx],
-                            self.__num_squares, self.__scale, self.__scene)
+                            self.__num_squares, self.__scale, self.__is_3d, self.__scene)
 
     def __create_grid_objects(self):
         """
@@ -276,6 +276,7 @@ class GraphicsGrid:
                                 self.grid_object[self.__labels_idx],
                                 self.__num_squares,
                                 self.__scale,
+                                self.__is_3d,
                                 self.__scene)
 
     def toggle_2d_3d(self):

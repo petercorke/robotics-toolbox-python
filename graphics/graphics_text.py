@@ -102,7 +102,7 @@ def draw_text(label_text, label_position, scene):
     return the_label
 
 
-def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
+def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, scene):
     """
     Draw the grid numbers along the xyz axes.
 
@@ -114,6 +114,8 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     :type num_squares: `int`
     :param scale: The scaled length of 1 square unit
     :type scale: `float`
+    :param is_3d: Whether the grid is 3D or not
+    :type is_3d: `bool`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
     """
@@ -160,7 +162,13 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     for x_pos in x_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(x_pos)
-        pos = vector(x_pos + padding, y_origin + padding, z_origin)
+        if is_3d:
+            if (sign(camera_axes.y) * -1) > 0:
+                pos = vector(x_pos, max_y_coord + padding, z_origin)
+            else:
+                pos = vector(x_pos, min_y_coord - padding, z_origin)
+        else:
+            pos = vector(x_pos, y_origin - padding, z_origin)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
             numbers_list[len(numbers_list)-1].height = get_text_size(scene)
@@ -169,13 +177,16 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
             numbers_list[index].pos = pos
             numbers_list[index].height = get_text_size(scene)
             index += 1
-    # Draw the axis label at either the positive or negative side away from center
-    # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
+    # Draw the axis label at the centre of the axes numbers
     txt = "X"
-    if (sign(camera_axes.x) * -1) > 0:
-        pos = vector(max_x_coord + 1, y_origin, z_origin)
+    if (sign(camera_axes.y) * -1) > 0:
+        x = (max_x_coord + min_x_coord) / 2
+        y = max_y_coord + scale * 2
+        pos = vector(x, y, z_origin)
     else:
-        pos = vector(min_x_coord - 1, y_origin, z_origin)
+        x = (max_x_coord + min_x_coord) / 2
+        y = min_y_coord - scale * 2
+        pos = vector(x, y, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -189,7 +200,13 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     for y_pos in y_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(y_pos)
-        pos = vector(x_origin, y_pos + padding, z_origin + padding)
+        if is_3d:
+            if (sign(camera_axes.x) * -1) > 0:
+                pos = vector(max_x_coord + padding, y_pos, z_origin)
+            else:
+                pos = vector(min_x_coord - padding, y_pos, z_origin)
+        else:
+            pos = vector(x_origin - padding, y_pos, z_origin)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
             numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -198,13 +215,17 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
             numbers_list[index].pos = pos
             numbers_list[index].height = get_text_size(scene)
             index += 1
-    # Draw the axis label at either the positive or negative side away from center
-    # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
+    # Draw the axis label at the centre of the axes numbers
     txt = "Y"
-    if (sign(camera_axes.y) * -1) > 0:
-        pos = vector(x_origin, max_y_coord + 1, z_origin)
+    if (sign(camera_axes.x) * -1) > 0:
+        x = max_x_coord + scale * 2
+        y = (max_y_coord + min_y_coord) / 2
+        pos = vector(x, y, z_origin)
     else:
-        pos = vector(x_origin, min_y_coord - 1, z_origin)
+        x = min_x_coord - scale * 2
+        y = (max_y_coord + min_y_coord) / 2
+        pos = vector(x, y, z_origin)
+
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -218,7 +239,10 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     for z_pos in z_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(z_pos)
-        pos = vector(x_origin, y_origin - padding, z_pos + padding)
+        if (sign(camera_axes.x) * -1) > 0:
+            pos = vector(max_x_coord + padding, y_origin, z_pos)
+        else:
+            pos = vector(min_x_coord - padding, y_origin, z_pos)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
             numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -230,10 +254,10 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, scene):
     # Draw the axis label at either the positive or negative side away from center
     # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
     txt = "Z"
-    if (sign(camera_axes.z) * -1) > 0:
-        pos = vector(x_origin, y_origin, max_z_coord + 1)
+    if (sign(camera_axes.x) * -1) > 0:
+        pos = vector(max_x_coord + scale * 2, y_origin, (max_z_coord + min_z_coord) / 2)
     else:
-        pos = vector(x_origin, y_origin, min_z_coord - 1)
+        pos = vector(min_x_coord - scale * 2, y_origin, (max_z_coord + min_z_coord) / 2)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
