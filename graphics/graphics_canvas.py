@@ -105,8 +105,6 @@ class GraphicsCanvas3D:
         """
         This function will clear the screen of all objects
         """
-        # self.__graphics_grid.clear_scene()
-
         # Set all robots variables as invisible
         for robot in self.__robots:
             robot.set_reference_visibility(False)
@@ -710,6 +708,7 @@ class GraphicsCanvas2D:
 
         self.__grid_visibility = grid
         self.__camera_lock = False
+        self.__grid_relative = True
 
         # Apply HTML title/caption
         if title != '':
@@ -719,8 +718,14 @@ class GraphicsCanvas2D:
         if caption != '':
             self.scene.caption = caption
 
-        # Rotate the camera
-        # convert_grid_to_z_up(self.scene)
+        self.__ui_controls = []
+        self.__reload_caption()
+        # Indices to easily identify entities
+        self.__idx_btn_reset = 0  # Camera Reset Button
+        self.__idx_chkbox_grid = 1  # Grid Visibility Checkbox
+        self.__idx_chkbox_cam = 2  # Camera Lock Checkbox
+        self.__idx_chkbox_rel = 3  # Grid Relative Checkbox
+        self.__idx_btn_clr = 4  # Clear button
 
         # Any time a key or mouse is held down, run the callback function
         rate(30)  # 30Hz
@@ -743,9 +748,24 @@ class GraphicsCanvas2D:
     #######################################
     #  Canvas Management
     #######################################
-    # TODO
     def clear_scene(self):
-        pass
+        """
+        Clear the scene of all objects, keeping the grid visible if set on
+        """
+        # Save grid visibility
+        restore = self.__grid_visibility
+
+        # Set invis
+        if restore:
+            self.__graphics_grid.set_visibility(False)
+
+        # Set all objects invis
+        for obj in self.scene.objects:
+            obj.visible = False
+
+        # Restore grid (if needed)
+        if restore:
+            self.__graphics_grid.set_visibility(True)
 
     def grid_visibility(self, is_visible):
         """
@@ -759,10 +779,6 @@ class GraphicsCanvas2D:
     #######################################
     #  UI Management
     #######################################
-    # TODO
-    def __setup_ui_controls(self):
-        pass
-
     def __handle_keyboard_inputs(self):
         """
         Pans amount dependent on distance between camera and focus point.
@@ -781,7 +797,7 @@ class GraphicsCanvas2D:
         Q = roll left (rotate)
         E = roll right (rotate)
 
-        ctrl + LMB = rotate (Default Vpython)
+        shift + LMB = pan (Default Vpython)
         """
         # If camera lock, just skip the function
         if self.__camera_lock:
@@ -881,6 +897,109 @@ class GraphicsCanvas2D:
         # (if directly at, draws numbers wrong spots)
         self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
         self.scene.up = y_axis_vector
+
+    def __reload_caption(self):
+        """
+        Reload the UI with the new list of robot names
+        """
+        # Remove all UI elements
+        for item in self.__ui_controls:
+            item.delete()
+        # Restore the caption
+        self.scene.caption = self.__default_caption
+        # Create the updated caption.
+        self.__setup_ui_controls()
+
+    def __setup_ui_controls(self):
+        """
+        The initial configuration of the user interface
+        """
+        self.scene.append_to_caption('\n')
+
+        # Button to reset camera
+        btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
+        self.scene.append_to_caption('\t')
+
+        chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
+        self.scene.append_to_caption('\t')
+
+        chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
+        self.scene.append_to_caption('\n\n')
+
+        # Button to clear the screen
+        btn_clr = button(bind=self.clear_scene, text="Clear Scene")
+        self.scene.append_to_caption('\n\n')
+
+        # Checkbox for grid visibility
+        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
+                               checked=self.__grid_visibility)
+        self.scene.append_to_caption('\t')
+
+        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
+        self.scene.append_to_caption('''
+                       <script type="text/javascript">
+                           $(document).keyup(function(event) {
+                               if(event.which === 32) {
+                                   event.preventDefault();
+                               }
+                           });
+                       </script>''')
+        # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
+
+        # Control manual
+        controls_str = '<br><b>Controls</b><br>' \
+                       '<b>PAN</b><br>' \
+                       'SHFT + LMB | <i>free pan</i><br>' \
+                       'W , S | <i>up / down</i><br>' \
+                       'A , D | <i>left / right</i><br>' \
+                       '<b>ROTATE</b><br>' \
+                       'ARROWS KEYS | <i>rotate direction</i><br>' \
+                       'Q , E | <i>roll left / right</i><br>' \
+                       '<b>ZOOM</b></br>' \
+                       'MOUSEWHEEL | <i>zoom in / out</i><br>' \
+                       '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>'
+        # Disable the arrow keys from scrolling in the browser
+        # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
+        self.scene.append_to_caption(controls_str)
+
+        return [btn_reset, chkbox_grid, chkbox_cam, chkbox_rel, btn_clr]
+
+    #######################################
+    # UI CALLBACKS
+    #######################################
+    def __camera_lock_checkbox(self, c):
+        """
+        When a checkbox is changed for the camera lock, update the camera
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        # Update parameters
+        # True = locked
+        self.__camera_lock = c.checked
+        # True = enabled
+        self.scene.userspin = not c.checked
+        self.scene.userzoom = not c.checked
+
+    def __grid_relative_checkbox(self, c):
+        """
+        When a checkbox is changed for the grid lock, update the grid
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        self.__graphics_grid.set_relative(c.checked)
+        self.__grid_relative = c.checked
+
+    def __grid_visibility_checkbox(self, c):
+        """
+        When a checkbox is changed for the grid visibility, update the graphics
+
+        :param c: The checkbox that has been toggled
+        :type c: class:`checkbox`
+        """
+        self.grid_visibility(c.checked)
+        self.__grid_visibility = c.checked
 
     #######################################
     #  Drawing Functions
