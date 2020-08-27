@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<robot name="vxxmd" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="robot_name" default = ""/>
+  <xacro:arg name="external_urdf_loc" default=""/>
+  <xacro:arg name="use_world_frame" default="false"/>
+
+  <xacro:property name="urdf_loc" value="$(arg external_urdf_loc)"/>
+
+  <material name="interbotix_black">
+    <texture filename="package://interbotix_descriptions/meshes/interbotix_black.png"/>
+  </material>
+
+  <xacro:if value="$(arg use_world_frame)">
+    <link name="world"/>
+    <joint name="fixed" type="fixed">
+      <parent link="world"/>
+      <child link="$(arg robot_name)/base_link"/>
+    </joint>
+  </xacro:if>
+
+  <link name="$(arg robot_name)/base_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vxxmd/VXT-XMD-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vxxmd/VXT-XMD-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="pan" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="100" lower="${-pi}" upper="${pi}" velocity="${pi}"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0787"/>
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/shoulder_link"/>
+  </joint>
+
+  <link name="$(arg robot_name)/shoulder_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003175"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vxxmd/VXT-XMD-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003175"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vxxmd/VXT-XMD-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tilt" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="100" lower="${radians(-68)}" upper="${radians(68)}" velocity="${pi}"/>
+    <origin rpy="0 0 0" xyz="0 0 0.04805"/>
+    <parent link="$(arg robot_name)/shoulder_link"/>
+    <child link="$(arg robot_name)/top_link"/>
+  </joint>
+
+  <link name="$(arg robot_name)/top_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.1314386"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vxxmd/VXT-XMD-M-3-Top.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.1314386"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vxxmd/VXT-XMD-M-3-Top.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>>
+  </link>
+
+  <joint name="surface" type="fixed">
+    <axis xyz="1 0 0"/>
+    <origin rpy="0 0 0" xyz="0 0 0.045"/>
+    <parent link="$(arg robot_name)/top_link"/>
+    <child link="$(arg robot_name)/surface_link"/>
+  </joint>
+
+  <link name="$(arg robot_name)/surface_link">
+  </link>
+
+  <xacro:if value="${urdf_loc != ''}">
+    <xacro:include filename="${urdf_loc}"/>
+  </xacro:if>
+
+</robot>

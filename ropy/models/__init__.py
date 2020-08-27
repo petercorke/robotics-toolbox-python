@@ -10,6 +10,7 @@ from ropy.models.PandaURDF import PandaURDF
 from ropy.models.Frankie import Frankie
 from ropy.models.Puma560 import Puma560
 from ropy.models.UR5 import UR5
+from ropy.models.wx250s import wx250s
 
 __all__ = [
     'Panda',
@@ -20,5 +21,6 @@ __all__ = [
     # 'LBR7',
     # 'Sawyer',
     # 'Mico',
-    'Puma560'
+    'Puma560',
+    'wx250s'
 ]
