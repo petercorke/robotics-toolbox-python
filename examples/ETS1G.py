@@ -157,23 +157,24 @@ class Exp(object):
         self.TQ, self.TR = self._find_pose((self.rQ, self.rR))
 
     def step_q(self, robot, Ts):
-        ps = 0.1
-        pi = 0.6
+        ps = 0.05
+        pi = 0.9
 
         e, m, _ = self.state(robot, Ts)
         v, robot.arrived = rp.p_servo(robot.fkine(), Ts, 1, threshold=0.17)
         Y = 0.01
 
-        Ain = np.eye(6)
+        Ain = np.zeros((12, 12))
         bin = np.zeros(6 + 6)
 
         for i in range(robot.n):
-            if np.abs(self.qlim[0, i] - robot.q[i]) > pi:
-                bin[i] = ((robot.q[i] - self.qlim[0, i]) - ps) / (pi - ps)
-            elif np.abs(self.qlim[1, i] - robot.q[i]) > pi:
+            if robot.q[i] - self.qlim[0, i] <= pi:
+                bin[i] = -1.0 * (((self.qlim[0, i] - robot.q[i]) + ps) / (pi - ps))
+                Ain[i, i] = -1
+            if self.qlim[1, i] - robot.q[i] <= pi:
                 bin[i] = ((self.qlim[1, i] - robot.q[i]) - ps) / (pi - ps)
+                Ain[i, i] = 1
 
-        print(bin)
 
         Q = np.eye(6 + 6)
         Q[:6, :6] *= Y
@@ -181,8 +182,7 @@ class Exp(object):
         Aeq = np.c_[robot.jacobe(), np.eye(6)]
         beq = v.reshape((6,))
         c = np.r_[-robot.jacobm().reshape((6,)), np.zeros(6)]
-        qd = qp.solve_qp(Q, c, None, None, Aeq, beq)
-        print(qd)
+        qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq)
 
         if np.any(np.isnan(qd)):
             robot.fail = True
@@ -244,8 +244,13 @@ class Exp(object):
         limit = False
         off = 0.00
         for i in range(self.n-2):
-            if (robot.q[i] <= (self.qlim[0, i] + off)
-               or robot.q[i] >= (self.qlim[1, i] - off)):
+            if robot.q[i] <= (self.qlim[0, i] + off):
+                if robot.name == "Quad UR5":
+                    print(str(robot.q[i]) + " below ---------------------------------------------------------")
+                return True
+            elif robot.q[i] >= (self.qlim[1, i] - off):
+                if robot.name == "Quad UR5":
+                    print(str(robot.q[i]) + " above ---------------------------------------------------------")
                 return True
 
         return limit
