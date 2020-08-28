@@ -578,6 +578,7 @@ class Collision(URDFType):
         self.geometry = geometry
         self.name = name
         self.origin = origin
+        self.geometry.ob.base = origin
 
     @property
     def geometry(self):
@@ -2110,7 +2111,6 @@ class URDF(URDFType):
 
     def __init__(self, name, links, joints=None,
                  transmissions=None,
-                #  materials=None,
                  other_xml=None):
         if joints is None:
             joints = []
@@ -2250,14 +2250,32 @@ class URDF(URDFType):
         elinks.append(base_link)
         self.elinks = elinks
 
-        # Store the visuals and inertials
+        # Store the visuals, collisions, and inertials
         for i in range(len(joints)):
             link = self._link_map[joints[i].child]
             elinks[i].r = link.inertial.origin
+            elinks[i].m = link.inertial.mass
+            elinks[i].inertia = link.inertial.inertia
+
+            try:
+                elinks[i].B = self.joints[i].dynamics.friction
+
+                # TODO Add damping
+                self.joints[i].dynamics.damping
+            except AttributeError:
+                pass
+
             try:
                 for visual in link.visuals:
                     elinks[i].geometry.append(visual.geometry.ob)
+            except AttributeError:
+                pass
 
+            try:
+                colls = []
+                for col in link.collisions:
+                    colls.append(col.geometry.ob)
+                elinks[i].collision = colls
             except AttributeError:
                 pass
 
@@ -2266,13 +2284,6 @@ class URDF(URDFType):
         for t in self.transmissions:
             elinks_dict[self.joint_map[t.joints[0].name].name].G = \
                 t.actuators[0].mechanicalReduction
-
-        for li in self.links:
-            print(li.inertial.mass)
-            print(li.inertial.inertia)
-            print(li.inertial.origin)
-
-        
 
     @property
     def name(self):

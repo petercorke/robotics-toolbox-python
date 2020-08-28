@@ -55,7 +55,8 @@ class ELink(object):
             B=0.0,
             Tc=np.zeros(2),
             G=1.0,
-            geometry=[]):
+            geometry=[],
+            collision=[]):
 
         super(ELink, self).__init__()
 
@@ -98,6 +99,7 @@ class ELink(object):
 
         self.qlim = qlim
         self.geometry = geometry
+        self.collision = collision
 
         # Dynamic Parameters
         self.m = m
@@ -107,6 +109,10 @@ class ELink(object):
         self.B = B
         self.Tc = Tc
         self.G = G
+
+    @property
+    def collision(self):
+        return self._collision
 
     @property
     def geometry(self):
@@ -179,6 +185,23 @@ class ELink(object):
     @property
     def q_idx(self):
         return self._q_idx
+
+    @collision.setter
+    def collision(self, coll):
+        new_coll = []
+
+        if isinstance(coll, list):
+            for gi in coll:
+                if isinstance(gi, rp.Shape):
+                    new_coll.append(gi)
+                else:
+                    raise TypeError('Collision must be of Shape class')
+        elif isinstance(coll, rp.Shape):
+            new_coll.append(gi)
+        else:
+            raise TypeError('Geometry must be of Shape class or list of Shape')
+
+        self._collision = new_coll
 
     @geometry.setter
     def geometry(self, geom):
