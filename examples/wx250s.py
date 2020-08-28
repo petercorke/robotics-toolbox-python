@@ -14,12 +14,12 @@ env.launch()
 wx = rp.wx250s()
 # wx.q = [0, 0, 0, 0, 0, 0]
 
-Tep = wx.fkine() * sm.SE3.Tx(-0.05) * sm.SE3.Ty(0.05) * sm.SE3.Tz(0.05)
+# Tep = wx.fkine() * sm.SE3.Tx(-0.05) * sm.SE3.Ty(0.05) * sm.SE3.Tz(0.05)
 
-arrived = False
-env.add(wx)
+# arrived = False
+# env.add(wx)
 
-dt = 50
+# dt = 50
 
 # for link in wx.ets:
 #     print()

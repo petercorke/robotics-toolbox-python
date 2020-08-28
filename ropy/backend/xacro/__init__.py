@@ -200,8 +200,9 @@ def eval_extension(s):  # pragma: no cover
         from rospkg.common import ResourceNotFound
         return resolve_args(
             s, context=substitution_args_context, resolve_anon=False)
-    except ImportError as e:
-        raise XacroException("substitution args not supported: ", exc=e)
+    except ImportError:
+        pass
+        # raise XacroException("substitution args not supported: ", exc=e)
     except ArgException as e:
         raise XacroException("Undefined substitution argument", exc=e)
     except ResourceNotFound as e:

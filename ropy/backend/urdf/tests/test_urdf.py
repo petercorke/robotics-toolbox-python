@@ -7,7 +7,7 @@
 import numpy as np
 import unittest
 
-from ropy.backend import URDF, Link, Joint, Transmission, Material
+from ropy.backend import URDF, Link, Joint, Transmission
 
 
 class TestURDF(unittest.TestCase):
@@ -24,8 +24,8 @@ class TestURDF(unittest.TestCase):
             self.assertIsInstance(ln, Link)
         for t in u.transmissions:
             self.assertIsInstance(t, Transmission)
-        for m in u.materials:
-            self.assertIsInstance(m, Material)
+        # for m in u.materials:
+        #     self.assertIsInstance(m, Material)
 
         # # Test fk
         # fk = u.link_fk()

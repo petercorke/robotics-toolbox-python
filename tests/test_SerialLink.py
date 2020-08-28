@@ -8,6 +8,7 @@ import numpy as np
 import ropy as rp
 import spatialmath as sm
 import unittest
+import pytest
 
 
 class TestSerialLink(unittest.TestCase):
@@ -1484,7 +1485,16 @@ class TestSerialLink(unittest.TestCase):
         e.launch()
         e.add(panda.fellipse(
                 q=panda.qr, centre=[0, 1]))
+        # e.close()
 
         with self.assertRaises(ValueError):
             e.add(panda.fellipse(
                 q=panda.qr, centre='ee', opt='rot'))
+
+        e.close()
+
+
+if __name__ == '__main__':
+
+    # unittest.main()
+    pytest.main(['tests/test_SerialLink.py'])

@@ -1,28 +1,28 @@
 <?xml version="1.0"?>
 <robot name="wx250s" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:arg name="robot_name" default = ""/>
-  <xacro:arg name="use_world_frame" default="false"/>
-  <xacro:arg name="use_default_gripper_bar" default="true"/>
-  <xacro:arg name="use_default_gripper_fingers" default="true"/>
-  <xacro:arg name="external_urdf_loc" default=""/>
-  <xacro:arg name="load_gazebo_configs" default="false"/>
+  <xacro:property name="robot_name" value = "ws"/>
+  <!-- <xacro:arg name="use_world_frame" default="false"/> -->
+  <xacro:property name="use_default_gripper_bar" value="true"/>
+  <xacro:property name="use_default_gripper_fingers" value="true"/>
+  <!-- <xacro:arg name="external_urdf_loc" default=""/> -->
+  <xacro:property name="load_gazebo_configs" value="false"/>
 
-  <xacro:property name="urdf_loc" value="$(arg external_urdf_loc)"/>
+  <xacro:property name="urdf_loc" value=""/>
 
   <material name="interbotix_black">
     <texture filename="../meshes/interbotix_black.png"/>
   </material>
 
-  <xacro:if value="$(arg use_world_frame)">
+  <!-- <xacro:if value="$(arg use_world_frame)">
     <link name="world"/>
     <joint name="fixed" type="fixed">
       <parent link="world"/>
-      <child link="$(arg robot_name)/base_link"/>
+      <child link="$(robot_name)/base_link"/>
     </joint>
-  </xacro:if>
+  </xacro:if> -->
 
-  <link name="$(arg robot_name)/base_link">
+  <link name="$(robot_name)/base_link">
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
@@ -47,8 +47,8 @@
     <axis xyz="0 0 1"/>
     <limit effort="100" lower="${-pi}" upper="${pi}" velocity="${pi}"/>
     <origin rpy="0 0 0" xyz="0 0 0.0716"/>
-    <parent link="$(arg robot_name)/base_link"/>
-    <child link="$(arg robot_name)/shoulder_link"/>
+    <parent link="$(robot_name)/base_link"/>
+    <child link="$(robot_name)/shoulder_link"/>
   </joint>
 
   <transmission name="trans_waist">
@@ -61,7 +61,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/shoulder_link">
+  <link name="$(robot_name)/shoulder_link">
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
       <geometry>
@@ -86,8 +86,8 @@
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="${radians(-108)}" upper="${radians(114)}" velocity="${pi}"/>
     <origin rpy="0 0 0" xyz="0 0 0.03865"/>
-    <parent link="$(arg robot_name)/shoulder_link"/>
-    <child link="$(arg robot_name)/upper_arm_link"/>
+    <parent link="$(robot_name)/shoulder_link"/>
+    <child link="$(robot_name)/upper_arm_link"/>
   </joint>
 
   <transmission name="trans_shoulder">
@@ -100,7 +100,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/upper_arm_link">
+  <link name="$(robot_name)/upper_arm_link">
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
       <geometry>
@@ -125,8 +125,8 @@
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="${radians(-92)}" upper="${radians(123)}" velocity="${pi}"/>
     <origin rpy="${pi} 0 0" xyz="0.04975 0 0.25"/>
-    <parent link="$(arg robot_name)/upper_arm_link"/>
-    <child link="$(arg robot_name)/upper_forearm_link"/>
+    <parent link="$(robot_name)/upper_arm_link"/>
+    <child link="$(robot_name)/upper_forearm_link"/>
   </joint>
 
   <transmission name="trans_elbow">
@@ -139,7 +139,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/upper_forearm_link">
+  <link name="$(robot_name)/upper_forearm_link">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -164,8 +164,8 @@
     <axis xyz="1 0 0"/>
     <limit effort="100" lower="${radians(-180)}" upper="${radians(180)}" velocity="${pi}"/>
     <origin rpy="0 0 0" xyz="0.175 0 0"/>
-    <parent link="$(arg robot_name)/upper_forearm_link"/>
-    <child link="$(arg robot_name)/lower_forearm_link"/>
+    <parent link="$(robot_name)/upper_forearm_link"/>
+    <child link="$(robot_name)/lower_forearm_link"/>
   </joint>
 
   <transmission name="trans_forearm_roll">
@@ -178,7 +178,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/lower_forearm_link">
+  <link name="$(robot_name)/lower_forearm_link">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -203,8 +203,8 @@
     <axis xyz="0 1 0"/>
     <limit effort="100" lower="${radians(-123)}" upper="${radians(100)}" velocity="${pi}"/>
     <origin rpy="0 0 0" xyz="0.075 0 0"/>
-    <parent link="$(arg robot_name)/lower_forearm_link"/>
-    <child link="$(arg robot_name)/wrist_link"/>
+    <parent link="$(robot_name)/lower_forearm_link"/>
+    <child link="$(robot_name)/wrist_link"/>
   </joint>
 
   <transmission name="trans_wrist_angle">
@@ -217,7 +217,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/wrist_link">
+  <link name="$(robot_name)/wrist_link">
     <visual>
       <origin rpy="0 ${pi} ${pi/2}" xyz="0 0 0"/>
       <geometry>
@@ -242,8 +242,8 @@
     <axis xyz="1 0 0"/>
     <limit effort="100" lower="${-pi}" upper="${pi}" velocity="${pi}"/>
     <origin rpy="${-pi} 0 0" xyz="0.065 0 0"/>
-    <parent link="$(arg robot_name)/wrist_link"/>
-    <child link="$(arg robot_name)/gripper_link"/>
+    <parent link="$(robot_name)/wrist_link"/>
+    <child link="$(robot_name)/gripper_link"/>
   </joint>
 
   <transmission name="trans_wrist_rotate">
@@ -256,7 +256,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/gripper_link">
+  <link name="$(robot_name)/gripper_link">
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="-0.02 0 0"/>
       <geometry>
@@ -280,11 +280,11 @@
   <joint name="ee_arm" type="fixed">
     <axis xyz="1 0 0"/>
     <origin rpy="0 0 0" xyz="0.043 0 0"/>
-    <parent link="$(arg robot_name)/gripper_link"/>
-    <child link="$(arg robot_name)/ee_arm_link"/>
+    <parent link="$(robot_name)/gripper_link"/>
+    <child link="$(robot_name)/ee_arm_link"/>
   </joint>
 
-  <link name="$(arg robot_name)/ee_arm_link">
+  <link name="$(robot_name)/ee_arm_link">
     <inertial>
       <mass value="0.001" />
       <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0" />
@@ -295,8 +295,8 @@
     <axis xyz="1 0 0"/>
     <limit effort="100" velocity="${pi}"/>
     <origin rpy="0 0 0" xyz="0.0055 0 0"/>
-    <parent link="$(arg robot_name)/ee_arm_link"/>
-    <child link="$(arg robot_name)/gripper_prop_link"/>
+    <parent link="$(robot_name)/ee_arm_link"/>
+    <child link="$(robot_name)/gripper_prop_link"/>
   </joint>
 
   <transmission name="trans_gripper">
@@ -309,7 +309,7 @@
     </actuator>
   </transmission>
 
-  <link name="$(arg robot_name)/gripper_prop_link">
+  <link name="$(robot_name)/gripper_prop_link">
     <visual>
       <origin rpy="0 0 ${pi/2}" xyz="-0.0685 0 0"/>
       <geometry>
@@ -337,11 +337,11 @@
     <joint name="gripper_bar" type="fixed">
       <axis xyz="1 0 0"/>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-      <parent link="$(arg robot_name)/ee_arm_link"/>
-      <child link="$(arg robot_name)/gripper_bar_link"/>
+      <parent link="$(robot_name)/ee_arm_link"/>
+      <child link="$(robot_name)/gripper_bar_link"/>
     </joint>
 
-    <link name="$(arg robot_name)/gripper_bar_link">
+    <link name="$(robot_name)/gripper_bar_link">
       <visual>
         <origin rpy="0 0 ${pi/2}" xyz="-0.063 0 0"/>
         <geometry>
@@ -365,11 +365,11 @@
     <joint name="ee_bar" type="fixed">
       <axis xyz="1 0 0"/>
       <origin rpy="0 0 0" xyz="0.023 0 0"/>
-      <parent link="$(arg robot_name)/gripper_bar_link"/>
-      <child link="$(arg robot_name)/fingers_link"/>
+      <parent link="$(robot_name)/gripper_bar_link"/>
+      <child link="$(robot_name)/fingers_link"/>
     </joint>
 
-    <link name="$(arg robot_name)/fingers_link">
+    <link name="$(robot_name)/fingers_link">
       <inertial>
         <mass value="0.001" />
         <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0" />
@@ -384,8 +384,8 @@
         <axis xyz="0 1 0"/>
         <limit effort="10" lower="0.015" upper="0.037" velocity="1"/>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <parent link="$(arg robot_name)/fingers_link"/>
-        <child link="$(arg robot_name)/left_finger_link"/>
+        <parent link="$(robot_name)/fingers_link"/>
+        <child link="$(robot_name)/left_finger_link"/>
       </joint>
 
       <transmission name="trans_left_finger">
@@ -398,7 +398,7 @@
         </actuator>
       </transmission>
 
-      <link name="$(arg robot_name)/left_finger_link">
+      <link name="$(robot_name)/left_finger_link">
         <visual>
           <origin rpy="${pi} ${pi} 0" xyz="0 0.005 0"/>
           <geometry>
@@ -423,8 +423,8 @@
         <axis xyz="0 1 0"/>
         <limit effort="10" lower="-0.037" upper="-0.015" velocity="1"/>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <parent link="$(arg robot_name)/fingers_link"/>
-        <child link="$(arg robot_name)/right_finger_link"/>
+        <parent link="$(robot_name)/fingers_link"/>
+        <child link="$(robot_name)/right_finger_link"/>
         <xacro:unless value="$(arg load_gazebo_configs)">
           <mimic joint="left_finger" multiplier="-1" offset="0"/>
         </xacro:unless>
@@ -440,7 +440,7 @@
         </actuator>
       </transmission>
 
-      <link name="$(arg robot_name)/right_finger_link">
+      <link name="$(robot_name)/right_finger_link">
         <visual>
           <origin rpy="0 ${pi} 0" xyz="0 -0.005 0"/>
           <geometry>
@@ -464,11 +464,11 @@
       <joint name="ee_gripper" type="fixed">
         <axis xyz="1 0 0"/>
         <origin rpy="0 0 0" xyz="0.027575 0 0"/>
-        <parent link="$(arg robot_name)/fingers_link"/>
-        <child link="$(arg robot_name)/ee_gripper_link"/>
+        <parent link="$(robot_name)/fingers_link"/>
+        <child link="$(robot_name)/ee_gripper_link"/>
       </joint>
 
-      <link name="$(arg robot_name)/ee_gripper_link">
+      <link name="$(robot_name)/ee_gripper_link">
         <inertial>
           <mass value="0.001" />
           <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0" />

@@ -37,3 +37,8 @@ class TestPyPlot(unittest.TestCase):
 
         env.restart()
         env.remove()
+
+
+if __name__ == '__main__':
+
+    unittest.main()

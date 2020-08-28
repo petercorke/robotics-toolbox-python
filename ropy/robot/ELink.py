@@ -24,7 +24,7 @@ class ELink(object):
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3,1)
+    :type r:  SE3
     :param I: dynamic - inertia of link with respect to COM
     :type I: float ndarray(3,3)
     :param Jm: dynamic - motor inertia
@@ -49,7 +49,7 @@ class ELink(object):
             parent=None,
             qlim=np.zeros(2),
             m=0.0,
-            r=np.zeros(3),
+            r=None,
             I=np.zeros((3, 3)),  # noqa
             Jm=0.0,
             B=0.0,
@@ -206,8 +206,10 @@ class ELink(object):
         self._m = m_new
 
     @r.setter
-    def r(self, r_new):
-        self._r = getvector(r_new, 3, out='col')
+    def r(self, T):
+        if not isinstance(T, SE3):
+            T = SE3(T)
+        self._r = T
 
     @I.setter
     def I(self, I_new):  # noqa

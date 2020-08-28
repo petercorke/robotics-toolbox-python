@@ -553,156 +553,6 @@ class Geometry(URDFType):
         return v
 
 
-# class Texture(URDFType):
-#     """An image-based texture.
-#     Parameters
-#     ----------
-#     filename : str
-#         The path to the image that contains this texture. This can be
-#         relative to the top-level URDF or an absolute path.
-#     image : :class:`PIL.Image.Image`, optional
-#         The image for the texture.
-#         If not specified, it is loaded automatically from the filename.
-#     """
-
-#     _ATTRIBS = {
-#         'filename': (str, True)
-#     }
-#     _TAG = 'texture'
-
-#     def __init__(self, filename, image=None):
-#         self.filename = filename
-#         self.image = image
-
-#     @property
-#     def filename(self):
-#         """str : Path to the image for this texture.
-#         """
-#         return self._filename
-
-#     @filename.setter
-#     def filename(self, value):
-#         self._filename = str(value)
-
-#     @classmethod
-#     def _from_xml(cls, node, path):
-#         kwargs = cls._parse(node, path)
-
-#         return Texture(**kwargs)
-
-#     def copy(self, prefix='', scale=None):
-#         """Create a deep copy with the prefix applied to all names.
-#         Parameters
-#         ----------
-#         prefix : str
-#             A prefix to apply to all names.
-#         Returns
-#         -------
-#         :class:`.Texture`
-#             A deep copy.
-#         """
-#         v = Texture(
-#             filename=self.filename
-#         )
-#         return v
-
-
-# class Material(URDFType):
-#     """A material for some geometry.
-#     Parameters
-#     ----------
-#     name : str
-#         The name of the material.
-#     color : (4,) float, optional
-#         The RGBA color of the material in the range [0,1].
-#     texture : :class:`.Texture`, optional
-#         A texture for the material.
-#     """
-#     _ATTRIBS = {
-#         'name': (str, True)
-#     }
-#     _ELEMENTS = {
-#         'texture': (Texture, False, False),
-#     }
-#     _TAG = 'material'
-
-#     def __init__(self, name, color=None, texture=None):
-#         self.name = name
-#         self.color = color
-#         self.texture = texture
-
-#     @property
-#     def name(self):
-#         """str : The name of the material.
-#         """
-#         return self._name
-
-#     @name.setter
-#     def name(self, value):
-#         self._name = str(value)
-
-#     @property
-#     def color(self):
-#         """(4,) float : The RGBA color of the material, in the range [0,1].
-#         """
-#         return self._color
-
-#     @color.setter
-#     def color(self, value):
-#         if value is not None:
-#             value = np.asanyarray(value).astype(np.float)
-#             value = np.clip(value, 0.0, 1.0)
-#             if value.shape != (4,):   # pragma nocover
-#                 raise ValueError('Color must be a (4,) float')
-#         self._color = value
-
-#     @property
-#     def texture(self):
-#         """:class:`.Texture` : The texture for the material.
-#         """
-#         return self._texture
-
-#     @texture.setter
-#     def texture(self, value):
-#         if value is not None:
-#             if isinstance(value, str):
-#                 value = Texture(filename=value)
-#             elif not isinstance(value, Texture):  # pragma nocover
-#                 raise ValueError('Invalid type for texture -- expect path to '
-#                                  'image or Texture')
-#         self._texture = value
-
-#     @classmethod
-#     def _from_xml(cls, node, path):
-#         kwargs = cls._parse(node, path)
-
-#         # Extract the color -- it's weirdly an attribute of a subelement
-#         color = node.find('color')
-#         if color is not None:
-#             color = np.fromstring(
-#                 color.attrib['rgba'], sep=' ', dtype=np.float64)
-#         kwargs['color'] = color
-
-#         return Material(**kwargs)
-
-#     def copy(self, prefix='', scale=None):
-#         """Create a deep copy of the material with the prefix applied to all names.
-#         Parameters
-#         ----------
-#         prefix : str
-#             A prefix to apply to all joint and link names.
-#         Returns
-#         -------
-#         :class:`.Material`
-#             A deep copy of the material.
-#         """
-#         return Material(
-#             name='{}{}'.format(prefix, self.name),
-#             color=self.color,
-#             texture=self.texture
-#         )
-
-
 class Collision(URDFType):
     """Collision properties of a link.
     Parameters
@@ -2302,13 +2152,8 @@ class URDF(URDFType):
                                  'found'.format(x.name))
             self._transmission_map[x.name] = x
 
-        # for x in self._materials:
-        #     if x.name in self._material_map:
-        #         raise ValueError('Two materials with name {} '
-        #                          'found'.format(x.name))
-        #     self._material_map[x.name] = x
-
         elinks = []
+        elinks_dict = {}
 
         for j in self.joints:
 
@@ -2380,6 +2225,7 @@ class URDF(URDFType):
                     qlim=qlim
                 )
             )
+            elinks_dict[elinks[-1].name] = elinks[-1]
 
         for i in range(len(elinks)):
             found = False
@@ -2404,10 +2250,10 @@ class URDF(URDFType):
         elinks.append(base_link)
         self.elinks = elinks
 
-        # Store the visuals
+        # Store the visuals and inertials
         for i in range(len(joints)):
             link = self._link_map[joints[i].child]
-
+            elinks[i].r = link.inertial.origin
             try:
                 for visual in link.visuals:
                     elinks[i].geometry.append(visual.geometry.ob)
@@ -2415,25 +2261,18 @@ class URDF(URDFType):
             except AttributeError:
                 pass
 
-        # for j in self.joints:
-        #     print(j.parent + ' <- ' + j.name + ' -> ' + j.child)
-
-        # for link in elinks:
-        #     # for p in link.parent:
-        #     #     print(p.name + ' -> ' + link.name)
-        #     for g in link.geometry:
-        #         print(link.name + ' -> ' + g.filename)
-
-        # for link in self.links:
-        #     for vis in link.visuals:
-        #         print(vis.geometry.mesh.filename)
-
-        # Synchronize materials between links and top-level set
-        # self._merge_materials()
-
-        # Validate the joints and transmissions
-        # actuated_joints = self._validate_joints()
+        # Apply gear ratio
         self._validate_transmissions()
+        for t in self.transmissions:
+            elinks_dict[self.joint_map[t.joints[0].name].name].G = \
+                t.actuators[0].mechanicalReduction
+
+        for li in self.links:
+            print(li.inertial.mass)
+            print(li.inertial.inertia)
+            print(li.inertial.origin)
+
+        
 
     @property
     def name(self):
@@ -2498,24 +2337,6 @@ class URDF(URDFType):
         the appropriate functions.
         """
         return copy.copy(self._transmission_map)
-
-    # @property
-    # def materials(self):
-    #     """list of :class:`.Material` : The materials of the URDF.
-    #     This returns a copy of the materials array which cannot be edited
-    #     directly. If you want to add or remove materials, use
-    #     the appropriate functions.
-    #     """
-    #     return copy.copy(self._materials)
-
-    # @property
-    # def material_map(self):
-    #     """dict : Map from material names to the materials themselves.
-    #     This returns a copy of the material map which cannot be edited
-    #     directly. If you want to add or remove materials, use
-    #     the appropriate functions.
-    #     """
-    #     return copy.copy(self._material_map)
 
     @property
     def other_xml(self):
