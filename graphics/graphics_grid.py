@@ -21,7 +21,7 @@ class GraphicsGrid:
 
         self.__relative_cam = True
         self.__num_squares = 10
-        self.__scale = 0.5
+        self.__scale = 1
 
         # Save the current camera settings
         self.camera_pos = self.__scene.camera.pos
@@ -75,8 +75,8 @@ class GraphicsGrid:
         camera_axes = self.camera_axes
         # Locate centre of axes
         if self.__relative_cam:
-            x_origin, y_origin, z_origin = round(self.__scene.center.x, 2),\
-                                           round(self.__scene.center.y, 2),\
+            x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
+                                           round(self.__scene.center.y, 2), \
                                            round(self.__scene.center.z, 2)
             self.__focal_point = [x_origin, y_origin, z_origin]
         else:
@@ -98,20 +98,20 @@ class GraphicsGrid:
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
         # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = x_origin + int(-(self.__num_squares / 2) +
-                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
-        max_x_coord = x_origin + int((self.__num_squares / 2) +
-                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
+        min_x_coord = round(x_origin + (-(self.__num_squares / 2) +
+                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        max_x_coord = round(x_origin + ((self.__num_squares / 2) +
+                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
 
-        min_y_coord = y_origin + int(-(self.__num_squares / 2) +
-                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
-        max_y_coord = y_origin + int((self.__num_squares / 2) +
-                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
+        min_y_coord = round(y_origin + (-(self.__num_squares / 2) +
+                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        max_y_coord = round(y_origin + ((self.__num_squares / 2) +
+                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
 
-        min_z_coord = z_origin + int(-(self.__num_squares / 2) +
-                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
-        max_z_coord = z_origin + int((self.__num_squares / 2) +
-                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
+        min_z_coord = round(z_origin + (-(self.__num_squares / 2) +
+                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        max_z_coord = round(z_origin + ((self.__num_squares / 2) +
+                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
 
         x_coords = arange(min_x_coord, max_x_coord + self.__scale, self.__scale)
         y_coords = arange(min_y_coord, max_y_coord + self.__scale, self.__scale)
@@ -215,20 +215,20 @@ class GraphicsGrid:
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
         # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = x_origin + int(-(self.__num_squares / 2) +
-                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
-        max_x_coord = x_origin + int((self.__num_squares / 2) +
-                                     (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale
+        min_x_coord = round(x_origin + (-(self.__num_squares / 2) +
+                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        max_x_coord = round(x_origin + ((self.__num_squares / 2) +
+                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
 
-        min_y_coord = y_origin + int(-(self.__num_squares / 2) +
-                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
-        max_y_coord = y_origin + int((self.__num_squares / 2) +
-                                     (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale
+        min_y_coord = round(y_origin + (-(self.__num_squares / 2) +
+                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        max_y_coord = round(y_origin + ((self.__num_squares / 2) +
+                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
 
-        min_z_coord = z_origin + int(-(self.__num_squares / 2) +
-                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
-        max_z_coord = z_origin + int((self.__num_squares / 2) +
-                                     (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale
+        min_z_coord = round(z_origin + (-(self.__num_squares / 2) +
+                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        max_z_coord = round(z_origin + ((self.__num_squares / 2) +
+                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
 
         # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
         x_middle = (max_x_coord + min_x_coord) / 2
@@ -358,14 +358,14 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
         colour = [0, 0, 0]
 
     if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
-       colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+            colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
         raise ValueError("RGB values must be normalised between 0 and 1")
 
     if thickness < 0.0:
         raise ValueError("Thickness must be greater than 0")
 
     # Length of the line using the magnitude
-    line_len = mag(pos2-pos1)
+    line_len = mag(pos2 - pos1)
 
     # Position of the line is the midpoint (centre) between the ends
     position = (pos1 + pos2) / 2
@@ -411,14 +411,14 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
         colour = [0, 0, 0]
 
     if colour[0] > 1.0 or colour[1] > 1.0 or colour[2] > 1.0 or \
-       colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
+            colour[0] < 0.0 or colour[1] < 0.0 or colour[2] < 0.0:
         raise ValueError("RGB values must be normalised between 0 and 1")
 
     if thickness < 0.0:
         raise ValueError("Thickness must be greater than 0")
 
     # Length of the line using the magnitude
-    line_len = mag(pos2-pos1)
+    line_len = mag(pos2 - pos1)
 
     # Axis direction of the line (to align the box (line) to intersect the two points)
     axis_dir = pos2 - pos1
@@ -427,16 +427,16 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
     # Return a compound of boxes of thin width and height to resemble a dashed line
     dash_positions = []
     boxes = []
-    pos1 = pos1 + (axis_dir * segment_len/2)  # Translate centre pos to centre of where dashes will originate from
+    pos1 = pos1 + (axis_dir * segment_len / 2)  # Translate centre pos to centre of where dashes will originate from
 
     # Range = number of dashes (vis and invis)
-    for idx in range(0,  int(ceil(line_len / (segment_len / axis_dir.mag)))):
+    for idx in range(0, int(ceil(line_len / (segment_len / axis_dir.mag)))):
         # Add every even point (zeroth, second...) to skip gaps between boxes
         if idx % 2 == 0:
             dash_positions.append(pos1)
         pos1 = (pos1 + axis_dir * segment_len)
         # If the axis between points changes, then the line has surpassed the end point. The line is done
-        check_dir = pos2-pos1
+        check_dir = pos2 - pos1
         check_dir.mag = 1.0
         if not vectors_approx_equal(axis_dir, check_dir):
             break
@@ -444,7 +444,7 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
     for xyz in dash_positions:
         length = segment_len
         # If the box will surpass the end point
-        len_to_end = (pos2-xyz).mag
+        len_to_end = (pos2 - xyz).mag
         if len_to_end < segment_len / 2:
             # Length is equal to dist to the end * 2 (as pos is middle of box)
             length = len_to_end * 2
