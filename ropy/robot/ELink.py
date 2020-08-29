@@ -338,7 +338,7 @@ class ELink(object):
             "G     =  {:.2f} \n" \
             "qlim  =  {:.2f} to {:.2f}".format(
                 self.m,
-                self.r[0, 0], self.r[1, 0], self.r[2, 0],
+                self.r.t[0], self.r.t[1], self.r.t[2],
                 self.I[0, 0], self.I[0, 1], self.I[0, 2],
                 self.I[1, 0], self.I[1, 1], self.I[1, 2],
                 self.I[2, 0], self.I[2, 1], self.I[2, 2],
