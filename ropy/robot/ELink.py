@@ -74,7 +74,7 @@ class ELink(object):
             parent = []
         elif not isinstance(parent, list):
             TypeError('The parent link must be of type ELink or list of Elink')
-            
+
         self._parent = parent
         self._child = []
 

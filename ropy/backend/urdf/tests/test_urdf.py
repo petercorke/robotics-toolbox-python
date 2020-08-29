@@ -85,7 +85,7 @@ class TestURDF(unittest.TestCase):
         # assert len(x.links) == 2 * len(u.links)
 
         # Test scale
-        x = u.copy(scale=3)
-        self.assertIsInstance(x, URDF)
-        x = x.copy(scale=[1, 1, 3])
-        self.assertIsInstance(x, URDF)
+        # x = u.copy(scale=3)
+        # self.assertIsInstance(x, URDF)
+        # x = x.copy(scale=[1, 1, 3])
+        # self.assertIsInstance(x, URDF)
