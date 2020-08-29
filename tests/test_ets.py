@@ -129,13 +129,15 @@ class TestETS(unittest.TestCase):
         p.q = q
         pm.q = q
 
-        r0 = p.allfkine()
-        r1 = p.allfkine(q)
+        p.allfkine()
         r2 = pm.allfkine()
 
         for i in range(7):
-            nt.assert_array_almost_equal(r0[i].A, r2[i].A)
-            nt.assert_array_almost_equal(r1[i].A, r2[i].A)
+            nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
+
+        p.allfkine(q)
+        for i in range(7):
+            nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
 
     def test_jacob0(self):
         panda = rp.Panda()
@@ -412,21 +414,6 @@ class TestETS(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
         nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     # def test_plot(self):
     #     panda = rp.Panda()
