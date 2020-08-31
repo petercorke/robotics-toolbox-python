@@ -79,6 +79,13 @@ class GraphicsGrid:
                                            round(self.__scene.center.y, 2), \
                                            round(self.__scene.center.z, 2)
             self.__focal_point = [x_origin, y_origin, z_origin]
+            # Convert focal point for 2D rendering. Puts focus point in centre of the view
+            if not self.__is_3d:
+                self.__focal_point = [val - int(self.__num_squares / 2) for val in self.__focal_point]
+                x_origin = self.__focal_point[0]
+                y_origin = self.__focal_point[1]
+                z_origin = 0
+                self.__focal_point[2] = z_origin
         else:
             x_origin, y_origin, z_origin = self.__focal_point[0], \
                                            self.__focal_point[1], \
@@ -116,6 +123,11 @@ class GraphicsGrid:
         x_coords = arange(min_x_coord, max_x_coord + self.__scale, self.__scale)
         y_coords = arange(min_y_coord, max_y_coord + self.__scale, self.__scale)
         z_coords = arange(min_z_coord, max_z_coord + self.__scale, self.__scale)
+
+        # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
+        x_middle = (max_x_coord + min_x_coord) / 2
+        y_middle = (max_y_coord + min_y_coord) / 2
+        z_middle = (max_z_coord + min_z_coord) / 2
 
         # XZ plane
         for x_point in x_coords:
@@ -166,9 +178,23 @@ class GraphicsGrid:
             ))
 
         # Compound the lines together into respective objects
-        xz_plane = compound(xz_lines)
-        xy_plane = compound(xy_lines)
-        yz_plane = compound(yz_lines)
+        # XY Plane
+        if camera_axes.z < 0:
+            xy_plane = compound(xy_lines, origin=vector(x_middle, y_middle, min_z_coord))
+        else:
+            xy_plane = compound(xy_lines, origin=vector(x_middle, y_middle, max_z_coord))
+
+        # XZ Plane
+        if camera_axes.y < 0:
+            xz_plane = compound(xz_lines, origin=vector(x_middle, min_y_coord, z_middle))
+        else:
+            xz_plane = compound(xz_lines, origin=vector(x_middle, max_y_coord, z_middle))
+
+        # YZ Plane
+        if camera_axes.x < 0:
+            yz_plane = compound(yz_lines, origin=vector(min_x_coord, y_middle, z_middle))
+        else:
+            yz_plane = compound(yz_lines, origin=vector(max_x_coord, y_middle, z_middle))
 
         # Combine all into one list
         grid = [None, None, None]
@@ -235,11 +261,18 @@ class GraphicsGrid:
         y_middle = (max_y_coord + min_y_coord) / 2
         z_middle = (max_z_coord + min_z_coord) / 2
 
+        print("x", min_x_coord, x_middle, max_x_coord)
+        print("y", min_y_coord, y_middle, max_y_coord)
+        print("z", min_z_coord, z_middle, max_z_coord)
+        print("pos", self.grid_object[self.__planes_idx][self.__xy_plane_idx])
+
         # XY Plane
         if camera_axes.z < 0:
             self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, min_z_coord)
         else:
             self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, max_z_coord)
+
+        print("pos", self.grid_object[self.__planes_idx][self.__xy_plane_idx])
 
         # XZ Plane
         if camera_axes.y < 0:
@@ -258,18 +291,23 @@ class GraphicsGrid:
         Update the grid axes and numbers if the camera position/rotation has changed.
         """
         # Obtain the new camera settings
-        new_camera_pos = self.__scene.camera.pos
-        new_camera_axes = self.__scene.camera.axis
+        new_camera_pos = vector(self.__scene.camera.pos)
+        new_camera_axes = vector(self.__scene.camera.axis)
 
-        old_camera_pos = self.camera_pos
-        old_camera_axes = self.camera_axes
+        old_camera_pos = vector(self.camera_pos)
+        old_camera_axes = vector(self.camera_axes)
+
+        # Update old positions
+        self.camera_pos = new_camera_pos
+        self.camera_axes = new_camera_axes
+
+        distance_from_center = mag(self.__scene.center - self.__scene.camera.pos)
+        new_scale = round(distance_from_center / 30.0, 1)
+        if not new_scale == self.__scale:
+            self.set_scale(new_scale)
 
         # If camera is different to previous: update
         if (not new_camera_axes.equals(old_camera_axes)) or (not new_camera_pos.equals(old_camera_pos)):
-            # Update old positions
-            self.camera_pos = new_camera_pos
-            self.camera_axes = new_camera_axes
-
             # Update grid
             self.__move_grid_objects()
             update_grid_numbers(self.__focal_point,
@@ -331,6 +369,22 @@ class GraphicsGrid:
         """
         self.__relative_cam = is_relative
         self.update_grid()
+
+    def set_scale(self, value):
+        """
+        :param value: The value to set the scale to
+        :type value: `float`
+        """
+        value = max(min(value, 100), 0.1)  # Between 0.1 and 100
+        self.__scale = value
+        # Turn off grid then delete
+        for plane in self.grid_object[self.__planes_idx]:
+            plane.visible = False
+        for text in self.grid_object[self.__labels_idx]:
+            text.visible = False
+
+        self.grid_object = [[], []]
+        self.__init_grid()
 
 
 def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
