@@ -156,11 +156,57 @@ class TestELink(unittest.TestCase):
         nt.assert_array_almost_equal(l0.r.A, np.eye(4))
         self.assertEqual(l0.Jm, 0.0)
 
+    def test_fail_parent(self):
+
+        with self.assertRaises(TypeError):
+            rp.ELink(parent=1)
+
     def test_setB(self):
         l0 = rp.ELink()
 
         with self.assertRaises(TypeError):
             l0.B = [1, 2]
+
+    def test_collision(self):
+        p = rp.PandaURDF()
+        link = p.ets[1]
+        col = link.collision[0]
+
+        self.assertIsInstance(col, rp.Shape)
+
+        self.assertIsInstance(col.base, sm.SE3)
+        self.assertTrue(col.primitive)
+        self.assertIsInstance(col.scale, np.ndarray)
+
+        col.radius = 2
+        self.assertEqual(col.radius, 2)
+
+        col.length = 2
+        self.assertEqual(col.length, 2)
+
+    def test_collision_fail(self):
+        l0 = rp.ELink()
+        col = rp.Shape.Box([1, 1, 1])
+        l0.collision = col
+
+        with self.assertRaises(TypeError):
+            l0.collision = [1, 1, 1]
+
+        with self.assertRaises(TypeError):
+            l0.collision = 1
+
+    def test_geometry_fail(self):
+        l0 = rp.ELink()
+        col = rp.Shape.Box([1, 1, 1])
+        l0.geometry = col
+        l0.geometry = [col, col]
+
+        with self.assertRaises(TypeError):
+            l0.geometry = [1, 1, 1]
+
+        with self.assertRaises(TypeError):
+            l0.geometry = 1
+
 
 if __name__ == '__main__':
 

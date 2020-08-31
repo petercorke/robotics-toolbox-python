@@ -73,7 +73,7 @@ class ELink(object):
         elif parent is None:
             parent = []
         elif not isinstance(parent, list):
-            TypeError('The parent link must be of type ELink or list of Elink')
+            raise TypeError('The parent link must be of type ELink or list of Elink')
 
         self._parent = parent
         self._child = []
@@ -197,7 +197,7 @@ class ELink(object):
                 else:
                     raise TypeError('Collision must be of Shape class')
         elif isinstance(coll, rp.Shape):
-            new_coll.append(gi)
+            new_coll.append(coll)
         else:
             raise TypeError('Geometry must be of Shape class or list of Shape')
 
@@ -214,7 +214,7 @@ class ELink(object):
                 else:
                     raise TypeError('Geometry must be of Shape class')
         elif isinstance(geom, rp.Shape):
-            new_geom.append(gi)
+            new_geom.append(geom)
         else:
             raise TypeError('Geometry must be of Shape class or list of Shape')
 

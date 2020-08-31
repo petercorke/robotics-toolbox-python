@@ -3,10 +3,7 @@
 @author: Jesse Haviland
 """
 
-import numpy.testing as nt
-import numpy as np
 import ropy as rp
-import spatialmath as sm
 import unittest
 
 
