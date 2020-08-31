@@ -129,20 +129,24 @@ class GraphicsGrid:
         y_middle = (max_y_coord + min_y_coord) / 2
         z_middle = (max_z_coord + min_z_coord) / 2
 
+        line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
+
         # XZ plane
         for x_point in x_coords:
             # Draw a line across for each x coord, along the same y-axis, from min to max z coord
             xz_lines.append(create_line(
                 vector(x_point, y_origin, min_z_coord),
                 vector(x_point, y_origin, max_z_coord),
-                self.__scene
+                self.__scene,
+                thickness=line_thickness
             ))
         for z_point in z_coords:
             # Draw a line across each z coord, along the same y-axis, from min to max z coord
             xz_lines.append(create_line(
                 vector(min_x_coord, y_origin, z_point),
                 vector(max_x_coord, y_origin, z_point),
-                self.__scene
+                self.__scene,
+                thickness=line_thickness
             ))
 
         # XY plane
@@ -151,14 +155,16 @@ class GraphicsGrid:
             xy_lines.append(create_line(
                 vector(x_point, min_y_coord, z_origin),
                 vector(x_point, max_y_coord, z_origin),
-                self.__scene
+                self.__scene,
+                thickness=line_thickness
             ))
         for y_point in y_coords:
             # Draw a line across each y coord, along the same z-axis, from min to max x coord
             xy_lines.append(create_line(
                 vector(min_x_coord, y_point, z_origin),
                 vector(max_x_coord, y_point, z_origin),
-                self.__scene
+                self.__scene,
+                thickness=line_thickness
             ))
 
         # YZ plane
@@ -167,14 +173,16 @@ class GraphicsGrid:
             yz_lines.append(create_line(
                 vector(x_origin, y_point, min_z_coord),
                 vector(x_origin, y_point, max_z_coord),
-                self.__scene
+                self.__scene,
+                thickness=line_thickness
             ))
         for z_point in z_coords:
             # Draw a line across each z coord, along the same x-axis, from min to max y coord
             yz_lines.append(create_line(
                 vector(x_origin, min_y_coord, z_point),
                 vector(x_origin, max_y_coord, z_point),
-                self.__scene
+                self.__scene,
+                thickness=line_thickness
             ))
 
         # Compound the lines together into respective objects
@@ -261,18 +269,11 @@ class GraphicsGrid:
         y_middle = (max_y_coord + min_y_coord) / 2
         z_middle = (max_z_coord + min_z_coord) / 2
 
-        print("x", min_x_coord, x_middle, max_x_coord)
-        print("y", min_y_coord, y_middle, max_y_coord)
-        print("z", min_z_coord, z_middle, max_z_coord)
-        print("pos", self.grid_object[self.__planes_idx][self.__xy_plane_idx])
-
         # XY Plane
         if camera_axes.z < 0:
             self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, min_z_coord)
         else:
             self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, max_z_coord)
-
-        print("pos", self.grid_object[self.__planes_idx][self.__xy_plane_idx])
 
         # XZ Plane
         if camera_axes.y < 0:
@@ -372,6 +373,8 @@ class GraphicsGrid:
 
     def set_scale(self, value):
         """
+        Set the scale and redraw the grid
+
         :param value: The value to set the scale to
         :type value: `float`
         """
