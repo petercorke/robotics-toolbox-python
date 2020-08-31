@@ -5,7 +5,6 @@
 
 import numpy as np
 import ropy as rp
-from collections import OrderedDict
 import copy
 import os
 import xml.etree.ElementTree as ET
@@ -1444,7 +1443,6 @@ class Joint(URDFType):
         if self.limit.upper is not None:
             upper = self.limit.upper
         return (cfg >= lower and cfg <= upper)
-
 
     @classmethod
     def _from_xml(cls, node, path):

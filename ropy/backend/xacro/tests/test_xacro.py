@@ -322,7 +322,7 @@ class TestXacroBase(unittest.TestCase):
 
     def quick_xacro(self, xml, cli=None, **kwargs):
         args = {}
-        if cli:  #pragma nocover
+        if cli:  # pragma nocover
             opts, _ = process_args(cli, require_input=False)
             args.update(vars(opts))  # initialize with cli args
         args.update(kwargs)  # explicit function args have highest priority

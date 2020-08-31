@@ -10,6 +10,7 @@ from ropy.backend import URDF, Link, Joint, Transmission, xacro
 import numpy as np
 import numpy.testing as nt
 
+
 class TestURDF(unittest.TestCase):
 
     def test_urdfpy(self):

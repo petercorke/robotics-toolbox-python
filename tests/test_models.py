@@ -23,3 +23,18 @@ class TestModels(unittest.TestCase):
         frankie = rp.Frankie()
         frankie.qr
         frankie.qz
+
+    def test_PandaURDF(self):
+        panda = rp.PandaURDF()
+        panda.qr
+        panda.qz
+
+    def test_UR5(self):
+        ur = rp.UR5()
+        ur.qr
+        ur.qz
+
+    def test_wx250s(self):
+        wx = rp.wx250s()
+        wx.qr
+        wx.qz
