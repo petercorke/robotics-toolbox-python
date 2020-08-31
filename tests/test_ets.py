@@ -8,7 +8,7 @@ import numpy.testing as nt
 import numpy as np
 import ropy as rp
 import unittest
-import spatialmath as sp
+import spatialmath as sm
 
 
 class TestETS(unittest.TestCase):
@@ -53,7 +53,7 @@ class TestETS(unittest.TestCase):
     def test_base(self):
         panda = rp.Panda()
 
-        pose = sp.SE3()
+        pose = sm.SE3()
 
         panda.base = pose.A
         nt.assert_array_almost_equal(np.eye(4), panda.base.A)
@@ -414,6 +414,71 @@ class TestETS(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
         nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
+
+    def test_init(self):
+        l0 = rp.ELink()
+        l1 = rp.ELink()
+        r = rp.ETS([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_link=l0)
+        r.base_link = l1
+        r.base_link = 0
+        r.ee_link = 1
+
+        with self.assertRaises(TypeError):
+            rp.ETS(l0, base=sm.SE3.Rx(1.3))
+
+        with self.assertRaises(TypeError):
+            rp.ETS([1, 2], base=sm.SE3.Rx(1.3))
+
+    def test_dict(self):
+        panda = rp.PandaURDF()
+        panda.to_dict()
+
+        wx = rp.wx250s()
+        wx.to_dict()
+
+    def test_fkdict(self):
+        panda = rp.PandaURDF()
+        fkd = panda.fk_dict()
+
+        for i in range(len(panda.ets)):
+            nt.assert_array_almost_equal(
+                panda.ets[i]._fk.t,
+                fkd['links'][i]['t'])
+
+    def test_qlim(self):
+        panda = rp.PandaURDF()
+
+        self.assertEqual(panda.qlim.shape[0], 2)
+        self.assertEqual(panda.qlim.shape[1], panda.n)
+
+    def test_manuf(self):
+        panda = rp.PandaURDF()
+
+        self.assertIsInstance(panda.manuf, str)
+
+    def test_complex(self):
+        l0 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.TRx()])
+        l1 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.TRy()], parent=l0)
+        l2 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.TRz()], parent=l1)
+        l3 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.Ttx()], parent=l2)
+        l4 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.Tty()], parent=l3)
+        l5 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.Ttz()], parent=l4)
+
+        r = rp.ETS([l0, l1, l2, l3, l4, l5])
+        r.q = [1, 2, 3, 1, 2, 3]
+
+        ans = np.array([
+            [-0., 0.08752679, -0.74761985, 0.41198225, 0.05872664, 0.90929743],
+            [1.46443609, 2.80993063, 0.52675075, -0.68124272, -0.64287284,
+                0.35017549],
+            [-1.04432, -1.80423571, -2.20308833, 0.60512725, -0.76371834,
+                -0.2248451],
+            [1., 0., 0.90929743, 0., 0., 0.],
+            [0., 0.54030231, 0.35017549, 0., 0., 0.],
+            [0., 0.84147098, -0.2248451, 0., 0., 0.]
+        ])
+
+        nt.assert_array_almost_equal(r.jacob0(), ans)
 
     # def test_plot(self):
     #     panda = rp.Panda()
