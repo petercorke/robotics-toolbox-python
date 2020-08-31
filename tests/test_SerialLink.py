@@ -1359,8 +1359,10 @@ class TestSerialLink(unittest.TestCase):
         e = panda.teach(block=False)
         e.close()
 
-        e2 = panda.teach(block=False, q=panda.qr)
-        e2.close()
+    def test_teach_withq(self):
+        panda = rp.PandaMDH()
+        e = panda.teach(q=panda.qr, block=False)
+        e.close()
 
     def test_plot(self):
         panda = rp.PandaMDH()
