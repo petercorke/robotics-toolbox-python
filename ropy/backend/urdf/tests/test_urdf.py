@@ -4,11 +4,11 @@
 @author (Adapted by) Jesse Haviland
 """
 
-import numpy as np
 import unittest
-
-from ropy.backend import URDF, Link, Joint, Transmission
-
+import ropy as rp
+from ropy.backend import URDF, Link, Joint, Transmission, xacro
+import numpy as np
+import numpy.testing as nt
 
 class TestURDF(unittest.TestCase):
 
@@ -24,68 +24,107 @@ class TestURDF(unittest.TestCase):
             self.assertIsInstance(ln, Link)
         for t in u.transmissions:
             self.assertIsInstance(t, Transmission)
-        # for m in u.materials:
-        #     self.assertIsInstance(m, Material)
 
-        # # Test fk
-        # fk = u.link_fk()
-        # self.assertIsInstance(fk, dict)
-        # for ln in fk:
-        #     self.assertIsInstance(ln, Link)
-        #     self.assertIsInstance(fk[ln], np.ndarray)
-        #     assert fk[ln].shape == (4, 4)
+    def test_urdf_visuals(self):
 
-        # fk = u.link_fk({'shoulder_pan_joint': 2.0})
-        # self.assertIsInstance(fk, dict)
-        # for ln in fk:
-        #     self.assertIsInstance(ln, Link)
-        #     self.assertIsInstance(fk[ln], np.ndarray)
-        #     assert fk[ln].shape == (4, 4)
+        urdf_string = xacro.main(
+            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+        urdf = URDF.loadstr(
+            urdf_string,
+            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
 
-        # fk = u.link_fk(np.zeros(6))
-        # self.assertIsInstance(fk, dict)
-        # for ln in fk:
-        #     self.assertIsInstance(ln, Link)
-        #     self.assertIsInstance(fk[ln], np.ndarray)
-        #     assert fk[ln].shape == (4, 4)
+        urdf.links[0].visuals[0].name = "Lonk"
+        self.assertTrue(urdf.links[0].visuals[0].name == "Lonk")
 
-        # fk = u.link_fk(np.zeros(6), link='upper_arm_link')
-        # self.assertIsInstance(fk, np.ndarray)
-        # assert fk.shape == (4, 4)
+        self.assertTrue(
+            isinstance(
+                urdf.links[0].visuals[0].origin,
+                np.ndarray))
 
-        # fk = u.link_fk(links=['shoulder_link', 'upper_arm_link'])
-        # self.assertIsInstance(fk, dict)
-        # assert len(fk) == 2
-        # for ln in fk:
-        #     self.assertIsInstance(ln, Link)
-        #     self.assertIsInstance(fk[ln], np.ndarray)
-        #     assert fk[ln].shape == (4, 4)
+        urdf.links[0].visuals[0].geometry.box = rp.backend.urdf.Box([1, 2, 3])
+        self.assertTrue(
+            isinstance(
+                urdf.links[0].visuals[0].geometry.geometry,
+                rp.backend.urdf.Box))
 
-        # fk = u.link_fk(links=list(u.links)[:2])
-        # self.assertIsInstance(fk, dict)
-        # assert len(fk) == 2
-        # for ln in fk:
-        #     self.assertIsInstance(ln, Link)
-        #     self.assertIsInstance(fk[ln], np.ndarray)
-        #     assert fk[ln].shape == (4, 4)
+        urdf.links[0].visuals[0].geometry.cylinder = \
+            rp.backend.urdf.Cylinder(1, 2)
 
-        # cfg = {j.name: np.random.uniform(size=1000) for j in u.actuated_joints}
-        # fk = u.link_fk_batch(cfgs=cfg)
-        # for key in fk:
-        #     self.assertIsInstance(fk[key], np.ndarray)
-        #     assert fk[key].shape == (1000, 4, 4)
+        urdf.links[0].visuals[0].geometry.sphere = \
+            rp.backend.urdf.Sphere(2)
 
-        # # Test join
-        # with self.assertRaises(ValueError):
-        #     x = u.join(u, link=u.link_map['tool0'])
-        # x = u.join(u, link=u.link_map['tool0'], name='copy', prefix='prefix')
-        # self.assertIsInstance(x, URDF)
-        # assert x.name == 'copy'
-        # assert len(x.joints) == 2 * len(u.joints) + 1
-        # assert len(x.links) == 2 * len(u.links)
+        nt.assert_array_almost_equal(
+            urdf.links[0].visuals[0].geometry.box.size,
+            [1, 2, 3])
 
-        # Test scale
-        # x = u.copy(scale=3)
-        # self.assertIsInstance(x, URDF)
-        # x = x.copy(scale=[1, 1, 3])
-        # self.assertIsInstance(x, URDF)
+        self.assertEqual(
+            urdf.links[0].visuals[0].geometry.cylinder.radius,
+            1)
+
+        self.assertEqual(
+            urdf.links[0].visuals[0].geometry.sphere.radius,
+            2)
+
+        self.assertTrue(
+            isinstance(
+                urdf.links[0].visuals[0].geometry.mesh,
+                rp.backend.urdf.Mesh))
+
+        try:
+            xacro.main("")
+        except BaseException:
+            pass
+
+    def test_urdf_load(self):
+        rp.wx250s()
+        rp.UR5()
+        rp.PandaURDF()
+
+        try:
+            xacro.main("")
+        except BaseException:
+            pass
+
+    def test_urdf_collisions(self):
+
+        urdf_string = xacro.main(
+            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+        urdf = URDF.loadstr(
+            urdf_string,
+            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+
+        urdf.links[0].collisions[0].name = "Lonk"
+        self.assertTrue(urdf.links[0].collisions[0].name == "Lonk")
+
+        self.assertTrue(
+            isinstance(
+                urdf.links[0].collisions[0].origin,
+                np.ndarray))
+
+        # urdf.links[0].visuals[0].geometry.cylinder = \
+        #     rp.backend.urdf.Cylinder(1, 2)
+
+        # urdf.links[0].visuals[0].geometry.sphere = \
+        #     rp.backend.urdf.Sphere(2)
+
+        # nt.assert_array_almost_equal(
+        #     urdf.links[0].visuals[0].geometry.box.size,
+        #     [1, 2, 3])
+
+        # self.assertEqual(
+        #     urdf.links[0].visuals[0].geometry.cylinder.radius,
+        #     1)
+
+        # self.assertEqual(
+        #     urdf.links[0].visuals[0].geometry.sphere.radius,
+        #     2)
+
+        # self.assertTrue(
+        #     isinstance(
+        #         urdf.links[0].visuals[0].geometry.mesh,
+        #         rp.backend.urdf.Mesh))
+
+        try:
+            xacro.main("")
+        except BaseException:
+            pass
