@@ -11,7 +11,7 @@ import ropy as rp
 import numpy as np
 
 
-class Sim(Connector):
+class Sim(Connector):  # pragma nocover
 
     def __init__(self):
         super(Sim, self).__init__()
