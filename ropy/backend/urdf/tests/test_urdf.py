@@ -101,28 +101,21 @@ class TestURDF(unittest.TestCase):
                 urdf.links[0].collisions[0].origin,
                 np.ndarray))
 
-        # urdf.links[0].visuals[0].geometry.cylinder = \
-        #     rp.backend.urdf.Cylinder(1, 2)
+        try:
+            xacro.main("")
+        except BaseException:
+            pass
 
-        # urdf.links[0].visuals[0].geometry.sphere = \
-        #     rp.backend.urdf.Sphere(2)
+    def test_urdf_dynamics(self):
 
-        # nt.assert_array_almost_equal(
-        #     urdf.links[0].visuals[0].geometry.box.size,
-        #     [1, 2, 3])
+        urdf_string = xacro.main(
+            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+        urdf = URDF.loadstr(
+            urdf_string,
+            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
 
-        # self.assertEqual(
-        #     urdf.links[0].visuals[0].geometry.cylinder.radius,
-        #     1)
-
-        # self.assertEqual(
-        #     urdf.links[0].visuals[0].geometry.sphere.radius,
-        #     2)
-
-        # self.assertTrue(
-        #     isinstance(
-        #         urdf.links[0].visuals[0].geometry.mesh,
-        #         rp.backend.urdf.Mesh))
+        self.assertEqual(urdf.joints[0].limit.effort, 87.0)
+        self.assertEqual(urdf.joints[0].limit.velocity, 2.175)
 
         try:
             xacro.main("")
