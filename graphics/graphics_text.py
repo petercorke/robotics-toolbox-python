@@ -4,7 +4,10 @@ from numpy import sign, arange
 
 def get_text_size(scene):
     """
+    Determine the text size based on zoom distance
 
+    :param scene: The scene in which the camera to be used resides.
+    :type scene: `vpython.canvas`
     """
     # Distance of camera from focus point to determine text size
     distance_from_center = mag(scene.center - scene.camera.pos)

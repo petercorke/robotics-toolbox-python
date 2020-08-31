@@ -336,6 +336,9 @@ class GraphicsCanvas3D:
     def __reload_caption(self, new_list):
         """
         Reload the UI with the new list of robot names
+
+        :param new_list: The new list to apply to the menu
+        :type new_list: `list`
         """
         # Remove all UI elements
         for item in self.__ui_controls:
@@ -351,7 +354,10 @@ class GraphicsCanvas3D:
 
     def __load_mode_ui(self, new_list):
         """
+        Load the UI menu depending on the current mode
 
+        :param new_list: The new list to apply to the menu
+        :type new_list: `list`
         """
         if self.__ui_mode == UImode.CANVASCONTROL:
             self.__ui_controls = self.__setup_ui_controls(new_list)
