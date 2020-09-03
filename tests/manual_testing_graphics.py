@@ -15,7 +15,6 @@ from time import sleep
 from numpy import array
 from spatialmath import SE3, SE2
 import graphics as gph
-from roboticstoolbox.models.graphical_puma560 import import_puma_560, Puma560
 from roboticstoolbox.robot.serial_link import SerialLink, Link
 
 
@@ -68,8 +67,8 @@ def test_import_stl():
     """
     This test will create a canvas with the Puma560 model loaded in.
     """
-    puma560 = import_puma_560(g_canvas)
-    puma560.print_joint_poses()
+    # puma560 = import_puma_560(g_canvas)
+    # puma560.print_joint_poses()
 
 
 def test_rotational_link():
@@ -143,70 +142,70 @@ def test_puma560_angle_change():
     This test loads in the Puma560 model and changes its angles over time.
     Joint angles are printed for validation.
     """
-    puma560 = import_puma_560(g_canvas)
-
-    print("Prior Poses")
-    puma560.print_joint_poses()
-
-    sleep(2)
-
-    # Get the poses for a ready-position
-    puma = Puma560()
-    poses = puma.fkine(puma.qr, alltout=True)
-
-    puma560.set_joint_poses([
-        poses[0],
-        poses[1],
-        poses[2],
-        poses[3],
-        poses[4],
-        poses[5],
-        poses[6]
-    ])
-
-    print("Final Poses")
-    puma560.print_joint_poses()
+    # puma560 = import_puma_560(g_canvas)
+    #
+    # print("Prior Poses")
+    # puma560.print_joint_poses()
+    #
+    # sleep(2)
+    #
+    # # Get the poses for a ready-position
+    # puma = Puma560()
+    # poses = puma.fkine(puma.qr, alltout=True)
+    #
+    # puma560.set_joint_poses([
+    #     poses[0],
+    #     poses[1],
+    #     poses[2],
+    #     poses[3],
+    #     poses[4],
+    #     poses[5],
+    #     poses[6]
+    # ])
+    #
+    # print("Final Poses")
+    # puma560.print_joint_poses()
 
 
 def test_clear_scene():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = import_puma_560(g_canvas)
-    puma560.set_reference_visibility(True)
-
-    sleep(2)
-
-    clear()
-    del puma560
+    # puma560 = import_puma_560(g_canvas)
+    # puma560.set_reference_visibility(True)
+    #
+    # sleep(2)
+    #
+    # clear()
+    # del puma560
 
 
 def test_clear_scene_with_grid_updating():
     """
     This test will import the Puma560 model, then after 2 seconds, clear the canvas of all models.
     """
-    puma560 = import_puma_560(g_canvas)
-
-    sleep(2)
-
-    # Get the poses for a ready-position
-    puma = Puma560()
-    poses = puma.fkine(puma.qr, alltout=True)
-
-    puma560.set_joint_poses([
-        poses[0],
-        poses[1],
-        poses[2],
-        poses[3],
-        poses[4],
-        poses[5],
-        poses[6]
-    ])
-
-    sleep(2)
-
-    clear()
-    del puma560
+    # puma560 = import_puma_560(g_canvas)
+    #
+    # sleep(2)
+    #
+    # # Get the poses for a ready-position
+    # puma = Puma560()
+    # poses = puma.fkine(puma.qr, alltout=True)
+    #
+    # puma560.set_joint_poses([
+    #     poses[0],
+    #     poses[1],
+    #     poses[2],
+    #     poses[3],
+    #     poses[4],
+    #     poses[5],
+    #     poses[6]
+    # ])
+    #
+    # sleep(2)
+    #
+    # clear()
+    # del puma560
 
 
 # TODO
@@ -366,8 +365,6 @@ def test_seriallink():
 
     robot = gph.GraphicalRobot(g_canvas, '', seriallink=tl)
     robot2 = gph.GraphicalRobot(g_canvas, '', seriallink=tl2)
-
-
 
 
 if __name__ == "__main__":
