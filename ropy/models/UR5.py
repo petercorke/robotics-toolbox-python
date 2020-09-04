@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 
 import numpy as np
-import os
 from ropy.robot.ETS import ETS
 from pathlib import Path
-
-import spatialmath as sm
 
 
 class UR5(ETS):
 
     def __init__(self):
 
-        fpath = Path('ropy/models/xarco/ur/urdf/ur5_joint_limited_robot.urdf.xacro')
-        abspath = os.getcwd() + '/ropy/models/xarco/ur/urdf/'
+        fpath = Path('ropy') / 'models' / 'xarco' / 'ur' / 'urdf'
+        fname = 'ur5_joint_limited_robot.urdf.xacro'
+        abspath = fpath.absolute()
 
-        args = super(UR5, self).urdf_to_ets_args(fpath)
+        args = super(UR5, self).urdf_to_ets_args((abspath / fname).as_posix())
 
         super(UR5, self).__init__(
             args[0],
@@ -30,7 +28,7 @@ class UR5(ETS):
         for link in self.ets:
             for gi in link.geometry:
                 if gi.filename[0] != '/':
-                    gi.filename = abspath + gi.filename
+                    gi.filename = (abspath / gi.filename).as_posix()
 
     @property
     def qz(self):

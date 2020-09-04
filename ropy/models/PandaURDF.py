@@ -10,11 +10,12 @@ class PandaURDF(ETS):
 
     def __init__(self):
 
-        fpath = Path('ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro')
-        # fpath = 'ropy/models/xarco/panda/robots/panda_arm.urdf.xacro'
-        abspath = os.getcwd() + '/ropy/models/xarco/panda/robots/'
+        fpath = Path('ropy') / 'models' / 'xarco' / 'panda' / 'robots'
+        fname = 'panda_arm_hand.urdf.xacro'
+        abspath = fpath.absolute()
 
-        args = super(PandaURDF, self).urdf_to_ets_args(fpath)
+        args = super(PandaURDF, self).urdf_to_ets_args(
+            (abspath / fname).as_posix())
 
         super(PandaURDF, self).__init__(
             args[0],
@@ -31,7 +32,7 @@ class PandaURDF(ETS):
         for link in self.ets:
             for gi in link.geometry:
                 if gi.filename[0] != '/':
-                    gi.filename = abspath + gi.filename
+                    gi.filename = (abspath / gi.filename).as_posix()
             # print(link.name)
             # print(link.geometry)
 
