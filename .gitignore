@@ -1,5 +1,4 @@
 # Toolbox builds
-spatialmath/docs/build
 
 # Byte-compiled / optimized / DLL files
 __pycache__
@@ -72,7 +71,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+doc/build/
 
 # PyBuilder
 .pybuilder/
