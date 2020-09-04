@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages, Extension
 from os import path
+import os
 
 here = path.abspath(path.dirname(__file__))
 
@@ -10,6 +11,17 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Get the release/version string
 with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
     release = f.read()
+
+
+def package_files(directory):
+    paths = []
+    for (pathhere, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', pathhere, filename))
+    return paths
+
+
+extra_files = package_files('ropy/models/xacro')
 
 frne = Extension(
         'frne',
@@ -41,7 +53,11 @@ setup(
 
     keywords='robotics vision arm kinematics ros',
 
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests", "examples"]),
+
+    package_data={'ropy': extra_files},
+
+    include_package_data=True,
 
     install_requires=[
         'numpy',

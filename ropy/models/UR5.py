@@ -3,17 +3,19 @@
 import numpy as np
 from ropy.robot.ETS import ETS
 from pathlib import Path
+import ropy as rp
 
 
 class UR5(ETS):
 
     def __init__(self):
 
-        fpath = Path('ropy') / 'models' / 'xarco' / 'ur' / 'urdf'
+        mpath = Path(rp.__file__).parent
+        fpath = mpath / 'models' / 'xacro' / 'ur' / 'urdf'
         fname = 'ur5_joint_limited_robot.urdf.xacro'
-        abspath = fpath.absolute()
+        # abspath = fpath.absolute()
 
-        args = super(UR5, self).urdf_to_ets_args((abspath / fname).as_posix())
+        args = super(UR5, self).urdf_to_ets_args((fpath / fname).as_posix())
 
         super(UR5, self).__init__(
             args[0],
@@ -28,7 +30,7 @@ class UR5(ETS):
         for link in self.ets:
             for gi in link.geometry:
                 if gi.filename[0] != '/':
-                    gi.filename = (abspath / gi.filename).as_posix()
+                    gi.filename = (fpath / gi.filename).as_posix()
 
     @property
     def qz(self):

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import numpy as np
-import os
 from ropy.robot.ETS import ETS
 from pathlib import Path
 
@@ -10,7 +9,7 @@ class PandaURDF(ETS):
 
     def __init__(self):
 
-        fpath = Path('ropy') / 'models' / 'xarco' / 'panda' / 'robots'
+        fpath = Path('ropy') / 'models' / 'xacro' / 'panda' / 'robots'
         fname = 'panda_arm_hand.urdf.xacro'
         abspath = fpath.absolute()
 
