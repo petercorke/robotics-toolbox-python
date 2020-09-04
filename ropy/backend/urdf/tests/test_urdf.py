@@ -29,10 +29,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_visuals(self):
 
         urdf_string = xacro.main(
-            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+            "ropy/models/xacro/panda/robots/panda_arm_hand.urdf.xacro")
         urdf = URDF.loadstr(
             urdf_string,
-            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+            "ropy/models/xacro/panda/robots/panda_arm_hand.urdf.xacro")
 
         urdf.links[0].visuals[0].name = "Lonk"
         self.assertTrue(urdf.links[0].visuals[0].name == "Lonk")
@@ -89,10 +89,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_collisions(self):
 
         urdf_string = xacro.main(
-            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+            "ropy/models/xacro/panda/robots/panda_arm_hand.urdf.xacro")
         urdf = URDF.loadstr(
             urdf_string,
-            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+            "ropy/models/xacro/panda/robots/panda_arm_hand.urdf.xacro")
 
         urdf.links[0].collisions[0].name = "Lonk"
         self.assertTrue(urdf.links[0].collisions[0].name == "Lonk")
@@ -110,10 +110,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_dynamics(self):
 
         urdf_string = xacro.main(
-            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+            "ropy/models/xacro/panda/robots/panda_arm_hand.urdf.xacro")
         urdf = URDF.loadstr(
             urdf_string,
-            "ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro")
+            "ropy/models/xacro/panda/robots/panda_arm_hand.urdf.xacro")
 
         self.assertEqual(urdf.joints[0].limit.effort, 87.0)
         self.assertEqual(urdf.joints[0].limit.velocity, 2.175)

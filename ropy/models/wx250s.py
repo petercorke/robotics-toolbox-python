@@ -9,8 +9,8 @@ class wx250s(ETS):
 
     def __init__(self):
 
-        fpath = 'ropy/models/xarco/interbotix/urdf/wx250s.urdf.xacro'
-        abspath = os.getcwd() + '/ropy/models/xarco/interbotix/urdf/'
+        fpath = 'ropy/models/xacro/interbotix/urdf/wx250s.urdf.xacro'
+        abspath = os.getcwd() + '/ropy/models/xacro/interbotix/urdf/'
 
         args = super(wx250s, self).urdf_to_ets_args(fpath)
 
