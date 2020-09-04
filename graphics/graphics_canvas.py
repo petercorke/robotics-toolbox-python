@@ -740,7 +740,7 @@ class GraphicsCanvas2D:
         # Create the grid, and display if wanted
         self.__graphics_grid = GraphicsGrid(self.scene)
         # Toggle grid to 2D
-        self.__graphics_grid.toggle_2d_3d()
+        # self.__graphics_grid.toggle_2d_3d()
         # Lock the grid
         # self.__graphics_grid.set_relative(False)
         # Turn off grid if applicable
@@ -750,6 +750,7 @@ class GraphicsCanvas2D:
         # Reset the camera to known spot
         self.__reset_camera()
         self.__graphics_grid.update_grid()
+        self.__graphics_grid.toggle_2d_3d()
 
     #######################################
     #  Canvas Management

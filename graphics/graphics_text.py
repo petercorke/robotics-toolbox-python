@@ -143,14 +143,20 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     # min = -num_squares or 0, around the default position
     # max = +num_squares or 0, around the default position
     # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-    min_x_coord = x_origin + int(-(num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale
-    max_x_coord = x_origin + int((num_squares / 2) + (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale
+    min_x_coord = round(x_origin + (-(num_squares / 2) +
+                                    (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale, 2)
+    max_x_coord = round(x_origin + ((num_squares / 2) +
+                                    (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale, 2)
 
-    min_y_coord = y_origin + int(-(num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale
-    max_y_coord = y_origin + int((num_squares / 2) + (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale
+    min_y_coord = round(y_origin + (-(num_squares / 2) +
+                                    (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale, 2)
+    max_y_coord = round(y_origin + ((num_squares / 2) +
+                                    (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale, 2)
 
-    min_z_coord = z_origin + int(-(num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale
-    max_z_coord = z_origin + int((num_squares / 2) + (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale
+    min_z_coord = round(z_origin + (-(num_squares / 2) +
+                                    (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale, 2)
+    max_z_coord = round(z_origin + ((num_squares / 2) +
+                                    (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale, 2)
 
     x_coords = arange(min_x_coord, max_x_coord + scale, scale)
     y_coords = arange(min_y_coord, max_y_coord + scale, scale)
@@ -237,6 +243,9 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
         numbers_list[index].pos = pos
         numbers_list[index].height = get_text_size(scene)
         index += 1
+
+    if not is_3d:
+        return
 
     # Z plane
     for z_pos in z_coords:
