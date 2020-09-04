@@ -3,15 +3,14 @@
 import numpy as np
 import os
 from ropy.robot.ETS import ETS
-
-import spatialmath as sm
+from pathlib import Path
 
 
 class PandaURDF(ETS):
 
     def __init__(self):
 
-        fpath = 'ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro'
+        fpath = Path('ropy/models/xarco/panda/robots/panda_arm_hand.urdf.xacro')
         # fpath = 'ropy/models/xarco/panda/robots/panda_arm.urdf.xacro'
         abspath = os.getcwd() + '/ropy/models/xarco/panda/robots/'
 

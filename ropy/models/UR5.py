@@ -3,6 +3,7 @@
 import numpy as np
 import os
 from ropy.robot.ETS import ETS
+from pathlib import Path
 
 import spatialmath as sm
 
@@ -11,7 +12,7 @@ class UR5(ETS):
 
     def __init__(self):
 
-        fpath = 'ropy/models/xarco/ur/urdf/ur5_joint_limited_robot.urdf.xacro'
+        fpath = Path('ropy/models/xarco/ur/urdf/ur5_joint_limited_robot.urdf.xacro')
         abspath = os.getcwd() + '/ropy/models/xarco/ur/urdf/'
 
         args = super(UR5, self).urdf_to_ets_args(fpath)
