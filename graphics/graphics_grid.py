@@ -303,7 +303,10 @@ class GraphicsGrid:
         self.camera_axes = new_camera_axes
 
         distance_from_center = mag(self.__scene.center - self.__scene.camera.pos)
-        new_scale = round(distance_from_center / 30.0, 1)
+        if self.__is_3d:
+            new_scale = round(distance_from_center / 30.0, 1)
+        else:
+            new_scale = round(distance_from_center / 15.0, 1)
         if not new_scale == self.__scale:
             self.set_scale(new_scale)
             if not self.__is_3d:
