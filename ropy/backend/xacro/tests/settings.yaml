@@ -1,0 +1,9 @@
+arms:
+  inc1:
+    file:  include1.xacro
+    macro: foo
+  inc2:
+    file:  include2.xacro
+    macro: foo
+    props:
+      port: 4242

@@ -1,0 +1,451 @@
+<?xml version="1.0"?>
+<robot name="vx250" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="robot_name" default = ""/>
+  <xacro:arg name="use_world_frame" default="false"/>
+  <xacro:arg name="use_default_gripper_bar" default="true"/>
+  <xacro:arg name="use_default_gripper_fingers" default="true"/>
+  <xacro:arg name="external_urdf_loc" default=""/>
+  <xacro:arg name="load_gazebo_configs" default="false"/>
+
+  <xacro:property name="urdf_loc" value="$(arg external_urdf_loc)"/>
+
+  <xacro:if value="$(arg load_gazebo_configs)">
+    <xacro:include filename="$(find interbotix_gazebo)/config/interbotix_texture.gazebo"/>
+  </xacro:if>
+
+  <material name="interbotix_black">
+    <texture filename="package://interbotix_descriptions/meshes/interbotix_black.png"/>
+  </material>
+
+  <xacro:if value="$(arg use_world_frame)">
+    <link name="world"/>
+    <joint name="fixed" type="fixed">
+      <parent link="world"/>
+      <child link="$(arg robot_name)/base_link"/>
+    </joint>
+  </xacro:if>
+
+  <link name="$(arg robot_name)/base_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-1-Base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 ${pi/2}" xyz="-0.0512186000 -0.0001032540 0.0203383000"/>
+      <mass value="0.941311" />
+      <inertia ixx="0.0058130000" iyy="0.0016850000" izz="0.0069500000" ixy="0.0000100200" ixz="0.0000006381" iyz="-0.0000741000" />
+    </inertial>
+  </link>
+
+  <joint name="waist" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="100" lower="${-pi}" upper="${pi}" velocity="${pi}"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0787"/>
+    <parent link="$(arg robot_name)/base_link"/>
+    <child link="$(arg robot_name)/shoulder_link"/>
+  </joint>
+
+  <transmission name="trans_waist">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="waist">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="waist_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="$(arg robot_name)/shoulder_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 -0.003"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-2-Shoulder.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 ${pi/2}" xyz="0.0002592330 -0.0000033552 0.0116129000"/>
+      <mass value="0.798614" />
+      <inertia ixx="0.0009388000" iyy="0.0011380000" izz="0.0012010000" ixy="-0.0000000010" ixz="-0.0000000191" iyz="0.0000059568" />
+    </inertial>
+  </link>
+
+  <joint name="shoulder" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="100" lower="${radians(-102)}" upper="${radians(100)}" velocity="${pi}"/>
+    <origin rpy="0 0 0" xyz="0 0 0.04805"/>
+    <parent link="$(arg robot_name)/shoulder_link"/>
+    <child link="$(arg robot_name)/upper_arm_link"/>
+  </joint>
+
+  <transmission name="trans_shoulder">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="shoulder">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="shoulder_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="$(arg robot_name)/upper_arm_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-3-UA.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-3-UA.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 ${pi/2}" xyz="0.0143621000 -0.0001048380 0.1712860000"/>
+      <mass value="0.549093" />
+      <inertia ixx="0.0046420000" iyy="0.0045180000" izz="0.0004815000" ixy="-0.0000037585" ixz="0.0000088533" iyz="0.0006202000" />
+    </inertial>
+  </link>
+
+  <joint name="elbow" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="100" lower="${radians(-92)}" upper="${radians(102)}" velocity="${pi}"/>
+    <origin rpy="${pi} 0 0" xyz="0.06 0 0.25"/>
+    <parent link="$(arg robot_name)/upper_arm_link"/>
+    <child link="$(arg robot_name)/forearm_link"/>
+  </joint>
+
+  <transmission name="trans_elbow">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="elbow">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="elbow_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="$(arg robot_name)/forearm_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-4-Forearm.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-4-Forearm.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 ${pi/2}" xyz="0.1447910000 -0.0000917040 0.0000000000"/>
+      <mass value="0.383741" />
+      <inertia ixx="0.0024380000" iyy="0.0001176000" izz="0.0024970000" ixy="-0.0000033607" ixz="0.0000000003" iyz="0.0000000000" />
+    </inertial>
+  </link>
+
+  <joint name="wrist_angle" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="100" lower="${radians(-123)}" upper="${radians(100)}" velocity="${pi}"/>
+    <origin rpy="0 0 0" xyz="0.25 0 0"/>
+    <parent link="$(arg robot_name)/forearm_link"/>
+    <child link="$(arg robot_name)/wrist_link"/>
+  </joint>
+
+  <transmission name="trans_wrist_angle">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wrist_angle">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="wrist_angle_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="$(arg robot_name)/wrist_link">
+    <visual>
+      <origin rpy="0 ${pi} ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-5-Wrist.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 ${pi} ${pi/2}" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-5-Wrist.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 ${pi} ${pi/2}" xyz="0.0434150000 0.0000080610 -0.0108670000"/>
+      <mass value="0.109737" />
+      <inertia ixx="0.0000380400" iyy="0.0000342500" izz="0.0000358400" ixy="0.0000000182" ixz="0.0000000026" iyz="0.0000024625" />
+    </inertial>
+  </link>
+
+  <joint name="wrist_rotate" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="100" lower="${-pi}" upper="${pi}" velocity="${pi}"/>
+    <origin rpy="${-pi} 0 0" xyz="0.065 0 0"/>
+    <parent link="$(arg robot_name)/wrist_link"/>
+    <child link="$(arg robot_name)/gripper_link"/>
+  </joint>
+
+  <transmission name="trans_wrist_rotate">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="wrist_rotate">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="wrist_rotate_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="$(arg robot_name)/gripper_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="-0.02 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-6-Gripper.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="-0.02 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-6-Gripper.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 ${pi/2}" xyz="0.0230000000 0.0000000010 0.0115240000"/>
+      <mass value="0.097666" />
+      <inertia ixx="0.0000326800" iyy="0.0000243600" izz="0.0000211900" ixy="0.0000000000" ixz="0.0000000000" iyz="0.0000002785" />
+    </inertial>
+  </link>
+
+  <joint name="ee_arm" type="fixed">
+    <axis xyz="1 0 0"/>
+    <origin rpy="0 0 0" xyz="0.043 0 0"/>
+    <parent link="$(arg robot_name)/gripper_link"/>
+    <child link="$(arg robot_name)/ee_arm_link"/>
+  </joint>
+
+  <link name="$(arg robot_name)/ee_arm_link">
+    <inertial>
+      <mass value="0.001" />
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+
+  <joint name="gripper" type="continuous">
+    <axis xyz="1 0 0"/>
+    <limit effort="100" velocity="${pi}"/>
+    <origin rpy="0 0 0" xyz="0.0055 0 0"/>
+    <parent link="$(arg robot_name)/ee_arm_link"/>
+    <child link="$(arg robot_name)/gripper_prop_link"/>
+  </joint>
+
+  <transmission name="trans_gripper">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="gripper">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="gripper_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <link name="$(arg robot_name)/gripper_prop_link">
+    <visual>
+      <origin rpy="0 0 ${pi/2}" xyz="-0.0685 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-7-Gripper-Prop.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="interbotix_black"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 ${pi/2}" xyz="-0.0685 0 0"/>
+      <geometry>
+        <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-7-Gripper-Prop.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 ${pi/2}" xyz="0.0008460000 -0.0000019330 0.0000420000"/>
+      <mass value="0.00434" />
+      <inertia ixx="0.0000005923" iyy="0.0000011156" izz="0.0000005743" ixy="0.0000000000" ixz="0.0000003195" iyz="-0.0000000004" />
+    </inertial>
+  </link>
+
+  <!-- If the default gripper bar is being used, then also add the gripper bar -->
+
+  <xacro:if value="$(arg use_default_gripper_bar)">
+
+    <joint name="gripper_bar" type="fixed">
+      <axis xyz="1 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <parent link="$(arg robot_name)/ee_arm_link"/>
+      <child link="$(arg robot_name)/gripper_bar_link"/>
+    </joint>
+
+    <link name="$(arg robot_name)/gripper_bar_link">
+      <visual>
+        <origin rpy="0 0 ${pi/2}" xyz="-0.063 0 0"/>
+        <geometry>
+          <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-8-Gripper-Bar.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="interbotix_black"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 ${pi/2}" xyz="-0.063 0 0"/>
+        <geometry>
+          <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-8-Gripper-Bar.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 ${pi/2}" xyz="0.0096870000 0.0000005670 0.0049620000"/>
+        <mass value="0.034199" />
+        <inertia ixx="0.0000074125" iyy="0.0000284300" izz="0.0000286000" ixy="-0.0000000008" ixz="-0.0000000006" iyz="-0.0000013889" />
+      </inertial>
+    </link>
+
+    <joint name="ee_bar" type="fixed">
+      <axis xyz="1 0 0"/>
+      <origin rpy="0 0 0" xyz="0.023 0 0"/>
+      <parent link="$(arg robot_name)/gripper_bar_link"/>
+      <child link="$(arg robot_name)/fingers_link"/>
+    </joint>
+
+    <link name="$(arg robot_name)/fingers_link">
+      <inertial>
+        <mass value="0.001" />
+        <inertia ixx="0.0001" iyy="0.0001" izz="0.0001" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+
+    <!-- If the default gripper fingers are being used, add those as well -->
+
+    <xacro:if value="$(arg use_default_gripper_fingers)">
+
+      <joint name="left_finger" type="prismatic">
+        <axis xyz="0 1 0"/>
+        <limit effort="10" lower="0.015" upper="0.037" velocity="1"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="$(arg robot_name)/fingers_link"/>
+        <child link="$(arg robot_name)/left_finger_link"/>
+      </joint>
+
+      <transmission name="trans_left_finger">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="left_finger">
+          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="left_finger_motor">
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+      </transmission>
+
+      <link name="$(arg robot_name)/left_finger_link">
+        <visual>
+          <origin rpy="${pi} ${pi} 0" xyz="0 0.005 0"/>
+          <geometry>
+            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-9-Finger.stl" scale="0.001 0.001 0.001"/>
+          </geometry>
+          <material name="interbotix_black"/>
+        </visual>
+        <collision>
+          <origin rpy="${pi} ${pi} 0" xyz="0 0.005 0"/>
+          <geometry>
+            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-9-Finger.stl" scale="0.001 0.001 0.001"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="${pi} ${pi} ${pi/2}" xyz="0.0138160000 0.0000000000 0.0000000000"/>
+           <mass value="0.016246" />
+          <inertia ixx="0.0000047310" iyy="0.0000015506" izz="0.0000037467" ixy="-0.0000004560" ixz="0.0000000000" iyz="0.0000000000" />
+        </inertial>
+      </link>
+
+      <joint name="right_finger" type="prismatic">
+        <axis xyz="0 1 0"/>
+        <limit effort="10" lower="-0.037" upper="-0.015" velocity="1"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <parent link="$(arg robot_name)/fingers_link"/>
+        <child link="$(arg robot_name)/right_finger_link"/>
+        <xacro:unless value="$(arg load_gazebo_configs)">
+          <mimic joint="left_finger" multiplier="-1" offset="0"/>
+        </xacro:unless>
+      </joint>
+
+      <transmission name="trans_right_finger">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_finger">
+          <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_finger_motor">
+          <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+      </transmission>
+
+      <link name="$(arg robot_name)/right_finger_link">
+        <visual>
+          <origin rpy="0 ${pi} 0" xyz="0 -0.005 0"/>
+          <geometry>
+            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-9-Finger.stl" scale="0.001 0.001 0.001"/>
+          </geometry>
+          <material name="interbotix_black"/>
+        </visual>
+        <collision>
+          <origin rpy="0 ${pi} 0" xyz="0 -0.005 0"/>
+          <geometry>
+            <mesh filename="package://interbotix_descriptions/meshes/meshes_vx250/VXA-250-M-9-Finger.stl" scale="0.001 0.001 0.001"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 ${pi} ${pi/2}" xyz="0.0138160000 0.0000000000  0.0000000000"/>
+          <mass value="0.016246" />
+          <inertia ixx="0.0000047310" iyy="0.0000015506" izz="0.0000037467" ixy="0.0000004560" ixz="0.0000000000" iyz="0.0000000000" />
+        </inertial>
+      </link>
+
+      <joint name="ee_gripper" type="fixed">
+        <axis xyz="1 0 0"/>
+        <origin rpy="0 0 0" xyz="0.027575 0 0"/>
+        <parent link="$(arg robot_name)/fingers_link"/>
+        <child link="$(arg robot_name)/ee_gripper_link"/>
+      </joint>
+
+      <link name="$(arg robot_name)/ee_gripper_link">
+        <inertial>
+          <mass value="0.001" />
+          <inertia ixx="0.0001" iyy="0.0001" izz="0.0001" ixy="0" ixz="0" iyz="0" />
+        </inertial>
+      </link>
+
+    </xacro:if>
+
+  </xacro:if>
+
+  <xacro:if value="${urdf_loc != ''}">
+    <xacro:include filename="${urdf_loc}"/>
+  </xacro:if>
+
+</robot>
