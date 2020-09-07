@@ -5,7 +5,7 @@ Arm Type Robots - DH
 
 SerialLink
 ------------
-.. automodule:: ropy.robot.SerialLink
+.. automodule:: roboticstoolbox.robot.SerialLink
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ SerialLink
 
 Revolute
 ------------
-.. automodule:: ropy.robot.Revolute
+.. automodule:: roboticstoolbox.robot.Revolute
    :members:
    :undoc-members:
    :show-inheritance:
@@ -25,7 +25,7 @@ Revolute
 
 Prismatic
 ------------
-.. automodule:: ropy.robot.Prismatic
+.. automodule:: roboticstoolbox.robot.Prismatic
    :members:
    :undoc-members:
    :show-inheritance:
@@ -35,7 +35,7 @@ Prismatic
 
 Link
 ------------
-.. automodule:: ropy.robot.Link
+.. automodule:: roboticstoolbox.robot.Link
    :members:
    :undoc-members:
    :show-inheritance:

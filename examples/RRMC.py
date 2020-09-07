@@ -3,7 +3,7 @@
 @author Jesse Haviland
 """
 
-import ropy as rp
+import roboticstoolbox as rp
 import spatialmath as sm
 import numpy as np
 import time

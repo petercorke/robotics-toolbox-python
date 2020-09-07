@@ -3,7 +3,7 @@
 @author Jesse Haviland
 """
 
-import ropy as rp
+import roboticstoolbox as rp
 
 # Make a panda robot
 panda = rp.PandaMDH()

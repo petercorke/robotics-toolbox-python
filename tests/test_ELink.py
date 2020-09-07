@@ -6,7 +6,7 @@ Created on Fri May 1 14:04:04 2020
 
 import numpy.testing as nt
 import numpy as np
-import ropy as rp
+import roboticstoolbox as rp
 import unittest
 import spatialmath as sm
 

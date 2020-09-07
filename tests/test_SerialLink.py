@@ -5,7 +5,7 @@
 
 import numpy.testing as nt
 import numpy as np
-import ropy as rp
+import roboticstoolbox as rp
 import spatialmath as sm
 import unittest
 import pytest

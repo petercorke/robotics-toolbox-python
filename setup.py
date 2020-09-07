@@ -21,17 +21,17 @@ def package_files(directory):
     return paths
 
 
-extra_files = package_files('ropy/models/xacro')
+extra_files = package_files('roboticstoolbox/models/xacro')
 
 frne = Extension(
         'frne',
         sources=[
-            './ropy/core/vmath.c',
-            './ropy/core/ne.c',
-            './ropy/core/frne.c'])
+            './roboticstoolbox/core/vmath.c',
+            './roboticstoolbox/core/ne.c',
+            './roboticstoolbox/core/frne.c'])
 
 setup(
-    name='ropy',
+    name='roboticstoolbox',
 
     version=release,
 
@@ -41,7 +41,7 @@ setup(
 
     long_description_content_type='text/markdown',
 
-    url='https://github.com/jhavl/ropy',
+    url='https://github.com/petercorke/robotics-toolbox-python',
 
     author='Jesse Haviland',
 
@@ -55,7 +55,7 @@ setup(
 
     packages=find_packages(exclude=["tests", "examples"]),
 
-    package_data={'ropy': extra_files},
+    package_data={'roboticstoolbox': extra_files},
 
     include_package_data=True,
 
@@ -64,5 +64,4 @@ setup(
         'spatialmath-python>=0.7.1',
         'scipy',
         'matplotlib']
-
 )

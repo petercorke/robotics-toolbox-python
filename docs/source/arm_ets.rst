@@ -5,7 +5,7 @@ Arm Type Robots - ETS
 
 ETS
 ------------
-.. automodule:: ropy.robot.ETS
+.. automodule:: roboticstoolbox.robot.ETS
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ETS
 
 ET
 ------------
-.. automodule:: ropy.robot.ET
+.. automodule:: roboticstoolbox.robot.ET
    :members:
    :undoc-members:
    :show-inheritance:
