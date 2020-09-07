@@ -4,6 +4,26 @@ import os
 
 here = path.abspath(path.dirname(__file__))
 
+req = [
+    'numpy',
+    'spatialmath-python>=0.7.1',
+    'scipy',
+    'matplotlib'
+]
+
+dev_req = [
+    'pytest',
+    'pytest-cov',
+    'flake8',
+    'pyyaml',
+]
+
+docs_req = [
+    'sphinx',
+    'sphinx_rtd_theme',
+    'sphinx_markdown_tables'
+]
+
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -15,7 +35,7 @@ with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
 
 def package_files(directory):
     paths = []
-    for (pathhere, directories, filenames) in os.walk(directory):
+    for (pathhere, _, filenames) in os.walk(directory):
         for filename in filenames:
             paths.append(os.path.join('..', pathhere, filename))
     return paths
@@ -59,9 +79,10 @@ setup(
 
     include_package_data=True,
 
-    install_requires=[
-        'numpy',
-        'spatialmath-python>=0.7.1',
-        'scipy',
-        'matplotlib']
+    install_requires=req,
+
+    extras_require={
+        'dev': dev_req,
+        'docs': docs_req,
+    }
 )

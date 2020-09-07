@@ -6,8 +6,6 @@ name: build
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   unittest:
@@ -26,16 +24,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r .github/dev_requirements.txt
-#     - name: Lint with flake8
-#       run: |
-#         # stop the build if there are Python syntax errors or undefined names
-#         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-#         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pip install .
+        pip install .[dev]
         pytest
   codecov:
     # If all tests pass:
@@ -51,10 +42,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r .github/dev_requirements.txt
     - name: Run coverage
       run: |
-        pip install -e .
+        pip install -e .[dev]
         pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
         coverage report
     - name: upload coverage to Codecov
@@ -75,8 +65,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r .github/dev_requirements.txt
-        pip install .
+        pip install .[docs]
     - name: Build docs
       run: |
         cd docs
