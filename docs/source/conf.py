@@ -14,8 +14,6 @@
 import os
 import sys
 import sphinx_rtd_theme
-# sys.path.insert(0, os.path.abspath('.'))
-# sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -66,10 +64,6 @@ exclude_patterns = ['test_*']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-# html_theme = 'alabaster'
-#html_theme = 'pyramid'
-#html_theme = 'sphinxdoc'
-
 
 html_theme_options = {
     # 'logo': '../../../../figs/icon.png',
@@ -77,7 +71,7 @@ html_theme_options = {
     # 'github_repo': 'roboticstoolbox',
     # 'logo_name': False,
     # 'description': 'Robotics Toolbox for Python',
-    'analytics_id': 'UA-102222819-3'
+    'analytics_id': 'UA-102222819-4'
     }
 
 show_authors = True
