@@ -501,7 +501,7 @@ class Collision(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
-        kwargs['origin'] = parse_origin(node)
+        kwargs['origin'], _ = parse_origin(node)
         return Collision(**kwargs)
 
 
@@ -570,7 +570,7 @@ class Visual(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
-        kwargs['origin'] = parse_origin(node)
+        kwargs['origin'], _ = parse_origin(node)
         return Visual(**kwargs)
 
 
@@ -628,7 +628,7 @@ class Inertial(URDFType):
 
     @classmethod
     def _from_xml(cls, node, path):
-        origin = parse_origin(node)
+        origin, _ = parse_origin(node)
         mass = float(node.find('mass').attrib['value'])
         n = node.find('inertia')
         xx = float(n.attrib['ixx'])
@@ -1273,13 +1273,14 @@ class Joint(URDFType):
 
     def __init__(self, name, joint_type, parent, child, axis=None, origin=None,
                  limit=None, dynamics=None, safety_controller=None,
-                 calibration=None, mimic=None):
+                 calibration=None, mimic=None, rpy=None):
         self.name = name
         self.parent = parent
         self.child = child
         self.joint_type = joint_type
         self.axis = axis
         self.origin = origin
+        self.rpy = rpy
         self.limit = limit
         self.dynamics = dynamics
         self.safety_controller = safety_controller
@@ -1356,6 +1357,14 @@ class Joint(URDFType):
     @origin.setter
     def origin(self, value):
         self._origin = configure_origin(value)
+
+    @property
+    def rpy(self):
+        return self._rpy
+
+    @rpy.setter
+    def rpy(self, value):
+        self._rpy = value
 
     @property
     def limit(self):
@@ -1459,7 +1468,7 @@ class Joint(URDFType):
         if axis is not None:
             axis = np.fromstring(axis.attrib['xyz'], sep=' ')
         kwargs['axis'] = axis
-        kwargs['origin'] = parse_origin(node)
+        kwargs['origin'], kwargs['rpy'] = parse_origin(node)
         return Joint(**kwargs)
 
 
@@ -1634,7 +1643,9 @@ class URDF(URDFType):
             ets = []
             T = sm.SE3(j.origin)
             trans = T.t
-            rot = T.rpy(unit='rad')
+            rot = j.rpy
+            print(trans)
+            print(rot)
 
             if trans[0] != 0:
                 ets.append(rp.ET.Ttx(trans[0]))
@@ -1654,7 +1665,8 @@ class URDF(URDFType):
             if rot[2] != 0:
                 ets.append(rp.ET.TRz(rot[2]))
 
-            if j.joint_type == 'revolute':   # pragma nocover
+            if j.joint_type == 'revolute' or \
+               j.joint_type == 'continuous':   # pragma nocover
                 if j.axis[0] == 1:
                     ets.append(rp.ET.TRx())
                 elif j.axis[0] == -1:

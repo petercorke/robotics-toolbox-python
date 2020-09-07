@@ -1,6 +1,7 @@
 """Utilities for URDF parsing.
 """
 import numpy as np
+import spatialmath as sm
 
 
 def rpy_to_matrix(coords):
@@ -46,15 +47,18 @@ def parse_origin(node):
         ``origin`` child. Defaults to the identity matrix if no ``origin``
         child was found.
     """
-    matrix = np.eye(4, dtype=np.float64)
+    matrix = sm.SE3()
+    rpy = np.array([0, 0, 0])
     origin_node = node.find('origin')
     if origin_node is not None:
         if 'xyz' in origin_node.attrib:
-            matrix[:3, 3] = np.fromstring(origin_node.attrib['xyz'], sep=' ')
+            t = np.fromstring(origin_node.attrib['xyz'], sep=' ')
+            matrix = sm.SE3(t)
         if 'rpy' in origin_node.attrib:
             rpy = np.fromstring(origin_node.attrib['rpy'], sep=' ')
-            matrix[:3, :3] = rpy_to_matrix(rpy)
-    return matrix
+            matrix.A[:3, :3] = sm.SE3.RPY(rpy).R
+   
+    return matrix.A, rpy
 
 
 # def get_filename(base_path, file_path, makedirs=False):

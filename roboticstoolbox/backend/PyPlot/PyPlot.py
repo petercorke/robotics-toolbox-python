@@ -176,7 +176,11 @@ class PyPlot(Connector):
     def hold(self):           # pragma: no cover
         signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
-        plt.show()
+
+        try:
+            plt.show()
+        except(AttributeError):
+            pass
 
     #
     #  Private methods
@@ -218,7 +222,10 @@ class PyPlot(Connector):
             self.ellipses[i].draw()
 
     def _plot_handler(self, sig, frame):
-        plt.pause(0.001)
+        try:
+            plt.pause(0.001)
+        except(AttributeError):
+            pass
 
     def _set_axes_equal(self):
         '''
