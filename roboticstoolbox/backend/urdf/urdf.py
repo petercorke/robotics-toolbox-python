@@ -15,9 +15,8 @@ from pathlib import Path
 
 from .utils import (parse_origin, configure_origin)
 
+abspath = Path(rp.__file__).parent / 'models' / 'xacro'
 
-fpath = Path('roboticstoolbox') / 'models' / 'xacro'
-abspath = fpath.absolute()
 
 class URDFType(object):
     """Abstract base class for all URDF types.
@@ -308,7 +307,6 @@ class Mesh(URDFType):
             value = value.replace('package://', '')
 
         value = (abspath / value).as_posix()
-        print(value)
 
         self._filename = value
 

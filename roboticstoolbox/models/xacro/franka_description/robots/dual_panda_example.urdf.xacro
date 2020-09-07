@@ -3,8 +3,8 @@
   <xacro:arg name="arm_id_1" default="panda_1" />
   <xacro:arg name="arm_id_2" default="panda_2" />
 
-  <xacro:include filename="panda_arm.xacro"/>
-  <xacro:include filename="hand.xacro"/>
+  <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro"/>
+  <xacro:include filename="$(find franka_description)/robots/hand.xacro"/>
 
   <!-- box shaped table as base for the 2 Pandas -->
   <link name="base">

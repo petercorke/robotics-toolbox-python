@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 
 import numpy as np
-import os
+import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS
+from pathlib import Path
 
 
 class wx250s(ETS):
 
     def __init__(self):
 
-        fpath = 'roboticstoolbox/models/xacro/interbotix/urdf/wx250s.urdf.xacro'
-        abspath = os.getcwd() + '/roboticstoolbox/models/xacro/interbotix/urdf/'
+        mpath = Path(rp.__file__).parent
+        fpath = mpath / 'models' / 'xacro' / 'interbotix_descriptions' / 'urdf'
+        fname = 'wx250s.urdf.xacro'
 
-        args = super(wx250s, self).urdf_to_ets_args(fpath)
+        args = super(wx250s, self).urdf_to_ets_args(
+            (fpath / fname).as_posix())
 
         super(wx250s, self).__init__(
             args[0],
@@ -22,13 +25,6 @@ class wx250s(ETS):
 
         self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
         self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0])
-
-        for link in self.ets:
-            for gi in link.geometry:
-                if gi.filename[0] != '/':
-                    gi.filename = abspath + gi.filename
-            # print(link.name)
-            # print(link.geometry)
 
     @property
     def qz(self):

@@ -195,13 +195,22 @@ class Macro(object):
 def eval_extension(s):  # pragma: no cover
     if s == '$(cwd)':
         return os.getcwd()
+
+    if s.startswith('$(find'):
+        return '..'
+
+    if s.startswith('$(arg'):
+        s = s.replace('$(arg ', '')
+        s = s[:-1]
+        return substitution_args_context['arg'][s]
+
     try:
         from roslaunch.substitution_args import resolve_args, ArgException
         from rospkg.common import ResourceNotFound
         return resolve_args(
             s, context=substitution_args_context, resolve_anon=False)
     except ImportError:
-        pass
+        return ''
         # raise XacroException("substitution args not supported: ", exc=e)
     except ArgException as e:
         raise XacroException("Undefined substitution argument", exc=e)
