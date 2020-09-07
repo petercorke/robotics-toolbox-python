@@ -1827,21 +1827,21 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inverse kinematics by optimization without joint limits</span>
 
-<span class="sd">        q, success, err = ikine(T) are the joint coordinates corresponding to</span>
-<span class="sd">        the robot end-effector pose T which is an SE3 object or homogenenous</span>
-<span class="sd">        transform matrix (4x4), and n is the number of robot joints.</span>
+<span class="sd">        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)</span>
+<span class="sd">        corresponding to the robot end-effector pose ``T`` which is an ``SE3``</span>
+<span class="sd">        instance. ``failure`` is True if the solver failed, and ``reason``</span>
+<span class="sd">        contains details of the failure.</span>
 
 <span class="sd">        This method can be used for robots with any number of degrees of</span>
 <span class="sd">        freedom.</span>
 
 <span class="sd">        Trajectory operation:</span>
-<span class="sd">        In all cases if T is a vector of SE3 objects (m) or a homogeneous</span>
-<span class="sd">        transform sequence (4x4xm) then returns the joint coordinates</span>
-<span class="sd">        corresponding to each of the transforms in the sequence. q is nxm</span>
-<span class="sd">        where n is the number of robot joints. The initial estimate of q for</span>
+<span class="sd">        If ``T`` contains multiple values, ie. a trajectory, then returns the joint coordinates</span>
+<span class="sd">        corresponding to each of the pose values in ``T``. ``q`` is nxm</span>
+<span class="sd">        where n is the number of robot joints. The initial estimate of ``q`` for</span>
 <span class="sd">        each time step is taken as the solution from the previous time step.</span>
-<span class="sd">        Retruns trajectory of joints q (nxm), list of success (m) and list of</span>
-<span class="sd">        errors (m)</span>
+<span class="sd">        Returns trajectory of joints ``q`` (nxm), list of failure (m) and list of</span>
+<span class="sd">        error reasons (m).</span>
 
 <span class="sd">        :param T: The desired end-effector pose</span>
 <span class="sd">        :type T: SE3 or SE3 trajectory</span>
@@ -1868,12 +1868,12 @@
 <span class="sd">            than Levenberg-Marquadt</span>
 <span class="sd">        :type transpose: float</span>
 
-<span class="sd">        :retrun q: The calculated joint values</span>
+<span class="sd">        :return q: The calculated joint values</span>
 <span class="sd">        :rtype q: float ndarray(n)</span>
-<span class="sd">        :retrun success: IK solved (True) or failed (False)</span>
-<span class="sd">        :rtype success: bool</span>
-<span class="sd">        :retrun error: If failed, what went wrong</span>
-<span class="sd">        :rtype error: List of String</span>
+<span class="sd">        :return failure: IK solver failed</span>
+<span class="sd">        :rtype failure: bool or list of bool</span>
+<span class="sd">        :return error: If failed, what went wrong</span>
+<span class="sd">        :rtype error: List of str</span>
 
 <span class="sd">        Underactuated robots:</span>
 <span class="sd">        For the case where the manipulator has fewer than 6 DOF the</span>
@@ -2031,6 +2031,7 @@
                 <span class="c1"># Are we there yet</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
                     <span class="c1"># print(iterations)</span>
+                    <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                     <span class="k">break</span>
 
                 <span class="c1"># Compute the Jacobian</span>
@@ -2085,17 +2086,16 @@
             <span class="n">qt</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
             <span class="n">tcount</span> <span class="o">+=</span> <span class="n">iterations</span>
 
-            <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
-                <span class="n">err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="s1">&#39;failed to converge: try a different &#39;</span>
-                    <span class="s1">&#39;initial value of joint coordinates&#39;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">failed</span><span class="p">):</span>
+            <span class="n">err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s1">&#39;failed to converge: try a different &#39;</span>
+                <span class="s1">&#39;initial value of joint coordinates&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">qt</span> <span class="o">=</span> <span class="n">qt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">failed</span> <span class="o">=</span> <span class="n">failed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">qt</span><span class="p">,</span> <span class="ow">not</span> <span class="n">failed</span><span class="p">,</span> <span class="n">err</span></div>
+        <span class="k">return</span> <span class="n">qt</span><span class="p">,</span> <span class="n">failed</span><span class="p">,</span> <span class="n">err</span></div>
 
 <div class="viewcode-block" id="SerialLink.ikine3"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.ikine3">[docs]</a>    <span class="k">def</span> <span class="nf">ikine3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elbow_up</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -3454,7 +3454,7 @@
             <span class="k">return</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">error</span></div>
 
 <div class="viewcode-block" id="SerialLink.teach"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.teach">[docs]</a>    <span class="k">def</span> <span class="nf">teach</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Graphical teach pendant</span>
@@ -3518,7 +3518,7 @@
         <span class="c1">#         &#39; Matplotlib required for this function&#39;)</span>
 
 <div class="viewcode-block" id="SerialLink.plot"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -3650,7 +3650,7 @@
         <span class="k">return</span> <span class="n">_fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SerialLink.plot_vellipse"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.plot_vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_vellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
             <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -3726,7 +3726,7 @@
             <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SerialLink.plot_fellipse"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.plot_fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
             <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -3802,7 +3802,7 @@
             <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SerialLink.plot2"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.plot2">[docs]</a>    <span class="k">def</span> <span class="nf">plot2</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -3863,7 +3863,7 @@
         <span class="c1">#         &#39; Matplotlib required for this function&#39;)</span>
 
 <div class="viewcode-block" id="SerialLink.teach2"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.SerialLink.SerialLink.teach2">[docs]</a>    <span class="k">def</span> <span class="nf">teach2</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        2D Graphical teach pendant</span>
