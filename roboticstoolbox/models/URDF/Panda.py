@@ -9,7 +9,8 @@ class Panda(ETS):
 
     def __init__(self):
 
-        fpath = Path('roboticstoolbox') / 'models' / 'xacro' / 'panda' / 'robots'
+        fpath = Path('roboticstoolbox') / 'models' / 'xacro' / 'panda' / \
+            'robots'
         fname = 'panda_arm_hand.urdf.xacro'
         abspath = fpath.absolute()
 

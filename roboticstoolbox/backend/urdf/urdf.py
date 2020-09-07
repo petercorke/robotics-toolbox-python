@@ -11,9 +11,13 @@ import os
 import xml.etree.ElementTree as ET
 import spatialmath as sm
 from io import BytesIO
+from pathlib import Path
 
 from .utils import (parse_origin, configure_origin)
 
+
+fpath = Path('roboticstoolbox') / 'models' / 'xacro'
+abspath = fpath.absolute()
 
 class URDFType(object):
     """Abstract base class for all URDF types.
@@ -299,6 +303,13 @@ class Mesh(URDFType):
 
     @filename.setter
     def filename(self, value):
+
+        if value.startswith('package://'):
+            value = value.replace('package://', '')
+
+        value = (abspath / value).as_posix()
+        print(value)
+
         self._filename = value
 
     @property
