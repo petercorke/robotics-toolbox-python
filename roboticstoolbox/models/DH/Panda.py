@@ -6,7 +6,7 @@ from roboticstoolbox.robot.Revolute import Revolute
 from roboticstoolbox.robot.SerialLink import SerialLink
 
 
-class PandaMDH(SerialLink):
+class Panda(SerialLink):
     """
     A class representing the Franka Emika Panda robot arm.
 
@@ -57,7 +57,7 @@ class PandaMDH(SerialLink):
         # super(Panda, self).__init__(L, name = 'Panda', manufacturer = 'Franka Emika', tool = transl(0, 0, d7))
         tool = transl(0, 0, tool_offset) @  trotz(-np.pi/4)
 
-        super(PandaMDH, self).__init__(
+        super(Panda, self).__init__(
             L,
             name='Panda',
             manufacturer='Franka Emika',

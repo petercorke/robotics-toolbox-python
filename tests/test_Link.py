@@ -153,7 +153,7 @@ class TestLink(unittest.TestCase):
                 "alpha= 0.00  offset= 0.00")
 
     def test_dyn(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
 
         s0 = puma.links[0].dyn()
 

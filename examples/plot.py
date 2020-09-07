@@ -7,7 +7,7 @@ import roboticstoolbox as rp
 import numpy as np
 
 # Make a panda robot
-panda = rp.PandaMDH()
+panda = rp.models.DH.Panda()
 
 # Init joint to the 'ready' joint angles
 panda.q = panda.qr

@@ -8,7 +8,7 @@ import numpy as np
 import spatialmath as sm
 import time
 
-panda = rp.PandaMDH()
+panda = rp.models.DH.Panda()
 panda.q = panda.qr
 
 vell = panda.vellipse(centre='ee')

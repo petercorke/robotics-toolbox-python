@@ -11,7 +11,7 @@ import time
 env = rp.backend.PyPlot()
 env.launch('Panda Resolved-Rate Motion Control Example')
 
-panda = rp.PandaMDH()
+panda = rp.models.DH.Panda()
 panda.q = panda.qr
 
 Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)

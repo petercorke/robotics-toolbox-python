@@ -10,28 +10,28 @@ import unittest
 class TestModels(unittest.TestCase):
 
     def test_puma(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.qr
         puma.qz
         puma.qs
         puma.qn
 
     def test_frankie(self):
-        frankie = rp.Frankie()
+        frankie = rp.models.ETS.Frankie()
         frankie.qr
         frankie.qz
 
     def test_PandaURDF(self):
-        panda = rp.PandaURDF()
+        panda = rp.models.Panda()
         panda.qr
         panda.qz
 
     def test_UR5(self):
-        ur = rp.UR5()
+        ur = rp.models.UR5()
         ur.qr
         ur.qz
 
     def test_wx250s(self):
-        wx = rp.wx250s()
+        wx = rp.models.wx250s()
         wx.qr
         wx.qz

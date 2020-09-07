@@ -77,9 +77,9 @@ class TestURDF(unittest.TestCase):
             pass
 
     def test_urdf_load(self):
-        rp.wx250s()
-        rp.UR5()
-        rp.PandaURDF()
+        rp.models.wx250s()
+        rp.models.UR5()
+        rp.models.Panda()
 
         try:
             xacro.main("")

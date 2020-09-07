@@ -13,7 +13,7 @@ import unittest
 class TestPyPlot(unittest.TestCase):
 
     def test_PyPlot(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         env = rp.backend.PyPlot()
         env.launch()
         env.add(panda)
@@ -22,7 +22,7 @@ class TestPyPlot(unittest.TestCase):
         env.close()
 
     def test_PyPlot_invisible(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         env = rp.backend.PyPlot()
         env.launch()
         env.add(panda, display=False)

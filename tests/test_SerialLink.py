@@ -290,13 +290,13 @@ class TestSerialLink(unittest.TestCase):
             r0 + l1
 
     def test_name(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
 
         panda.name = 'new'
         self.assertEqual(panda.name, 'new')
 
     def test_base(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
 
         panda.base = sm.SE3.Rx(2)
         nt.assert_array_almost_equal(panda.base.A, sm.SE3.Rx(2).A)
@@ -305,7 +305,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(panda.base.A, sm.SE3.Ty(2).A)
 
     def test_A(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
@@ -328,14 +328,14 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(panda.A([1, 4]).A, T2, decimal=4)
 
     def test_A_error(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
 
         with self.assertRaises(ValueError):
             panda.A(7, q).A
 
     def test_islimit(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
@@ -359,7 +359,7 @@ class TestSerialLink(unittest.TestCase):
         self.assertFalse(r2.isspherical())
 
     def test_payload(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         nt.assert_array_almost_equal(panda.r[:, 6], np.zeros(3))
         nt.assert_array_almost_equal(panda.links[6].m, 0)
 
@@ -372,13 +372,13 @@ class TestSerialLink(unittest.TestCase):
 
     def test_jointdynamics(self):
         # TODO
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.jointdynamics(1, 2)
         pass
 
     def test_twists(self):
         # TODO
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
@@ -387,7 +387,7 @@ class TestSerialLink(unittest.TestCase):
         pass
 
     def test_fkine_panda(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
 
         T = np.array([
@@ -444,7 +444,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(r0.jacob0(), J0, decimal=4)
 
     def test_jacobe_panda(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
@@ -528,7 +528,7 @@ class TestSerialLink(unittest.TestCase):
             nt.assert_array_almost_equal(n2.links[i].Tc, L[i].Tc)
 
     def test_pay(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = [1, 2, 3, 4, 5, 6, 7]
 
         w = [1, 2, 3, 4, 5, 6]
@@ -584,7 +584,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(r0.friction(qd), tau)
 
     def test_allfkine(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
@@ -675,7 +675,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(res4, tauB3, decimal=4)
 
     def test_ikcon(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
         T = panda.fkine(q)
         Tt = sm.SE3([T, T, T])
@@ -695,7 +695,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(qa3[:, 1], qr, decimal=4)
 
     def test_ikine(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
         T = panda.fkine(q)
         Tt = sm.SE3([T, T])
@@ -785,7 +785,7 @@ class TestSerialLink(unittest.TestCase):
             r3.ikine3(T)
 
     def test_ikine6s_puma(self):
-        r0 = rp.Puma560()
+        r0 = rp.models.DH.Puma560()
         q = r0.qr
         T = r0.fkine(q)
 
@@ -883,7 +883,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
     def test_ikine6s_traj(self):
-        r0 = rp.Puma560()
+        r0 = rp.models.DH.Puma560()
         q = r0.qr
         T = r0.fkine(q)
         Tt = sm.SE3([T, T, T])
@@ -910,7 +910,7 @@ class TestSerialLink(unittest.TestCase):
         r2 = rp.SerialLink([l1, l2, l3])
         r3 = rp.SerialLink([l6, l6, l6, l6, l6, l6])
 
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         T = sm.SE3(0, 10, 10)
         puma.ikine6s(T)
 
@@ -930,7 +930,7 @@ class TestSerialLink(unittest.TestCase):
             r3.ikine6s(T)
 
     def test_ikinem(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         q = puma.qr
         T = puma.fkine(q)
         Tt = sm.SE3([T, T])
@@ -949,7 +949,7 @@ class TestSerialLink(unittest.TestCase):
             np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
 
     def test_ikunc(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         q = puma.qr
         T = puma.fkine(q)
         Tt = sm.SE3([T, T])
@@ -968,7 +968,7 @@ class TestSerialLink(unittest.TestCase):
             T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
 
     def test_rne(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
 
         z = np.zeros(6)
@@ -995,7 +995,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(t4, tr3, decimal=4)
 
     def test_rne_traj(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
 
         z = np.zeros(6)
         o = np.ones(6)
@@ -1009,7 +1009,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(t0[:, 1], tr1, decimal=4)
 
     def test_rne_delete(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
 
         z = np.zeros(6)
 
@@ -1023,7 +1023,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(t1, tr0, decimal=4)
 
     def test_accel(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1042,7 +1042,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(qdd2, res, decimal=4)
 
     def test_inertia(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1064,7 +1064,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(I2, Ir, decimal=4)
 
     def test_cinertia(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1086,7 +1086,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(M2, Mr, decimal=4)
 
     def test_coriolis(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1110,7 +1110,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(C2, Cr, decimal=4)
 
     def test_gravload(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1131,7 +1131,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(tau3, taur, decimal=4)
 
     def test_itorque(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1149,7 +1149,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(taui2, tauir, decimal=4)
 
     def test_str(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         l0 = rp.Prismatic(mdh=1)
         r0 = rp.SerialLink([l0, l0, l0])
         str(r0)
@@ -1174,7 +1174,7 @@ class TestSerialLink(unittest.TestCase):
         self.assertEqual(str(puma), res)
 
     def test_paycap(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1197,7 +1197,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_allclose(wmax2, res0)
 
     def test_jacob_dot(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qr
         puma.qd = puma.qr
         q = puma.qr
@@ -1211,7 +1211,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(j1, res, decimal=4)
 
     def test_yoshi(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1233,7 +1233,7 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_almost_equal(m4, a3, decimal=4)
 
     def test_asada(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
         q = puma.qn
 
@@ -1291,14 +1291,14 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(mx5, ax3, decimal=4)
 
     def test_maniplty_fail(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         puma.q = puma.qn
 
         with self.assertRaises(ValueError):
             puma.maniplty(method='notamethod')
 
     def test_perterb(self):
-        puma = rp.Puma560()
+        puma = rp.models.DH.Puma560()
         p2 = puma.perterb()
         p3 = puma.perterb(0.8)
 
@@ -1336,7 +1336,7 @@ class TestSerialLink(unittest.TestCase):
             self.assertTrue(resm1[i] < 0.8 or np.isnan(resm1[i]))
 
     def test_qmincon(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
 
         q = panda.qr
@@ -1354,18 +1354,18 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(q2[:, 1], qres, decimal=4)
 
     def test_teach(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.teach(block=False)
         e.close()
 
     def test_teach_withq(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         e = panda.teach(q=panda.qr, block=False)
         e.close()
 
     def test_plot(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.plot(block=False)
         e.close()
@@ -1378,13 +1378,13 @@ class TestSerialLink(unittest.TestCase):
         e.close()
 
     def test_plot_traj(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = np.random.rand(7, 3)
         e = panda.plot(block=False, q=q, dt=0)
         e.close()
 
     def test_control_type(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
 
         panda.control_type = 'p'
 
@@ -1392,7 +1392,7 @@ class TestSerialLink(unittest.TestCase):
             panda.control_type = 'z'
 
     def test_plot_vellipse(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
 
         e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
@@ -1410,7 +1410,7 @@ class TestSerialLink(unittest.TestCase):
             panda.plot_vellipse(centre='ff')
 
     def test_plot_fellipse(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
 
         e = panda.plot_fellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
@@ -1428,25 +1428,25 @@ class TestSerialLink(unittest.TestCase):
             panda.plot_fellipse(centre='ff')
 
     def test_plot_with_vellipse(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.plot(block=False, vellipse=True)
         e.close()
 
     def test_plot_with_fellipse(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.plot(block=False, fellipse=True)
         e.close()
 
     def test_plot2(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.plot2(block=False, name=True)
         e.close()
 
     def test_plot2_traj(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         q = np.random.rand(7, 3)
         e = panda.plot2(block=False, q=q, dt=0)
         e.close()
@@ -1459,7 +1459,7 @@ class TestSerialLink(unittest.TestCase):
         e.close()
 
     def test_teach2(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.teach(block=False)
         e.close()
@@ -1468,20 +1468,20 @@ class TestSerialLink(unittest.TestCase):
         e2.close()
 
     def test_plot_with_vellipse2(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.plot2(block=False, vellipse=True, limits=[1, 2, 1, 2])
         e.step()
         e.close()
 
     def test_plot_with_fellipse2(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = panda.plot2(block=False, fellipse=True)
         e.close()
 
     def test_plot_with_vellipse2_fail(self):
-        panda = rp.PandaMDH()
+        panda = rp.models.DH.Panda()
         panda.q = panda.qr
         e = rp.backend.PyPlot2()
         e.launch()

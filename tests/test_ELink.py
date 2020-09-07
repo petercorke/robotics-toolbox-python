@@ -168,7 +168,7 @@ class TestELink(unittest.TestCase):
             l0.B = [1, 2]
 
     def test_collision(self):
-        p = rp.PandaURDF()
+        p = rp.models.Panda()
         link = p.ets[1]
         col = link.collision[0]
 
