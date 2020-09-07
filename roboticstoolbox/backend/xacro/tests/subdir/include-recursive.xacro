@@ -1,5 +1,0 @@
-<a xmlns:xacro="http://www.ros.org/xacro">
-    <xacro:include filename="include1.xml"/>
-    <xacro:include filename="./include1.xml"/>
-    <xacro:include filename="$(cwd)/include1.xml"/>
-</a>

@@ -1,4 +1,0 @@
-<a xmlns:xacro="http://www.ros.org/wiki/xacro">
-	<xacro:property name="var" value="1"/>
-	<xacro:macro name="foo"><inc1/></xacro:macro>
-</a>
