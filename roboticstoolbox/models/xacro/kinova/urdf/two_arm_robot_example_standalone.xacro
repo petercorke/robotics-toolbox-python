@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!-- j2s6_3 refers to jaco v2 6DOF spherical 3fingers -->
+
+
+<robot xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:gazebo="http://playerstage.sourceforge.net/gazebo/xmlschema/#gz"
+    xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model"
+	xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+	xmlns:body="http://playerstage.sourceforge.net/gazebo/xmlschema/#body"
+    xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom"
+    xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint"
+	xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+	xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+	xmlns:rendering="http://playerstage.sourceforge.net/gazebo/xmlschema/#rendering"
+    xmlns:renderable="http://playerstage.sourceforge.net/gazebo/xmlschema/#renderable"
+    xmlns:physics="http://playerstage.sourceforge.net/gazebo/xmlschema/#physics"
+	xmlns:xacro="http://www.ros.org/wiki/xacro" name="j2s6a300">
+
+
+  <xacro:include filename="$(find kinova_description)/urdf/j2n6s300.xacro"/>
+
+  <link name="root">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size = "0 0 0"/>
+      </geometry>
+
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size = "0 0 0"/>
+      </geometry>
+    </collision>
+  </link>
+
+	<link name="left_arm_mount">
+  </link>
+
+  <link name="right_arm_mount">
+  </link>
+
+	 <joint name="left_arm_attach" type="fixed">
+    <child link="left_arm_mount" />
+    <parent link="root" />
+    <origin xyz="-0.2 0 0" rpy="0 0 1.5707" />
+  </joint>
+
+  <joint name="right_arm_attach" type="fixed">
+    <child link="right_arm_mount" />
+    <parent link="root" />
+    <origin xyz="0.2 0 0" rpy="0 0 1.5707" />
+  </joint>
+
+  <xacro:j2n6s300  base_parent="left_arm_mount" prefix="left"/>
+
+	<xacro:j2n6s300  base_parent="right_arm_mount" prefix="right"/>
+
+</robot>

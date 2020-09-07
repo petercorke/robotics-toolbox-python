@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<robot name="kuka_lbr_iiwa_14_r820" xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include filename="$(find kuka_lbr_iiwa_support)/urdf/lbr_iiwa_14_r820_macro.xacro"/>
+  <xacro:kuka_lbr_iiwa_14_r820 prefix=""/>
+</robot>

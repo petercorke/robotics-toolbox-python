@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!-- PhantomX Pincher Arm gripper URDF-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+    <bioloid_F3_fixed parent="arm_wrist_flex_link" name="arm_wrist_F3_0" color="${color}">
+      <origin xyz="0 0 ${F2_HEIGHT}" rpy="0 ${M_PI} ${-M_PI}"/>
+    </bioloid_F3_fixed>
+    
+    <!-- gripper joint -->
+    <dynamixel_AX12_fixed parent="arm_wrist_F3_0_link" name="gripper_servo" >
+      <origin xyz="0 0 ${-AX12_WIDTH/2}" rpy="${M_PI/2} ${M_PI} ${M_PI/2}"/>
+    </dynamixel_AX12_fixed>
+    
+     <gripper_finger_base parent="gripper_servo_link" name="gripper_finger_base" color="${color}">
+      <origin xyz="0.015  ${AX12_WIDTH} 0" rpy="${M_PI/2} ${-M_PI} ${M_PI/2}"/>
+    </gripper_finger_base>
+  
+     <!-- Finger 1 --> 
+    <!-- Modifications by C. Roesmann: Instead of changing the arbotix driver to distinguish between a prismatic and a revolute joint, we do  the conversion here using a mimic. -->
+    <joint name="gripper_joint" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="30" velocity="0.5" lower="-0.8" upper="0.8"/> <!--lower="0.002" upper="0.031"-->
+      <parent link="gripper_servo_link"/>
+      <child link="link_revolute_to_prismatic_virtual1"/>
+    </joint> 
+    
+    <link name="link_revolute_to_prismatic_virtual1"/>
+
+    <joint name="gripper_joint_prismatic1" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="30" velocity="0.5" lower="-0.01" upper="0.0"/>
+      <parent link="gripper_servo_link"/>
+      <child link="gripper_active_link"/>
+      <mimic joint="gripper_joint" multiplier="${FACTOR_GRIPPER_TRANSL}"  offset = "${OFFSET_GRIPPER_TRANSL}"/>
+    </joint> 
+
+    <pincher_gripper name="gripper_active" color="${color}" >
+      <origin xyz="-0.02 0.023 0" rpy="${-M_PI/2} 0 0"/>
+    </pincher_gripper>
+     
+    <!-- Finger 2 --> 
+    <!-- Note: currently static but should be a Mimic of Finger 1 -->
+    <!--joint name="gripper2_joint" type="fixed">
+      <parent link="gripper_servo_link"/>
+      <child link="gripper_active2_link"/>
+    </joint>  -->
+    
+    <pincher_gripper name="gripper_active2" color="${color}" >
+      <origin xyz="0.02 0.023 0" rpy="${-M_PI/2} ${M_PI} 0"/>
+    </pincher_gripper>
+      
+    <!-- Using Mimic -->
+    <!-- gripper 2 joint -->
+    <!--  ### Mimic would be better but causes Missing Joint error in Moveit 
+      <joint name="gripper2_joint" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="30" velocity="0.5" lower="0.002" upper="0.031"/>
+      <parent link="gripper_servo_link"/>
+      <child link="gripper_active2_link"/>
+      <mimic joint="gripper_joint" multiplier="-.5"  offset = "0"/>
+    </joint-->  
+
+    <!-- Changes by C. Roesmann -->
+    <joint name="gripper2_joint" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="30" velocity="0.5" lower="0.0" upper="0.02"/>
+      <parent link="gripper_servo_link"/>
+      <child link="gripper_active2_link"/>
+      <mimic joint="gripper_joint" multiplier="-${FACTOR_GRIPPER_TRANSL}"  offset = "-${OFFSET_GRIPPER_TRANSL}"/>
+    </joint> 
+
+
+
+ <gazebo reference="gripper_active_link">
+     <gravity>false</gravity>
+ </gazebo>
+
+ <gazebo reference="gripper_active2_link">
+     <gravity>false</gravity>
+ </gazebo>
+
+
+
+</robot>

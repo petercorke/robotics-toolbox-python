@@ -1,0 +1,278 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:macro name="kuka_kr5_arc" params="prefix">
+    <!-- LINKS -->
+    <!-- base link -->
+    <link name="${prefix}base_link">
+      <inertial>
+        <origin xyz="-0.017519394031846 8.11394768450848E-07 0.0975924044854325"
+                rpy="0 0 0" />
+        <mass value="7.58585707666653" />
+        <inertia
+            ixx="0.0441803207364147"
+            ixy="5.37433593375545E-07"
+            ixz="0.004045564920652"
+            iyy="0.0584309411563095"
+            iyz="-4.8990117845347E-07"
+            izz="0.0514875586171667" />
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/base_link.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/base_link.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <!-- link 1 (A1) -->
+    <link name="${prefix}link_1">
+      <inertial>
+        <origin
+          xyz="0.0359968408135882 0.00783796591813503 -0.0864969937502713"
+          rpy="0 0 0" />
+        <mass
+          value="5.77242340173648" />
+        <inertia
+          ixx="0.0327019582662897"
+          ixy="-0.00189987845379704"
+          ixz="0.00937014136132958"
+          iyy="0.0373787564144547"
+          iyz="-0.00197023031658988"
+          izz="0.0348614383349291" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/link_1.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/link_1.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <!-- link 2 -->
+    <link name="${prefix}link_2">
+      <inertial>
+        <origin
+          xyz="0.00610231661046294 0.0401115026555897 -0.11531122862673"
+          rpy="0 0 0" />
+        <mass
+          value="4.64974639735464" />
+        <inertia
+          ixx="0.0663459530931455"
+          ixy="0.000173652478770081"
+          ixz="0.000586191290902105"
+          iyy="0.070407913174161"
+          iyz="-0.00203071071007864"
+          izz="0.0102816377550493" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/link_2.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/link_2.stl"  />
+        </geometry>
+      </collision>
+    </link>
+    <!-- link 3 -->
+    <link name="${prefix}link_3">
+      <inertial>
+        <origin
+          xyz="0.0755031858462784 -0.046481517407519 -0.00506472105904233"
+          rpy="0 0 0" />
+        <mass
+          value="4.3593398708568" />
+        <inertia
+          ixx="0.0202008069207718"
+          ixy="5.72394748332304E-05"
+          ixz="0.000556621203065716"
+          iyy="0.0246796752429931"
+          iyz="0.000697020296811431"
+          izz="0.0178067561136726" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/link_3.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/link_3.stl"  />
+        </geometry>
+      </collision>
+    </link>
+    <!-- link 4 -->
+    <link name="${prefix}link_4">
+      <inertial>
+        <origin
+          xyz="0.0857493724873204 -0.00149370513017266 -0.00271609825446984"
+          rpy="0 0 0" />
+        <mass
+          value="2.06809715541017" />
+        <inertia
+          ixx="0.00444943757623485"
+          ixy="-0.000424915429214687"
+          ixz="-0.000117340671961173"
+          iyy="0.00882693069799353"
+          iyz="0.000136971152627904"
+          izz="0.0101131228921778" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/link_4.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/link_4.stl"  />
+        </geometry>
+      </collision>
+    </link>
+    <!-- link 5 -->
+    <link name="${prefix}link_5">
+      <inertial>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <mass
+          value="0.328309098974388" />
+        <inertia
+          ixx="0.000221789219477276"
+          ixy="-9.59628913869705E-07"
+          ixz="1.40395663663479E-20"
+          iyy="0.000321152451627032"
+          iyz="-4.44973606670705E-20"
+          izz="0.000275966419870925" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/link_5.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/link_5.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <!-- link 6 -->
+    <link name="${prefix}link_6">
+      <inertial>
+        <origin
+          xyz="0.00983949894991115 -2.78372724487979E-05 -1.11022302462516E-15"
+          rpy="0 0 0" />
+        <mass
+          value="0.0789494717998531" />
+        <inertia
+          ixx="3.53285039019399E-05"
+          ixy="-3.23299732456798E-08"
+          ixz="-6.9643163510009E-19"
+          iyy="2.30177957763861E-05"
+          iyz="-9.26550270485857E-19"
+          izz="2.28539400944714E-05" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/visual/link_6.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr5_support/meshes/kr5_arc/collision/link_6.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <!-- tool link -->
+    <!-- This frame corresponds to the $FLANGE coordinate system in KUKA KRC controllers. -->
+    <link name="${prefix}tool0"/>
+    <!-- END LINKS -->
+
+    <!-- JOINTS -->
+    <!-- joint 1 (A1) -->
+    <joint name="${prefix}joint_a1" type="revolute">
+      <origin xyz="0 0 0.4" rpy="${pi} 0 0"/>
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}link_1"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="${radians(-155)}" upper="${radians(155)}" velocity="${radians(154)}"/>
+    </joint>
+    <!-- joint 2 (A2) -->
+    <joint name="${prefix}joint_a2" type="revolute">
+      <origin xyz="0.18 0 0" rpy="${pi/2} 0 0"/>
+      <parent link="${prefix}link_1"/>
+      <child link="${prefix}link_2"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="${radians(-180)}" upper="${radians(65)}" velocity="${radians(154)}"/>
+    </joint>
+    <!-- joint 3 (A3) -->
+    <joint name="${prefix}joint_a3" type="revolute">
+      <origin xyz="0.6 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}link_2"/>
+      <child link="${prefix}link_3"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="${radians(-15)}" upper="${radians(158)}" velocity="${radians(228)}"/>
+    </joint>
+    <!-- joint 4 (A4) -->
+    <joint name="${prefix}joint_a4" type="revolute">
+      <origin xyz="0 -0.12 0" rpy="0 ${-pi/2} 0"/>
+      <parent link="${prefix}link_3"/>
+      <child link="${prefix}link_4"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="${radians(-350)}" upper="${radians(350)}" velocity="${radians(343)}"/>
+    </joint>
+    <!-- joint 5 (A5) -->
+    <joint name="${prefix}joint_a5" type="revolute">
+      <origin xyz="0 0 -0.62" rpy="0 ${pi/2} 0"/>
+      <parent link="${prefix}link_4"/>
+      <child link="${prefix}link_5"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="${radians(-130)}" upper="${radians(130)}" velocity="${radians(384)}"/>
+    </joint>
+    <!-- joint 6 (A6) -->
+    <joint name="${prefix}joint_a6" type="revolute">
+      <origin xyz="0 0 0" rpy="0 ${-pi/2} 0"/>
+      <parent link="${prefix}link_5"/>
+      <child link="${prefix}link_6"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0" lower="${radians(-350)}" upper="${radians(350)}" velocity="${radians(721)}"/>
+    </joint>
+    <!-- tool frame - fixed frame -->
+    <joint name="${prefix}joint_a6-tool0" type="fixed">
+      <parent link="${prefix}link_6"/>
+      <child link="${prefix}tool0"/>
+      <origin xyz="0 0 -0.115" rpy="0 ${-pi} ${-pi/2}"/>
+    </joint>
+    <!-- END JOINTS -->
+
+    <!-- ROS base_link to KUKA $ROBROOT coordinate system transform -->
+    <link name="${prefix}base" />
+    <joint name="${prefix}base_link-base" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base" />
+    </joint>
+    
+  </xacro:macro>
+</robot>

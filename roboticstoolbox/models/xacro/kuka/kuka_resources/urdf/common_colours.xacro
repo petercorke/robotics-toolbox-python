@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- colours based on RAL values given in "FAQ - Colours of robot and robot
+       controller", version "KUKA.Tifs | 2010-01-21 |YM| DefaultColorsRobotAndController.doc",
+       downloaded 2015-07-18 from
+       http://www.kuka.be/main/cservice/faqs/hardware/DefaultColorsRobotAndController.pdf
+
+       all RAL colours converted using http://www.visual-graphics.de/en/customer-care/ral-colours
+  -->
+
+  <!-- default colors for robots -->
+  <!-- RAL 2003: mechanical arm (pastel orange) -->
+  <xacro:property name="colour_kuka_orange"               value="${246/255} ${120/255} ${ 40/255} 1.0" />
+
+  <!-- RAL 9005: robot base (jet black) -->
+  <xacro:property name="colour_kuka_black"                value="${ 14/255} ${ 14/255} ${ 16/255} 1.0" />
+
+  <!-- RAL 7022: pedestal frame (olive grey) -->
+  <xacro:property name="colour_kuka_pedestal"             value="${129/255} ${120/255} ${ 99/255} 1.0" />
+
+
+  <!-- default colors for KR C2 controller cabinets -->
+  <!-- RAL 7016 (anthracite gray) -->
+  <xacro:property name="colour_kuka_anthracite_gray"      value="${ 56/255} ${ 62/255} ${ 66/255} 1.0" />
+
+
+  <!-- optional colors -->
+  <!-- RAL 1004 - golden -->
+  <xacro:property name="colour_kuka_ral_golden"           value="${228/255} ${158/255} ${ 34/255} 1.0" />
+
+  <!-- RAL 1006 - corn yellow -->
+  <xacro:property name="colour_kuka_ral_corn_yellow"      value="${226/255} ${144/255} ${ 32/255} 1.0" />
+
+  <!-- RAL 1013 - pearly white -->
+  <xacro:property name="colour_kuka_ral_pearly_white"     value="${227/255} ${217/255} ${198/255} 1.0" />
+
+  <!-- RAL 1015 - light ivory -->
+  <xacro:property name="colour_kuka_ral_light_ivory"      value="${230/255} ${210/255} ${181/255} 1.0" />
+
+  <!-- RAL 2000 - yellow orange -->
+  <xacro:property name="colour_kuka_ral_yellow_orange"    value="${218/255} ${110/255} ${  0/255} 1.0" />
+
+  <!-- RAL 2008 - light orange -->
+  <xacro:property name="colour_kuka_ral_light_orange"     value="${237/255} ${107/255} ${ 33/255} 1.0" />
+
+  <!-- RAL 3002 - carmine -->
+  <xacro:property name="colour_kuka_ral_carmine"          value="${155/255} ${ 34/255} ${ 33/255} 1.0" />
+
+  <!-- RAL 3004 - crimson -->
+  <xacro:property name="colour_kuka_ral_crimson"          value="${107/255} ${ 28/255} ${ 35/255} 1.0" />
+
+  <!-- RAL 3005 - claret red -->
+  <xacro:property name="colour_kuka_ral_claret_red"       value="${ 89/255} ${ 25/255} ${ 31/255} 1.0" />
+
+  <!-- RAL 4009 - pastel mauve -->
+  <xacro:property name="colour_kuka_ral_pastel_mauve"     value="${157/255} ${134/255} ${146/255} 1.0" />
+
+  <!-- RAL 5000 - purple blue -->
+  <xacro:property name="colour_kuka_ral_purple_blue"      value="${ 49/255} ${ 79/255} ${111/255} 1.0" />
+
+  <!-- RAL 5001 - greenish blue -->
+  <xacro:property name="colour_kuka_ral_greenish_blue"    value="${ 15/255} ${ 76/255} ${100/255} 1.0" />
+
+  <!-- RAL 5002 - ultramarine -->
+  <xacro:property name="colour_kuka_ral_ultramarine"      value="${  0/255} ${ 56/255} ${123/255} 1.0" />
+
+  <!-- RAL 5005 - signal blue -->
+  <xacro:property name="colour_kuka_ral_signal_blue"      value="${  0/255} ${ 83/255} ${135/255} 1.0" />
+
+  <!-- RAL 5007 - luminous blue -->
+  <xacro:property name="colour_kuka_ral_luminous_blue"    value="${ 55/255} ${107/255} ${140/255} 1.0" />
+
+  <!-- RAL 5012 - light blau -->
+  <xacro:property name="colour_kuka_ral_light_blau"       value="${  0/255} ${137/255} ${182/255} 1.0" />
+
+  <!-- RAL 5018 - turquoise blue -->
+  <xacro:property name="colour_kuka_ral_turquoise_blue"   value="${  5/255} ${139/255} ${140/255} 1.0" />
+
+  <!-- RAL 6011 - mignonette green -->
+  <xacro:property name="colour_kuka_ral_mignonette_green" value="${108/255} ${124/255} ${ 89/255} 1.0" />
+
+  <!-- RAL 6021 - celadon -->
+  <xacro:property name="colour_kuka_ral_celadon"          value="${138/255} ${153/255} ${119/255} 1.0" />
+
+  <!-- RAL 6034 - pastel green -->
+  <xacro:property name="colour_kuka_ral_pastel_green"     value="${122/255} ${172/255} ${172/255} 1.0" />
+
+  <!-- RAL 7001 - silver gray -->
+  <xacro:property name="colour_kuka_ral_silver_gray"      value="${140/255} ${150/255} ${157/255} 1.0" />
+
+  <!-- RAL 7011 - ferric gray -->
+  <xacro:property name="colour_kuka_ral_ferric_gray"      value="${ 82/255} ${ 89/255} ${ 93/255} 1.0" />
+
+  <!-- RAL 7032 - silicic gray -->
+  <xacro:property name="colour_kuka_ral_silicic_gray"     value="${181/255} ${176/255} ${161/255} 1.0" />
+
+  <!-- RAL 7035 - light gray -->
+  <xacro:property name="colour_kuka_ral_light_gray"       value="${197/255} ${199/255} ${196/255} 1.0" />
+
+  <!-- RAL 7038 - agate gray -->
+  <xacro:property name="colour_kuka_ral_agate_gray"       value="${176/255} ${176/255} ${169/255} 1.0" />
+
+  <!-- RAL 9001 - cream white -->
+  <xacro:property name="colour_kuka_ral_cream_white"      value="${233/255} ${224/255} ${210/255} 1.0" />
+
+  <!-- RAL 9002 - gray white  -->
+  <xacro:property name="colour_kuka_ral_gray_white"       value="${215/255} ${213/255} ${203/255} 1.0" />
+
+  <!-- RAL 9010 - pure white  -->
+  <xacro:property name="colour_kuka_ral_pure_white"       value="${241/255} ${236/255} ${255/255} 1.0" />
+</robot>

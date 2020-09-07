@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!--Generates a urdf from the macro in kr16_2_macro.xacro -->
+<robot name="kuka_kr16_2" xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include filename="$(find kuka_kr16_support)/urdf/kr16_2_macro.xacro" />
+  <xacro:kuka_kr16_2 prefix=""/>
+</robot>

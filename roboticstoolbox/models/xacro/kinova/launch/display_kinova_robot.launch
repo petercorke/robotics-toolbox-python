@@ -1,0 +1,14 @@
+<launch>
+	<arg name="gui" default="True" />
+	<arg name="kinova_robotType" default="j2n6s300" />
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find kinova_description)/urdf/$(arg kinova_robotType)_standalone.xacro'" />
+	<param name="use_gui" value="$(arg gui)"/>
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+		<param name="zeros/$(arg kinova_robotType)_joint_2" value="3.1415"/>
+		<param name="zeros/$(arg kinova_robotType)_joint_3" value="3.1415"/>
+	  <param name="zeros/$(arg kinova_robotType)_joint_4" value="3.1415"/> 
+	</node>
+
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+</launch>
+

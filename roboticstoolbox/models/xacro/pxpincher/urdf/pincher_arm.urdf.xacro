@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!-- Describe URDF for PhantomX Pincher Arm -->
+<robot name="turtlebot_arm" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- We can configure joints velocity limit and lower/upper limits
+          to allow access to different operational areas, e.g. left handed vs. right handed robot -->
+
+
+
+
+   <xacro:property name="joints_vlimit" value="1.571"/>
+    <xacro:property name="pan_llimit" value="-1.17"/>
+    <xacro:property name="pan_ulimit" value="1.43"/>
+    <xacro:property name="shoulder_llimit" value="0"/>
+    <xacro:property name="shoulder_ulimit" value="2.00"/>
+    <xacro:property name="elbow_llimit" value="-2.17"/>
+    <xacro:property name="elbow_ulimit" value="0.01"/>
+    <xacro:property name="wrist_llimit" value="-1.25"/>
+    <xacro:property name="wrist_ulimit" value="1.68"/>
+   
+
+
+    <!-- Included URDF Files -->
+    
+     <!-- Pincher arm is same as Turtlebot -->
+    <xacro:include filename="$(find pxpincher_description)/urdf/turtlebot_arm.xacro"/>
+    
+    <!-- As we don't have here a turtlebot base, add a base_link link as its location reference -->
+    <link name="base_link"/>
+
+    <!-- Turtlebot arm macro -->
+    <turtlebot_arm parent="base_link" color="Gray" gripper_color="Gray"   pincher_gripper="true" turtlebot_gripper="false">
+      <!-- Place the "floating" arm at the location it should be if mounted on a turtlebot,
+           as pick and place and other demos assume this location -->
+      <origin xyz="0.06 0 0.01"/>
+    </turtlebot_arm>
+
+
+
+<!-- Phantomx Arm mount/Controllerboard link-->
+<joint name="arm_mount_joint" type="fixed">
+   <!--origin xyz="-0.09 -0.06 -0.105" rpy="0 0 0"/-->
+   <origin xyz="0.04 0.0 -0.065" rpy="0 0 0"/>
+   <parent link="arm_base_link"/>
+   <child link="arm_mount_link"/>
+   <axis xyz="0 0 1"/>
+ </joint>
+<link name="arm_mount_link">
+ <visual>
+   <!--origin xyz="0.18 -0.01 0.05" rpy="0 0 7.85"/-->
+   <origin xyz="0.091 -0.1 0.0" rpy="0 0 1.57"/>
+   <geometry>
+     <mesh filename="package://pxpincher_description/meshes/arm_mount.stl" scale="0.01 0.01 0.01"/>
+    </geometry>
+   <material name="Gray"/>
+  </visual>
+</link>
+
+
+
+
+
+
+
+</robot>

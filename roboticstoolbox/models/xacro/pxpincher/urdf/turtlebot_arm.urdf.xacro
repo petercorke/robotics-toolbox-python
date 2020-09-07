@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- Describe URDF for Turtlebot Arm -->
+<robot name="turtlebot_arm" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- We can configure joints velocity limit and lower/upper limits
+         to allow access to different operational areas, e.g. left handed vs. right handed robot -->
+    <xacro:property name="joints_vlimit" value="1.571"/>
+    <xacro:property name="pan_llimit" value="-2.617"/>
+    <xacro:property name="pan_ulimit" value="2.617"/>
+    <xacro:property name="shoulder_llimit" value="-2.617"/>
+    <xacro:property name="shoulder_ulimit" value="2.617"/>
+    <xacro:property name="elbow_llimit" value="-2.617"/>
+    <xacro:property name="elbow_ulimit" value="2.617"/>
+    <xacro:property name="wrist_llimit" value="-1.745"/>
+    <xacro:property name="wrist_ulimit" value="1.745"/>
+
+    <!-- Included URDF Files -->   
+    <xacro:include filename="$(find pxpincher_description)/urdf/turtlebot_arm.xacro"/>
+
+    <!-- As we don't have here a turtlebot base, add a base_link link as its location reference -->
+    <link name="base_link"/>
+
+    <!-- Turtlebot arm macro -->
+    <turtlebot_arm parent="base_link" color="White" gripper_color="Green"
+                    pincher_gripper="false" turtlebot_gripper="true">               
+      <!-- Place the "floating" arm at the location it should be if mounted on a turtlebot,
+           as pick and place and other demos assume this location -->
+      <origin xyz="0.1 0.03 0.435"/>
+    </turtlebot_arm>
+</robot>

@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include filename="$(find kuka_resources)/urdf/common_colours.xacro"/>
+
+  <xacro:macro name="material_kuka_orange">
+    <material name="">
+      <color rgba="${colour_kuka_orange}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_black">
+    <material name="">
+      <color rgba="${colour_kuka_black}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_pedestal">
+    <material name="">
+      <color rgba="${colour_kuka_pedestal}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_golden">
+    <material name="">
+      <color rgba="${colour_kuka_golden}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_corn_yellow">
+    <material name="">
+      <color rgba="${colour_kuka_ral_corn_yellow}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_pearly_white">
+    <material name="">
+      <color rgba="${colour_kuka_ral_pearly_white}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_light_ivory">
+    <material name="">
+      <color rgba="${colour_kuka_ral_light_ivory}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_yellow_orange">
+    <material name="">
+      <color rgba="${colour_kuka_ral_yellow_orange}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_light_orange">
+    <material name="">
+      <color rgba="${colour_kuka_ral_light_orange}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_carmine">
+    <material name="">
+      <color rgba="${colour_kuka_ral_carmine}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_crimson">
+    <material name="">
+      <color rgba="${colour_kuka_ral_crimson}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_claret_red">
+    <material name="">
+      <color rgba="${colour_kuka_ral_claret_red}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_pastel_mauve">
+    <material name="">
+      <color rgba="${colour_kuka_ral_pastel_mauve}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_purple_blue">
+    <material name="">
+      <color rgba="${colour_kuka_ral_purple_blue}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_greenish_blue">
+    <material name="">
+      <color rgba="${colour_kuka_ral_greenish_blue}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_ultramarine">
+    <material name="">
+      <color rgba="${colour_kuka_ral_ultramarine}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_signal_blue">
+    <material name="">
+      <color rgba="${colour_kuka_ral_signal_blue}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_luminous_blue">
+    <material name="">
+      <color rgba="${colour_kuka_ral_luminous_blue}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_light_blau">
+    <material name="">
+      <color rgba="${colour_kuka_ral_light_blau}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_turquoise_blue">
+    <material name="">
+      <color rgba="${colour_kuka_ral_turquoise_blue}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_mignonette_green">
+    <material name="">
+      <color rgba="${colour_kuka_ral_mignonette_green}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_celadon">
+    <material name="">
+      <color rgba="${colour_kuka_ral_celadon}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_pastel_green">
+    <material name="">
+      <color rgba="${colour_kuka_ral_pastel_green}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_silver_gray">
+    <material name="">
+      <color rgba="${colour_kuka_ral_silver_gray}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_ferric_gray">
+    <material name="">
+      <color rgba="${colour_kuka_ral_ferric_gray}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_silicic_gray">
+    <material name="">
+      <color rgba="${colour_kuka_ral_silicic_gray}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_light_gray">
+    <material name="">
+      <color rgba="${colour_kuka_ral_light_gray}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_agate_gray">
+    <material name="">
+      <color rgba="${colour_kuka_ral_agate_gray}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_cream_white">
+    <material name="">
+      <color rgba="${colour_kuka_ral_cream_white}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_gray_white">
+    <material name="">
+      <color rgba="${colour_kuka_ral_gray_white}"/>
+    </material>
+  </xacro:macro>
+
+  <xacro:macro name="material_kuka_ral_pure_white">
+    <material name="">
+      <color rgba="${colour_kuka_ral_pure_white}"/>
+    </material>
+  </xacro:macro>
+</robot>

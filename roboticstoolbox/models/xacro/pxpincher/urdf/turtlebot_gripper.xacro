@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!-- Turtlebot Arm gripper URDF-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+    <bioloid_F3_fixed parent="arm_wrist_flex_link" name="arm_wrist_F3_0" color="${color}">
+      <origin xyz="0 0.016 ${F2_HEIGHT}" rpy="0 ${M_PI} ${-M_PI/2}"/>
+    </bioloid_F3_fixed>
+    <!-- gripper joint -->
+    <dynamixel_AX12_fixed parent="arm_wrist_F3_0_link" name="gripper_servo">
+      <origin xyz="-0.02275 0 ${-AX12_WIDTH/2}" rpy="${M_PI} ${M_PI/2} 0"/>
+    </dynamixel_AX12_fixed>
+
+    <!-- finger 1 -->
+    <joint name="gripper_joint" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="30" velocity="0.785" lower="-0.40" upper="0.46"/>
+      <parent link="gripper_servo_link"/>
+      <child link="gripper_active_link"/>
+    </joint>
+    <link name="gripper_active_link">
+      <inertial>
+        <mass value="0.010"/>
+        <origin xyz="0 0 0"/>
+        <inertia ixx="0.000001" ixy="0.0" ixz="0.0"
+                 iyy="0.000001" iyz="0.0"
+                 izz="0.000001"/>
+      </inertial>
+      <visual>
+        <origin xyz=" 0 0 0 " rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://pxpincher_description/meshes/F2.stl" scale="${M_SCALE} ${M_SCALE} ${M_SCALE}"/>
+        </geometry>
+        <material name="${color}"/>
+      </visual>
+      <collision>
+        <origin xyz="0.0 0.0 0.00775" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.025 0.0485 0.0375"/>
+        </geometry>
+      </collision>
+    </link>
+    <finger_fixed parent="gripper_active_link" name="gripper_active_finger" color="${gripper_color}">
+      <origin xyz="0 0 ${F2_HEIGHT}" rpy="0 0 0"/>
+    </finger_fixed>
+
+    <!-- finger 2 -->
+    <bioloid_F3_fixed parent="gripper_servo_link" name="gripper_static" color="${color}">
+      <origin xyz="0 0 ${-AX12_HEIGHT-F10_HEIGHT+0.001}" rpy="0 ${M_PI} 0"/>
+    </bioloid_F3_fixed>
+    <finger_fixed parent="gripper_static_link" name="gripper_static_finger" color="${gripper_color}">
+      <origin xyz="0 0 0" rpy="0 0 ${M_PI}"/>
+    </finger_fixed>
+</robot>

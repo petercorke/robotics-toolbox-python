@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <property name="pi" value="3.141592654"/>
+  <!--degrees to radians-->
+  <property name="deg" value="0.017453293"/>
+
+  <xacro:macro name="kuka_kr210l150" params="prefix">
+    <!-- links -->
+    <link name="${prefix}base_link">
+      <inertial>
+        <origin xyz="-0.027804 0.00039112 0.14035" rpy="0 0 0"/>
+        <mass value="1572.9"/>
+        <inertia ixx="89.282" ixy="-0.47721" ixz="0.85562" iyy="107.51" iyz="0.0067576" izz="172.02"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/base_link.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/base_link.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}link_1">
+      <inertial>
+        <origin xyz="-0.036811 -0.024697 0.56577" rpy="0 0 0"/>
+        <mass value="1385.5"/>
+        <inertia ixx="90.873" ixy="33.809" ixz="17.159" iyy="147.03" iyz="0.063634" izz="168.19"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/link_1.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/link_1.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}link_2">
+      <inertial>
+        <origin xyz="0.016923 -0.19196 0.44751" rpy="0 0 0"/>
+        <mass value="958.62"/>
+        <inertia ixx="180.42" ixy="-0.83462" ixz="0.32549" iyy="177.68" iyz="-20.82" izz="20.495"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/link_2.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/link_2.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}link_3">
+      <inertial>
+        <origin xyz="0.18842 0.18344 -0.042799" rpy="0 0 0"/>
+        <mass value="710.03"/>
+        <inertia ixx="11.887" ixy="-0.12154" ixz="-1.3604" iyy="98.805" iyz="-0.056505" izz="96.251"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/link_3.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/link_3.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}link_4">
+      <inertial>
+        <origin xyz="0.27146 -0.007326 5.2775E-05" rpy="0 0 0"/>
+        <mass value="173.73"/>
+        <inertia ixx="1.8001" ixy="-0.18515" ixz="0.00051232" iyy="5.514" iyz="0.00070469" izz="6.3498"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/link_4.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/link_4.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}link_5">
+      <inertial>
+        <origin xyz="0.04379 0.025984 3.5491E-07" rpy="0 0 0"/>
+        <mass value="72.17"/>
+        <inertia ixx="0.3938" ixy="-0.085332" ixz="1.7223E-06" iyy="0.68945" iyz="-7.0292E-06" izz="0.67292"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/link_5.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/link_5.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <link name="${prefix}link_6">
+      <inertial>
+        <origin xyz="-0.017956 -1.5237E-05 0.00015484" rpy="0 0 0"/>
+        <mass value="6.3154"/>
+        <inertia ixx="0.031746" ixy="1.7673E-07" ixz="-6.6558E-06" iyy="0.016686" iyz="1.4304E-07" izz="0.016723"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/visual/link_6.dae"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.75294 0.75294 0.75294 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kuka_kr210_support/meshes/kr210l150/collision/link_6.stl"/>
+        </geometry>
+      </collision>
+    </link>
+    <!-- This frame corresponds to the $FLANGE coordinate system in KUKA KRC controllers. -->
+    <link name="${prefix}tool0"/>
+
+    <!-- joints -->
+    <joint name="${prefix}joint_a1" type="revolute">
+      <origin xyz="-0.00262 0.00097586 0.33099" rpy="0 0 0"/>
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}link_1"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-185*deg}" upper="${185*deg}" effort="0" velocity="${123*deg}"/>
+    </joint>
+    <joint name="${prefix}joint_a2" type="revolute">
+      <origin xyz="0.35277 -0.037476 0.4192" rpy="0 0 0"/>
+      <parent link="${prefix}link_1"/>
+      <child link="${prefix}link_2"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${-45*deg}" upper="${85*deg}" effort="0" velocity="${115*deg}"/>
+    </joint>
+    <joint name="${prefix}joint_a3" type="revolute">
+      <origin xyz="-9.8483E-05 -0.1475 1.2499" rpy="0 0 0"/>
+      <parent link="${prefix}link_2"/>
+      <child link="${prefix}link_3"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${-210*deg}" upper="${(155-90)*deg}" effort="0" velocity="${112*deg}"/>
+    </joint>
+    <joint name="${prefix}joint_a4" type="revolute">
+      <origin xyz="0.95795 0.184 -0.055059" rpy="0 0 0"/>
+      <parent link="${prefix}link_3"/>
+      <child link="${prefix}link_4"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="${-350*deg}" upper="${350*deg}" effort="0" velocity="${179*deg}"/>
+    </joint>
+    <joint name="${prefix}joint_a5" type="revolute">
+      <origin xyz="0.542 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}link_4"/>
+      <child link="${prefix}link_5"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${-125*deg}" upper="${125*deg}" effort="0" velocity="${172*deg}"/>
+    </joint>
+    <joint name="${prefix}joint_a6" type="revolute">
+      <origin xyz="0.1925 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}link_5"/>
+      <child link="${prefix}link_6"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="${-350*deg}" upper="${350*deg}" effort="0" velocity="${219*deg}"/>
+    </joint>
+    <joint name="${prefix}link_6-tool0" type="fixed">
+      <parent link="${prefix}link_6"/>
+      <child link="${prefix}tool0"/>
+      <origin xyz="0.0375 0 -0.00023924" rpy="0 0 0"/>
+    </joint>
+
+    <!-- rename 'Link1' to 'link_1', maintain bw-compatibility -->
+    <link name="${prefix}Link1"/>
+    <joint name="${prefix}Link1-link_1" type="fixed">
+      <parent link="${prefix}link_1"/>
+      <child link="${prefix}Link1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>
