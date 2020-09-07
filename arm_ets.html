@@ -1,0 +1,838 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Arm Type Robots - ETS &mdash; Robotics Toolbox Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Arm Type Robots - DH" href="arm_dh.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Arm Type Robots - DH</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Arm Type Robots - ETS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-roboticstoolbox.robot.ETS">ETS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-roboticstoolbox.robot.ET">ET</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Arm Type Robots - ETS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/arm_ets.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="arm-type-robots-ets">
+<h1>Arm Type Robots - ETS<a class="headerlink" href="#arm-type-robots-ets" title="Permalink to this headline">¶</a></h1>
+<p><em>Code author: Jesse Haviland</em></p>
+<div class="section" id="module-roboticstoolbox.robot.ETS">
+<span id="ets"></span><h2>ETS<a class="headerlink" href="#module-roboticstoolbox.robot.ETS" title="Permalink to this headline">¶</a></h2>
+<p>Created on Tue Apr 24 15:48:52 2020
+&#64;author: Jesse Haviland</p>
+<dl class="py class">
+<dt id="roboticstoolbox.robot.ETS.ETS">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ETS.</code><code class="sig-name descname">ETS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elinks</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'noname'</span></em>, <em class="sig-param"><span class="n">base_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ee_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">manufacturer</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">base</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tool</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">array([0.0, 0.0, 9.81])</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The Elementary Transform Sequence (ETS). A superclass which represents the
+kinematics of a serial-link manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et_list</strong> (<em>ET list</em>) – List of elementary transforms which represent the robot
+kinematics</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the robot</p></li>
+<li><p><strong>manufacturer</strong> (<em>str</em><em>, </em><em>optional</em>) – Manufacturer of the robot</p></li>
+<li><p><strong>base</strong> (<em>SE3</em><em>, </em><em>optional</em>) – Location of the base is the world frame</p></li>
+<li><p><strong>tool</strong> (<em>SE3</em><em>, </em><em>optional</em>) – Offset of the flange of the robot to the end-effector</p></li>
+<li><p><strong>gravity</strong> – The gravity vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform Sequence,
+J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.bfs_link">
+<code class="sig-name descname">bfs_link</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.bfs_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.bfs_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.dfs_path">
+<code class="sig-name descname">dfs_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">l1</span></em>, <em class="sig-param"><span class="n">l2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.dfs_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.dfs_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.fk_dict">
+<code class="sig-name descname">fk_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.fk_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.fk_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.urdf_to_ets_args">
+<em class="property">static </em><code class="sig-name descname">urdf_to_ets_args</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.urdf_to_ets_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.urdf_to_ets_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.qlim">
+<em class="property">property </em><code class="sig-name descname">qlim</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.qlim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.ets">
+<em class="property">property </em><code class="sig-name descname">ets</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.n">
+<em class="property">property </em><code class="sig-name descname">n</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.n" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.M">
+<em class="property">property </em><code class="sig-name descname">M</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.M" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.q_idx">
+<em class="property">property </em><code class="sig-name descname">q_idx</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.q_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.manuf">
+<em class="property">property </em><code class="sig-name descname">manuf</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.manuf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.gravity">
+<em class="property">property </em><code class="sig-name descname">gravity</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.gravity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.q">
+<em class="property">property </em><code class="sig-name descname">q</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.qd">
+<em class="property">property </em><code class="sig-name descname">qd</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.qd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.qdd">
+<em class="property">property </em><code class="sig-name descname">qdd</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.qdd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.control_type">
+<em class="property">property </em><code class="sig-name descname">control_type</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.control_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.base">
+<em class="property">property </em><code class="sig-name descname">base</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.base" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.tool">
+<em class="property">property </em><code class="sig-name descname">tool</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.tool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.base_link">
+<em class="property">property </em><code class="sig-name descname">base_link</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.base_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.ee_link">
+<em class="property">property </em><code class="sig-name descname">ee_link</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ee_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.fkine">
+<code class="sig-name descname">fkine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.fkine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.fkine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates the forward kinematics of a robot based on its ETS and
+joint angles q.</p>
+<p>T = fkine(q) evaluates forward kinematics for the robot at joint
+configuration q.</p>
+<p>T = fkine() as above except uses the stored q value of the
+robot object.</p>
+<p>Trajectory operation:
+Calculates fkine for each point on a trajectory of joints q where
+q is (nxm) and the returning SE3 in (m)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformation matrix representing the pose of the
+end-effector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SE3</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>The robot’s base or tool transform, if present, are incorporated
+into the result.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.allfkine">
+<code class="sig-name descname">allfkine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.allfkine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.allfkine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tall = allfkine(q) evaluates fkine for each joint within a robot and
+returns a trajecotry of poses.</p>
+<p>Tall = allfkine() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return T</dt>
+<dd class="field-even"><p>Homogeneous transformation trajectory</p>
+</dd>
+<dt class="field-odd">Rtype T</dt>
+<dd class="field-odd"><p>SE3 list</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>The robot’s base transform, if present, are incorporated
+into the result.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.jacob0">
+<code class="sig-name descname">jacob0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacob0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacob0" title="Permalink to this definition">¶</a></dt>
+<dd><p>J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
+velocity to end-effector spatial velocity. v = J0*qd in the
+base frame.</p>
+<p>J0 = jacob0() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return J</dt>
+<dd class="field-even"><p>The manipulator Jacobian in ee frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(6,n)</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.jacobe">
+<code class="sig-name descname">jacobe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
+velocity to end-effector spatial velocity. v = Je*qd in the
+end-effector frame.</p>
+<p>Je = jacobe() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return J</dt>
+<dd class="field-even"><p>The manipulator Jacobian in ee frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(6,n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.hessian0">
+<code class="sig-name descname">hessian0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J0</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessian0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="Permalink to this definition">¶</a></dt>
+<dd><p>The manipulator Hessian tensor maps joint acceleration to end-effector
+spatial acceleration, expressed in the world-coordinate frame. This
+function calulcates this based on the ETS of the robot. One of J0 or q
+is required. Supply J0 if already calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J0</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian in the 0 frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulator Hessian in 0 frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(6,n,n)</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.manipulability">
+<code class="sig-name descname">manipulability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.manipulability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.manipulability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the manipulability index (scalar) robot at the joint
+configuration q. It indicates dexterity, that is, how isotropic the
+robot’s motion is with respect to the 6 degrees of Cartesian motion.
+The measure is high when the manipulator is capable of equal motion
+in all directions and low when the manipulator is close to a
+singularity. One of J or q is required. Supply J if already
+calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian in any frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulability index</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Analysis and control of robot manipulators with redundancy,
+T. Yoshikawa,</p></li>
+<li><p>Robotics Research: The First International Symposium (M. Brady
+and R. Paul, eds.), pp. 735-747, The MIT press, 1984.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.jacobm">
+<code class="sig-name descname">jacobm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">H</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the manipulability Jacobian. This measure relates the rate
+of change of the manipulability to the joint velocities of the robot.
+One of J or q is required. Supply J and H if already calculated to
+save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian in any frame</p></li>
+<li><p><strong>H</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>,</em><em>n</em><em>)</em>) – The manipulator Hessian in any frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulability Jacobian</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.jacobev">
+<code class="sig-name descname">jacobev</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jv = jacobev(q) is the spatial velocity Jacobian, at joint
+configuration q, which relates the velocity in the base frame to the
+velocity in the end-effector frame.</p>
+<p>Jv = jacobev() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Returns J</dt>
+<dd class="field-even"><p>The velocity Jacobian in ee frame</p>
+</dd>
+<dt class="field-odd">Rtype J</dt>
+<dd class="field-odd"><p>float ndarray(6,6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.jacob0v">
+<code class="sig-name descname">jacob0v</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacob0v"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacob0v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
+configuration q, which relates the velocity in the end-effector frame
+to velocity in the base frame</p>
+<p>Jv = jacob0v() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Returns J</dt>
+<dd class="field-even"><p>The velocity Jacobian in 0 frame</p>
+</dd>
+<dt class="field-odd">Rtype J</dt>
+<dd class="field-odd"><p>float ndarray(6,6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-roboticstoolbox.robot.ET">
+<span id="et"></span><h2>ET<a class="headerlink" href="#module-roboticstoolbox.robot.ET" title="Permalink to this headline">¶</a></h2>
+<p>&#64;author: Jesse Haviland</p>
+<dl class="py class">
+<dt id="roboticstoolbox.robot.ET.ET">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ET.</code><code class="sig-name descname">ET</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis_func</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">joint</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class implements a single elementary transform (ET)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis_func</strong> (static <a href="#id1"><span class="problematic" id="id2">et.T__</span></a> function) – The function which calculates the transform of the ET.</p></li>
+<li><p><strong>eta</strong> (<em>float</em><em>, </em><em>optional</em>) – The coordinate of the ET. If not supplied the ET corresponds
+to a variable ET which is a joint</p></li>
+<li><p><strong>joint</strong> (<em>int</em><em>, </em><em>optional</em>) – If this ET corresponds to a joint, this corresponds to the
+joint number within the robot</p></li>
+</ul>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform Sequence,
+J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.eta">
+<em class="property">property </em><code class="sig-name descname">eta</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.eta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.eta_deg">
+<em class="property">property </em><code class="sig-name descname">eta_deg</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.eta_deg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.axis_func">
+<em class="property">property </em><code class="sig-name descname">axis_func</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.axis_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.axis">
+<em class="property">property </em><code class="sig-name descname">axis</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.axis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.jtype">
+<em class="property">property </em><code class="sig-name descname">jtype</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.jtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.j">
+<em class="property">property </em><code class="sig-name descname">j</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.j" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.T">
+<code class="sig-name descname">T</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transformation matrix of the ET</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float</em><em> (</em><em>radians</em><em>)</em><em>, </em><em>required for variable ET's</em>) – Is used if this ET is variable (a joint)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformation matrix of the ET</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.TRx">
+<em class="property">classmethod </em><code class="sig-name descname">TRx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.TRx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.TRx" title="Permalink to this definition">¶</a></dt>
+<dd><p>An elementary transform (ET). A pure rotation of eta about the x-axis.</p>
+<p>L = TRx(eta) will instantiate an ET object which represents a pure
+rotation about the x-axis by amount eta.</p>
+<p>L = TRx() as above except this ET representation a variable
+rotation, i.e. a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eta</strong> (<em>float</em><em> (</em><em>radians</em><em>)</em>) – The amount of rotation about the x-axis</p></li>
+<li><p><strong>joint</strong> (<em>int</em>) – The joint number within the robot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ET object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET">ET</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.TRy">
+<em class="property">classmethod </em><code class="sig-name descname">TRy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.TRy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.TRy" title="Permalink to this definition">¶</a></dt>
+<dd><p>An elementary transform (ET). A pure rotation of eta about the y-axis.</p>
+<p>L = TRy(eta) will instantiate an ET object which represents a pure
+rotation about the y-axis by amount eta.</p>
+<p>L = TRy() as above except this ET representation a variable
+rotation, i.e. a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eta</strong> (<em>float</em><em> (</em><em>radians</em><em>)</em>) – The amount of rotation about the y-axis</p></li>
+<li><p><strong>joint</strong> (<em>int</em>) – The joint number within the robot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ET object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET">ET</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.TRz">
+<em class="property">classmethod </em><code class="sig-name descname">TRz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.TRz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.TRz" title="Permalink to this definition">¶</a></dt>
+<dd><p>An elementary transform (ET). A pure rotation of eta about the z-axis.</p>
+<p>L = TRz(eta) will instantiate an ET object which represents a pure
+rotation about the z-axis by amount eta.</p>
+<p>L = TRz() as above except this ET representation a variable
+rotation, i.e. a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eta</strong> (<em>float</em><em> (</em><em>radians</em><em>)</em>) – The amount of rotation about the z-axis</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ET object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET">ET</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.Ttx">
+<em class="property">classmethod </em><code class="sig-name descname">Ttx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.Ttx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.Ttx" title="Permalink to this definition">¶</a></dt>
+<dd><p>An elementary transform (ET). A pure translation of eta along the
+x-axis</p>
+<p>L = Ttx(eta) will instantiate an ET object which represents a pure
+translation along the x-axis by amount eta.</p>
+<p>L = Ttx() as above except this ET representation a variable
+translation, i.e. a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eta</strong> (<em>float</em><em> (</em><em>metres</em><em>)</em>) – The amount of translation along the x-axis</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ET object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET">ET</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.Tty">
+<em class="property">classmethod </em><code class="sig-name descname">Tty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.Tty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.Tty" title="Permalink to this definition">¶</a></dt>
+<dd><p>An elementary transform (ET). A pure translation of eta along the
+x-axis</p>
+<p>L = Tty(eta) will instantiate an ET object which represents a pure
+translation along the y-axis by amount eta.</p>
+<p>L = Tty() as above except this ET representation a variable
+translation, i.e. a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eta</strong> (<em>float</em><em> (</em><em>metres</em><em>)</em>) – The amount of translation along the x-axis</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ET object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET">ET</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.Ttz">
+<em class="property">classmethod </em><code class="sig-name descname">Ttz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.Ttz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.Ttz" title="Permalink to this definition">¶</a></dt>
+<dd><p>An elementary transform (ET). A pure translation of eta along the
+z-axis</p>
+<p>L = Ttz(eta) will instantiate an ET object which represents a pure
+translation along the z-axis by amount eta.</p>
+<p>L = Ttz() as above except this ET representation a variable
+translation, i.e. a joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>eta</strong> (<em>float</em><em> (</em><em>metres</em><em>)</em>) – The amount of translation along the x-axis</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An ET object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET">ET</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="arm_dh.html" class="btn btn-neutral float-left" title="Arm Type Robots - DH" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-102222819-3', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

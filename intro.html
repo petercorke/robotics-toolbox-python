@@ -1,0 +1,1127 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; Robotics Toolbox Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Arm Type Robots - DH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm_ets.html">Arm Type Robots - ETS</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Introduction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Spatial maths capability underpins all of robotics and robotic vision by describing the relative position and orientation of objects in 2D or 3D space.  This package:</p>
+<ul class="simple">
+<li><p>provides Python classes and functions to manipulate matrices that represent relevant mathematical objects such as rotation matrices <span class="math notranslate nohighlight">\(R \in SO(2), SO(3)\)</span>, homogeneous transformation matrices <span class="math notranslate nohighlight">\(T \in SE(2), SE(3)\)</span> and quaternions <span class="math notranslate nohighlight">\(q \in \mathbb{H}\)</span>.</p></li>
+<li><p>replicates, as much as possible, the functionality of the <a class="reference external" href="https://github.com/petercorke/spatial-math">Spatial Math Toolbox</a> for MATLAB ® which underpins the <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-matlab">Robotics Toolbox</a> for MATLAB. Important considerations included:</p>
+<ul>
+<li><p>being as similar as possible to the MATLAB Toolbox function names and semantics</p></li>
+<li><p>but balancing the tension of being as Pythonic as possible</p></li>
+<li><p>use Python keyword arguments to replace the MATLAB Toolbox string options supported using <cite>tb_optparse`</cite></p></li>
+<li><p>use <code class="docutils literal notranslate"><span class="pre">numpy</span></code> arrays for rotation and homogeneous transformation matrices, quaternions and vectors</p></li>
+<li><p>all functions that accept a vector can accept a list, tuple, or <cite>np.ndarray</cite></p></li>
+<li><p>The classes can hold a sequence of elements, they are polymorphic with lists, which can be used to represent trajectories or time sequences.</p></li>
+</ul>
+</li>
+</ul>
+<p>Quick example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spatialmath</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">R</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SO3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">R</span>
+<span class="go">   1         0         0</span>
+<span class="go">   0         0.866025 -0.5</span>
+</pre></div>
+</div>
+<p>which constructs a rotation about the x-axis by 30 degrees.</p>
+<div class="section" id="high-level-classes">
+<h2>High-level classes<a class="headerlink" href="#high-level-classes" title="Permalink to this headline">¶</a></h2>
+<p>These classes abstract the low-level numpy arrays into objects of class <cite>SO2</cite>, <cite>SE2</cite>, <cite>SO3</cite>, <cite>SE3</cite>, <cite>UnitQuaternion</cite> that obey the rules associated with the mathematical groups SO(2), SE(2), SO(3), SE(3) and
+H.
+Using classes has several merits:</p>
+<ul class="simple">
+<li><p>ensures type safety, for example it stops us mixing a 2D homogeneous transformation with a 3D rotation matrix – both of which are 3x3 matrices.</p></li>
+<li><p>ensure that an SO(2), SO(3) or unit-quaternion rotation is always valid because the constraints (eg. orthogonality, unit norm) are enforced when the object is constructed.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SO2</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">[[ 0.99500417 -0.09983342]</span>
+<span class="go"> [ 0.09983342  0.99500417]]</span>
+</pre></div>
+</div>
+<p>Type safety and type validity are particularly important when we deal with a sequence of such objects.  In robotics we frequently deal with trajectories of poses or rotation to describe objects moving in the
+world.
+However a list of these items has the type <cite>list</cite> and the elements are not enforced to be homogeneous, ie. a list could contain a mixture of classes.
+Another option would be to create a <cite>numpy</cite> array of these objects, the upside being it could be a multi-dimensional array.  The downside is that again the array is not guaranteed to be homogeneous.</p>
+<p>The approach adopted here is to give these classes list <em>super powers</em> so that a single <cite>SE3</cite> object can contain a list of SE(3) poses.  The pose objects are a list subclass so we can index it or slice it as we
+would a list, but the result each time belongs to the class it was sliced from.  Here’s a simple example of SE(3) but applicable to all the classes</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">T</span> <span class="o">=</span> <span class="n">transl</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># create a 4x4 np.array</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># append a copy</span>
+<span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># append a copy</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># extract one element of the list</span>
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+  <span class="c1"># do a thing</span>
+</pre></div>
+</div>
+<p>These classes are all derived from two parent classes:</p>
+<ul class="simple">
+<li><p><cite>RTBPose</cite> which provides common functionality for all</p></li>
+<li><p><cite>UserList</cite> which provdides the ability to act like a list</p></li>
+</ul>
+<div class="section" id="operators-for-pose-objects">
+<h3>Operators for pose objects<a class="headerlink" href="#operators-for-pose-objects" title="Permalink to this headline">¶</a></h3>
+<p>Standard arithmetic operators can be applied to all these objects.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Operator</p></th>
+<th class="head"><p>dunder method</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">*</span></code></p></td>
+<td><p><strong>__mul__</strong> , __rmul__</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">*=</span></code></p></td>
+<td><p>__imul__</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></td>
+<td><p><strong>__truediv__</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/=</span></code></p></td>
+<td><p>__itruediv__</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">**</span></code></p></td>
+<td><p><strong>__pow__</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">**=</span></code></p></td>
+<td><p>__ipow__</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">+</span></code></p></td>
+<td><p><strong>__add__</strong>, __radd__</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">+=</span></code></p></td>
+<td><p>__iadd__</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-</span></code></p></td>
+<td><p><strong>__sub__</strong>, __rsub__</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-=</span></code></p></td>
+<td><p>__isub__</p></td>
+</tr>
+</tbody>
+</table>
+<p>This online documentation includes just the method shown in bold.
+The other related methods all invoke that method.</p>
+<p>The classes represent mathematical groups, and the rules of group are enforced.
+If this is a group operation, ie. the operands are of the same type and the operator
+is the group operator, the result will be of the input type, otherwise the result
+will be a matrix.</p>
+<div class="section" id="so-n-and-se-n">
+<h4>SO(n) and SE(n)<a class="headerlink" href="#so-n-and-se-n" title="Permalink to this headline">¶</a></h4>
+<p>For the groups SO(n) and SE(n) the group operator is composition represented
+by the multiplication operator.  The identity element is a unit matrix.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 17%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">*</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Pose</p></td>
+<td><p>Pose</p></td>
+<td><p>Pose</p></td>
+<td><p>composition [1]</p></td>
+</tr>
+<tr class="row-even"><td><p>Pose</p></td>
+<td><p>scalar</p></td>
+<td><p>matrix</p></td>
+<td><p>elementwise product</p></td>
+</tr>
+<tr class="row-odd"><td><p>scalar</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix</p></td>
+<td><p>elementwise product</p></td>
+</tr>
+<tr class="row-even"><td><p>Pose</p></td>
+<td><p>N-vector</p></td>
+<td><p>N-vector</p></td>
+<td><p>vector transform [2]</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pose</p></td>
+<td><p>NxM matrix</p></td>
+<td><p>NxM matrix</p></td>
+<td><p>vector transform [2] [3]</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ol class="arabic simple">
+<li><p>Composition is performed by standard matrix multiplication.</p></li>
+<li><p>N=2 (for SO2 and SE2),  N=3 (for SO3 and SE3).</p></li>
+<li><p>Matrix columns are taken as the vectors to transform.</p></li>
+</ol>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 19%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Pose</p></td>
+<td><p>Pose</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix * inverse #1</p></td>
+</tr>
+<tr class="row-even"><td><p>Pose</p></td>
+<td><p>scalar</p></td>
+<td><p>matrix</p></td>
+<td><p>elementwise product</p></td>
+</tr>
+<tr class="row-odd"><td><p>scalar</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix</p></td>
+<td><p>elementwise product</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ol class="arabic simple">
+<li><p>The left operand is multiplied by the <code class="docutils literal notranslate"><span class="pre">.inv</span></code> property of the right operand.</p></li>
+</ol>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 16%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">**</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Pose</p></td>
+<td><p>int &gt;= 0</p></td>
+<td><p>Pose</p></td>
+<td><p>exponentiation [1]</p></td>
+</tr>
+<tr class="row-even"><td><p>Pose</p></td>
+<td><p>int &lt;=0</p></td>
+<td><p>Pose</p></td>
+<td><p>exponentiation [1] then inverse</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ol class="arabic simple">
+<li><p>By repeated multiplication.</p></li>
+</ol>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 17%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">+</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Pose</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix</p></td>
+<td><p>elementwise sum</p></td>
+</tr>
+<tr class="row-even"><td><p>Pose</p></td>
+<td><p>scalar</p></td>
+<td><p>matrix</p></td>
+<td><p>add scalar to all elements</p></td>
+</tr>
+<tr class="row-odd"><td><p>scalar</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix</p></td>
+<td><p>add scalarto all elements</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 15%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">-</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Pose</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix</p></td>
+<td><p>elementwise difference</p></td>
+</tr>
+<tr class="row-even"><td><p>Pose</p></td>
+<td><p>scalar</p></td>
+<td><p>matrix</p></td>
+<td><p>subtract scalar from all elements</p></td>
+</tr>
+<tr class="row-odd"><td><p>scalar</p></td>
+<td><p>Pose</p></td>
+<td><p>matrix</p></td>
+<td><p>subtract all elements from scalar</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="unit-quaternions-and-quaternions">
+<h4>Unit quaternions and quaternions<a class="headerlink" href="#unit-quaternions-and-quaternions" title="Permalink to this headline">¶</a></h4>
+<p>Quaternions form a ring and support the operations of multiplication, addition and
+subtraction. Unit quaternions form a group and the group operator is composition represented
+by the multiplication operator.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">*</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Hamilton product</p></td>
+</tr>
+<tr class="row-even"><td><p>Quaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Hamilton product</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>scalar</p></td>
+<td><p>Quaternion</p></td>
+<td><p>scalar product #2</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Hamilton product</p></td>
+</tr>
+<tr class="row-odd"><td><p>UnitQuaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Hamilton product #1</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>scalar</p></td>
+<td><p>Quaternion</p></td>
+<td><p>scalar product #2</p></td>
+</tr>
+<tr class="row-odd"><td><p>UnitQuaternion</p></td>
+<td><p>3-vector</p></td>
+<td><p>3-vector</p></td>
+<td><p>vector rotation #3</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>3xN matrix</p></td>
+<td><p>3xN matrix</p></td>
+<td><p>vector transform #2#3</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ol class="arabic simple">
+<li><p>Composition.</p></li>
+<li><p>N=2 (for SO2 and SE2),  N=3 (for SO3 and SE3).</p></li>
+<li><p>Matrix columns are taken as the vectors to transform.</p></li>
+</ol>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>UnitQuaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Hamilton product with inverse #1</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ol class="arabic simple">
+<li><p>The left operand is multiplied by the <code class="docutils literal notranslate"><span class="pre">.inv</span></code> property of the right operand.</p></li>
+</ol>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">**</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>int &gt;= 0</p></td>
+<td><p>Quaternion</p></td>
+<td><p>exponentiation [1]</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>int &gt;= 0</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>exponentiation [1]</p></td>
+</tr>
+<tr class="row-odd"><td><p>UnitQuaternion</p></td>
+<td><p>int &lt;=0</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>exponentiation [1] then inverse</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ol class="arabic simple">
+<li><p>By repeated multiplication.</p></li>
+</ol>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">+</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise sum</p></td>
+</tr>
+<tr class="row-even"><td><p>Quaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise sum</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>scalar</p></td>
+<td><p>Quaternion</p></td>
+<td><p>add to each element</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise sum</p></td>
+</tr>
+<tr class="row-odd"><td><p>UnitQuaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise sum</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>scalar</p></td>
+<td><p>Quaternion</p></td>
+<td><p>add to each element</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Operands</p></th>
+<th class="head" colspan="2"><p><code class="docutils literal notranslate"><span class="pre">-</span></code></p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>left</p></th>
+<th class="head"><p>right</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise difference</p></td>
+</tr>
+<tr class="row-even"><td><p>Quaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise difference</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quaternion</p></td>
+<td><p>scalar</p></td>
+<td><p>Quaternion</p></td>
+<td><p>subtract scalar from each element</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise difference</p></td>
+</tr>
+<tr class="row-odd"><td><p>UnitQuaternion</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>Quaternion</p></td>
+<td><p>elementwise difference</p></td>
+</tr>
+<tr class="row-even"><td><p>UnitQuaternion</p></td>
+<td><p>scalar</p></td>
+<td><p>Quaternion</p></td>
+<td><p>subtract scalar from each element</p></td>
+</tr>
+</tbody>
+</table>
+<p>Any other operands will raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> exception.</p>
+</div>
+</div>
+<div class="section" id="list-capability">
+<h3>List capability<a class="headerlink" href="#list-capability" title="Permalink to this headline">¶</a></h3>
+<p>Each of these object classes has <code class="docutils literal notranslate"><span class="pre">UserList</span></code> as a base class which means it inherits all the functionality of
+a Python list</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">R</span> <span class="o">=</span> <span class="n">SO3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+<span class="go">   1</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">R</span> <span class="o">=</span> <span class="n">SO3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+<span class="go">  32</span>
+<span class="go">&gt;&gt; R[0]</span>
+<span class="go">   1         0         0</span>
+<span class="go">   0         1         0</span>
+<span class="go">   0         0         1</span>
+<span class="go">&gt;&gt; R[-1]</span>
+<span class="go">   1         0         0</span>
+<span class="go">   0         0.996542  0.0830894</span>
+<span class="go">   0        -0.0830894 0.996542</span>
+</pre></div>
+</div>
+<p>where each item is an object of the same class as that it was extracted from.
+Slice notation is also available, eg. <code class="docutils literal notranslate"><span class="pre">R[0:-1:3]</span></code> is a new SO3 instance containing every third element of <code class="docutils literal notranslate"><span class="pre">R</span></code>.</p>
+<p>In particular it includes an iterator allowing comprehensions</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">eul</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">R</span><span class="p">]</span>
+<span class="go">[array([ 90.        ,   4.76616702, -90.        ]),</span>
+<span class="go"> array([ 90.        ,  16.22532292, -90.        ]),</span>
+<span class="go"> array([ 90.        ,  27.68447882, -90.        ]),</span>
+<span class="go">   .</span>
+<span class="go">   .</span>
+<span class="go"> array([-90.       ,  11.4591559,  90.       ]),</span>
+<span class="go"> array([0., 0., 0.])]</span>
+</pre></div>
+</div>
+<p>Useful functions that be used on such objects include</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Operation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">clear</span></code></p></td>
+<td><p>Clear all elements, object now has zero length</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">append</span></code></p></td>
+<td><p>Append a single element</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">del</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">enumerate</span></code></p></td>
+<td><p>Iterate over the elments</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">extend</span></code></p></td>
+<td><p>Append a list of same type pose objects</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">insert</span></code></p></td>
+<td><p>Insert an element</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">len</span></code></p></td>
+<td><p>Return the number of elements</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">map</span></code></p></td>
+<td><p>Map a function of each element</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pop</span></code></p></td>
+<td><p>Remove first element and return it</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slice</span></code></p></td>
+<td><p>Index from a slice object</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">zip</span></code></p></td>
+<td><p>Iterate over the elments</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="vectorization">
+<h3>Vectorization<a class="headerlink" href="#vectorization" title="Permalink to this headline">¶</a></h3>
+<p>For most methods, if applied to an object that contains N elements, the result will be the appropriate return object type with N elements.</p>
+<p>Most binary operations (<cite>*</cite>, <cite>*=</cite>, <cite>**</cite>, <cite>+</cite>, <cite>+=</cite>, <cite>-</cite>, <cite>-=</cite>, <cite>==</cite>, <cite>!=</cite>) are vectorized.  For the case:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Z</span> <span class="o">=</span> <span class="n">X</span> <span class="n">op</span> <span class="n">Y</span>
+</pre></div>
+</div>
+<p>the lengths of the operands and the results are given by</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>operands</p></th>
+<th class="head" colspan="2"><p>results</p></th>
+</tr>
+<tr class="row-even"><th class="head"><p>len(X)</p></th>
+<th class="head"><p>len(Y)</p></th>
+<th class="head"><p>len(Z)</p></th>
+<th class="head"><p>results</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>Z    = X op Y</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>M</p></td>
+<td><p>M</p></td>
+<td><p>Z[i] = X op Y[i]</p></td>
+</tr>
+<tr class="row-odd"><td><p>M</p></td>
+<td><p>1</p></td>
+<td><p>M</p></td>
+<td><p>Z[i] = X[i] op Y</p></td>
+</tr>
+<tr class="row-even"><td><p>M</p></td>
+<td><p>M</p></td>
+<td><p>M</p></td>
+<td><p>Z[i] = X[i] op Y[i]</p></td>
+</tr>
+</tbody>
+</table>
+<p>Any other combination of lengths is not allowed and will raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> exception.</p>
+</div>
+</div>
+<div class="section" id="low-level-spatial-math">
+<h2>Low-level spatial math<a class="headerlink" href="#low-level-spatial-math" title="Permalink to this headline">¶</a></h2>
+<p>All the classes just described abstract the <code class="docutils literal notranslate"><span class="pre">base</span></code> package which represent the spatial-math object as a numpy.ndarray.</p>
+<p>The inputs to functions in this package are either floats, lists, tuples or numpy.ndarray objects describing vectors or arrays.  Functions that require a vector can be passed a list, tuple or numpy.ndarray for a vector – described in the documentation as being of type <em>array_like</em>.</p>
+<p>Numpy vectors are somewhat different to MATLAB, and is a gnarly aspect of numpy.  Numpy arrays have a shape described by a shape tuple which is a list of the dimensions.  Typically all <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> vectors have the shape (N,), that is, they have only one dimension.  The <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> product of an (M,N) array and a (N,) vector is a (M,) array.  A numpy column vector has shape (N,1) and a row vector has shape (1,N) but functions also accept row (1,N)  and column (N,1) vectors.
+Iterating over a numpy.ndarray is done by row, not columns as in MATLAB.  Iterating over a 1D array (N,) returns consecutive elements, iterating a row vector (1,N) returns the entire row, iterating a column vector (N,1) returns consecutive elements (rows).</p>
+<p>For example an SE(2) pose is represented by a 3x3 numpy array, an ndarray with shape=(3,3). A unit quaternion is
+represented by a 4-element numpy array, an ndarray with shape=(4,).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 31%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Spatial object</p></th>
+<th class="head"><p>equivalent class</p></th>
+<th class="head"><p>numpy.ndarray shape</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2D rotation SO(2)</p></td>
+<td><p>SO2</p></td>
+<td><p>(2,2)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2D pose SE(2)</p></td>
+<td><p>SE2</p></td>
+<td><p>(3,3)</p></td>
+</tr>
+<tr class="row-even"><td><p>3D rotation SO(3)</p></td>
+<td><p>SO3</p></td>
+<td><p>(3,3)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3D poseSE3 SE(3)</p></td>
+<td><p>SE3</p></td>
+<td><p>(3,3)</p></td>
+</tr>
+<tr class="row-even"><td><p>3D rotation</p></td>
+<td><p>UnitQuaternion</p></td>
+<td><p>(4,)</p></td>
+</tr>
+<tr class="row-odd"><td><p>n/a</p></td>
+<td><p>Quaternion</p></td>
+<td><p>(4,)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Tjhe classes <code class="docutils literal notranslate"><span class="pre">SO2</span></code>, <code class="docutils literal notranslate"><span class="pre">`SE2</span></code>, <code class="docutils literal notranslate"><span class="pre">`SO3</span></code>, <code class="docutils literal notranslate"><span class="pre">SE3</span></code>, <code class="docutils literal notranslate"><span class="pre">UnitQuaternion</span></code> can operate conveniently on lists but the <code class="docutils literal notranslate"><span class="pre">base</span></code> functions do not support this.
+If you wish to work with these functions and create lists of pose objects you could keep the numpy arrays in high-order numpy arrays (ie. add an extra dimensions),
+or keep them in a list, tuple or any other python contai described in the [high-level spatial math section](#high-level-classes).</p>
+<p>Let’s show a simple example:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">spatialmath.base.transforms</span> <span class="k">as</span> <span class="nn">base</span>
+ <span class="o">&gt;&gt;&gt;</span> <span class="n">base</span><span class="o">.</span><span class="n">rotx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+ <span class="n">array</span><span class="p">([[</span> <span class="mf">1.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">],</span>
+        <span class="p">[</span> <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.95533649</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.29552021</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.29552021</span><span class="p">,</span>  <span class="mf">0.95533649</span><span class="p">]])</span>
+
+ <span class="o">&gt;&gt;&gt;</span> <span class="n">base</span><span class="o">.</span><span class="n">rotx</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+ <span class="n">array</span><span class="p">([[</span> <span class="mf">1.</span>       <span class="p">,</span>  <span class="mf">0.</span>       <span class="p">,</span>  <span class="mf">0.</span>       <span class="p">],</span>
+        <span class="p">[</span> <span class="mf">0.</span>       <span class="p">,</span>  <span class="mf">0.8660254</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span>      <span class="p">],</span>
+        <span class="p">[</span> <span class="mf">0.</span>       <span class="p">,</span>  <span class="mf">0.5</span>      <span class="p">,</span>  <span class="mf">0.8660254</span><span class="p">]])</span>
+
+ <span class="o">&gt;&gt;&gt;</span> <span class="n">R</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">rotx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">@</span> <span class="n">base</span><span class="o">.</span><span class="n">roty</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>At line 1 we import all the base functions into the namespae <code class="docutils literal notranslate"><span class="pre">base</span></code>.
+In line 12 when we multiply the matrices we need to use the <cite>&#64;</cite> operator to perform matrix multiplication.  The <cite>*</cite> operator performs element-wise multiplication, which is equivalent to the MATLAB <code class="docutils literal notranslate"><span class="pre">.*</span></code> operator.</p>
+<p>We also support multiple ways of passing vector information to functions that require it:</p>
+<ul class="simple">
+<li><p>as separate positional arguments</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transl2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>as a list or a tuple</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transl2</span><span class="p">(</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="p">)</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+
+<span class="n">transl2</span><span class="p">(</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>or as a <cite>numpy</cite> array</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transl2</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span> <span class="p">)</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>There is a single module that deals with quaternions, regular quaternions and unit quaternions, and the representation is a <cite>numpy</cite> array of four elements.  As above, functions can accept the <cite>numpy</cite> array, a list, dict or <cite>numpy</cite> row or column vectors.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spatialmath.base.quaternion</span> <span class="k">as</span> <span class="nn">quat</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">quat</span><span class="o">.</span><span class="n">qqmul</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span>
+<span class="go">array([-60,  12,  30,  24])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span><span class="o">.</span><span class="n">qprint</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="go">-60.000000 &lt; 12.000000, 30.000000, 24.000000 &gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span><span class="o">.</span><span class="n">qnorm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="go">72.24956747275377</span>
+</pre></div>
+</div>
+<p>Functions exist to convert to and from SO(3) rotation matrices and a 3-vector representation.  The latter is often used for SLAM and bundle adjustment applications, being a minimal representation of orientation.</p>
+<div class="section" id="graphics">
+<h3>Graphics<a class="headerlink" href="#graphics" title="Permalink to this headline">¶</a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> is installed then we can add 2D coordinate frames to a figure in a variety of styles:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="n">trplot2</span><span class="p">(</span> <span class="n">transl2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">rviz</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+ <span class="n">trplot2</span><span class="p">(</span> <span class="n">transl2</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">arrow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
+ <span class="n">trplot2</span><span class="p">(</span> <span class="n">transl2</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="nd">@trot2</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="figure align-center" id="id1">
+<img alt="_images/transforms2d.png" src="_images/transforms2d.png" />
+<p class="caption"><span class="caption-text">Output of <code class="docutils literal notranslate"><span class="pre">trplot2</span></code></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>If a figure does not yet exist one is added.  If a figure exists but there is no 2D axes then one is added.  To add to an existing axes you can pass this in using the <code class="docutils literal notranslate"><span class="pre">axes</span></code> argument.  By default the frames are drawn with lines or arrows of unit length.  Autoscaling is enabled.</p>
+<p>Similarly, we can plot 3D coordinate frames in a variety of styles:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="n">trplot</span><span class="p">(</span> <span class="n">transl</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">rviz</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+ <span class="n">trplot</span><span class="p">(</span> <span class="n">transl</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
+ <span class="n">trplot</span><span class="p">(</span> <span class="n">transl</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="nd">@trotx</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+</pre></div>
+</td></tr></table></div>
+<div class="figure align-center" id="id2">
+<img alt="_images/transforms3d.png" src="_images/transforms3d.png" />
+<p class="caption"><span class="caption-text">Output of <code class="docutils literal notranslate"><span class="pre">trplot</span></code></span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">dims</span></code> option in lines 1 and 3 sets the workspace dimensions.  Note that the last set value is what is displayed.</p>
+<p>Depending on the backend you are using you may need to include</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="symbolic-support">
+<h3>Symbolic support<a class="headerlink" href="#symbolic-support" title="Permalink to this headline">¶</a></h3>
+<p>Some functions have support for symbolic variables, for example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sympy</span>
+
+<span class="n">theta</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rotx</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+<span class="p">[[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+ <span class="p">[</span><span class="mi">0</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)]</span>
+ <span class="p">[</span><span class="mi">0</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)]]</span>
+</pre></div>
+</div>
+<p>The resulting <cite>numpy</cite> array is an array of symbolic objects not numbers &amp;ndash; the constants are also symbolic objects.  You can read the elements of the matrix</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">  1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go"> int</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">cos(theta)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go"> cos</span>
+</pre></div>
+</div>
+<p>We see that the symbolic constants are converted back to Python numeric types on read.</p>
+<p>Similarly when we assign an element or slice of the symbolic matrix to a numeric value, they are converted to symbolic constants on the way in.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">22</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">[[1 0 0 22]</span>
+<span class="go"> [0 cos(theta) -sin(theta) 0]</span>
+<span class="go"> [0 sin(theta) cos(theta) 0]</span>
+<span class="go"> [0 0 0 1]]</span>
+</pre></div>
+</div>
+<p>but you can’t write a symbolic value into a floating point matrix</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">trotx</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="n">theta</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">  .</span>
+<span class="gr">  .</span>
+<span class="gr">TypeError</span>: <span class="n">can&#39;t convert expression to float</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="matlab-compatability">
+<h3>MATLAB compatability<a class="headerlink" href="#matlab-compatability" title="Permalink to this headline">¶</a></h3>
+<p>We can create a MATLAB like environment by</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spatialmath</span>  <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base</span>  <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>which has familiar functions like <code class="docutils literal notranslate"><span class="pre">rotx</span></code> and <code class="docutils literal notranslate"><span class="pre">rpy2r</span></code> available, as well as classes like <code class="docutils literal notranslate"><span class="pre">SE3</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">R</span> <span class="o">=</span> <span class="n">rotx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">R2</span> <span class="o">=</span> <span class="n">rpy2r</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-102222819-3', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>
