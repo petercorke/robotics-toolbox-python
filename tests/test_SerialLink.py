@@ -1373,7 +1373,7 @@ class TestSerialLink(unittest.TestCase):
     def test_teach_basic(self):
         l0 = rp.Link(d=2)
         r0 = rp.SerialLink([l0, l0])
-        e = r0.teach(False)
+        e = r0.teach(block=False)
         e.step()
         e.close()
 
@@ -1454,7 +1454,7 @@ class TestSerialLink(unittest.TestCase):
     def test_teach2_basic(self):
         l0 = rp.Link(d=2)
         r0 = rp.SerialLink([l0, l0])
-        e = r0.teach2(False)
+        e = r0.teach2(block=False)
         e.step()
         e.close()
 

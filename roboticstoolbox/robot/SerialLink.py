@@ -3303,7 +3303,7 @@ class SerialLink(object):
             return qstar, success, error
 
     def teach(
-            self, block=True, q=None, limits=None,
+            self, q=None, block=True, limits=None,
             jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
         Graphical teach pendant
@@ -3367,7 +3367,7 @@ class SerialLink(object):
         #         ' Matplotlib required for this function')
 
     def plot(
-            self, block=True, q=None, dt=50, limits=None,
+            self, q=None, block=True, dt=50, limits=None,
             vellipse=False, fellipse=False,
             jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
@@ -3499,7 +3499,7 @@ class SerialLink(object):
         return _fellipse(self, q=q, opt=opt, centre=centre)
 
     def plot_vellipse(
-            self, block=True, q=None, vellipse=None,
+            self, q=None, block=True, vellipse=None,
             limits=None, opt='trans', centre=[0, 0, 0],
             jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
@@ -3575,7 +3575,7 @@ class SerialLink(object):
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     def plot_fellipse(
-            self, block=True, q=None, fellipse=None,
+            self, q=None, block=True, fellipse=None,
             limits=None, opt='trans', centre=[0, 0, 0],
             jointaxes=True, eeframe=True, shadow=True, name=True):
         '''
@@ -3651,7 +3651,7 @@ class SerialLink(object):
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     def plot2(
-            self, block=True, q=None, dt=50, limits=None,
+            self, q=None, block=True, dt=50, limits=None,
             vellipse=False, fellipse=False,
             eeframe=True, name=False):
         '''
@@ -3712,7 +3712,7 @@ class SerialLink(object):
         #         ' Matplotlib required for this function')
 
     def teach2(
-            self, block=True, q=None, limits=None,
+            self, q=None, block=True, limits=None,
             eeframe=True, name=False):
         '''
         2D Graphical teach pendant
