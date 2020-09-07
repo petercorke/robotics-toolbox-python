@@ -54,10 +54,9 @@ jobs:
         pip install -r .github/dev_requirements.txt
     - name: Run coverage
       run: |
-        pip install .
+        pip install -e .
         pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
         coverage report
-        cat .coverage
     - name: upload coverage to Codecov
       uses: codecov/codecov-action@master
       with:
