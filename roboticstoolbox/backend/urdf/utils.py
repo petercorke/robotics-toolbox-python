@@ -4,32 +4,32 @@ import numpy as np
 import spatialmath as sm
 
 
-def rpy_to_matrix(coords):
-    """Convert roll-pitch-yaw coordinates to a 3x3 homogenous rotation matrix.
-    The roll-pitch-yaw axes in a typical URDF are defined as a
-    rotation of ``r`` radians around the x-axis followed by a rotation of
-    ``p`` radians around the y-axis followed by a rotation of ``y`` radians
-    around the z-axis. These are the Z1-Y2-X3 Tait-Bryan angles. See
-    Wikipedia_ for more information.
-    .. _Wikipedia: https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
-    Parameters
-    ----------
-    coords : (3,) float
-        The roll-pitch-yaw coordinates in order (x-rot, y-rot, z-rot).
-    Returns
-    -------
-    R : (3,3) float
-        The corresponding homogenous 3x3 rotation matrix.
-    """
-    coords = np.asanyarray(coords, dtype=np.float64)
-    c3, c2, c1 = np.cos(coords)
-    s3, s2, s1 = np.sin(coords)
+# def rpy_to_matrix(coords):
+#     """Convert roll-pitch-yaw coordinates to a 3x3 homogenous rotation matrix.
+#     The roll-pitch-yaw axes in a typical URDF are defined as a
+#     rotation of ``r`` radians around the x-axis followed by a rotation of
+#     ``p`` radians around the y-axis followed by a rotation of ``y`` radians
+#     around the z-axis. These are the Z1-Y2-X3 Tait-Bryan angles. See
+#     Wikipedia_ for more information.
+#     .. _Wikipedia: https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
+#     Parameters
+#     ----------
+#     coords : (3,) float
+#         The roll-pitch-yaw coordinates in order (x-rot, y-rot, z-rot).
+#     Returns
+#     -------
+#     R : (3,3) float
+#         The corresponding homogenous 3x3 rotation matrix.
+#     """
+#     coords = np.asanyarray(coords, dtype=np.float64)
+#     c3, c2, c1 = np.cos(coords)
+#     s3, s2, s1 = np.sin(coords)
 
-    return np.array([
-        [c1 * c2, (c1 * s2 * s3) - (c3 * s1), (s1 * s3) + (c1 * c3 * s2)],
-        [c2 * s1, (c1 * c3) + (s1 * s2 * s3), (c3 * s1 * s2) - (c1 * s3)],
-        [-s2, c2 * s3, c2 * c3]
-    ], dtype=np.float64)
+#     return np.array([
+#         [c1 * c2, (c1 * s2 * s3) - (c3 * s1), (s1 * s3) + (c1 * c3 * s2)],
+#         [c2 * s1, (c1 * c3) + (s1 * s2 * s3), (c3 * s1 * s2) - (c1 * s3)],
+#         [-s2, c2 * s3, c2 * c3]
+#     ], dtype=np.float64)
 
 
 def parse_origin(node):

@@ -1644,8 +1644,8 @@ class URDF(URDFType):
             T = sm.SE3(j.origin)
             trans = T.t
             rot = j.rpy
-            print(trans)
-            print(rot)
+            # print(trans)
+            # print(rot)
 
             if trans[0] != 0:
                 ets.append(rp.ET.Ttx(trans[0]))
