@@ -1676,21 +1676,21 @@ class SerialLink(object):
         """
         Inverse kinematics by optimization without joint limits
 
-        q, success, err = ikine(T) are the joint coordinates corresponding to
-        the robot end-effector pose T which is an SE3 object or homogenenous
-        transform matrix (4x4), and n is the number of robot joints.
+        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)
+        corresponding to the robot end-effector pose ``T`` which is an ``SE3``
+        instance. ``failure`` is True if the solver failed, and ``reason``
+        contains details of the failure.
 
         This method can be used for robots with any number of degrees of
         freedom.
 
         Trajectory operation:
-        In all cases if T is a vector of SE3 objects (m) or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is nxm
-        where n is the number of robot joints. The initial estimate of q for
+        If ``T`` contains multiple values, ie. a trajectory, then returns the joint coordinates
+        corresponding to each of the pose values in ``T``. ``q`` is nxm
+        where n is the number of robot joints. The initial estimate of ``q`` for
         each time step is taken as the solution from the previous time step.
-        Retruns trajectory of joints q (nxm), list of success (m) and list of
-        errors (m)
+        Returns trajectory of joints ``q`` (nxm), list of failure (m) and list of
+        error reasons (m).
 
         :param T: The desired end-effector pose
         :type T: SE3 or SE3 trajectory
@@ -1717,12 +1717,12 @@ class SerialLink(object):
             than Levenberg-Marquadt
         :type transpose: float
 
-        :retrun q: The calculated joint values
+        :return q: The calculated joint values
         :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: If failed, what went wrong
-        :rtype error: List of String
+        :return failure: IK solver failed
+        :rtype failure: bool or list of bool
+        :return error: If failed, what went wrong
+        :rtype error: List of str
 
         Underactuated robots:
         For the case where the manipulator has fewer than 6 DOF the
@@ -1880,6 +1880,7 @@ class SerialLink(object):
                 # Are we there yet
                 if np.linalg.norm(W @ e) < tol:
                     # print(iterations)
+                    failed.append(False)
                     break
 
                 # Compute the Jacobian
@@ -1934,17 +1935,16 @@ class SerialLink(object):
             qt[:, i] = q
             tcount += iterations
 
-            if failed:
-                err.append(
-                    'failed to converge: try a different '
-                    'initial value of joint coordinates')
-            else:
-                failed.append(False)
+        if any(failed):
+            err.append(
+                'failed to converge: try a different '
+                'initial value of joint coordinates')
 
         if trajn == 1:
             qt = qt[:, 0]
+            failed = failed[0]
 
-        return qt, not failed, err
+        return qt, failed, err
 
     def ikine3(self, T, left=True, elbow_up=True):
         """
