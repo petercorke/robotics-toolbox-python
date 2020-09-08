@@ -167,7 +167,7 @@
 <dl class="py class">
 <dt id="roboticstoolbox.robot.SerialLink.SerialLink">
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.SerialLink.</code><code class="sig-name descname">SerialLink</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">L</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'noname'</span></em>, <em class="sig-param"><span class="n">manufacturer</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">base</span><span class="o">=</span><span class="default_value">SE3(array([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]))</span></em>, <em class="sig-param"><span class="n">tool</span><span class="o">=</span><span class="default_value">SE3(array([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]))</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">array([0.0, 0.0, 9.81])</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Dynamics.Dynamics</span></code></p>
 <p>A superclass for arm type robots. A concrete class that represents a
 serial-link arm-type robot.  Each link and joint in the chain is
 described by a Link-class object using Denavit-Hartenberg parameters
@@ -661,369 +661,6 @@ if not supplied will use the stored q values).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.accel">
-<code class="sig-name descname">accel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">torque</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.accel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.accel" title="Permalink to this definition">¶</a></dt>
-<dd><p>qdd = accel(qd, torque, q) calculates a vector (n) of joint
-accelerations that result from applying the actuator force/torque (n)
-to the manipulator in state q (n) and qd (n), and n is the number of
-robot joints.</p>
-<p>a = accel(qd, torque) as above except uses the stored q value of the
-robot object.</p>
-<p>If q, qd, torque are matrices (nxk) then qdd is a matrix (nxk) where
-each row is the acceleration corresponding to the equivalent cols of
-q, qd, torque.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p></li>
-<li><p><strong>torque</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint torques of the robot</p></li>
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return qdd</dt>
-<dd class="field-even"><p>The joint accelerations of the robot</p>
-</dd>
-<dt class="field-odd">Rtype qdd</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>Useful for simulation of manipulator dynamics, in
-conjunction with a numerical integration function.</p></li>
-<li><p>Uses the method 1 of Walker and Orin to compute the forward
-dynamics.</p></li>
-<li><p>Featherstone’s method is more efficient for robots with large
-numbers of joints.</p></li>
-<li><p>Joint friction is considered.</p></li>
-</ul>
-</dd>
-<dt class="field-odd">References</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>Efficient dynamic computer simulation of robotic mechanisms,
-M. W. Walker and D. E. Orin,
-ASME Journa of Dynamic Systems, Measurement and Control, vol.
-104, no. 3, pp. 205-211, 1982.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.nofriction">
-<code class="sig-name descname">nofriction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">viscous</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.nofriction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.nofriction" title="Permalink to this definition">¶</a></dt>
-<dd><p>NFrobot = nofriction(coulomb, viscous) copies the robot and returns
-a robot with the same parameters except, the Coulomb and/or viscous
-friction parameter set to zero</p>
-<p>NFrobot = nofriction(coulomb, viscous) copies the robot and returns
-a robot with the same parameters except the Coulomb friction parameter
-is set to zero</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>coulomb</strong> (<em>bool</em>) – if True, will set the coulomb friction to 0</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.SerialLink.SerialLink" title="roboticstoolbox.robot.SerialLink.SerialLink">SerialLink</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.pay">
-<code class="sig-name descname">pay</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">W</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.pay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.pay" title="Permalink to this definition">¶</a></dt>
-<dd><p>tau = pay(W, J) Returns the generalised joint force/torques due to a
-payload wrench W applied to the end-effector. Where the manipulator
-Jacobian is J (6xn), and n is the number of robot joints.</p>
-<p>tau = pay(W, q, frame) as above but the Jacobian is calculated at pose
-q in the frame given by frame which is 0 for base frame, 1 for
-end-effector frame.</p>
-<p>Uses the formula tau = J’W, where W is a wrench vector applied at the
-end effector, W = [Fx Fy Fz Mx My Mz]’.</p>
-<dl class="simple">
-<dt>Trajectory operation:</dt><dd><p>In the case q is nxm or J is 6xnxm then tau is nxm where each row
-is the generalised force/torque at the pose given by corresponding
-row of q.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>W</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>)</em>) – A wrench vector applied at the end effector,
-W = [Fx Fy Fz Mx My Mz]</p></li>
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-<li><p><strong>J</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian (Optional, if not supplied will
-use the q value).</p></li>
-<li><p><strong>frame</strong> (<em>int</em>) – The frame in which to torques are expressed in when J
-is not supplied. 0 means base frame of the robot, 1 means end-
-effector frame</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return tau</dt>
-<dd class="field-even"><p>The joint forces/torques due to w</p>
-</dd>
-<dt class="field-odd">Rtype tau</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>Wrench vector and Jacobian must be from the same reference
-frame.</p></li>
-<li><p>Tool transforms are taken into consideration when frame=1.</p></li>
-<li><p>Must have a constant wrench - no trajectory support for this
-yet.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.friction">
-<code class="sig-name descname">friction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.friction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.friction" title="Permalink to this definition">¶</a></dt>
-<dd><p>tau = friction(qd) calculates the vector of joint friction
-forces/torques for the robot moving with joint velocities qd.</p>
-<p>The friction model includes:</p>
-<ul class="simple">
-<li><p>Viscous friction which is a linear function of velocity.</p></li>
-<li><p>Coulomb friction which is proportional to sign(qd).</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>qd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The joint friction forces.torques for the robot</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float ndarray(n,)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>The friction value should be added to the motor output torque,
-it has a negative value when qd&gt;0.</p></li>
-<li><p>The returned friction value is referred to the output of the
-gearbox.</p></li>
-<li><p>The friction parameters in the Link object are referred to the
-motor.</p></li>
-<li><p>Motor viscous friction is scaled up by G^2.</p></li>
-<li><p>Motor Coulomb friction is scaled up by G.</p></li>
-<li><p>The appropriate Coulomb friction value to use in the
-non-symmetric case depends on the sign of the joint velocity,
-not the motor velocity.</p></li>
-<li><p>The absolute value of the gear ratio is used. Negative gear
-ratios are tricky: the Puma560 has negative gear ratio for
-joints 1 and 3.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.cinertia">
-<code class="sig-name descname">cinertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.cinertia"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.cinertia" title="Permalink to this definition">¶</a></dt>
-<dd><p>M = cinertia(q) is the nxn Cartesian (operational space) inertia
-matrix which relates Cartesian force/torque to Cartesian
-acceleration at the joint configuration q.</p>
-<p>M = cinertia() as above except uses the stored q value of the robot
-object.</p>
-<p>If q is a matrix (nxk), each row is interpretted as a joint state
-vector, and the result is a 3d-matrix (nxnxk) where each plane
-corresponds to the cinertia for the corresponding row of q.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p>
-</dd>
-<dt class="field-even">Return M</dt>
-<dd class="field-even"><p>The inertia matrix</p>
-</dd>
-<dt class="field-odd">Rtype M</dt>
-<dd class="field-odd"><p>float ndarray(n,n)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.inertia">
-<code class="sig-name descname">inertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.inertia"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.inertia" title="Permalink to this definition">¶</a></dt>
-<dd><p>SerialLink.INERTIA Manipulator inertia matrix</p>
-<p>I = inertia(q) is the symmetric joint inertia matrix (nxn) which
-relates joint torque to joint acceleration for the robot at joint
-configuration q.</p>
-<p>I = inertia() as above except uses the stored q value of the robot
-object.</p>
-<p>If q is a matrix (nxk), each row is interpretted as a joint state
-vector, and the result is a 3d-matrix (nxnxk) where each plane
-corresponds to the inertia for the corresponding row of q.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p>
-</dd>
-<dt class="field-even">Return I</dt>
-<dd class="field-even"><p>The inertia matrix</p>
-</dd>
-<dt class="field-odd">Rtype I</dt>
-<dd class="field-odd"><p>float ndarray(n,n)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>The diagonal elements I(J,J) are the inertia seen by joint
-actuator J.</p></li>
-<li><p>The off-diagonal elements I(J,K) are coupling inertias that
-relate acceleration on joint J to force/torque on joint K.</p></li>
-<li><p>The diagonal terms include the motor inertia reflected through
-the gear ratio.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.coriolis">
-<code class="sig-name descname">coriolis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.coriolis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.coriolis" title="Permalink to this definition">¶</a></dt>
-<dd><p>C = coriolis(qd, q) calculates the Coriolis/centripetal matrix (nxn)
-for the robot in configuration q and velocity qd, where n is the
-number of joints. The product c*qd is the vector of joint
-force/torque due to velocity coupling. The diagonal elements are due
-to centripetal effects and the off-diagonal elements are due to
-Coriolis effects. This matrix is also known as the velocity coupling
-matrix, since it describes the disturbance forces on any joint due to
-velocity of all other joints.</p>
-<p>C = coriolis(qd) as above except uses the stored q value of the robot
-object.</p>
-<p>If q and qd are matrices (nxk), each row is interpretted as a
-joint state vector, and the result (nxnxk) is a 3d-matrix where
-each plane corresponds to a row of q and qd.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p></li>
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return C</dt>
-<dd class="field-even"><p>The Coriolis/centripetal matrix</p>
-</dd>
-<dt class="field-odd">Rtype C</dt>
-<dd class="field-odd"><p>float ndarray(n,n)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>Joint viscous friction is also a joint force proportional to
-velocity but it is eliminated in the computation of this value.</p></li>
-<li><p>Computationally slow, involves n^2/2 invocations of RNE.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.itorque">
-<code class="sig-name descname">itorque</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qdd</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.itorque"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.itorque" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inertia torque</p>
-<p>tauI = itorque(qdd, q) is the inertia force/torque vector (n) at the
-specified joint configuration q (n) and acceleration qdd (n), and n
-is the number of robot joints. taui = inertia(q) * qdd.</p>
-<p>If q and qdd are matrices (nxk), each row is interpretted as a joint
-state vector, and the result is a matrix (nxk) where each row is the
-corresponding joint torques.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qdd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint accelerations of the robot</p></li>
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return taui</dt>
-<dd class="field-even"><p>The inertia torque vector</p>
-</dd>
-<dt class="field-odd">Rtype tai</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>If the robot model contains non-zero motor inertia then this
-will included in the result.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.gravjac">
-<code class="sig-name descname">gravjac</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.gravjac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.gravjac" title="Permalink to this definition">¶</a></dt>
-<dd><p>tauB = gravjac(q, grav) calculates the generalised joint force/torques
-due to gravity.</p>
-<p>tauB = gravjac() as above except uses the stored q and gravitational
-acceleration of the robot object.</p>
-<p>Trajectory operation:
-If q is nxm where n is the number of robot joints then a
-trajectory is assumed where each row of q corresponds to a robot
-configuration. tau (nxm) is the generalised joint torque, each row
-corresponding to an input pose, and jacob0 (6xnxm) where each
-plane is a Jacobian corresponding to an input pose.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-<li><p><strong>grav</strong> (<em>float ndarray</em><em>(</em><em>3</em><em>,</em><em>)</em>) – The gravity vector (Optional, if not supplied will
-use the stored gravity values).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return tau</dt>
-<dd class="field-even"><p>The generalised joint force/torques due to gravity</p>
-</dd>
-<dt class="field-odd">Rtype tau</dt>
-<dd class="field-odd"><p>float ndarray(n,)</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>The gravity vector is defined by the SerialLink property if not
-explicitly given.</p></li>
-<li><p>Does not use inverse dynamics function RNE.</p></li>
-<li><p>Faster than computing gravity and Jacobian separately.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.gravload">
-<code class="sig-name descname">gravload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.gravload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.gravload" title="Permalink to this definition">¶</a></dt>
-<dd><p>taug = gravload(q, grav) calculates the joint gravity loading (n) for
-the robot in the joint configuration q, and the gravitational load
-grav.</p>
-<p>taug = gravload() as above except uses the stored q and gravitational
-acceleration of the robot object.</p>
-<p>If q is a matrix (nxm) each column is interpreted as a joint
-configuration vector, and the result is a matrix (nxm) each column
-being the corresponding joint torques.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-<li><p><strong>grav</strong> (<em>float ndarray</em><em>(</em><em>3</em><em>)</em>) – The gravity vector (Optional, if not supplied will
-use the stored gravity values).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return taug</dt>
-<dd class="field-even"><p>The generalised joint force/torques due to gravity</p>
-</dd>
-<dt class="field-odd">Rtype taug</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.SerialLink.SerialLink.ikcon">
 <code class="sig-name descname">ikcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.ikcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.ikcon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits</p>
@@ -1311,6 +948,441 @@ Vol. 5, No. 2, Summer 1986, p. 32-44</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.accel">
+<code class="sig-name descname">accel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">torque</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>qdd = accel(qd, torque, q) calculates a vector (n) of joint
+accelerations that result from applying the actuator force/torque (n)
+to the manipulator in state q (n) and qd (n), and n is the number of
+robot joints.</p>
+<p>a = accel(qd, torque) as above except uses the stored q value of the
+robot object.</p>
+<p>If q, qd, torque are matrices (nxk) then qdd is a matrix (nxk) where
+each row is the acceleration corresponding to the equivalent cols of
+q, qd, torque.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p></li>
+<li><p><strong>torque</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint torques of the robot</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return qdd</dt>
+<dd class="field-even"><p>The joint accelerations of the robot</p>
+</dd>
+<dt class="field-odd">Rtype qdd</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Useful for simulation of manipulator dynamics, in
+conjunction with a numerical integration function.</p></li>
+<li><p>Uses the method 1 of Walker and Orin to compute the forward
+dynamics.</p></li>
+<li><p>Featherstone’s method is more efficient for robots with large
+numbers of joints.</p></li>
+<li><p>Joint friction is considered.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Efficient dynamic computer simulation of robotic mechanisms,
+M. W. Walker and D. E. Orin,
+ASME Journa of Dynamic Systems, Measurement and Control, vol.
+104, no. 3, pp. 205-211, 1982.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.cinertia">
+<code class="sig-name descname">cinertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.cinertia" title="Permalink to this definition">¶</a></dt>
+<dd><p>M = cinertia(q) is the nxn Cartesian (operational space) inertia
+matrix which relates Cartesian force/torque to Cartesian
+acceleration at the joint configuration q.</p>
+<p>M = cinertia() as above except uses the stored q value of the robot
+object.</p>
+<p>If q is a matrix (nxk), each row is interpretted as a joint state
+vector, and the result is a 3d-matrix (nxnxk) where each plane
+corresponds to the cinertia for the corresponding row of q.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return M</dt>
+<dd class="field-even"><p>The inertia matrix</p>
+</dd>
+<dt class="field-odd">Rtype M</dt>
+<dd class="field-odd"><p>float ndarray(n,n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.coriolis">
+<code class="sig-name descname">coriolis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.coriolis" title="Permalink to this definition">¶</a></dt>
+<dd><p>C = coriolis(qd, q) calculates the Coriolis/centripetal matrix (nxn)
+for the robot in configuration q and velocity qd, where n is the
+number of joints. The product c*qd is the vector of joint
+force/torque due to velocity coupling. The diagonal elements are due
+to centripetal effects and the off-diagonal elements are due to
+Coriolis effects. This matrix is also known as the velocity coupling
+matrix, since it describes the disturbance forces on any joint due to
+velocity of all other joints.</p>
+<p>C = coriolis(qd) as above except uses the stored q value of the robot
+object.</p>
+<p>If q and qd are matrices (nxk), each row is interpretted as a
+joint state vector, and the result (nxnxk) is a 3d-matrix where
+each plane corresponds to a row of q and qd.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return C</dt>
+<dd class="field-even"><p>The Coriolis/centripetal matrix</p>
+</dd>
+<dt class="field-odd">Rtype C</dt>
+<dd class="field-odd"><p>float ndarray(n,n)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Joint viscous friction is also a joint force proportional to
+velocity but it is eliminated in the computation of this value.</p></li>
+<li><p>Computationally slow, involves n^2/2 invocations of RNE.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.friction">
+<code class="sig-name descname">friction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.friction" title="Permalink to this definition">¶</a></dt>
+<dd><p>tau = friction(qd) calculates the vector of joint friction
+forces/torques for the robot moving with joint velocities qd.</p>
+<p>The friction model includes:</p>
+<ul class="simple">
+<li><p>Viscous friction which is a linear function of velocity.</p></li>
+<li><p>Coulomb friction which is proportional to sign(qd).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The joint friction forces.torques for the robot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(n,)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>The friction value should be added to the motor output torque,
+it has a negative value when qd&gt;0.</p></li>
+<li><p>The returned friction value is referred to the output of the
+gearbox.</p></li>
+<li><p>The friction parameters in the Link object are referred to the
+motor.</p></li>
+<li><p>Motor viscous friction is scaled up by G^2.</p></li>
+<li><p>Motor Coulomb friction is scaled up by G.</p></li>
+<li><p>The appropriate Coulomb friction value to use in the
+non-symmetric case depends on the sign of the joint velocity,
+not the motor velocity.</p></li>
+<li><p>The absolute value of the gear ratio is used. Negative gear
+ratios are tricky: the Puma560 has negative gear ratio for
+joints 1 and 3.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.gravjac">
+<code class="sig-name descname">gravjac</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.gravjac" title="Permalink to this definition">¶</a></dt>
+<dd><p>tauB = gravjac(q, grav) calculates the generalised joint force/torques
+due to gravity.</p>
+<p>tauB = gravjac() as above except uses the stored q and gravitational
+acceleration of the robot object.</p>
+<p>Trajectory operation:
+If q is nxm where n is the number of robot joints then a
+trajectory is assumed where each row of q corresponds to a robot
+configuration. tau (nxm) is the generalised joint torque, each row
+corresponding to an input pose, and jacob0 (6xnxm) where each
+plane is a Jacobian corresponding to an input pose.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>grav</strong> (<em>float ndarray</em><em>(</em><em>3</em><em>,</em><em>)</em>) – The gravity vector (Optional, if not supplied will
+use the stored gravity values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return tau</dt>
+<dd class="field-even"><p>The generalised joint force/torques due to gravity</p>
+</dd>
+<dt class="field-odd">Rtype tau</dt>
+<dd class="field-odd"><p>float ndarray(n,)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>The gravity vector is defined by the SerialLink property if not
+explicitly given.</p></li>
+<li><p>Does not use inverse dynamics function RNE.</p></li>
+<li><p>Faster than computing gravity and Jacobian separately.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.gravload">
+<code class="sig-name descname">gravload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.gravload" title="Permalink to this definition">¶</a></dt>
+<dd><p>taug = gravload(q, grav) calculates the joint gravity loading (n) for
+the robot in the joint configuration q, and the gravitational load
+grav.</p>
+<p>taug = gravload() as above except uses the stored q and gravitational
+acceleration of the robot object.</p>
+<p>If q is a matrix (nxm) each column is interpreted as a joint
+configuration vector, and the result is a matrix (nxm) each column
+being the corresponding joint torques.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>grav</strong> (<em>float ndarray</em><em>(</em><em>3</em><em>)</em>) – The gravity vector (Optional, if not supplied will
+use the stored gravity values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return taug</dt>
+<dd class="field-even"><p>The generalised joint force/torques due to gravity</p>
+</dd>
+<dt class="field-odd">Rtype taug</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.inertia">
+<code class="sig-name descname">inertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.inertia" title="Permalink to this definition">¶</a></dt>
+<dd><p>SerialLink.INERTIA Manipulator inertia matrix</p>
+<p>I = inertia(q) is the symmetric joint inertia matrix (nxn) which
+relates joint torque to joint acceleration for the robot at joint
+configuration q.</p>
+<p>I = inertia() as above except uses the stored q value of the robot
+object.</p>
+<p>If q is a matrix (nxk), each row is interpretted as a joint state
+vector, and the result is a 3d-matrix (nxnxk) where each plane
+corresponds to the inertia for the corresponding row of q.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return I</dt>
+<dd class="field-even"><p>The inertia matrix</p>
+</dd>
+<dt class="field-odd">Rtype I</dt>
+<dd class="field-odd"><p>float ndarray(n,n)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>The diagonal elements I(J,J) are the inertia seen by joint
+actuator J.</p></li>
+<li><p>The off-diagonal elements I(J,K) are coupling inertias that
+relate acceleration on joint J to force/torque on joint K.</p></li>
+<li><p>The diagonal terms include the motor inertia reflected through
+the gear ratio.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.itorque">
+<code class="sig-name descname">itorque</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qdd</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.itorque" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inertia torque</p>
+<p>tauI = itorque(qdd, q) is the inertia force/torque vector (n) at the
+specified joint configuration q (n) and acceleration qdd (n), and n
+is the number of robot joints. taui = inertia(q) * qdd.</p>
+<p>If q and qdd are matrices (nxk), each row is interpretted as a joint
+state vector, and the result is a matrix (nxk) where each row is the
+corresponding joint torques.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qdd</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint accelerations of the robot</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return taui</dt>
+<dd class="field-even"><p>The inertia torque vector</p>
+</dd>
+<dt class="field-odd">Rtype tai</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>If the robot model contains non-zero motor inertia then this
+will included in the result.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.nofriction">
+<code class="sig-name descname">nofriction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">viscous</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.nofriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>NFrobot = nofriction(coulomb, viscous) copies the robot and returns
+a robot with the same parameters except, the Coulomb and/or viscous
+friction parameter set to zero</p>
+<p>NFrobot = nofriction(coulomb, viscous) copies the robot and returns
+a robot with the same parameters except the Coulomb friction parameter
+is set to zero</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coulomb</strong> (<em>bool</em>) – if True, will set the coulomb friction to 0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.SerialLink.SerialLink" title="roboticstoolbox.robot.SerialLink.SerialLink">SerialLink</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.pay">
+<code class="sig-name descname">pay</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">W</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.pay" title="Permalink to this definition">¶</a></dt>
+<dd><p>tau = pay(W, J) Returns the generalised joint force/torques due to a
+payload wrench W applied to the end-effector. Where the manipulator
+Jacobian is J (6xn), and n is the number of robot joints.</p>
+<p>tau = pay(W, q, frame) as above but the Jacobian is calculated at pose
+q in the frame given by frame which is 0 for base frame, 1 for
+end-effector frame.</p>
+<p>Uses the formula tau = J’W, where W is a wrench vector applied at the
+end effector, W = [Fx Fy Fz Mx My Mz]’.</p>
+<dl class="simple">
+<dt>Trajectory operation:</dt><dd><p>In the case q is nxm or J is 6xnxm then tau is nxm where each row
+is the generalised force/torque at the pose given by corresponding
+row of q.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>W</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>)</em>) – A wrench vector applied at the end effector,
+W = [Fx Fy Fz Mx My Mz]</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian (Optional, if not supplied will
+use the q value).</p></li>
+<li><p><strong>frame</strong> (<em>int</em>) – The frame in which to torques are expressed in when J
+is not supplied. 0 means base frame of the robot, 1 means end-
+effector frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return tau</dt>
+<dd class="field-even"><p>The joint forces/torques due to w</p>
+</dd>
+<dt class="field-odd">Rtype tau</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Wrench vector and Jacobian must be from the same reference
+frame.</p></li>
+<li><p>Tool transforms are taken into consideration when frame=1.</p></li>
+<li><p>Must have a constant wrench - no trajectory support for this
+yet.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.paycap">
+<code class="sig-name descname">paycap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">tauR</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.paycap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static payload capacity of a robot</p>
+<p>wmax, joint = paycap(q, w, f, tauR) returns the maximum permissible
+payload wrench wmax (6) applied at the end-effector, and the index
+of the joint (zero indexed) which hits its force/torque limit at that
+wrench. q (n) is the manipulator pose, w the payload wrench (6), f the
+wrench reference frame and tauR (nx2) is a matrix of joint
+forces/torques (first col is maximum, second col minimum).</p>
+<p>Trajectory operation:
+In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
+the results at the pose given by corresponding row of q.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The payload wrench</p></li>
+<li><p><strong>tauR</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>,</em><em>2</em><em>)</em>) – Joint torque matrix minimum and maximums</p></li>
+<li><p><strong>frame</strong> (<em>int</em>) – The frame in which to torques are expressed in when J
+is not supplied. 0 means base frame of the robot, 1 means end-
+effector frame</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retrun wmax</dt>
+<dd class="field-even"><p>The maximum permissible payload wrench</p>
+</dd>
+<dt class="field-odd">Rtype wmax</dt>
+<dd class="field-odd"><p>float ndarray(6)</p>
+</dd>
+<dt class="field-even">Retrun joint</dt>
+<dd class="field-even"><p>The joint index (zero indexed) which hits its
+force/torque limit</p>
+</dd>
+<dt class="field-odd">Rtype joint</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Wrench vector and Jacobian must be from the same reference frame</p></li>
+<li><p>Tool transforms are taken into consideration for frame=1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.SerialLink.SerialLink.perterb">
+<code class="sig-name descname">perterb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.perterb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perturb robot parameters</p>
+<p>rp = perturb(p) is a new robot object in which the dynamic parameters
+(link mass and inertia) have been perturbed. The perturbation is
+multiplicative so that values are multiplied by random numbers in the
+interval (1-p) to (1+p). The name string of the perturbed robot is
+prefixed by ‘P/’.</p>
+<p>Useful for investigating the robustness of various model-based control
+schemes. For example to vary parameters in the range +/- 10 percent
+is: r2 = puma.perturb(0.1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>float</em>) – The percent (+/-) to be perturbed. Default 10%</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.SerialLink.SerialLink" title="roboticstoolbox.robot.SerialLink.SerialLink">SerialLink</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.SerialLink.SerialLink.ikinem">
 <code class="sig-name descname">ikinem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pweight</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">qlimits</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">nolm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.ikinem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.ikinem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics with joint limits
@@ -1491,53 +1563,6 @@ has been initialised in c.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.paycap">
-<code class="sig-name descname">paycap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">tauR</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.paycap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.paycap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Static payload capacity of a robot</p>
-<p>wmax, joint = paycap(q, w, f, tauR) returns the maximum permissible
-payload wrench wmax (6) applied at the end-effector, and the index
-of the joint (zero indexed) which hits its force/torque limit at that
-wrench. q (n) is the manipulator pose, w the payload wrench (6), f the
-wrench reference frame and tauR (nx2) is a matrix of joint
-forces/torques (first col is maximum, second col minimum).</p>
-<p>Trajectory operation:
-In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
-the results at the pose given by corresponding row of q.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>w</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The payload wrench</p></li>
-<li><p><strong>tauR</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>,</em><em>2</em><em>)</em>) – Joint torque matrix minimum and maximums</p></li>
-<li><p><strong>frame</strong> (<em>int</em>) – The frame in which to torques are expressed in when J
-is not supplied. 0 means base frame of the robot, 1 means end-
-effector frame</p></li>
-<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
-if not supplied will use the stored q values).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Retrun wmax</dt>
-<dd class="field-even"><p>The maximum permissible payload wrench</p>
-</dd>
-<dt class="field-odd">Rtype wmax</dt>
-<dd class="field-odd"><p>float ndarray(6)</p>
-</dd>
-<dt class="field-even">Retrun joint</dt>
-<dd class="field-even"><p>The joint index (zero indexed) which hits its
-force/torque limit</p>
-</dd>
-<dt class="field-odd">Rtype joint</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">Notes</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>Wrench vector and Jacobian must be from the same reference frame</p></li>
-<li><p>Tool transforms are taken into consideration for frame=1.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.SerialLink.SerialLink.jacob_dot">
 <code class="sig-name descname">jacob_dot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qd</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.jacob_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.jacob_dot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jqd = jacob_dot(q, qd) is the product (6) of the derivative of the
@@ -1636,31 +1661,6 @@ Journal of Dynamic Systems, Measurement, and Control,
 vol. 105, p. 131, 1983.</p></li>
 <li><p>Robotics, Vision &amp; Control, P. Corke, Springer 2011.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.SerialLink.SerialLink.perterb">
-<code class="sig-name descname">perterb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/SerialLink.html#SerialLink.perterb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.SerialLink.SerialLink.perterb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perturb robot parameters</p>
-<p>rp = perturb(p) is a new robot object in which the dynamic parameters
-(link mass and inertia) have been perturbed. The perturbation is
-multiplicative so that values are multiplied by random numbers in the
-interval (1-p) to (1+p). The name string of the perturbed robot is
-prefixed by ‘P/’.</p>
-<p>Useful for investigating the robustness of various model-based control
-schemes. For example to vary parameters in the range +/- 10 percent
-is: r2 = puma.perturb(0.1)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>p</strong> (<em>float</em>) – The percent (+/-) to be perturbed. Default 10%</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.SerialLink.SerialLink" title="roboticstoolbox.robot.SerialLink.SerialLink">SerialLink</a></p>
 </dd>
 </dl>
 </dd></dl>

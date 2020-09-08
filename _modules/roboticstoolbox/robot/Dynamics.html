@@ -1,0 +1,1026 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>roboticstoolbox.robot.Dynamics &mdash; Robotics Toolbox Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm_dh.html">Arm Type Robots - DH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm_ets.html">Arm Type Robots - ETS</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.robot.Dynamics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.robot.Dynamics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Rigid-body dynamics functionality of the Toolbox.</span>
+
+<span class="sd">Requires access to:</span>
+
+<span class="sd">    * ``links`` list of ``Link`` objects, atttribute</span>
+<span class="sd">    * ``rne()`` the inverse dynamics method</span>
+
+<span class="sd">so must be subclassed by ``SerialLink`` class.</span>
+
+<span class="sd">:todo: perhaps these should be abstract properties, methods of this calss</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> \
+    <span class="n">getvector</span><span class="p">,</span> <span class="n">verifymatrix</span>
+
+
+<span class="k">class</span> <span class="nc">Dynamics</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">accel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">torque</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        qdd = accel(qd, torque, q) calculates a vector (n) of joint</span>
+<span class="sd">        accelerations that result from applying the actuator force/torque (n)</span>
+<span class="sd">        to the manipulator in state q (n) and qd (n), and n is the number of</span>
+<span class="sd">        robot joints.</span>
+
+<span class="sd">        a = accel(qd, torque) as above except uses the stored q value of the</span>
+<span class="sd">        robot object.</span>
+
+<span class="sd">        If q, qd, torque are matrices (nxk) then qdd is a matrix (nxk) where</span>
+<span class="sd">        each row is the acceleration corresponding to the equivalent cols of</span>
+<span class="sd">        q, qd, torque.</span>
+
+<span class="sd">        :param qd: The joint velocities of the robot</span>
+<span class="sd">        :type qd: float ndarray(n)</span>
+<span class="sd">        :param torque: The joint torques of the robot</span>
+<span class="sd">        :type torque: float ndarray(n)</span>
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        :return qdd: The joint accelerations of the robot</span>
+<span class="sd">        :rtype qdd: float ndarray(n)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - Useful for simulation of manipulator dynamics, in</span>
+<span class="sd">              conjunction with a numerical integration function.</span>
+<span class="sd">            - Uses the method 1 of Walker and Orin to compute the forward</span>
+<span class="sd">              dynamics.</span>
+<span class="sd">            - Featherstone&#39;s method is more efficient for robots with large</span>
+<span class="sd">              numbers of joints.</span>
+<span class="sd">            - Joint friction is considered.</span>
+
+<span class="sd">        :references:</span>
+<span class="sd">            - Efficient dynamic computer simulation of robotic mechanisms,</span>
+<span class="sd">              M. W. Walker and D. E. Orin,</span>
+<span class="sd">              ASME Journa of Dynamic Systems, Measurement and Control, vol.</span>
+<span class="sd">              104, no. 3, pp. 205-211, 1982.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="n">qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="n">torque</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">torque</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">torque</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">qdd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="c1"># Compute current manipulator inertia torques resulting from unit</span>
+            <span class="c1"># acceleration of each joint with no gravity.</span>
+            <span class="n">qI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">qdI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">qddI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+            <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span><span class="n">qddI</span><span class="p">,</span> <span class="n">qdI</span><span class="p">,</span> <span class="n">qI</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># Compute gravity and coriolis torque torques resulting from zero</span>
+            <span class="c1"># acceleration at given velocity &amp; with gravity acting.</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)),</span> <span class="n">qd</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+            <span class="n">inter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">((</span><span class="n">torque</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">tau</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">qdd</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">@</span> <span class="n">inter</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qdd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qdd</span>
+
+    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        NFrobot = nofriction(coulomb, viscous) copies the robot and returns</span>
+<span class="sd">        a robot with the same parameters except, the Coulomb and/or viscous</span>
+<span class="sd">        friction parameter set to zero</span>
+
+<span class="sd">        NFrobot = nofriction(coulomb, viscous) copies the robot and returns</span>
+<span class="sd">        a robot with the same parameters except the Coulomb friction parameter</span>
+<span class="sd">        is set to zero</span>
+
+<span class="sd">        :param coulomb: if True, will set the coulomb friction to 0</span>
+<span class="sd">        :type coulomb: bool</span>
+
+<span class="sd">        :return: A copy of the robot with dynamic parameters perturbed</span>
+<span class="sd">        :rtype: SerialLink</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">nofriction</span><span class="p">(</span><span class="n">coulomb</span><span class="p">,</span> <span class="n">viscous</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">rp</span><span class="o">.</span><span class="n">SerialLink</span><span class="p">(</span>
+            <span class="n">L</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;NF&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">manuf</span><span class="p">,</span>
+            <span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
+            <span class="n">tool</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="p">,</span>
+            <span class="n">gravity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        tau = pay(W, J) Returns the generalised joint force/torques due to a</span>
+<span class="sd">        payload wrench W applied to the end-effector. Where the manipulator</span>
+<span class="sd">        Jacobian is J (6xn), and n is the number of robot joints.</span>
+
+<span class="sd">        tau = pay(W, q, frame) as above but the Jacobian is calculated at pose</span>
+<span class="sd">        q in the frame given by frame which is 0 for base frame, 1 for</span>
+<span class="sd">        end-effector frame.</span>
+
+<span class="sd">        Uses the formula tau = J&#39;W, where W is a wrench vector applied at the</span>
+<span class="sd">        end effector, W = [Fx Fy Fz Mx My Mz]&#39;.</span>
+
+<span class="sd">        Trajectory operation:</span>
+<span class="sd">          In the case q is nxm or J is 6xnxm then tau is nxm where each row</span>
+<span class="sd">          is the generalised force/torque at the pose given by corresponding</span>
+<span class="sd">          row of q.</span>
+
+<span class="sd">        :param W: A wrench vector applied at the end effector,</span>
+<span class="sd">            W = [Fx Fy Fz Mx My Mz]</span>
+<span class="sd">        :type W: float ndarray(6)</span>
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param J: The manipulator Jacobian (Optional, if not supplied will</span>
+<span class="sd">            use the q value).</span>
+<span class="sd">        :type J: float ndarray(6,n)</span>
+<span class="sd">        :param frame: The frame in which to torques are expressed in when J</span>
+<span class="sd">            is not supplied. 0 means base frame of the robot, 1 means end-</span>
+<span class="sd">            effector frame</span>
+<span class="sd">        :type frame: int</span>
+
+<span class="sd">        :return tau: The joint forces/torques due to w</span>
+<span class="sd">        :rtype tau: float ndarray(n)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - Wrench vector and Jacobian must be from the same reference</span>
+<span class="sd">              frame.</span>
+<span class="sd">            - Tool transforms are taken into consideration when frame=1.</span>
+<span class="sd">            - Must have a constant wrench - no trajectory support for this</span>
+<span class="sd">              yet.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">trajn</span><span class="p">:</span>
+            <span class="c1"># A trajectory</span>
+            <span class="k">if</span> <span class="n">J</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Jacobian supplied</span>
+                <span class="n">verifymatrix</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use q instead</span>
+                <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+                <span class="n">J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">frame</span><span class="p">:</span>
+                        <span class="n">J</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">J</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Single configuration</span>
+            <span class="k">if</span> <span class="n">J</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Jacobian supplied</span>
+                <span class="n">verifymatrix</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use q instead</span>
+                <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">frame</span><span class="p">:</span>
+                    <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="o">-</span><span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+                <span class="n">tau</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">J</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">tau</span>
+
+    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        tau = friction(qd) calculates the vector of joint friction</span>
+<span class="sd">        forces/torques for the robot moving with joint velocities qd.</span>
+
+<span class="sd">        The friction model includes:</span>
+
+<span class="sd">        - Viscous friction which is a linear function of velocity.</span>
+<span class="sd">        - Coulomb friction which is proportional to sign(qd).</span>
+
+<span class="sd">        :param qd: The joint velocities of the robot</span>
+<span class="sd">        :type qd: float ndarray(n)</span>
+
+<span class="sd">        :return: The joint friction forces.torques for the robot</span>
+<span class="sd">        :rtype: float ndarray(n,)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - The friction value should be added to the motor output torque,</span>
+<span class="sd">              it has a negative value when qd&gt;0.</span>
+<span class="sd">            - The returned friction value is referred to the output of the</span>
+<span class="sd">              gearbox.</span>
+<span class="sd">            - The friction parameters in the Link object are referred to the</span>
+<span class="sd">              motor.</span>
+<span class="sd">            - Motor viscous friction is scaled up by G^2.</span>
+<span class="sd">            - Motor Coulomb friction is scaled up by G.</span>
+<span class="sd">            - The appropriate Coulomb friction value to use in the</span>
+<span class="sd">              non-symmetric case depends on the sign of the joint velocity,</span>
+<span class="sd">              not the motor velocity.</span>
+<span class="sd">            - The absolute value of the gear ratio is used. Negative gear</span>
+<span class="sd">              ratios are tricky: the Puma560 has negative gear ratio for</span>
+<span class="sd">              joints 1 and 3.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">tau</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">tau</span>
+
+    <span class="k">def</span> <span class="nf">cinertia</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        M = cinertia(q) is the nxn Cartesian (operational space) inertia</span>
+<span class="sd">        matrix which relates Cartesian force/torque to Cartesian</span>
+<span class="sd">        acceleration at the joint configuration q.</span>
+
+<span class="sd">        M = cinertia() as above except uses the stored q value of the robot</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        If q is a matrix (nxk), each row is interpretted as a joint state</span>
+<span class="sd">        vector, and the result is a 3d-matrix (nxnxk) where each plane</span>
+<span class="sd">        corresponds to the cinertia for the corresponding row of q.</span>
+
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        :return M: The inertia matrix</span>
+<span class="sd">        :rtype M: float ndarray(n,n)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">Mt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">Ji</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inertia</span><span class="p">(</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">Mt</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ji</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">M</span> <span class="o">@</span> <span class="n">Ji</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Mt</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Mt</span>
+
+    <span class="k">def</span> <span class="nf">inertia</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        SerialLink.INERTIA Manipulator inertia matrix</span>
+
+<span class="sd">        I = inertia(q) is the symmetric joint inertia matrix (nxn) which</span>
+<span class="sd">        relates joint torque to joint acceleration for the robot at joint</span>
+<span class="sd">        configuration q.</span>
+
+<span class="sd">        I = inertia() as above except uses the stored q value of the robot</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        If q is a matrix (nxk), each row is interpretted as a joint state</span>
+<span class="sd">        vector, and the result is a 3d-matrix (nxnxk) where each plane</span>
+<span class="sd">        corresponds to the inertia for the corresponding row of q.</span>
+
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        :return I: The inertia matrix</span>
+<span class="sd">        :rtype I: float ndarray(n,n)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - The diagonal elements I(J,J) are the inertia seen by joint</span>
+<span class="sd">              actuator J.</span>
+<span class="sd">            - The off-diagonal elements I(J,K) are coupling inertias that</span>
+<span class="sd">              relate acceleration on joint J to force/torque on joint K.</span>
+<span class="sd">            - The diagonal terms include the motor inertia reflected through</span>
+<span class="sd">              the gear ratio.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">In</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="n">In</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)),</span>
+                <span class="n">grav</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">In</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">In</span>
+
+    <span class="k">def</span> <span class="nf">coriolis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        C = coriolis(qd, q) calculates the Coriolis/centripetal matrix (nxn)</span>
+<span class="sd">        for the robot in configuration q and velocity qd, where n is the</span>
+<span class="sd">        number of joints. The product c*qd is the vector of joint</span>
+<span class="sd">        force/torque due to velocity coupling. The diagonal elements are due</span>
+<span class="sd">        to centripetal effects and the off-diagonal elements are due to</span>
+<span class="sd">        Coriolis effects. This matrix is also known as the velocity coupling</span>
+<span class="sd">        matrix, since it describes the disturbance forces on any joint due to</span>
+<span class="sd">        velocity of all other joints.</span>
+
+<span class="sd">        C = coriolis(qd) as above except uses the stored q value of the robot</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        If q and qd are matrices (nxk), each row is interpretted as a</span>
+<span class="sd">        joint state vector, and the result (nxnxk) is a 3d-matrix where</span>
+<span class="sd">        each plane corresponds to a row of q and qd.</span>
+
+<span class="sd">        :param qd: The joint velocities of the robot</span>
+<span class="sd">        :type qd: float ndarray(n)</span>
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        :return C: The Coriolis/centripetal matrix</span>
+<span class="sd">        :rtype C: float ndarray(n,n)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - Joint viscous friction is also a joint force proportional to</span>
+<span class="sd">              velocity but it is eliminated in the computation of this value.</span>
+<span class="sd">            - Computationally slow, involves n^2/2 invocations of RNE.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="n">qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">r1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nofriction</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+        <span class="n">Csq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="c1"># Find the torques that depend on a single finite joint speed,</span>
+        <span class="c1"># these are due to the squared (centripetal) terms</span>
+        <span class="c1"># set QD = [1 0 0 ...] then resulting torque is due to qd_1^2</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">QD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">QD</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">tau</span> <span class="o">=</span> <span class="n">r1</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">QD</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">grav</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">Csq</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Csq</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">tau</span>
+
+        <span class="c1"># Find the torques that depend on a pair of finite joint speeds,</span>
+        <span class="c1"># these are due to the product (Coridolis) terms</span>
+        <span class="c1"># set QD = [1 1 0 ...] then resulting torque is due to</span>
+        <span class="c1"># qd_1 qd_2 + qd_1^2 + qd_2^2</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                    <span class="c1"># Find a product term  qd_i * qd_j</span>
+                    <span class="n">QD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">QD</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">QD</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">tau</span> <span class="o">=</span> <span class="n">r1</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">QD</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">grav</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+                    <span class="n">C</span><span class="p">[:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span><span class="p">[:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> \
+                        <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="n">Csq</span><span class="p">[:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">Csq</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span> <span class="o">*</span> <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+
+                    <span class="n">C</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> \
+                        <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="n">Csq</span><span class="p">[:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">Csq</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span> <span class="o">*</span> <span class="n">qd</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+
+            <span class="n">C</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">Csq</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">qd</span><span class="p">[:,</span> <span class="n">k</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">C</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">C</span>
+
+    <span class="k">def</span> <span class="nf">itorque</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qdd</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inertia torque</span>
+
+<span class="sd">        tauI = itorque(qdd, q) is the inertia force/torque vector (n) at the</span>
+<span class="sd">        specified joint configuration q (n) and acceleration qdd (n), and n</span>
+<span class="sd">        is the number of robot joints. taui = inertia(q) * qdd.</span>
+
+<span class="sd">        If q and qdd are matrices (nxk), each row is interpretted as a joint</span>
+<span class="sd">        state vector, and the result is a matrix (nxk) where each row is the</span>
+<span class="sd">        corresponding joint torques.</span>
+
+<span class="sd">        :param qdd: The joint accelerations of the robot</span>
+<span class="sd">        :type qdd: float ndarray(n)</span>
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        :return taui: The inertia torque vector</span>
+<span class="sd">        :rtype tai: float ndarray(n)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - If the robot model contains non-zero motor inertia then this</span>
+<span class="sd">              will included in the result.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="n">qdd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">qdd</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">taui</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="n">taui</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span>
+                <span class="n">qdd</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">grav</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">taui</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">taui</span>
+
+    <span class="k">def</span> <span class="nf">gravjac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        tauB = gravjac(q, grav) calculates the generalised joint force/torques</span>
+<span class="sd">        due to gravity.</span>
+
+<span class="sd">        tauB = gravjac() as above except uses the stored q and gravitational</span>
+<span class="sd">        acceleration of the robot object.</span>
+
+<span class="sd">        Trajectory operation:</span>
+<span class="sd">        If q is nxm where n is the number of robot joints then a</span>
+<span class="sd">        trajectory is assumed where each row of q corresponds to a robot</span>
+<span class="sd">        configuration. tau (nxm) is the generalised joint torque, each row</span>
+<span class="sd">        corresponding to an input pose, and jacob0 (6xnxm) where each</span>
+<span class="sd">        plane is a Jacobian corresponding to an input pose.</span>
+
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param grav: The gravity vector (Optional, if not supplied will</span>
+<span class="sd">            use the stored gravity values).</span>
+<span class="sd">        :type grav: float ndarray(3,)</span>
+
+<span class="sd">        :return tau: The generalised joint force/torques due to gravity</span>
+<span class="sd">        :rtype tau: float ndarray(n,)</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - The gravity vector is defined by the SerialLink property if not</span>
+<span class="sd">              explicitly given.</span>
+<span class="sd">            - Does not use inverse dynamics function RNE.</span>
+<span class="sd">            - Faster than computing gravity and Jacobian separately.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">grav</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grav</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grav</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">grav</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+
+            <span class="n">poses</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">poses</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">poses</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">:</span>
+            <span class="n">baseAxis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">a</span>
+            <span class="n">baseOrigin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">t</span>
+
+        <span class="n">tauB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">poses</span><span class="p">))</span>
+
+        <span class="c1"># Forces</span>
+        <span class="n">force</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">force</span><span class="p">[:,</span> <span class="n">joint</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">joint</span><span class="p">]</span><span class="o">.</span><span class="n">m</span> <span class="o">*</span> <span class="n">grav</span><span class="p">)</span>
+
+        <span class="c1"># Centre of masses (local frames)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">r</span><span class="p">[:,</span> <span class="n">joint</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">joint</span><span class="p">]</span><span class="o">.</span><span class="n">r</span><span class="p">),</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">pose</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">poses</span><span class="p">):</span>
+            <span class="n">com_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allfkine</span><span class="p">(</span><span class="n">q</span><span class="p">[:,</span> <span class="n">pose</span><span class="p">])</span>
+
+            <span class="n">jointOrigins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">jointAxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">jointOrigins</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">t</span>
+                <span class="n">jointAxes</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">a</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">:</span>
+                <span class="n">jointOrigins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span>
+                    <span class="n">baseOrigin</span><span class="p">,</span> <span class="n">jointOrigins</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">]</span>
+                <span class="n">jointAxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span>
+                    <span class="n">baseAxis</span><span class="p">,</span> <span class="n">jointAxes</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">]</span>
+
+            <span class="c1"># Backwards recursion</span>
+            <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># C.o.M. in world frame, homog</span>
+                <span class="n">com</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">joint</span><span class="p">]</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="n">r</span><span class="p">[:,</span> <span class="n">joint</span><span class="p">]</span>
+
+                <span class="c1"># Add it to the distal others</span>
+                <span class="n">com_arr</span><span class="p">[:,</span> <span class="n">joint</span><span class="p">]</span> <span class="o">=</span> <span class="n">com</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+                <span class="c1"># for all links distal to it</span>
+                <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">joint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">joint</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
+                        <span class="c1"># Revolute joint</span>
+                        <span class="n">d</span> <span class="o">=</span> <span class="n">com_arr</span><span class="p">[:,</span> <span class="n">link</span><span class="p">]</span> <span class="o">-</span> <span class="n">jointOrigins</span><span class="p">[:,</span> <span class="n">joint</span><span class="p">]</span>
+                        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cross3</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">force</span><span class="p">[:,</span> <span class="n">link</span><span class="p">])</span>
+                        <span class="c1"># Though r x F would give the applied torque</span>
+                        <span class="c1"># and not the reaction torque, the gravity</span>
+                        <span class="c1"># vector is nominally in the positive z</span>
+                        <span class="c1"># direction, not negative, hence the force is</span>
+                        <span class="c1"># the reaction force</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Prismatic joint</span>
+                        <span class="c1"># Force on prismatic joint</span>
+                        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">force</span><span class="p">[:,</span> <span class="n">link</span><span class="p">]</span>
+
+                <span class="n">tauB</span><span class="p">[</span><span class="n">joint</span><span class="p">,</span> <span class="n">pose</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">jointAxes</span><span class="p">[:,</span> <span class="n">joint</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">poses</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tauB</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tauB</span>
+
+    <span class="k">def</span> <span class="nf">_cross3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">c</span>
+
+    <span class="k">def</span> <span class="nf">gravload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        taug = gravload(q, grav) calculates the joint gravity loading (n) for</span>
+<span class="sd">        the robot in the joint configuration q, and the gravitational load</span>
+<span class="sd">        grav.</span>
+
+<span class="sd">        taug = gravload() as above except uses the stored q and gravitational</span>
+<span class="sd">        acceleration of the robot object.</span>
+
+<span class="sd">        If q is a matrix (nxm) each column is interpreted as a joint</span>
+<span class="sd">        configuration vector, and the result is a matrix (nxm) each column</span>
+<span class="sd">        being the corresponding joint torques.</span>
+
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param grav: The gravity vector (Optional, if not supplied will</span>
+<span class="sd">            use the stored gravity values).</span>
+<span class="sd">        :type grav: float ndarray(3)</span>
+
+<span class="sd">        :return taug: The generalised joint force/torques due to gravity</span>
+<span class="sd">        :rtype taug: float ndarray(n)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">if</span> <span class="n">grav</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grav</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="n">grav</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">grav</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">grav</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">trajn</span><span class="p">:</span>
+            <span class="n">grav</span> <span class="o">=</span> <span class="n">grav</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+        <span class="n">verifymatrix</span><span class="p">(</span><span class="n">grav</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">taug</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="n">taug</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rne</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">grav</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">taug</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">taug</span>
+
+    <span class="k">def</span> <span class="nf">paycap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">tauR</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Static payload capacity of a robot</span>
+
+<span class="sd">        wmax, joint = paycap(q, w, f, tauR) returns the maximum permissible</span>
+<span class="sd">        payload wrench wmax (6) applied at the end-effector, and the index</span>
+<span class="sd">        of the joint (zero indexed) which hits its force/torque limit at that</span>
+<span class="sd">        wrench. q (n) is the manipulator pose, w the payload wrench (6), f the</span>
+<span class="sd">        wrench reference frame and tauR (nx2) is a matrix of joint</span>
+<span class="sd">        forces/torques (first col is maximum, second col minimum).</span>
+
+<span class="sd">        Trajectory operation:</span>
+<span class="sd">        In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are</span>
+<span class="sd">        the results at the pose given by corresponding row of q.</span>
+
+<span class="sd">        :param w: The payload wrench</span>
+<span class="sd">        :type w: float ndarray(n)</span>
+<span class="sd">        :param tauR: Joint torque matrix minimum and maximums</span>
+<span class="sd">        :type tauR: float ndarray(n,2)</span>
+<span class="sd">        :param frame: The frame in which to torques are expressed in when J</span>
+<span class="sd">            is not supplied. 0 means base frame of the robot, 1 means end-</span>
+<span class="sd">            effector frame</span>
+<span class="sd">        :type frame: int</span>
+<span class="sd">        :param q: The joint angles/configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        :retrun wmax: The maximum permissible payload wrench</span>
+<span class="sd">        :rtype wmax: float ndarray(6)</span>
+<span class="sd">        :retrun joint: The joint index (zero indexed) which hits its</span>
+<span class="sd">            force/torque limit</span>
+<span class="sd">        :rtype joint: int</span>
+
+<span class="sd">        :notes:</span>
+<span class="sd">            - Wrench vector and Jacobian must be from the same reference frame</span>
+<span class="sd">            - Tool transforms are taken into consideration for frame=1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trajn</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">trajn</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+
+        <span class="n">verifymatrix</span><span class="p">(</span><span class="n">tauR</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">wmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="n">trajn</span><span class="p">))</span>
+        <span class="n">joint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">trajn</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
+            <span class="n">tauB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gravload</span><span class="p">(</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+            <span class="c1"># tauP = self.rne(</span>
+            <span class="c1">#     np.zeros(self.n), np.zeros(self.n),</span>
+            <span class="c1">#     q, grav=[0, 0, 0], fext=w/np.linalg.norm(w))</span>
+
+            <span class="n">tauP</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pay</span><span class="p">(</span>
+                <span class="n">w</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]),</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">frame</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span>
+
+            <span class="n">M</span> <span class="o">=</span> <span class="n">tauP</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">tauP</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+
+            <span class="n">TAUm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">TAUM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">TAUM</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">tauR</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">TAUm</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">tauR</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">WM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">WM</span><span class="p">[</span><span class="n">M</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">TAUM</span><span class="p">[</span><span class="n">M</span><span class="p">]</span> <span class="o">-</span> <span class="n">tauB</span><span class="p">[</span><span class="n">M</span><span class="p">])</span> <span class="o">/</span> <span class="n">tauP</span><span class="p">[</span><span class="n">M</span><span class="p">]</span>
+            <span class="n">WM</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">TAUm</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">-</span> <span class="n">tauB</span><span class="p">[</span><span class="n">m</span><span class="p">])</span> <span class="o">/</span> <span class="n">tauP</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+
+            <span class="n">WM</span><span class="p">[</span><span class="n">WM</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">NINF</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">Inf</span>
+
+            <span class="n">wmax</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">WM</span>
+            <span class="n">joint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">WM</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">wmax</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">joint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">wmax</span><span class="p">,</span> <span class="n">joint</span>
+
+    <span class="k">def</span> <span class="nf">perterb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Perturb robot parameters</span>
+
+<span class="sd">        rp = perturb(p) is a new robot object in which the dynamic parameters</span>
+<span class="sd">        (link mass and inertia) have been perturbed. The perturbation is</span>
+<span class="sd">        multiplicative so that values are multiplied by random numbers in the</span>
+<span class="sd">        interval (1-p) to (1+p). The name string of the perturbed robot is</span>
+<span class="sd">        prefixed by &#39;P/&#39;.</span>
+
+<span class="sd">        Useful for investigating the robustness of various model-based control</span>
+<span class="sd">        schemes. For example to vary parameters in the range +/- 10 percent</span>
+<span class="sd">        is: r2 = puma.perturb(0.1)</span>
+
+<span class="sd">        :param p: The percent (+/-) to be perturbed. Default 10%</span>
+<span class="sd">        :type p: float</span>
+
+<span class="sd">        :return: A copy of the robot with dynamic parameters perturbed</span>
+<span class="sd">        :rtype: SerialLink</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copy</span><span class="p">()</span>
+        <span class="n">r2</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;P/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">r2</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">r2</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">m</span> <span class="o">*</span> <span class="n">s</span>
+
+            <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">r2</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">r2</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">I</span> <span class="o">*</span> <span class="n">s</span>    <span class="c1"># noqa</span>
+
+        <span class="k">return</span> <span class="n">r2</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-102222819-4', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>
