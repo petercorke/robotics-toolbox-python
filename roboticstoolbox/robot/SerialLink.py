@@ -80,11 +80,13 @@ class SerialLink(Dynamics):
             if isinstance(L[i], Link):
                 self._links.append(L[i])
                 self._n += 1
+                L[i].id = self._n
 
             elif isinstance(L[i], SerialLink):
                 for j in range(L[i].n):
                     self._links.append(L[i].links[j])
                     self._n += 1
+                    L[i].id = self._n
 
             else:
                 raise TypeError("Input can be only Link or SerialLink")

@@ -85,6 +85,7 @@ class Link(object):
         self.alpha = alpha
         self.a = a
         self.mdh = mdh
+        self.id = None
         self.offset = offset
 
         self.flip = flip
@@ -126,13 +127,13 @@ class Link(object):
     def __str__(self):
 
         if not self.sigma:
-            s = "Revolute   theta={: .2f}  d={: .2f}  a={: .2f}  " \
-                "alpha={: .2f}  offset={: .2f}".format(
-                    self.theta, self.d, self.a, self.alpha, self.offset)
+            s = "Revolute   theta=q{} +{: .2f},  d={: .2f},  a={: .2f},  " \
+                "alpha={: .2f}".format(
+                    self.id, self.offset, self.d, self.a, self.alpha)
         else:
-            s = "Prismatic  theta={: .2f}  d={: .2f}  a={: .2f}  " \
-                "alpha={: .2f}  offset={: .2f}".format(
-                    self.theta, self.d, self.a, self.alpha, self.offset)
+            s = "Prismatic  theta={: .2f},  d=q{} +{: .2f},  a={: .2f},  " \
+                "alpha={: .2f}".format(
+                    self.theta, self.id, self.offset, self.a, self.alpha, )
 
         return s
 
