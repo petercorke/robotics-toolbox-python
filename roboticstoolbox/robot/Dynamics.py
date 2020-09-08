@@ -12,11 +12,13 @@ so must be subclassed by ``SerialLink`` class.
 """
 
 import numpy as np
+import roboticstoolbox as rp
 from spatialmath.base.argcheck import \
-    getvector, ismatrix, isscalar, verifymatrix
+    getvector, verifymatrix
+
 
 class Dynamics:
-    
+
     def accel(self, qd, torque, q=None):
         """
         qdd = accel(qd, torque, q) calculates a vector (n) of joint
@@ -121,7 +123,7 @@ class Dynamics:
         for i in range(self.n):
             L.append(self.links[i].nofriction(coulomb, viscous))
 
-        return SerialLink(
+        return rp.SerialLink(
             L,
             name='NF' + self.name,
             manufacturer=self.manuf,

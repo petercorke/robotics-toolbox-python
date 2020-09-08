@@ -72,7 +72,7 @@ class Link(object):
             flip=False,
             m=0.0,
             r=np.zeros(3),
-            I=np.zeros((3, 3)),
+            I=np.zeros((3, 3)),       # noqa
             Jm=0.0,
             B=0.0,
             Tc=np.zeros(2),
@@ -94,7 +94,7 @@ class Link(object):
         # Dynamic Parameters
         self.m = m
         self.r = r
-        self.I = I
+        self.I = I    # noqa
         self.Jm = Jm
         self.B = B
         self.Tc = Tc
@@ -185,7 +185,7 @@ class Link(object):
         return self._r
 
     @property
-    def I(self):
+    def I(self):    # noqa
         return self._I
 
     @property
@@ -255,7 +255,7 @@ class Link(object):
         self._r = getvector(r_new, 3, out='col')
 
     @I.setter
-    def I(self, I_new):
+    def I(self, I_new):  # noqa
         # Try for Inertia Matrix
         try:
             verifymatrix(I_new, (3, 3))

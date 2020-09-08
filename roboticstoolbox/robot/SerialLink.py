@@ -16,7 +16,8 @@ from frne import init, frne, delete
 from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
-from roboticstoolbox.robot.dynamics import Dynamics
+from roboticstoolbox.robot.Dynamics import Dynamics
+
 
 class SerialLink(Dynamics):
     """
