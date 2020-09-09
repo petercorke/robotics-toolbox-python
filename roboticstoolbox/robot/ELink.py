@@ -387,13 +387,6 @@ class ELink(object):
             else:
                 T = self.ets[k].T()
 
-            print(type(T))
-            print(T)
-
-            if not isinstance(T, SE3):
-                print(q)
-                print(self.ets[1].T(1))
-
             tr = tr * T
 
             
