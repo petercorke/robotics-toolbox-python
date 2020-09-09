@@ -559,11 +559,12 @@ if not supplied will use the stored q values).</p>
 </div>
 <div class="section" id="module-roboticstoolbox.robot.ET">
 <span id="et"></span><h2>ET<a class="headerlink" href="#module-roboticstoolbox.robot.ET" title="Permalink to this headline">¶</a></h2>
-<p>&#64;author: Jesse Haviland</p>
+<p>&#64;author: Jesse Haviland
+&#64;author: Peter Corke</p>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.ET.ET">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ET.</code><code class="sig-name descname">ET</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis_func</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">joint</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ET.</code><code class="sig-name descname">ET</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.UserList</span></code></p>
 <p>This class implements a single elementary transform (ET)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -582,14 +583,25 @@ J. Haviland and P. Corke</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt id="roboticstoolbox.robot.ET.ET.STATIC">
+<code class="sig-name descname">STATIC</code><em class="property"> = 0</em><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.STATIC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="roboticstoolbox.robot.ET.ET.VARIABLE">
+<code class="sig-name descname">VARIABLE</code><em class="property"> = 1</em><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.VARIABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="roboticstoolbox.robot.ET.ET.et">
+<code class="sig-name descname">et</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.et" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#roboticstoolbox.robot.ET.ET" title="roboticstoolbox.robot.ET.ET"><code class="xref py py-class docutils literal notranslate"><span class="pre">ET</span></code></a></p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ET.ET.eta">
 <em class="property">property </em><code class="sig-name descname">eta</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.eta" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.eta_deg">
-<em class="property">property </em><code class="sig-name descname">eta_deg</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.eta_deg" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -605,11 +617,6 @@ J. Haviland and P. Corke</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ET.ET.jtype">
 <em class="property">property </em><code class="sig-name descname">jtype</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.jtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.j">
-<em class="property">property </em><code class="sig-name descname">j</code><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.j" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -630,8 +637,23 @@ J. Haviland and P. Corke</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.TRx">
-<em class="property">classmethod </em><code class="sig-name descname">TRx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.TRx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.TRx" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ET.ET.__mul__">
+<code class="sig-name descname">__mul__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rest</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.__mul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__rmul__">
+<code class="sig-name descname">__rmul__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rest</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.__rmul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__getitem__">
+<code class="sig-name descname">__getitem__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.rx">
+<em class="property">classmethod </em><code class="sig-name descname">rx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.rx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.rx" title="Permalink to this definition">¶</a></dt>
 <dd><p>An elementary transform (ET). A pure rotation of eta about the x-axis.</p>
 <p>L = TRx(eta) will instantiate an ET object which represents a pure
 rotation about the x-axis by amount eta.</p>
@@ -654,8 +676,8 @@ rotation, i.e. a joint</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.TRy">
-<em class="property">classmethod </em><code class="sig-name descname">TRy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.TRy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.TRy" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ET.ET.ry">
+<em class="property">classmethod </em><code class="sig-name descname">ry</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.ry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.ry" title="Permalink to this definition">¶</a></dt>
 <dd><p>An elementary transform (ET). A pure rotation of eta about the y-axis.</p>
 <p>L = TRy(eta) will instantiate an ET object which represents a pure
 rotation about the y-axis by amount eta.</p>
@@ -678,8 +700,8 @@ rotation, i.e. a joint</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.TRz">
-<em class="property">classmethod </em><code class="sig-name descname">TRz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.TRz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.TRz" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ET.ET.rz">
+<em class="property">classmethod </em><code class="sig-name descname">rz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.rz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.rz" title="Permalink to this definition">¶</a></dt>
 <dd><p>An elementary transform (ET). A pure rotation of eta about the z-axis.</p>
 <p>L = TRz(eta) will instantiate an ET object which represents a pure
 rotation about the z-axis by amount eta.</p>
@@ -699,8 +721,8 @@ rotation, i.e. a joint</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.Ttx">
-<em class="property">classmethod </em><code class="sig-name descname">Ttx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.Ttx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.Ttx" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ET.ET.tx">
+<em class="property">classmethod </em><code class="sig-name descname">tx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.tx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.tx" title="Permalink to this definition">¶</a></dt>
 <dd><p>An elementary transform (ET). A pure translation of eta along the
 x-axis</p>
 <p>L = Ttx(eta) will instantiate an ET object which represents a pure
@@ -721,8 +743,8 @@ translation, i.e. a joint</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.Tty">
-<em class="property">classmethod </em><code class="sig-name descname">Tty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.Tty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.Tty" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ET.ET.ty">
+<em class="property">classmethod </em><code class="sig-name descname">ty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.ty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.ty" title="Permalink to this definition">¶</a></dt>
 <dd><p>An elementary transform (ET). A pure translation of eta along the
 x-axis</p>
 <p>L = Tty(eta) will instantiate an ET object which represents a pure
@@ -742,9 +764,154 @@ translation, i.e. a joint</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="roboticstoolbox.robot.ET.ET.__abstractmethods__">
+<code class="sig-name descname">__abstractmethods__</code><em class="property"> = frozenset({})</em><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__abstractmethods__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ET.ET.Ttz">
-<em class="property">classmethod </em><code class="sig-name descname">Ttz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.Ttz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.Ttz" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ET.ET.__contains__">
+<code class="sig-name descname">__contains__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">item</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__contains__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__copy__">
+<code class="sig-name descname">__copy__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__copy__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__delitem__">
+<code class="sig-name descname">__delitem__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__delitem__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__eq__">
+<code class="sig-name descname">__eq__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__ge__">
+<code class="sig-name descname">__ge__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__ge__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self&gt;=value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__gt__">
+<code class="sig-name descname">__gt__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__gt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self&gt;value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="roboticstoolbox.robot.ET.ET.__hash__">
+<code class="sig-name descname">__hash__</code><em class="property"> = None</em><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__iadd__">
+<code class="sig-name descname">__iadd__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__iadd__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__imul__">
+<code class="sig-name descname">__imul__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__imul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__iter__">
+<code class="sig-name descname">__iter__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__le__">
+<code class="sig-name descname">__le__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__le__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self&lt;=value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__len__">
+<code class="sig-name descname">__len__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__len__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__lt__">
+<code class="sig-name descname">__lt__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__lt__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self&lt;value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__radd__">
+<code class="sig-name descname">__radd__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__reversed__">
+<code class="sig-name descname">__reversed__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__reversed__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__setitem__">
+<code class="sig-name descname">__setitem__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">item</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="roboticstoolbox.robot.ET.ET.__slots__">
+<code class="sig-name descname">__slots__</code><em class="property"> = ()</em><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__slots__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.__subclasshook__">
+<em class="property">classmethod </em><code class="sig-name descname">__subclasshook__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">C</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.__subclasshook__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract classes can override this to customize issubclass().</p>
+<p>This is invoked early on by abc.ABCMeta.__subclasscheck__().
+It should return True, False or NotImplemented.  If it returns
+NotImplemented, the normal algorithm is used.  Otherwise, it
+overrides the normal algorithm (and the outcome is cached).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">item</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>S.append(value) – append value to the end of the sequence</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.clear">
+<code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None – remove all items from S<a class="headerlink" href="#roboticstoolbox.robot.ET.ET.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.extend">
+<code class="sig-name descname">extend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>S.extend(iterable) – extend sequence by appending elements from the iterable</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.insert">
+<code class="sig-name descname">insert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">item</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>S.insert(index, value) – insert value before index</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.pop">
+<code class="sig-name descname">pop</code><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param">index</em><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; item – remove and return item at index (default last).<a class="headerlink" href="#roboticstoolbox.robot.ET.ET.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raise IndexError if list is empty or index is out of range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.reverse">
+<code class="sig-name descname">reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>S.reverse() – reverse <em>IN PLACE</em></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ET.ET.tz">
+<em class="property">classmethod </em><code class="sig-name descname">tz</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ET.html#ET.tz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ET.ET.tz" title="Permalink to this definition">¶</a></dt>
 <dd><p>An elementary transform (ET). A pure translation of eta along the
 z-axis</p>
 <p>L = Ttz(eta) will instantiate an ET object which represents a pure
