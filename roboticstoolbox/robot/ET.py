@@ -27,12 +27,12 @@ class ET(UserList):   # TODO should be ETS
 
     """
 
-# TODO should probably prefix with __
+    # TODO should probably prefix with __
     STATIC = 0
     VARIABLE = 1
-    et = namedtuple('ET', 'eta axis_func axis jtype T j eta_deg')
+    et = namedtuple('ET', 'eta axis_func axis jtype T')
 
-    def __init__(self, axis_func=None, axis=None, eta=None, joint=None):
+    def __init__(self, axis_func=None, axis=None, eta=None):
 
         super().__init__()  # init UserList superclass
 
@@ -46,33 +46,20 @@ class ET(UserList):   # TODO should be ETS
             # constant value specified
             jtype = self.STATIC
             T = axis_func(eta)
-            j = None
         else:
-            # it's a joint variable
+            # it's a variable joint
             jtype = self.VARIABLE
-            j = joint
             T = None
 
-        if jtype is self.STATIC and axis[0] == 'R':
-            # it's a rotation joint
-            eta_deg = eta * (180 / np.pi)
-        else:
-            eta_deg = None
-        
-        # save all the params in a named tuple
-        e = self.et(eta, axis_func, axis, jtype, T, j, eta_deg)
+        # Save all the params in a named tuple
+        e = self.et(eta, axis_func, axis, jtype, T)
 
-        # and make it the only value of this instance
+        # And make it the only value of this instance
         self.data = [e]
 
     @property
     def eta(self):
         return self.data[0].eta
-
-# TODO why do we need degrees version?
-    @property
-    def eta_deg(self):
-        return self.data[0].eta_deg
 
     @property
     def axis_func(self):
@@ -83,16 +70,8 @@ class ET(UserList):   # TODO should be ETS
         return self.data[0].axis
 
     @property
-    def j(self):
-        return self.data[0].j
-
-    @property
     def jtype(self):
         return self.data[0].jtype
-
-    # @j.setter
-    # def j(self, j_new):
-    #     self._j = j_new
 
     def T(self, q=None):
         """
@@ -119,17 +98,19 @@ class ET(UserList):   # TODO should be ETS
         """
         es = []
         joint = 0
-        for et in self:  # for et in the object, display it, data comes from properties which come from the named tuple
+
+        # For et in the object, display it, data comes from properties
+        # which come from the named tuple
+        for et in self:
 
             if et.jtype is self.STATIC:
                 if et.axis[0] == 'R':
-                    s = '%s(%g)' % (et.axis, et.eta_deg)
+                    s = '%s(%g)' % (et.axis, et.eta * 180 / np.pi)
                 else:
                     s = '%s(%g)' % (et.axis, et.eta)
             else:
-                # s = '%s(q%d)' % (et.axis, et.j)
-                s = '%s(q%d)' % (et.axis, joint)    
-                joint += 1      
+                s = '%s(q%d)' % (et.axis, joint)
+                joint += 1
             es.append(s)
 
         return " * ".join(es)
@@ -138,6 +119,11 @@ class ET(UserList):   # TODO should be ETS
     def __mul__(self, rest):
         prod = ET()
         prod.data = self.data + rest.data
+        return prod
+
+    def __rmul__(self, rest):
+        prod = ET()
+        prod.data = self.data + rest
         return prod
 
     # redefine so that indexing returns an ET type
@@ -153,13 +139,6 @@ class ET(UserList):   # TODO should be ETS
 
     def __repr__(self):
         return str(self)
-
-    # @staticmethod
-    # def _check_args(eta, joint):
-    #     if eta is None and joint is None:
-    #         raise ValueError(
-    #             'One of eta (the elementary transform parameter), '
-    #             'or joint (the joint number) must be supplied')
 
     @classmethod
     def rx(cls, eta=None):
@@ -282,16 +261,16 @@ class ET(UserList):   # TODO should be ETS
         """
         return cls(SE3.Tz, axis='tz', eta=eta)
 
-if __name__ == "__main__":
 
-    from math import pi
+# if __name__ == "__main__":
 
-    e = ET.rx(pi/2)
-    print(e)
+#     from math import pi
 
-    e = ET.rx(pi/2) * ET.tx(0.3) * ET.ty(0.4) * ET.rx(-pi/2)
-    print(e)
+#     e = ET.rx(pi/2)
+#     print(e)
 
-    
-    e = ET.rx(pi/2) * ET.tx() * ET.ty() * ET.rx(-pi/2)
-    print(e)
+#     e = ET.rx(pi/2) * ET.tx(0.3) * ET.ty(0.4) * ET.rx(-pi/2)
+#     print(e)
+
+#     e = ET.rx(pi/2) * ET.tx() * ET.ty() * ET.rx(-pi/2)
+#     print(e)

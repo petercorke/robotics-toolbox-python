@@ -1640,7 +1640,7 @@ class URDF(URDFType):
 
         for j in self.joints:
 
-            ets = []
+            ets = rp.ET()
             T = sm.SE3(j.origin)
             trans = T.t
             rot = j.rpy
@@ -1648,56 +1648,56 @@ class URDF(URDFType):
             # print(rot)
 
             if trans[0] != 0:
-                ets.append(rp.ET.Ttx(trans[0]))
+                ets = ets * rp.ET.tx(trans[0])
 
             if trans[1] != 0:
-                ets.append(rp.ET.Tty(trans[1]))
+                ets = ets * rp.ET.ty(trans[1])
 
             if trans[2] != 0:
-                ets.append(rp.ET.Ttz(trans[2]))
+                ets = ets * rp.ET.tz(trans[2])
 
             if rot[0] != 0:
-                ets.append(rp.ET.TRx(rot[0]))
+                ets = ets * rp.ET.rx(rot[0])
 
             if rot[1] != 0:
-                ets.append(rp.ET.TRy(rot[1]))
+                ets = ets * rp.ET.ry(rot[1])
 
             if rot[2] != 0:
-                ets.append(rp.ET.TRz(rot[2]))
+                ets = ets * rp.ET.rz(rot[2])
 
             if j.joint_type == 'revolute' or \
                j.joint_type == 'continuous':   # pragma nocover
                 if j.axis[0] == 1:
-                    ets.append(rp.ET.TRx())
+                    ets = ets * rp.ET.rx()
                 elif j.axis[0] == -1:
-                    ets.append(rp.ET.TRy(np.pi))
-                    ets.append(rp.ET.TRx())
+                    ets = ets * rp.ET.ry(np.pi)
+                    ets = ets * rp.ET.rx()
                 elif j.axis[1] == 1:
-                    ets.append(rp.ET.TRy())
+                    ets = ets * rp.ET.ry()
                 elif j.axis[1] == -1:
-                    ets.append(rp.ET.TRz(np.pi))
-                    ets.append(rp.ET.TRy())
+                    ets = ets * rp.ET.rz(np.pi)
+                    ets = ets * rp.ET.ry()
                 elif j.axis[2] == 1:
-                    ets.append(rp.ET.TRz())
+                    ets = ets * rp.ET.rz()
                 elif j.axis[2] == -1:
-                    ets.append(rp.ET.TRx(np.pi))
-                    ets.append(rp.ET.TRz())
+                    ets = ets * rp.ET.rx(np.pi)
+                    ets = ets * rp.ET.rz()
             elif j.joint_type == 'prismatic':   # pragma nocover
                 if j.axis[0] == 1:
-                    ets.append(rp.ET.Ttx())
+                    ets = ets * rp.ET.tx()
                 elif j.axis[0] == -1:
-                    ets.append(rp.ET.TRy(np.pi))
-                    ets.append(rp.ET.Ttx())
+                    ets = ets * rp.ET.ry(np.pi)
+                    ets = ets * rp.ET.tx()
                 elif j.axis[1] == 1:
-                    ets.append(rp.ET.Tty())
+                    ets = ets * rp.ET.ty()
                 elif j.axis[1] == -1:
-                    ets.append(rp.ET.TRz(np.pi))
-                    ets.append(rp.ET.Tty())
+                    ets = ets * rp.ET.rz(np.pi)
+                    ets = ets * rp.ET.ty()
                 elif j.axis[2] == 1:
-                    ets.append(rp.ET.Ttz())
+                    ets = ets * rp.ET.tz()
                 elif j.axis[2] == -1:
-                    ets.append(rp.ET.TRx(np.pi))
-                    ets.append(rp.ET.Ttz())
+                    ets = ets * rp.ET.rx(np.pi)
+                    ets = ets * rp.ET.tz()
 
             try:
                 qlim = [j.limit.lower, j.limit.upper]
@@ -1724,7 +1724,7 @@ class URDF(URDFType):
             if not found:
                 link = self._link_map[self.joints[i].parent]
                 base_link = rp.ELink(
-                        [],
+                        rp.ET(),
                         name=link.name)
                 elinks[i]._parent.append(base_link)
                 try:
@@ -1938,6 +1938,6 @@ class URDF(URDFType):
             if child.tag not in valid_tags:
                 extra_xml_node.append(child)
 
-        data = ET.tostring(extra_xml_node)
-        kwargs['other_xml'] = data
+        # data = ET.ostring(extra_xml_node)
+        # kwargs['other_xml'] = data
         return URDF(**kwargs)
