@@ -7,6 +7,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
+from roboticstoolbox.robot.ET import ET
 
 
 class ELink(object):
@@ -44,7 +45,7 @@ class ELink(object):
 
     def __init__(
             self,
-            ET_list=[],
+            ets=ET(),
             name='',
             parent=None,
             qlim=np.zeros(2),
@@ -63,7 +64,12 @@ class ELink(object):
         self.STATIC = 0
         self.VARIABLE = 1
 
-        self._ets = ET_list
+        if isinstance(ets, ET):
+            self._ets = ets
+        else:
+            raise TypeError(
+                'The ets argument must be of type ETS')
+
         self._q_idx = []
 
         self._name = name
@@ -73,7 +79,9 @@ class ELink(object):
         elif parent is None:
             parent = []
         elif not isinstance(parent, list):
-            raise TypeError('The parent link must be of type ELink or list of Elink')
+            raise TypeError(
+                'The parent link must be of type ELink'
+                ' or list of Elink')
 
         self._parent = parent
         self._child = []
@@ -83,8 +91,8 @@ class ELink(object):
 
         # Initialise joints
         for i in range(self.M):
-            if ET_list[i].jtype is not ET_list[i].STATIC:
-                ET_list[i].j = len(self._q_idx)
+            if ets[i].jtype is not ets[i].STATIC:
+                ets[i].j = len(self._q_idx)
                 self._q_idx.append(i)
 
         if len(self._q_idx) > 1:
@@ -303,7 +311,7 @@ class ELink(object):
     def _copy(self):
         # Copy the Link
         link = ELink(  # noqa
-            ET_list=self.ets,
+            ets=self.ets,
             qlim=self.qlim,
             m=self.m,
             r=self.r,
@@ -379,8 +387,16 @@ class ELink(object):
             else:
                 T = self.ets[k].T()
 
+            print(type(T))
+            print(T)
+
+            if not isinstance(T, SE3):
+                print(q)
+                print(self.ets[1].T(1))
+
             tr = tr * T
 
+            
         return tr
 
     def islimit(self, q):

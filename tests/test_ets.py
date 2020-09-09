@@ -457,12 +457,12 @@ class TestETS(unittest.TestCase):
         self.assertIsInstance(panda.manuf, str)
 
     def test_complex(self):
-        l0 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.TRx()])
-        l1 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.TRy()], parent=l0)
-        l2 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.TRz()], parent=l1)
-        l3 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.Ttx()], parent=l2)
-        l4 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.Tty()], parent=l3)
-        l5 = rp.ELink([rp.ET.Ttx(0.1), rp.ET.Ttz()], parent=l4)
+        l0 = rp.ELink(rp.ET.tx(0.1) * rp.ET.rx())
+        l1 = rp.ELink(rp.ET.tx(0.1) * rp.ET.ry(), parent=l0)
+        l2 = rp.ELink(rp.ET.tx(0.1) * rp.ET.rz(), parent=l1)
+        l3 = rp.ELink(rp.ET.tx(0.1) * rp.ET.tx(), parent=l2)
+        l4 = rp.ELink(rp.ET.tx(0.1) * rp.ET.ty(), parent=l3)
+        l5 = rp.ELink(rp.ET.tx(0.1) * rp.ET.tz(), parent=l4)
 
         r = rp.ETS([l0, l1, l2, l3, l4, l5])
         r.q = [1, 2, 3, 1, 2, 3]
@@ -487,11 +487,11 @@ class TestETS(unittest.TestCase):
     #     e.close()
 
     # def test_plot_complex(self):
-    #     l0 = rp.ET.TRz()
-    #     l1 = rp.ET.Ttx()
-    #     l2 = rp.ET.TRy()
-    #     l3 = rp.ET.Ttz(1)
-    #     l4 = rp.ET.TRx()
+    #     l0 = rp.ET.rz()
+    #     l1 = rp.ET.tx()
+    #     l2 = rp.ET.ry()
+    #     l3 = rp.ET.tz(1)
+    #     l4 = rp.ET.rx()
 
     #     E = rp.ETS([l0, l1, l2, l3, l4])
     #     e = E.plot(block=False)
@@ -499,11 +499,11 @@ class TestETS(unittest.TestCase):
     #     e.close()
 
     # def test_teach(self):
-    #     l0 = rp.ET.TRz()
-    #     l1 = rp.ET.Ttx()
-    #     l2 = rp.ET.TRy()
-    #     l3 = rp.ET.Ttz(1)
-    #     l4 = rp.ET.TRx()
+    #     l0 = rp.ET.rz()
+    #     l1 = rp.ET.tx()
+    #     l2 = rp.ET.ry()
+    #     l3 = rp.ET.tz(1)
+    #     l4 = rp.ET.rx()
 
     #     E = rp.ETS([l0, l1, l2, l3, l4])
     #     e = E.teach(block=False, q=[1, 2, 3, 4])

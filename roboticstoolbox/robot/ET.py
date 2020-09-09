@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 @author: Jesse Haviland
+@author: Peter Corke
 """
-
+from collections import UserList, namedtuple
 import numpy as np
 from spatialmath import SE3
 
 
-class ET(object):
+class ET(UserList):   # TODO should be ETS
     """
     This class implements a single elementary transform (ET)
 
@@ -25,53 +26,52 @@ class ET(object):
           J. Haviland and P. Corke
 
     """
-    def __init__(self, axis_func, axis, eta=None, joint=None):
 
-        super(ET, self).__init__()
-        self.STATIC = 0
-        self.VARIABLE = 1
+    # TODO should probably prefix with __
+    STATIC = 0
+    VARIABLE = 1
+    et = namedtuple('ET', 'eta axis_func axis jtype T')
 
-        self._eta = eta
-        self._axis_func = axis_func
-        self._axis = axis
+    def __init__(self, axis_func=None, axis=None, eta=None):
 
-        if self.eta is not None:
-            self._jtype = self.STATIC
-            self._T = axis_func(eta)
+        super().__init__()  # init UserList superclass
+
+        if axis_func is None and axis is None and eta is None:
+            # ET()
+            # create instance with no values
+            self.data = []
+            return
+
+        if eta is not None:
+            # constant value specified
+            jtype = self.STATIC
+            T = axis_func(eta)
         else:
-            self._jtype = self.VARIABLE
-            self.j = joint
+            # it's a variable joint
+            jtype = self.VARIABLE
+            T = None
 
-        if self._jtype is self.STATIC and self.axis[0] == 'R':
-            self._eta_deg = self.eta * (180 / np.pi)
+        # Save all the params in a named tuple
+        e = self.et(eta, axis_func, axis, jtype, T)
+
+        # And make it the only value of this instance
+        self.data = [e]
 
     @property
     def eta(self):
-        return self._eta
-
-    @property
-    def eta_deg(self):
-        return self._eta_deg
+        return self.data[0].eta
 
     @property
     def axis_func(self):
-        return self._axis_func
+        return self.data[0].axis_func
 
     @property
     def axis(self):
-        return self._axis
-
-    @property
-    def j(self):
-        return self._j
+        return self.data[0].axis
 
     @property
     def jtype(self):
-        return self._jtype
-
-    @j.setter
-    def j(self, j_new):
-        self._j = j_new
+        return self.data[0].jtype
 
     def T(self, q=None):
         """
@@ -84,7 +84,7 @@ class ET(object):
 
         """
         if self.jtype is self.STATIC:
-            return self._T
+            return self.data[0].T
         else:
             return self.axis_func(q)
 
@@ -96,26 +96,52 @@ class ET(object):
         :rtype: str
 
         """
-        if self.jtype is self.STATIC:
-            if self.axis[0] == 'R':
-                return '%s(%g)' % (self.axis, self.eta_deg)
+        es = []
+        joint = 0
+
+        # For et in the object, display it, data comes from properties
+        # which come from the named tuple
+        for et in self:
+
+            if et.jtype is self.STATIC:
+                if et.axis[0] == 'R':
+                    s = '%s(%g)' % (et.axis, et.eta * 180 / np.pi)
+                else:
+                    s = '%s(%g)' % (et.axis, et.eta)
             else:
-                return '%s(%g)' % (self.axis, self.eta)
+                s = '%s(q%d)' % (et.axis, joint)
+                joint += 1
+            es.append(s)
+
+        return " * ".join(es)
+
+    # redefine * operator to concatenate the internal lists
+    def __mul__(self, rest):
+        prod = ET()
+        prod.data = self.data + rest.data
+        return prod
+
+    def __rmul__(self, rest):
+        prod = ET()
+        prod.data = self.data + rest
+        return prod
+
+    # redefine so that indexing returns an ET type
+    def __getitem__(self, i):
+        item = ET()
+        data = self.data[i]  # can be [2] or slice, eg. [3:5]
+        # ensure that data is always a list
+        if isinstance(data, list):
+            item.data = data
         else:
-            return '%s(q%d)' % (self.axis, self.j)
+            item.data = [data]
+        return item
 
     def __repr__(self):
         return str(self)
 
-    # @staticmethod
-    # def _check_args(eta, joint):
-    #     if eta is None and joint is None:
-    #         raise ValueError(
-    #             'One of eta (the elementary transform parameter), '
-    #             'or joint (the joint number) must be supplied')
-
     @classmethod
-    def TRx(cls, eta=None):
+    def rx(cls, eta=None):
         """
         An elementary transform (ET). A pure rotation of eta about the x-axis.
 
@@ -133,19 +159,10 @@ class ET(object):
         :rtype: ET
 
         """
-
-        def axis_func(eta):
-            return SE3(np.array([
-                [1, 0, 0, 0],
-                [0, np.cos(eta), -np.sin(eta), 0],
-                [0, np.sin(eta), np.cos(eta), 0],
-                [0, 0, 0, 1]
-            ]))
-
-        return cls(axis_func, axis='Rx', eta=eta)
+        return cls(SE3.Rx, axis='Rx', eta=eta)
 
     @classmethod
-    def TRy(cls, eta=None):
+    def ry(cls, eta=None):
         """
         An elementary transform (ET). A pure rotation of eta about the y-axis.
 
@@ -163,19 +180,10 @@ class ET(object):
         :rtype: ET
 
         """
-
-        def axis_func(eta):
-            return SE3(np.array([
-                [np.cos(eta), 0, np.sin(eta), 0],
-                [0, 1, 0, 0],
-                [-np.sin(eta), 0, np.cos(eta), 0],
-                [0, 0, 0, 1]
-            ]))
-
-        return cls(axis_func, axis='Ry', eta=eta)
+        return cls(SE3.Ry, axis='Ry', eta=eta)
 
     @classmethod
-    def TRz(cls, eta=None):
+    def rz(cls, eta=None):
         """
         An elementary transform (ET). A pure rotation of eta about the z-axis.
 
@@ -191,19 +199,10 @@ class ET(object):
         :rtype: ET
 
         """
-
-        def axis_func(eta):
-            return SE3(np.array([
-                [np.cos(eta), -np.sin(eta), 0, 0],
-                [np.sin(eta), np.cos(eta), 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]
-            ]))
-
-        return cls(axis_func, axis='Rz', eta=eta)
+        return cls(SE3.Rz, axis='Rz', eta=eta)
 
     @classmethod
-    def Ttx(cls, eta=None):
+    def tx(cls, eta=None):
         """
         An elementary transform (ET). A pure translation of eta along the
         x-axis
@@ -220,19 +219,10 @@ class ET(object):
         :rtype: ET
 
         """
-
-        def axis_func(eta):
-            return SE3(np.array([
-                [1, 0, 0, eta],
-                [0, 1, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]
-            ]))
-
-        return cls(axis_func, axis='tx', eta=eta)
+        return cls(SE3.Tx, axis='tx', eta=eta)
 
     @classmethod
-    def Tty(cls, eta=None):
+    def ty(cls, eta=None):
         """
         An elementary transform (ET). A pure translation of eta along the
         x-axis
@@ -249,19 +239,10 @@ class ET(object):
         :rtype: ET
 
         """
-
-        def axis_func(eta):
-            return SE3(np.array([
-                [1, 0, 0, 0],
-                [0, 1, 0, eta],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]
-            ]))
-
-        return cls(axis_func, axis='ty', eta=eta)
+        return cls(SE3.Ty, axis='ty', eta=eta)
 
     @classmethod
-    def Ttz(cls, eta=None):
+    def tz(cls, eta=None):
         """
         An elementary transform (ET). A pure translation of eta along the
         z-axis
@@ -278,13 +259,18 @@ class ET(object):
         :rtype: ET
 
         """
+        return cls(SE3.Tz, axis='tz', eta=eta)
 
-        def axis_func(eta):
-            return SE3(np.array([
-                [1, 0, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 1, eta],
-                [0, 0, 0, 1]
-            ]))
 
-        return cls(axis_func, axis='tz', eta=eta)
+# if __name__ == "__main__":
+
+#     from math import pi
+
+#     e = ET.rx(pi/2)
+#     print(e)
+
+#     e = ET.rx(pi/2) * ET.tx(0.3) * ET.ty(0.4) * ET.rx(-pi/2)
+#     print(e)
+
+#     e = ET.rx(pi/2) * ET.tx() * ET.ty() * ET.rx(-pi/2)
+#     print(e)

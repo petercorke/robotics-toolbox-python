@@ -40,69 +40,69 @@ class Frankie(ETS):
         tool_offset = (103)*mm
 
         b0 = ELink(
-            [ET.TRz()],
+            ET.rz(),
             name='base0',
             parent=None
         )
 
         b1 = ELink(
-            [ET.Ttx()],
+            ET.tx(),
             name='base1',
             parent=b0
         )
 
         l0 = ELink(
-            [ET.Ttz(0.333), ET.TRz()],
+            ET.tz(0.333) * ET.rz(),
             name='link0',
             parent=b1
         )
 
         l1 = ELink(
-            [ET.TRx(-90*deg), ET.TRz()],
+            ET.rx(-90*deg) * ET.rz(),
             name='link1',
             parent=l0
         )
 
         l2 = ELink(
-            [ET.TRx(90*deg), ET.Ttz(0.316), ET.TRz()],
+            ET.rx(90*deg) * ET.tz(0.316) * ET.rz(),
             name='link2',
             parent=l1
         )
 
         l3 = ELink(
-            [ET.Ttx(0.0825), ET.TRx(90*deg), ET.TRz()],
+            ET.tx(0.0825) * ET.rx(90*deg) * ET.rz(),
             name='link3',
             parent=l2
         )
 
         l4 = ELink(
-            [ET.Ttx(-0.0825), ET.TRx(-90*deg), ET.Ttz(0.384), ET.TRz()],
+            ET.tx(-0.0825) * ET.rx(-90*deg) * ET.tz(0.384) * ET.rz(),
             name='link4',
             parent=l3
         )
 
         l5 = ELink(
-            [ET.TRx(90*deg), ET.TRz()],
+            ET.rx(90*deg) * ET.rz(),
             name='link5',
             parent=l4
         )
 
         l6 = ELink(
-            [ET.Ttx(0.088), ET.TRx(90*deg), ET.Ttz(0.107), ET.TRz()],
+            ET.tx(0.088) * ET.rx(90*deg) * ET.tz(0.107) * ET.rz(),
             name='link6',
             parent=l5
         )
 
         ee = ELink(
-            [ET.Ttz(tool_offset), ET.TRz(-np.pi/4)],
+            ET.tz(tool_offset) * ET.rz(-np.pi/4),
             name='ee',
             parent=l6
         )
 
-        ETlist = [b0, b1, l0, l1, l2, l3, l4, l5, l6, ee]
+        ets = [b0, b1, l0, l1, l2, l3, l4, l5, l6, ee]
 
         super(Frankie, self).__init__(
-            ETlist,
+            ets,
             name='Frankie',
             manufacturer='Franka Emika, Omron')
 

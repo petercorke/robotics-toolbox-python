@@ -14,42 +14,49 @@ import spatialmath as sm
 class TestELink(unittest.TestCase):
 
     def test_str_ets(self):
-        rx = rp.ET.TRx(1.543)
-        ry = rp.ET.TRy(1.543)
-        tz = rp.ET.Ttz(1)
+        rx = rp.ET.rx(1.543)
+        ry = rp.ET.ry(1.543)
+        tz = rp.ET.tz(1)
 
-        l0 = rp.ELink([rx, ry, tz])
+        l0 = rp.ELink(rx * ry * tz)
 
-        ans = '[Rx(88.4074), Ry(88.4074), tz(1)]'
+        ans = 'Rx(88.4074) * Ry(88.4074) * tz(1)'
 
         self.assertEqual(str(l0), ans)
 
     def test_init(self):
-        rx = rp.ET.TRx(1.543)
-        ry = rp.ET.TRy(1.543)
-        tz = rp.ET.Ttz()
-        ty = rp.ET.Tty()
+        rx = rp.ET.rx(1.543)
+        ry = rp.ET.ry(1.543)
+        tz = rp.ET.tz()
+        ty = rp.ET.ty()
 
         with self.assertRaises(ValueError):
-            rp.ELink([rx, ry, tz, ty])
+            rp.ELink(rx * ry * tz * ty)
+
+    def test_init_fail(self):
+        rx = rp.ET.rx(1.543)
+        ty = rp.ET.ty()
+
+        with self.assertRaises(TypeError):
+            rp.ELink([rx, ty])
 
     def test_A(self):
-        rx = rp.ET.TRx(1.543)
-        ry = rp.ET.TRy(1.543)
-        tz = rp.ET.Ttz(1)
+        rx = rp.ET.rx(1.543)
+        ry = rp.ET.ry(1.543)
+        tz = rp.ET.tz(1)
 
-        l0 = rp.ELink([rx, ry, tz])
+        l0 = rp.ELink(rx * ry * tz)
 
         ans = sm.SE3.Rx(1.543) * sm.SE3.Ry(1.543) * sm.SE3.Tz(1)
 
         nt.assert_array_almost_equal(l0.A().A, ans.A)
 
     def test_A2(self):
-        rx = rp.ET.TRx(np.pi)
-        ry = rp.ET.TRy(np.pi)
-        tz = rp.ET.Ttz()
+        rx = rp.ET.rx(np.pi)
+        ry = rp.ET.ry(np.pi)
+        tz = rp.ET.tz()
 
-        l0 = rp.ELink([rx, ry, tz])
+        l0 = rp.ELink(rx * ry * tz)
 
         ans = sm.SE3.Rx(np.pi) * sm.SE3.Ry(np.pi) * sm.SE3.Tz(1.2)
 

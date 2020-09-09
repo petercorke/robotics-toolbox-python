@@ -597,7 +597,7 @@ class ETS(object):
                 if k != link.q_idx:
                     U = U @ link.ets[k].T().A
                 else:
-                    if link.ets[k]._axis == 'Rz':
+                    if link.ets[k].axis == 'Rz':
                         U = U @ link.ets[k].T(q[j]).A
                         Tu = np.linalg.inv(U) @ T
 
@@ -611,7 +611,7 @@ class ETS(object):
                         J[3:, j] = a
 
                         j += 1
-                    if link.ets[k]._axis == 'Ry':
+                    if link.ets[k].axis == 'Ry':
                         U = U @ link.ets[k].T(q[j]).A
                         Tu = np.linalg.inv(U) @ T
 
@@ -625,7 +625,7 @@ class ETS(object):
                         J[3:, j] = o
 
                         j += 1
-                    if link.ets[k]._axis == 'Rx':
+                    if link.ets[k].axis == 'Rx':
                         U = U @ link.ets[k].T(q[j]).A
                         Tu = np.linalg.inv(U) @ T
 
@@ -639,7 +639,7 @@ class ETS(object):
                         J[3:, j] = n
 
                         j += 1
-                    elif link.ets[k]._axis == 'tx':
+                    elif link.ets[k].axis == 'tx':
                         U = U @ link.ets[k].T(q[j]).A
                         n = U[:3, 0]
 
@@ -647,7 +647,7 @@ class ETS(object):
                         J[3:, j] = np.array([0, 0, 0])
 
                         j += 1
-                    elif link.ets[k]._axis == 'ty':
+                    elif link.ets[k].axis == 'ty':
                         U = U @ link.ets[k].T(q[j]).A
                         o = U[:3, 1]
 
@@ -655,7 +655,7 @@ class ETS(object):
                         J[3:, j] = np.array([0, 0, 0])
 
                         j += 1
-                    elif link.ets[k]._axis == 'tz':
+                    elif link.ets[k].axis == 'tz':
                         U = U @ link.ets[k].T(q[j]).A
                         a = U[:3, 2]
 
