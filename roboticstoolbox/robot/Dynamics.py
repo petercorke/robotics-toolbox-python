@@ -223,6 +223,71 @@ class Dynamics:
 
         return tau
 
+    def payload(self, m, p=np.zeros(3)):
+        """
+        payload(m, p) adds payload mass adds a payload with point mass m at
+        position p in the end-effector coordinate frame.
+
+        payload(m) adds payload mass adds a payload with point mass m at
+        in the end-effector coordinate frame.
+
+        payload(0) removes added payload.
+
+        :param m: mass (kg)
+        :type m: float
+        :param p: position in end-effector frame
+        :type p: float ndarray(3,1)
+
+        """
+
+        p = getvector(p, 3, out='col')
+        lastlink = self.links[self.n - 1]
+
+        lastlink.m = m
+        lastlink.r = p
+
+    def jointdynamics(self, q, qd=None):
+        """
+        Transfer function of joint actuator
+
+        :param q: The joint angles/configuration of the robot
+        :type q: float ndarray(n)
+        :param qd: The joint velocities of the robot
+        :type qd: float ndarray(n)
+        :return: transfer function denominators
+        :rtype: list of 2-tuples
+
+        - ``tf = jointdynamics(qd, q)`` calculates a vector of n continuous-time
+          transfer functions that represent the transfer function
+          1/(Js+B) for each joint based on the dynamic parameters of the robot
+          and the configuration q (n). n is the number of robot joints.
+
+        - ``tf = jointdynamics(q, qd)`` as above but include the linearized effects
+          of Coulomb friction when operating at joint velocity QD (1xN).
+        """
+
+        tf = []
+        for j, link in enumerate(self.links):
+            
+            # compute inertia for this joint
+            zero = np.zeros((self.n))
+            qdd = np.zeros((self.n))
+            qdd[j] = 1
+            M = self.rne(q, zero, qdd, grav=[0, 0, 0])
+            J = link.Jm + M[j] / abs(link.G) ** 2
+            
+            # compute friction
+            B = link.B
+            if qd is not None:
+                # add linearized Coulomb friction at the operating point
+                if qd > 0:
+                    B += link.Tc[0] / qd[j]
+                elif qd < 0:
+                    B += link.Tc[1] / qd[j]
+            tf.append((J, B))
+
+        return tf
+
     def friction(self, qd):
         """
         tau = friction(qd) calculates the vector of joint friction
