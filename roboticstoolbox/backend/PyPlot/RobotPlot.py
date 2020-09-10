@@ -201,15 +201,18 @@ class RobotPlot(object):
                 self.joints.append(
                     self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2))
 
+        # Plot the shadow of the robot links, draw first so robot is always
+        # in front
+        if self.shadow:
+            self.sh_links = self.ax.plot(
+                loc[0, :], loc[1, :],
+                linewidth=3, color='lightgrey')
+
         # Plot the robot links
         self.links = self.ax.plot(
             loc[0, :], loc[1, :], loc[2, :], linewidth=5, color='#E16F6D')
 
-        # Plot the shadow of the robot links
-        if self.shadow:
-            self.sh_links = self.ax.plot(
-                loc[0, :], loc[1, :],
-                linewidth=3, color='#464646')
+
 
     def init2(self):
 
