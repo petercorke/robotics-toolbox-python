@@ -372,9 +372,14 @@ class TestSerialLink(unittest.TestCase):
 
     def test_jointdynamics(self):
         # TODO
-        panda = rp.models.DH.Panda()
-        panda.jointdynamics(1, 2)
-        pass
+        self.skipTest("error jointdynamics not complete")
+        # error in the J value
+        puma = rp.models.DH.Puma560()
+        jd = puma.jointdynamics(puma.qn)
+        nt.assert_array_almost_equal(jd[0], [0.001133478453251, 0.001480000000000])
+        nt.assert_array_almost_equal(jd[1], [0.579706964030143e-3, 0.817000000000000e-3])
+        nt.assert_array_almost_equal(jd[2], [0.000525146448377, 0.001380000000000])
+
 
     def test_twists(self):
         # TODO
