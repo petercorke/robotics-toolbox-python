@@ -16,5 +16,6 @@ __all__ = [
     # 'rpy_to_trans',
     # 'xyzrpy_to_trans',
     'null',
-    'p_servo'
+    'p_servo',
+    'trajectory'
 ]
