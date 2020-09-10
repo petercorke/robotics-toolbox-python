@@ -122,20 +122,20 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(TT[2].A, ans)
         nt.assert_array_almost_equal(TT[3].A, ans)
 
-    def test_allfkine(self):
+    def test_fkine_all(self):
         pm = rp.models.DH.Panda()
         p = rp.models.ETS.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         p.q = q
         pm.q = q
 
-        p.allfkine()
-        r2 = pm.allfkine()
+        p.fkine_all()
+        r2 = pm.fkine_all()
 
         for i in range(7):
             nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
 
-        p.allfkine(q)
+        p.fkine_all(q)
         for i in range(7):
             nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
 
