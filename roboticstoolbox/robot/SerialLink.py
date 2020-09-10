@@ -19,7 +19,7 @@ from roboticstoolbox.backend.PyPlot.functions import \
 from roboticstoolbox.robot.Dynamics import Dynamics
 
 
-class SerialLink(Dynamics):
+class DHRobot(Dynamics):
     """
     A superclass for arm type robots. A concrete class that represents a
     serial-link arm-type robot.  Each link and joint in the chain is
@@ -67,7 +67,7 @@ class SerialLink(Dynamics):
         self.tool = tool
         self.gravity = gravity
 
-        super(SerialLink, self).__init__()
+        super().__init__()
 
         # Verify L
         if not isinstance(L, list):
@@ -2981,3 +2981,8 @@ class SerialLink(Dynamics):
         #     print(
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
+
+class SerialLink(DHRobot):
+    def __init__(self, *args, **kwargs):
+        print('SerialLink is deprecated, use DHRobot instead')
+        super().__init__(*args, **kwargs)
