@@ -2582,7 +2582,7 @@ class DHRobot(Dynamics):
     def plot(
             self, q=None, block=True, dt=50, limits=None,
             vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
         '''
         Graphical display and animation
 
@@ -2630,6 +2630,8 @@ class DHRobot(Dynamics):
         :type shadow: bool
         :param name: (Plot Option) Plot the name of the robot near its base
         :type name: bool
+        :param movie: name of file in which to save an animated GIF 
+        :type movie: str
 
         :retrun: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -2641,7 +2643,8 @@ class DHRobot(Dynamics):
         return _plot(
             self, block, q, dt, limits,
             vellipse=vellipse, fellipse=fellipse,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,
+            movie=movie)
         # except ModuleNotFoundError:
         #     print(
         #         'Could not find matplotlib.'

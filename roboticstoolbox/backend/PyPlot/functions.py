@@ -9,12 +9,17 @@ import numpy as np
 from spatialmath.base.argcheck import getvector, verifymatrix
 from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
 from matplotlib.widgets import Slider
+try:
+    import PIL
+    _pil_exists = True
+except ImportError:
+    _pil_exists = False
 
 
 def _plot(
         robot, block, q, dt, limits=None,
         vellipse=False, fellipse=False,
-        jointaxes=True, eeframe=True, shadow=True, name=True):
+        jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
 
     # Make an empty 3D figure
     env = rp.backend.PyPlot()
@@ -49,11 +54,33 @@ def _plot(
         fell = robot.fellipse(centre='ee')
         env.add(fell)
 
+    if movie is not None:
+        if not _pil_exists:
+            raise RuntimeError('to save movies PIL must be installed:\npip3 install PIL')
+        images = []  # list of images saved from each plot
+        # make the background white, looks better than grey stipple
+        env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+
     if trajn != 1:
         for i in range(trajn):
             robot.q = q[:, i]
             env.step()
             time.sleep(dt/1000)
+            
+            if movie is not None:
+                # render the frame and save as a PIL image in the list
+                canvas = env.fig.canvas
+                img = PIL.Image.frombytes('RGB', canvas.get_width_height(), 
+                 canvas.tostring_rgb())
+                images.append(img)
+
+    if movie is not None:
+        # save it as an animated GIF
+        images[0].save(movie,
+               save_all=True, append_images=images[1:], optimize=False, 
+               duration=dt, loop=0)
 
     # Keep the plot open
     if block:           # pragma: no cover
