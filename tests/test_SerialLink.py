@@ -583,7 +583,7 @@ class TestSerialLink(unittest.TestCase):
 
         nt.assert_array_almost_equal(r0.friction(qd), tau)
 
-    def test_allfkine(self):
+    def test_fkine_all(self):
         panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
@@ -631,8 +631,8 @@ class TestSerialLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
 
-        Tall = panda.allfkine(q)
-        Tall2 = panda.allfkine()
+        Tall = panda.fkine_all(q)
+        Tall2 = panda.fkine_all()
 
         nt.assert_array_almost_equal(Tall[0].A, t0, decimal=4)
         nt.assert_array_almost_equal(Tall[1].A, t1, decimal=4)

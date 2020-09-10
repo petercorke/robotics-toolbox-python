@@ -578,7 +578,7 @@ class Dynamics:
         for pose in range(poses):
             com_arr = np.zeros((3, self.n))
 
-            T = self.allfkine(q[:, pose])
+            T = self.fkine_all(q[:, pose])
 
             jointOrigins = np.zeros((3, self.n))
             jointAxes = np.zeros((3, self.n))
