@@ -100,7 +100,9 @@ class DHRobot(Dynamics):
         self.control_type = 'v'
 
         # Check the DH convention
-        self._check_dh()
+        self._mdh = self.links[0].mdh
+        if not all([link.mdh == self.mdh for link in self.links]):
+                raise ValueError('Robot has mixed D&H link conventions')
 
         # rne parameters
         self._rne_init = False
@@ -176,12 +178,6 @@ class DHRobot(Dynamics):
             base=self.base,
             tool=self.tool,
             gravity=self.gravity)
-
-    def _check_dh(self):
-        self._mdh = self.links[0].mdh
-        for i in range(self.n):
-            if not self.links[i].mdh == self.mdh:
-                raise ValueError('Robot has mixed D&H links conventions.')
 
     def _copy(self):
         L = []
