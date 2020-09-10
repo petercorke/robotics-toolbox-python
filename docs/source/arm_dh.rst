@@ -10,37 +10,47 @@ SerialLink
    :undoc-members:
    :show-inheritance:
    :inherited-members:
-   :special-members:
-   :exclude-members: count, index, sort, remove, __dict__, __weakref__, __add__, __init__, __repr__, __str__, __module__
+   
 
-Revolute
-------------
-.. automodule:: roboticstoolbox.robot.Revolute
+Revolute - standard DH
+----------------------
+.. automodule:: roboticstoolbox.robot.RevoluteDH
    :members:
    :undoc-members:
    :show-inheritance:
    :inherited-members:
-   :special-members:
-   :exclude-members: count, index, sort, remove, __dict__, __weakref__, __add__, __init__, __repr__, __str__, __module__
 
-Prismatic
-------------
-.. automodule:: roboticstoolbox.robot.Prismatic
+Prismatic - standard DH
+-----------------------
+.. automodule:: roboticstoolbox.robot.PrismaticDH
    :members:
    :undoc-members:
    :show-inheritance:
    :inherited-members:
-   :special-members:
-   :exclude-members: count, index, sort, remove, __dict__, __weakref__, __add__, __init__, __repr__, __str__, __module__
+   
 
-Link
-------------
-.. automodule:: roboticstoolbox.robot.Link
+Revolute - modified DH
+----------------------
+.. automodule:: roboticstoolbox.robot.RevoluteMDH
    :members:
    :undoc-members:
    :show-inheritance:
    :inherited-members:
-   :special-members:
-   :exclude-members: count, index, sort, remove, __dict__, __weakref__, __add__, __init__, __repr__, __str__, __module__
+   
+Prismatic - modified DH
+-----------------------
+.. automodule:: roboticstoolbox.robot.PrismaticMDH
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:
+   
+------------
+.. automodule:: roboticstoolbox.robot.DHLink
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:
+
 
    

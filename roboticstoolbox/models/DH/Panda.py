@@ -2,9 +2,8 @@
 
 import numpy as np
 from spatialmath.base import trotz, transl
-from roboticstoolbox.robot.Revolute import Revolute
-from roboticstoolbox.robot.SerialLink import SerialLink
 
+from roboticstoolbox import SerialLink, RevoluteMDH
 
 class Panda(SerialLink):
     """
@@ -44,13 +43,14 @@ class Panda(SerialLink):
         flange = (107)*mm
         # d7 = (58.4)*mm
 
-        L1 = Revolute(a =    0.0, d = 0.333, alpha =      0.0, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
-        L2 = Revolute(a =    0.0, d =   0.0, alpha = -np.pi/2, qlim = np.array([-1.7628, 1.7628]), mdh = 1)
-        L3 = Revolute(a =    0.0, d = 0.316, alpha =  np.pi/2, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
-        L4 = Revolute(a = 0.0825, d =   0.0, alpha =  np.pi/2, qlim = np.array([-3.0718, -0.0698]), mdh = 1)
-        L5 = Revolute(a =-0.0825, d = 0.384, alpha = -np.pi/2, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
-        L6 = Revolute(a =    0.0, d =   0.0, alpha =  np.pi/2, qlim = np.array([-0.0175, 3.7525]), mdh = 1)
-        L7 = Revolute(a =  0.088, d =flange, alpha =  np.pi/2, qlim = np.array([-2.8973, 2.8973]), mdh = 1)
+        # This Panda model is defined using modified Denavit-Hartenberg parameters
+        L1 = RevoluteMDH(a =    0.0, d = 0.333, alpha =      0.0, qlim = np.array([-2.8973, 2.8973]))
+        L2 = RevoluteMDH(a =    0.0, d =   0.0, alpha = -np.pi/2, qlim = np.array([-1.7628, 1.7628]))
+        L3 = RevoluteMDH(a =    0.0, d = 0.316, alpha =  np.pi/2, qlim = np.array([-2.8973, 2.8973]))
+        L4 = RevoluteMDH(a = 0.0825, d =   0.0, alpha =  np.pi/2, qlim = np.array([-3.0718, -0.0698]))
+        L5 = RevoluteMDH(a =-0.0825, d = 0.384, alpha = -np.pi/2, qlim = np.array([-2.8973, 2.8973]))
+        L6 = RevoluteMDH(a =    0.0, d =   0.0, alpha =  np.pi/2, qlim = np.array([-0.0175, 3.7525]))
+        L7 = RevoluteMDH(a =  0.088, d =flange, alpha =  np.pi/2, qlim = np.array([-2.8973, 2.8973]))
 
         L = [L1, L2, L3, L4, L5, L6, L7]
 
@@ -69,3 +69,7 @@ class Panda(SerialLink):
         # self.qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
+if __name__ == '__main__':
+
+    panda = Panda()
+    print(panda)

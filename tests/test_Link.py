@@ -12,22 +12,22 @@ import spatialmath as sm
 import unittest
 
 
-class TestLink(unittest.TestCase):
+class TestDHLink(unittest.TestCase):
 
     def test_link(self):
-        rp.Link()
+        rp.DHLink()
 
     def test_qlim(self):
-        l0 = rp.Link(qlim=[-1, 1])
+        l0 = rp.DHLink(qlim=[-1, 1])
 
         self.assertEqual(l0.islimit(-0.9), False)
         self.assertEqual(l0.islimit(-1.9), True)
         self.assertEqual(l0.islimit(2.9), True)
 
     def test_Tc(self):
-        l0 = rp.Link(Tc=1)
-        l1 = rp.Link(Tc=[1])
-        l2 = rp.Link(Tc=[1, 2])
+        l0 = rp.DHLink(Tc=1)
+        l1 = rp.DHLink(Tc=[1])
+        l2 = rp.DHLink(Tc=[1, 2])
 
         Tc0 = np.array([1, -1])
         Tc1 = np.array([1, -1])
@@ -38,9 +38,9 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(l2.Tc, Tc2)
 
     def test_I(self):
-        l0 = rp.Link(I=[1, 2, 3])
-        l1 = rp.Link(I=[0, 1, 2, 3, 4, 5])
-        l2 = rp.Link(I=np.eye(3))
+        l0 = rp.DHLink(I=[1, 2, 3])
+        l1 = rp.DHLink(I=[0, 1, 2, 3, 4, 5])
+        l2 = rp.DHLink(I=np.eye(3))
 
         I0 = np.array([
             [1, 0, 0],
@@ -61,11 +61,11 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(l2.I, I2)
 
     def test_A(self):
-        l0 = rp.Link(sigma=0)
-        l1 = rp.Link(sigma=1)
-        l2 = rp.Link(sigma=0, mdh=0)
-        l3 = rp.Link(sigma=1, mdh=1)
-        l4 = rp.Link(flip=True)
+        l0 = rp.DHLink(sigma=0)
+        l1 = rp.DHLink(sigma=1)
+        l2 = rp.DHLink(sigma=0, mdh=0)
+        l3 = rp.DHLink(sigma=1, mdh=1)
+        l4 = rp.DHLink(flip=True)
 
         T0 = sm.SE3(np.array([
             [-1, 0, 0, 0],
@@ -88,7 +88,7 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(l4.A(np.pi).A, T0.A)
 
     def test_friction(self):
-        l0 = rp.Revolute(d=2, Tc=[2, -1], B=3, G=2)
+        l0 = rp.RevoluteDH(d=2, Tc=[2, -1], B=3, G=2)
 
         tau = -124
         tau2 = 122
@@ -97,10 +97,10 @@ class TestLink(unittest.TestCase):
         nt.assert_almost_equal(l0.friction(-10), tau2)
 
     def test_nofriction(self):
-        l0 = rp.Link(Tc=2, B=3)
-        l1 = rp.Link(Tc=2, B=3)
-        l2 = rp.Link(Tc=2, B=3)
-        l3 = rp.Link(Tc=2, B=3)
+        l0 = rp.DHLink(Tc=2, B=3)
+        l1 = rp.DHLink(Tc=2, B=3)
+        l2 = rp.DHLink(Tc=2, B=3)
+        l3 = rp.DHLink(Tc=2, B=3)
 
         n0 = l1.nofriction()
         n1 = l2.nofriction(viscous=True)
@@ -116,8 +116,8 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(n2.Tc, l0.Tc)
 
     def test_sigma(self):
-        l0 = rp.Link(sigma=0)
-        l1 = rp.Link(sigma=1)
+        l0 = rp.DHLink(sigma=0)
+        l1 = rp.DHLink(sigma=1)
 
         self.assertEqual(l0.isrevolute(), True)
         self.assertEqual(l0.isprismatic(), False)
@@ -125,22 +125,22 @@ class TestLink(unittest.TestCase):
         self.assertEqual(l1.isprismatic(), True)
 
     def test_add(self):
-        l0 = rp.Link()
-        l1 = rp.Link()
+        l0 = rp.DHLink()
+        l1 = rp.DHLink()
 
         self.assertIsInstance(l0 + l1, rp.SerialLink)
         self.assertRaises(TypeError, l0.__add__, 1)
 
     def test_properties(self):
-        l0 = rp.Link()
+        l0 = rp.DHLink()
 
         self.assertEqual(l0.m, 0.0)
         nt.assert_array_almost_equal(l0.r, np.zeros((3, 1)))
         self.assertEqual(l0.Jm, 0.0)
 
     def test_str(self):
-        l0 = rp.Prismatic()
-        l1 = rp.Revolute()
+        l0 = rp.PrismaticDH()
+        l1 = rp.RevoluteDH()
 
         s0 = l0.__str__()
         s1 = l1.__repr__()
@@ -156,36 +156,40 @@ class TestLink(unittest.TestCase):
         puma = rp.models.DH.Puma560()
 
         s0 = puma.links[0].dyn()
-
+        
         self.assertEqual(
             s0,
-            "m     =  0.00 \n"
-            "r     =  0.00 0.00 0.00 \n"
-            "        | 0.00 0.00 0.00 | \n"
-            "I     = | 0.00 0.35 0.00 | \n"
-            "        | 0.00 0.00 0.00 | \n"
-            "Jm    =  0.00 \n"
-            "B     =  0.00 \n"
-            "Tc    =  0.40(+) -0.43(-) \n"
-            "G     =  -62.61 \n"
-            "qlim  =  -2.79 to 2.79")
+            r"""m     =  0 
+r     =  0 0 0 
+        |      0      0      0 | 
+I     = |      0   0.35      0 | 
+        |      0      0      0 | 
+Jm    =  0.0002 
+B     =  0.0015 
+Tc    =  0.4(+) -0.43(-) 
+G     =  -63 
+qlim  =  -2.8 to 2.8""")
 
     def test_revolute(self):
-        l0 = rp.Revolute()
+        l0 = rp.RevoluteDH()
 
         self.assertEqual(l0.sigma, 0)
         with self.assertRaises(ValueError):
             l0.theta = 1
 
     def test_prismatic(self):
-        l0 = rp.Prismatic()
+        l0 = rp.PrismaticDH()
 
         self.assertEqual(l0.sigma, 1)
         with self.assertRaises(ValueError):
             l0.d = 1
 
     def test_setB(self):
-        l0 = rp.Prismatic()
+        l0 = rp.PrismaticDH()
 
         with self.assertRaises(TypeError):
             l0.B = [1, 2]
+
+if __name__ == '__main__':
+
+    unittest.main()

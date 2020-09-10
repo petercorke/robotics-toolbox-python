@@ -3,17 +3,19 @@
 @author: Jesse Haviland
 """
 
+# TODO why are these here?
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import copy
 import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
 
 
-class Link(object):
+class DHLink():
     """
     A link superclass for all link types. A Link object holds all information
     related to a robot joint and link such as kinematics parameters,
@@ -66,7 +68,7 @@ class Link(object):
             theta=0.0,
             a=0.0,
             sigma=0,
-            mdh=0,
+            mdh=False,
             offset=0.0,
             qlim=np.zeros(2),
             flip=False,
@@ -77,6 +79,11 @@ class Link(object):
             B=0.0,
             Tc=np.zeros(2),
             G=1.0):
+
+        # TODO
+        #  probably should make DHLink(link) return a copy
+        #  probably should enforce keyword arguments, easy to make an 
+        #    error with positional args
 
         # Kinematic parameters
         self.sigma = sigma
@@ -101,7 +108,7 @@ class Link(object):
         self.G = G
 
     def __add__(self, L):
-        if isinstance(L, Link):
+        if isinstance(L, DHLink):
             return rp.SerialLink([self, L])
 
         elif isinstance(L, rp.SerialLink):
@@ -313,25 +320,27 @@ class Link(object):
 
     def _copy(self):
         # Copy the Link
-        link = Link(
-            d=self.d,
-            alpha=self.alpha,
-            theta=self.theta,
-            a=self.a,
-            sigma=self.sigma,
-            mdh=self.mdh,
-            offset=self.offset,
-            qlim=self.qlim,
-            flip=self.flip,
-            m=self.m,
-            r=self.r,
-            I=self.I,
-            Jm=self.Jm,
-            B=self.B,
-            Tc=self.Tc,
-            G=self.G)
+        # link = DHLink(
+        #     d=self.d,
+        #     alpha=self.alpha,
+        #     theta=self.theta,
+        #     a=self.a,
+        #     sigma=self.sigma,
+        #     mdh=self.mdh,
+        #     offset=self.offset,
+        #     qlim=self.qlim,
+        #     flip=self.flip,
+        #     m=self.m,
+        #     r=self.r,
+        #     I=self.I,
+        #     Jm=self.Jm,
+        #     B=self.B,
+        #     Tc=self.Tc,
+        #     G=self.G)
 
-        return link
+        # TODO how many places is this called?
+
+        return copy.copy(self)
 
     def dyn(self):
         """
@@ -345,16 +354,16 @@ class Link(object):
         :rtype s: string
         """
 
-        s = "m     =  {:.2f} \n" \
-            "r     =  {:.2f} {:.2f} {:.2f} \n" \
-            "        | {:.2f} {:.2f} {:.2f} | \n" \
-            "I     = | {:.2f} {:.2f} {:.2f} | \n" \
-            "        | {:.2f} {:.2f} {:.2f} | \n" \
-            "Jm    =  {:.2f} \n" \
-            "B     =  {:.2f} \n" \
-            "Tc    =  {:.2f}(+) {:.2f}(-) \n" \
-            "G     =  {:.2f} \n" \
-            "qlim  =  {:.2f} to {:.2f}".format(
+        s = "m     =  {:.2g} \n" \
+            "r     =  {:.2g} {:.2g} {:.2g} \n" \
+            "        | {:6.2g} {:6.2g} {:6.2g} | \n" \
+            "I     = | {:6.2g} {:6.2g} {:6.2g} | \n" \
+            "        | {:6.2g} {:6.2g} {:6.2g} | \n" \
+            "Jm    =  {:.2g} \n" \
+            "B     =  {:.2g} \n" \
+            "Tc    =  {:.2g}(+) {:.2g}(-) \n" \
+            "G     =  {:.2g} \n" \
+            "qlim  =  {:.2g} to {:.2g}".format(
                 self.m,
                 self.r[0, 0], self.r[1, 0], self.r[2, 0],
                 self.I[0, 0], self.I[0, 1], self.I[0, 2],
@@ -541,3 +550,303 @@ class Link(object):
         tau = -np.abs(self.G) * tau
 
         return tau
+
+class RevoluteDH(DHLink):
+    r"""
+    Class for revolute links using standard DH convention
+
+    :param d: kinematic - link offset
+    :type d: float
+    :param alpha: kinematic - link twist
+    :type alpha: float
+    :param a: kinematic - link length
+    :type a: float
+    :param sigma: kinematic - 0 if revolute, 1 if prismatic
+    :type sigma: int
+    :param mdh: kinematic - 0 if standard D&H, else 1
+    :type mdh: int
+    :param offset: kinematic - joint variable offset
+    :type offset: float
+
+    :param qlim: joint variable limits [min max]
+    :type qlim: float ndarray(1,2)
+    :param flip: joint moves in opposite direction
+    :type flip: bool
+
+    :param m: dynamic - link mass
+    :type m: float
+    :param r: dynamic - position of COM with respect to link frame
+    :type r:  float ndarray(3)
+    :param I: dynamic - inertia of link with respect to COM
+    :type I: float ndarray(3,3)
+    :param Jm: dynamic - motor inertia
+    :type Jm: float
+    :param B: dynamic - motor viscous friction (1x1 or 2x1)
+    :type B: float
+    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
+    :type Tc: float ndarray(2)
+    :param G: dynamic - gear ratio
+    :type G: float
+
+    A subclass of the DHLink class for a revolute joint: holds all information
+    related to a robot link such as kinematics parameters, rigid-body inertial
+    parameters, motor and transmission parameters.
+
+    The link transform is
+
+    .. math::
+    
+        \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)
+
+    where :math:`q_i` is the joint variable.
+
+    :references:
+        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+
+    :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
+    """
+
+    def __init__(
+            self,
+            d=0.0,
+            a=0.0,
+            alpha=0.0,
+            offset=0.0,
+            qlim=np.zeros(2),
+            flip=False,
+            **kwargs
+            ):
+
+        theta = 0.0
+        sigma = 0
+        mdh = False
+
+        super().__init__(
+            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh, 
+            offset=offset, qlim=qlim, flip=flip, **kwargs)
+
+class PrismaticDH(DHLink):
+    r"""
+    Class for prismatic link using standard DH convention
+
+    :param theta: kinematic: joint angle
+    :type theta: float
+    :param d: kinematic - link offset
+    :type d: float
+    :param alpha: kinematic - link twist
+    :type alpha: float
+    :param a: kinematic - link length
+    :type a: float
+    :param sigma: kinematic - 0 if revolute, 1 if prismatic
+    :type sigma: int
+    :param mdh: kinematic - 0 if standard D&H, else 1
+    :type mdh: int
+    :param offset: kinematic - joint variable offset
+    :type offset: float
+
+    :param qlim: joint variable limits [min max]
+    :type qlim: float ndarray(1,2)
+    :param flip: joint moves in opposite direction
+    :type flip: bool
+
+    :param m: dynamic - link mass
+    :type m: float
+    :param r: dynamic - position of COM with respect to link frame
+    :type r:  float ndarray(3)
+    :param I: dynamic - inertia of link with respect to COM
+    :type I: float ndarray(3,3)
+    :param Jm: dynamic - motor inertia
+    :type Jm: float
+    :param B: dynamic - motor viscous friction (1x1 or 2x1)
+    :type B: float
+    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
+    :type Tc: float ndarray(2)
+    :param G: dynamic - gear ratio
+    :type G: float
+
+    A subclass of the DHLink class for a prismatic joint: holds all information
+    related to a robot link such as kinematics parameters, rigid-body inertial
+    parameters, motor and transmission parameters.
+
+    The link transform is
+
+    .. math::
+    
+        \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)
+
+    where :math:`q_i` is the joint variable.
+
+    :references:
+        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+
+    :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
+    """
+
+    def __init__(
+            self,
+            theta=0.0,
+            a=0.0,
+            alpha=0.0,
+            offset=0.0,
+            qlim=np.zeros(2),
+            flip=False,
+            **kwargs
+            ):
+
+        d = 0.0
+        sigma = 1
+        mdh = False
+
+        super().__init__(
+            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh, 
+            offset=offset, qlim=qlim, flip=flip, **kwargs)
+
+class RevoluteMDH(DHLink):
+    r"""
+    Class for revolute links using modified DH convention
+
+    :param d: kinematic - link offset
+    :type d: float
+    :param alpha: kinematic - link twist
+    :type alpha: float
+    :param a: kinematic - link length
+    :type a: float
+    :param sigma: kinematic - 0 if revolute, 1 if prismatic
+    :type sigma: int
+    :param mdh: kinematic - 0 if standard D&H, else 1
+    :type mdh: int
+    :param offset: kinematic - joint variable offset
+    :type offset: float
+
+    :param qlim: joint variable limits [min max]
+    :type qlim: float ndarray(1,2)
+    :param flip: joint moves in opposite direction
+    :type flip: bool
+
+    :param m: dynamic - link mass
+    :type m: float
+    :param r: dynamic - position of COM with respect to link frame
+    :type r:  float ndarray(3)
+    :param I: dynamic - inertia of link with respect to COM
+    :type I: float ndarray(3,3)
+    :param Jm: dynamic - motor inertia
+    :type Jm: float
+    :param B: dynamic - motor viscous friction (1x1 or 2x1)
+    :type B: float
+    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
+    :type Tc: float ndarray(2)
+    :param G: dynamic - gear ratio
+    :type G: float
+
+    A subclass of the DHLink class for a revolute joint: holds all information
+    related to a robot link such as kinematics parameters, rigid-body inertial
+    parameters, motor and transmission parameters.
+
+    The link transform is
+
+    .. math::
+    
+        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) 
+
+    where :math:`q_i` is the joint variable.
+
+    :references:
+        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+
+    :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
+    """
+
+    def __init__(
+            self,
+            d=0.0,
+            a=0.0,
+            alpha=0.0,
+            offset=0.0,
+            qlim=np.zeros(2),
+            flip=False,
+            **kwargs
+            ):
+
+        theta = 0.0
+        sigma = 0
+        mdh = True
+
+        super().__init__(
+            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh, 
+            offset=offset, qlim=qlim, flip=flip, **kwargs)
+
+class PrismaticMDH(DHLink):
+    r"""
+    Class for prismatic link using modified DH convention
+
+    :param theta: kinematic: joint angle
+    :type theta: float
+    :param d: kinematic - link offset
+    :type d: float
+    :param alpha: kinematic - link twist
+    :type alpha: float
+    :param a: kinematic - link length
+    :type a: float
+    :param sigma: kinematic - 0 if revolute, 1 if prismatic
+    :type sigma: int
+    :param mdh: kinematic - 0 if standard D&H, else 1
+    :type mdh: int
+    :param offset: kinematic - joint variable offset
+    :type offset: float
+
+    :param qlim: joint variable limits [min max]
+    :type qlim: float ndarray(1,2)
+    :param flip: joint moves in opposite direction
+    :type flip: bool
+
+    :param m: dynamic - link mass
+    :type m: float
+    :param r: dynamic - position of COM with respect to link frame
+    :type r:  float ndarray(3)
+    :param I: dynamic - inertia of link with respect to COM
+    :type I: float ndarray(3,3)
+    :param Jm: dynamic - motor inertia
+    :type Jm: float
+    :param B: dynamic - motor viscous friction (1x1 or 2x1)
+    :type B: float
+    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
+    :type Tc: float ndarray(2)
+    :param G: dynamic - gear ratio
+    :type G: float
+
+    A subclass of the DHLink class for a prismatic joint: holds all information
+    related to a robot link such as kinematics parameters, rigid-body inertial
+    parameters, motor and transmission parameters.
+
+    The link transform is
+    
+    .. math::
+    
+        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}}
+
+    where :math:`q_i` is the joint variable.
+
+    :references:
+        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+
+    :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
+    """
+
+    def __init__(
+            self,
+            theta=0.0,
+            a=0.0,
+            alpha=0.0,
+            offset=0.0,
+            qlim=np.zeros(2),
+            flip=False,
+            **kwargs
+            ):
+
+        d = 0.0
+        sigma = 1
+        mdh = True
+
+        super().__init__(
+            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh, 
+            offset=offset, qlim=qlim, flip=flip, **kwargs)

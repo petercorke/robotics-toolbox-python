@@ -5,7 +5,7 @@
 
 import numpy as np
 from functools import wraps
-from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
@@ -78,7 +78,7 @@ class SerialLink(Dynamics):
         self._n = 0
 
         for i in range(length):
-            if isinstance(L[i], Link):
+            if isinstance(L[i], DHLink):
                 self._links.append(L[i])
                 self._n += 1
                 L[i].id = self._n
@@ -90,7 +90,7 @@ class SerialLink(Dynamics):
                     L[i].id = self._n
 
             else:
-                raise TypeError("Input can be only Link or SerialLink")
+                raise TypeError("Input can be only DHLink or SerialLink")
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -154,20 +154,20 @@ class SerialLink(Dynamics):
     def __add__(self, L):
         nlinks = []
 
-        # TODO - Should I do a deep copy here a physically copy the Links
+        # TODO - Should I do a deep copy here a physically copy the DHLinks
         # and not just the references?
-        # Copy Link references to new list
+        # Copy DHLink references to new list
         for i in range(self.n):
             nlinks.append(self.links[i])
 
-        if isinstance(L, Link):
+        if isinstance(L, DHLink):
             nlinks.append(L)
         elif isinstance(L, SerialLink):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
             raise TypeError("Can only combine SerialLinks with other "
-                            "SerialLinks or Links")
+                            "SerialLinks or DHLinks")
 
         return SerialLink(
             nlinks,
