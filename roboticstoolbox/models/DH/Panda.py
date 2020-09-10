@@ -3,9 +3,9 @@
 import numpy as np
 from spatialmath.base import trotz, transl
 
-from roboticstoolbox import SerialLink, RevoluteMDH
+from roboticstoolbox import DHRobot, RevoluteMDH
 
-class Panda(SerialLink):
+class Panda(DHRobot):
     """
     A class representing the Franka Emika Panda robot arm.
 

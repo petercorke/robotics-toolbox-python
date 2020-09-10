@@ -105,6 +105,7 @@ class PyPlot(Connector):
         plt.ion()
 
         self._update_robots()
+        plt.pause(0.01)
 
     def reset(self):
         '''
@@ -151,7 +152,7 @@ class PyPlot(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.SerialLink) or isinstance(ob, rp.ETS):
+        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ETS):
             self.robots.append(
                 RobotPlot(
                     ob, self.ax, readonly, display,

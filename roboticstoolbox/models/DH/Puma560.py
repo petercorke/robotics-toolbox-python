@@ -17,9 +17,9 @@
 
 from math import pi
 import numpy as np
-from roboticstoolbox import SerialLink, RevoluteDH
+from roboticstoolbox import DHRobot, RevoluteDH
 
-class Puma560(SerialLink):
+class Puma560(DHRobot):
     """
     Create model of Puma 560 manipulator
 

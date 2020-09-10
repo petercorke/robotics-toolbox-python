@@ -18,12 +18,12 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from roboticstoolbox import SerialLink, RevoluteDH, PrismaticDH
+from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
 from math import pi
 import numpy as np
 
 
-class Stanford(SerialLink):
+class Stanford(DHRobot):
     """
     Create model of Stanford arm manipulator
 
