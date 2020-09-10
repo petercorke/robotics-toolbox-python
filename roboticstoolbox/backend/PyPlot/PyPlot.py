@@ -105,7 +105,6 @@ class PyPlot(Connector):
         plt.ion()
 
         self._update_robots()
-        plt.pause(0.01)
 
     def reset(self):
         '''
