@@ -6,16 +6,22 @@ Created on Tue Apr 24 15:48:52 2020
 
 from os.path import splitext
 import numpy as np
-# import spatialmath as sp
+from functools import wraps
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
-from spatialmath.base import tr2rpy, r2q
+from spatialmath.base import r2q
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
 from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
+
+try:
+    import fcl
+    _fcl = True
+except ImportError:
+    _fcl = False
 
 
 class ETS(object):
@@ -128,6 +134,14 @@ class ETS(object):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
+
+    # def _q_listen(func):
+    #     @wraps(func)
+    #     def wrapper(*args):
+    #         s = args[0]
+    #         s.allfkine()
+    #         return func(*args)
+    #     return wrapper
 
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path
@@ -400,6 +414,7 @@ class ETS(object):
     def q(self, q_new):
         q_new = getvector(q_new, self.n)
         self._q = q_new
+        self.allfkine()
 
     @qd.setter
     def qd(self, qd_new):
@@ -425,7 +440,7 @@ class ETS(object):
 
     @tool.setter
     def tool(self, T):
-        if not isinstance(T, SE3): # pragma nocover
+        if not isinstance(T, SE3):  # pragma nocover
             T = SE3(T)
         self._tool = T
 
@@ -558,6 +573,10 @@ class ETS(object):
                 t = self.ets[i].A()
 
             self.ets[i]._fk = self.ets[i].parent[0]._fk * t
+
+            # Update the collision objects transform as well
+            for col in self.ets[i].collision:
+                col.wT = self.ets[i]._fk
 
     def jacob0(self, q=None):
         """
@@ -904,6 +923,33 @@ class ETS(object):
         Jv[3:, 3:] = r
 
         return Jv
+
+    def scollision(self):
+        i = 0
+        for l1 in self.ets:
+            for ob1 in l1.collision:
+                for l2 in self.ets:
+                    # print(l2.name)
+                    if l1.name != l2.name and \
+                       any([l2.name != li.name for li in l1.parent]) and \
+                       any([l2.name != li.name for li in l1.child]):
+                        for ob2 in l2.collision:
+                            # i += 1
+                            # print(i)
+                            request = fcl.CollisionRequest()
+                            result = fcl.CollisionResult()
+                            ret = fcl.collide(ob1.co, ob2.co, request, result)
+                            if ret:
+                                print(l1.name + ' -> ' + l2.name)
+                                # import code
+                                # code.interact(local=dict(globals(), **locals()))
+                                print(ob1)
+                                print(ob2)
+                            # print(ret)
+
+                
+                
+
 
     # def teach(
     #         self, block=True, q=None, limits=None,

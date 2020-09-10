@@ -6,6 +6,12 @@
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 
+try:
+    import fcl
+    _fcl = True
+except ImportError:
+    _fcl = False
+
 
 class Shape(object):
 
@@ -16,12 +22,30 @@ class Shape(object):
             radius=0,
             length=0,
             scale=[1, 1, 1],
-            filename=None):
+            filename=None,
+            co=None):
 
         self.base = base
         self.primitive = primitive
         self.scale = scale
+        self.radius = radius
+        self.length = length
         self.filename = filename
+        self.co = co
+
+    @property
+    def wT(self):
+        return self._wT
+
+    @wT.setter
+    def wT(self, T):
+        if not isinstance(T, SE3):
+            T = SE3(T)
+        self._wT = self.base * T
+
+        if _fcl:
+            tf = fcl.Transform(self._wT.R, self._wT.t)
+            # self.co.setTransform(tf)
 
     @property
     def base(self):
@@ -77,15 +101,36 @@ class Shape(object):
 
     @classmethod
     def Box(cls, scale, base=None):
-        return cls(True, base=base, scale=scale)
+
+        if _fcl:
+            obj = fcl.Box(scale[0], scale[1], scale[2])
+            co = fcl.CollisionObject(obj, fcl.Transform())
+        else:
+            co = None
+
+        return cls(True, base=base, scale=scale, co=co)
 
     @classmethod
     def Cylinder(cls, radius, length, base=None):
-        return cls(True, base=base, radius=radius, length=length)
+
+        if _fcl:
+            obj = fcl.Cylinder(radius, length)
+            co = fcl.CollisionObject(obj, fcl.Transform())
+        else:
+            co = None
+
+        return cls(True, base=base, radius=radius, length=length, co=co)
 
     @classmethod
     def Sphere(cls, radius, base=None):
-        return cls(True, base=base, radius=radius)
+
+        if _fcl:
+            obj = fcl.Sphere(radius)
+            co = fcl.CollisionObject(obj, fcl.Transform())
+        else:
+            co = None
+
+        return cls(True, base=base, radius=radius, co=co)
 
     @classmethod
     def Mesh(cls, filename, base=None, scale=None):
