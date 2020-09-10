@@ -5,13 +5,14 @@
 
 # Note::
 # - SI units are used.
-# - Gear ratios not currently known, though reflected armature inertia 
+# - Gear ratios not currently known, though reflected armature inertia
 #   is known, so gear ratios are set to 1.
 #
 # References::
-# - Kinematic data from "Modelling, Trajectory calculation and Servoing of 
+# - Kinematic data from "Modelling, Trajectory calculation and Servoing of
 #   a computer controlled arm".  Stanford AIM-177.  Figure 2.3
-# - Dynamic data from "Robot manipulators: mathematics, programming and control"
+# - Dynamic data from "Robot manipulators: mathematics, programming and
+#   control"
 #   Paul 1981, Tables 6.5, 6.6
 # - Dobrotin & Scheinman, "Design of a computer controlled manipulator for
 #   robot research", IJCAI, 1973.
@@ -44,17 +45,19 @@ class Stanford(DHRobot):
         inch = 0.0254
 
         L0 = RevoluteDH(
-            d=0.412,          # link length (Dennavit-Hartenberg notation)
+            d=0.412,      # link length (Dennavit-Hartenberg notation)
             a=0,          # link offset (Dennavit-Hartenberg notation)
-            alpha=-pi/2,   # link twist (Dennavit-Hartenberg notation)
-            I=[0.276, 0.255, 0.071, 0, 0, 0],  # inertia tensor of link with respect to
-                                      # center of mass I = [L_xx, L_yy, L_zz,
-                                      # L_xy, L_yz, L_xz]
-            r=[0, 0.0175, -0.1105],  # distance of ith origin to center of mass [x,y,z]
-                          # in link reference frame
-            m=9.29,          # mass of link
-            Jm=0.953,    # actuator inertia
-            G=1,   # gear ratio
+            alpha=-pi/2,  # link twist (Dennavit-Hartenberg notation)
+            # inertia tensor of link with respect to
+            # center of mass I = [L_xx, L_yy, L_zz,
+            # L_xy, L_yz, L_xz]
+            I=[0.276, 0.255, 0.071, 0, 0, 0],
+            # distance of ith origin to center of mass [x,y,z]
+            # in link reference frame
+            r=[0, 0.0175, -0.1105],
+            m=9.29,       # mass of link
+            Jm=0.953,     # actuator inertia
+            G=1,          # gear ratio
             qlim=[-170*deg, 170*deg])    # minimum and maximum joint angle
 
         L1 = RevoluteDH(
@@ -105,6 +108,7 @@ class Stanford(DHRobot):
     @property
     def qz(self):
         return self._qz
+
 
 if __name__ == '__main__':
 
