@@ -3,7 +3,7 @@
 """
 @author: Peter Corke
 """
-from roboticstoolbox.trajectory import *
+from roboticstoolbox.tools.trajectory import *
 import numpy as np
 import numpy.testing as nt
 import unittest
