@@ -273,7 +273,7 @@ class Dynamics:
             zero = np.zeros((self.n))
             qdd = np.zeros((self.n))
             qdd[j] = 1
-            M = self.rne(q, zero, qdd, grav=[0, 0, 0])
+            M = self.rne(qdd, zero, q, grav=[0, 0, 0])
             J = link.Jm + M[j] / abs(link.G) ** 2
             
             # compute friction
