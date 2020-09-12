@@ -1,4 +1,4 @@
-There are three types of model supported by the Toolbox, and all are subclasses of the abstract `Robot` superclass.
+The Toolbox supports three types of model. Each is represented by a distinct class which inherits from the abstract `Robot` superclass.
 
 * [Denavit-Hartenberg (DH) models](roboticstoolbox/models/DH). These are defined using standard or modified DH parameters, with optional 3D meshes for visualisation and optional dynamic parameters.
 * [ETS models](roboticstoolbox/models/ETS). There are defined using a sequence of elementary transformations (rotation and translations), and is a quick and intuitive way to describe a robot, see [this article](https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters/).
