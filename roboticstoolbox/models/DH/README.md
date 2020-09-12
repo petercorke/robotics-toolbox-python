@@ -1,4 +1,19 @@
-# Creating a new robot model using Denavit-Hartenberg parameters
+# Denavit-Hartenberg models
+
+## Shipped robot models
+
+| Model name | Description |
+| ---        | ---         |
+| Ball       | an n-link robot that folds into a ball shape |
+| Cobra600   | 4-axis Adept (now OMRON) SCARA robot |
+| IRB140  | 6-axis ABB robot |
+| KR5  | 6-axis Kuka robot |
+| Panda | 7-axis Franka-Emika robot |
+| Puma | 6-axis Unimation robot (with dynamics data) |
+| Stanford | 6-axis Stanford resarch robot, 1 prismatic joint (with dynamics data) |
+| Threelink | ?? |
+
+## Creating a new robot model using Denavit-Hartenberg parameters
 
 To begin, you must know:
 
@@ -7,7 +22,7 @@ To begin, you must know:
 3. The joint structure, does it have revolute, prismatic joints or both.
 
 
-## Write the definition
+### Write the definition
 
 Create a file called `MYROBOT.py` where `MYROBOT` is a descriptive name of your
 robot that is a valid filename and Python class name.
@@ -132,7 +147,7 @@ Toolbox models have a configuration called `qz` which is the set of zero
 joint angles.
 
 
-## Adding your model to the Toolbox
+### Adding your model to the Toolbox
 
 Edit the file `__init__.py` in this folder.  Add a line like:
 
@@ -142,7 +157,7 @@ from roboticstoolbox.models.DH.Stanford import MYROBOT
 
 and then add `'MYROBOT'` to the list that defines `__all__`.
 
-## Testing
+### Testing
 
 Now to test your class
 
@@ -152,7 +167,7 @@ Now to test your class
     print(myrobot.MYCONFIG)    # check that the joint configuration works
 ```
 
-## Next steps
+### Next steps
 
 You can now use the power of the Toolbox to compute forward and inverse
 kinematics, display a graphical model, and interactively teach the robot.
@@ -160,3 +175,7 @@ If you defined dynamic parameters then you can compute forward and inverse
 rigid-body dyamics and simulate the response of the robot to applied torques.
 
 Good luck and enjoy!
+
+### Contribute your model
+
+If you think your model might be interesting to others consider submitting a pull request.
