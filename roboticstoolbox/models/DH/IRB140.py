@@ -9,11 +9,11 @@ from math import pi
 import numpy as np
 
 
-class Irb140(DHRobot):
+class IRB140(DHRobot):
     """
-    Irb140 Create model of ABB IRB 140 manipulator
+    IRB140 Create model of ABB IRB 140 manipulator
 
-    Irb140 is a script that creates the workspace variable irb140 which
+    IRB140 is a script that creates the workspace variable irb140 which
     describes the kinematic characteristics of an ABB IRB 140 manipulator
     using standard DH conventions.
     Also define the workspace vectors:
