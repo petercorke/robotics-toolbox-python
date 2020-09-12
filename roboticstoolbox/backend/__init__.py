@@ -2,6 +2,6 @@ from roboticstoolbox.backend.PyPlot import *
 from roboticstoolbox.backend.urdf import *
 
 try:
-    from roboticstoolbox.backend.Sim import *
+    from roboticstoolbox.backend.Swift import *
 except ImportError:
     pass
