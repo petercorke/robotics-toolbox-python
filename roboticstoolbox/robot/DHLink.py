@@ -109,9 +109,9 @@ class DHLink():
 
     def __add__(self, L):
         if isinstance(L, DHLink):
-            return rp.SerialLink([self, L])
+            return rp.DHRobot([self, L])
 
-        elif isinstance(L, rp.SerialLink):
+        elif isinstance(L, rp.DHRobot):
             nlinks = [self]
 
             # TODO - Should I do a deep copy here a physically copy the Links
@@ -120,7 +120,7 @@ class DHLink():
             for i in range(L.n):
                 nlinks.append(L.links[i])
 
-            return rp.SerialLink(
+            return rp.DHRobot(
                 nlinks,
                 name=L.name,
                 manufacturer=L.manuf,
