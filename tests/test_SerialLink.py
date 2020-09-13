@@ -972,30 +972,31 @@ class TestSerialLink(unittest.TestCase):
 
     def test_rne(self):
         puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
 
         z = np.zeros(6)
         o = np.ones(6)
         fext = [1, 2, 3, 1, 2, 3]
 
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
-        tr1 = [29.1421, 56.5044, 16.3528, 1.2645, 1.1239, 0.5196]
-        tr2 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
-        tr3 = [29.7849, 53.9511, 15.0208,  4.0929, -0.8761, 3.5196]
+        tr1 = [3.35311, 36.0025, 7.42596, 0.190043, 0.203441, 0.194133]
+        tr2 = [32.4952, 60.867, 17.7436, 1.45452, 1.29911, 0.713781]
+        tr3 = [29.1421, 56.5044, 16.3528, 1.26448, 1.12392, 0.519648]
+        tr4 = [32.4952, 29.2271, 11.7085, 1.45452, 1.27086, 0.713781]
+        tr5 = [0.642756, 29.0866, 4.70321, 2.82843, -1.97175, 3]
 
-        t0 = puma.rne(z, z, puma.qn)
-        t1 = puma.rne(z, o, puma.qn)
-
-        puma.gravity = [0, 0, 9.81]
-        t2 = puma.rne(o, o, puma.qn)
-        t3 = puma.rne(z, z, grav=[0, 0, 9.81])
-        t4 = puma.rne(z, o, q=puma.qn, fext=fext)
+        t0 = puma.rne(puma.qn, z, z)
+        t1 = puma.rne(puma.qn, z, o)
+        t2 = puma.rne(puma.qn, o, o)
+        t3 = puma.rne(puma.qn, o, z)
+        t4 = puma.rne(puma.qn, o, o, grav=[0,0,0])
+        t5 = puma.rne(puma.qn, z, z, fext=fext)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
         nt.assert_array_almost_equal(t1, tr1, decimal=4)
         nt.assert_array_almost_equal(t2, tr2, decimal=4)
-        nt.assert_array_almost_equal(t3, tr0, decimal=4)
-        nt.assert_array_almost_equal(t4, tr3, decimal=4)
+        nt.assert_array_almost_equal(t3, tr3, decimal=4)
+        nt.assert_array_almost_equal(t4, tr4, decimal=4)
+        nt.assert_array_almost_equal(t5, tr5, decimal=4)
 
     def test_rne_traj(self):
         puma = rp.models.DH.Puma560()
@@ -1006,7 +1007,7 @@ class TestSerialLink(unittest.TestCase):
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
         tr1 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
 
-        t0 = puma.rne(np.c_[z, o], np.c_[z, o], np.c_[puma.qn, puma.qn])
+        t0 = puma.rne(np.c_[puma.qn, puma.qn], np.c_[z, o], np.c_[z, o])
 
         nt.assert_array_almost_equal(t0[:, 0], tr0, decimal=4)
         nt.assert_array_almost_equal(t0[:, 1], tr1, decimal=4)
@@ -1018,9 +1019,9 @@ class TestSerialLink(unittest.TestCase):
 
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
 
-        t0 = puma.rne(z, z, puma.qn)
+        t0 = puma.rne(puma.qn, z, z)
         puma.delete_rne()
-        t1 = puma.rne(z, z, puma.qn)
+        t1 = puma.rne(puma.qn, z, z)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
         nt.assert_array_almost_equal(t1, tr0, decimal=4)
@@ -1035,14 +1036,12 @@ class TestSerialLink(unittest.TestCase):
 
         res = [-7.4102, -9.8432, -10.9694, -4.4314, -0.9881, 21.0228]
 
-        qdd0 = puma.accel(qd, torque, q)
-        qdd1 = puma.accel(np.c_[qd, qd], np.c_[torque, torque], np.c_[q, q])
-        qdd2 = puma.accel(qd, torque)
+        qdd0 = puma.accel(q, qd, torque)
+        qdd1 = puma.accel(np.c_[q, q], np.c_[qd, qd], np.c_[torque, torque])
 
         nt.assert_array_almost_equal(qdd0, res, decimal=4)
         nt.assert_array_almost_equal(qdd1[:, 0], res, decimal=4)
         nt.assert_array_almost_equal(qdd1[:, 1], res, decimal=4)
-        nt.assert_array_almost_equal(qdd2, res, decimal=4)
 
     def test_inertia(self):
         puma = rp.models.DH.Puma560()
@@ -1059,12 +1058,10 @@ class TestSerialLink(unittest.TestCase):
 
         I0 = puma.inertia(q)
         I1 = puma.inertia(np.c_[q, q])
-        I2 = puma.inertia()
 
         nt.assert_array_almost_equal(I0, Ir, decimal=4)
         nt.assert_array_almost_equal(I1[:, :, 0], Ir, decimal=4)
         nt.assert_array_almost_equal(I1[:, :, 1], Ir, decimal=4)
-        nt.assert_array_almost_equal(I2, Ir, decimal=4)
 
     def test_cinertia(self):
         puma = rp.models.DH.Puma560()
@@ -1103,14 +1100,12 @@ class TestSerialLink(unittest.TestCase):
             [-0.0002, 0.0028, 0.0046, -0.0002, -0.0000, -0.0000],
             [0.0001, 0.0000, 0.0000, 0.0000, 0.0000, 0]]
 
-        C0 = puma.coriolis(qd, q)
-        C1 = puma.coriolis(np.c_[qd, qd], np.c_[q, q])
-        C2 = puma.coriolis(qd)
+        C0 = puma.coriolis(q, qd)
+        C1 = puma.coriolis(np.c_[q, q], np.c_[qd, qd])
 
         nt.assert_array_almost_equal(C0, Cr, decimal=4)
         nt.assert_array_almost_equal(C1[:, :, 0], Cr, decimal=4)
         nt.assert_array_almost_equal(C1[:, :, 1], Cr, decimal=4)
-        nt.assert_array_almost_equal(C2, Cr, decimal=4)
 
     def test_gravload(self):
         puma = rp.models.DH.Puma560()
@@ -1142,37 +1137,30 @@ class TestSerialLink(unittest.TestCase):
 
         tauir = [3.1500, 9.4805, 3.6189, 0.1901, 0.3519, 0.5823]
 
-        taui0 = puma.itorque(qdd, q)
-        taui1 = puma.itorque(np.c_[qdd, qdd], np.c_[q, q])
-        taui2 = puma.itorque(qdd)
+        taui0 = puma.itorque(q, qdd)
+        taui1 = puma.itorque(np.c_[q, q], np.c_[qdd, qdd])
 
         nt.assert_array_almost_equal(taui0, tauir, decimal=4)
         nt.assert_array_almost_equal(taui1[:, 0], tauir, decimal=4)
         nt.assert_array_almost_equal(taui1[:, 1], tauir, decimal=4)
-        nt.assert_array_almost_equal(taui2, tauir, decimal=4)
 
     def test_str(self):
         puma = rp.models.DH.Puma560()
         l0 = rp.PrismaticMDH()
-        r0 = rp.SerialLink([l0, l0, l0])
+        r0 = rp.DHRobot([l0, l0, l0])
         str(r0)
 
-        res = (
-            "\nPuma 560 (Unimation): 6 axis, RRRRRR, std DH\n"
-            "Parameters:\n"
-            "Revolute   theta=q1 + 0.00,  d= 0.00,  a= 0.00,"
-            "  alpha= 1.57\n"
-            "Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,"
-            "  alpha= 0.00\n"
-            "Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,"
-            "  alpha=-1.57\n"
-            "Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,"
-            "  alpha= 1.57\n"
-            "Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,"
-            "  alpha=-1.57\n"
-            "Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,"
-            "  alpha= 0.00\n\n"
-            "tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg")
+        res = """
+Puma 560 (Unimation): 6 axis, RRRRRR, std DH
+Parameters:
+Revolute   theta=q1 + 0.00,  d= 0.67,  a= 0.00,  alpha= 1.57
+Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,  alpha= 0.00
+Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,  alpha=-1.57
+Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,  alpha= 1.57
+Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,  alpha=-1.57
+Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,  alpha= 0.00
+
+tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
         self.assertEqual(str(puma), res)
 

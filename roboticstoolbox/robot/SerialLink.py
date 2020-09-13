@@ -2065,32 +2065,32 @@ class DHRobot(Dynamics):
             return qt, success, err
 
     @_check_rne
-    def rne(self, qdd, qd, q=None, grav=None, fext=None):
-        """
+    def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
+        r"""
         Inverse dynamics
 
-        tau = rne(qdd, qd, q, grav, fext) is the joint torque required for
-        the robot to achieve the specified joint position q (1xn), velocity qd
-        (1xn) and acceleration qdd (1xn), where n is the number of robot
-        joints. fext describes the wrench acting on the end-effector
+        :param q: The joint angles/configuration of the robot (Optional,
+        if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param qd: The joint velocities of the robot
+        :type qd: float ndarray(n)
+        :param qdd: The joint accelerations of the robot
+        :type qdd: float ndarray(n)
+        :param grav: Gravity vector to overwrite robots gravity value
+        :type grav: float ndarray(6)
+        :param fext: Specify wrench acting on the end-effector
+             :math:`W=[F_x F_y F_z M_x M_y M_z]`
+        :type fext: float ndarray(6)
+
+        ``tau = rne(q, qd, qdd, grav, fext)`` is the joint torque required for
+        the robot to achieve the specified joint position ``q`` (1xn), velocity
+        ``qd`` (1xn) and acceleration ``qdd`` (1xn), where n is the number of
+        robot joints. ``fext`` describes the wrench acting on the end-effector
 
         Trajectory operation:
         If q, qd and qdd (nxm) are matrices with m cols representing a
         trajectory then tau (nxm) is a matrix with cols corresponding to each
         trajectory step.
-
-        :param qdd: The joint accelerations of the robot
-        :type qdd: float ndarray(n)
-        :param qd: The joint velocities of the robot
-        :type qd: float ndarray(n)
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param grav: Gravity vector to overwrite robots gravity value
-        :type grav: float ndarray(6)
-        :param fext: Specify wrench acting on the end-effector
-             W=[Fx Fy Fz Mx My Mz]
-        :type fext: float ndarray(6)
 
         :notes:
             - The torque computed contains a contribution due to armature
@@ -2100,9 +2100,6 @@ class DHRobot(Dynamics):
         """
 
         trajn = 1
-
-        if q is None:
-            q = self.q
 
         try:
             q = getvector(q, self.n, 'col')
