@@ -342,7 +342,7 @@ class DHLink():
 
         return copy.copy(self)
 
-    def dyn(self):
+    def dyn(self, indent=0):
         """
         Show inertial properties of link
 
@@ -350,20 +350,22 @@ class DHLink():
         the link object in a multi-line format. The properties shown are mass,
         centre of mass, inertia, friction, gear ratio and motor properties.
 
+        :param indent: indent each line by this many spaces
+        :type indent: int
         :return s: The string representation of the link dynamics
         :rtype s: string
         """
 
-        s = "m     =  {:.2g} \n" \
-            "r     =  {:.2g} {:.2g} {:.2g} \n" \
-            "        | {:6.2g} {:6.2g} {:6.2g} | \n" \
-            "I     = | {:6.2g} {:6.2g} {:6.2g} | \n" \
-            "        | {:6.2g} {:6.2g} {:6.2g} | \n" \
-            "Jm    =  {:.2g} \n" \
-            "B     =  {:.2g} \n" \
-            "Tc    =  {:.2g}(+) {:.2g}(-) \n" \
-            "G     =  {:.2g} \n" \
-            "qlim  =  {:.2g} to {:.2g}".format(
+        s = "m     =  {:8.2g} \n" \
+            "r     =  {:8.2g} {:8.2g} {:8.2g} \n" \
+            "        | {:8.2g} {:8.2g} {:8.2g} | \n" \
+            "I     = | {:8.2g} {:8.2g} {:8.2g} | \n" \
+            "        | {:8.2g} {:8.2g} {:8.2g} | \n" \
+            "Jm    =  {:8.2g} \n" \
+            "B     =  {:8.2g} \n" \
+            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n" \
+            "G     =  {:8.2g} \n" \
+            "qlim  =  {:8.2g} to {:8.2g}".format(
                 self.m,
                 self.r[0, 0], self.r[1, 0], self.r[2, 0],
                 self.I[0, 0], self.I[0, 1], self.I[0, 2],
@@ -375,6 +377,12 @@ class DHLink():
                 self.G,
                 self.qlim[0], self.qlim[1]
             )
+
+        if indent >0:
+            # insert indentations into the string
+            # TODO there is probably a tidier way to integrate this step with above
+            sp = ' ' * indent
+            s = sp + s.replace('\n', '\n' + sp)
 
         return s
 
@@ -483,14 +491,14 @@ class DHLink():
 
     def nofriction(self, coulomb=True, viscous=False):
         """
-        l2 = nofriction(coulomb, viscous) copies the link and returns a link
+        ``l2 = nofriction(coulomb, viscous)`` copies the link and returns a link
         with the same parameters except, the Coulomb and/or viscous friction
         parameter to zero.
 
-        l2 = nofriction() as above except the the Coulomb parameter is set to
+        ``l2 = nofriction()`` as above except the the Coulomb parameter is set to
         zero.
 
-        :param coulomb: if True, will set the coulomb friction to 0
+        :param coulomb: if True, will set the Coulomb friction to 0
         :type coulomb: bool
         :param viscous: if True, will set the viscous friction to 0
         :type viscous: bool
@@ -509,7 +517,7 @@ class DHLink():
 
     def friction(self, qd):
         """
-        tau = friction(qd) Calculates the joint friction force/torque (n)
+        ``tau = friction(qd)`` Calculates the joint friction force/torque (n)
         for joint velocity qd (n). The friction model includes:
 
         - Viscous friction which is a linear function of velocity.

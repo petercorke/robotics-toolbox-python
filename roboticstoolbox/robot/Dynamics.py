@@ -10,14 +10,230 @@ so must be subclassed by ``SerialLink`` class.
 
 :todo: perhaps these should be abstract properties, methods of this calss
 """
-
+import copy
+from collections import namedtuple
 import numpy as np
 import roboticstoolbox as rp
 from spatialmath.base.argcheck import \
-    getvector, verifymatrix
-
+    getvector, verifymatrix, isscalar
+from scipy import integrate, interpolate
 
 class Dynamics:
+
+    def printdyn(self):
+        """
+        Print dynamic parameters
+
+        Display the kinematic and dynamic parameters to the console in 
+        reable format
+        """
+        for j, link in enumerate(self.links):
+            print("\nLink {:d}::".format(j), link)
+            print(link.dyn(indent=2))
+
+
+    def fdyn(self, T, q0, torqfun=None, targs=None, qd0=None, 
+        solver='RK45', sargs=None, dt=None, progress=False):
+        """
+        Integrate forward dynamics
+
+        :param T: integration time
+        :type T: float
+        :param q0: initial joint coordinates
+        :type q0: array_like
+        :param qd0: initial joint velocities, assumed zero if not given
+        :type qd0: array_like
+        :param torqfun: a function that computes torque as a function of time
+        and/or state
+        :type torqfun: callable
+        :param targs: argumments passed to ``torqfun``
+        :type targs: dict
+        :type solver: name of scipy solver to use, RK45 is the default
+        :param solver: str
+        :type sargs: arguments passed to the solver
+        :param sargs: dict
+        :type dt: time step for results
+        :param dt: float
+        :param progress: show progress bar, default False
+        :type progress: bool
+
+        :return: robot trajectory
+        :rtype: namedtuple
+
+        - ``tg = R.fdyn(T, q)`` integrates the dynamics of the robot with zero
+          input torques over the time  interval 0 to ``T`` and returns the
+          trajectory as a namedtuple with elements:
+
+            - ``t`` the time vector (M,)
+            - ``q`` the joint coordinates (M,n)
+            - ``qd`` the joint velocities (M,n)
+
+        - ``tg = R.fdyn(T, q, torqfun)`` as above but the torque applied to the
+          joints is given by the provided function::
+
+                tau = function(robot, t, q, qd, **args)
+
+          where the inputs are:
+
+            - the robot object
+            - current time
+            - current joint coordinates (n,)
+            - current joint velocity (n,)
+            - args, optional keyword arguments can be specified, these are
+              passed in from the ``targs`` kewyword argument.
+
+          The function must return a Numpy array (n,) of joint forces/torques.
+
+        Examples:
+        
+         #. to apply zero joint torque to the robot without Coulomb
+            friction::
+
+                def myfunc(robot, t, q, qd):
+                    return np.zeros((robot.n,))
+
+                tg = robot.nofriction().fdyn(5, q0, myfunc)
+
+                plt.figure()
+                plt.plot(tg.t, tg.q)
+                plt.show()
+
+            We could also use a lambda function::
+
+                tg = robot.nofriction().fdyn(5, q0, lambda r, t, q, qd: np.zeros((r.n,)))
+
+         #. the robot is controlled by a PD controller. We first define a
+            function to compute the control which has additional parameters for
+            the setpoint and control gains (qstar, P, D)::
+
+                def myfunc(robot, t, q, qd, qstar, P, D):
+                    return (qstar - q) * P + qd * D  # P, D are (6,)
+
+                targs = {'qstar': VALUE, 'P': VALUE, 'D': VALUE}
+                tg = robot.fdyn(10, q0, myfunc, targs=targs) )
+
+        Many integrators have variable step length which is problematic if we
+        want to animate the result.  If ``dt`` is specified then the solver
+        results are interpolated in time steps of ``dt``.
+
+        :notes:
+
+        - This function performs poorly with non-linear joint friction, such as
+          Coulomb friction.  The R.nofriction() method can be used to set this
+          friction to zero.
+        - If the function is not specified then zero force/torque is
+          applied to the manipulator joints.
+        - Interpolation is performed using `ScipY integrate.ode <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html>`
+          - The SciPy RK45 integrator is used by default
+        - Interpolation is performed using `SciPy interp1 <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`
+
+        :seealso: :func:`DHRobot.accel`, :func:`DHRobot.nofriction`, :func:`DHRobot.rne`.
+        """
+
+        n = self.n
+  
+        if not isscalar(T):
+            raise ValueError('T must be a scalar')
+        q0 = getvector(q0, n)
+        if qd0 is None:
+            qd0 = np.zeros((n,))
+        else:
+            qd0 = getvector(qd0, n)
+        if torqfun is not None:
+            if not callable(torqfun):
+                raise ValueError('torque function must be callable')
+        if sargs is None:
+            sargs = {}
+        if targs is None:
+            targs = {}
+        
+        # concatenate q and qd into the initial state vector
+        x0 = np.r_[q0, qd0]
+
+        scipy_integrator = integrate.__dict__[solver]  # get user specified integrator
+
+        integrator = scipy_integrator(
+            lambda t, y: self._fdyn(t, y, torqfun, targs),
+            t0=0.0, y0=x0, t_bound=T, **sargs
+            )
+
+        # initialize list of time and states
+        tlist = [0]
+        xlist = [np.r_[q0, qd0]]
+        
+        if progress:
+            _printProgressBar(0, prefix='Progress:', suffix='complete', length=60)
+
+        while integrator.status == 'running':
+
+            # step the integrator, calls _fdyn multiple times
+            integrator.step()
+
+            if integrator.status == 'failed':
+                raise RuntimeError('integration completed with failed status ')
+
+            # stash the results
+            tlist.append(integrator.t)
+            xlist.append(integrator.y)
+            
+            # update the progress bar
+            if progress:
+                _printProgressBar(integrator.t / T, prefix='Progress:', suffix='complete', length=60)
+
+        # cleanup the progress bar
+        if progress:
+                print('\r' + ' '* 90 + '\r')    
+
+        tarray = np.array(tlist)
+        xarray = np.array(xlist)
+
+        if dt is not None:
+            # interpolate data to equal time steps of dt
+            interp = interpolate.interp1d(tarray, xarray, axis=0)
+            
+            tnew = np.arange(0, T, dt)
+            xnew = interp(tnew)
+            return namedtuple('fdyn', 't q qd')(tnew, xnew[:, :n], xnew[:, n:])
+        else:
+            return namedtuple('fdyn', 't q qd')(tarray, xarray[:, :n], xarray[:, n:])
+
+    def _fdyn(self, t, x, torqfun, targs):
+        """
+        Private function called by fdyn
+
+        :param t: current time
+        :type t: float
+        :param x: current state [q, qd]
+        :type x: numpy array (2n,)
+        :param torqfun: a function that computes torque as a function of time
+        and/or state
+        :type torqfun: callable
+        :param targs: argumments passed to ``torqfun``
+        :type targs: dict
+
+        :return: derivative of current state [qd, qdd]
+        :rtype: numpy array (2n,)
+
+        Called by ``fdyn`` to evaluate the robot velocity and acceleration for
+        forward dynamics.
+        """
+        n = self.n
+
+        q = x[0:n]
+        qd = x[n:]
+
+        # evaluate the torque function if one is given
+        if torqfun is None:
+            tau = np.zeros((n,))
+        else:
+            tau = torqfun(self, t, q, qd, **targs)
+            if len(tau) != n or not all(np.isreal(tau)):
+                raise RuntimeError('torque function must return vector with N real elements')
+    
+        qdd = self.accel(q, qd, tau)
+
+        return np.r_[qd, qdd]
+
 
     def accel(self, q, qd, torque, ):
         """
@@ -113,18 +329,14 @@ class Dynamics:
 
         """
 
-        L = []
+        # shallow copy the robot object
+        nf = copy.copy(self)
+        nf.name = 'NF/' + self.name
 
-        for i in range(self.n):
-            L.append(self.links[i].nofriction(coulomb, viscous))
+        # add the modified links (copies)
+        nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
 
-        return rp.SerialLink(
-            L,
-            name='NF' + self.name,
-            manufacturer=self.manuf,
-            base=self.base,
-            tool=self.tool,
-            gravity=self.gravity)
+        return nf
 
     def pay(self, W, q=None, J=None, frame=1):
         """
@@ -866,3 +1078,10 @@ class Dynamics:
             r2.links[i].I = r2.links[i].I * s    # noqa
 
         return r2
+
+def _printProgressBar (fraction, prefix='', suffix='', decimals=1, length=50, fill = '█', printEnd = "\r"):
+    
+    percent = ("{0:." + str(decimals) + "f}").format(fraction * 100)
+    filledLength = int(length * fraction)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
