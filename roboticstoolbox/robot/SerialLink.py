@@ -83,14 +83,14 @@ class DHRobot(Dynamics):
                 self._n += 1
                 L[i].id = self._n
 
-            elif isinstance(L[i], SerialLink):
+            elif isinstance(L[i], DHRobot):
                 for j in range(L[i].n):
                     self._links.append(L[i].links[j])
                     self._n += 1
                     L[i].id = self._n
 
             else:
-                raise TypeError("Input can be only DHLink or SerialLink")
+                raise TypeError("Input can be only DHLink or DHRobot")
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -164,14 +164,14 @@ class DHRobot(Dynamics):
 
         if isinstance(L, DHLink):
             nlinks.append(L)
-        elif isinstance(L, SerialLink):
+        elif isinstance(L, DHRobot):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
-            raise TypeError("Can only combine SerialLinks with other "
-                            "SerialLinks or DHLinks")
+            raise TypeError("Can only combine DHRobots with other "
+                            "DHRobots or DHLinks")
 
-        return SerialLink(
+        return DHRobot(
             nlinks,
             name=self.name,
             manufacturer=self.manuf,
@@ -185,7 +185,7 @@ class DHRobot(Dynamics):
         for i in range(self.n):
             L.append(self.links[i]._copy())
 
-        r2 = SerialLink(
+        r2 = DHRobot(
             L,
             name=self.name,
             manufacturer=self.manuf,

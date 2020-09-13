@@ -128,7 +128,7 @@ class TestDHLink(unittest.TestCase):
         l0 = rp.DHLink()
         l1 = rp.DHLink()
 
-        self.assertIsInstance(l0 + l1, rp.SerialLink)
+        self.assertIsInstance(l0 + l1, rp.DHRobot)
         self.assertRaises(TypeError, l0.__add__, 1)
 
     def test_properties(self):

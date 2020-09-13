@@ -15,7 +15,7 @@ class TestSerialLink(unittest.TestCase):
 
     def test_seriallink(self):
         l0 = rp.DHLink()
-        rp.SerialLink([l0])
+        rp.DHRobot([l0])
 
     def test_isprismatic(self):
         l0 = rp.PrismaticDH()
@@ -23,7 +23,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
 
         ans = [True, False, True, False]
 
@@ -35,7 +35,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
 
         ans = [False, True, False, True]
 
@@ -47,7 +47,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = np.array([np.pi, np.pi, np.pi, np.pi / 2.0])
 
         ans = np.array([np.pi, 180, np.pi, 90])
@@ -61,7 +61,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = np.array([np.pi, 180, np.pi, 90])
         r0.q = q
 
@@ -75,7 +75,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH(d=4.0)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [0.0, 2.0, 0.0, 4.0]
 
         self.assertEqual(r0.d, ans)
@@ -86,7 +86,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(a=3.0)
         l3 = rp.RevoluteDH(a=4.0)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [1.0, 2.0, 3.0, 4.0]
 
         self.assertEqual(r0.a, ans)
@@ -97,7 +97,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=3.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [1.0, 0.0, 3.0, 0.0]
 
         self.assertEqual(r0.theta, ans)
@@ -109,8 +109,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(r=r)
         l3 = rp.RevoluteDH(r=r)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
-        r1 = rp.SerialLink([l0])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+        r1 = rp.DHRobot([l0])
         ans = np.c_[r, r, r, r]
 
         nt.assert_array_almost_equal(r0.r, ans)
@@ -122,7 +122,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(offset=3.0)
         l3 = rp.RevoluteDH(offset=4.0)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [1.0, 2.0, 3.0, 4.0]
 
         self.assertEqual(r0.offset, ans)
@@ -134,8 +134,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(qlim=qlim)
         l3 = rp.RevoluteDH(qlim=qlim)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
-        r1 = rp.SerialLink([l0])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+        r1 = rp.DHRobot([l0])
         ans = np.c_[qlim, qlim, qlim, qlim]
 
         nt.assert_array_almost_equal(r0.qlim, ans)
@@ -156,7 +156,7 @@ class TestSerialLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         r0.q = q
 
         nt.assert_array_almost_equal(r0.fkine(q).A, T1)
@@ -178,7 +178,7 @@ class TestSerialLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
 
         TT = r0.fkine(qq)
 
@@ -190,7 +190,7 @@ class TestSerialLink(unittest.TestCase):
     def test_links(self):
         l0 = rp.PrismaticDH()
         with self.assertRaises(TypeError):
-            rp.SerialLink(l0)
+            rp.DHRobot(l0)
 
     def test_multiple(self):
         l0 = rp.PrismaticDH()
@@ -198,10 +198,10 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l2, l3])
-        r3 = rp.SerialLink([r0, r1])
-        r4 = rp.SerialLink([r0, l2, l3])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l2, l3])
+        r3 = rp.DHRobot([r0, r1])
+        r4 = rp.DHRobot([r0, l2, l3])
 
         q = np.array([1, 2, 3, 4])
 
@@ -219,7 +219,7 @@ class TestSerialLink(unittest.TestCase):
         l0 = rp.PrismaticDH()
 
         with self.assertRaises(TypeError):
-            rp.SerialLink([l0, 1])
+            rp.DHRobot([l0, 1])
 
     def test_add_seriallink(self):
         l0 = rp.PrismaticDH()
@@ -227,8 +227,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l2, l3])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l2, l3])
         r3 = r0 + r1
 
         q = np.array([1, 2, 3, 4])
@@ -248,8 +248,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l1, l2, l3])
         r3 = r0 + l2 + l3
         r4 = l0 + r1
 
@@ -268,7 +268,7 @@ class TestSerialLink(unittest.TestCase):
     def test_add_error(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1])
+        r0 = rp.DHRobot([l0, l1])
 
         with self.assertRaises(TypeError):
             r0 + 2
@@ -276,17 +276,17 @@ class TestSerialLink(unittest.TestCase):
     def test_dh_error(self):
         l0 = rp.PrismaticMDH()
         l1 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0])
-        r1 = rp.SerialLink([l1])
+        r0 = rp.DHRobot([l0])
+        r1 = rp.DHRobot([l1])
 
         with self.assertRaises(ValueError):
-            rp.SerialLink([l0, l1])
+            rp.DHRobot([l0, l1])
 
         with self.assertRaises(ValueError):
             r0 + r1
 
         with self.assertRaises(ValueError):
-            rp.SerialLink([l0, l1])
+            rp.DHRobot([l0, l1])
             r0 + l1
 
     def test_name(self):
@@ -350,9 +350,9 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.RevoluteDH(alpha=np.pi / 2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
-        r1 = rp.SerialLink([l0, l1])
-        r2 = rp.SerialLink([l1, l2, l3, l0])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+        r1 = rp.DHRobot([l0, l1])
+        r2 = rp.DHRobot([l1, l2, l3, l0])
 
         self.assertTrue(r0.isspherical())
         self.assertFalse(r1.isspherical())
@@ -407,7 +407,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -429,7 +429,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -468,7 +468,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -490,7 +490,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -513,7 +513,7 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.DHLink(Tc=2, B=3)
         L = [l0, l1, l2, l3]
 
-        r0 = rp.SerialLink(L)
+        r0 = rp.DHRobot(L)
 
         n0 = r0.nofriction()
         n1 = r0.nofriction(viscous=True)
@@ -579,7 +579,7 @@ class TestSerialLink(unittest.TestCase):
         l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1])
         qd = [1, 2, 3, 4]
 
-        r0 = rp.SerialLink([l0, l0, l0, l0])
+        r0 = rp.DHRobot([l0, l0, l0, l0])
 
         tau = np.array([-16, -28, -40, -52])
 
@@ -705,8 +705,8 @@ class TestSerialLink(unittest.TestCase):
         l0 = rp.RevoluteDH(d=2.0)
         l1 = rp.PrismaticDH(theta=1.0)
         l2 = rp.PrismaticDH(theta=1, qlim=[0, 2])
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l0, l2])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l0, l2])
 
         qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
 
@@ -748,10 +748,10 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.RevoluteDH(d=0.15005, a=0.0203, alpha=-np.pi / 2)
         l3 = rp.PrismaticDH()
         l4 = rp.PrismaticMDH()
-        r0 = rp.SerialLink([l0, l1, l2])
-        r1 = rp.SerialLink([l3, l3])
-        r2 = rp.SerialLink([l3, l3, l3])
-        r3 = rp.SerialLink([l4, l4, l4])
+        r0 = rp.DHRobot([l0, l1, l2])
+        r1 = rp.DHRobot([l3, l3])
+        r2 = rp.DHRobot([l3, l3, l3])
+        r3 = rp.DHRobot([l4, l4, l4])
 
         q = [1, 1, 1]
         r0.q = q
@@ -808,8 +808,8 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.RevoluteDH(alpha=-np.pi / 2)
         l4 = rp.RevoluteDH(alpha=np.pi / 2)
         l5 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-        r1 = rp.SerialLink([l1, l0, l2, l3, l4, l5])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+        r1 = rp.DHRobot([l1, l0, l2, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
         T1 = r0.fkine(q)
         T2 = r1.fkine(q)
@@ -836,8 +836,8 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.RevoluteDH(alpha=-np.pi / 2)
         l4 = rp.RevoluteDH(alpha=np.pi / 2)
         l5 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-        r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+        r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
         T1 = r0.fkine(q)
         T2 = r1.fkine(q)
@@ -865,8 +865,8 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.RevoluteDH(alpha=-np.pi / 2)
         l4 = rp.RevoluteDH(alpha=np.pi / 2)
         l5 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-        r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+        r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
         T1 = r0.fkine(q)
         T2 = r1.fkine(q)
@@ -910,10 +910,10 @@ class TestSerialLink(unittest.TestCase):
         l4b = rp.RevoluteDH()
         l5 = rp.RevoluteDH()
         l6 = rp.RevoluteMDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4a, l5])
-        r1 = rp.SerialLink([l0, l1, l2, l3, l4b, l5])
-        r2 = rp.SerialLink([l1, l2, l3])
-        r3 = rp.SerialLink([l6, l6, l6, l6, l6, l6])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4a, l5])
+        r1 = rp.DHRobot([l0, l1, l2, l3, l4b, l5])
+        r2 = rp.DHRobot([l1, l2, l3])
+        r3 = rp.DHRobot([l6, l6, l6, l6, l6, l6])
 
         puma = rp.models.DH.Puma560()
         T = sm.SE3(0, 10, 10)
@@ -1378,7 +1378,7 @@ class TestSerialLink(unittest.TestCase):
 
     def test_teach_basic(self):
         l0 = rp.DHLink(d=2)
-        r0 = rp.SerialLink([l0, l0])
+        r0 = rp.DHRobot([l0, l0])
         e = r0.teach(block=False)
         e.step()
         e.close()
@@ -1459,7 +1459,7 @@ class TestSerialLink(unittest.TestCase):
 
     def test_teach2_basic(self):
         l0 = rp.DHLink(d=2)
-        r0 = rp.SerialLink([l0, l0])
+        r0 = rp.DHRobot([l0, l0])
         e = r0.teach2(block=False)
         e.step()
         e.close()
