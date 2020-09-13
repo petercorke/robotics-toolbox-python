@@ -573,20 +573,144 @@ class Dynamics:
         else:
             return taui
 
-    def gravjac(self, q=None, grav=None):
-        """
-        tauB = gravjac(q, grav) calculates the generalised joint force/torques
-        due to gravity.
+    # NOT CONVINCED WE NEED THIS, AND IT'S ORPHAN CODE
+    # def gravjac(self, q, grav=None):
+    #     """
+    #     Compute gravity load and Jacobian
 
-        tauB = gravjac() as above except uses the stored q and gravitational
-        acceleration of the robot object.
+    #     :param q: The joint angles/configuration of the robot 
+    #     :type q: float ndarray(n)
+    #     :param grav: The gravity vector (Optional, if not supplied will
+    #         use the stored gravity values).
+    #     :type grav: float ndarray(3,)
 
-        Trajectory operation:
-        If q is nxm where n is the number of robot joints then a
-        trajectory is assumed where each row of q corresponds to a robot
-        configuration. tau (nxm) is the generalised joint torque, each row
-        corresponding to an input pose, and jacob0 (6xnxm) where each
-        plane is a Jacobian corresponding to an input pose.
+    #     :return tau: The generalised joint force/torques due to gravity
+    #     :rtype tau: float ndarray(n,)
+
+    #     ``tauB = gravjac(q, grav)`` calculates the generalised joint force/torques
+    #     due to gravity and the Jacobian
+
+    #     Trajectory operation:
+    #     If q is nxm where n is the number of robot joints then a
+    #     trajectory is assumed where each row of q corresponds to a robot
+    #     configuration. tau (nxm) is the generalised joint torque, each row
+    #     corresponding to an input pose, and jacob0 (6xnxm) where each
+    #     plane is a Jacobian corresponding to an input pose.
+
+    #     :notes:
+    #         - The gravity vector is defined by the SerialLink property if not
+    #           explicitly given.
+    #         - Does not use inverse dynamics function RNE.
+    #         - Faster than computing gravity and Jacobian separately.
+
+    #     Written by Bryan Moutrie
+
+    #     :seealso: :func:`gravload`
+    #     """
+
+    #     # TODO use np.cross instead
+    #     def _cross3(self, a, b):
+    #         c = np.zeros(3)
+    #         c[2] = a[0] * b[1] - a[1] * b[0]
+    #         c[0] = a[1] * b[2] - a[2] * b[1]
+    #         c[1] = a[2] * b[0] - a[0] * b[2]
+    #         return c
+
+    #     def makeJ(O, A, e, r):
+    #         J[3:6,:] = A
+    #         for j in range(r):
+    #             if r[j]:
+    #                 J[0:3,j] = cross3(A(:,j),e-O(:,j));
+    #             else:
+    #                 J[:,j] = J[[4 5 6 1 2 3],j]; %J(1:3,:) = 0;
+
+    #     if grav is None:
+    #         grav = np.copy(self.gravity)
+    #     else:
+    #         grav = getvector(grav, 3)
+
+    #     try:
+    #         if q is not None:
+    #             q = getvector(q, self.n, 'col')
+    #         else:
+    #             q = np.copy(self.q)
+    #             q = getvector(q, self.n, 'col')
+
+    #         poses = 1
+    #     except ValueError:
+    #         poses = q.shape[1]
+    #         verifymatrix(q, (self.n, poses))
+
+    #     if not self.mdh:
+    #         baseAxis = self.base.a
+    #         baseOrigin = self.base.t
+
+    #     tauB = np.zeros((self.n, poses))
+
+    #     # Forces
+    #     force = np.zeros((3, self.n))
+
+    #     for joint in range(self.n):
+    #         force[:, joint] = np.squeeze(self.links[joint].m * grav)
+
+    #     # Centre of masses (local frames)
+    #     r = np.zeros((4, self.n))
+    #     for joint in range(self.n):
+    #         r[:, joint] = np.r_[np.squeeze(self.links[joint].r), 1]
+
+    #     for pose in range(poses):
+    #         com_arr = np.zeros((3, self.n))
+
+    #         T = self.fkine_all(q[:, pose])
+
+    #         jointOrigins = np.zeros((3, self.n))
+    #         jointAxes = np.zeros((3, self.n))
+    #         for i in range(self.n):
+    #             jointOrigins[:, i] = T[i].t
+    #             jointAxes[:, i] = T[i].a
+
+    #         if not self.mdh:
+    #             jointOrigins = np.c_[
+    #                 baseOrigin, jointOrigins[:, :-1]
+    #             ]
+    #             jointAxes = np.c_[
+    #                 baseAxis, jointAxes[:, :-1]
+    #             ]
+
+    #         # Backwards recursion
+    #         for joint in range(self.n - 1, -1, -1):
+    #             # C.o.M. in world frame, homog
+    #             com = T[joint].A @ r[:, joint]
+
+    #             # Add it to the distal others
+    #             com_arr[:, joint] = com[0:3]
+
+    #             t = np.zeros(3)
+
+    #             # for all links distal to it
+    #             for link in range(joint, self.n):
+    #                 if not self.links[joint].sigma:
+    #                     # Revolute joint
+    #                     d = com_arr[:, link] - jointOrigins[:, joint]
+    #                     t = t + self._cross3(d, force[:, link])
+    #                     # Though r x F would give the applied torque
+    #                     # and not the reaction torque, the gravity
+    #                     # vector is nominally in the positive z
+    #                     # direction, not negative, hence the force is
+    #                     # the reaction force
+    #                 else:
+    #                     # Prismatic joint
+    #                     # Force on prismatic joint
+    #                     t = t + force[:, link]
+
+    #             tauB[joint, pose] = t.T @ jointAxes[:, joint]
+
+    #     if poses == 1:
+    #         return tauB[:, 0]
+    #     else:
+    #         return tauB
+
+
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
