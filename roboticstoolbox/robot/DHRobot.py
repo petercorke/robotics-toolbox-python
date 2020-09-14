@@ -2385,8 +2385,6 @@ class DHRobot(Dynamics):
             raise ValueError(
                 'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
 
-
-
     def qmincon(self, q=None):
         '''
         qs, success, err = qmincon(q) exploits null space motion and returns

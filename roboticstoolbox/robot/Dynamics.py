@@ -13,10 +13,10 @@ so must be subclassed by ``SerialLink`` class.
 import copy
 from collections import namedtuple
 import numpy as np
-import roboticstoolbox as rp
 from spatialmath.base.argcheck import \
     getvector, verifymatrix, isscalar
 from scipy import integrate, interpolate
+
 
 class Dynamics:
 
@@ -24,16 +24,16 @@ class Dynamics:
         """
         Print dynamic parameters
 
-        Display the kinematic and dynamic parameters to the console in 
+        Display the kinematic and dynamic parameters to the console in
         reable format
         """
         for j, link in enumerate(self.links):
             print("\nLink {:d}::".format(j), link)
             print(link.dyn(indent=2))
 
-
-    def fdyn(self, T, q0, torqfun=None, targs=None, qd0=None, 
-        solver='RK45', sargs=None, dt=None, progress=False):
+    def fdyn(
+            self, T, q0, torqfun=None, targs=None, qd0=None,
+            solver='RK45', sargs=None, dt=None, progress=False):
         """
         Integrate forward dynamics
 
@@ -85,7 +85,7 @@ class Dynamics:
           The function must return a Numpy array (n,) of joint forces/torques.
 
         Examples:
-        
+
          #. to apply zero joint torque to the robot without Coulomb
             friction::
 
@@ -100,7 +100,8 @@ class Dynamics:
 
             We could also use a lambda function::
 
-                tg = robot.nofriction().fdyn(5, q0, lambda r, t, q, qd: np.zeros((r.n,)))
+                tg = robot.nofriction().fdyn(
+                    5, q0, lambda r, t, q, qd: np.zeros((r.n,)))
 
          #. the robot is controlled by a PD controller. We first define a
             function to compute the control which has additional parameters for
@@ -123,15 +124,18 @@ class Dynamics:
           friction to zero.
         - If the function is not specified then zero force/torque is
           applied to the manipulator joints.
-        - Interpolation is performed using `ScipY integrate.ode <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html>`
+        - Interpolation is performed using `ScipY integrate.ode
+          <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html>`
           - The SciPy RK45 integrator is used by default
-        - Interpolation is performed using `SciPy interp1 <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`
+        - Interpolation is performed using `SciPy interp1
+          <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`
 
-        :seealso: :func:`DHRobot.accel`, :func:`DHRobot.nofriction`, :func:`DHRobot.rne`.
+        :seealso: :func:`DHRobot.accel`, :func:`DHRobot.nofriction`,
+            :func:`DHRobot.rne`.
         """
 
         n = self.n
-  
+
         if not isscalar(T):
             raise ValueError('T must be a scalar')
         q0 = getvector(q0, n)
@@ -146,11 +150,12 @@ class Dynamics:
             sargs = {}
         if targs is None:
             targs = {}
-        
+
         # concatenate q and qd into the initial state vector
         x0 = np.r_[q0, qd0]
 
-        scipy_integrator = integrate.__dict__[solver]  # get user specified integrator
+        # get user specified integrator
+        scipy_integrator = integrate.__dict__[solver]
 
         integrator = scipy_integrator(
             lambda t, y: self._fdyn(t, y, torqfun, targs),
@@ -160,9 +165,10 @@ class Dynamics:
         # initialize list of time and states
         tlist = [0]
         xlist = [np.r_[q0, qd0]]
-        
+
         if progress:
-            _printProgressBar(0, prefix='Progress:', suffix='complete', length=60)
+            _printProgressBar(
+                0, prefix='Progress:', suffix='complete', length=60)
 
         while integrator.status == 'running':
 
@@ -175,14 +181,16 @@ class Dynamics:
             # stash the results
             tlist.append(integrator.t)
             xlist.append(integrator.y)
-            
+
             # update the progress bar
             if progress:
-                _printProgressBar(integrator.t / T, prefix='Progress:', suffix='complete', length=60)
+                _printProgressBar(
+                    integrator.t / T, prefix='Progress:', suffix='complete',
+                    length=60)
 
         # cleanup the progress bar
         if progress:
-                print('\r' + ' '* 90 + '\r')    
+            print('\r' + ' ' * 90 + '\r')
 
         tarray = np.array(tlist)
         xarray = np.array(xlist)
@@ -190,12 +198,13 @@ class Dynamics:
         if dt is not None:
             # interpolate data to equal time steps of dt
             interp = interpolate.interp1d(tarray, xarray, axis=0)
-            
+
             tnew = np.arange(0, T, dt)
             xnew = interp(tnew)
             return namedtuple('fdyn', 't q qd')(tnew, xnew[:, :n], xnew[:, n:])
         else:
-            return namedtuple('fdyn', 't q qd')(tarray, xarray[:, :n], xarray[:, n:])
+            return namedtuple('fdyn', 't q qd')(
+                tarray, xarray[:, :n], xarray[:, n:])
 
     def _fdyn(self, t, x, torqfun, targs):
         """
@@ -228,14 +237,14 @@ class Dynamics:
         else:
             tau = torqfun(self, t, q, qd, **targs)
             if len(tau) != n or not all(np.isreal(tau)):
-                raise RuntimeError('torque function must return vector with N real elements')
-    
+                raise RuntimeError(
+                    'torque function must return vector with N real elements')
+
         qdd = self.accel(q, qd, tau)
 
         return np.r_[qd, qdd]
 
-
-    def accel(self, q, qd, torque, ):
+    def accel(self, q, qd, torque):
         """
         Compute acceleration due to applied torque
 
@@ -278,21 +287,21 @@ class Dynamics:
         trajn = 1
 
         try:
-            q = getvector(q, self.n, 'col')
-            qd = getvector(qd, self.n, 'col')
-            torque = getvector(torque, self.n, 'col')
+            q = getvector(q, self.n, 'row')
+            qd = getvector(qd, self.n, 'row')
+            torque = getvector(torque, self.n, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
-            verifymatrix(qd, (self.n, trajn))
-            verifymatrix(torque, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(qd, (trajn, self.n))
+            verifymatrix(torque, (trajn, self.n))
 
-        qdd = np.zeros((self.n, trajn))
+        qdd = np.zeros((trajn, self.n))
 
         for i in range(trajn):
             # Compute current manipulator inertia torques resulting from unit
             # acceleration of each joint with no gravity.
-            qI = np.c_[q[:, i]] @ np.ones((1, self.n))
+            qI = (np.c_[q[i, :]] @ np.ones((1, self.n))).T
             qdI = np.zeros((self.n, self.n))
             qddI = np.eye(self.n)
 
@@ -300,14 +309,14 @@ class Dynamics:
 
             # Compute gravity and coriolis torque torques resulting from zero
             # acceleration at given velocity & with gravity acting.
-            tau = self.rne(q[:, i], qd[:, i], np.zeros((1, self.n)))
+            tau = self.rne(q[i, :], qd[i, :], np.zeros((1, self.n)))
 
-            inter = np.expand_dims((torque[:, i] - tau), axis=1)
+            inter = np.expand_dims((torque[i, :] - tau), axis=1)
 
-            qdd[:, i] = (np.linalg.inv(m) @ inter).flatten()
+            qdd[i, :] = (np.linalg.inv(m) @ inter).flatten()
 
         if trajn == 1:
-            return qdd[:, 0]
+            return qdd[0, :]
         else:
             return qdd
 
@@ -387,23 +396,23 @@ class Dynamics:
             W = getvector(W, 6)
             trajn = 0
         except ValueError:
-            trajn = W.shape[1]
-            verifymatrix(W, (6, trajn))
+            trajn = W.shape[0]
+            verifymatrix(W, (trajn, 6))
 
         if trajn:
             # A trajectory
             if J is not None:
                 # Jacobian supplied
-                verifymatrix(J, (6, self.n, trajn))
+                verifymatrix(J, (trajn, 6, self.n))
             else:
                 # Use q instead
-                verifymatrix(q, (self.n, trajn))
-                J = np.zeros((6, self.n, trajn))
+                verifymatrix(q, (trajn, self.n))
+                J = np.zeros((trajn, 6, self.n))
                 for i in range(trajn):
                     if frame:
-                        J[:, :, i] = self.jacobe(q[:, i])
+                        J[i, :, :] = self.jacobe(q[i, :])
                     else:
-                        J[:, :, i] = self.jacob0(q[:, i])
+                        J[i, :, :] = self.jacob0(q[i, :])
         else:
             # Single configuration
             if J is not None:
@@ -424,10 +433,10 @@ class Dynamics:
         if trajn == 0:
             tau = -J.T @ W
         else:
-            tau = np.zeros((self.n, trajn))
+            tau = np.zeros((trajn, self.n))
 
             for i in range(trajn):
-                tau[:, i] = -J[:, :, i].T @ W[:, i]
+                tau[i, :] = -J[i, :, :].T @ W[i, :]
 
         return tau
 
@@ -465,25 +474,27 @@ class Dynamics:
         :return: transfer function denominators
         :rtype: list of 2-tuples
 
-        - ``tf = jointdynamics(qd, q)`` calculates a vector of n continuous-time
-          transfer functions that represent the transfer function
-          1/(Js+B) for each joint based on the dynamic parameters of the robot
-          and the configuration q (n). n is the number of robot joints.
+        - ``tf = jointdynamics(qd, q)`` calculates a vector of n
+          continuous-time transfer functions that represent the transfer
+          function 1/(Js+B) for each joint based on the dynamic parameters
+          of the robot and the configuration q (n). n is the number of robot
+          joints.
 
-        - ``tf = jointdynamics(q, qd)`` as above but include the linearized effects
-          of Coulomb friction when operating at joint velocity QD (1xN).
+        - ``tf = jointdynamics(q, qd)`` as above but include the linearized
+          effects of Coulomb friction when operating at joint velocity QD
+          (1xN).
         """
 
         tf = []
         for j, link in enumerate(self.links):
-            
+
             # compute inertia for this joint
             zero = np.zeros((self.n))
             qdd = np.zeros((self.n))
             qdd[j] = 1
             M = self.rne(q, zero, qdd, grav=[0, 0, 0])
             J = link.Jm + M[j] / abs(link.G) ** 2
-            
+
             # compute friction
             B = link.B
             if qd is not None:
@@ -566,21 +577,21 @@ class Dynamics:
             q = self.q
 
         try:
-            q = getvector(q, self.n, 'col')
+            q = getvector(q, self.n, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
 
-        Mt = np.zeros((self.n, self.n, trajn))
+        Mt = np.zeros((trajn, self.n, self.n))
 
         for i in range(trajn):
-            J = self.jacob0(q[:, i])
+            J = self.jacob0(q[i, :])
             Ji = np.linalg.pinv(J)
-            M = self.inertia(q[:, i])
-            Mt[:, :, i] = Ji.T @ M @ Ji
+            M = self.inertia(q[i, :])
+            Mt[i, :, :] = Ji.T @ M @ Ji
 
         if trajn == 1:
-            return Mt[:, :, 0]
+            return Mt[0, :, :]
         else:
             return Mt
 
@@ -619,22 +630,22 @@ class Dynamics:
         trajn = 1
 
         try:
-            q = getvector(q, self.n, 'col')
+            q = getvector(q, self.n, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
 
-        In = np.zeros((self.n, self.n, trajn))
+        In = np.zeros((trajn, self.n, self.n))
 
         for i in range(trajn):
-            In[:, :, i] = self.rne(
-                np.c_[q[:, i]] @ np.ones((1, self.n)),
+            In[i, :, :] = self.rne(
+                (np.c_[q[i, :]] @ np.ones((1, self.n))).T,
                 np.zeros((self.n, self.n)),
                 np.eye(self.n),
                 grav=[0, 0, 0])
 
         if trajn == 1:
-            return In[:, :, 0]
+            return In[0, :, :]
         else:
             return In
 
@@ -642,8 +653,8 @@ class Dynamics:
         """
         Coriolis and centripetal term
 
-        ``C = coriolis(q, qd)`` calculates the Coriolis/centripetal matrix (nxn)
-        for the robot in configuration q and velocity qd, where n is the
+        ``C = coriolis(q, qd)`` calculates the Coriolis/centripetal matrix
+        (nxn) for the robot in configuration q and velocity qd, where n is the
         number of joints. The product c*qd is the vector of joint
         force/torque due to velocity coupling. The diagonal elements are due
         to centripetal effects and the off-diagonal elements are due to
@@ -665,17 +676,17 @@ class Dynamics:
         trajn = 1
 
         try:
-            q = getvector(q, self.n, 'col')
-            qd = getvector(qd, self.n, 'col')
+            q = getvector(q, self.n, 'row')
+            qd = getvector(qd, self.n, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
-            verifymatrix(qd, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(qd, (trajn, self.n))
 
         r1 = self.nofriction(True, True)
 
-        C = np.zeros((self.n, self.n, trajn))
-        Csq = np.zeros((self.n, self.n, trajn))
+        C = np.zeros((trajn, self.n, self.n))
+        Csq = np.zeros((trajn, self.n, self.n))
 
         # Find the torques that depend on a single finite joint speed,
         # these are due to the squared (centripetal) terms
@@ -685,8 +696,8 @@ class Dynamics:
                 QD = np.zeros(self.n)
                 QD[i] = 1
                 tau = r1.rne(
-                    q[:, j], QD, np.zeros(self.n), grav=[0, 0, 0])
-                Csq[:, i, j] = Csq[:, i, j] + tau
+                    q[j, :], QD, np.zeros(self.n), grav=[0, 0, 0])
+                Csq[j, :, i] = Csq[j, :, i] + tau
 
         # Find the torques that depend on a pair of finite joint speeds,
         # these are due to the product (Coridolis) terms
@@ -699,18 +710,18 @@ class Dynamics:
                     QD = np.zeros(self.n)
                     QD[i] = 1
                     QD[j] = 1
-                    tau = r1.rne(q[:, k], QD, np.zeros(self.n), grav=[0, 0, 0])
+                    tau = r1.rne(q[k, :], QD, np.zeros(self.n), grav=[0, 0, 0])
 
-                    C[:, j, k] = C[:, j, k] + \
-                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[i, k] / 2
+                    C[k, :, j] = C[k, :, j] + \
+                        (tau - Csq[k, :, j] - Csq[k, :, i]) * qd[k, i] / 2
 
-                    C[:, i, k] = C[:, i, k] + \
-                        (tau - Csq[:, j, k] - Csq[:, i, k]) * qd[j, k] / 2
+                    C[k, :, i] = C[k, :, i] + \
+                        (tau - Csq[k, :, j] - Csq[k, :, i]) * qd[k, j] / 2
 
-            C[:, :, k] = C[:, :, k] + Csq[:, :, k] @ np.diag(qd[:, k])
+            C[k, :, :] = C[k, :, :] + Csq[k, :, :] @ np.diag(qd[k, :])
 
         if trajn == 1:
-            return C[:, :, 0]
+            return C[0, :, :]
         else:
             return C
 
@@ -727,9 +738,9 @@ class Dynamics:
         :return taui: The inertia torque vector
         :rtype taui: float ndarray(n)
 
-        ``tauI = itorque(q, qdd)`` is the inertia force/torque vector (n) at the
-        specified joint configuration q (n) and acceleration qdd (n), and n
-        is the number of robot joints. taui = inertia(q) * qdd.
+        ``tauI = itorque(q, qdd)`` is the inertia force/torque vector (n) at
+        the specified joint configuration q (n) and acceleration qdd (n), and
+        n is the number of robot joints. taui = inertia(q) * qdd.
 
         If q and qdd are matrices (nxk), each row is interpretted as a joint
         state vector, and the result is a matrix (nxk) where each row is the
@@ -742,23 +753,23 @@ class Dynamics:
         """
 
         trajn = 1
-        
-        try:
-            q = getvector(q, self.n, 'col')
-            qdd = getvector(qdd, self.n, 'col')
-        except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
-            verifymatrix(qdd, (self.n, trajn))
 
-        taui = np.zeros((self.n, trajn))
+        try:
+            q = getvector(q, self.n, 'row')
+            qdd = getvector(qdd, self.n, 'row')
+        except ValueError:
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(qdd, (trajn, self.n))
+
+        taui = np.zeros((trajn, self.n))
 
         for i in range(trajn):
-            taui[:, i] = self.rne(
-                q[:, i], np.zeros(self.n), qdd[:, i], grav=[0, 0, 0])
+            taui[i, :] = self.rne(
+                q[i, :], np.zeros(self.n), qdd[i, :], grav=[0, 0, 0])
 
         if trajn == 1:
-            return taui[:, 0]
+            return taui[0, :]
         else:
             return taui
 
@@ -767,7 +778,7 @@ class Dynamics:
     #     """
     #     Compute gravity load and Jacobian
 
-    #     :param q: The joint angles/configuration of the robot 
+    #     :param q: The joint angles/configuration of the robot
     #     :type q: float ndarray(n)
     #     :param grav: The gravity vector (Optional, if not supplied will
     #         use the stored gravity values).
@@ -776,8 +787,8 @@ class Dynamics:
     #     :return tau: The generalised joint force/torques due to gravity
     #     :rtype tau: float ndarray(n,)
 
-    #     ``tauB = gravjac(q, grav)`` calculates the generalised joint force/torques
-    #     due to gravity and the Jacobian
+    #     ``tauB = gravjac(q, grav)`` calculates the generalised joint force/
+    #     torques due to gravity and the Jacobian
 
     #     Trajectory operation:
     #     If q is nxm where n is the number of robot joints then a
@@ -899,7 +910,6 @@ class Dynamics:
     #     else:
     #         return tauB
 
-
     def gravload(self, q=None, grav=None):
         """
         Compute gravity load
@@ -917,8 +927,8 @@ class Dynamics:
         the robot in the joint configuration ``q`` and using the default
         gravitational acceleration specified in the SerialLink object.
 
-        ``taug = gravload(q, grav)`` as above except the gravitational acceleration
-        is explicitly specified as `grav``.
+        ``taug = gravload(q, grav)`` as above except the gravitational
+        acceleration is explicitly specified as `grav``.
 
         If q is a matrix (nxm) each column is interpreted as a joint
         configuration vector, and the result is a matrix (nxm) each column
@@ -932,27 +942,27 @@ class Dynamics:
             q = self.q
 
         if grav is None:
-            grav = getvector(np.copy(self.gravity), 3, 'col')
+            grav = getvector(np.copy(self.gravity), 3, 'row')
 
         try:
-            q = getvector(q, self.n, 'col')
-            grav = getvector(grav, 3, 'col')
+            q = getvector(q, self.n, 'row')
+            grav = getvector(grav, 3, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
 
-        if grav.shape[1] < trajn:
-            grav = grav @ np.ones((1, trajn))
-        verifymatrix(grav, (3, trajn))
+        if grav.shape[0] < trajn:
+            grav = (grav.T @ np.ones((1, trajn))).T
+        verifymatrix(grav, (trajn, 3))
 
-        taug = np.zeros((self.n, trajn))
+        taug = np.zeros((trajn, self.n))
 
         for i in range(trajn):
-            taug[:, i] = self.rne(
-                 q[:, i], np.zeros(self.n), np.zeros(self.n),grav[:, i])
+            taug[i, :] = self.rne(
+                 q[i, :], np.zeros(self.n), np.zeros(self.n), grav[i, :])
 
         if trajn == 1:
-            return taug[:, 0]
+            return taug[0, :]
         else:
             return taug
 
@@ -965,8 +975,8 @@ class Dynamics:
         :param tauR: Joint torque matrix minimum and maximums
         :type tauR: float ndarray(n,2)
         :param frame: The frame in which to torques are expressed in when J
-            is not supplied. 'base' means base frame of the robot, 'ee' means end-
-            effector frame
+            is not supplied. 'base' means base frame of the robot, 'ee' means
+            end-effector frame
         :type frame: str
         :param q: The joint angles/configuration of the robot.
         :type q: float ndarray(n)
@@ -980,9 +990,9 @@ class Dynamics:
         ``wmax, joint = paycap(q, w, f, tauR)`` returns the maximum permissible
         payload wrench ``wmax`` (6) applied at the end-effector, and the index
         of the joint (zero indexed) which hits its force/torque limit at that
-        wrench. ``q`` (n) is the manipulator pose, ``w`` the payload wrench (6), ``f`` the
-        wrench reference frame and tauR (nx2) is a matrix of joint
-        forces/torques (first col is maximum, second col minimum).
+        wrench. ``q`` (n) is the manipulator pose, ``w`` the payload wrench
+        (6), ``f`` the wrench reference frame and tauR (nx2) is a matrix of
+        joint forces/torques (first col is maximum, second col minimum).
 
         Trajectory operation:
         In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
@@ -1000,27 +1010,27 @@ class Dynamics:
             q = self.q
 
         try:
-            q = getvector(q, self.n, 'col')
-            w = getvector(w, 6, 'col')
+            q = getvector(q, self.n, 'row')
+            w = getvector(w, 6, 'row')
         except ValueError:
             trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
-            verifymatrix(w, (6, trajn))
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(w, (trajn, 6))
 
         verifymatrix(tauR, (self.n, 2))
 
-        wmax = np.zeros((6, trajn))
+        wmax = np.zeros((trajn, 6))
         joint = np.zeros(trajn, dtype=np.int)
 
         for i in range(trajn):
-            tauB = self.gravload(q[:, i])
+            tauB = self.gravload(q[i, :])
 
             # tauP = self.rne(
             #     np.zeros(self.n), np.zeros(self.n),
             #     q, grav=[0, 0, 0], fext=w/np.linalg.norm(w))
 
             tauP = self.pay(
-                w[:, i]/np.linalg.norm(w[:, i]), q=q[:, i], frame=frame)
+                w[i, :]/np.linalg.norm(w[i, :]), q=q[i, :], frame=frame)
 
             M = tauP > 0
             m = tauP <= 0
@@ -1038,11 +1048,11 @@ class Dynamics:
 
             WM[WM == np.NINF] = np.Inf
 
-            wmax[:, i] = WM
+            wmax[i, :] = WM
             joint[i] = np.argmin(WM)
 
         if trajn == 1:
-            return wmax[:, 0], joint[0]
+            return wmax[0, :], joint[0]
         else:
             return wmax, joint
 
@@ -1080,9 +1090,12 @@ class Dynamics:
 
         return r2
 
-def _printProgressBar (fraction, prefix='', suffix='', decimals=1, length=50, fill = '█', printEnd = "\r"):
-    
+
+def _printProgressBar(
+        fraction, prefix='', suffix='', decimals=1,
+        length=50, fill='█', printEnd="\r"):
+
     percent = ("{0:." + str(decimals) + "f}").format(fraction * 100)
     filledLength = int(length * fraction)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
