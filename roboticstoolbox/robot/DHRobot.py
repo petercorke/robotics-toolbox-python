@@ -102,7 +102,7 @@ class DHRobot(Dynamics):
         # Check the DH convention
         self._mdh = self.links[0].mdh
         if not all([link.mdh == self.mdh for link in self.links]):
-                raise ValueError('Robot has mixed D&H link conventions')
+            raise ValueError('Robot has mixed D&H link conventions')
 
         # rne parameters
         self._rne_init = False
@@ -133,9 +133,6 @@ class DHRobot(Dynamics):
             dh = 'mod DH'
 
         rpy = self.tool.rpy()
-
-        # TODO Update this on next spatialmaths release
-        # rpy = self.tool.rpy()
 
         for i in range(3):
             if rpy[i] == 0:
@@ -483,8 +480,6 @@ class DHRobot(Dynamics):
         else:
             return False
 
-
-
     def isprismatic(self):
         """
         Identify prismatic joints.
@@ -644,7 +639,7 @@ class DHRobot(Dynamics):
             the rows are interpreted as the generalized joint coordinates
             for a sequence of points along a trajectory. q(j,i) is the
             j'th joint parameter for the i'th trajectory point.
-        :type q: float ndarray(n) or (nxm)
+        :type q: float ndarray(n) or (mxn)
 
         :return T: Homogeneous transformation matrix or trajectory
         :rtype T: SE3 or SE3 list
@@ -660,9 +655,9 @@ class DHRobot(Dynamics):
         cols = 0
         if q is None:
             q = np.copy(self.q)
-        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[1] > 1:
-            cols = q.shape[1]
-            ismatrix(q, (self.n, cols))
+        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[0] > 1:
+            cols = q.shape[0]
+            ismatrix(q, (cols, self.n))
         else:
             q = getvector(q, self.n)
 
@@ -873,8 +868,6 @@ class DHRobot(Dynamics):
 
         return Jv
 
-
-
     def ikcon(self, T, q0=None):
         """
         Inverse kinematics by optimization with joint limits
@@ -889,10 +882,10 @@ class DHRobot(Dynamics):
         Trajectory operation:
         In all cases if T is a vector of SE3 objects or a homogeneous
         transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is nxm
-        where N is the number of robot joints. The initial estimate of q
+        corresponding to each of the transforms in the sequence. q is mxn
+        where n is the number of robot joints. The initial estimate of q
         for each time step is taken as the solution from the previous time
-        step. Retruns trajectory of joints q (nxm), list of success (m) and
+        step. Retruns trajectory of joints q (mxn), list of success (m) and
         list of errors (m)
 
         :param T: The desired end-effector pose
@@ -928,14 +921,14 @@ class DHRobot(Dynamics):
 
         try:
             if q0 is not None:
-                q0 = getvector(q0, self.n, 'col')
+                q0 = getvector(q0, self.n, 'row')
             else:
-                q0 = np.zeros((self.n, trajn))
+                q0 = np.zeros((trajn, self.n))
         except ValueError:
-            verifymatrix(q0, (self.n, trajn))
+            verifymatrix(q0, (trajn, self.n))
 
         # create output variables
-        qstar = np.zeros((self.n, trajn))
+        qstar = np.zeros((trajn, self.n))
         error = []
         exitflag = []
 
@@ -955,15 +948,15 @@ class DHRobot(Dynamics):
             Ti = T[i]
             res = minimize(
                 lambda q: cost(q, Ti, omega),
-                q0[:, i], bounds=bnds, options={'gtol': 1e-6})
-            qstar[:, i] = res.x
+                q0[i, :], bounds=bnds, options={'gtol': 1e-6})
+            qstar[i, :] = res.x
             error.append(res.fun)
             exitflag.append(res.success)
 
         if trajn > 1:
             return qstar, exitflag, error
         else:
-            return qstar[:, 0], exitflag[0], error[0]
+            return qstar[0, :], exitflag[0], error[0]
 
     def ikine(
             self, T,
@@ -989,12 +982,12 @@ class DHRobot(Dynamics):
         freedom.
 
         Trajectory operation:
-        If ``T`` contains multiple values, ie. a trajectory, then returns the joint coordinates
-        corresponding to each of the pose values in ``T``. ``q`` is nxm
-        where n is the number of robot joints. The initial estimate of ``q`` for
-        each time step is taken as the solution from the previous time step.
-        Returns trajectory of joints ``q`` (nxm), list of failure (m) and list of
-        error reasons (m).
+        If ``T`` contains multiple values, ie. a trajectory, then returns the
+        joint coordinates corresponding to each of the pose values in ``T``.
+        ``q`` is mxn where n is the number of robot joints. The initial
+        estimate of ``q`` for each time step is taken as the solution from the
+        previous time step. Returns trajectory of joints ``q`` (mxn), list of
+        failure (m) and list of error reasons (m).
 
         :param T: The desired end-effector pose
         :type T: SE3 or SE3 trajectory
@@ -1088,13 +1081,13 @@ class DHRobot(Dynamics):
         try:
             if q0 is not None:
                 if trajn == 1:
-                    q0 = getvector(q0, self.n, 'col')
+                    q0 = getvector(q0, self.n, 'row')
                 else:
-                    verifymatrix(q0, (self.n, trajn))
+                    verifymatrix(q0, (trajn, self.n))
             else:
-                q0 = np.zeros((self.n, trajn))
+                q0 = np.zeros((trajn, self.n))
         except ValueError:
-            verifymatrix(q0, (self.n, trajn))
+            verifymatrix(q0, (trajn, self.n))
 
         if mask is not None:
             mask = getvector(mask, 6)
@@ -1148,7 +1141,7 @@ class DHRobot(Dynamics):
         W = np.diag(mask)
 
         # Preallocate space for results
-        qt = np.zeros((self.n, len(T)))
+        qt = np.zeros((len(T), self.n))
 
         # Total iteration count
         tcount = 0
@@ -1165,7 +1158,7 @@ class DHRobot(Dynamics):
 
         for i in range(len(T)):
             iterations = 0
-            q = np.copy(q0[:, i])
+            q = np.copy(q0[i, :])
             Yl = Y
 
             while True:
@@ -1236,7 +1229,7 @@ class DHRobot(Dynamics):
 
                 nm = np.linalg.norm(W @ e)
 
-            qt[:, i] = q
+            qt[i, :] = q
             tcount += iterations
 
         if any(failed):
@@ -1245,7 +1238,7 @@ class DHRobot(Dynamics):
                 'initial value of joint coordinates')
 
         if trajn == 1:
-            qt = qt[:, 0]
+            qt = qt[0, :]
             failed = failed[0]
 
         return qt, failed, err
@@ -1310,7 +1303,7 @@ class DHRobot(Dynamics):
 
         trajn = len(T)
 
-        qt = np.zeros((3, trajn))
+        qt = np.zeros((trajn, 3))
 
         for j in range(trajn):
             theta = np.zeros(3)
@@ -1380,10 +1373,10 @@ class DHRobot(Dynamics):
                 theta[i] -= self.links[i].offset
 
             # Append to trajectory
-            qt[:, j] = theta
+            qt[j, :] = theta
 
         if trajn == 1:
-            return qt[:, 0]
+            return qt[0, :]
         else:
             return qt
 
@@ -1403,7 +1396,7 @@ class DHRobot(Dynamics):
         Trajectory operation:
         In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
         transform sequence (4x4xM) then the inverse kinematics is computed for
-        all m poses resulting in q (nxm) with each row representing the joint
+        all m poses resulting in q (mxn) with each row representing the joint
         angles at the corresponding pose.
 
         :param T: The desired end-effector pose
@@ -1486,7 +1479,7 @@ class DHRobot(Dynamics):
         else:
             raise ValueError('This kinematic structure not supported')
 
-        q = np.zeros((self.n, trajn))
+        q = np.zeros((trajn, self.n))
         err = []
 
         for j in range(trajn):
@@ -1764,12 +1757,12 @@ class DHRobot(Dynamics):
                 for k in range(self.n):
                     theta[k] -= self.links[k].offset
 
-                q[:, j] = theta
+                q[j, :] = theta
             else:
                 err.append('point not reachable')
 
         if trajn == 1:
-            return q[:, 0], err
+            return q[0, :], err
         else:
             return q, err
 
@@ -1849,7 +1842,7 @@ class DHRobot(Dynamics):
         Trajectory operation:
         In all cases if T is 4x4xm it is taken as a homogeneous transform
         sequence and ikinem(T) returns the joint coordinates corresponding to
-        each of the transforms in the sequence. q is nxm where n is the number
+        each of the transforms in the sequence. q is mxn where n is the number
         of robot joints. The initial estimate of q for each time step is taken
         as the solution from the previous time step.
 
@@ -1911,14 +1904,11 @@ class DHRobot(Dynamics):
         trajn = len(T)
 
         if q0 is None:
-            q0 = np.zeros((self.n, trajn))
+            q0 = np.zeros((trajn, self.n))
 
-        try:
-            q0 = getvector(q0, self.n, 'col')
-        except ValueError:
-            verifymatrix(q0, (self.n, trajn))
+        verifymatrix(q0, (trajn, self.n))
 
-        qt = np.zeros((self.n, trajn))
+        qt = np.zeros((trajn, self.n))
         success = []
         err = []
         col = 2
@@ -1953,24 +1943,24 @@ class DHRobot(Dynamics):
 
                 res = minimize(
                     lambda q: cost(q, Ti, pweight, col, stiffness),
-                    q0[:, i], bounds=bnds,
+                    q0[i, :], bounds=bnds,
                     options={'gtol': 1e-6, 'maxiter': ilimit})
             else:
                 # No joint limits, unconstrained optimization
                 res = minimize(
                     lambda q: cost(q, Ti, pweight, col, stiffness),
-                    q0[:, i],
+                    q0[i, :],
                     options={'gtol': 1e-6, 'maxiter': ilimit})
 
             if res.success and i < trajn - 1:
-                q0[:, i + 1] = res.x
+                q0[i + 1, :] = res.x
 
-            qt[:, i] = res.x
+            qt[i, :] = res.x
             success.append(res.success)
             err.append(res.fun)
 
         if trajn == 1:
-            return qt[:, 0], success[0], err[0]
+            return qt[0, :], success[0], err[0]
         else:
             return qt, success, err
 
@@ -1990,7 +1980,7 @@ class DHRobot(Dynamics):
         Trajectory operation:
         In all cases if T is a vector of SE3 objects (m) or a homogeneous
         transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is nxm
+        corresponding to each of the transforms in the sequence. q is mxn
         where n is the number of robot joints. The initial estimate of q
         for each time step is taken as the solution from the previous time
         step.
@@ -2027,14 +2017,11 @@ class DHRobot(Dynamics):
         trajn = len(T)
 
         if q0 is None:
-            q0 = np.zeros((self.n, trajn))
+            q0 = np.zeros((trajn, self.n))
 
-        try:
-            q0 = getvector(q0, self.n, 'col')
-        except ValueError:
-            verifymatrix(q0, (self.n, trajn))
+        verifymatrix(q0, (trajn, self.n))
 
-        qt = np.zeros((self.n, trajn))
+        qt = np.zeros((trajn, self.n))
         success = []
         err = []
 
@@ -2052,15 +2039,15 @@ class DHRobot(Dynamics):
                 lambda q: sumsqr(((
                     np.linalg.inv(Ti.A) @ self.fkine(q).A) - np.eye(4)) @
                     omega),
-                q0[:, i],
+                q0[i, :],
                 options={'gtol': 1e-6, 'maxiter': ilimit})
 
-            qt[:, i] = res.x
+            qt[i, :] = res.x
             success.append(res.success)
             err.append(res.fun)
 
         if trajn == 1:
-            return qt[:, 0], success[0], err[0]
+            return qt[0, :], success[0], err[0]
         else:
             return qt, success, err
 
@@ -2088,8 +2075,8 @@ class DHRobot(Dynamics):
         robot joints. ``fext`` describes the wrench acting on the end-effector
 
         Trajectory operation:
-        If q, qd and qdd (nxm) are matrices with m cols representing a
-        trajectory then tau (nxm) is a matrix with cols corresponding to each
+        If q, qd and qdd (mxn) are matrices with m cols representing a
+        trajectory then tau (mxn) is a matrix with cols corresponding to each
         trajectory step.
 
         :notes:
@@ -2102,14 +2089,14 @@ class DHRobot(Dynamics):
         trajn = 1
 
         try:
-            q = getvector(q, self.n, 'col')
-            qd = getvector(qd, self.n, 'col')
-            qdd = getvector(qdd, self.n, 'col')
+            q = getvector(q, self.n, 'row')
+            qd = getvector(qd, self.n, 'row')
+            qdd = getvector(qdd, self.n, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
-            verifymatrix(qd, (self.n, trajn))
-            verifymatrix(qdd, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(qd, (trajn, self.n))
+            verifymatrix(qdd, (trajn, self.n))
 
         if grav is None:
             grav = self.gravity
@@ -2124,14 +2111,14 @@ class DHRobot(Dynamics):
         else:
             fext = getvector(fext, 6)
 
-        tau = np.zeros((self.n, trajn))
+        tau = np.zeros((trajn, self.n))
 
         for i in range(trajn):
-            tau[:, i] = frne(
-                self._rne_ob, q[:, i], qd[:, i], qdd[:, i], grav, fext)
+            tau[i, :] = frne(
+                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], grav, fext)
 
         if trajn == 1:
-            return tau[:, 0]
+            return tau[0, :]
         else:
             return tau
 
@@ -2296,7 +2283,7 @@ class DHRobot(Dynamics):
         axes=[0, 0, 0, 1, 1, 1] to consider only rotation. Defaults to all
         motion.
 
-        If q is a matrix (nxm) then m (mx1) is a vector of manipulability
+        If q is a matrix (mxn) then m (mx1) is a vector of manipulability
         indices for each joint configuration specified by a row of q.
 
         [m, CI] = maniplty(q, OPTIONS) as above, but for the case of the Asada
@@ -2366,16 +2353,16 @@ class DHRobot(Dynamics):
             q = self.q
 
         try:
-            q = getvector(q, self.n, 'col')
+            q = getvector(q, self.n, 'row')
         except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
 
         w = np.zeros(trajn)
 
         if method == 'yoshikawa':
             for i in range(trajn):
-                w[i] = yoshi(self, q[:, i], axes)
+                w[i] = yoshi(self, q[i, :], axes)
 
             if trajn == 1:
                 return w[0]
@@ -2387,7 +2374,7 @@ class DHRobot(Dynamics):
             mx = np.zeros((dof, dof, trajn))
 
             for i in range(trajn):
-                w[i], mx[:, :, i] = asada(self, q[:, i], axes, dof)
+                w[i], mx[:, :, i] = asada(self, q[i, :], axes, dof)
 
             if trajn == 1:
                 return w[0], mx[:, :, 0]
@@ -2409,8 +2396,8 @@ class DHRobot(Dynamics):
         err which is the scalar final value of the objective function.
 
         Trajectory operation:
-        In all cases if q is nxm it is taken as a pose sequence and qmincon()
-        returns the adjusted joint coordinates (nxm) corresponding to each of
+        In all cases if q is mxn it is taken as a pose sequence and qmincon()
+        returns the adjusted joint coordinates (mxn) corresponding to each of
         the poses in the sequence.
 
         err and success are also m and indicate the results of optimisation
@@ -2562,7 +2549,7 @@ class DHRobot(Dynamics):
         env = plot(block=False) as avove except the plot in non-blocking. Note
         that the plot will exit when the python script finishes executing.
 
-        env = plot(q, dt) as above except q is an nxm trajectory of joint
+        env = plot(q, dt) as above except q is an mxn trajectory of joint
         angles. This creates an animation of the robot moving through the
         trajectories with a gap dt milliseconds in between.
 
@@ -2849,7 +2836,7 @@ class DHRobot(Dynamics):
         env = plot2(block=False) as avove except the plot in non-blocking. Note
         that the plot will exit when the python script finishes executing.
 
-        env = plot2(q, dt) as above except q is an nxm trajectory of joint
+        env = plot2(q, dt) as above except q is an mxn trajectory of joint
         angles. This creates an animation of the robot moving through the
         trajectories with a gap dt milliseconds in between.
 

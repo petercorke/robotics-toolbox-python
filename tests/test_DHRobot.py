@@ -688,13 +688,13 @@ class TestDHRobot(unittest.TestCase):
 
         qa, success, err = panda.ikcon(T.A, q0=np.zeros(7))
         qa2, success, err = panda.ikcon(Tt)
-        qa3, _, _ = panda.ikcon(Tt, q0=np.zeros((7, 3)))
+        qa3, _, _ = panda.ikcon(Tt, q0=np.zeros((3, 7)))
 
         nt.assert_array_almost_equal(qa, qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[:, 1], qr, decimal=4)
-        nt.assert_array_almost_equal(qa3[:, 0], qr, decimal=4)
-        nt.assert_array_almost_equal(qa3[:, 1], qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[0, :], qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[1, :], qr, decimal=4)
+        nt.assert_array_almost_equal(qa3[0, :], qr, decimal=4)
+        nt.assert_array_almost_equal(qa3[1, :], qr, decimal=4)
 
     def test_ikine(self):
         panda = rp.models.DH.Panda()
@@ -712,7 +712,7 @@ class TestDHRobot(unittest.TestCase):
 
         qa, success, err = panda.ikine(T)
         qa2, success, err = panda.ikine(Tt)
-        qa3, success, err = panda.ikine(Tt, q0=np.zeros((7, 2)))
+        qa3, success, err = panda.ikine(Tt, q0=np.zeros((2, 7)))
         qa4, success, err = panda.ikine(T, q0=np.zeros(7))
 
         # Untested
@@ -726,9 +726,9 @@ class TestDHRobot(unittest.TestCase):
             ilimit=1, search=True, slimit=1)
 
         nt.assert_array_almost_equal(qa, qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[:, 0], qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[:, 1], qr, decimal=4)
-        nt.assert_array_almost_equal(qa3[:, 1], qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[0, :], qr, decimal=4)
+        nt.assert_array_almost_equal(qa2[1, :], qr, decimal=4)
+        nt.assert_array_almost_equal(qa3[1, :], qr, decimal=4)
         nt.assert_array_almost_equal(qa4, qr, decimal=4)
 
         with self.assertRaises(ValueError):
@@ -771,8 +771,8 @@ class TestDHRobot(unittest.TestCase):
         q4 = r0.ikine3(T, left=False)
 
         nt.assert_array_almost_equal(q0, res, decimal=4)
-        nt.assert_array_almost_equal(q1[:, 0], res, decimal=4)
-        nt.assert_array_almost_equal(q1[:, 1], res, decimal=4)
+        nt.assert_array_almost_equal(q1[0, :], res, decimal=4)
+        nt.assert_array_almost_equal(q1[1, :], res, decimal=4)
         nt.assert_array_almost_equal(q2, res2, decimal=4)
         nt.assert_array_almost_equal(q3, res3, decimal=4)
         nt.assert_array_almost_equal(q4, res4, decimal=4)
@@ -897,9 +897,9 @@ class TestDHRobot(unittest.TestCase):
 
         q0, _ = r0.ikine6s(Tt)
 
-        nt.assert_array_almost_equal(q0[:, 0], qr0, decimal=4)
-        nt.assert_array_almost_equal(q0[:, 1], qr0, decimal=4)
-        nt.assert_array_almost_equal(q0[:, 2], qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[0, :], qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[1, :], qr0, decimal=4)
+        nt.assert_array_almost_equal(q0[2, :], qr0, decimal=4)
 
     def test_ikine6s_fail(self):
         l0 = rp.RevoluteDH(alpha=np.pi / 2)
@@ -944,12 +944,12 @@ class TestDHRobot(unittest.TestCase):
         q1, success, _ = puma.ikinem(T.A, qlimits=False)
         q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
 
-        print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
+        # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
 
         self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)) < 0.7)
+            np.sum(np.abs(T.A - puma.fkine(q0[0, :]).A)) < 0.7)
         self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q0[:, 1]).A)) < 0.7)
+            np.sum(np.abs(T.A - puma.fkine(q0[1, :]).A)) < 0.7)
         self.assertTrue(
             np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
 
@@ -964,10 +964,10 @@ class TestDHRobot(unittest.TestCase):
         q2, success, _ = puma.ikunc(T, ilimit=1)
 
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[:, 0]).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(q0[0, :]).A, np.zeros((4, 4)), decimal=4)
 
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[:, 1]).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(q0[1, :]).A, np.zeros((4, 4)), decimal=4)
 
         nt.assert_array_almost_equal(
             T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
@@ -1009,10 +1009,10 @@ class TestDHRobot(unittest.TestCase):
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
         tr1 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
 
-        t0 = puma.rne(np.c_[puma.qn, puma.qn], np.c_[z, o], np.c_[z, o])
+        t0 = puma.rne(np.c_[puma.qn, puma.qn].T, np.c_[z, o].T, np.c_[z, o].T)
 
-        nt.assert_array_almost_equal(t0[:, 0], tr0, decimal=4)
-        nt.assert_array_almost_equal(t0[:, 1], tr1, decimal=4)
+        nt.assert_array_almost_equal(t0[0, :], tr0, decimal=4)
+        nt.assert_array_almost_equal(t0[1, :], tr1, decimal=4)
 
     def test_rne_delete(self):
         puma = rp.models.DH.Puma560()
@@ -1211,7 +1211,7 @@ tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
         m0 = puma.maniplty()
         m1 = puma.maniplty(q)
-        m2 = puma.maniplty(np.c_[q, q])
+        m2 = puma.maniplty(np.c_[q, q].T)
         m3 = puma.maniplty(q, axes=[1, 1, 1, 0, 0, 0])
         m4 = puma.maniplty(q, axes=[0, 0, 0, 1, 1, 1])
 
@@ -1233,7 +1233,7 @@ tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
         m0, mx0 = puma.maniplty(method='asada')
         m1, mx1 = puma.maniplty(q, method='asada')
-        m2, mx2 = puma.maniplty(np.c_[q, q], method='asada')
+        m2, mx2 = puma.maniplty(np.c_[q, q].T, method='asada')
         m3, mx3 = puma.maniplty(q, axes=[1, 1, 1, 0, 0, 0], method='asada')
         m4, mx4 = puma.maniplty(q, axes=[0, 0, 0, 1, 1, 1], method='asada')
         m5, mx5 = puma.maniplty(puma.qz, method='asada')
