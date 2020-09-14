@@ -198,6 +198,7 @@ class ETS(object):
                 'eta': [],
                 'q_idx': link.q_idx,
                 'geometry': [],
+                'collision': [],
                 't': link._fk.t.tolist(),
                 'q': r2q(link._fk.R).tolist()
             }
@@ -206,7 +207,20 @@ class ETS(object):
                 li['axis'].append(et.axis)
                 li['eta'].append(et.eta)
 
-            for gi in link.geometry:
+            # for gi in link.geometry:
+            #     g_fk = link._fk * gi.base
+            #     if gi.scale is not None:
+            #         scale = gi.scale.tolist()
+            #     else:
+            #         scale = [1, 1, 1]
+            #     li['geometry'].append({
+            #         'filename': gi.filename,
+            #         'scale': scale,
+            #         't': g_fk.t.tolist(),
+            #         'q': r2q(g_fk.R).tolist()
+            #     })
+
+            for gi in link.collision:
                 g_fk = link._fk * gi.base
                 if gi.scale is not None:
                     scale = gi.scale.tolist()
