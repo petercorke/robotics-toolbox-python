@@ -8,12 +8,11 @@ import numpy as np
 import roboticstoolbox as rp
 import spatialmath as sm
 import unittest
-import pytest
 
 
-class TestSerialLink(unittest.TestCase):
+class TestDHRobot(unittest.TestCase):
 
-    def test_seriallink(self):
+    def test_DHRobot(self):
         l0 = rp.DHLink()
         rp.DHRobot([l0])
 
@@ -221,7 +220,7 @@ class TestSerialLink(unittest.TestCase):
         with self.assertRaises(TypeError):
             rp.DHRobot([l0, 1])
 
-    def test_add_seriallink(self):
+    def test_add_DHRobot(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
         l2 = rp.PrismaticDH(theta=2.0)
@@ -374,9 +373,12 @@ class TestSerialLink(unittest.TestCase):
         puma = rp.models.DH.Puma560()
         jd = puma.jointdynamics(puma.qn)
         # numbers come from MATLAB
-        nt.assert_array_almost_equal(jd[0], [0.001133478453251, 0.001480000000000])
-        nt.assert_array_almost_equal(jd[1], [0.579706964030143e-3, 0.817000000000000e-3])
-        nt.assert_array_almost_equal(jd[2], [0.000525146448377, 0.001380000000000])
+        nt.assert_array_almost_equal(
+            jd[0], [0.001133478453251, 0.001480000000000])
+        nt.assert_array_almost_equal(
+            jd[1], [0.579706964030143e-3, 0.817000000000000e-3])
+        nt.assert_array_almost_equal(
+            jd[2], [0.000525146448377, 0.001380000000000])
 
     def test_twists(self):
         # TODO
@@ -988,7 +990,7 @@ class TestSerialLink(unittest.TestCase):
         t1 = puma.rne(puma.qn, z, o)
         t2 = puma.rne(puma.qn, o, o)
         t3 = puma.rne(puma.qn, o, z)
-        t4 = puma.rne(puma.qn, o, o, grav=[0,0,0])
+        t4 = puma.rne(puma.qn, o, o, grav=[0, 0, 0])
         t5 = puma.rne(puma.qn, z, z, fext=fext)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
@@ -1479,7 +1481,6 @@ tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
         e.launch()
         e.add(panda.fellipse(
                 q=panda.qr, centre=[0, 1]))
-        # e.close()
 
         with self.assertRaises(ValueError):
             e.add(panda.fellipse(

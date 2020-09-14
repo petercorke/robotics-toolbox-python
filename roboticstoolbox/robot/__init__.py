@@ -1,5 +1,6 @@
-from roboticstoolbox.robot.SerialLink import SerialLink, DHRobot
-from roboticstoolbox.robot.DHLink import DHLink, RevoluteDH, PrismaticDH, RevoluteMDH, PrismaticMDH
+from roboticstoolbox.robot.DHRobot import SerialLink, DHRobot
+from roboticstoolbox.robot.DHLink import DHLink, RevoluteDH, PrismaticDH, \
+    RevoluteMDH, PrismaticMDH
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ET import ET
@@ -9,9 +10,9 @@ __all__ = [
     'SerialLink',
     'DHRobot',
     'DHLink',
-    'RevoluteDH', 
-    'PrismaticDH', 
-    'RevoluteMDH', 
+    'RevoluteDH',
+    'PrismaticDH',
+    'RevoluteMDH',
     'PrismaticMDH',
     'ETS',
     'ELink',
