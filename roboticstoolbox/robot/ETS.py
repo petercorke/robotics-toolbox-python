@@ -198,30 +198,18 @@ class ETS(object):
                 'eta': [],
                 'q_idx': link.q_idx,
                 'geometry': [],
-                'collision': [],
-                't': link._fk.t.tolist(),
-                'q': r2q(link._fk.R).tolist()
+                'collision': []
             }
 
             for et in link.ets:
                 li['axis'].append(et.axis)
                 li['eta'].append(et.eta)
 
-            # for gi in link.geometry:
-            #     g_fk = link._fk * gi.base
-            #     if gi.scale is not None:
-            #         scale = gi.scale.tolist()
-            #     else:
-            #         scale = [1, 1, 1]
-            #     li['geometry'].append({
-            #         'filename': gi.filename,
-            #         'scale': scale,
-            #         't': g_fk.t.tolist(),
-            #         'q': r2q(g_fk.R).tolist()
-            #     })
+            for gi in link.geometry:
+                li['geometry'].append(gi.to_dict())
 
             for gi in link.collision:
-                li['geometry'].append(gi.to_dict(link._fk))
+                li['collision'].append(gi.to_dict())
 
             ob['links'].append(li)
 
@@ -238,9 +226,15 @@ class ETS(object):
         for link in self.ets:
 
             li = {
-                't': link._fk.t.tolist(),
-                'q': r2q(link._fk.R).tolist()
+                'geometry': [],
+                'collision': []
             }
+
+            for gi in link.geometry:
+                li['geometry'].append(gi.fk_dict())
+
+            for gi in link.collision:
+                li['collision'].append(gi.fk_dict())
 
             ob['links'].append(li)
 
@@ -581,6 +575,9 @@ class ETS(object):
             # Update the collision objects transform as well
             for col in self.ets[i].collision:
                 col.wT = self.ets[i]._fk
+
+            for gi in self.ets[i].geometry:
+                gi.wT = self.ets[i]._fk
 
     def jacob0(self, q=None):
         """
@@ -947,8 +944,8 @@ class ETS(object):
                                 print(l1.name + ' -> ' + l2.name)
                                 # import code
                                 # code.interact(local=dict(globals(), **locals()))
-                                print(ob1)
-                                print(ob2)
+                                # print(ob1)
+                                # print(ob2)
                             # print(ret)
 
                 

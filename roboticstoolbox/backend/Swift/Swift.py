@@ -90,7 +90,7 @@ class Swift(Connector):  # pragma nocover
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob):
+    def add(self, ob, show_robot=True, show_collision=False):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -102,6 +102,8 @@ class Swift(Connector):  # pragma nocover
 
         if isinstance(ob, rp.ETS):
             robot = ob.to_dict()
+            robot['show_robot'] = show_robot
+            robot['show_collision'] = show_collision
             id = self.swift.robot(robot)
             self.robots.append(ob)
             return id

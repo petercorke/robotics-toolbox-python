@@ -17,23 +17,23 @@ panda.q = panda.qr
 Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
 
 arrived = False
-env.add(panda)
+env.add(panda, show_collision=True)
 time.sleep(1)
 
 dt = 0.05
 
 # env.record_start('file.webm')
 
-# while not arrived:
+while not arrived:
 
-#     start = time.time()
-#     v, arrived = rp.p_servo(panda.fkine(), Tep, 1.0)
-#     panda.qd = np.linalg.pinv(panda.jacobe()) @ v
-#     env.step(5)
-#     stop = time.time()
+    start = time.time()
+    v, arrived = rp.p_servo(panda.fkine(), Tep, 1.0)
+    panda.qd = np.linalg.pinv(panda.jacobe()) @ v
+    env.step(5)
+    stop = time.time()
 
-#     if stop - start < dt:
-#         time.sleep(dt - (stop - start))
+    if stop - start < dt:
+        time.sleep(dt - (stop - start))
 
 # env.record_stop()
 

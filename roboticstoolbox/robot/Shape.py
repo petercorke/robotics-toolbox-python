@@ -6,6 +6,7 @@
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from spatialmath.base import r2q
+import numpy as np
 
 try:
     import fcl
@@ -27,18 +28,22 @@ class Shape(object):
             co=None,
             stype=None):
 
+        self.co = co
         self.base = base
+        self.wT = None
         self.primitive = primitive
         self.scale = scale
         self.radius = radius
         self.length = length
         self.filename = filename
-        self.co = co
         self.stype = stype
 
-    def to_dict(self, link_fk):
-        shape_fk = self.base * link_fk
-        # shape_fk = self.base
+    def to_dict(self):
+
+        if self.stype == 'cylinder':
+            fk = self.wT * SE3.Rx(np.pi/2)
+        else:
+            fk = self.wT
 
         shape = {
             'stype': self.stype,
@@ -46,8 +51,22 @@ class Shape(object):
             'filename': self.filename,
             'radius': self.radius,
             'length': self.length,
-            't': self.wT.t.tolist(),
-            'q': r2q(self.wT.R).tolist()
+            't': fk.t.tolist(),
+            'q': r2q(fk.R).tolist()
+        }
+
+        return shape
+        
+    def fk_dict(self):
+
+        if self.stype == 'cylinder':
+            fk = self.wT * SE3.Rx(np.pi/2)
+        else:
+            fk = self.wT
+
+        shape = {
+            't': fk.t.tolist(),
+            'q': r2q(fk.R).tolist()
         }
 
         return shape
@@ -62,9 +81,9 @@ class Shape(object):
             T = SE3(T)
         self._wT = T * self.base
 
-        if _fcl:
+        if _fcl and self.co is not None:
             tf = fcl.Transform(self._wT.R, self._wT.t)
-            # self.co.setTransform(tf)
+            self.co.setTransform(tf)
 
     @property
     def base(self):
