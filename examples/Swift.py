@@ -22,20 +22,20 @@ time.sleep(1)
 
 dt = 0.05
 
-env.record_start('file.webm')
+# env.record_start('file.webm')
 
-while not arrived:
+# while not arrived:
 
-    start = time.time()
-    v, arrived = rp.p_servo(panda.fkine(), Tep, 1.0)
-    panda.qd = np.linalg.pinv(panda.jacobe()) @ v
-    env.step(5)
-    stop = time.time()
+#     start = time.time()
+#     v, arrived = rp.p_servo(panda.fkine(), Tep, 1.0)
+#     panda.qd = np.linalg.pinv(panda.jacobe()) @ v
+#     env.step(5)
+#     stop = time.time()
 
-    if stop - start < dt:
-        time.sleep(dt - (stop - start))
+#     if stop - start < dt:
+#         time.sleep(dt - (stop - start))
 
-env.record_stop()
+# env.record_stop()
 
 # Uncomment to stop the plot from closing
 # env.hold()

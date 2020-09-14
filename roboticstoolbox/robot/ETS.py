@@ -221,17 +221,7 @@ class ETS(object):
             #     })
 
             for gi in link.collision:
-                g_fk = link._fk * gi.base
-                if gi.scale is not None:
-                    scale = gi.scale.tolist()
-                else:
-                    scale = [1, 1, 1]
-                li['geometry'].append({
-                    'filename': gi.filename,
-                    'scale': scale,
-                    't': g_fk.t.tolist(),
-                    'q': r2q(g_fk.R).tolist()
-                })
+                li['geometry'].append(gi.to_dict(link._fk))
 
             ob['links'].append(li)
 
@@ -428,7 +418,7 @@ class ETS(object):
     def q(self, q_new):
         q_new = getvector(q_new, self.n)
         self._q = q_new
-        self.allfkine()
+        self.fkine_all()
 
     @qd.setter
     def qd(self, qd_new):

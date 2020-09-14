@@ -5,6 +5,7 @@
 
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
+from spatialmath.base import r2q
 
 try:
     import fcl
@@ -23,7 +24,8 @@ class Shape(object):
             length=0,
             scale=[1, 1, 1],
             filename=None,
-            co=None):
+            co=None,
+            stype=None):
 
         self.base = base
         self.primitive = primitive
@@ -32,6 +34,23 @@ class Shape(object):
         self.length = length
         self.filename = filename
         self.co = co
+        self.stype = stype
+
+    def to_dict(self, link_fk):
+        shape_fk = self.base * link_fk
+        # shape_fk = self.base
+
+        shape = {
+            'stype': self.stype,
+            'scale': self.scale.tolist(),
+            'filename': self.filename,
+            'radius': self.radius,
+            'length': self.length,
+            't': self.wT.t.tolist(),
+            'q': r2q(self.wT.R).tolist()
+        }
+
+        return shape
 
     @property
     def wT(self):
@@ -41,7 +60,7 @@ class Shape(object):
     def wT(self, T):
         if not isinstance(T, SE3):
             T = SE3(T)
-        self._wT = self.base * T
+        self._wT = T * self.base
 
         if _fcl:
             tf = fcl.Transform(self._wT.R, self._wT.t)
@@ -67,6 +86,8 @@ class Shape(object):
     def scale(self, value):
         if value is not None:
             value = getvector(value, 3)
+        else:
+            value = getvector([1, 1, 1], 3)
         self._scale = value
 
     @property
@@ -108,7 +129,8 @@ class Shape(object):
         else:
             co = None
 
-        return cls(True, base=base, scale=scale, co=co)
+        return cls(
+            True, base=base, scale=scale, co=co, stype='box')
 
     @classmethod
     def Cylinder(cls, radius, length, base=None):
@@ -119,7 +141,9 @@ class Shape(object):
         else:
             co = None
 
-        return cls(True, base=base, radius=radius, length=length, co=co)
+        return cls(
+            True, base=base, radius=radius, length=length, co=co,
+            stype='cylinder')
 
     @classmethod
     def Sphere(cls, radius, base=None):
@@ -130,11 +154,12 @@ class Shape(object):
         else:
             co = None
 
-        return cls(True, base=base, radius=radius, co=co)
+        return cls(True, base=base, radius=radius, co=co, stype='sphere')
 
     @classmethod
     def Mesh(cls, filename, base=None, scale=None):
-        return cls(False, filename=filename, base=base, scale=scale)
+        return cls(
+            False, filename=filename, base=base, scale=scale, stype='mesh')
 
 
 # class Mesh(Shape):
