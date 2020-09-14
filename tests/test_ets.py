@@ -454,7 +454,7 @@ class TestETS(unittest.TestCase):
     def test_manuf(self):
         panda = rp.models.ETS.Panda()
 
-        self.assertIsInstance(panda.manuf, str)
+        self.assertIsInstance(panda.manufacturer, str)
 
     def test_complex(self):
         l0 = rp.ELink(rp.ET.tx(0.1) * rp.ET.rx())

@@ -121,7 +121,7 @@ class ETS(object):
 
         self._reset_fk_path()
         self.name = name
-        self.manuf = manufacturer
+        self.manufacturer = manufacturer
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -357,8 +357,8 @@ class ETS(object):
         return self._name
 
     @property
-    def manuf(self):
-        return self._manuf
+    def manufacturer(self):
+        return self._manufacturer
 
     @property
     def base(self):
@@ -388,9 +388,9 @@ class ETS(object):
     def name(self, name_new):
         self._name = name_new
 
-    @manuf.setter
-    def manuf(self, manuf_new):
-        self._manuf = manuf_new
+    @manufacturer.setter
+    def manufacturer(self, manufacturer_new):
+        self._manufacturer = manufacturer_new
 
     @gravity.setter
     def gravity(self, gravity_new):

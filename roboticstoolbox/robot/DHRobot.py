@@ -62,7 +62,7 @@ class DHRobot(Dynamics):
             gravity=np.array([0, 0, 9.81])):
 
         self.name = name
-        self.manuf = manufacturer
+        self.manufacturer = manufacturer
         self.base = base
         self.tool = tool
         self.gravity = gravity
@@ -142,7 +142,7 @@ class DHRobot(Dynamics):
             'Parameters:\n'\
             '%s\n'\
             'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
-                self.name, self.manuf, self.n, axes, dh,
+                self.name, self.manufacturer, self.n, axes, dh,
                 L,
                 self.tool.A[0, 3], self.tool.A[1, 3],
                 self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
@@ -170,11 +170,11 @@ class DHRobot(Dynamics):
 
         return DHRobot(
             nlinks,
-            name=self.name,
-            manufacturer=self.manuf,
-            base=self.base,
-            tool=self.tool,
-            gravity=self.gravity)
+            name = self.name,
+            manufacturer = self.manufacturer,
+            base = self.base,
+            tool = self.tool,
+            gravity = self.gravity)
 
     def _copy(self):
         L = []
@@ -184,11 +184,11 @@ class DHRobot(Dynamics):
 
         r2 = DHRobot(
             L,
-            name=self.name,
-            manufacturer=self.manuf,
-            base=self.base,
-            tool=self.tool,
-            gravity=self.gravity)
+            name = self.name,
+            manufacturer=  self.manufacturer,
+            base = self.base,
+            tool = self.tool,
+            gravity = self.gravity)
 
         r2.q = self.q
         r2.qd = self.qd
@@ -240,8 +240,8 @@ class DHRobot(Dynamics):
         return self._name
 
     @property
-    def manuf(self):
-        return self._manuf
+    def manufacturer(self):
+        return self._manufacturer
 
     @property
     def links(self):
@@ -325,9 +325,9 @@ class DHRobot(Dynamics):
             v = np.c_[v, self.links[i].qlim]
         return v
 
-    @manuf.setter
-    def manuf(self, manuf_new):
-        self._manuf = manuf_new
+    @manufacturer.setter
+    def manufacturer(self, manufacturer_new):
+        self._manufacturer = manufacturer_new
 
     @control_type.setter
     def control_type(self, cn):

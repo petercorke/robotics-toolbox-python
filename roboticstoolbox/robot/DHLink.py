@@ -122,11 +122,11 @@ class DHLink():
 
             return rp.DHRobot(
                 nlinks,
-                name=L.name,
-                manufacturer=L.manuf,
-                base=L.base,
-                tool=L.tool,
-                gravity=L.gravity)
+                name = L.name,
+                manufacturer = L.manufacturer,
+                base = L.base,
+                tool = L.tool,
+                gravity = L.gravity)
 
         else:
             raise TypeError("Cannot add a Link with a non Link object")
