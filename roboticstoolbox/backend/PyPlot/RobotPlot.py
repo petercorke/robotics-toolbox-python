@@ -52,7 +52,7 @@ class RobotPlot(object):
 
     def axes_calcs(self):
         # Joint and ee poses
-        T = self.robot.allfkine()
+        T = self.robot.fkine_all()
         Te = self.robot.fkine()
         Tb = self.robot.base
 
@@ -78,7 +78,7 @@ class RobotPlot(object):
         for i in range(self.robot.n):
             loc[:, i + 1] = T[i].t
 
-            if isinstance(self.robot, rp.SerialLink) \
+            if isinstance(self.robot, rp.DHRobot) \
                     or self.robot.ets[self.robot.q_idx[i]].axis == 'Rz' \
                     or self.robot.ets[self.robot.q_idx[i]].axis == 'tz':
                 Tji = T[i] * Tjz

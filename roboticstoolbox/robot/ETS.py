@@ -190,7 +190,7 @@ class ETS(object):
             'q_idx': self.q_idx
         }
 
-        self.allfkine()
+        self.fkine_all()
 
         for link in self.ets:
             li = {
@@ -242,7 +242,7 @@ class ETS(object):
             'links': []
         }
 
-        self.allfkine()
+        self.fkine_all()
         # print(Tall)
 
         for link in self.ets:
@@ -539,12 +539,12 @@ class ETS(object):
 
         return t
 
-    def allfkine(self, q=None):
+    def fkine_all(self, q=None):
         '''
-        Tall = allfkine(q) evaluates fkine for each joint within a robot and
+        Tall = fkine_all(q) evaluates fkine for each joint within a robot and
         returns a trajecotry of poses.
 
-        Tall = allfkine() as above except uses the stored q value of the
+        Tall = fkine_all() as above except uses the stored q value of the
         robot object.
 
         :param q: The joint angles/configuration of the robot (Optional,

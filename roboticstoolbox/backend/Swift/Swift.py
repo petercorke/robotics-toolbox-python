@@ -11,10 +11,10 @@ import roboticstoolbox as rp
 import numpy as np
 
 
-class Sim(Connector):  # pragma nocover
+class Swift(Connector):  # pragma nocover
 
     def __init__(self):
-        super(Sim, self).__init__()
+        super(Swift, self).__init__()
 
         # Popen(['npm', 'start', '--prefix', os.environ['SIM_ROOT']])
 
@@ -33,8 +33,8 @@ class Sim(Connector):  # pragma nocover
 
         self.robots = []
 
-        self.sim = zerorpc.Client()
-        self.sim.connect("tcp://127.0.0.1:4242")
+        self.swift = zerorpc.Client()
+        self.swift.connect("tcp://127.0.0.1:4242")
 
     def step(self, dt=50):
         '''
@@ -102,7 +102,7 @@ class Sim(Connector):  # pragma nocover
 
         if isinstance(ob, rp.ETS):
             robot = ob.to_dict()
-            id = self.sim.robot(robot)
+            id = self.swift.robot(robot)
             self.robots.append(ob)
             return id
 
@@ -142,5 +142,11 @@ class Sim(Connector):  # pragma nocover
     def _draw_robots(self):
 
         for i in range(len(self.robots)):
-            self.robots[i].allfkine()
-            self.sim.poses([i, self.robots[i].fk_dict()])
+            self.robots[i].fkine_all()
+            self.swift.poses([i, self.robots[i].fk_dict()])
+
+    def record_start(self, file):
+        self.swift.record_start(file)
+
+    def record_stop(self):
+        self.swift.record_stop(1)

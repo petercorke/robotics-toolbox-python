@@ -17,9 +17,9 @@
 
 from math import pi
 import numpy as np
-from roboticstoolbox import SerialLink, RevoluteDH
+from roboticstoolbox import DHRobot, RevoluteDH
 
-class Puma560(SerialLink):
+class Puma560(DHRobot):
     """
     Create model of Puma 560 manipulator
 
@@ -58,8 +58,10 @@ class Puma560(SerialLink):
 
         deg = pi/180
 
+        base = 0.672      # from mounting surface to shoulder axis
+
         L0 = RevoluteDH(
-            d=0,          # link length (Dennavit-Hartenberg notation)
+            d=base,          # link length (Dennavit-Hartenberg notation)
             a=0,          # link offset (Dennavit-Hartenberg notation)
             alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
             I=[0, 0.35, 0, 0, 0, 0],  # inertia tensor of link with respect to

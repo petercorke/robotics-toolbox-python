@@ -128,7 +128,7 @@ class TestDHLink(unittest.TestCase):
         l0 = rp.DHLink()
         l1 = rp.DHLink()
 
-        self.assertIsInstance(l0 + l1, rp.SerialLink)
+        self.assertIsInstance(l0 + l1, rp.DHRobot)
         self.assertRaises(TypeError, l0.__add__, 1)
 
     def test_properties(self):
@@ -159,16 +159,16 @@ class TestDHLink(unittest.TestCase):
         
         self.assertEqual(
             s0,
-            r"""m     =  0 
-r     =  0 0 0 
-        |      0      0      0 | 
-I     = |      0   0.35      0 | 
-        |      0      0      0 | 
-Jm    =  0.0002 
-B     =  0.0015 
-Tc    =  0.4(+) -0.43(-) 
-G     =  -63 
-qlim  =  -2.8 to 2.8""")
+            r"""m     =         0 
+r     =         0        0        0 
+        |        0        0        0 | 
+I     = |        0     0.35        0 | 
+        |        0        0        0 | 
+Jm    =    0.0002 
+B     =    0.0015 
+Tc    =       0.4(+)    -0.43(-) 
+G     =       -63 
+qlim  =      -2.8 to      2.8""")
 
     def test_revolute(self):
         l0 = rp.RevoluteDH()

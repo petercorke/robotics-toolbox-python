@@ -15,7 +15,7 @@ class TestSerialLink(unittest.TestCase):
 
     def test_seriallink(self):
         l0 = rp.DHLink()
-        rp.SerialLink([l0])
+        rp.DHRobot([l0])
 
     def test_isprismatic(self):
         l0 = rp.PrismaticDH()
@@ -23,7 +23,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
 
         ans = [True, False, True, False]
 
@@ -35,7 +35,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
 
         ans = [False, True, False, True]
 
@@ -47,7 +47,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = np.array([np.pi, np.pi, np.pi, np.pi / 2.0])
 
         ans = np.array([np.pi, 180, np.pi, 90])
@@ -61,7 +61,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = np.array([np.pi, 180, np.pi, 90])
         r0.q = q
 
@@ -75,7 +75,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH()
         l3 = rp.RevoluteDH(d=4.0)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [0.0, 2.0, 0.0, 4.0]
 
         self.assertEqual(r0.d, ans)
@@ -86,7 +86,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(a=3.0)
         l3 = rp.RevoluteDH(a=4.0)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [1.0, 2.0, 3.0, 4.0]
 
         self.assertEqual(r0.a, ans)
@@ -97,7 +97,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=3.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [1.0, 0.0, 3.0, 0.0]
 
         self.assertEqual(r0.theta, ans)
@@ -109,8 +109,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(r=r)
         l3 = rp.RevoluteDH(r=r)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
-        r1 = rp.SerialLink([l0])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+        r1 = rp.DHRobot([l0])
         ans = np.c_[r, r, r, r]
 
         nt.assert_array_almost_equal(r0.r, ans)
@@ -122,7 +122,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(offset=3.0)
         l3 = rp.RevoluteDH(offset=4.0)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         ans = [1.0, 2.0, 3.0, 4.0]
 
         self.assertEqual(r0.offset, ans)
@@ -134,8 +134,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(qlim=qlim)
         l3 = rp.RevoluteDH(qlim=qlim)
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
-        r1 = rp.SerialLink([l0])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+        r1 = rp.DHRobot([l0])
         ans = np.c_[qlim, qlim, qlim, qlim]
 
         nt.assert_array_almost_equal(r0.qlim, ans)
@@ -156,7 +156,7 @@ class TestSerialLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         r0.q = q
 
         nt.assert_array_almost_equal(r0.fkine(q).A, T1)
@@ -178,7 +178,7 @@ class TestSerialLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
 
         TT = r0.fkine(qq)
 
@@ -190,7 +190,7 @@ class TestSerialLink(unittest.TestCase):
     def test_links(self):
         l0 = rp.PrismaticDH()
         with self.assertRaises(TypeError):
-            rp.SerialLink(l0)
+            rp.DHRobot(l0)
 
     def test_multiple(self):
         l0 = rp.PrismaticDH()
@@ -198,10 +198,10 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l2, l3])
-        r3 = rp.SerialLink([r0, r1])
-        r4 = rp.SerialLink([r0, l2, l3])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l2, l3])
+        r3 = rp.DHRobot([r0, r1])
+        r4 = rp.DHRobot([r0, l2, l3])
 
         q = np.array([1, 2, 3, 4])
 
@@ -219,7 +219,7 @@ class TestSerialLink(unittest.TestCase):
         l0 = rp.PrismaticDH()
 
         with self.assertRaises(TypeError):
-            rp.SerialLink([l0, 1])
+            rp.DHRobot([l0, 1])
 
     def test_add_seriallink(self):
         l0 = rp.PrismaticDH()
@@ -227,8 +227,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l2, l3])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l2, l3])
         r3 = r0 + r1
 
         q = np.array([1, 2, 3, 4])
@@ -248,8 +248,8 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2.0)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l1, l2, l3])
         r3 = r0 + l2 + l3
         r4 = l0 + r1
 
@@ -268,7 +268,7 @@ class TestSerialLink(unittest.TestCase):
     def test_add_error(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1])
+        r0 = rp.DHRobot([l0, l1])
 
         with self.assertRaises(TypeError):
             r0 + 2
@@ -276,17 +276,17 @@ class TestSerialLink(unittest.TestCase):
     def test_dh_error(self):
         l0 = rp.PrismaticMDH()
         l1 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0])
-        r1 = rp.SerialLink([l1])
+        r0 = rp.DHRobot([l0])
+        r1 = rp.DHRobot([l1])
 
         with self.assertRaises(ValueError):
-            rp.SerialLink([l0, l1])
+            rp.DHRobot([l0, l1])
 
         with self.assertRaises(ValueError):
             r0 + r1
 
         with self.assertRaises(ValueError):
-            rp.SerialLink([l0, l1])
+            rp.DHRobot([l0, l1])
             r0 + l1
 
     def test_name(self):
@@ -350,9 +350,9 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.RevoluteDH(alpha=np.pi / 2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
-        r1 = rp.SerialLink([l0, l1])
-        r2 = rp.SerialLink([l1, l2, l3, l0])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+        r1 = rp.DHRobot([l0, l1])
+        r2 = rp.DHRobot([l1, l2, l3, l0])
 
         self.assertTrue(r0.isspherical())
         self.assertFalse(r1.isspherical())
@@ -371,10 +371,12 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(panda.links[6].m, m)
 
     def test_jointdynamics(self):
-        # TODO
-        panda = rp.models.DH.Panda()
-        panda.jointdynamics(1, 2)
-        pass
+        puma = rp.models.DH.Puma560()
+        jd = puma.jointdynamics(puma.qn)
+        # numbers come from MATLAB
+        nt.assert_array_almost_equal(jd[0], [0.001133478453251, 0.001480000000000])
+        nt.assert_array_almost_equal(jd[1], [0.579706964030143e-3, 0.817000000000000e-3])
+        nt.assert_array_almost_equal(jd[2], [0.000525146448377, 0.001380000000000])
 
     def test_twists(self):
         # TODO
@@ -405,7 +407,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -427,7 +429,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -466,7 +468,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -488,7 +490,7 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.PrismaticDH(theta=2)
         l3 = rp.RevoluteDH()
 
-        r0 = rp.SerialLink([l0, l1, l2, l3])
+        r0 = rp.DHRobot([l0, l1, l2, l3])
         q = [1, 2, 3, 4]
         r0.q = q
 
@@ -511,7 +513,7 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.DHLink(Tc=2, B=3)
         L = [l0, l1, l2, l3]
 
-        r0 = rp.SerialLink(L)
+        r0 = rp.DHRobot(L)
 
         n0 = r0.nofriction()
         n1 = r0.nofriction(viscous=True)
@@ -577,13 +579,13 @@ class TestSerialLink(unittest.TestCase):
         l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1])
         qd = [1, 2, 3, 4]
 
-        r0 = rp.SerialLink([l0, l0, l0, l0])
+        r0 = rp.DHRobot([l0, l0, l0, l0])
 
         tau = np.array([-16, -28, -40, -52])
 
         nt.assert_array_almost_equal(r0.friction(qd), tau)
 
-    def test_allfkine(self):
+    def test_fkine_all(self):
         panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
@@ -631,8 +633,8 @@ class TestSerialLink(unittest.TestCase):
             [0, 0, 0, 1]
         ])
 
-        Tall = panda.allfkine(q)
-        Tall2 = panda.allfkine()
+        Tall = panda.fkine_all(q)
+        Tall2 = panda.fkine_all()
 
         nt.assert_array_almost_equal(Tall[0].A, t0, decimal=4)
         nt.assert_array_almost_equal(Tall[1].A, t1, decimal=4)
@@ -643,36 +645,34 @@ class TestSerialLink(unittest.TestCase):
         nt.assert_array_almost_equal(Tall[6].A, t6, decimal=4)
         nt.assert_array_almost_equal(Tall2[0].A, t0, decimal=4)
 
-    def test_gravjac(self):
-        l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1], alpha=0.4, a=0.2,
-                         r=[0.1, 0.2, 0.05], m=0.5)
-        l1 = rp.PrismaticDH(theta=0.1, B=3, G=2, Tc=[2, -1], a=0.2,
-                          r=[0.1, 0.2, 0.05], m=0.5)
+    # def test_gravjac(self):
+    #     l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1], alpha=0.4, a=0.2,
+    #                      r=[0.1, 0.2, 0.05], m=0.5)
+    #     l1 = rp.PrismaticDH(theta=0.1, B=3, G=2, Tc=[2, -1], a=0.2,
+    #                       r=[0.1, 0.2, 0.05], m=0.5)
 
-        r0 = rp.SerialLink([l0, l0, l0, l0])
-        r1 = rp.SerialLink([l0, l0, l0, l1])
-        q = [0.3, 0.4, 0.2, 0.1]
-        qT = np.c_[q, q]
-        r0.q = q
+    #     r0 = rp.DHRobot([l0, l0, l0, l0])
+    #     r1 = rp.DHRobot([l0, l0, l0, l1])
+    #     q = [0.3, 0.4, 0.2, 0.1]
+    #     qT = np.c_[q, q]
 
-        grav = [0.3, 0.5, 0.7]
+    #     grav = [0.3, 0.5, 0.7]
 
-        tauB = [0, 4.6280, 3.1524, 0.9324]
-        tauB2 = [1.9412, 1.1374, 0.3494, -0.0001]
-        tauB3 = [0, 3.2819, 2.0195, 1.9693]
+    #     tauB = [0, 4.6280, 3.1524, 0.9324]
+    #     tauB2 = [1.9412, 1.1374, 0.3494, -0.0001]
+    #     tauB3 = [0, 3.2819, 2.0195, 1.9693]
 
-        res0 = r0.gravjac(qT)
-        res1 = r0.gravjac(q)
-        res2 = r0.gravjac(q, grav)
-        res3 = r0.gravjac()
-        res4 = r1.gravjac(q)
+    #     res0 = r0.gravjac(qT)
+    #     res1 = r0.gravjac(q)
+    #     res2 = r0.gravjac(q, grav)
+    #     res4 = r1.gravjac(q)
 
-        nt.assert_array_almost_equal(res0[:, 0], tauB, decimal=4)
-        nt.assert_array_almost_equal(res0[:, 1], tauB, decimal=4)
-        nt.assert_array_almost_equal(res1, tauB, decimal=4)
-        nt.assert_array_almost_equal(res2, tauB2, decimal=4)
-        nt.assert_array_almost_equal(res3, tauB, decimal=4)
-        nt.assert_array_almost_equal(res4, tauB3, decimal=4)
+    #     nt.assert_array_almost_equal(res0[:, 0], tauB, decimal=4)
+    #     nt.assert_array_almost_equal(res0[:, 1], tauB, decimal=4)
+    #     nt.assert_array_almost_equal(res1, tauB, decimal=4)
+    #     nt.assert_array_almost_equal(res2, tauB2, decimal=4)
+    #     nt.assert_array_almost_equal(res3, tauB, decimal=4)
+    #     nt.assert_array_almost_equal(res4, tauB3, decimal=4)
 
     def test_ikcon(self):
         panda = rp.models.DH.Panda()
@@ -703,8 +703,8 @@ class TestSerialLink(unittest.TestCase):
         l0 = rp.RevoluteDH(d=2.0)
         l1 = rp.PrismaticDH(theta=1.0)
         l2 = rp.PrismaticDH(theta=1, qlim=[0, 2])
-        r0 = rp.SerialLink([l0, l1])
-        r1 = rp.SerialLink([l0, l2])
+        r0 = rp.DHRobot([l0, l1])
+        r1 = rp.DHRobot([l0, l2])
 
         qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
 
@@ -746,10 +746,10 @@ class TestSerialLink(unittest.TestCase):
         l2 = rp.RevoluteDH(d=0.15005, a=0.0203, alpha=-np.pi / 2)
         l3 = rp.PrismaticDH()
         l4 = rp.PrismaticMDH()
-        r0 = rp.SerialLink([l0, l1, l2])
-        r1 = rp.SerialLink([l3, l3])
-        r2 = rp.SerialLink([l3, l3, l3])
-        r3 = rp.SerialLink([l4, l4, l4])
+        r0 = rp.DHRobot([l0, l1, l2])
+        r1 = rp.DHRobot([l3, l3])
+        r2 = rp.DHRobot([l3, l3, l3])
+        r3 = rp.DHRobot([l4, l4, l4])
 
         q = [1, 1, 1]
         r0.q = q
@@ -806,8 +806,8 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.RevoluteDH(alpha=-np.pi / 2)
         l4 = rp.RevoluteDH(alpha=np.pi / 2)
         l5 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-        r1 = rp.SerialLink([l1, l0, l2, l3, l4, l5])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+        r1 = rp.DHRobot([l1, l0, l2, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
         T1 = r0.fkine(q)
         T2 = r1.fkine(q)
@@ -834,8 +834,8 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.RevoluteDH(alpha=-np.pi / 2)
         l4 = rp.RevoluteDH(alpha=np.pi / 2)
         l5 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-        r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+        r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
         T1 = r0.fkine(q)
         T2 = r1.fkine(q)
@@ -863,8 +863,8 @@ class TestSerialLink(unittest.TestCase):
         l3 = rp.RevoluteDH(alpha=-np.pi / 2)
         l4 = rp.RevoluteDH(alpha=np.pi / 2)
         l5 = rp.RevoluteDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4, l5])
-        r1 = rp.SerialLink([l2, l1, l0, l3, l4, l5])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+        r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
         q = [1, 1, 1, 1, 1, 1]
         T1 = r0.fkine(q)
         T2 = r1.fkine(q)
@@ -908,10 +908,10 @@ class TestSerialLink(unittest.TestCase):
         l4b = rp.RevoluteDH()
         l5 = rp.RevoluteDH()
         l6 = rp.RevoluteMDH()
-        r0 = rp.SerialLink([l0, l1, l2, l3, l4a, l5])
-        r1 = rp.SerialLink([l0, l1, l2, l3, l4b, l5])
-        r2 = rp.SerialLink([l1, l2, l3])
-        r3 = rp.SerialLink([l6, l6, l6, l6, l6, l6])
+        r0 = rp.DHRobot([l0, l1, l2, l3, l4a, l5])
+        r1 = rp.DHRobot([l0, l1, l2, l3, l4b, l5])
+        r2 = rp.DHRobot([l1, l2, l3])
+        r3 = rp.DHRobot([l6, l6, l6, l6, l6, l6])
 
         puma = rp.models.DH.Puma560()
         T = sm.SE3(0, 10, 10)
@@ -972,30 +972,31 @@ class TestSerialLink(unittest.TestCase):
 
     def test_rne(self):
         puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
 
         z = np.zeros(6)
         o = np.ones(6)
         fext = [1, 2, 3, 1, 2, 3]
 
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
-        tr1 = [29.1421, 56.5044, 16.3528, 1.2645, 1.1239, 0.5196]
-        tr2 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
-        tr3 = [29.7849, 53.9511, 15.0208,  4.0929, -0.8761, 3.5196]
+        tr1 = [3.35311, 36.0025, 7.42596, 0.190043, 0.203441, 0.194133]
+        tr2 = [32.4952, 60.867, 17.7436, 1.45452, 1.29911, 0.713781]
+        tr3 = [29.1421, 56.5044, 16.3528, 1.26448, 1.12392, 0.519648]
+        tr4 = [32.4952, 29.2271, 11.7085, 1.45452, 1.27086, 0.713781]
+        tr5 = [0.642756, 29.0866, 4.70321, 2.82843, -1.97175, 3]
 
-        t0 = puma.rne(z, z, puma.qn)
-        t1 = puma.rne(z, o, puma.qn)
-
-        puma.gravity = [0, 0, 9.81]
-        t2 = puma.rne(o, o, puma.qn)
-        t3 = puma.rne(z, z, grav=[0, 0, 9.81])
-        t4 = puma.rne(z, o, q=puma.qn, fext=fext)
+        t0 = puma.rne(puma.qn, z, z)
+        t1 = puma.rne(puma.qn, z, o)
+        t2 = puma.rne(puma.qn, o, o)
+        t3 = puma.rne(puma.qn, o, z)
+        t4 = puma.rne(puma.qn, o, o, grav=[0,0,0])
+        t5 = puma.rne(puma.qn, z, z, fext=fext)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
         nt.assert_array_almost_equal(t1, tr1, decimal=4)
         nt.assert_array_almost_equal(t2, tr2, decimal=4)
-        nt.assert_array_almost_equal(t3, tr0, decimal=4)
-        nt.assert_array_almost_equal(t4, tr3, decimal=4)
+        nt.assert_array_almost_equal(t3, tr3, decimal=4)
+        nt.assert_array_almost_equal(t4, tr4, decimal=4)
+        nt.assert_array_almost_equal(t5, tr5, decimal=4)
 
     def test_rne_traj(self):
         puma = rp.models.DH.Puma560()
@@ -1006,7 +1007,7 @@ class TestSerialLink(unittest.TestCase):
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
         tr1 = [32.4952, 60.8670, 17.7436, 1.4545, 1.2991, 0.7138]
 
-        t0 = puma.rne(np.c_[z, o], np.c_[z, o], np.c_[puma.qn, puma.qn])
+        t0 = puma.rne(np.c_[puma.qn, puma.qn], np.c_[z, o], np.c_[z, o])
 
         nt.assert_array_almost_equal(t0[:, 0], tr0, decimal=4)
         nt.assert_array_almost_equal(t0[:, 1], tr1, decimal=4)
@@ -1018,9 +1019,9 @@ class TestSerialLink(unittest.TestCase):
 
         tr0 = [-0.0000, 31.6399, 6.0351, 0.0000, 0.0283, 0]
 
-        t0 = puma.rne(z, z, puma.qn)
+        t0 = puma.rne(puma.qn, z, z)
         puma.delete_rne()
-        t1 = puma.rne(z, z, puma.qn)
+        t1 = puma.rne(puma.qn, z, z)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
         nt.assert_array_almost_equal(t1, tr0, decimal=4)
@@ -1035,14 +1036,12 @@ class TestSerialLink(unittest.TestCase):
 
         res = [-7.4102, -9.8432, -10.9694, -4.4314, -0.9881, 21.0228]
 
-        qdd0 = puma.accel(qd, torque, q)
-        qdd1 = puma.accel(np.c_[qd, qd], np.c_[torque, torque], np.c_[q, q])
-        qdd2 = puma.accel(qd, torque)
+        qdd0 = puma.accel(q, qd, torque)
+        qdd1 = puma.accel(np.c_[q, q], np.c_[qd, qd], np.c_[torque, torque])
 
         nt.assert_array_almost_equal(qdd0, res, decimal=4)
         nt.assert_array_almost_equal(qdd1[:, 0], res, decimal=4)
         nt.assert_array_almost_equal(qdd1[:, 1], res, decimal=4)
-        nt.assert_array_almost_equal(qdd2, res, decimal=4)
 
     def test_inertia(self):
         puma = rp.models.DH.Puma560()
@@ -1059,12 +1058,10 @@ class TestSerialLink(unittest.TestCase):
 
         I0 = puma.inertia(q)
         I1 = puma.inertia(np.c_[q, q])
-        I2 = puma.inertia()
 
         nt.assert_array_almost_equal(I0, Ir, decimal=4)
         nt.assert_array_almost_equal(I1[:, :, 0], Ir, decimal=4)
         nt.assert_array_almost_equal(I1[:, :, 1], Ir, decimal=4)
-        nt.assert_array_almost_equal(I2, Ir, decimal=4)
 
     def test_cinertia(self):
         puma = rp.models.DH.Puma560()
@@ -1103,14 +1100,12 @@ class TestSerialLink(unittest.TestCase):
             [-0.0002, 0.0028, 0.0046, -0.0002, -0.0000, -0.0000],
             [0.0001, 0.0000, 0.0000, 0.0000, 0.0000, 0]]
 
-        C0 = puma.coriolis(qd, q)
-        C1 = puma.coriolis(np.c_[qd, qd], np.c_[q, q])
-        C2 = puma.coriolis(qd)
+        C0 = puma.coriolis(q, qd)
+        C1 = puma.coriolis(np.c_[q, q], np.c_[qd, qd])
 
         nt.assert_array_almost_equal(C0, Cr, decimal=4)
         nt.assert_array_almost_equal(C1[:, :, 0], Cr, decimal=4)
         nt.assert_array_almost_equal(C1[:, :, 1], Cr, decimal=4)
-        nt.assert_array_almost_equal(C2, Cr, decimal=4)
 
     def test_gravload(self):
         puma = rp.models.DH.Puma560()
@@ -1142,37 +1137,30 @@ class TestSerialLink(unittest.TestCase):
 
         tauir = [3.1500, 9.4805, 3.6189, 0.1901, 0.3519, 0.5823]
 
-        taui0 = puma.itorque(qdd, q)
-        taui1 = puma.itorque(np.c_[qdd, qdd], np.c_[q, q])
-        taui2 = puma.itorque(qdd)
+        taui0 = puma.itorque(q, qdd)
+        taui1 = puma.itorque(np.c_[q, q], np.c_[qdd, qdd])
 
         nt.assert_array_almost_equal(taui0, tauir, decimal=4)
         nt.assert_array_almost_equal(taui1[:, 0], tauir, decimal=4)
         nt.assert_array_almost_equal(taui1[:, 1], tauir, decimal=4)
-        nt.assert_array_almost_equal(taui2, tauir, decimal=4)
 
     def test_str(self):
         puma = rp.models.DH.Puma560()
         l0 = rp.PrismaticMDH()
-        r0 = rp.SerialLink([l0, l0, l0])
+        r0 = rp.DHRobot([l0, l0, l0])
         str(r0)
 
-        res = (
-            "\nPuma 560 (Unimation): 6 axis, RRRRRR, std DH\n"
-            "Parameters:\n"
-            "Revolute   theta=q1 + 0.00,  d= 0.00,  a= 0.00,"
-            "  alpha= 1.57\n"
-            "Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,"
-            "  alpha= 0.00\n"
-            "Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,"
-            "  alpha=-1.57\n"
-            "Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,"
-            "  alpha= 1.57\n"
-            "Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,"
-            "  alpha=-1.57\n"
-            "Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,"
-            "  alpha= 0.00\n\n"
-            "tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg")
+        res = """
+Puma 560 (Unimation): 6 axis, RRRRRR, std DH
+Parameters:
+Revolute   theta=q1 + 0.00,  d= 0.67,  a= 0.00,  alpha= 1.57
+Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,  alpha= 0.00
+Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,  alpha=-1.57
+Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,  alpha= 1.57
+Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,  alpha=-1.57
+Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,  alpha= 0.00
+
+tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
         self.assertEqual(str(puma), res)
 
@@ -1376,7 +1364,7 @@ class TestSerialLink(unittest.TestCase):
 
     def test_teach_basic(self):
         l0 = rp.DHLink(d=2)
-        r0 = rp.SerialLink([l0, l0])
+        r0 = rp.DHRobot([l0, l0])
         e = r0.teach(block=False)
         e.step()
         e.close()
@@ -1457,7 +1445,7 @@ class TestSerialLink(unittest.TestCase):
 
     def test_teach2_basic(self):
         l0 = rp.DHLink(d=2)
-        r0 = rp.SerialLink([l0, l0])
+        r0 = rp.DHRobot([l0, l0])
         e = r0.teach2(block=False)
         e.step()
         e.close()

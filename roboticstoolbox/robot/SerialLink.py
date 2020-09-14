@@ -10,7 +10,7 @@ from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
 from spatialmath.base.transforms3d import tr2delta, tr2eul
-from spatialmath import SE3
+from spatialmath import SE3, Twist3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 from roboticstoolbox.backend.PyPlot.functions import \
@@ -83,14 +83,14 @@ class DHRobot(Dynamics):
                 self._n += 1
                 L[i].id = self._n
 
-            elif isinstance(L[i], SerialLink):
+            elif isinstance(L[i], DHRobot):
                 for j in range(L[i].n):
                     self._links.append(L[i].links[j])
                     self._n += 1
                     L[i].id = self._n
 
             else:
-                raise TypeError("Input can be only DHLink or SerialLink")
+                raise TypeError("Input can be only DHLink or DHRobot")
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -100,7 +100,9 @@ class DHRobot(Dynamics):
         self.control_type = 'v'
 
         # Check the DH convention
-        self._check_dh()
+        self._mdh = self.links[0].mdh
+        if not all([link.mdh == self.mdh for link in self.links]):
+                raise ValueError('Robot has mixed D&H link conventions')
 
         # rne parameters
         self._rne_init = False
@@ -162,14 +164,14 @@ class DHRobot(Dynamics):
 
         if isinstance(L, DHLink):
             nlinks.append(L)
-        elif isinstance(L, SerialLink):
+        elif isinstance(L, DHRobot):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
-            raise TypeError("Can only combine SerialLinks with other "
-                            "SerialLinks or DHLinks")
+            raise TypeError("Can only combine DHRobots with other "
+                            "DHRobots or DHLinks")
 
-        return SerialLink(
+        return DHRobot(
             nlinks,
             name=self.name,
             manufacturer=self.manuf,
@@ -177,19 +179,13 @@ class DHRobot(Dynamics):
             tool=self.tool,
             gravity=self.gravity)
 
-    def _check_dh(self):
-        self._mdh = self.links[0].mdh
-        for i in range(self.n):
-            if not self.links[i].mdh == self.mdh:
-                raise ValueError('Robot has mixed D&H links conventions.')
-
     def _copy(self):
         L = []
 
         for i in range(self.n):
             L.append(self.links[i]._copy())
 
-        r2 = SerialLink(
+        r2 = DHRobot(
             L,
             name=self.name,
             manufacturer=self.manuf,
@@ -487,51 +483,7 @@ class DHRobot(Dynamics):
         else:
             return False
 
-    def payload(self, m, p=np.zeros(3)):
-        """
-        payload(m, p) adds payload mass adds a payload with point mass m at
-        position p in the end-effector coordinate frame.
 
-        payload(m) adds payload mass adds a payload with point mass m at
-        in the end-effector coordinate frame.
-
-        payload(0) removes added payload.
-
-        :param m: mass (kg)
-        :type m: float
-        :param p: position in end-effector frame
-        :type p: float ndarray(3,1)
-
-        """
-
-        p = getvector(p, 3, out='col')
-        lastlink = self.links[self.n - 1]
-
-        lastlink.m = m
-        lastlink.r = p
-
-    def jointdynamics(self, q, qd):
-        """
-        Transfer function of joint actuator.
-
-        tf = jointdynamics(qd, q) calculates a vector of n continuous-time
-        transfer function objects that represent the transfer function
-        1/(Js+B) for each joint based on the dynamic parameters of the robot
-        and the configuration q (n). n is the number of robot joints.
-
-        tf = jointdynamics(qd) as above except uses the stored q value of the
-        robot object.
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: float ndarray(n)
-        :param qd: The joint velocities of the robot
-        :type qd: float ndarray(n)
-
-        """
-
-        # TODO a tf object implementation?
-        pass
 
     def isprismatic(self):
         """
@@ -629,35 +581,52 @@ class DHRobot(Dynamics):
 
     def twists(self, q=None):
         """
-        Joint axis twists.
+        Joint axis as  twists
 
-        tw, T = twists(q) calculates a vector of Twist objects (n) that
-        represent the axes of the joints for the robot with joint coordinates
-        q (n). Also returns T0 which is an SE3 object representing the pose of
-        the tool.
-
-        tw, T = twists() as above except uses the stored q value of the
-        robot object.
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: float ndarray(n)
-
+        :param q: The joint angles/configuration of the robot
+        :type q: array_like (n)
         :return tw: a vector of Twist objects
         :rtype tw: float ndarray(n,)
         :return T0: Represents the pose of the tool
         :rtype T0: SE3
 
+        - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
+          represent the axes of the joints for the robot with joint coordinates
+          ``q`` (n). Also returns T0 which is an SE3 object representing the pose of
+          the tool.
+
+        - ``tw, T0 = twists()`` as above but the joint coordinates are taken to be
+          zero.
+
         """
 
-        pass
+        if q is None:
+            q = np.zeros((self.n))
 
-        # if q is None:
-        #     q = np.copy(self.q)
-        # else:
-        #     q = getvector(q, self.n)
+        T = self.fkine_all(q)
+        tw = Twist3.Alloc(self.n)
+        if not self.mdh:
+            # DH case
+            for j in range(self.n):
+                if j == 0:
+                    if self.links[j].sigma == 0:
+                        tw[j] = Twist3.R([0, 0, 1], [0, 0, 0])  # revolute
+                    else:
+                        tw[j] = Twist3.P([0, 0, 1])  # prismatic
+                else:
+                    if self.links[j].sigma == 0:
+                        tw[j] = Twist3.R(T[j-1].a, T[j-1].t)  # revolute
+                    else:
+                        tw[j] = Twist3.P(T[j-1].a)  # prismatic
+        else:
+            # MDH case
+            for j in range(self.n):
+                if self.links[j].sigma == 0:
+                    tw[j] = Twist3.R(T[j].a, T[j].t)
+                else:
+                    tw[j] = Twist3.P(T[j].a, T[j].t)
 
-        # TODO Implement this
+        return tw, T[-1]
 
     def fkine(self, q=None):
         '''
@@ -719,10 +688,10 @@ class DHRobot(Dynamics):
 
         return t
 
-    def allfkine(self, q=None):
+    def fkine_all(self, q=None):
         '''
         Tall = allfkine(q) evaluates fkine for each joint within a robot and
-        returns a trajecotry of poses.
+        returns a sequence of link frame poses.
 
         Tall = allfkine() as above except uses the stored q value of the
         robot object.
@@ -2096,32 +2065,32 @@ class DHRobot(Dynamics):
             return qt, success, err
 
     @_check_rne
-    def rne(self, qdd, qd, q=None, grav=None, fext=None):
-        """
+    def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
+        r"""
         Inverse dynamics
 
-        tau = rne(qdd, qd, q, grav, fext) is the joint torque required for
-        the robot to achieve the specified joint position q (1xn), velocity qd
-        (1xn) and acceleration qdd (1xn), where n is the number of robot
-        joints. fext describes the wrench acting on the end-effector
+        :param q: The joint angles/configuration of the robot (Optional,
+        if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param qd: The joint velocities of the robot
+        :type qd: float ndarray(n)
+        :param qdd: The joint accelerations of the robot
+        :type qdd: float ndarray(n)
+        :param grav: Gravity vector to overwrite robots gravity value
+        :type grav: float ndarray(6)
+        :param fext: Specify wrench acting on the end-effector
+             :math:`W=[F_x F_y F_z M_x M_y M_z]`
+        :type fext: float ndarray(6)
+
+        ``tau = rne(q, qd, qdd, grav, fext)`` is the joint torque required for
+        the robot to achieve the specified joint position ``q`` (1xn), velocity
+        ``qd`` (1xn) and acceleration ``qdd`` (1xn), where n is the number of
+        robot joints. ``fext`` describes the wrench acting on the end-effector
 
         Trajectory operation:
         If q, qd and qdd (nxm) are matrices with m cols representing a
         trajectory then tau (nxm) is a matrix with cols corresponding to each
         trajectory step.
-
-        :param qdd: The joint accelerations of the robot
-        :type qdd: float ndarray(n)
-        :param qd: The joint velocities of the robot
-        :type qd: float ndarray(n)
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param grav: Gravity vector to overwrite robots gravity value
-        :type grav: float ndarray(6)
-        :param fext: Specify wrench acting on the end-effector
-             W=[Fx Fy Fz Mx My Mz]
-        :type fext: float ndarray(6)
 
         :notes:
             - The torque computed contains a contribution due to armature
@@ -2131,9 +2100,6 @@ class DHRobot(Dynamics):
         """
 
         trajn = 1
-
-        if q is None:
-            q = self.q
 
         try:
             q = getvector(q, self.n, 'col')
