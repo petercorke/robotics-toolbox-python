@@ -927,25 +927,70 @@ class ETS(object):
 
     def scollision(self):
         i = 0
-        for l1 in self.ets:
-            for ob1 in l1.collision:
-                for l2 in self.ets:
-                    # print(l2.name)
-                    if l1.name != l2.name and \
-                       any([l2.name != li.name for li in l1.parent]) and \
-                       any([l2.name != li.name for li in l1.child]):
-                        for ob2 in l2.collision:
-                            # i += 1
-                            # print(i)
-                            request = fcl.CollisionRequest()
-                            result = fcl.CollisionResult()
-                            ret = fcl.collide(ob1.co, ob2.co, request, result)
-                            if ret:
-                                print(l1.name + ' -> ' + l2.name)
-                                # import code
-                                # code.interact(local=dict(globals(), **locals()))
-                                # print(ob1)
-                                # print(ob2)
+
+        l1 = self.ets[1]
+        ob1 = l1.collision[0]
+
+        for l2 in self.ets:
+            print(l2.name)
+            if l1.name != l2.name and \
+                    any([l2.name != li.name for li in l1.parent]) and \
+                    any([l2.name != li.name for li in l1.child]):
+                ob2 = l2.collision[0]
+                request = fcl.DistanceRequest()
+                result = fcl.DistanceResult()
+                ret = fcl.distance(ob1.co, ob2.co, request, result)
+                print(ret)
+                # print(result.nearest_points)
+                np1 = result.nearest_points[0]
+                np2 = result.nearest_points[1]
+
+                aTb = (ob1.wT.inv() * ob2.wT).t
+                bTa = (ob1.wT.inv() * ob2.wT).inv().t
+
+                bTp = -(aTb - np1)
+                aTp = -(bTa - np2)
+
+
+
+                # t1 = ob1.wT.t + np1
+                # t2 = ob2.wT.t + np2
+                # d = np.linalg.norm(bTp - aTp)
+                d = np.linalg.norm(np1 - np2)
+                print(d)
+
+
+        # for l1 in self.ets:
+        #     print(l1.name)
+        #     for ob1 in l1.collision:
+                
+        #         print(ob1.stype)
+        #         print(ob1.wT)
+
+
+                # for l2 in self.ets:
+                #     # print(l2.name)
+                #     if l1.name != l2.name and \
+                #        any([l2.name != li.name for li in l1.parent]) and \
+                #        any([l2.name != li.name for li in l1.child]):
+                #         for ob2 in l2.collision:
+                #             # i += 1
+                #             # print(i)
+                #             request = fcl.CollisionRequest()
+                #             result = fcl.CollisionResult()
+                #             ret = fcl.collide(ob1.co, ob2.co, request, result)
+                #             if ret:
+                #                 request = fcl.DistanceRequest()
+                #                 result = fcl.DistanceResult()
+                #                 ret = fcl.distance(ob1.co, ob2.co, request, result)
+                #                 print(l1.name + ' -> ' + l2.name)
+                #                 print(ret)
+                #                 print(result.nearest_points)
+
+                #                 # import code
+                #                 # code.interact(local=dict(globals(), **locals()))
+                #                 # print(ob1)
+                #                 # print(ob2)
                             # print(ret)
 
                 

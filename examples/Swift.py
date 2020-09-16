@@ -17,7 +17,7 @@ panda.q = panda.qr
 Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
 
 arrived = False
-env.add(panda, show_collision=True)
+env.add(panda, show_collision=True, show_robot=False)
 time.sleep(1)
 
 dt = 0.05
