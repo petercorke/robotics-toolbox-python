@@ -11,7 +11,8 @@ from __future__ import print_function
 import copy
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
+from spatialmath.base.argcheck import getvector, verifymatrix, \
+    isscalar, isvector, ismatrix
 import roboticstoolbox as rp
 
 
@@ -263,26 +264,32 @@ class DHLink():
 
     @I.setter
     def I(self, I_new):  # noqa
-        # Try for Inertia Matrix
-        try:
-            verifymatrix(I_new, (3, 3))
-        except (ValueError, TypeError):
 
-            # Try for the moments and products of inertia
-            # [Ixx Iyy Izz Ixy Iyz Ixz]
-            try:
-                Ia = getvector(I_new, 6)
-                I_new = np.array([
-                    [Ia[0], Ia[3], Ia[5]],
-                    [Ia[3], Ia[1], Ia[4]],
-                    [Ia[5], Ia[4], Ia[2]]
-                ])
-            except ValueError:
+        if ismatrix(I_new, (3,3)):
+            # 3x3 matrix passed
+            if np.any(np.abs(I_new - I_new.T) > 1e-8):
+                raise ValueError('3x3 matrix is not symmetric')
 
-                # Try for the moments of inertia
-                # [Ixx Iyy Izz]
-                Ia = getvector(I_new, 3)
-                I_new = np.diag(Ia)
+        elif isvector(I_new, 9):
+            # 3x3 matrix passed as a 1d vector
+            I_new = I_new.reshape(3, 3)
+            if np.any(np.abs(I_new - I_new.T) > 1e-8):
+                raise ValueError('3x3 matrix is not symmetric')
+
+        elif isvector(I_new, 6):
+            # 6-vector passed, moments and products of inertia, [Ixx Iyy Izz Ixy Iyz Ixz]
+            I_new = np.array([
+                [I_new[0], I_new[3], I_new[5]],
+                [I_new[3], I_new[1], I_new[4]],
+                [I_new[5], I_new[4], I_new[2]]
+            ])
+
+        elif isvector(I_new, 3):
+            # 3-vector passed, moments of inertia [Ixx Iyy Izz]
+            I_new = np.diag(I_new)
+
+        else:
+            raise ValueError('invalid shape passed: must be (3,3), (6,), (3,)')
 
         self._I = I_new
 
