@@ -32,6 +32,7 @@ class Swift(Connector):  # pragma nocover
         super().launch()
 
         self.robots = []
+        self.shapes = []
 
         self.swift = zerorpc.Client()
         self.swift.connect("tcp://127.0.0.1:4242")
@@ -107,6 +108,12 @@ class Swift(Connector):  # pragma nocover
             id = self.swift.robot(robot)
             self.robots.append(ob)
             return id
+        elif isinstance(ob, rp.Shape):
+            shape = ob.to_dict()
+            id = self.swift.shape(shape)
+            self.shapes.append(ob)
+            return id
+
 
     def remove(self):
         '''

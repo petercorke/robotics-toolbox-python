@@ -617,72 +617,41 @@ class ETS(object):
                 if k != link.q_idx:
                     U = U @ link.ets[k].T().A
                 else:
+                    # self._jacoblink(link, k, T)
+                    U = U @ link.ets[k].T(q[j]).A
+                    Tu = np.linalg.inv(U) @ T
+                    n = U[:3, 0]
+                    o = U[:3, 1]
+                    a = U[:3, 2]
+                    x = Tu[0, 3]
+                    y = Tu[1, 3]
+                    z = Tu[2, 3]
+
                     if link.ets[k].axis == 'Rz':
-                        U = U @ link.ets[k].T(q[j]).A
-                        Tu = np.linalg.inv(U) @ T
-
-                        n = U[:3, 0]
-                        o = U[:3, 1]
-                        a = U[:3, 2]
-                        y = Tu[1, 3]
-                        x = Tu[0, 3]
-
                         J[:3, j] = (o * x) - (n * y)
                         J[3:, j] = a
 
-                        j += 1
-                    if link.ets[k].axis == 'Ry':
-                        U = U @ link.ets[k].T(q[j]).A
-                        Tu = np.linalg.inv(U) @ T
-
-                        n = U[:3, 0]
-                        o = U[:3, 1]
-                        a = U[:3, 2]
-                        z = Tu[2, 3]
-                        x = Tu[0, 3]
-
+                    elif link.ets[k].axis == 'Ry':
                         J[:3, j] = (n * z) - (a * x)
                         J[3:, j] = o
 
-                        j += 1
-                    if link.ets[k].axis == 'Rx':
-                        U = U @ link.ets[k].T(q[j]).A
-                        Tu = np.linalg.inv(U) @ T
-
-                        n = U[:3, 0]
-                        o = U[:3, 1]
-                        a = U[:3, 2]
-                        y = Tu[1, 3]
-                        z = Tu[2, 3]
-
+                    elif link.ets[k].axis == 'Rx':
                         J[:3, j] = (a * y) - (o * z)
                         J[3:, j] = n
 
-                        j += 1
                     elif link.ets[k].axis == 'tx':
-                        U = U @ link.ets[k].T(q[j]).A
-                        n = U[:3, 0]
-
                         J[:3, j] = n
                         J[3:, j] = np.array([0, 0, 0])
 
-                        j += 1
                     elif link.ets[k].axis == 'ty':
-                        U = U @ link.ets[k].T(q[j]).A
-                        o = U[:3, 1]
-
                         J[:3, j] = o
                         J[3:, j] = np.array([0, 0, 0])
 
-                        j += 1
                     elif link.ets[k].axis == 'tz':
-                        U = U @ link.ets[k].T(q[j]).A
-                        a = U[:3, 2]
-
                         J[:3, j] = a
                         J[3:, j] = np.array([0, 0, 0])
 
-                        j += 1
+                    j += 1
 
         return J
 
@@ -956,7 +925,7 @@ class ETS(object):
                 # t1 = ob1.wT.t + np1
                 # t2 = ob2.wT.t + np2
                 # d = np.linalg.norm(bTp - aTp)
-                d = np.linalg.norm(np1 - np2)
+                # d = np.linalg.norm(np1 - np2)
                 print(d)
 
 
