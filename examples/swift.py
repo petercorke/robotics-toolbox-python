@@ -8,25 +8,96 @@ import spatialmath as sm
 import numpy as np
 import time
 import qpsolvers as qp
+import fcl
+
+
+def link_closest_point(links, ob):
+
+    c_ret = np.inf
+    c_res = None
+    c_base = None
+
+    for link in links:
+        for col in link.collision:
+            # col = link.collision[0]
+            request = fcl.DistanceRequest()
+            result = fcl.DistanceResult()
+            ret = fcl.distance(col.co, sphere.co, request, result)
+            if ret < c_ret:
+                c_ret = ret
+                c_res = result
+                c_base = col.base
+
+    # Take the link transform represented in the world frame
+    # Multiply it by the translation of the link frame to the nearest point
+    # The result is the closest point pose represented in the world frame
+    # where the closest point is represented with the links rotational frame
+    # rather than the links collision objects rotational frame
+    c_wTcp = link._fk * sm.SE3((c_base * sm.SE3(result.nearest_points[0])).t)
+
+    return c_ret, c_res, c_wTcp
+
+
+# def link_closest_point(link, ob):
+
+#     c_ret = np.inf
+#     c_res = None
+#     c_base = None
+#     c_type = None
+
+#     for col in link.collision:
+#         # col = link.collision[0]
+#         request = fcl.DistanceRequest()
+#         result = fcl.DistanceResult()
+#         ret = fcl.distance(col.co, sphere.co, request, result)
+#         if ret < c_ret:
+#             c_ret = ret
+#             c_res = result
+#             c_base = col.base
+#             c_type = col.stype
+
+#     # if c_type == 'cylinder':
+#     # print(result.nearest_points[0])
+
+#     # result.nearest_points[0][2] = 0
+
+#     # Take the link transform represented in the world frame
+#     # Multiply it by the translation of the link frame to the nearest point
+#     # The result is the closest point pose represented in the world frame
+#     # where the closest point is represented with the links rotational frame
+#     # rather than the links collision objects rotational frame
+#     c_wTcp = link._fk * sm.SE3((c_base * sm.SE3(result.nearest_points[0])).t)
+
+#     return c_ret, c_res, c_wTcp
+
+
+def closer(ret1, res1, ret2, res2):
+    if ret1 < ret2:
+        return ret1, res1
+    else:
+        return ret2, res2
+
 
 env = rp.backend.Swift()
 env.launch()
 
 panda = rp.models.Panda()
 panda.q = panda.qr
+# panda.q[4] += 0.1
 # Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
-Tep = panda.fkine() * sm.SE3.Tz(0.6)  * sm.SE3.Tx(-0.1) #* sm.SE3.Ty(-0.1)
+Tep = panda.fkine() * sm.SE3.Tz(0.6) * sm.SE3.Tx(-0.1)  # * sm.SE3.Ty(-0.1)
 
 sphere = rp.Shape.Sphere(0.05, sm.SE3(0.5, 0, 0.2))
+sphere.wT = sm.SE3()
 
 arrived = False
-env.add(panda, show_collision=False, show_robot=True)
+env.add(panda, show_collision=True, show_robot=False)
 env.add(sphere)
 time.sleep(1)
 
 dt = 0.05
 ps = 0.05
-pi = 0.9
+pi = 0.6
 
 # env.record_start('file.webm')
 
@@ -60,10 +131,20 @@ while not arrived:
     beq = v.reshape((6,))
     c = np.r_[-panda.jacobm().reshape((panda.n,)), np.zeros(6)]
 
+
+    # Get closest link
+    linkA = panda._fkpath[-1]
+    linkB = panda._fkpath[-2]
+    linkC = panda._fkpath[-3]
+    panda.fkine_all()
+    retA, resA, wTcp = link_closest_point([linkA, linkB], sphere)
+    cpTc = wTcp.inv() * (sphere.base * sm.SE3(resA.nearest_points[1]))
+
+
+    d0 = np.linalg.norm(cpTc.t)
+    n0 = cpTc.t / d0
+
     # Distance Jacobian
-    eTc0 = panda.fkine().inv() * sphere.base
-    d0 = np.linalg.norm(eTc0.t)
-    n0 = eTc0.t / d0
     ds = 0.05
     di = 0.6
 

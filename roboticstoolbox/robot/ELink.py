@@ -389,7 +389,6 @@ class ELink(object):
 
             tr = tr * T
 
-            
         return tr
 
     def islimit(self, q):

@@ -56,7 +56,7 @@ class Shape(object):
         }
 
         return shape
-        
+
     def fk_dict(self):
 
         if self.stype == 'cylinder':
@@ -70,6 +70,9 @@ class Shape(object):
         }
 
         return shape
+
+    def __repr__(self):
+        return f'{self.stype},\n{self.base}'
 
     @property
     def wT(self):
