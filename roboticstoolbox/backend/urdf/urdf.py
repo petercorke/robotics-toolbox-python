@@ -1718,7 +1718,7 @@ class URDF(URDFType):
             for j in range(len(elinks)):
                 if i != j:
                     if self.joints[i].parent == self.joints[j].child:
-                        elinks[i]._parent.append(elinks[j])
+                        elinks[i]._parent = elinks[j]
                         found = True
 
             if not found:
@@ -1726,7 +1726,7 @@ class URDF(URDFType):
                 base_link = rp.ELink(
                         rp.ET(),
                         name=link.name)
-                elinks[i]._parent.append(base_link)
+                elinks[i]._parent = base_link
                 try:
                     for visual in link.visuals:
                         base_link.geometry.append(visual.geometry.ob)

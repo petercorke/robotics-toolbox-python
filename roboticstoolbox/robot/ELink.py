@@ -75,13 +75,12 @@ class ELink(object):
         self._name = name
 
         if isinstance(parent, ELink):
-            parent = [parent]
+            pass
         elif parent is None:
-            parent = []
-        elif not isinstance(parent, list):
+            pass
+        elif isinstance(parent, list):
             raise TypeError(
-                'The parent link must be of type ELink'
-                ' or list of Elink')
+                'Only one parent link can be present')
 
         self._parent = parent
         self._child = []
@@ -117,6 +116,9 @@ class ELink(object):
         self.B = B
         self.Tc = Tc
         self.G = G
+
+    def __repr__(self):
+        return self.name
 
     @property
     def collision(self):

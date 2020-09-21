@@ -74,6 +74,7 @@ class ETS(object):
             raise TypeError('The links must be stored in a list.')
 
         self._ets = []
+        self._elinks = {}
         self._n = 0
         self._M = 0
         self._q_idx = []
@@ -82,6 +83,7 @@ class ETS(object):
         for link in elinks:
             if isinstance(link, ELink):
                 self._M += 1
+                self._elinks[link.name] = link
             else:
                 raise TypeError("Input can be only ELink")
 
@@ -90,11 +92,12 @@ class ETS(object):
         self.root = []
         self.end = []
         for link in elinks:
-            for li in link.parent:
-                li._child.append(link)
-
-            if len(link.parent) == 0:
+            if link.parent is None:
                 self.root.append(link)
+            else:
+                link.parent._child.append(link)
+
+
 
         # Find the bottom of the tree
         for link in elinks:
@@ -337,6 +340,10 @@ class ETS(object):
         return v
 
     @property
+    def elinks(self):
+        return self._elinks
+
+    @property
     def base_link(self):
         return self._base_link
 
@@ -570,7 +577,7 @@ class ETS(object):
             else:
                 t = self.ets[i].A()
 
-            self.ets[i]._fk = self.ets[i].parent[0]._fk * t
+            self.ets[i]._fk = self.ets[i].parent._fk * t
 
             # Update the collision objects transform as well
             for col in self.ets[i].collision:
