@@ -91,6 +91,7 @@ Tep = panda.fkine() * sm.SE3.Tz(0.6) * sm.SE3.Tx(-0.1)  # * sm.SE3.Ty(-0.1)
 
 sphere = rp.Shape.Sphere(0.05, sm.SE3(0.5, 0, 0.2))
 sphere.wT = sm.SE3()
+sphere.v = [-0.01, 0, 0.01, 0, 0, 0]
 
 arrived = False
 env.add(panda, show_collision=True, show_robot=False)

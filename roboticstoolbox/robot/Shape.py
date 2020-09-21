@@ -37,6 +37,7 @@ class Shape(object):
         self.length = length
         self.filename = filename
         self.stype = stype
+        self.v = np.zeros(6)
 
     def to_dict(self):
 
@@ -52,7 +53,8 @@ class Shape(object):
             'radius': self.radius,
             'length': self.length,
             't': fk.t.tolist(),
-            'q': r2q(fk.R).tolist()
+            'q': r2q(fk.R).tolist(),
+            'v': self.v.tolist()
         }
 
         return shape
@@ -73,6 +75,14 @@ class Shape(object):
 
     def __repr__(self):
         return f'{self.stype},\n{self.base}'
+
+    @property
+    def v(self):
+        return self._v
+
+    @v.setter
+    def v(self, value):
+        self._v = getvector(value, 6)
 
     @property
     def wT(self):

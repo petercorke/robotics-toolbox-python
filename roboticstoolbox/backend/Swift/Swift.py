@@ -9,6 +9,7 @@ from roboticstoolbox.backend.Connector import Connector
 import zerorpc
 import roboticstoolbox as rp
 import numpy as np
+import spatialmath as sm
 
 
 class Swift(Connector):  # pragma nocover
@@ -147,6 +148,19 @@ class Swift(Connector):  # pragma nocover
                 raise ValueError(
                     'Invalid robot.control_type. '
                     'Must be one of \'p\', \'v\', or \'a\'')
+
+    def _step_shapes(self, dt):
+
+        for shape in self.shapes:
+
+            T = shape.base
+            t = T.t
+            r = T.rpy('rad')
+
+            t += shape.v[:3] * (dt / 1000)
+            r += shape.v[3:] * (dt / 1000)
+
+            shape.base = sm.SE3(t) * sm.SE3.RPY(r)
 
     def _draw_robots(self):
 
