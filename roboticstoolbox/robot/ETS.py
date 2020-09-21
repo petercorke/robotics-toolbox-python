@@ -530,6 +530,32 @@ class ETS(object):
 
         return t
 
+    def fkine_graph(self, q=None, from_link=None, to_link=None):
+
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if q is None:
+            q = self.q
+
+        path, _ = self.get_path(from_link, to_link)
+        j = 0
+        tr = self.base
+
+        for link in path:
+            if link.jtype == link.VARIABLE:
+                T = link.A(q[j])
+                j += 1
+            else:
+                T = link.A()
+
+            tr = tr * T
+
+        return tr
+
     def fkine_all(self, q=None):
         '''
         Tall = fkine_all(q) evaluates fkine for each joint within a robot and
@@ -662,7 +688,138 @@ class ETS(object):
 
         return J
 
-    def jacobe(self, q=None):
+    def get_path(self, from_link, to_link):
+        path = []
+        n = 0
+        link = to_link
+
+        path.append(link)
+        if link.jtype is link.VARIABLE:
+            n += 1
+
+        while link != from_link:
+            link = link.parent
+            path.append(link)
+            if link.jtype is link.VARIABLE:
+                n += 1
+
+        path.reverse()
+
+        return path, n
+
+    def jacob0_graph(self, q=None, from_link=None, to_link=None, offset=None):
+
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if offset is None:
+            offset = SE3()
+
+        path, n = self.get_path(from_link, to_link)
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        T = (self.base.inv() * self.fkine_graph(
+                q, from_link=from_link, to_link=to_link))
+        T = (T * offset).A
+        U = np.eye(4)
+        j = 0
+        J = np.zeros((6, n))
+
+        for link in path:
+
+            for k in range(link.M):
+
+                if k != link.q_idx:
+                    U = U @ link.ets[k].T().A
+                    if link == to_link:
+                        U = U @ offset.A
+                else:
+                    # self._jacoblink(link, k, T)
+                    U = U @ link.ets[k].T(q[j]).A
+
+                    if link == to_link:
+                        U = U @ offset.A
+
+                    Tu = np.linalg.inv(U) @ T
+                    n = U[:3, 0]
+                    o = U[:3, 1]
+                    a = U[:3, 2]
+                    x = Tu[0, 3]
+                    y = Tu[1, 3]
+                    z = Tu[2, 3]
+
+                    if link.ets[k].axis == 'Rz':
+                        J[:3, j] = (o * x) - (n * y)
+                        J[3:, j] = a
+
+                    elif link.ets[k].axis == 'Ry':
+                        J[:3, j] = (n * z) - (a * x)
+                        J[3:, j] = o
+
+                    elif link.ets[k].axis == 'Rx':
+                        J[:3, j] = (a * y) - (o * z)
+                        J[3:, j] = n
+
+                    elif link.ets[k].axis == 'tx':
+                        J[:3, j] = n
+                        J[3:, j] = np.array([0, 0, 0])
+
+                    elif link.ets[k].axis == 'ty':
+                        J[:3, j] = o
+                        J[3:, j] = np.array([0, 0, 0])
+
+                    elif link.ets[k].axis == 'tz':
+                        J[:3, j] = a
+                        J[3:, j] = np.array([0, 0, 0])
+
+                    j += 1
+
+        return J
+
+    def jacobe(self, q=None, from_link=None, to_link=None, offset=None):
+        """
+        Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity. v = Je*qd in the
+        end-effector frame.
+
+        Je = jacobe() as above except uses the stored q value of the
+        robot object.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :return J: The manipulator Jacobian in ee frame
+        :rtype: float ndarray(6,n)
+
+        """
+
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if offset is None:
+            offset = SE3()
+
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, self.n)
+
+        J0 = self.jacob0_graph(q, from_link, to_link, offset)
+        Je = self.jacobev(q, from_link, to_link, offset) @ J0
+        return Je
+
+    def jacobe_old(self, q=None):
         """
         Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
         velocity to end-effector spatial velocity. v = Je*qd in the
@@ -848,7 +1005,7 @@ class ETS(object):
 
     #     return model
 
-    def jacobev(self, q=None):
+    def jacobev(self, q=None, from_link=None, to_link=None, offset=None):
         """
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the base frame to the
@@ -866,7 +1023,17 @@ class ETS(object):
 
         """
 
-        r = (self.base.inv() * self.fkine(q)).R
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if offset is None:
+            offset = SE3()
+
+        r = (self.base.inv() * self.fkine_graph(
+                q, from_link, to_link) * offset).R
         r = np.linalg.inv(r)
 
         Jv = np.zeros((6, 6))

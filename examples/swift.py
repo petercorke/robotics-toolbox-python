@@ -11,6 +11,37 @@ import qpsolvers as qp
 import fcl
 
 
+def link_calc(link, col, ob):
+    di = 0.25
+    ds = 0.05
+
+    request = fcl.DistanceRequest()
+    result = fcl.DistanceResult()
+    ret = fcl.distance(col.co, sphere.co, request, result)
+
+    # wTlp = link._fk * sm.SE3((col.base * sm.SE3(result.nearest_points[0])).t)
+    wTlp = col.base * sm.SE3(result.nearest_points[0])
+    wTcp = ob.base * sm.SE3(result.nearest_points[1])
+    lpTcp = wTlp.inv() * wTcp
+
+    d = ret
+
+    if d < di:
+
+        n = lpTcp.t / d
+        nh = np.expand_dims(np.r_[n, 0, 0, 0], axis=0)
+
+        Je = panda.jacobe(to_link=link, offset=col.base)
+        n = Je.shape[1]
+        l_Ain = np.c_[nh @ Je, np.zeros((1, 13 - n))]
+        l_bin = 0.1 * (d - ds) / (di - ds)
+    else:
+        l_Ain = None
+        l_bin = None
+
+    return l_Ain, l_bin
+
+
 def link_closest_point(links, ob):
 
     c_ret = np.inf
@@ -19,7 +50,7 @@ def link_closest_point(links, ob):
 
     for link in links:
         for col in link.collision:
-            # col = link.collision[0]
+            # col = link.collision[1]
             request = fcl.DistanceRequest()
             result = fcl.DistanceResult()
             ret = fcl.distance(col.co, sphere.co, request, result)
@@ -33,49 +64,20 @@ def link_closest_point(links, ob):
     # The result is the closest point pose represented in the world frame
     # where the closest point is represented with the links rotational frame
     # rather than the links collision objects rotational frame
-    c_wTcp = link._fk * sm.SE3((c_base * sm.SE3(result.nearest_points[0])).t)
+    wTlp = link._fk * sm.SE3((c_base * sm.SE3(c_res.nearest_points[0])).t)
+    # print(wTlp)
+    # wTlp = sm.SE3() * sm.SE3(wTlp.t)
+    # print(wTlp)
 
-    return c_ret, c_res, c_wTcp
+    # wTlp = link._fk * sm.SE3(c_base.t)
 
+    # wTcp = sm.SE3() * sm.SE3((ob.base * sm.SE3(c_res.nearest_points[1])).t)
+    wTcp = ob.base * sm.SE3(c_res.nearest_points[1])
 
-# def link_closest_point(link, ob):
+    lpTcp = wTlp.inv() * wTcp
 
-#     c_ret = np.inf
-#     c_res = None
-#     c_base = None
-#     c_type = None
+    return c_ret, c_res, lpTcp
 
-#     for col in link.collision:
-#         # col = link.collision[0]
-#         request = fcl.DistanceRequest()
-#         result = fcl.DistanceResult()
-#         ret = fcl.distance(col.co, sphere.co, request, result)
-#         if ret < c_ret:
-#             c_ret = ret
-#             c_res = result
-#             c_base = col.base
-#             c_type = col.stype
-
-#     # if c_type == 'cylinder':
-#     # print(result.nearest_points[0])
-
-#     # result.nearest_points[0][2] = 0
-
-#     # Take the link transform represented in the world frame
-#     # Multiply it by the translation of the link frame to the nearest point
-#     # The result is the closest point pose represented in the world frame
-#     # where the closest point is represented with the links rotational frame
-#     # rather than the links collision objects rotational frame
-#     c_wTcp = link._fk * sm.SE3((c_base * sm.SE3(result.nearest_points[0])).t)
-
-#     return c_ret, c_res, c_wTcp
-
-
-def closer(ret1, res1, ret2, res2):
-    if ret1 < ret2:
-        return ret1, res1
-    else:
-        return ret2, res2
 
 
 env = rp.backend.Swift()
@@ -103,11 +105,6 @@ pi = 0.6
 
 while not arrived:
 
-    start = time.time()
-    v, arrived = rp.p_servo(panda.fkine(), Tep, 1.0)
-    # panda.qd = np.linalg.pinv(panda.jacobe()) @ v
-    # env.step(5)
-
     v, arrived = rp.p_servo(panda.fkine(), Tep, 1)
     eTep = panda.fkine().inv() * Tep
     e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
@@ -124,12 +121,31 @@ while not arrived:
     #         bin[i] = ((panda.qlim[1, i] - panda.q[i]) - ps) / (pi - ps)
     #         Ain[i, i] = 1
 
-    Q = np.eye(panda.n + 6)
-    Q[:panda.n, :panda.n] *= Y
-    Q[panda.n:, panda.n:] = (1 / e) * np.eye(6)
+    n = 7
+    Q = np.eye(n + 6)
+    Q[:n, :n] *= Y
+    Q[n:, n:] = (1 / e) * np.eye(6)
     Aeq = np.c_[panda.jacobe(), np.eye(6)]
     beq = v.reshape((6,))
-    c = np.r_[-panda.jacobm().reshape((panda.n,)), np.zeros(6)]
+    Jm = panda.jacobm().reshape((panda.n,))
+    c = np.r_[-Jm[:7], np.zeros(6)]
+
+    l_groups = []
+    j = -1
+    for link in panda._fkpath:
+
+        if link.jtype:
+            j += 1
+            l_groups.append([])
+
+        if j >= 0:
+            l_groups[j].append(link)
+
+
+
+    # Distance Jacobian
+    Ain = None
+    bin = None
 
 
     # Get closest link
@@ -137,26 +153,53 @@ while not arrived:
     linkB = panda._fkpath[-2]
     linkC = panda._fkpath[-3]
     panda.fkine_all()
-    retA, resA, wTcp = link_closest_point([linkA, linkB], sphere)
-    cpTc = wTcp.inv() * (sphere.base * sm.SE3(resA.nearest_points[1]))
 
 
-    d0 = np.linalg.norm(cpTc.t)
-    n0 = cpTc.t / d0
+    links = panda._fkpath[2:]
 
-    # Distance Jacobian
-    ds = 0.05
-    di = 0.6
+    t0 = time.time()
+    for link in links:
+        for col in link.collision:
+            l_Ain, l_bin = link_calc(link, col, sphere)
 
-    if d0 <= di:
-        nh0 = np.expand_dims(np.r_[n0, 0, 0, 0], axis=0)
-        Ain = np.c_[nh0 @ panda.jacobe(), np.zeros((1, 6))]
-        bin = np.array([0.1 * (d0 - ds) / (di - ds)])
-    else:
-        Ain = None
-        bin = None
+            if l_Ain is not None and l_bin is not None:
+                if Ain is None:
+                    Ain = l_Ain
+                else:
+                    Ain = np.r_[Ain, l_Ain]
 
+                if bin is None:
+                    bin = np.array(l_bin)
+                else:
+                    bin = np.r_[bin, l_bin]
+
+    # retA, resA, lpTcp = link_closest_point([linkA], sphere)
+    # # cpTc = wTcp.inv() * (sphere.base * sm.SE3(resA.nearest_points[1]))
+
+    # d0 = np.linalg.norm(lpTcp.t)
+    # d0 = retA
+    # n0 = lpTcp.t / d0
+
+    # print(d0)
+    # print(retA)
+    # print(n0)
+
+    # # Distance Jacobian
+    # ds = 0.05
+    # di = 0.6
+
+    # if d0 <= di:
+    #     nh0 = np.expand_dims(np.r_[n0, 0, 0, 0], axis=0)
+    #     Ain = np.c_[nh0 @ panda.jacobe(), np.zeros((1, 6))]
+    #     bin = np.array([0.1 * (d0 - ds) / (di - ds)])
+    # else:
+    #     Ain = None
+    #     bin = None
+
+    t1 = time.time()
     qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq)
+    t2 = time.time()
+    print(t1-t0)
 
     if np.any(np.isnan(qd)):
         panda.qd = panda.qz
@@ -164,12 +207,3 @@ while not arrived:
         panda.qd = qd[:panda.n]
 
     env.step(25)
-
-    stop = time.time()
-    if stop - start < dt:
-        time.sleep(dt - (stop - start))
-
-# env.record_stop()
-
-# Uncomment to stop the plot from closing
-# env.hold()
