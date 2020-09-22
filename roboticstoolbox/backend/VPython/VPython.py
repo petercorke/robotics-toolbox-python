@@ -4,12 +4,28 @@
 """
 
 from roboticstoolbox.backend.Connector import Connector
+from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D
 
 
 class VPython(Connector):
 
     def __init__(self):
+        """
+        Open a localhost session with no canvases
+
+        """
         super(VPython, self).__init__()
+
+        # Create a canvas to initiate the connection
+        temp = GraphicsCanvas3D()
+
+        # Delete the canvas to leave a blank screen
+        temp.scene.append_to_caption('''
+            <script type="text/javascript">
+                let gs = document.getElementById('glowscript');
+                gs.innerHTML = '';
+            </script>
+        ''')
 
     def launch(self):
         """
@@ -19,6 +35,8 @@ class VPython(Connector):
         """
 
         super().launch()
+
+        # Create the canvas with the given information
 
     def step(self):
         """
@@ -36,6 +54,8 @@ class VPython(Connector):
         """
 
         super().step()
+
+        # Update positions to new frame
 
     def reset(self):
         """
@@ -55,6 +75,10 @@ class VPython(Connector):
 
         super().restart()
 
+        # Close session
+
+        # Load new session
+
     def close(self):
         """
         state = close() triggers the external program to gracefully close
@@ -63,9 +87,7 @@ class VPython(Connector):
 
         super().close()
 
-    #
-    #  Methods to interface with the robots created in other environments
-    #
+        # Close session
 
     def add(self):
         """
@@ -77,6 +99,8 @@ class VPython(Connector):
 
         super().add()
 
+        # Add robot to canvas
+
     def remove(self):
         """
         id = remove(robot) removes the robot to the external environment.
@@ -84,3 +108,5 @@ class VPython(Connector):
         """
 
         super().remove()
+
+        # Remove robot from canvas
