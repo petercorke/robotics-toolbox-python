@@ -5,6 +5,7 @@
 
 from roboticstoolbox.backend.Connector import Connector
 
+from vpython import canvas, sphere
 from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D, GraphicsCanvas2D
 
 
@@ -21,7 +22,8 @@ class VPython(Connector):
         self.canvas = None
 
         # Create a canvas to initiate the connection
-        temp = GraphicsCanvas3D()
+        temp = canvas()
+        sphere(scene=temp)
 
         # Delete the canvas to leave a blank screen
         temp.scene.append_to_caption('''
