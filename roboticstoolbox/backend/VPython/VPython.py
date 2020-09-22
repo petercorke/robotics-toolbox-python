@@ -19,7 +19,7 @@ class VPython(Connector):
         super(VPython, self).__init__()
 
         # Init vars
-        self.canvas = None
+        self.canvases = []
 
         # Create a canvas to initiate the connection
         temp = canvas()
@@ -44,9 +44,9 @@ class VPython(Connector):
 
         # Create the canvas with the given information
         if is_3d:
-            self.canvas = GraphicsCanvas3D(height, width, title, caption, grid)
+            self.canvases.append(GraphicsCanvas3D(height, width, title, caption, grid))
         else:
-            self.canvas = GraphicsCanvas2D(height, width, title, caption, grid)
+            self.canvases.append(GraphicsCanvas2D(height, width, title, caption, grid))
 
     def step(self):
         """
@@ -79,15 +79,23 @@ class VPython(Connector):
     def restart(self):
         """
         state = restart() triggers the external program to close and relaunch
-        to thestate defined by launch
+        to the state defined by launch
 
         """
 
         super().restart()
 
-        # Close session
+        if len(self.canvases) > 0:
+            # Clear localhost
+            self.canvases[0].scene.append_to_caption('''
+                <script type="text/javascript">
+                    let gs = document.getElementById('glowscript');
+                    gs.innerHTML = '';
+                </script>
+                ''')
 
-        # Load new session
+            # Delete all sessions
+            self.canvases = []
 
     def close(self):
         """
