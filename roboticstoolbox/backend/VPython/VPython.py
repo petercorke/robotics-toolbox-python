@@ -20,7 +20,7 @@ class VPython(Connector):
 
         # Init vars
         self.canvases = []
-        self.canvas_settings = []
+        self.canvas_settings = []  # 2D array of [is_3d, height, width, title, caption, grid] per canvas
 
         self._create_empty_session()
 
@@ -33,7 +33,7 @@ class VPython(Connector):
 
         super().launch()
 
-        self.canvas_settings = [is_3d, height, width, title, caption, grid]
+        self.canvas_settings.append([is_3d, height, width, title, caption, grid])
 
         # Create the canvas with the given information
         if is_3d:
@@ -82,14 +82,12 @@ class VPython(Connector):
             self.canvases = []
 
             self._create_empty_session()
-            self.launch(
-                self.canvas_settings[0],
-                self.canvas_settings[1],
-                self.canvas_settings[2],
-                self.canvas_settings[3],
-                self.canvas_settings[4],
-                self.canvas_settings[5],
-            )
+            for settings in self.canvas_settings:
+                # Create the canvas with the given information
+                if settings[0]:
+                    self.canvases.append(GraphicsCanvas3D(settings[1], settings[2], settings[3], settings[4], settings[5]))
+                else:
+                    self.canvases.append(GraphicsCanvas2D(settings[1], settings[2], settings[3], settings[4], settings[5]))
 
     def restart(self):
         """
@@ -102,14 +100,12 @@ class VPython(Connector):
 
         self.close()
         self._create_empty_session()
-        self.launch(
-            self.canvas_settings[0],
-            self.canvas_settings[1],
-            self.canvas_settings[2],
-            self.canvas_settings[3],
-            self.canvas_settings[4],
-            self.canvas_settings[5],
-        )
+        for settings in self.canvas_settings:
+            # Create the canvas with the given information
+            if settings[0]:
+                self.canvases.append(GraphicsCanvas3D(settings[1], settings[2], settings[3], settings[4], settings[5]))
+            else:
+                self.canvases.append(GraphicsCanvas2D(settings[1], settings[2], settings[3], settings[4], settings[5]))
 
     def close(self):
         """
@@ -152,7 +148,12 @@ class VPython(Connector):
 
         # Remove robot from canvas
 
-    def _create_empty_session(self):
+    @staticmethod
+    def _create_empty_session():
+        """
+        Create a canvas to ensure the localhost session has been opened.
+        Then clear the browser tab
+        """
         # Create a canvas to initiate the connection
         temp = GraphicsCanvas2D()
 
