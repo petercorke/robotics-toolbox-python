@@ -7,7 +7,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ETS import ETS
 
 
 class ELink(object):
@@ -16,8 +16,8 @@ class ELink(object):
     related to a robot joint and link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
 
-    :param ETS: kinematic - The elementary transforms which make up the link
-    :type ETS: list (ET)
+    :param ets: kinematic - The elementary transforms which make up the link
+    :type ets: ETS
 
     :param qlim: joint variable limits [min max]
     :type qlim: float ndarray(2)
@@ -45,7 +45,8 @@ class ELink(object):
 
     def __init__(
             self,
-            ets=ET(),
+            ets=ETS(),
+            vet=None,
             name='',
             parent=None,
             qlim=np.zeros(2),
@@ -64,7 +65,7 @@ class ELink(object):
         self.STATIC = 0
         self.VARIABLE = 1
 
-        if isinstance(ets, ET):
+        if isinstance(ets, ETS):
             self._ets = ets
         else:
             raise TypeError(

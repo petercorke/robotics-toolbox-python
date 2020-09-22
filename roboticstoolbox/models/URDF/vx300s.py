@@ -2,11 +2,11 @@
 
 import numpy as np
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 from pathlib import Path
 
 
-class vx300s(ETS):
+class vx300s(ERobot):
 
     def __init__(self):
 

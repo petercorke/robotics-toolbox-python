@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 import roboticstoolbox as rp
 from pathlib import Path
 from math import pi
 
 
-class Puma560(ETS):
+class Puma560(ERobot):
 
     def __init__(self):
 

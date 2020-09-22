@@ -1640,7 +1640,7 @@ class URDF(URDFType):
 
         for j in self.joints:
 
-            ets = rp.ET()
+            ets = rp.ETS()
             T = sm.SE3(j.origin)
             trans = T.t
             rot = j.rpy
@@ -1648,56 +1648,56 @@ class URDF(URDFType):
             # print(rot)
 
             if trans[0] != 0:
-                ets = ets * rp.ET.tx(trans[0])
+                ets = ets * rp.ETS.tx(trans[0])
 
             if trans[1] != 0:
-                ets = ets * rp.ET.ty(trans[1])
+                ets = ets * rp.ETS.ty(trans[1])
 
             if trans[2] != 0:
-                ets = ets * rp.ET.tz(trans[2])
+                ets = ets * rp.ETS.tz(trans[2])
 
             if rot[0] != 0:
-                ets = ets * rp.ET.rx(rot[0])
+                ets = ets * rp.ETS.rx(rot[0])
 
             if rot[1] != 0:
-                ets = ets * rp.ET.ry(rot[1])
+                ets = ets * rp.ETS.ry(rot[1])
 
             if rot[2] != 0:
-                ets = ets * rp.ET.rz(rot[2])
+                ets = ets * rp.ETS.rz(rot[2])
 
             if j.joint_type == 'revolute' or \
                j.joint_type == 'continuous':   # pragma nocover
                 if j.axis[0] == 1:
-                    ets = ets * rp.ET.rx()
+                    ets = ets * rp.ETS.rx()
                 elif j.axis[0] == -1:
-                    ets = ets * rp.ET.ry(np.pi)
-                    ets = ets * rp.ET.rx()
+                    ets = ets * rp.ETS.ry(np.pi)
+                    ets = ets * rp.ETS.rx()
                 elif j.axis[1] == 1:
-                    ets = ets * rp.ET.ry()
+                    ets = ets * rp.ETS.ry()
                 elif j.axis[1] == -1:
-                    ets = ets * rp.ET.rz(np.pi)
-                    ets = ets * rp.ET.ry()
+                    ets = ets * rp.ETS.rz(np.pi)
+                    ets = ets * rp.ETS.ry()
                 elif j.axis[2] == 1:
-                    ets = ets * rp.ET.rz()
+                    ets = ets * rp.ETS.rz()
                 elif j.axis[2] == -1:
-                    ets = ets * rp.ET.rx(np.pi)
-                    ets = ets * rp.ET.rz()
+                    ets = ets * rp.ETS.rx(np.pi)
+                    ets = ets * rp.ETS.rz()
             elif j.joint_type == 'prismatic':   # pragma nocover
                 if j.axis[0] == 1:
-                    ets = ets * rp.ET.tx()
+                    ets = ets * rp.ETS.tx()
                 elif j.axis[0] == -1:
-                    ets = ets * rp.ET.ry(np.pi)
-                    ets = ets * rp.ET.tx()
+                    ets = ets * rp.ETS.ry(np.pi)
+                    ets = ets * rp.ETS.tx()
                 elif j.axis[1] == 1:
-                    ets = ets * rp.ET.ty()
+                    ets = ets * rp.ETS.ty()
                 elif j.axis[1] == -1:
-                    ets = ets * rp.ET.rz(np.pi)
-                    ets = ets * rp.ET.ty()
+                    ets = ets * rp.ETS.rz(np.pi)
+                    ets = ets * rp.ETS.ty()
                 elif j.axis[2] == 1:
-                    ets = ets * rp.ET.tz()
+                    ets = ets * rp.ETS.tz()
                 elif j.axis[2] == -1:
-                    ets = ets * rp.ET.rx(np.pi)
-                    ets = ets * rp.ET.tz()
+                    ets = ets * rp.ETS.rx(np.pi)
+                    ets = ets * rp.ETS.tz()
 
             try:
                 qlim = [j.limit.lower, j.limit.upper]
@@ -1724,7 +1724,7 @@ class URDF(URDFType):
             if not found:
                 link = self._link_map[self.joints[i].parent]
                 base_link = rp.ELink(
-                        rp.ET(),
+                        rp.ETS(),
                         name=link.name)
                 elinks[i]._parent = base_link
                 try:

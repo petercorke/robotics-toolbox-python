@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 from pathlib import Path
 import roboticstoolbox as rp
 
 
-class j2n4s300(ETS):
+class j2n4s300(ERobot):
 
     def __init__(self):
 

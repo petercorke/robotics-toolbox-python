@@ -418,16 +418,16 @@ class TestETS(unittest.TestCase):
     def test_init(self):
         l0 = rp.ELink()
         l1 = rp.ELink()
-        r = rp.ETS([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_link=l0)
+        r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_link=l0)
         r.base_link = l1
         r.base_link = 0
         r.ee_link = 1
 
         with self.assertRaises(TypeError):
-            rp.ETS(l0, base=sm.SE3.Rx(1.3))
+            rp.ERobot(l0, base=sm.SE3.Rx(1.3))
 
         with self.assertRaises(TypeError):
-            rp.ETS([1, 2], base=sm.SE3.Rx(1.3))
+            rp.ERobot([1, 2], base=sm.SE3.Rx(1.3))
 
     def test_dict(self):
         panda = rp.models.ETS.Panda()
@@ -457,14 +457,14 @@ class TestETS(unittest.TestCase):
         self.assertIsInstance(panda.manuf, str)
 
     def test_complex(self):
-        l0 = rp.ELink(rp.ET.tx(0.1) * rp.ET.rx())
-        l1 = rp.ELink(rp.ET.tx(0.1) * rp.ET.ry(), parent=l0)
-        l2 = rp.ELink(rp.ET.tx(0.1) * rp.ET.rz(), parent=l1)
-        l3 = rp.ELink(rp.ET.tx(0.1) * rp.ET.tx(), parent=l2)
-        l4 = rp.ELink(rp.ET.tx(0.1) * rp.ET.ty(), parent=l3)
-        l5 = rp.ELink(rp.ET.tx(0.1) * rp.ET.tz(), parent=l4)
+        l0 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.rx())
+        l1 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.ry(), parent=l0)
+        l2 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.rz(), parent=l1)
+        l3 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.tx(), parent=l2)
+        l4 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.ty(), parent=l3)
+        l5 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.tz(), parent=l4)
 
-        r = rp.ETS([l0, l1, l2, l3, l4, l5])
+        r = rp.ERobot([l0, l1, l2, l3, l4, l5])
         r.q = [1, 2, 3, 1, 2, 3]
 
         ans = np.array([
@@ -487,25 +487,25 @@ class TestETS(unittest.TestCase):
     #     e.close()
 
     # def test_plot_complex(self):
-    #     l0 = rp.ET.rz()
-    #     l1 = rp.ET.tx()
-    #     l2 = rp.ET.ry()
-    #     l3 = rp.ET.tz(1)
-    #     l4 = rp.ET.rx()
+    #     l0 = rp.ETS.rz()
+    #     l1 = rp.ETS.tx()
+    #     l2 = rp.ETS.ry()
+    #     l3 = rp.ETS.tz(1)
+    #     l4 = rp.ETS.rx()
 
-    #     E = rp.ETS([l0, l1, l2, l3, l4])
+    #     E = rp.ERobot([l0, l1, l2, l3, l4])
     #     e = E.plot(block=False)
     #     e.step(0)
     #     e.close()
 
     # def test_teach(self):
-    #     l0 = rp.ET.rz()
-    #     l1 = rp.ET.tx()
-    #     l2 = rp.ET.ry()
-    #     l3 = rp.ET.tz(1)
-    #     l4 = rp.ET.rx()
+    #     l0 = rp.ETS.rz()
+    #     l1 = rp.ETS.tx()
+    #     l2 = rp.ETS.ry()
+    #     l3 = rp.ETS.tz(1)
+    #     l4 = rp.ETS.rx()
 
-    #     E = rp.ETS([l0, l1, l2, l3, l4])
+    #     E = rp.ERobot([l0, l1, l2, l3, l4])
     #     e = E.teach(block=False, q=[1, 2, 3, 4])
     #     e.close()
 
