@@ -5,8 +5,8 @@
 
 from roboticstoolbox.backend.Connector import Connector
 
-from vpython import canvas, sphere
 from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D, GraphicsCanvas2D
+from roboticstoolbox.backend.VPython.common_functions import close_localhost_session
 
 
 class VPython(Connector):
@@ -22,8 +22,7 @@ class VPython(Connector):
         self.canvases = []
 
         # Create a canvas to initiate the connection
-        temp = canvas()
-        sphere(scene=temp)
+        temp = GraphicsCanvas2D()
 
         # Delete the canvas to leave a blank screen
         temp.scene.append_to_caption('''
@@ -106,6 +105,15 @@ class VPython(Connector):
         super().close()
 
         # Close session
+        if len(self.canvases) > 0:
+            # if a canvas made
+            close_localhost_session(self.canvases[0])
+        else:
+            # No canvas, so make one
+            temp = GraphicsCanvas2D()
+            close_localhost_session(temp)
+
+        self.canvases = []
 
     def add(self):
         """
