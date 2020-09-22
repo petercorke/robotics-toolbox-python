@@ -4,7 +4,8 @@
 """
 
 from roboticstoolbox.backend.Connector import Connector
-from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D
+
+from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D, GraphicsCanvas2D
 
 
 class VPython(Connector):
@@ -15,6 +16,9 @@ class VPython(Connector):
 
         """
         super(VPython, self).__init__()
+
+        # Init vars
+        self.canvas = None
 
         # Create a canvas to initiate the connection
         temp = GraphicsCanvas3D()
@@ -27,7 +31,7 @@ class VPython(Connector):
             </script>
         ''')
 
-    def launch(self):
+    def launch(self, is_3d=True, height=500, width=888, title='', caption='', grid=True):
         """
         env = launch(args) launch the external program with an empty or
         specific scene as defined by args
@@ -37,6 +41,10 @@ class VPython(Connector):
         super().launch()
 
         # Create the canvas with the given information
+        if is_3d:
+            self.canvas = GraphicsCanvas3D(height, width, title, caption, grid)
+        else:
+            self.canvas = GraphicsCanvas2D(height, width, title, caption, grid)
 
     def step(self):
         """
