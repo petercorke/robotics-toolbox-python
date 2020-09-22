@@ -20,17 +20,9 @@ class VPython(Connector):
 
         # Init vars
         self.canvases = []
+        self.canvas_settings = []
 
-        # Create a canvas to initiate the connection
-        temp = GraphicsCanvas2D()
-
-        # Delete the canvas to leave a blank screen
-        temp.scene.append_to_caption('''
-            <script type="text/javascript">
-                let gs = document.getElementById('glowscript');
-                gs.innerHTML = '';
-            </script>
-        ''')
+        self._create_empty_session()
 
     def launch(self, is_3d=True, height=500, width=888, title='', caption='', grid=True):
         """
@@ -40,6 +32,8 @@ class VPython(Connector):
         """
 
         super().launch()
+
+        self.canvas_settings = [is_3d, height, width, title, caption, grid]
 
         # Create the canvas with the given information
         if is_3d:
@@ -75,15 +69,6 @@ class VPython(Connector):
 
         super().reset()
 
-    def restart(self):
-        """
-        state = restart() triggers the external program to close and relaunch
-        to the state defined by launch
-
-        """
-
-        super().restart()
-
         if len(self.canvases) > 0:
             # Clear localhost
             self.canvases[0].scene.append_to_caption('''
@@ -95,6 +80,36 @@ class VPython(Connector):
 
             # Delete all sessions
             self.canvases = []
+
+            self._create_empty_session()
+            self.launch(
+                self.canvas_settings[0],
+                self.canvas_settings[1],
+                self.canvas_settings[2],
+                self.canvas_settings[3],
+                self.canvas_settings[4],
+                self.canvas_settings[5],
+            )
+
+    def restart(self):
+        """
+        state = restart() triggers the external program to close and relaunch
+        to the state defined by launch
+
+        """
+
+        super().restart()
+
+        self.close()
+        self._create_empty_session()
+        self.launch(
+            self.canvas_settings[0],
+            self.canvas_settings[1],
+            self.canvas_settings[2],
+            self.canvas_settings[3],
+            self.canvas_settings[4],
+            self.canvas_settings[5],
+        )
 
     def close(self):
         """
@@ -136,3 +151,15 @@ class VPython(Connector):
         super().remove()
 
         # Remove robot from canvas
+
+    def _create_empty_session(self):
+        # Create a canvas to initiate the connection
+        temp = GraphicsCanvas2D()
+
+        # Delete the canvas to leave a blank screen
+        temp.scene.append_to_caption('''
+            <script type="text/javascript">
+                let gs = document.getElementById('glowscript');
+                gs.innerHTML = '';
+            </script>
+        ''')
