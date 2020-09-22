@@ -114,3 +114,18 @@ def wrap_to_pi(angle_type, angle):
         raise ValueError('angle_type must be "deg" or "rad"')
 
     return angle
+
+
+def close_localhost_session(canvas):
+    """
+    Terminate the local host session through JavaScript
+
+    :param canvas: The scene to append the JS to the caption
+    :type canvas: class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas3D`,
+                  class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas2D`
+    """
+    canvas.scene.append_to_caption('''
+        <script type="text/javascript">
+            close();
+        </script>
+        ''')
