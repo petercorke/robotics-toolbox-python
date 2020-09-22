@@ -1644,6 +1644,7 @@ class URDF(URDFType):
             T = sm.SE3(j.origin)
             trans = T.t
             rot = j.rpy
+            v = None
             # print(trans)
             # print(rot)
 
@@ -1668,36 +1669,36 @@ class URDF(URDFType):
             if j.joint_type == 'revolute' or \
                j.joint_type == 'continuous':   # pragma nocover
                 if j.axis[0] == 1:
-                    ets = ets * rp.ETS.rx()
+                    v = rp.ETS.rx()
                 elif j.axis[0] == -1:
                     ets = ets * rp.ETS.ry(np.pi)
-                    ets = ets * rp.ETS.rx()
+                    v = rp.ETS.rx()
                 elif j.axis[1] == 1:
-                    ets = ets * rp.ETS.ry()
+                    v = rp.ETS.ry()
                 elif j.axis[1] == -1:
                     ets = ets * rp.ETS.rz(np.pi)
-                    ets = ets * rp.ETS.ry()
+                    v = rp.ETS.ry()
                 elif j.axis[2] == 1:
-                    ets = ets * rp.ETS.rz()
+                    v = rp.ETS.rz()
                 elif j.axis[2] == -1:
                     ets = ets * rp.ETS.rx(np.pi)
-                    ets = ets * rp.ETS.rz()
+                    v = rp.ETS.rz()
             elif j.joint_type == 'prismatic':   # pragma nocover
                 if j.axis[0] == 1:
-                    ets = ets * rp.ETS.tx()
+                    v = rp.ETS.tx()
                 elif j.axis[0] == -1:
                     ets = ets * rp.ETS.ry(np.pi)
-                    ets = ets * rp.ETS.tx()
+                    v = rp.ETS.tx()
                 elif j.axis[1] == 1:
-                    ets = ets * rp.ETS.ty()
+                    v = rp.ETS.ty()
                 elif j.axis[1] == -1:
                     ets = ets * rp.ETS.rz(np.pi)
-                    ets = ets * rp.ETS.ty()
+                    v = rp.ETS.ty()
                 elif j.axis[2] == 1:
-                    ets = ets * rp.ETS.tz()
+                    v = rp.ETS.tz()
                 elif j.axis[2] == -1:
                     ets = ets * rp.ETS.rx(np.pi)
-                    ets = ets * rp.ETS.tz()
+                    v = rp.ETS.tz()
 
             try:
                 qlim = [j.limit.lower, j.limit.upper]
@@ -1707,6 +1708,7 @@ class URDF(URDFType):
             elinks.append(
                 rp.ELink(
                     ets,
+                    v,
                     name=j.name,
                     qlim=qlim
                 )

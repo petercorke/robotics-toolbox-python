@@ -46,7 +46,7 @@ class ELink(object):
     def __init__(
             self,
             ets=ETS(),
-            vet=None,
+            v=None,
             name='',
             parent=None,
             qlim=np.zeros(2),
@@ -71,8 +71,6 @@ class ELink(object):
             raise TypeError(
                 'The ets argument must be of type ETS')
 
-        self._q_idx = []
-
         self._name = name
 
         if isinstance(parent, list):
@@ -89,21 +87,31 @@ class ELink(object):
         self._M = len(self._ets)
 
         # Initialise joints
-        for i in range(self.M):
-            if ets[i].jtype is not ets[i].STATIC:
-                ets[i].j = len(self._q_idx)
-                self._q_idx.append(i)
+        if isinstance(ets, ETS):
+            self._Ts = SE3()
+            for i in range(self.M):
+                if ets[i].jtype is not ets[i].STATIC:
+                    raise ValueError('The transforms in ets must be constant')
 
-        if len(self._q_idx) > 1:
+                self._Ts *= ets[i].T()
+
+        elif isinstance(ets, SE3):
+            self._Ts = ets
+
+        # Check the variable joint
+        if v is None:
+            self._jtype = self.STATIC
+        elif not isinstance(v, ETS):
+            raise TypeError('v must be of type ETS')
+        elif v[0].jtype is v[0].STATIC:
+            raise ValueError('v must be a variable ETS')
+        elif len(v) > 1:
             raise ValueError(
                 "An elementary link can only have one joint variable")
-        elif len(self._q_idx) == 0:
-            self._jtype = self.STATIC
-            self._q_idx = None
         else:
             self._jtype = self.VARIABLE
-            self._q_idx = self._q_idx[0]
 
+        self._v = v
         self.qlim = qlim
         self.geometry = geometry
         self.collision = collision
@@ -119,6 +127,14 @@ class ELink(object):
 
     def __repr__(self):
         return self.name
+
+    @property
+    def v(self):
+        return self._v
+
+    @property
+    def Ts(self):
+        return self._Ts
 
     @property
     def collision(self):
@@ -191,10 +207,6 @@ class ELink(object):
     @property
     def G(self):
         return self._G
-
-    @property
-    def q_idx(self):
-        return self._q_idx
 
     @collision.setter
     def collision(self, coll):
@@ -376,22 +388,25 @@ class ELink(object):
 
         """
 
-        j = 0
-        tr = SE3()
+        # j = 0
+        # tr = SE3()
 
-        if self.q_idx is not None and q is None:
+        if self.jtype == self.VARIABLE and q is None:
             raise ValueError("q is required for variable joints")
 
-        for k in range(self.M):
-            if self.ets[k].jtype == self.ets[k].VARIABLE:
-                T = self.ets[k].T(q)
-                j += 1
-            else:
-                T = self.ets[k].T()
+        # for k in range(self.M):
+        #     if self.ets[k].jtype == self.ets[k].VARIABLE:
+        #         T = self.ets[k].T(q)
+        #         j += 1
+        #     else:
+        #         T = self.ets[k].T()
 
-            tr = tr * T
+        #     tr = tr * T
 
-        return tr
+        if self.v is not None:
+            return self.Ts * self.v.T(q)
+        else:
+            return self.Ts
 
     def islimit(self, q):
         """

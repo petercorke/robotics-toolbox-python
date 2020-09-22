@@ -9,9 +9,9 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.backend.PyPlot.functions import \
-    _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
-    _plot2, _teach2
+# from roboticstoolbox.backend.PyPlot.functions import \
+    # _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
+    # _plot2, _teach2
 from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 
@@ -94,8 +94,6 @@ class ERobot(object):
                 self.root.append(link)
             else:
                 link.parent._child.append(link)
-
-
 
         # Find the bottom of the tree
         for link in elinks:
@@ -197,7 +195,6 @@ class ERobot(object):
             li = {
                 'axis': [],
                 'eta': [],
-                'q_idx': link.q_idx,
                 'geometry': [],
                 'collision': []
             }
@@ -222,7 +219,6 @@ class ERobot(object):
         }
 
         self.fkine_all()
-        # print(Tall)
 
         for link in self.ets:
 
@@ -610,81 +606,81 @@ class ERobot(object):
             for gi in self.ets[i].geometry:
                 gi.wT = self.ets[i]._fk
 
-    def jacob0(self, q=None):
-        """
-        J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity. v = J0*qd in the
-        base frame.
+    # def jacob0(self, q=None):
+    #     """
+    #     J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
+    #     velocity to end-effector spatial velocity. v = J0*qd in the
+    #     base frame.
 
-        J0 = jacob0() as above except uses the stored q value of the
-        robot object.
+    #     J0 = jacob0() as above except uses the stored q value of the
+    #     robot object.
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+    #     :param q: The joint angles/configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
 
-        :return J: The manipulator Jacobian in ee frame
-        :rtype: float ndarray(6,n)
+    #     :return J: The manipulator Jacobian in ee frame
+    #     :rtype: float ndarray(6,n)
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+    #     :references:
+    #         - Kinematic Derivatives using the Elementary Transform
+    #           Sequence, J. Haviland and P. Corke
+    #     """
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+    #     if q is None:
+    #         q = np.copy(self.q)
+    #     else:
+    #         q = getvector(q, self.n)
 
-        T = (self.base.inv() * self.fkine(q)).A
-        U = np.eye(4)
-        j = 0
-        J = np.zeros((6, self.n))
+    #     T = (self.base.inv() * self.fkine(q)).A
+    #     U = np.eye(4)
+    #     j = 0
+    #     J = np.zeros((6, self.n))
 
-        for link in self._fkpath:
+    #     for link in self._fkpath:
 
-            for k in range(link.M):
+    #         for k in range(link.M):
 
-                if k != link.q_idx:
-                    U = U @ link.ets[k].T().A
-                else:
-                    # self._jacoblink(link, k, T)
-                    U = U @ link.ets[k].T(q[j]).A
-                    Tu = np.linalg.inv(U) @ T
-                    n = U[:3, 0]
-                    o = U[:3, 1]
-                    a = U[:3, 2]
-                    x = Tu[0, 3]
-                    y = Tu[1, 3]
-                    z = Tu[2, 3]
+    #             if k != link.q_idx:
+    #                 U = U @ link.ets[k].T().A
+    #             else:
+    #                 # self._jacoblink(link, k, T)
+    #                 U = U @ link.ets[k].T(q[j]).A
+    #                 Tu = np.linalg.inv(U) @ T
+    #                 n = U[:3, 0]
+    #                 o = U[:3, 1]
+    #                 a = U[:3, 2]
+    #                 x = Tu[0, 3]
+    #                 y = Tu[1, 3]
+    #                 z = Tu[2, 3]
 
-                    if link.ets[k].axis == 'Rz':
-                        J[:3, j] = (o * x) - (n * y)
-                        J[3:, j] = a
+    #                 if link.ets[k].axis == 'Rz':
+    #                     J[:3, j] = (o * x) - (n * y)
+    #                     J[3:, j] = a
 
-                    elif link.ets[k].axis == 'Ry':
-                        J[:3, j] = (n * z) - (a * x)
-                        J[3:, j] = o
+    #                 elif link.ets[k].axis == 'Ry':
+    #                     J[:3, j] = (n * z) - (a * x)
+    #                     J[3:, j] = o
 
-                    elif link.ets[k].axis == 'Rx':
-                        J[:3, j] = (a * y) - (o * z)
-                        J[3:, j] = n
+    #                 elif link.ets[k].axis == 'Rx':
+    #                     J[:3, j] = (a * y) - (o * z)
+    #                     J[3:, j] = n
 
-                    elif link.ets[k].axis == 'tx':
-                        J[:3, j] = n
-                        J[3:, j] = np.array([0, 0, 0])
+    #                 elif link.ets[k].axis == 'tx':
+    #                     J[:3, j] = n
+    #                     J[3:, j] = np.array([0, 0, 0])
 
-                    elif link.ets[k].axis == 'ty':
-                        J[:3, j] = o
-                        J[3:, j] = np.array([0, 0, 0])
+    #                 elif link.ets[k].axis == 'ty':
+    #                     J[:3, j] = o
+    #                     J[3:, j] = np.array([0, 0, 0])
 
-                    elif link.ets[k].axis == 'tz':
-                        J[:3, j] = a
-                        J[3:, j] = np.array([0, 0, 0])
+    #                 elif link.ets[k].axis == 'tz':
+    #                     J[:3, j] = a
+    #                     J[3:, j] = np.array([0, 0, 0])
 
-                    j += 1
+    #                 j += 1
 
-        return J
+    #     return J
 
     def get_path(self, from_link, to_link):
         path = []
@@ -705,7 +701,7 @@ class ERobot(object):
 
         return path, n
 
-    def jacob0_graph(self, q=None, from_link=None, to_link=None, offset=None):
+    def jacob0(self, q=None, from_link=None, to_link=None, offset=None):
 
         if from_link is None:
             from_link = self.base_link
@@ -732,52 +728,47 @@ class ERobot(object):
 
         for link in path:
 
-            for k in range(link.M):
+            if link.jtype is link.STATIC:
+                U = U @ link.A().A
+            else:
+                U = U @ link.A(q[j]).A
 
-                if k != link.q_idx:
-                    U = U @ link.ets[k].T().A
-                    if link == to_link:
-                        U = U @ offset.A
-                else:
-                    # self._jacoblink(link, k, T)
-                    U = U @ link.ets[k].T(q[j]).A
+                if link == to_link:
+                    U = U @ offset.A
 
-                    if link == to_link:
-                        U = U @ offset.A
+                Tu = np.linalg.inv(U) @ T
+                n = U[:3, 0]
+                o = U[:3, 1]
+                a = U[:3, 2]
+                x = Tu[0, 3]
+                y = Tu[1, 3]
+                z = Tu[2, 3]
 
-                    Tu = np.linalg.inv(U) @ T
-                    n = U[:3, 0]
-                    o = U[:3, 1]
-                    a = U[:3, 2]
-                    x = Tu[0, 3]
-                    y = Tu[1, 3]
-                    z = Tu[2, 3]
+                if link.v.axis == 'Rz':
+                    J[:3, j] = (o * x) - (n * y)
+                    J[3:, j] = a
 
-                    if link.ets[k].axis == 'Rz':
-                        J[:3, j] = (o * x) - (n * y)
-                        J[3:, j] = a
+                elif link.v.axis == 'Ry':
+                    J[:3, j] = (n * z) - (a * x)
+                    J[3:, j] = o
 
-                    elif link.ets[k].axis == 'Ry':
-                        J[:3, j] = (n * z) - (a * x)
-                        J[3:, j] = o
+                elif link.v.axis == 'Rx':
+                    J[:3, j] = (a * y) - (o * z)
+                    J[3:, j] = n
 
-                    elif link.ets[k].axis == 'Rx':
-                        J[:3, j] = (a * y) - (o * z)
-                        J[3:, j] = n
+                elif link.v.axis == 'tx':
+                    J[:3, j] = n
+                    J[3:, j] = np.array([0, 0, 0])
 
-                    elif link.ets[k].axis == 'tx':
-                        J[:3, j] = n
-                        J[3:, j] = np.array([0, 0, 0])
+                elif link.v.axis == 'ty':
+                    J[:3, j] = o
+                    J[3:, j] = np.array([0, 0, 0])
 
-                    elif link.ets[k].axis == 'ty':
-                        J[:3, j] = o
-                        J[3:, j] = np.array([0, 0, 0])
+                elif link.v.axis == 'tz':
+                    J[:3, j] = a
+                    J[3:, j] = np.array([0, 0, 0])
 
-                    elif link.ets[k].axis == 'tz':
-                        J[:3, j] = a
-                        J[3:, j] = np.array([0, 0, 0])
-
-                    j += 1
+                j += 1
 
         return J
 
@@ -813,7 +804,7 @@ class ERobot(object):
         else:
             q = getvector(q, self.n)
 
-        J0 = self.jacob0_graph(q, from_link, to_link, offset)
+        J0 = self.jacob0(q, from_link, to_link, offset)
         Je = self.jacobev(q, from_link, to_link, offset) @ J0
         return Je
 

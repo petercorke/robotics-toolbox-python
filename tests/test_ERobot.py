@@ -417,7 +417,7 @@ class TestETS(unittest.TestCase):
 
     def test_init(self):
         l0 = rp.ELink()
-        l1 = rp.ELink()
+        l1 = rp.ELink(parent=l0)
         r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_link=l0)
         r.base_link = l1
         r.base_link = 0
@@ -457,12 +457,12 @@ class TestETS(unittest.TestCase):
         self.assertIsInstance(panda.manuf, str)
 
     def test_complex(self):
-        l0 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.rx())
-        l1 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.ry(), parent=l0)
-        l2 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.rz(), parent=l1)
-        l3 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.tx(), parent=l2)
-        l4 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.ty(), parent=l3)
-        l5 = rp.ELink(rp.ETS.tx(0.1) * rp.ETS.tz(), parent=l4)
+        l0 = rp.ELink(rp.ETS.tx(0.1), rp.ETS.rx())
+        l1 = rp.ELink(rp.ETS.tx(0.1), rp.ETS.ry(), parent=l0)
+        l2 = rp.ELink(rp.ETS.tx(0.1), rp.ETS.rz(), parent=l1)
+        l3 = rp.ELink(rp.ETS.tx(0.1), rp.ETS.tx(), parent=l2)
+        l4 = rp.ELink(rp.ETS.tx(0.1), rp.ETS.ty(), parent=l3)
+        l5 = rp.ELink(rp.ETS.tx(0.1), rp.ETS.tz(), parent=l4)
 
         r = rp.ERobot([l0, l1, l2, l3, l4, l5])
         r.q = [1, 2, 3, 1, 2, 3]

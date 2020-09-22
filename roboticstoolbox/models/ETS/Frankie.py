@@ -40,55 +40,62 @@ class Frankie(ERobot):
         tool_offset = (103)*mm
 
         b0 = ELink(
-            ETS.rz(),
+            v=ETS.rz(),
             name='base0',
             parent=None
         )
 
         b1 = ELink(
-            ETS.tx(),
+            v=ETS.tx(),
             name='base1',
             parent=b0
         )
 
         l0 = ELink(
-            ETS.tz(0.333) * ETS.rz(),
+            ETS.tz(0.333),
+            ETS.rz(),
             name='link0',
             parent=b1
         )
 
         l1 = ELink(
-            ETS.rx(-90*deg) * ETS.rz(),
+            ETS.rx(-90*deg),
+            ETS.rz(),
             name='link1',
             parent=l0
         )
 
         l2 = ELink(
-            ETS.rx(90*deg) * ETS.tz(0.316) * ETS.rz(),
+            ETS.rx(90*deg) * ETS.tz(0.316),
+            ETS.rz(),
             name='link2',
             parent=l1
         )
 
         l3 = ELink(
-            ETS.tx(0.0825) * ETS.rx(90*deg) * ETS.rz(),
+            ETS.tx(0.0825) * ETS.rx(90*deg),
+            ETS.rz(),
             name='link3',
             parent=l2
         )
 
         l4 = ELink(
-            ETS.tx(-0.0825) * ETS.rx(-90*deg) * ETS.tz(0.384) * ETS.rz(),
+            ETS.tx(-0.0825) * ETS.rx(-90*deg) * ETS.tz(0.384),
+            ETS.rz(),
             name='link4',
             parent=l3
         )
 
         l5 = ELink(
-            ETS.rx(90*deg) * ETS.rz(),
+            ETS.rx(90*deg),
+            ETS.rz(),
             name='link5',
             parent=l4
         )
 
         l6 = ELink(
-            ETS.tx(0.088) * ETS.rx(90*deg) * ETS.tz(0.107) * ETS.rz(),
+            ETS.tx(0.088) * ETS.rx(90*deg) * ETS.tz(0.107),
+            ETS.rz(),
             name='link6',
             parent=l5
         )

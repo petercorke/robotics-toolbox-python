@@ -56,7 +56,7 @@ class TestELink(unittest.TestCase):
         ry = rp.ETS.ry(np.pi)
         tz = rp.ETS.tz()
 
-        l0 = rp.ELink(rx * ry * tz)
+        l0 = rp.ELink(rx * ry, tz)
 
         ans = sm.SE3.Rx(np.pi) * sm.SE3.Ry(np.pi) * sm.SE3.Tz(1.2)
 
