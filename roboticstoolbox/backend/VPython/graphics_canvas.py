@@ -1,7 +1,7 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider, \
     wtext, degrees
-from graphics.common_functions import *
-from graphics.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
+from roboticstoolbox.backend.VPython.common_functions import *
+from roboticstoolbox.backend.VPython.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
 from enum import Enum
 
 
@@ -662,7 +662,7 @@ class GraphicsCanvas2D:
         :type grid: `bool`, optional
         """
 
-    def __init__(self, height=360, width=640, title='', caption='', grid=True):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True):
 
         # Private lists
         self.__line_styles = [

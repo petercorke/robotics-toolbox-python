@@ -1,5 +1,5 @@
 from vpython import shapes, radians, extrusion, vector
-from graphics.graphics_stl import import_object_from_numpy_stl
+from roboticstoolbox.backend.VPython.graphics_stl import import_object_from_numpy_stl
 
 
 class Object2D:

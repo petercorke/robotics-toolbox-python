@@ -1,5 +1,5 @@
 from vpython import vec, vertex, color, triangle, compound
-from graphics.common_functions import *
+from roboticstoolbox.backend.VPython.common_functions import *
 from stl import mesh
 
 

@@ -1,7 +1,7 @@
 from vpython import vector, compound, mag, box
 from numpy import sign, ceil, arange
-from graphics.graphics_text import update_grid_numbers
-from graphics.graphics_object2d import Marker2D
+from roboticstoolbox.backend.VPython.graphics_text import update_grid_numbers
+from roboticstoolbox.backend.VPython.graphics_object2d import Marker2D
 from spatialmath import SE2
 
 
