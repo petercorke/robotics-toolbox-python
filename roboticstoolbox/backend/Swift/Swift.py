@@ -56,11 +56,10 @@ class Swift(Connector):  # pragma nocover
         super().step
 
         self._step_robots(dt)
+        self._step_shapes(dt)
 
         # self._draw_ellipses()
-        self._draw_robots()
-
-        # self._update_robots()
+        self._draw_all()
 
     def reset(self):
         '''
@@ -162,11 +161,14 @@ class Swift(Connector):  # pragma nocover
 
             shape.base = sm.SE3(t) * sm.SE3.RPY(r)
 
-    def _draw_robots(self):
+    def _draw_all(self):
 
         for i in range(len(self.robots)):
             self.robots[i].fkine_all()
-            self.swift.poses([i, self.robots[i].fk_dict()])
+            self.swift.robot_poses([i, self.robots[i].fk_dict()])
+
+        for i in range(len(self.shapes)):
+            self.swift.shape_poses([i, self.shapes[i].fk_dict()])
 
     def record_start(self, file):
         self.swift.record_start(file)

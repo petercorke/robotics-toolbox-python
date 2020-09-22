@@ -28,6 +28,7 @@ class Shape(object):
             co=None,
             stype=None):
 
+        self._wT = SE3()
         self.co = co
         self.base = base
         self.wT = None
@@ -76,6 +77,11 @@ class Shape(object):
     def __repr__(self):
         return f'{self.stype},\n{self.base}'
 
+    def _update_fcl(self):
+        if _fcl and self.co is not None:
+            tf = fcl.Transform(self.wT.R, self.wT.t)
+            self.co.setTransform(tf)
+
     @property
     def v(self):
         return self._v
@@ -86,17 +92,14 @@ class Shape(object):
 
     @property
     def wT(self):
-        return self._wT
+        return self._wT * self.base
 
     @wT.setter
     def wT(self, T):
         if not isinstance(T, SE3):
             T = SE3(T)
-        self._wT = T * self.base
-
-        if _fcl and self.co is not None:
-            tf = fcl.Transform(self._wT.R, self._wT.t)
-            self.co.setTransform(tf)
+        self._wT = T
+        self._update_fcl()
 
     @property
     def base(self):
@@ -151,6 +154,7 @@ class Shape(object):
         if not isinstance(T, SE3):
             T = SE3(T)
         self._base = T
+        self._update_fcl()
 
     @classmethod
     def Box(cls, scale, base=None):
