@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
 from vpython import shapes, radians, extrusion, vector
 from roboticstoolbox.backend.VPython.graphics_stl import import_object_from_numpy_stl
 

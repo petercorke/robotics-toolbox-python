@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
+
 from vpython import box, compound, color, sqrt
 from roboticstoolbox.backend.VPython.graphics_canvas import draw_reference_frame_axes
 from roboticstoolbox.backend.VPython.common_functions import *

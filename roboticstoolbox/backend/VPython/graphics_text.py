@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
+
 from vpython import color, label, mag, vector
 from numpy import sign, arange
 

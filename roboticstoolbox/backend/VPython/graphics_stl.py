@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
+
 from vpython import vec, vertex, color, triangle, compound
 from roboticstoolbox.backend.VPython.common_functions import *
 from stl import mesh

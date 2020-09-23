@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider, \
     wtext, degrees
 from roboticstoolbox.backend.VPython.common_functions import *
@@ -183,6 +188,47 @@ class GraphicsCanvas3D:
 
         # Set it as selected
         self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
+
+    def delete_robot(self, robot):
+        """
+        This function is called when a new robot is to be deleted from the scene.
+
+        :param robot: A graphical robot to add to the scene
+        :type robot: class:`graphics.graphics_robot.GraphicalRobot`
+        """
+        if len(self.__robots) == 0 or robot not in self.__robots:
+            return
+
+        robot_index = self.__robots.index(robot)
+
+        # Clear the robot visuals
+        self.__robots[robot_index].set_reference_visibility(False)
+        self.__robots[robot_index].set_robot_visibility(False)
+
+        # Remove from UI
+        new_list = []
+        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+            new_list.append(name)
+
+        del new_list[robot_index]
+        del self.__robots[robot_index]
+        del self.__teachpanel[robot_index]
+
+        self.__selected_robot = 0
+        # Update UI
+        self.__reload_caption(new_list)
+        # Select the top item
+        if len(self.__ui_controls[self.__idx_menu_robots].choices) > 0:
+            self.__ui_controls[self.__idx_menu_robots].index = 0
+
+    def is_robot_in_canvas(self, robot):
+        """
+        Checks whether the given robot is in the canvas
+
+        :param robot: A graphical robot to add to the scene
+        :type robot: class:`graphics.graphics_robot.GraphicalRobot`
+        """
+        return robot in self.__robots
 
     #######################################
     #  UI Management

@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
 from vpython import vector, compound, mag, box
 from numpy import sign, ceil, arange
 from roboticstoolbox.backend.VPython.graphics_text import update_grid_numbers

@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+"""
+@author Micah Huth
+"""
+
+
 from vpython import radians, vector
 from numpy import array
 from spatialmath import SE3
