@@ -6,7 +6,7 @@
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider, \
     wtext, degrees
 from roboticstoolbox.backend.VPython.common_functions import *
-from roboticstoolbox.backend.VPython.graphics_grid import GraphicsGrid, create_line, create_segmented_line, create_marker
+from roboticstoolbox.backend.VPython.grid import GraphicsGrid, create_line, create_segmented_line, create_marker
 from enum import Enum
 
 

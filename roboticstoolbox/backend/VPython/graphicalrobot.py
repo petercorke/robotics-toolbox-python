@@ -5,9 +5,9 @@
 
 
 from vpython import box, compound, color, sqrt
-from roboticstoolbox.backend.VPython.graphics_canvas import draw_reference_frame_axes
+from roboticstoolbox.backend.VPython.canvas import draw_reference_frame_axes
 from roboticstoolbox.backend.VPython.common_functions import *
-from roboticstoolbox.backend.VPython.graphics_stl import set_stl_origin, import_object_from_numpy_stl
+from roboticstoolbox.backend.VPython.stl import set_stl_origin, import_object_from_numpy_stl
 from time import perf_counter
 from spatialmath import SE3
 
