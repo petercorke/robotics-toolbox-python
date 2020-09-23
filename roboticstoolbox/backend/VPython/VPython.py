@@ -6,6 +6,7 @@
 from roboticstoolbox.backend.Connector import Connector
 
 from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D, GraphicsCanvas2D
+from roboticstoolbox.backend.VPython.graphics_robot import GraphicalRobot
 from roboticstoolbox.backend.VPython.common_functions import close_localhost_session
 
 
@@ -21,6 +22,7 @@ class VPython(Connector):
         # Init vars
         self.canvases = []
         self.canvas_settings = []  # 2D array of [is_3d, height, width, title, caption, grid] per canvas
+        self.robots = []
 
         self._create_empty_session()
 
@@ -126,17 +128,30 @@ class VPython(Connector):
 
         self.canvases = []
 
-    def add(self):
+    def add(self, fig_num, name, dhrobot):
         """
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
         robots which will act upon the step() method being called.
 
+        :param fig_num: The canvas number to place the robot in
+        :type fig_num: `int`
+        :param name: The name of the robot
+        :type name: `str`
+        :param dhrobot: The DHRobot object (if applicable)
+        :type dhrobot: class:`roboticstoolbox.robot.DHRobot.DHRobot`, None
+        :raises ValueError: Figure number must be between 0 and number of figures created
+
         """
 
         super().add()
 
+        # Sanity check input
+        if fig_num < 0 or fig_num > len(self.canvases) - 1:
+            raise ValueError("Figure number must be between 0 and number of figures created")
+
         # Add robot to canvas
+        self.robots.append(GraphicalRobot(self.canvases[fig_num], name, dhrobot))
 
     def remove(self):
         """
@@ -147,6 +162,10 @@ class VPython(Connector):
         super().remove()
 
         # Remove robot from canvas
+
+    #
+    #  Private Methods
+    #
 
     @staticmethod
     def _create_empty_session():
