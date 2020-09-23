@@ -5,6 +5,8 @@
 
 from roboticstoolbox.backend.Connector import Connector
 
+from roboticstoolbox.robot.DHLink import DHLink
+
 from roboticstoolbox.backend.VPython.graphics_canvas import GraphicsCanvas3D, GraphicsCanvas2D
 from roboticstoolbox.backend.VPython.graphics_robot import GraphicalRobot
 from roboticstoolbox.backend.VPython.common_functions import close_localhost_session
@@ -154,15 +156,43 @@ class VPython(Connector):
         self.robots.append(GraphicalRobot(self.canvases[fig_num], name, dhrobot))
         self.canvases[fig_num].add_robot(self.robots[len(self.robots)-1])
 
-    def remove(self):
+    def remove(self, id, fig_num=0):
         """
         id = remove(robot) removes the robot to the external environment.
 
+        :param id: The Identification of the robot to remove. Can be either the DHLink or GraphicalRobot
+        :type id: class:`roboticstoolbox.robot.DHRobot.DHRobot`,
+                  class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+        :param fig_num: The canvas index to delete the robot from, defaults to the initial one
+        :type fig_num: `int`, optional
+        :raises ValueError: Figure number must be between 0 and total number of canvases
+        :raises TypeError: Input must be a DHLink or GraphicalRobot
         """
 
         super().remove()
 
-        # Remove robot from canvas
+        if fig_num < 0 or fig_num >= len(self.canvases):
+            raise ValueError("Figure number must be between 0 and total number of canvases")
+
+        # If DHLink given
+        if isinstance(id, DHLink):
+            robot = None
+            # Find first occurrence of it that is in the correct canvas
+            for i in range(len(self.robots)):
+                if self.robots[i].seriallink.equal(id) and self.canvases[fig_num].is_robot_in(self.robots[i]):
+                    robot = self.robots[i]
+                    break
+            if robot is None:
+                return
+            else:
+                self.canvases[fig_num].delete_robot(robot)
+        # ElseIf GraphicalRobot given
+        elif isinstance(id, GraphicalRobot):
+            if self.canvases[fig_num].is_robot_in(id):
+                self.canvases[fig_num].delete_robot(id)
+        # Else
+        else:
+            raise TypeError("Input must be a DHLink or GraphicalRobot")
 
     #
     #  Private Methods
