@@ -6,7 +6,13 @@ import time
 import cProfile
 panda = rp.models.Panda()
 panda.q = panda.qr
-cProfile.run('panda.jacobe()')
+
+def func():
+    for i in range(1000):
+        panda.jacobe()
+
+cProfile.run('func()')
+
 
 
 # env = rp.backend.Swift()

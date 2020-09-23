@@ -93,7 +93,10 @@ class ELink(object):
                 if ets[i].jtype is not ets[i].STATIC:
                     raise ValueError('The transforms in ets must be constant')
 
-                self._Ts *= ets[i].T()
+                if not isinstance(ets[i].T(), SE3):
+                    self._Ts *= SE3(ets[i].T())
+                else:
+                    self._Ts *= ets[i].T()
 
         elif isinstance(ets, SE3):
             self._Ts = ets
@@ -373,7 +376,7 @@ class ELink(object):
 
         return s
 
-    def A(self, q=None):
+    def A(self, q=None, fast=False):
         """
         Link transform matrix
 
@@ -404,9 +407,15 @@ class ELink(object):
         #     tr = tr * T
 
         if self.v is not None:
-            return self.Ts * self.v.T(q)
+            if fast:
+                return self.Ts.A @ self.v.T(q)
+            else:
+                return SE3(self.Ts.A @ self.v.T(q), check=False)
         else:
-            return self.Ts
+            if fast:
+                return self.Ts.A
+            else:
+                return self.Ts
 
     def islimit(self, q):
         """

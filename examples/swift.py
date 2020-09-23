@@ -16,7 +16,7 @@ count = 0
 
 
 def link_calc(link, col, ob):
-    di = 0.35
+    di = 0.30
     ds = 0.05
 
     t1 = time.time()
@@ -49,7 +49,7 @@ def link_calc(link, col, ob):
         l_Ain = np.zeros((1, 13))
         l_Ain[0, :n] = nh @ Je
         #  = np.c_[nh @ Je, np.zeros((1, 13 - n))]
-        l_bin = (100.1 * (d - ds) / (di - ds)) + dp
+        l_bin = (100 * (d - ds) / (di - ds)) + dp
     else:
         l_Ain = None
         l_bin = None
@@ -112,11 +112,11 @@ Tep = panda.fkine() * sm.SE3.Tz(0.6) * sm.SE3.Tx(-0.1)  # * sm.SE3.Ty(-0.1)
 
 
 s1 = rp.Shape.Sphere(0.05, sm.SE3(0.5, 0, 0.2))
-s2 = rp.Shape.Sphere(0.05, sm.SE3(0.2, 0.35, 0.5))
-s3 = rp.Shape.Sphere(0.05, sm.SE3(0.45, -0.25, 0.1))
+s2 = rp.Shape.Sphere(0.05, sm.SE3(0.15, 0.25, 0.5))
+s3 = rp.Shape.Sphere(0.05, sm.SE3(0.25, -0.25, 0.1))
 s1.v = [-0.08, 0.2, 0.08, 0, 0, 0]
 s2.v = [0, -0.25, 0, 0, 0, 0]
-s3.v = [0, 0.1, 0, 0, 0, 0]
+s3.v = [0.2, 0.2, 0, 0, 0, 0]
 
 arrived = False
 # env.add(panda, show_collision=True, show_robot=False)
@@ -152,7 +152,7 @@ while not arrived:
     n = 7
     Q = np.eye(n + 6)
     Q[:n, :n] *= Y
-    Q[n:, n:] = 100 * (1 / e) * np.eye(6)
+    Q[n:, n:] = 200 * (1 / e) * np.eye(6)
     Aeq = np.c_[panda.jacobe(), np.eye(6)]
     beq = v.reshape((6,))
     Jm = panda.jacobm().reshape((panda.n,))
@@ -186,20 +186,20 @@ while not arrived:
     ta = 0
     tb = 0
 
-    for link in links:
-        for col in link.collision:
-            l_Ain, l_bin = link_calc(link, col, s1)
+    # for link in links:
+    #     for col in link.collision:
+    #         l_Ain, l_bin = link_calc(link, col, s1)
 
-            if l_Ain is not None and l_bin is not None:
-                if Ain is None:
-                    Ain = l_Ain
-                else:
-                    Ain = np.r_[Ain, l_Ain]
+    #         if l_Ain is not None and l_bin is not None:
+    #             if Ain is None:
+    #                 Ain = l_Ain
+    #             else:
+    #                 Ain = np.r_[Ain, l_Ain]
 
-                if bin is None:
-                    bin = np.array(l_bin)
-                else:
-                    bin = np.r_[bin, l_bin]
+    #             if bin is None:
+    #                 bin = np.array(l_bin)
+    #             else:
+    #                 bin = np.r_[bin, l_bin]
 
     for link in links:
         for col in link.collision:
@@ -216,20 +216,20 @@ while not arrived:
                 else:
                     bin = np.r_[bin, l_bin]
 
-    for link in links:
-        for col in link.collision:
-            l_Ain, l_bin = link_calc(link, col, s3)
+    # for link in links:
+    #     for col in link.collision:
+    #         l_Ain, l_bin = link_calc(link, col, s3)
 
-            if l_Ain is not None and l_bin is not None:
-                if Ain is None:
-                    Ain = l_Ain
-                else:
-                    Ain = np.r_[Ain, l_Ain]
+    #         if l_Ain is not None and l_bin is not None:
+    #             if Ain is None:
+    #                 Ain = l_Ain
+    #             else:
+    #                 Ain = np.r_[Ain, l_Ain]
 
-                if bin is None:
-                    bin = np.array(l_bin)
-                else:
-                    bin = np.r_[bin, l_bin]
+    #             if bin is None:
+    #                 bin = np.array(l_bin)
+    #             else:
+    #                 bin = np.r_[bin, l_bin]
 
 
     print(count)
@@ -270,7 +270,7 @@ while not arrived:
     else:
         panda.qd = qd[:panda.n]
 
-    env.step(20)
+    env.step(5)
 
-print(ta/count)
-print(tb/count)
+# print(ta/count)
+# print(tb/count)

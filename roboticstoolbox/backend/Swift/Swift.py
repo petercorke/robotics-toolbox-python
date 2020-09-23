@@ -101,7 +101,7 @@ class Swift(Connector):  # pragma nocover
 
         super().add()
 
-        if isinstance(ob, rp.ETS):
+        if isinstance(ob, rp.ERobot):
             robot = ob.to_dict()
             robot['show_robot'] = show_robot
             robot['show_collision'] = show_collision
