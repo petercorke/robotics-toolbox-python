@@ -8,7 +8,7 @@ from roboticstoolbox.backend.Connector import Connector
 from roboticstoolbox.robot.DHLink import DHLink
 
 from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, GraphicsCanvas2D
-from roboticstoolbox.backend.VPython.robot import GraphicalRobot
+from roboticstoolbox.backend.VPython.graphicalrobot import GraphicalRobot
 from roboticstoolbox.backend.VPython.common_functions import close_localhost_session
 
 
