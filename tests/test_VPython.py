@@ -14,8 +14,17 @@ import roboticstoolbox.backend.VPython.graphicalrobot as robot
 import roboticstoolbox.backend.VPython.stl as stl
 
 
-class TestCommonFunctions(unittest.TestCase):
+class TestVPython(unittest.TestCase):
+
     def setUp(self):
+        self.robot_scene = canvas.GraphicsCanvas3D()
+
+        #    0.707107 -0.707107  0         0
+        #    0.707107  0.707107  0         1
+        #    0         0         1         0.4
+        #    0         0         0         1
+        self.robot_se3 = SE3().Ty(1) * SE3().Tz(0.4) * SE3().Rz(45, 'deg')
+        self.robot_structure = 1.0
         self.se3 = SE3().Tx(3)
         warnings.simplefilter('ignore', category=ResourceWarning)
 
@@ -25,6 +34,7 @@ class TestCommonFunctions(unittest.TestCase):
         common.close_localhost_session(temp)
         del temp
 
+    #########################################################################################
     def test_get_pose_x_vector(self):
         self.assertEqual(common.get_pose_x_vec(self.se3), vector(1, 0, 0))
 
@@ -85,18 +95,7 @@ class TestCommonFunctions(unittest.TestCase):
         for test in tests:
             self.assertEqual(common.wrap_to_pi(test[0], test[1]), test[2])
 
-
-class TestCanvas(unittest.TestCase):
-
-    def setUp(self):
-        warnings.simplefilter('ignore', category=ResourceWarning)
-
-    @classmethod
-    def tearDownClass(cls):
-        temp = canvas.GraphicsCanvas3D()
-        common.close_localhost_session(temp)
-        del temp
-
+    #########################################################################################
     def test_graphics_canvas_init(self):
         # Create a canvas with all options being used (different to defaults)
         scene = canvas.GraphicsCanvas3D(
@@ -183,18 +182,6 @@ class TestCanvas(unittest.TestCase):
         # Check SE3 are equal
         self.assertEqual(actual, expected)
 
-
-class TestGrid(unittest.TestCase):
-
-    def setUp(self):
-        warnings.simplefilter('ignore', category=ResourceWarning)
-
-    @classmethod
-    def tearDownClass(cls):
-        temp = canvas.GraphicsCanvas3D()
-        common.close_localhost_session(temp)
-        del temp
-
     def test_grid_init(self):
         # Create a scene
         scene = canvas.GraphicsCanvas3D(title="Test Grid Init", grid=False)
@@ -202,25 +189,7 @@ class TestGrid(unittest.TestCase):
         # Create a (technically second) graphics grid for the scene
         grid = canvas.GraphicsGrid(scene.scene)
 
-
-class TestRobot(unittest.TestCase):
-    def setUp(self):
-        self.scene = canvas.GraphicsCanvas3D()
-
-        #    0.707107 -0.707107  0         0
-        #    0.707107  0.707107  0         1
-        #    0         0         1         0.4
-        #    0         0         0         1
-        self.se3 = SE3().Ty(1) * SE3().Tz(0.4) * SE3().Rz(45, 'deg')
-        self.structure = 1.0
-        warnings.simplefilter('ignore', category=ResourceWarning)
-
-    @classmethod
-    def tearDownClass(cls):
-        temp = canvas.GraphicsCanvas3D()
-        common.close_localhost_session(temp)
-        del temp
-
+    #########################################################################################
     def check_obj_pose(self, obj, pose):
         self.assertEqual(common.vpython_to_se3(obj.get_graphic_object()), pose)
 
@@ -231,166 +200,166 @@ class TestRobot(unittest.TestCase):
     # Init functions
     ##################################################
     def test_default_joint_init(self):
-        self.scene.scene.title = "Test Default Joint init"
-        joint = robot.DefaultJoint(self.se3, self.structure, self.scene)
-        self.check_obj_pose(joint, self.se3)
+        self.robot_scene.scene.title = "Test Default Joint init"
+        joint = robot.DefaultJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        self.check_obj_pose(joint, self.robot_se3)
 
         # has int not float
-        self.assertRaises(TypeError, robot.DefaultJoint, self.se3, 1, self.scene)
+        self.assertRaises(TypeError, robot.DefaultJoint, self.robot_se3, 1, self.robot_scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.DefaultJoint, 1.0, self.se3, self.scene)
+        self.assertRaises(TypeError, robot.DefaultJoint, 1.0, self.robot_se3, self.robot_scene)
 
     def test_rotational_joint_init(self):
-        self.scene.scene.title = "Test Rotational Joint init"
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
-        self.check_obj_pose(joint, self.se3)
+        self.robot_scene.scene.title = "Test Rotational Joint init"
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        self.check_obj_pose(joint, self.robot_se3)
         self.check_joint_type(joint, "R")
 
         # has int not float
-        self.assertRaises(TypeError, robot.RotationalJoint, self.se3, 1, self.scene)
+        self.assertRaises(TypeError, robot.RotationalJoint, self.robot_se3, 1, self.robot_scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.RotationalJoint, 1.0, self.se3, self.scene)
+        self.assertRaises(TypeError, robot.RotationalJoint, 1.0, self.robot_se3, self.robot_scene)
 
     def test_prismatic_joint_init(self):
-        self.scene.scene.title = "Test Prismatic Joint init"
-        joint = robot.PrismaticJoint(self.se3, self.structure, self.scene)
-        self.check_obj_pose(joint, self.se3)
+        self.robot_scene.scene.title = "Test Prismatic Joint init"
+        joint = robot.PrismaticJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        self.check_obj_pose(joint, self.robot_se3)
         self.check_joint_type(joint, "P")
 
         # has int not float
-        self.assertRaises(TypeError, robot.PrismaticJoint, self.se3, 1, self.scene)
+        self.assertRaises(TypeError, robot.PrismaticJoint, self.robot_se3, 1, self.robot_scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.PrismaticJoint, 1.0, self.se3, self.scene)
+        self.assertRaises(TypeError, robot.PrismaticJoint, 1.0, self.robot_se3, self.robot_scene)
 
     def test_static_joint_init(self):
-        self.scene.scene.title = "Test Static Joint init"
-        joint = robot.StaticJoint(self.se3, self.structure, self.scene)
-        self.check_obj_pose(joint, self.se3)
+        self.robot_scene.scene.title = "Test Static Joint init"
+        joint = robot.StaticJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        self.check_obj_pose(joint, self.robot_se3)
         self.check_joint_type(joint, "S")
 
         # has int not float
-        self.assertRaises(TypeError, robot.StaticJoint, self.se3, 1, self.scene)
+        self.assertRaises(TypeError, robot.StaticJoint, self.robot_se3, 1, self.robot_scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.StaticJoint, 1.0, self.se3, self.scene)
+        self.assertRaises(TypeError, robot.StaticJoint, 1.0, self.robot_se3, self.robot_scene)
 
     def test_gripper_joint_init(self):
-        self.scene.scene.title = "Test Gripper Joint init"
-        joint = robot.Gripper(self.se3, self.structure, self.scene)
-        self.check_obj_pose(joint, self.se3)
+        self.robot_scene.scene.title = "Test Gripper Joint init"
+        joint = robot.Gripper(self.robot_se3, self.robot_structure, self.robot_scene)
+        self.check_obj_pose(joint, self.robot_se3)
         self.check_joint_type(joint, "G")
 
         # has int not float
-        self.assertRaises(TypeError, robot.Gripper, self.se3, 1, self.scene)
+        self.assertRaises(TypeError, robot.Gripper, self.robot_se3, 1, self.robot_scene)
         # has vars in wrong order
-        self.assertRaises(TypeError, robot.Gripper, 1.0, self.se3, self.scene)
+        self.assertRaises(TypeError, robot.Gripper, 1.0, self.robot_se3, self.robot_scene)
 
     def test_graphical_robot_init(self):
-        self.scene.scene.title = "Test Graphical Robot init"
-        robot.GraphicalRobot(self.scene, "Robot 1")
+        self.robot_scene.scene.title = "Test Graphical Robot init"
+        robot.GraphicalRobot(self.robot_scene, "Robot 1")
 
         # Canvas obj given not scene
-        self.assertRaises(Exception, robot.GraphicalRobot, self.scene, "Robot 2")
+        self.assertRaises(Exception, robot.GraphicalRobot, self.robot_scene, "Robot 2")
 
     ##################################################
     # Joint Functions
     ##################################################
     def test_set_joint_position(self):
         # Create a scene
-        self.scene.scene.title = "Test Set Joint Position"
+        self.robot_scene.scene.title = "Test Set Joint Position"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Move joint x+3, y, z-2
-        joint.update_position(self.se3 * SE3().Tx(3) * SE3().Tz(-2))
+        joint.update_position(self.robot_se3 * SE3().Tx(3) * SE3().Tz(-2))
 
         # Check position
-        self.check_obj_pose(joint, self.se3 * SE3().Tx(3) * SE3().Tz(-2))
+        self.check_obj_pose(joint, self.robot_se3 * SE3().Tx(3) * SE3().Tz(-2))
 
     def test_set_joint_orientation(self):
         # Create a scene
-        self.scene.scene.title = "Test Set Joint Orientation"
+        self.robot_scene.scene.title = "Test Set Joint Orientation"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Rotate joint x+30d, y, z+45d
-        joint.update_orientation(self.se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
+        joint.update_orientation(self.robot_se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
 
         # Check position
-        self.check_obj_pose(joint, self.se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
+        self.check_obj_pose(joint, self.robot_se3 * SE3().Rx(30, 'deg') * SE3().Rz(45, 'deg'))
 
     def test_set_joint_pose(self):
         # Create a scene
-        self.scene.scene.title = "Test Set Joint Pose"
+        self.robot_scene.scene.title = "Test Set Joint Pose"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Move joint x+30d, y, z-2
-        joint.update_pose(self.se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
+        joint.update_pose(self.robot_se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
 
         # Check position
-        self.check_obj_pose(joint, self.se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
+        self.check_obj_pose(joint, self.robot_se3 * SE3().Rx(30, 'deg') * SE3().Tz(-2))
 
     def test_draw_reference_frame(self):
         # Scene update
-        self.scene.scene.title = "Test Draw Reference Frame"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Draw Reference Frame"
+        self.robot_scene.grid_visibility(False)
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Count num objects
-        num_obj_initial = len(self.scene.scene.objects)
+        num_obj_initial = len(self.robot_scene.scene.objects)
 
         # Turn off reference frame
         joint.draw_reference_frame(False)
 
         # Count num objects
-        num_obj_off = len(self.scene.scene.objects)
+        num_obj_off = len(self.robot_scene.scene.objects)
         self.assertEqual(num_obj_initial - num_obj_off, 1)
 
         # Turn on
         joint.draw_reference_frame(True)
 
         # Count num objects
-        num_obj_on = len(self.scene.scene.objects)
+        num_obj_on = len(self.robot_scene.scene.objects)
         self.assertEqual(num_obj_on - num_obj_off, 1)
         self.assertEqual(num_obj_on, num_obj_initial)
 
     def test_joint_visibility(self):
         # Scene update
-        self.scene.scene.title = "Test Joint Visibility"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Joint Visibility"
+        self.robot_scene.grid_visibility(False)
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Count num objects
-        num_obj_initial = len(self.scene.scene.objects)
+        num_obj_initial = len(self.robot_scene.scene.objects)
 
         # Turn off joint graphic
         joint.set_joint_visibility(False)
 
         # Count num objects
-        num_obj_off = len(self.scene.scene.objects)
+        num_obj_off = len(self.robot_scene.scene.objects)
         self.assertEqual(num_obj_initial - num_obj_off, 1)
 
         # Turn on
         joint.set_joint_visibility(True)
 
         # Count num objects
-        num_obj_on = len(self.scene.scene.objects)
+        num_obj_on = len(self.robot_scene.scene.objects)
         self.assertEqual(num_obj_on - num_obj_off, 1)
         self.assertEqual(num_obj_on, num_obj_initial)
 
     def test_joint_texture(self):
         # Scene update
-        self.scene.scene.title = "Test Joint Texture"
+        self.robot_scene.scene.title = "Test Joint Texture"
 
         # Create joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Apply texture and colour
         joint.set_texture(
@@ -416,10 +385,10 @@ class TestRobot(unittest.TestCase):
 
     def test_joint_transparency(self):
         # Scene update
-        self.scene.scene.title = "Test Joint Transparency"
+        self.robot_scene.scene.title = "Test Joint Transparency"
 
         # Create joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Apply texture and colour
         opc_val = 0.34
@@ -435,10 +404,10 @@ class TestRobot(unittest.TestCase):
 
     def test_set_origin(self):
         # Update scene
-        self.scene.scene.title = "Test Set Origin"
+        self.robot_scene.scene.title = "Test Set Origin"
 
         # Create a joint
-        joint = robot.RotationalJoint(SE3(), self.structure, self.scene)
+        joint = robot.RotationalJoint(SE3(), self.robot_structure, self.robot_scene)
 
         # Save origin pos (copy of)
         first_pos = vector(joint.get_graphic_object().origin)
@@ -458,23 +427,23 @@ class TestRobot(unittest.TestCase):
 
     def test_joint_get_pose(self):
         # Update scene
-        self.scene.scene.title = "Test Get Joint Pose"
+        self.robot_scene.scene.title = "Test Get Joint Pose"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Get pose
         pose = joint.get_pose()
 
         # Check it's equal (proves get returned correctly)
-        self.assertEqual(self.se3, pose)
+        self.assertEqual(self.robot_se3, pose)
 
     def test_joint_get_axis_vector(self):
         # Update scene
-        self.scene.scene.title = "Test Get Joint Pose"
+        self.robot_scene.scene.title = "Test Get Joint Pose"
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Get axis vector
         x_vec = joint.get_axis_vector(common.x_axis_vector)
@@ -482,22 +451,22 @@ class TestRobot(unittest.TestCase):
         z_vec = joint.get_axis_vector(common.z_axis_vector)
 
         # Check it's equal (proves get returned correctly)
-        self.assertEqual(common.get_pose_x_vec(self.se3), x_vec)
-        self.assertEqual(common.get_pose_y_vec(self.se3), y_vec)
-        self.assertEqual(common.get_pose_z_vec(self.se3), z_vec)
+        self.assertEqual(common.get_pose_x_vec(self.robot_se3), x_vec)
+        self.assertEqual(common.get_pose_y_vec(self.robot_se3), y_vec)
+        self.assertEqual(common.get_pose_z_vec(self.robot_se3), z_vec)
 
         # Check error is thrown
         self.assertRaises(ValueError, joint.get_axis_vector, vector(0.5, 2, 3))
 
     def test_joint_get_type(self):
         # Update scene
-        self.scene.scene.title = "Test Joint Get Type"
+        self.robot_scene.scene.title = "Test Joint Get Type"
 
         # Create one of each joint
-        r = robot.RotationalJoint(self.se3, self.structure, self.scene)
-        p = robot.PrismaticJoint(self.se3, self.structure, self.scene)
-        s = robot.StaticJoint(self.se3, self.structure, self.scene)
-        g = robot.Gripper(self.se3, self.structure, self.scene)
+        r = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        p = robot.PrismaticJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        s = robot.StaticJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        g = robot.Gripper(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Check each is correct
         self.check_joint_type(r, "R")
@@ -507,33 +476,33 @@ class TestRobot(unittest.TestCase):
 
     def test_joint_get_graphic(self):
         # Update scene
-        self.scene.scene.title = "Test Joint Get Graphic"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Joint Get Graphic"
+        self.robot_scene.grid_visibility(False)
 
         # Create a joint
-        joint = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
         joint.draw_reference_frame(False)
 
         # Get graphic obj
         gph_obj = joint.get_graphic_object()
 
         # If obj equal only obj in scene
-        self.assertEqual(len(self.scene.scene.objects), 1)
-        self.assertEqual(gph_obj, self.scene.scene.objects[0])
+        self.assertEqual(len(self.robot_scene.scene.objects), 1)
+        self.assertEqual(gph_obj, self.robot_scene.scene.objects[0])
 
     ##################################################
     # Robot functions
     ##################################################
     def test_robot_append_made_link(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Append Made Link"
+        self.robot_scene.scene.title = "Test Robot Append Made Link"
 
         # Create 2 joints
-        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene)
-        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint1 = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        joint2 = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Create robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
 
         # Add 1 joint
         robot1.append_made_link(joint1)
@@ -553,36 +522,36 @@ class TestRobot(unittest.TestCase):
 
     def test_robot_append_link(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Append Link"
+        self.robot_scene.scene.title = "Test Robot Append Link"
 
         # Create robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
 
         # Add link
-        robot1.append_link("r", self.se3, self.structure)
-        robot1.append_link("R", self.se3, self.structure)
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
+        robot1.append_link("R", self.robot_se3, self.robot_structure)
 
         # Print poses to verify
         robot1.print_joint_poses()
 
         # Try wrong inputs, expecting errors
-        self.assertRaises(ValueError, robot1.append_link, "x", self.se3, self.structure)  # bad joint type
-        self.assertRaises(TypeError, robot1.append_link, "p", self.structure, self.se3)  # incorrect param order
+        self.assertRaises(ValueError, robot1.append_link, "x", self.robot_se3, self.robot_structure)  # bad joint type
+        self.assertRaises(TypeError, robot1.append_link, "p", self.robot_structure, self.robot_se3)  # incorrect param order
 
     def test_robot_detach_link(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Detach Link"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Robot Detach Link"
+        self.robot_scene.grid_visibility(False)
 
         # Create robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
 
         # Add two links
-        robot1.append_link("r", self.se3, self.structure)
-        robot1.append_link("r", self.se3 * SE3().Tx(1), self.structure)
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
+        robot1.append_link("r", self.robot_se3 * SE3().Tx(1), self.robot_structure)
 
         # Count num objects
-        num_obj = len(self.scene.scene.objects)
+        num_obj = len(self.robot_scene.scene.objects)
 
         # Count num joints
         num_joints = robot1.num_joints
@@ -591,77 +560,77 @@ class TestRobot(unittest.TestCase):
         robot1.detach_link()
 
         # Verify new object count
-        self.assertEqual(len(self.scene.scene.objects), num_obj - 2)  # 2 = one for joint, 1 for ref frame
+        self.assertEqual(len(self.robot_scene.scene.objects), num_obj - 2)  # 2 = one for joint, 1 for ref frame
 
         # Verify new joint count
         self.assertEqual(robot1.num_joints, num_joints - 1)  # Taken away 1 joint
 
         # Create new empty robot
-        robot2 = robot.GraphicalRobot(self.scene, "Robot 2")
+        robot2 = robot.GraphicalRobot(self.robot_scene, "Robot 2")
 
         # Attempt to detach from empty
         self.assertRaises(UserWarning, robot2.detach_link)
 
     def test_robot_reference_visibility(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Reference Visibility"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Robot Reference Visibility"
+        self.robot_scene.grid_visibility(False)
 
         # Create two link robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
-        robot1.append_link("r", self.se3, self.structure)
-        robot1.append_link("r", self.se3, self.structure)
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
 
         # Count num obj visible
-        num_obj = len(self.scene.scene.objects)
+        num_obj = len(self.robot_scene.scene.objects)
 
         # Turn off ref frames
         robot1.set_reference_visibility(False)
 
         # Verify new amount
-        self.assertEqual(len(self.scene.scene.objects), num_obj - 2)  # Take 1 for each link
+        self.assertEqual(len(self.robot_scene.scene.objects), num_obj - 2)  # Take 1 for each link
 
         # Turn on ref frames
         robot1.set_reference_visibility(True)
 
         # Verify amount
-        self.assertEqual(len(self.scene.scene.objects), num_obj)  # Original amount
+        self.assertEqual(len(self.robot_scene.scene.objects), num_obj)  # Original amount
 
     def test_robot_visibility(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Visibility"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Robot Visibility"
+        self.robot_scene.grid_visibility(False)
 
         # Create two link robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
-        robot1.append_link("r", self.se3, self.structure)
-        robot1.append_link("r", self.se3, self.structure)
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
 
         # Count num obj visible
-        num_obj = len(self.scene.scene.objects)
+        num_obj = len(self.robot_scene.scene.objects)
 
         # Turn off ref frames
         robot1.set_robot_visibility(False)
 
         # Verify new amount
-        self.assertEqual(len(self.scene.scene.objects), num_obj - 2)  # Take 1 for each link
+        self.assertEqual(len(self.robot_scene.scene.objects), num_obj - 2)  # Take 1 for each link
 
         # Turn on ref frames
         robot1.set_robot_visibility(True)
 
         # Verify amount
-        self.assertEqual(len(self.scene.scene.objects), num_obj)  # Original amount
+        self.assertEqual(len(self.robot_scene.scene.objects), num_obj)  # Original amount
 
     def test_robot_transparency(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Transparency"
+        self.robot_scene.scene.title = "Test Robot Transparency"
 
         # Create two joints
-        joint1 = robot.RotationalJoint(self.se3, self.structure, self.scene)
-        joint2 = robot.RotationalJoint(self.se3, self.structure, self.scene)
+        joint1 = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
+        joint2 = robot.RotationalJoint(self.robot_se3, self.robot_structure, self.robot_scene)
 
         # Create robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
 
         # Add joints
         robot1.append_made_link(joint1)
@@ -680,13 +649,13 @@ class TestRobot(unittest.TestCase):
 
     def test_robot_set_poses(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Set Poses"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Robot Set Poses"
+        self.robot_scene.grid_visibility(False)
 
         # Create a two link robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
-        robot1.append_link("r", self.se3, self.structure)
-        robot1.append_link("r", self.se3 * SE3().Tx(1), self.structure)
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
+        robot1.append_link("r", self.robot_se3 * SE3().Tx(1), self.robot_structure)
 
         s1 = SE3().Tx(2) * SE3().Tz(0.3) * SE3().Ry(23, 'deg')
         s2 = SE3().Ty(0.5) * SE3().Tx(1.2) * SE3().Rz(-34, 'deg')
@@ -697,36 +666,36 @@ class TestRobot(unittest.TestCase):
         # For each obj in scene, make sure it is one of the two locations
         # Ensure objects visible are just reference frames (they have same pose as the graphic itself)
         robot1.set_robot_visibility(False)
-        self.assertEqual(len(self.scene.scene.objects), 2)  # Should only have 2 reference frames in the scene
+        self.assertEqual(len(self.robot_scene.scene.objects), 2)  # Should only have 2 reference frames in the scene
         # Both objects must be in either of the poses (but not the same one)
         self.assertTrue(
             # 0 in s1, 1 in s2
-            (common.vpython_to_se3(self.scene.scene.objects[0]) == s1 and
-             common.vpython_to_se3(self.scene.scene.objects[1]) == s2)
+            (common.vpython_to_se3(self.robot_scene.scene.objects[0]) == s1 and
+             common.vpython_to_se3(self.robot_scene.scene.objects[1]) == s2)
             or
             # 1 in s1, 0 in s2
-            (common.vpython_to_se3(self.scene.scene.objects[1]) == s1 and
-             common.vpython_to_se3(self.scene.scene.objects[0]) == s2)
+            (common.vpython_to_se3(self.robot_scene.scene.objects[1]) == s1 and
+             common.vpython_to_se3(self.robot_scene.scene.objects[0]) == s2)
         )
 
         # Try giving not enough poses
         self.assertRaises(UserWarning, robot1.set_joint_poses, [])
 
         # Create new robot
-        robot2 = robot.GraphicalRobot(self.scene, "Robot 2")
+        robot2 = robot.GraphicalRobot(self.robot_scene, "Robot 2")
 
         # Try setting poses on empty robot
         self.assertRaises(UserWarning, robot2.set_joint_poses, [s1, s2])
 
     def test_robot_animate(self):
         # Update scene
-        self.scene.scene.title = "Test Robot Animate"
-        self.scene.grid_visibility(False)
+        self.robot_scene.scene.title = "Test Robot Animate"
+        self.robot_scene.grid_visibility(False)
 
         # Create a two link robot
-        robot1 = robot.GraphicalRobot(self.scene, "Robot 1")
-        robot1.append_link("r", self.se3, self.structure)
-        robot1.append_link("r", self.se3 * SE3().Tx(1), self.structure)
+        robot1 = robot.GraphicalRobot(self.robot_scene, "Robot 1")
+        robot1.append_link("r", self.robot_se3, self.robot_structure)
+        robot1.append_link("r", self.robot_se3 * SE3().Tx(1), self.robot_structure)
 
         s1 = SE3().Tx(2) * SE3().Tz(0.3) * SE3().Ry(23, 'deg')
         s2 = SE3().Ty(0.5) * SE3().Tx(1.2) * SE3().Rz(-34, 'deg')
@@ -738,16 +707,16 @@ class TestRobot(unittest.TestCase):
         # For each obj in scene, make sure it is one of the two locations
         # Ensure objects visible are just reference frames (they have same pose as the graphic itself)
         robot1.set_robot_visibility(False)
-        self.assertEqual(len(self.scene.scene.objects), 2)  # Should only have 2 reference frames in the scene
+        self.assertEqual(len(self.robot_scene.scene.objects), 2)  # Should only have 2 reference frames in the scene
         # Both objects must be in either of the poses (but not the same one)
         self.assertTrue(
             # 0 in s1, 1 in s2
-            (common.vpython_to_se3(self.scene.scene.objects[0]) == s1 and
-             common.vpython_to_se3(self.scene.scene.objects[1]) == s2)
+            (common.vpython_to_se3(self.robot_scene.scene.objects[0]) == s1 and
+             common.vpython_to_se3(self.robot_scene.scene.objects[1]) == s2)
             or
             # 1 in s1, 0 in s2
-            (common.vpython_to_se3(self.scene.scene.objects[1]) == s1 and
-             common.vpython_to_se3(self.scene.scene.objects[0]) == s2)
+            (common.vpython_to_se3(self.robot_scene.scene.objects[1]) == s1 and
+             common.vpython_to_se3(self.robot_scene.scene.objects[0]) == s2)
         )
 
         # Try giving no frames
@@ -759,18 +728,7 @@ class TestRobot(unittest.TestCase):
         # Try giving wrong number SE3s
         self.assertRaises(UserWarning, robot1.animate, [[]], 1)
 
-
-class TestStl(unittest.TestCase):
-
-    def setUp(self):
-        warnings.simplefilter('ignore', category=ResourceWarning)
-
-    @classmethod
-    def tearDownClass(cls):
-        temp = canvas.GraphicsCanvas3D()
-        common.close_localhost_session(temp)
-        del temp
-
+    #########################################################################################
     def test_import_object(self):
         # Update Scene
         scene = canvas.GraphicsCanvas3D(title="Test Import Object")
@@ -789,11 +747,6 @@ class TestStl(unittest.TestCase):
         self.assertEqual(graphic_obj.pos, vector(0, 0, 0))  # Object is at origin
         # Can't check how many objects, as each triangle counts as one. No way to know correct amount
         # self.assertEqual(len(scene.scene.objects), num_obj + 1)  # 1 object was added to the scene
-
-
-class TestText(unittest.TestCase):
-    # No functions to really test here
-    pass
 
 
 if __name__ == '__main__':
