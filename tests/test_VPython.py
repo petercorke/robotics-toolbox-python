@@ -7,13 +7,11 @@ from spatialmath import SE3
 from vpython import vector, box
 from numpy import array
 from math import pi
-# from roboticstoolbox import Puma560
-# Can't import the graphics the usual way as it needs to make use of functions not imported through __init__
+
 import roboticstoolbox.backend.VPython.common_functions as common
 import roboticstoolbox.backend.VPython.canvas as canvas
 import roboticstoolbox.backend.VPython.graphicalrobot as robot
 import roboticstoolbox.backend.VPython.stl as stl
-# from roboticstoolbox.models.graphical_puma560 import import_puma_560
 
 
 class TestCommonFunctions(unittest.TestCase):
@@ -89,6 +87,16 @@ class TestCommonFunctions(unittest.TestCase):
 
 
 class TestCanvas(unittest.TestCase):
+
+    def setUp(self):
+        warnings.simplefilter('ignore', category=ResourceWarning)
+
+    @classmethod
+    def tearDownClass(cls):
+        temp = canvas.GraphicsCanvas3D()
+        common.close_localhost_session(temp)
+        del temp
+
     def test_graphics_canvas_init(self):
         # Create a canvas with all options being used (different to defaults)
         scene = canvas.GraphicsCanvas3D(
@@ -177,6 +185,16 @@ class TestCanvas(unittest.TestCase):
 
 
 class TestGrid(unittest.TestCase):
+
+    def setUp(self):
+        warnings.simplefilter('ignore', category=ResourceWarning)
+
+    @classmethod
+    def tearDownClass(cls):
+        temp = canvas.GraphicsCanvas3D()
+        common.close_localhost_session(temp)
+        del temp
+
     def test_grid_init(self):
         # Create a scene
         scene = canvas.GraphicsCanvas3D(title="Test Grid Init", grid=False)
@@ -195,6 +213,13 @@ class TestRobot(unittest.TestCase):
         #    0         0         0         1
         self.se3 = SE3().Ty(1) * SE3().Tz(0.4) * SE3().Rz(45, 'deg')
         self.structure = 1.0
+        warnings.simplefilter('ignore', category=ResourceWarning)
+
+    @classmethod
+    def tearDownClass(cls):
+        temp = canvas.GraphicsCanvas3D()
+        common.close_localhost_session(temp)
+        del temp
 
     def check_obj_pose(self, obj, pose):
         self.assertEqual(common.vpython_to_se3(obj.get_graphic_object()), pose)
@@ -736,6 +761,16 @@ class TestRobot(unittest.TestCase):
 
 
 class TestStl(unittest.TestCase):
+
+    def setUp(self):
+        warnings.simplefilter('ignore', category=ResourceWarning)
+
+    @classmethod
+    def tearDownClass(cls):
+        temp = canvas.GraphicsCanvas3D()
+        common.close_localhost_session(temp)
+        del temp
+
     def test_import_object(self):
         # Update Scene
         scene = canvas.GraphicsCanvas3D(title="Test Import Object")
@@ -759,29 +794,6 @@ class TestStl(unittest.TestCase):
 class TestText(unittest.TestCase):
     # No functions to really test here
     pass
-
-
-class TestPuma(unittest.TestCase):
-    def test_import_puma560(self):
-        # Create scene
-        scene = canvas.GraphicsCanvas3D(title="Test Import Puma560")
-
-        # Import puma560
-        robot1 = import_puma_560(scene)
-
-        # Check all joints are added
-        self.assertEqual(len(robot1.joints), 7)
-
-        # For each joint, check it's in the right pose
-        puma = Puma560()
-        correct_poses = puma.fkine(puma.qz, alltout=True)
-
-        # Initial doesn't have an SE3 in correct_poses
-        self.assertEqual(common.vpython_to_se3(robot1.joints[0].get_graphic_object()), SE3())
-
-        # As the base doesn't have a correct pose, need to offset the check indices
-        for idx in range(len(correct_poses)):
-            self.assertEqual(common.vpython_to_se3(robot1.joints[idx].get_graphic_object()), correct_poses[idx])
 
 
 if __name__ == '__main__':
