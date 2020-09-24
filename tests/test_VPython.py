@@ -1,23 +1,31 @@
 #!/usr/bin/env python3
 
 import unittest
+import warnings
 
 from spatialmath import SE3
 from vpython import vector, box
 from numpy import array
 from math import pi
-from roboticstoolbox import Puma560
+# from roboticstoolbox import Puma560
 # Can't import the graphics the usual way as it needs to make use of functions not imported through __init__
-import graphics.common_functions as common
-import graphics.graphics_canvas as canvas
-import graphics.graphics_robot as robot
-import graphics.graphics_stl as stl
-from roboticstoolbox.models.graphical_puma560 import import_puma_560
+import roboticstoolbox.backend.VPython.common_functions as common
+import roboticstoolbox.backend.VPython.canvas as canvas
+import roboticstoolbox.backend.VPython.graphicalrobot as robot
+import roboticstoolbox.backend.VPython.stl as stl
+# from roboticstoolbox.models.graphical_puma560 import import_puma_560
 
 
 class TestCommonFunctions(unittest.TestCase):
     def setUp(self):
         self.se3 = SE3().Tx(3)
+        warnings.simplefilter('ignore', category=ResourceWarning)
+
+    @classmethod
+    def tearDownClass(cls):
+        temp = canvas.GraphicsCanvas3D()
+        common.close_localhost_session(temp)
+        del temp
 
     def test_get_pose_x_vector(self):
         self.assertEqual(common.get_pose_x_vec(self.se3), vector(1, 0, 0))
