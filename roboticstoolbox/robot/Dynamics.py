@@ -339,8 +339,8 @@ class Dynamics:
         """
 
         # shallow copy the robot object
+        self.delete_rne()  # remove the inherited C pointers
         nf = copy.copy(self)
-        nf.delete_rne()  # remove the inherited C pointers
         nf.name = 'NF/' + self.name
 
         # add the modified links (copies)
