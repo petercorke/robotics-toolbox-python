@@ -421,7 +421,10 @@ class ERobot(object):
 
     @qd.setter
     def qd(self, qd_new):
-        self._qd = getvector(qd_new, self.n)
+        try:
+            self._qd = getvector(qd_new, self.n)
+        except ValueError:
+            self.qd = np.r_[qd_new, 0, 0]
 
     @qdd.setter
     def qdd(self, qdd_new):
