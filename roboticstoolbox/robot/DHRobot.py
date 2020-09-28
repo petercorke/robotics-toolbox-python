@@ -105,9 +105,8 @@ class DHRobot(Dynamics):
             raise ValueError('Robot has mixed D&H link conventions')
 
         # rne parameters
-        self._rne_init = False
         self._rne_ob = None
-        self._rne_changed = False
+        self._rne_changed = True
 
     def __str__(self):
         """
@@ -220,20 +219,30 @@ class DHRobot(Dynamics):
 
     def _check_rne(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            if not args[0]._rne_init or args[0]._rne_changed:
+        def wrapper_check_rne(*args, **kwargs):
+            if args[0]._rne_ob is None or args[0]._rne_changed:
+                args[0].delete_rne()
                 args[0]._init_rne()
-                args[0]._rne_init = True
-                args[0]._rne_changed = False
+            args[0]._rne_changed = False
             return func(*args, **kwargs)
-        return wrapper
+        return wrapper_check_rne
 
     def _listen_rne(func):
         @wraps(func)
-        def wrapper(*args):
+        def wrapper_listen_rne(*args):
             args[0]._rne_changed = True
             return func(*args)
-        return wrapper
+        return wrapper_listen_rne
+
+    def delete_rne(self):
+        """
+        Frees the memory holding the robot object in c if the robot object
+        has been initialised in c.
+        """
+        if self._rne_ob is not None:
+            delete(self._rne_ob)
+            self._rne_changed = False
+            self._rne_ob = None
 
     @property
     def name(self):
@@ -2085,7 +2094,6 @@ class DHRobot(Dynamics):
             - If a model has no dynamic parameters set the result is zero.
 
         """
-
         trajn = 1
 
         try:
@@ -2121,17 +2129,6 @@ class DHRobot(Dynamics):
             return tau[0, :]
         else:
             return tau
-
-    def delete_rne(self):
-        """
-        Frees the memory holding the robot object in c if the robot object
-        has been initialised in c.
-        """
-        if self._rne_init:
-            delete(self._rne_ob)
-            self._rne_init = False
-            self._rne_changed = False
-            self._rne_ob = None
 
     def jacob_dot(self, q=None, qd=None):
         '''
