@@ -1212,7 +1212,12 @@ class Transmission(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
+        # print(cls._parse(node, path))
+        # if node.find('type') is not None:
         kwargs['trans_type'] = node.find('type').text
+        # else:
+            # kwargs['trans_type'] = ''
+
         return Transmission(**kwargs)
 
 

@@ -39,6 +39,7 @@ import os
 import re
 import sys
 import xml.dom.minidom
+from pathlib import Path
 
 from copy import deepcopy
 from .color import error, warning
@@ -57,6 +58,8 @@ substitution_args_context = {}
 # Stack of currently processed files
 filestack = []
 
+# The top level directory
+tld = ''
 
 def push_file(filename):
     """
@@ -197,6 +200,7 @@ def eval_extension(s):  # pragma: no cover
         return os.getcwd()
 
     if s.startswith('$(find'):
+        # return tld
         return '..'
 
     if s.startswith('$(arg'):
@@ -1054,6 +1058,9 @@ def main(filename):   # pragma: no cover
         'just_includes': False,
         'mappings': {}
     }
+
+    global tld
+    tld = Path(filename).parent.as_posix()
 
     try:
         # open and process file

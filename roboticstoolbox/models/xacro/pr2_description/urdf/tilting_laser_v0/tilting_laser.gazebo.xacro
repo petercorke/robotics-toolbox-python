@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="pr2_tilting_laser_gazebo_v0" params="name">
+    <gazebo reference="${name}_mount_link">
+    </gazebo>
+  </xacro:macro>
+</robot>
