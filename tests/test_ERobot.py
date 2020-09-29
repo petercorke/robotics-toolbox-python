@@ -436,14 +436,14 @@ class TestETS(unittest.TestCase):
         wx = rp.models.wx250s()
         wx.to_dict()
 
-    def test_fkdict(self):
-        panda = rp.models.ETS.Panda()
-        fkd = panda.fk_dict()
+    # def test_fkdict(self):
+    #     panda = rp.models.ETS.Panda()
+    #     fkd = panda.fk_dict()
 
-        for i in range(len(panda.ets)):
-            nt.assert_array_almost_equal(
-                panda.ets[i]._fk.t,
-                fkd['links'][i]['t'])
+    #     for i in range(len(panda.ets)):
+    #         nt.assert_array_almost_equal(
+    #             panda.ets[i]._fk.t,
+    #             fkd['links'][i]['t'])
 
     def test_qlim(self):
         panda = rp.models.ETS.Panda()

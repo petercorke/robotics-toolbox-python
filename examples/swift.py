@@ -114,16 +114,16 @@ Tep = panda.fkine() * sm.SE3.Tz(0.6) * sm.SE3.Tx(-0.1)  # * sm.SE3.Ty(-0.1)
 s1 = rp.Shape.Sphere(0.05, sm.SE3(0.5, 0, 0.2))
 s2 = rp.Shape.Sphere(0.05, sm.SE3(0.15, 0.25, 0.5))
 s3 = rp.Shape.Sphere(0.05, sm.SE3(0.25, -0.25, 0.1))
-s1.v = [-0.08, 0.2, 0.08, 0, 0, 0]
+# s1.v = [-0.08, 0.2, 0.08, 0, 0, 0]
 s2.v = [0, -0.25, 0, 0, 0, 0]
-s3.v = [0.2, 0.2, 0, 0, 0, 0]
+# s3.v = [0.2, 0.2, 0, 0, 0, 0]
 
 arrived = False
 # env.add(panda, show_collision=True, show_robot=False)
 env.add(panda)
-env.add(s1)
+# env.add(s1)
 env.add(s2)
-env.add(s3)
+# env.add(s3)
 time.sleep(1)
 
 dt = 0.05
@@ -270,7 +270,7 @@ while not arrived:
     else:
         panda.qd = qd[:panda.n]
 
-    env.step(5)
+    env.step(15)
 
 # print(ta/count)
 # print(tb/count)

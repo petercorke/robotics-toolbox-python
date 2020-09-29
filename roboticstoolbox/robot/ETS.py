@@ -159,7 +159,15 @@ class ETS(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Rx, axis='Rx', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, 0],
+                [0, np.cos(eta), -np.sin(eta), 0],
+                [0, np.sin(eta), np.cos(eta), 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='Rx', eta=eta)
 
     @classmethod
     def ry(cls, eta=None):
@@ -180,7 +188,15 @@ class ETS(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Ry, axis='Ry', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [np.cos(eta), 0, np.sin(eta), 0],
+                [0, 1, 0, 0],
+                [-np.sin(eta), 0, np.cos(eta), 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='Ry', eta=eta)
 
     @classmethod
     def rz(cls, eta=None):
@@ -227,7 +243,15 @@ class ETS(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Tx, axis='tx', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, eta],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='tx', eta=eta)
 
     @classmethod
     def ty(cls, eta=None):
@@ -277,7 +301,15 @@ class ETS(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Tz, axis='tz', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, eta],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='tz', eta=eta)
 
 
 # if __name__ == "__main__":
