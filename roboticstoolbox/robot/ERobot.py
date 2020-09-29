@@ -255,11 +255,11 @@ class ERobot(object):
     #     )
 
     @staticmethod
-    def urdf_to_ets_args(file_path):
+    def urdf_to_ets_args(file_path, tld=None):
         name, ext = splitext(file_path)
 
         if ext == '.xacro':
-            urdf_string = xacro.main(file_path)
+            urdf_string = xacro.main(file_path, tld)
             urdf = URDF.loadstr(urdf_string, file_path)
 
         return urdf.elinks, urdf.name

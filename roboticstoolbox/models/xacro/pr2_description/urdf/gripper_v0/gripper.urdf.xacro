@@ -353,7 +353,7 @@
 
     <!-- extensions -->
     <xacro:pr2_gripper_gazebo_v0 side="${side}" />
-    <xacro:pr2_gripper_transmission_v0 side="${side}"
+    <!-- <xacro:pr2_gripper_transmission_v0 side="${side}"
         screw_reduction="${screw_reduction}"
         gear_ratio="${gear_ratio}"
         theta0="${theta0}"
@@ -363,7 +363,7 @@
         h="${h}"
         a="${a}"
         b="${b}"
-        r="${r}" />
+        r="${r}" /> -->
 
   </xacro:macro>
 

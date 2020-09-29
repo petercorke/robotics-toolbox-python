@@ -12,10 +12,11 @@ class PR2(ERobot):
 
         mpath = Path(rp.__file__).parent
         fpath = mpath / 'models' / 'xacro' / 'pr2_description' / 'robots'
-        fname = 'right_arm.urdf.xacro'
+        fname = 'pr2.urdf.xacro'
+        tld = mpath / 'models' / 'xacro' / 'pr2_description'
 
         args = super(PR2, self).urdf_to_ets_args(
-            (fpath / fname).as_posix())
+            (fpath / fname).as_posix(), tld)
 
         super(PR2, self).__init__(
             args[0],

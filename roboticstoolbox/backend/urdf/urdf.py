@@ -153,6 +153,7 @@ class URDFType(object):
             and elements in the class arrays.
         """
         kwargs = cls._parse_simple_attribs(node)
+        print(kwargs)
         kwargs.update(cls._parse_simple_elements(node, path))
         return kwargs
 
@@ -1212,11 +1213,11 @@ class Transmission(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
-        # print(cls._parse(node, path))
-        # if node.find('type') is not None:
-        kwargs['trans_type'] = node.find('type').text
-        # else:
-            # kwargs['trans_type'] = ''
+        print(cls._parse(node, path))
+        if node.find('type') is not None:
+            kwargs['trans_type'] = node.find('type').text
+        else:
+            kwargs['trans_type'] = ' '
 
         return Transmission(**kwargs)
 
@@ -1751,7 +1752,8 @@ class URDF(URDFType):
             elinks[i].inertia = link.inertial.inertia
 
             try:
-                elinks[i].B = self.joints[i].dynamics.friction
+                if self.joints[i].dynamics.friction is not None:
+                    elinks[i].B = self.joints[i].dynamics.friction
 
                 # TODO Add damping
                 self.joints[i].dynamics.damping

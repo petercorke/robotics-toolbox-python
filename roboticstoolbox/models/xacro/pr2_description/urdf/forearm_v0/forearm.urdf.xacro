@@ -120,7 +120,7 @@
     </link>
     <!-- extensions-->
     <xacro:pr2_forearm_gazebo_v0 side="${side}" />
-    <xacro:pr2_forearm_transmission_v0 side="${side}" />
+    <!-- <xacro:pr2_forearm_transmission_v0 side="${side}" /> -->
 
   </xacro:macro>
 

@@ -200,8 +200,8 @@ def eval_extension(s):  # pragma: no cover
         return os.getcwd()
 
     if s.startswith('$(find'):
-        # return tld
-        return '..'
+        return tld
+        # return '..'
 
     if s.startswith('$(arg'):
         s = s.replace('$(arg ', '')
@@ -1049,7 +1049,7 @@ def process_file(input_file_name, **kwargs):   # pragma: no cover
     return doc
 
 
-def main(filename):   # pragma: no cover
+def main(filename, tld_other=None):   # pragma: no cover
     opts = {
         'output': None,
         'just_deps': False,
@@ -1060,7 +1060,11 @@ def main(filename):   # pragma: no cover
     }
 
     global tld
-    tld = Path(filename).parent.as_posix()
+
+    if tld_other is None:
+        tld = '..'
+    else:
+        tld = tld_other
 
     try:
         # open and process file
