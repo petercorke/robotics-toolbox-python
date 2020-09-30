@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 @author: Peter Corke
 @author: Samuel Drew
@@ -38,3 +39,8 @@ class Cobra600(DHRobot):
     @property
     def qz(self):
         return self._qz
+
+if __name__ == '__main__':
+
+    cobra = Cobra600()
+    print(cobra)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 @author: Peter Corke
 @author: Samuel Drew
@@ -61,3 +62,8 @@ class Ball(DHRobot):
         else:
             f = theta2
         return f
+
+if __name__ == '__main__':
+
+    ball = Ball()
+    print(ball)

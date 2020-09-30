@@ -179,3 +179,5 @@ if __name__ == '__main__':
 
     puma = Puma560()
     print(puma)
+    # for i, L in enumerate(puma):
+    #     print(L)
