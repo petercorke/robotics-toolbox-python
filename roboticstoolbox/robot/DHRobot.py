@@ -529,6 +529,19 @@ class DHRobot(Dynamics):
 
         return p
 
+    def config(self):
+        """
+        Return the joint configuration string
+
+        :return: joint configuration string
+        :rtype: str
+
+        A string with one letter per joint, the letter is ``R`` for a revolute
+        joint, and ``P`` for a prismatic joint.  A Puma560 robot is "RRRRRR"
+        and the Stanford arm is "RRPRRR".
+        """
+        return ''.join(['R' if L.isrevolute() else 'P' for L in self])
+
     def todegrees(self, q=None):
         """
         Convert joint angles to degrees.
