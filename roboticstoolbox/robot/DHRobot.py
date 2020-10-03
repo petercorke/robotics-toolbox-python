@@ -115,39 +115,102 @@ class DHRobot(Dynamics):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        axes = ''
-        L = ''
+        s = ""
+        deg = 180 / np.pi
 
-        for i in range(self.n):
-            L += str(self.links[i]) + '\n'
-
-            if not self.links[i].sigma:
-                axes += 'R'
+        def qs(j, link):
+            j += 1
+            if link.isprismatic():
+                if L.offset == 0:
+                    return f"q{j:d}"
+                else:
+                    return f"q{j:d} + {L.offset:}"
             else:
-                axes += 'P'
+                if L.offset == 0:
+                    return f"q{j:d}"
+                else:
+                    return f"q{j:d} + {L.offset * deg:}\u00b0"
 
-        if not self.mdh:
-            dh = 'std DH'
+        if self.mdh:
+            table = ANSITable(
+                Column("aⱼ₋₁", headalign="^"),
+                Column("⍺ⱼ₋₁", headalign="^"),
+                Column("θⱼ", headalign="^"),
+                Column("dⱼ", headalign="^"),
+                border="thick"
+                )
+            for j, L in enumerate(self):
+                if L.isprismatic():
+                    table.row(L.a, str(L.alpha * deg) + "\u00b0", str(L.theta * deg) + "\u00b0", qs(j, L))
+                else:
+                    table.row(L.a, str(L.alpha * deg) + "\u00b0", qs(j, L), L.d)
         else:
-            dh = 'mod DH'
+            # DH format
+            table = ANSITable(
+                Column("θⱼ", headalign="^", colalign="<"),
+                Column("dⱼ", headalign="^"),
+                Column("aⱼ", headalign="^"),
+                Column("⍺ⱼ", headalign="^"),
+                border="thick"
+                )
+            for j, L in enumerate(self):
+                if L.isprismatic():
+                    table.row(str(L.theta * deg) + "\u00b0", qs(j, L), L.a, str(L.alpha * deg) + "\u00b0")
+                else:
+                    table.row(qs(j, L), L.d, L.a, str(L.alpha * deg) + "\u00b0")
+        
+        s = str(table)
 
-        rpy = self.tool.rpy()
+        table = table = ANSITable(
+            Column("", colalign=">"),
+            Column("", colalign="<"), border="thin", header=False)
+        table.row("base", self.base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
+        table.row("tool", self.tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
 
-        for i in range(3):
-            if rpy[i] == 0:
-                rpy[i] = 0
+        for name, q in self._configdict.items():
+            qlist = []
+            for i, L in enumerate(self):
+                if L.isprismatic():
+                    qlist.append(f"{q[i]:.3g}")
+                else:
+                    qlist.append(f"{q[i] * deg:.3g}\u00b0")
+            table.row(name, ', '.join(qlist))
 
-        model = '\n%s (%s): %d axis, %s, %s\n'\
-            'Parameters:\n'\
-            '%s\n'\
-            'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
-                self.name, self.manufacturer, self.n, axes, dh,
-                L,
-                self.tool.A[0, 3], self.tool.A[1, 3],
-                self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
-            )
+        return s + "\n" + str(table)
 
-        return model
+        # axes = ''
+        # L = ''
+
+        # for i in range(self.n):
+        #     L += str(self.links[i]) + '\n'
+
+        #     if not self.links[i].sigma:
+        #         axes += 'R'
+        #     else:
+        #         axes += 'P'
+
+        # if not self.mdh:
+        #     dh = 'std DH'
+        # else:
+        #     dh = 'mod DH'
+
+        # rpy = self.tool.rpy()
+
+        # for i in range(3):
+        #     if rpy[i] == 0:
+        #         rpy[i] = 0
+
+        # model = '\n%s (%s): %d axis, %s, %s\n'\
+        #     'Parameters:\n'\
+        #     '%s\n'\
+        #     'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
+        #         self.name, self.manufacturer, self.n, axes, dh,
+        #         L,
+        #         self.tool.A[0, 3], self.tool.A[1, 3],
+        #         self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
+        #     )
+
+        # return model
 
     def __add__(self, L):
         nlinks = []
