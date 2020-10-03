@@ -4,8 +4,8 @@
 """
 
 import numpy as np
-from functools import wraps
-from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox.robot import Robot, DHRobot #, DHLink
+from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
@@ -17,9 +17,11 @@ from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
 from roboticstoolbox.robot.Dynamics import Dynamics
+from ansitable import ANSITable, Column
+from functools import wraps
 
 
-class DHRobot(Dynamics):
+class DHRobot(Robot, Dynamics):
     """
     A superclass for arm type robots. A concrete class that represents a
     serial-link arm-type robot.  Each link and joint in the chain is
@@ -280,12 +282,7 @@ class DHRobot(Dynamics):
             return func(*args, **kwargs)
         return wrapper_check_rne
 
-    def _listen_rne(func):
-        @wraps(func)
-        def wrapper_listen_rne(*args):
-            args[0]._rne_changed = True
-            return func(*args)
-        return wrapper_listen_rne
+
 
     def delete_rne(self):
         """
