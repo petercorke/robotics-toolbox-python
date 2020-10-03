@@ -55,19 +55,9 @@ class DHRobot(Dynamics):
     def __init__(
             self,
             L,
-            name='noname',
-            manufacturer='',
-            base=SE3(),
-            tool=SE3(),
-            gravity=np.array([0, 0, 9.81])):
+            **kwargs):
 
-        self.name = name
-        self.manufacturer = manufacturer
-        self.base = base
-        self.tool = tool
-        self.gravity = gravity
-
-        super().__init__()
+        super().__init__(L, **kwargs)
 
         # Verify L
         if not isinstance(L, list):
@@ -308,52 +298,8 @@ class DHRobot(Dynamics):
             self._rne_ob = None
 
     @property
-    def name(self):
-        return self._name
-
-    @property
-    def manufacturer(self):
-        return self._manufacturer
-
-    @property
-    def links(self):
-        return self._links
-
-    @property
-    def base(self):
-        return self._base
-
-    @property
-    def tool(self):
-        return self._tool
-
-    @property
-    def gravity(self):
-        return self._gravity
-
-    @property
-    def n(self):
-        return self._n
-
-    @property
     def mdh(self):
         return self._mdh
-
-    @property
-    def q(self):
-        return self._q
-
-    @property
-    def qd(self):
-        return self._qd
-
-    @property
-    def qdd(self):
-        return self._qdd
-
-    @property
-    def control_type(self):
-        return self._control_type
 
     @property
     def d(self):
@@ -397,50 +343,6 @@ class DHRobot(Dynamics):
             v = np.c_[v, self.links[i].qlim]
         return v
 
-    @manufacturer.setter
-    def manufacturer(self, manufacturer_new):
-        self._manufacturer = manufacturer_new
-
-    @control_type.setter
-    def control_type(self, cn):
-        if cn == 'p' or cn == 'v' or cn == 'a':
-            self._control_type = cn
-        else:
-            raise ValueError(
-                'Control type must be one of \'p\', \'v\', or \'a\'')
-
-    @gravity.setter
-    @_listen_rne
-    def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3, 'col')
-
-    @name.setter
-    def name(self, name_new):
-        self._name = name_new
-
-    @base.setter
-    def base(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._base = T
-
-    @tool.setter
-    def tool(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._tool = T
-
-    @q.setter
-    def q(self, q_new):
-        self._q = getvector(q_new, self.n)
-
-    @qd.setter
-    def qd(self, qd_new):
-        self._qd = getvector(qd_new, self.n)
-
-    @qdd.setter
-    def qdd(self, qdd_new):
-        self._qdd = getvector(qdd_new, self.n)
 
     def A(self, joints, q=None):
         """
