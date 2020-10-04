@@ -56,33 +56,20 @@ class KR5(DHRobot):
 
         L = [L1, L2, L3, L4, L5, L6]
 
-        self._qz = [0, 0, 0, 0, 0, 0]
-
-        self._qk1 = [pi/4, pi/3, pi/4, pi/6, pi/4, pi/6]
-
-        self._qk2 = [pi/4, pi/3, pi/6, pi/3, pi/4, pi/6]
-
-        self._qk3 = [pi/6, pi/3, pi/6, pi/3, pi/6, pi/3]
 
         # Create SerialLink object
-        super(KR5, self).__init__(
+        super().__init__(
             L,
-            basemesh="KUKA/KR5_arc/link0.stl",
+            meshdir="KUKA/KR5_arc",
             name='KR5',
             manufacturer='KUKA')
 
-    @property
-    def qz(self):
-        return self._qz
+        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
+        self.addconfiguration("qk1", [pi/4, pi/3, pi/4, pi/6, pi/4, pi/6])
+        self.addconfiguration("qk2", [pi/4, pi/3, pi/6, pi/3, pi/4, pi/6])
+        self.addconfiguration("qk3", [pi/6, pi/3, pi/6, pi/3, pi/6, pi/3])
 
-    @property
-    def qk1(self):
-        return self._qk1
+if __name__ == '__main__':
 
-    @property
-    def qk2(self):
-        return self._qk2
-
-    @property
-    def qk3(self):
-        return self._qk3
+    robot = KR5()
+    print(robot)

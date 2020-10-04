@@ -97,11 +97,7 @@ class IRB140(DHRobot):
             )
         ]
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0])
 
-        self._qd = np.array([0, -90*deg, 180*deg, 0, 0, -90*deg])
-
-        self._qr = np.array([0, -90*deg, 90*deg, 0, 90*deg, -90*deg])
 
         super().__init__(
             L,
@@ -109,14 +105,11 @@ class IRB140(DHRobot):
             name='IRB 140',
             manufacturer='ABB')
 
-    @property
-    def qz(self):
-        return self._qz
+        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
+        self.addconfiguration("qd", [0, -90*deg, 180*deg, 0, 0, -90*deg])
+        self.addconfiguration("qr", [0, -90*deg, 90*deg, 0, 90*deg, -90*deg])
 
-    @property
-    def qr(self):
-        return self._qr
+if __name__ == '__main__':
 
-    @property
-    def qd(self):
-        return self._qd
+    robot = IRB140()
+    print(robot)

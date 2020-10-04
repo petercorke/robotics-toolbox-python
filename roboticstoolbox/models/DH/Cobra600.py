@@ -32,13 +32,11 @@ class Cobra600(DHRobot):
              PrismaticDH(qlim=[0, 0.210]),
              RevoluteDH()]
 
-        super(Cobra600, self).__init__(L, name='Cobra600', manufacturer='Adept')
+        super().__init__(L, name='Cobra600', manufacturer='Adept')
 
-        self._qz = [0, 0, 0, 0]
+        # zero angles, L shaped pose
+        self.addconfiguration("qz", np.array([0, 0, 0, 0]))
 
-    @property
-    def qz(self):
-        return self._qz
 
 if __name__ == '__main__':
 

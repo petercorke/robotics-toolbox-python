@@ -142,42 +142,26 @@ class Puma560(DHRobot):
             )
         ]
 
-        # zero angles, L shaped pose
-        self._qz = np.array([0, 0, 0, 0, 0, 0])
-
-        # ready pose, arm up
-        self._qr = np.array([0, pi/2, -pi/2, 0, 0, 0])
-
-        # straight and horizontal
-        self._qs = np.array([0, 0, -pi/2, 0, 0, 0])
-
-        # nominal table top picking pose
-        self._qn = np.array([0, pi/4, pi, 0, pi/4, 0])
-
         super().__init__(
             L,
             name="Puma 560",
-            manufacturer="Unimation")
+            manufacturer="Unimation",
+            keywords=('dynamics',))
 
-    @property
-    def qz(self):
-        return self._qz
+        # zero angles, L shaped pose
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
-    @property
-    def qr(self):
-        return self._qr
+        # ready pose, arm up
+        self.addconfiguration("qr", np.array([0, pi/2, -pi/2, 0, 0, 0]))
 
-    @property
-    def qs(self):
-        return self._qs
+        # straight and horizontal
+        self.addconfiguration("qs", np.array([0, 0, -pi/2, 0, 0, 0]))
 
-    @property
-    def qn(self):
-        return self._qn
+        # nominal table top picking pose
+        self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
 if __name__ == '__main__':
 
     puma = Puma560()
     print(puma)
-    # for i, L in enumerate(puma):
-    #     print(L)
+
