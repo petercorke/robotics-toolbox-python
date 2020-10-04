@@ -34,6 +34,8 @@ class Robot:
             gravity = np.array([0, 0, 9.81])
         self.gravity = gravity
 
+        if not isinstance(links, list):
+            raise TypeError('The links must be stored in a list.')
         for link in links:
             if not isinstance(link, Link):
                 raise TypeError('links should all be Link subclass')
