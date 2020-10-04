@@ -1,6 +1,8 @@
 import roboticstoolbox.models as m
+from roboticstoolbox import Robot
+from ansitable import ANSITable, Column
 
-def models():
+def models(category=None):
     """
     Display all robot models in summary form
 
@@ -8,21 +10,39 @@ def models():
     lists the name, manufacturer, and number of joints.
     """
 
-    for category in ['DH', 'URDF', 'ETS']:
+    if category is None:
+        for category in ['DH', 'URDF', 'ETS']:
+            models(category)
+    
+    else:
         print(category + ':')
+        # table = ANSITable("model", "manufacturer", "DoF", "config", "keywords")
+        table = ANSITable(
+            Column("class", headalign="^", colalign="<"),
+            Column("model", headalign="^", colalign="<"),
+            Column("manufacturer", headalign="^", colalign="<"),
+            Column("DoF", colalign="<"),
+            Column("config", colalign="<"),
+            Column("keywords", headalign="^", colalign="<"),
+            border="thin"
+        )
         group = m.__dict__[category]
-
         for cls in group.__dict__.values():
-            # TODO should check that cls issubclass of Robot superclass (when there is one)
             try:
-                robot = cls()
+                if issubclass(cls, Robot):
+                    # we found a Robot subclass, instantiate it
+                    robot = cls()
+                    table.row(
+                        cls.__name__,
+                        robot.name,
+                        robot.manufacturer,
+                        robot.n,
+                        robot.config(),
+                        ', '.join(robot.keywords)
+                    )
             except:
-                continue
+                pass
+        table.print()
 
-            s = robot.name
-            if robot.manufacturer is not None:
-                s += ' (' + robot.manufacturer + ')'
-            print(f"  {s:40s} {robot.n:d} dof")
-
-        
-models()
+if __name__ == "__main__":
+    models()
