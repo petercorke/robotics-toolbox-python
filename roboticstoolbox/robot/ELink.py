@@ -8,9 +8,10 @@ from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
 from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.Link import Link
 
 
-class ELink(object):
+class ELink(Link):
     """
     A link superclass for all link types. A Link object holds all information
     related to a robot joint and link such as kinematics parameters,

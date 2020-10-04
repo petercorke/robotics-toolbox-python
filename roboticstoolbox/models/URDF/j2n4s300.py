@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 from pathlib import Path
 import roboticstoolbox as rp
 
 
-class j2n4s300(ETS):
+class j2n4s300(ERobot):
 
     def __init__(self):
 
@@ -14,22 +14,20 @@ class j2n4s300(ETS):
         fpath = mpath / 'models' / 'xacro' / 'kinova_description' / 'urdf'
         fname = 'j2n4s300_standalone.xacro'
 
-        args = super(j2n4s300, self).urdf_to_ets_args(
+        args = super().urdf_to_ets_args(
             (fpath / fname).as_posix())
 
-        super(j2n4s300, self).__init__(
+        super().__init__(
             args[0],
-            name=args[1])
+            name=args[1],
+            manufacturer = 'Kinova'
+            )
 
-        self.manufacturer = 'Kinova'
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration("qr", np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi/180)
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-        self._qr = np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi/180
 
-    @property
-    def qz(self):
-        return self._qz
+if __name__ == '__main__':
 
-    @property
-    def qr(self):
-        return self._qr
+    robot = j2n4s300()
+    print(robot)

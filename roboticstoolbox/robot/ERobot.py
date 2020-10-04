@@ -16,9 +16,9 @@ from roboticstoolbox.backend.PyPlot.functions import \
     _plot2, _teach2
 from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
+from roboticstoolbox.robot.Robot import Robot
 
-
-class ETS(object):
+class ERobot(Robot):
     """
     The Elementary Transform Sequence (ETS). A superclass which represents the
     kinematics of a serial-link manipulator
@@ -45,27 +45,12 @@ class ETS(object):
     def __init__(
             self,
             elinks,
-            name='noname',
             base_link=None,
             ee_link=None,
-            manufacturer='',
-            base=None,
-            tool=None,
-            gravity=np.array([0, 0, 9.81])):
+            **kwargs
+            ):
 
-        super(ETS, self).__init__()
-
-        if base is None:
-            self.base = SE3()
-        else:
-            self.base = base
-
-        self.tool = SE3()
-        self.gravity = gravity
-
-        # Verify elinks
-        if not isinstance(elinks, list):
-            raise TypeError('The links must be stored in a list.')
+        super().__init__(elinks, **kwargs)
 
         self._ets = []
         self._n = 0
@@ -114,20 +99,21 @@ class ETS(object):
 
             lst.append(link)
 
-        # Figure out the order of links with resepect to joint variables
+        # Figure out the order of links with respect to joint variables
         self.bfs_link(
             lambda link: add_links(link, self._ets, self._q_idx))
         self._n = len(self._q_idx)
 
         self._reset_fk_path()
-        self.name = name
-        self.manufacturer = manufacturer
 
         # Current joint angles of the robot
+        # TODO should go to Robot class?
         self.q = np.zeros(self.n)
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
+
+
 
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path

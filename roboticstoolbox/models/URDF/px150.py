@@ -2,11 +2,11 @@
 
 import numpy as np
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 from pathlib import Path
 
 
-class px150(ETS):
+class px150(ERobot):
 
     def __init__(self):
 
@@ -14,22 +14,20 @@ class px150(ETS):
         fpath = mpath / 'models' / 'xacro' / 'interbotix_descriptions' / 'urdf'
         fname = 'px150.urdf.xacro'
 
-        args = super(px150, self).urdf_to_ets_args(
+        args = super().urdf_to_ets_args(
             (fpath / fname).as_posix())
 
-        super(px150, self).__init__(
+        super().__init__(
             args[0],
-            name=args[1])
+            name=args[1],
+            manufacturer = 'Interbotix'
+            )
 
-        self.manufacturer = 'Interbotix'
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0]))
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
-        self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0])
 
-    @property
-    def qz(self):
-        return self._qz
+if __name__ == '__main__':
 
-    @property
-    def qr(self):
-        return self._qr
+    robot = px150()
+    print(robot)
