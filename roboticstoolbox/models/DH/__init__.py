@@ -5,7 +5,9 @@ from roboticstoolbox.models.DH.Ball import Ball
 from roboticstoolbox.models.DH.Cobra600 import Cobra600
 from roboticstoolbox.models.DH.IRB140 import IRB140
 from roboticstoolbox.models.DH.KR5 import KR5
-from roboticstoolbox.models.DH.Threelink import Threelink
+from roboticstoolbox.models.DH.Orion5 import Orion5
+from roboticstoolbox.models.DH.Planar3 import Planar3
+from roboticstoolbox.models.DH.Planar2 import Planar2
 
 
 __all__ = [
@@ -16,5 +18,7 @@ __all__ = [
     'Cobra600',
     'IRB140',
     'KR5',
-    'Threelink'
+    'Orion5',
+    'Planar3',
+    'Planar2'
 ]
