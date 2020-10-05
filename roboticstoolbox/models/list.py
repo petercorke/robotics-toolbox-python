@@ -1,8 +1,8 @@
-import roboticstoolbox.models as m
-from roboticstoolbox import Robot
+from roboticstoolbox.robot.Robot import Robot
 from ansitable import ANSITable, Column
+import importlib
 
-def models(keywords=None, dof=None):
+def list(keywords=None, dof=None):
     """
     Display all robot models in summary form
 
@@ -11,21 +11,24 @@ def models(keywords=None, dof=None):
     :param dof: number of DoF to filter on, defaults to None
     :type dof: int, optional
     
-    - ``models()`` displays a list of all models provided by the Toolbox.  It
+    - ``list()`` displays a list of all models provided by the Toolbox.  It
       lists the name, manufacturer, model type, number of DoF, and keywords.
 
-    - ``models(keywords=KW)`` as above, but only displays models that have a
+    - ``list(keywords=KW)`` as above, but only displays models that have a
       keyword in the tuple ``KW``.
 
-    - ``models(dof=N)`` as above, but only display models that have ``N``
+    - ``list(dof=N)`` as above, but only display models that have ``N``
       degrees of freedom.
 
     The filters can be combined
     
-    - ``models(keywords=KW, dof=N)`` are those models that have a keyword in
+    - ``list(keywords=KW, dof=N)`` are those models that have a keyword in
       ``KW`` and have ``N`` degrees of freedom.
     """
 
+    import roboticstoolbox.models as m
+    # module = importlib.import_module('.' + os.path.splitext(file)[0], package='bdsim.blocks')
+    
     table = ANSITable(
         Column("class", headalign="^", colalign="<"),
         Column("model", headalign="^", colalign="<"),
@@ -67,7 +70,7 @@ def models(keywords=None, dof=None):
     table.print()
 
 if __name__ == "__main__":
-    models()
-    models(keywords=('dynamics',))
-    models(dof=6)
-    models(keywords=('dynamics',), dof=6)
+    list()
+    list(keywords=('dynamics',))
+    list(dof=6)
+    list(keywords=('dynamics',), dof=6)
