@@ -690,7 +690,7 @@ class GraphicalRobot:
         """
         # If seriallink object, run it's fkine
         if self.seriallink is not None:
-            return self.seriallink.fkine(joint_angles, alltout=True)
+            return self.seriallink.fkine_all(joint_angles)
         # Else TODO
         else:
             pass
