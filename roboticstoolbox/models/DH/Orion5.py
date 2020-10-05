@@ -13,6 +13,9 @@ class Orion5(DHRobot):
         mm = 1e-3
         deg = pi / 180
 
+        # details from https://rawrobotics.com.au/orion5
+        # User Manual at https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view
+
         h = 53.0 * mm
         r = 30.309 * mm
         l2 = 170.384 * mm
@@ -25,9 +28,12 @@ class Orion5(DHRobot):
         # Turret, Shoulder, Elbow, Wrist, Claw
         links = [
                  RevoluteDH(d=h, a=0, alpha=90 * deg),  # Turret
-                 RevoluteDH(d=0, a=l2, alpha=0),         # Shoulder
-                 RevoluteDH(d=0, a=-l3, alpha=0),         # Elbow
-                 RevoluteDH(d=0, a=l4+c, alpha=0)        # Wrist
+                 RevoluteDH(d=0, a=l2, alpha=0,         # Shoulder
+                    qlim=[10 * deg, 122.5 * deg] ),
+                 RevoluteDH(d=0, a=-l3, alpha=0,         # Elbow
+                    qlim=[20 * deg, 340 * deg]),
+                 RevoluteDH(d=0, a=l4+c, alpha=0,        # Wrist
+                    qlim=[45 * deg, 315 * deg])
             ]
 
         super().__init__(
