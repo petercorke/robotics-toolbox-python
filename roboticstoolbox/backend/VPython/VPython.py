@@ -45,7 +45,7 @@ class VPython(Connector):
         else:
             self.canvases.append(GraphicsCanvas2D(height, width, title, caption, grid))
 
-    def step(self):
+    def step(self, id, q=None, fig_num=0):
         """
         state = step(args) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
@@ -58,13 +58,44 @@ class VPython(Connector):
         by the robot object, and not all robot objects support all control
         types.
 
+        :param id: The Identification of the robot to remove. Can be either the DHLink or GraphicalRobot
+        :type id: class:`roboticstoolbox.robot.DHRobot.DHRobot`,
+                  class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+        :param q: The joint angles/configuration of the robot (Optional, if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param fig_num: The canvas index to delete the robot from, defaults to the initial one
+        :type fig_num: `int`, optional
+        :raises ValueError: Figure number must be between 0 and total number of canvases
+        :raises TypeError: Input must be a DHLink or GraphicalRobot
+
         """
 
         super().step()
 
-        # Position mode
+        if fig_num < 0 or fig_num >= len(self.canvases):
+            raise ValueError("Figure number must be between 0 and total number of canvases")
 
-        # Update positions to new frame
+        # If DHLink given
+        if isinstance(id, DHLink):
+            robot = None
+            # Find first occurrence of it that is in the correct canvas
+            for i in range(len(self.robots)):
+                if self.robots[i].seriallink.equal(id) and self.canvases[fig_num].is_robot_in(self.robots[i]):
+                    robot = self.robots[i]
+                    break
+            if robot is None:
+                return
+            else:
+                poses = robot.fkine(q)
+                robot.set_joint_poses(poses)
+        # ElseIf GraphicalRobot given
+        elif isinstance(id, GraphicalRobot):
+            if self.canvases[fig_num].is_robot_in(id):
+                poses = id.fkine(q)
+                id.set_joint_poses(poses)
+        # Else
+        else:
+            raise TypeError("Input must be a DHLink or GraphicalRobot")
 
     def reset(self):
         """
