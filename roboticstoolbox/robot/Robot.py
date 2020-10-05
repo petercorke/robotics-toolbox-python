@@ -50,7 +50,7 @@ class Robot:
         return self._links[i]
 
     def dynchanged(self):
-        self._dynchange = True
+        self._dynchanged = True
 
     @property
     def n(self):
