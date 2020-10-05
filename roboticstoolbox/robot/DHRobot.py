@@ -98,7 +98,7 @@ class DHRobot(Robot, Dynamics):
 
         # rne parameters
         self._rne_ob = None
-        self._rne_changed = True
+        self._dynchanged = True
 
     def __str__(self):
         """
@@ -584,26 +584,28 @@ class DHRobot(Robot, Dynamics):
 
         T = self.fkine_all(q)
         tw = Twist3.Alloc(self.n)
-        if not self.mdh:
+        if self.mdh:
+            # MDH case
+            for j, link in enumerate(self):
+                if link.sigma == 0:
+                    tw[j] = Twist3.R(T[j].a, T[j].t)
+                else:
+                    tw[j] = Twist3.P(T[j].a, T[j].t)
+        else:
             # DH case
-            for j in range(self.n):
+            for j, link in enumerate(self):
                 if j == 0:
-                    if self.links[j].sigma == 0:
+                    # first link case
+                    if link.sigma == 0:
                         tw[j] = Twist3.R([0, 0, 1], [0, 0, 0])  # revolute
                     else:
                         tw[j] = Twist3.P([0, 0, 1])  # prismatic
                 else:
-                    if self.links[j].sigma == 0:
+                    # subsequent links
+                    if link.sigma == 0:
                         tw[j] = Twist3.R(T[j-1].a, T[j-1].t)  # revolute
                     else:
                         tw[j] = Twist3.P(T[j-1].a)  # prismatic
-        else:
-            # MDH case
-            for j in range(self.n):
-                if self.links[j].sigma == 0:
-                    tw[j] = Twist3.R(T[j].a, T[j].t)
-                else:
-                    tw[j] = Twist3.P(T[j].a, T[j].t)
 
         return tw, T[-1]
 
@@ -2083,11 +2085,13 @@ class DHRobot(Robot, Dynamics):
 
         if grav is None:
             grav = self.gravity
+        else:
+            grav = getvector(grav, 3)
 
         # The c function doesn't handle base rotation, so we need to hack the
         # gravity vector instead
         grav = self.base.R.T @ grav
-        grav = getvector(grav, 3)
+        
 
         if fext is None:
             fext = np.zeros(6)
