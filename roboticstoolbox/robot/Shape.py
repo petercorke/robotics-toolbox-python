@@ -7,6 +7,7 @@ from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from spatialmath.base import r2q
 import numpy as np
+import os
 
 try:
     import fcl
@@ -14,6 +15,11 @@ try:
 except ImportError:
     _fcl = False
 
+try:
+    import trimesh
+    _trimesh = True
+except ImportError:
+    _trimesh = False
 
 class Shape(object):
 
@@ -194,8 +200,24 @@ class Shape(object):
 
     @classmethod
     def Mesh(cls, filename, base=None, scale=None):
+
+        name, file_extension = os.path.splitext(filename)
+
+        if _fcl and _trimesh and \
+                (file_extension == '.stl' or file_extension == '.STL'):
+
+            tmesh = trimesh.load(filename)
+            m = fcl.BVHModel()
+            m.beginModel(len(tmesh.vertices), len(tmesh.faces))
+            m.addSubModel(tmesh.vertices, tmesh.faces)
+            m.endModel()
+
+            co = fcl.CollisionObject(m, fcl.Transform())
+        else:
+            co = None
+
         return cls(
-            False, filename=filename, base=base, scale=scale, stype='mesh')
+            False, filename=filename, base=base, co=co, scale=scale, stype='mesh')
 
 
 # class Mesh(Shape):

@@ -87,11 +87,10 @@ class ERobot(object):
 
         # Set up references between links, a bi-directional linked list
         # Also find the top of the tree
-        self.root = []
         self.end = []
         for link in elinks:
             if link.parent is None:
-                self.root.append(link)
+                self.root = link
             else:
                 link.parent._child.append(link)
 
@@ -102,7 +101,7 @@ class ERobot(object):
 
         # If the base link is not defined, use the root of the tree
         if base_link is None:
-            self._base_link = self.root[0]   # Needs to be private attrib
+            self._base_link = self.root      # Needs to be private attrib
         else:
             self._base_link = base_link      # Needs to be private attrib
 
@@ -146,21 +145,34 @@ class ERobot(object):
         # Pre-calculate the forward kinematics path
         self._fkpath = self.dfs_path(self.base_link, self.ee_link)
 
-    def bfs_link(self, func):
-        queue = self.root
+    # def bfs_link(self, func):
+    #     queue = self.root
 
-        for li in queue:
-            func(li)
+    #     for li in queue:
+    #         func(li)
+
+    #     def vis_children(link):
+    #         for li in link.child:
+    #             if li not in queue:
+    #                 queue.append(li)
+    #                 func(li)
+
+    #     while len(queue) > 0:
+    #         link = queue.pop(0)
+    #         vis_children(link)
+
+    def bfs_link(self, func):
+        visited = [self.root]
 
         def vis_children(link):
-            for li in link.child:
-                if li not in queue:
-                    queue.append(li)
-                    func(li)
+            visited.append(link)
+            func(link)
 
-        while len(queue) > 0:
-            link = queue.pop(0)
-            vis_children(link)
+            for li in link.child:
+                if li not in visited:
+                    vis_children(li)
+
+        vis_children(self.root)
 
     def dfs_path(self, l1, l2):
         path = []
@@ -726,7 +738,10 @@ class ERobot(object):
         if q is None:
             q = np.copy(self.q)
         else:
-            q = getvector(q, self.n)
+            try:
+                q = getvector(q, n)
+            except ValueError:
+                q = getvector(q, self.n)
 
         if T is None:
             T = (self.base.inv()
@@ -813,8 +828,8 @@ class ERobot(object):
 
         if q is None:
             q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        # else:
+        #     q = getvector(q, n)
 
         T = (self.base.inv()
              * self.fkine_graph(q, from_link=from_link, to_link=to_link)
@@ -913,7 +928,7 @@ class ERobot(object):
             if q is None:
                 q = np.copy(self.q)
             else:
-                q = getvector(q, self.n)
+                q = getvector(q, n)
 
             J = self.jacob0(q, from_link, to_link)
         else:
@@ -955,20 +970,21 @@ class ERobot(object):
             if q is None:
                 q = np.copy(self.q)
             else:
-                q = getvector(q, self.n)
+                q = getvector(q, n)
 
-            J = self.jacob0(q)
+            J = self.jacob0(q, from_link, to_link)
         else:
             verifymatrix(J, (6, n))
 
         if H is None:
-            H = self.hessian0(J0=J)
+            H = self.hessian0(J0=J, from_link=from_link, to_link=to_link)
         else:
             verifymatrix(H, (6, n, n))
 
-        manipulability = self.manipulability(J=J)
+        manipulability = self.manipulability(
+            J=J, from_link=from_link, to_link=to_link)
         b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((self.n, 1))
+        Jm = np.zeros((n, 1))
 
         for i in range(n):
             c = J @ np.transpose(H[:, :, i])

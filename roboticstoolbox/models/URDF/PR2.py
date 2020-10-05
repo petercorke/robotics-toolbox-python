@@ -23,6 +23,7 @@ class PR2(ERobot):
             name=args[1])
 
         self.manufacturer = 'Willow Garage'
+        # self.base_link = self.ets[]
         # self.ee_link = self.ets[9]
 
     #     self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])

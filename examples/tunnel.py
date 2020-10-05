@@ -14,48 +14,9 @@ problems = np.array([
     [0, 1],
     [0, 2],
     [0, 3],
-    [0, 4],
-    [0, 5],
-    [0, 6],
-    [0, 7],
-    [0, 8],
-    [0, 9],
     [1, 2],
     [1, 3],
-    [1, 4],
-    [1, 5],
-    [1, 6],
-    [1, 7],
-    [1, 8],
-    [1, 9],
-    [2, 3],
-    [2, 4],
-    [2, 5],
-    [2, 6],
-    [2, 7],
-    [2, 8],
-    [2, 9],
-    [3, 4],
-    [3, 5],
-    [3, 6],
-    [3, 7],
-    [3, 8],
-    [3, 9],
-    [4, 5],
-    [4, 6],
-    [4, 7],
-    [4, 8],
-    [4, 9],
-    [5, 6],
-    [5, 7],
-    [5, 8],
-    [5, 9],
-    [6, 7],
-    [6, 8],
-    [6, 9],
-    [7, 8],
-    [7, 9],
-    [8, 9]])
+    [2, 3]])
 
 qdmax = np.array([
     2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100,
@@ -63,41 +24,23 @@ qdmax = np.array([
 lb = -qdmax
 ub = qdmax
 
-q0 = [-0.5653, -0.1941, -1.2602, -0.7896, -2.3227, -0.3919, -2.5173]
-q1 = [-0.1361, -0.1915, -1.2602, -0.8652, -2.8852, -0.7962, -2.039]
-q2 = [0.2341, -0.2138, -1.2602, -0.4709, -3.0149, -0.7505, -2.0164]
-q3 = [0.1584,  0.3429, -1.2382, -0.9829, -2.0892, -1.6126, -0.5582]
-q4 = [0.3927,  0.1763, -1.2382, -0.1849, -1.96, -1.4092, -1.0492]
-q5 = [-0.632,  0.5012, -1.2382, -0.8353, 2.2571, -0.1041,  0.3066]
-q6 = [0.1683,  0.7154, -0.4195, -1.0496, 2.4832, -0.6028, -0.6401]
-q7 = [-0.1198,  0.5299, -0.6291, -0.4348, 2.1715, -1.6403,  1.8299]
-q8 = [0.2743,  0.4088, -0.5291, -0.4304, 2.119, -1.9994, 1.7162]
-q9 = [0.2743,  0.4088, -0.5291, -0.4304, -0.9985, -1.0032, -1.7278]
-qs = [q0, q1, q2, q3, q4, q5, q6, q7, q8, q9]
+q0 = [-0.3728,  1.0259, -0.9876, -1.2082,  2.0677, -0.563, -1.6563]
+q1 = [0.2993,  0.1747, -1.7835, -0.8593,  3.1042, -1.2145, -1.3626]
+q2 = [0.3537,  0.2079, -1.7168, -0.2937,  3.0224, -0.7083, -1.3286]
+q3 = [0.3398, -0.2349, -0.0415, -1.5042,  2.7647, -1.7995,  3.0539]
+qs = [q0, q1, q2, q3]
 
 s1 = rp.Shape.Box(
-    scale=[0.60, 1.1, 0.02],
-    base=sm.SE3(0.95, 0, 0.20))
+    scale=[0.6, 0.04, 0.6],
+    base=sm.SE3(0.65, -0.15, 0.43))
 
 s2 = rp.Shape.Box(
-    scale=[0.60, 1.1, 0.02],
-    base=sm.SE3(0.95, 0, 0.60))
+    scale=[0.6, 0.04, 0.6],
+    base=sm.SE3(0.65, -0.15, 1.22))
 
 s3 = rp.Shape.Box(
-    scale=[0.60, 1.1, 0.02],
-    base=sm.SE3(0.95, 0, 1.00))
-
-s4 = rp.Shape.Box(
-    scale=[0.60, 1.1, 0.02],
-    base=sm.SE3(0.95, 0, 1.40))
-
-s5 = rp.Shape.Box(
-    scale=[0.60, 0.02, 1.40],
-    base=sm.SE3(0.95, 0.55, 0.7))
-
-s6 = rp.Shape.Box(
-    scale=[0.60, 0.02, 1.40],
-    base=sm.SE3(0.95, -0.55, 0.7))
+    scale=[0.3, 0.04, 0.2],
+    base=sm.SE3(0.8, -0.15, 0.83))
 
 s0 = rp.Shape.Sphere(
     radius=0.05
@@ -108,14 +51,21 @@ env.launch()
 
 r = rp.models.PR2()
 r.q = [
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.16825, 0.0, 0.0, 0.0, -0.5652894131595758, -0.1940789551546196,
-    -1.260201738335192, -0.7895653603354864, -2.322747882942366,
-    -0.3918504494615993, -2.5173485998351066, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 2.1347678577910827, 0.05595277251194286, 0.48032314980402596,
-    -2.0802263633096487, 1.2294916701952125, -0.8773017824611689,
-    2.932954218704465, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-# r.base = sm.SE3(0.11382412910461426, 0.0, 0.0)
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.16825, 0.0, 0.0, 0.0, -0.37279882212870064, 1.0259015008778194,
+    -0.9875997438281771, -1.208229229103619, 2.0676739431952065,
+    -0.5630237954661839, -1.6563473012595384, 2.248201624865942e-15, 0.0, 0.0,
+    0.0, 0.0, 0.0, -1.1102230246251565e-16, 1.1473791555597268,
+    -0.2578419004077155, 0.5298918609954418, -2.121201719392923,
+    2.198118788614387, -1.4189668927954484, 2.1828521334438378,
+    -1.2961853812498703e-14, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+R = sm.base.q2r([0.9999523740218402, 0.0, 0.0, 0.00975959466810749])
+T = np.eye(4)
+T[:3, :3] = R
+T = sm.SE3(T)
+r.base = sm.SE3(-0.013043247163295746, -0.2435353398323059, 0.0) * T
+
 
 env.add(r)
 # env.add(r, show_robot=False, show_collision=True)
@@ -123,9 +73,6 @@ env.add(s0)
 env.add(s1)
 env.add(s2)
 env.add(s3)
-env.add(s4)
-env.add(s5)
-env.add(s6)
 time.sleep(1)
 
 # ETS number 43
@@ -298,46 +245,46 @@ def servo(q0, q1, it):
 
         closest = 1000000
         j = 0
-        for link in links:
-            if link.jtype == link.VARIABLE:
-                j += 1
+        # for link in links:
+        #     if link.jtype == link.VARIABLE:
+        #         j += 1
 
-            for col in link.collision:
-                l_Ain, l_bin, ret = link_calc(link, col, s3, q[:j], np.array([0, 0, -1]))
-                if ret < closest:
-                    closest = ret
+        #     for col in link.collision:
+        #         l_Ain, l_bin, ret = link_calc(link, col, s2, q[:j], np.array([0, 0, -1]))
+        #         if ret < closest:
+        #             closest = ret
 
-                if l_Ain is not None and l_bin is not None:
-                    if Ain is None:
-                        Ain = l_Ain
-                    else:
-                        Ain = np.r_[Ain, l_Ain]
+        #         if l_Ain is not None and l_bin is not None:
+        #             if Ain is None:
+        #                 Ain = l_Ain
+        #             else:
+        #                 Ain = np.r_[Ain, l_Ain]
 
-                    if bin is None:
-                        bin = np.array(l_bin)
-                    else:
-                        bin = np.r_[bin, l_bin]
+        #             if bin is None:
+        #                 bin = np.array(l_bin)
+        #             else:
+        #                 bin = np.r_[bin, l_bin]
 
         j = 0
-        for link in links:
-            if link.jtype == link.VARIABLE:
-                j += 1
+        # for link in links:
+        #     if link.jtype == link.VARIABLE:
+        #         j += 1
 
-            for col in link.collision:
-                l_Ain, l_bin, ret = link_calc(link, col, s6, q[:j], np.array([0, -1, 0]))
-                if ret < closest:
-                    closest = ret
+        #     for col in link.collision:
+        #         l_Ain, l_bin, ret = link_calc(link, col, s1, q[:j], np.array([0, -1, 0]))
+        #         if ret < closest:
+        #             closest = ret
 
-                if l_Ain is not None and l_bin is not None:
-                    if Ain is None:
-                        Ain = l_Ain
-                    else:
-                        Ain = np.r_[Ain, l_Ain]
+        #         if l_Ain is not None and l_bin is not None:
+        #             if Ain is None:
+        #                 Ain = l_Ain
+        #             else:
+        #                 Ain = np.r_[Ain, l_Ain]
 
-                    if bin is None:
-                        bin = np.array(l_bin)
-                    else:
-                        bin = np.r_[bin, l_bin]
+        #             if bin is None:
+        #                 bin = np.array(l_bin)
+        #             else:
+        #                 bin = np.r_[bin, l_bin]
 
         # if closest < 0.2 and shape(l2._fk, s3):
         if plane_int(l2._fk.t, tep, s3):
@@ -390,7 +337,7 @@ def servo(q0, q1, it):
 
 it_max = 20000
 
-probs = 45
+probs = 6
 j = 0
 
 for i in range(probs):

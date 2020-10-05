@@ -83,8 +83,6 @@ class URDFType(object):
             t, r = cls._ATTRIBS[a]  # t = type, r = required (bool)
             if r:
                 try:
-                    # print(t)
-                    # print(node.attrib[a])
                     v = cls._parse_attrib(t, node.attrib[a])
                 except Exception:   # pragma nocover
                     raise ValueError(
@@ -153,7 +151,6 @@ class URDFType(object):
             and elements in the class arrays.
         """
         kwargs = cls._parse_simple_attribs(node)
-        print(kwargs)
         kwargs.update(cls._parse_simple_elements(node, path))
         return kwargs
 
@@ -1213,7 +1210,6 @@ class Transmission(URDFType):
     @classmethod
     def _from_xml(cls, node, path):
         kwargs = cls._parse(node, path)
-        print(cls._parse(node, path))
         if node.find('type') is not None:
             kwargs['trans_type'] = node.find('type').text
         else:
@@ -1651,8 +1647,6 @@ class URDF(URDFType):
             trans = T.t
             rot = j.rpy
             v = None
-            # print(trans)
-            # print(rot)
 
             if trans[0] != 0:
                 ets = ets * rp.ETS.tx(trans[0])

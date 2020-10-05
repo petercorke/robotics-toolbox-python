@@ -135,7 +135,8 @@ class Swift(Connector):  # pragma nocover
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt / 1000)
 
-                    if np.any(robot.qlim[:, i] != 0):
+                    if np.any(robot.qlim[:, i] != 0) and \
+                            not np.any(np.isnan(robot.qlim[:, i])):
                         robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
                         robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
 

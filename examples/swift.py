@@ -14,10 +14,14 @@ ta = 0
 tb = 0
 count = 0
 
+qdmax = np.array([
+    2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100,
+    5000000, 5000000, 5000000, 5000000, 5000000, 5000000])
+
 
 def link_calc(link, col, ob):
     di = 0.30
-    ds = 0.05
+    ds = 0.1
 
     t1 = time.time()
 
@@ -30,6 +34,13 @@ def link_calc(link, col, ob):
     wTlp = col.base * sm.SE3(result.nearest_points[0])
     wTcp = ob.base * sm.SE3(result.nearest_points[1])
     lpTcp = wTlp.inv() * wTcp
+
+    if ret != np.linalg.norm(lpTcp.t):
+        wTcp = sm.SE3(wTlp.t) * sm.SE3(0, ret, 0)
+        lpTcp = wTlp.inv() * wTcp
+    # else:
+    #     wTcp = ob.base * sm.SE3(result.nearest_points[1])
+    #     lpTcp = wTlp.inv() * wTcp
 
     t2 = time.time()
 
@@ -49,7 +60,7 @@ def link_calc(link, col, ob):
         l_Ain = np.zeros((1, 13))
         l_Ain[0, :n] = nh @ Je
         #  = np.c_[nh @ Je, np.zeros((1, 13 - n))]
-        l_bin = (100 * (d - ds) / (di - ds)) + dp
+        l_bin = (10 * (d - ds) / (di - ds)) + dp
     else:
         l_Ain = None
         l_bin = None
@@ -61,7 +72,7 @@ def link_calc(link, col, ob):
     ta += t2 - t1
     tb += t3 - t2
 
-    return l_Ain, l_bin
+    return l_Ain, l_bin, ret
 
 
 def link_closest_point(links, ob):
@@ -108,27 +119,33 @@ panda = rp.models.Panda()
 panda.q = panda.qr
 # panda.q[4] += 0.1
 # Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
-Tep = panda.fkine() * sm.SE3.Tz(0.6) * sm.SE3.Tx(-0.1)  # * sm.SE3.Ty(-0.1)
+# Tep = panda.fkine() * sm.SE3.Tz(0.6) * sm.SE3.Tx(-0.1)  # * sm.SE3.Ty(-0.1)
+Tep = panda.fkine() * sm.SE3.Ty(-0.5) #* sm.SE3.Tx(-0.5)
 
 
 s1 = rp.Shape.Sphere(0.05, sm.SE3(0.5, 0, 0.2))
 s2 = rp.Shape.Sphere(0.05, sm.SE3(0.15, 0.25, 0.5))
 s3 = rp.Shape.Sphere(0.05, sm.SE3(0.25, -0.25, 0.1))
+s4 = rp.Shape.Box([0.4, 0.01, 0.5], sm.SE3(0.6, 0.25, 0.6))
 # s1.v = [-0.08, 0.2, 0.08, 0, 0, 0]
 s2.v = [0, -0.25, 0, 0, 0, 0]
 # s3.v = [0.2, 0.2, 0, 0, 0, 0]
 
 arrived = False
-# env.add(panda, show_collision=True, show_robot=False)
-env.add(panda)
+env.add(panda, show_collision=True, show_robot=False)
+# env.add(panda)
 # env.add(s1)
-env.add(s2)
+# env.add(s2)
 # env.add(s3)
+env.add(s4)
 time.sleep(1)
 
 dt = 0.05
 ps = 0.05
 pi = 0.6
+
+lb = -qdmax
+ub = qdmax
 
 # env.record_start('file.webm')
 while not arrived:
@@ -148,15 +165,20 @@ while not arrived:
     #     if panda.qlim[1, i] - panda.q[i] <= pi:
     #         bin[i] = ((panda.qlim[1, i] - panda.q[i]) - ps) / (pi - ps)
     #         Ain[i, i] = 1
-
+    # print()
+    # print(np.round(v, 2))
     n = 7
     Q = np.eye(n + 6)
     Q[:n, :n] *= Y
-    Q[n:, n:] = 200 * (1 / e) * np.eye(6)
+    # Q[n:, n:] = 200 * (1 / e) * np.eye(6)
+    Q[n:, n:] = [1/10, 1/100, 1/100, 1/100, 1/100, 1/100] * np.eye(6)
     Aeq = np.c_[panda.jacobe(), np.eye(6)]
+    
     beq = v.reshape((6,))
-    Jm = panda.jacobm().reshape((panda.n,))
+    
+    Jm = panda.jacobm().reshape((7,))
     c = np.r_[-Jm[:7], np.zeros(6)]
+    c = np.zeros(13)
 
     l_groups = []
     j = -1
@@ -174,9 +196,9 @@ while not arrived:
     bin = None
 
     # Get closest link
-    linkA = panda._fkpath[-1]
-    linkB = panda._fkpath[-2]
-    linkC = panda._fkpath[-3]
+    # linkA = panda._fkpath[-1]
+    # linkB = panda._fkpath[-2]
+    # linkC = panda._fkpath[-3]
     panda.fkine_all()
     links = panda._fkpath[1:]
 
@@ -201,9 +223,14 @@ while not arrived:
     #             else:
     #                 bin = np.r_[bin, l_bin]
 
+    closest = 10000
+
     for link in links:
         for col in link.collision:
-            l_Ain, l_bin = link_calc(link, col, s2)
+            l_Ain, l_bin, ret = link_calc(link, col, s4)
+
+            if ret < closest:
+                closest = ret
 
             if l_Ain is not None and l_bin is not None:
                 if Ain is None:
@@ -215,6 +242,12 @@ while not arrived:
                     bin = np.array(l_bin)
                 else:
                     bin = np.r_[bin, l_bin]
+
+    # print(closest)
+    beq[0] += -0.5
+
+
+    # Q[n:, n:] = 1/10 * closest * np.eye(6)
 
     # for link in links:
     #     for col in link.collision:
@@ -232,9 +265,9 @@ while not arrived:
     #                 bin = np.r_[bin, l_bin]
 
 
-    print(count)
-    print(ta)
-    print(tb)
+    # print(count)
+    # print(ta)
+    # print(tb)
 
 
     # retA, resA, lpTcp = link_closest_point([linkA], sphere)
@@ -261,9 +294,12 @@ while not arrived:
     #     bin = None
 
     t1 = time.time()
-    qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq)
+    qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq, lb=lb, ub=ub)
+    # qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq)
     t2 = time.time()
-    print(t1-t0)
+    # print(t1-t0)
+
+    print(np.round(qd[7:], 2))
 
     if np.any(np.isnan(qd)):
         panda.qd = panda.qz
