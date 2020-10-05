@@ -97,20 +97,17 @@ class Stanford(DHRobot):
 
         L = [L0, L1, L2, L3, L4, L5]
 
-        # zero angles, L shaped pose
-        self._qz = np.array([0, 0, 0, 0, 0, 0])
-
-        super(Stanford, self).__init__(
+        super().__init__(
             L,
             name="Stanford arm",
-            manufacturer="Victor Scheinman")
-
-    @property
-    def qz(self):
-        return self._qz
-
+            manufacturer="Victor Scheinman",
+            keywords=('dynamics',))
+            
+        # zero angles, L shaped pose
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
 if __name__ == '__main__':
 
     stanford = Stanford()
     print(stanford)
+

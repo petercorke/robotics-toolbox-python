@@ -4,8 +4,8 @@
 """
 
 import numpy as np
-from functools import wraps
-from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox.robot import Robot, DHRobot #, DHLink
+from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
     getvector, ismatrix, isscalar, verifymatrix
@@ -17,9 +17,11 @@ from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
 from roboticstoolbox.robot.Dynamics import Dynamics
+from ansitable import ANSITable, Column
+from functools import wraps
 
 
-class DHRobot(Dynamics):
+class DHRobot(Robot, Dynamics):
     """
     A superclass for arm type robots. A concrete class that represents a
     serial-link arm-type robot.  Each link and joint in the chain is
@@ -55,19 +57,9 @@ class DHRobot(Dynamics):
     def __init__(
             self,
             L,
-            name='noname',
-            manufacturer='',
-            base=SE3(),
-            tool=SE3(),
-            gravity=np.array([0, 0, 9.81])):
+            **kwargs):
 
-        self.name = name
-        self.manufacturer = manufacturer
-        self.base = base
-        self.tool = tool
-        self.gravity = gravity
-
-        super().__init__()
+        super().__init__(L, **kwargs)
 
         # Verify L
         if not isinstance(L, list):
@@ -105,9 +97,8 @@ class DHRobot(Dynamics):
             raise ValueError('Robot has mixed D&H link conventions')
 
         # rne parameters
-        self._rne_init = False
         self._rne_ob = None
-        self._rne_changed = False
+        self._dynchanged = True
 
     def __str__(self):
         """
@@ -116,39 +107,102 @@ class DHRobot(Dynamics):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        axes = ''
-        L = ''
+        s = ""
+        deg = 180 / np.pi
 
-        for i in range(self.n):
-            L += str(self.links[i]) + '\n'
-
-            if not self.links[i].sigma:
-                axes += 'R'
+        def qs(j, link):
+            j += 1
+            if link.isprismatic():
+                if L.offset == 0:
+                    return f"q{j:d}"
+                else:
+                    return f"q{j:d} + {L.offset:}"
             else:
-                axes += 'P'
+                if L.offset == 0:
+                    return f"q{j:d}"
+                else:
+                    return f"q{j:d} + {L.offset * deg:}\u00b0"
 
-        if not self.mdh:
-            dh = 'std DH'
+        if self.mdh:
+            table = ANSITable(
+                Column("aⱼ₋₁", headalign="^"),
+                Column("⍺ⱼ₋₁", headalign="^"),
+                Column("θⱼ", headalign="^"),
+                Column("dⱼ", headalign="^"),
+                border="thick"
+                )
+            for j, L in enumerate(self):
+                if L.isprismatic():
+                    table.row(L.a, str(L.alpha * deg) + "\u00b0", str(L.theta * deg) + "\u00b0", qs(j, L))
+                else:
+                    table.row(L.a, str(L.alpha * deg) + "\u00b0", qs(j, L), L.d)
         else:
-            dh = 'mod DH'
+            # DH format
+            table = ANSITable(
+                Column("θⱼ", headalign="^", colalign="<"),
+                Column("dⱼ", headalign="^"),
+                Column("aⱼ", headalign="^"),
+                Column("⍺ⱼ", headalign="^"),
+                border="thick"
+                )
+            for j, L in enumerate(self):
+                if L.isprismatic():
+                    table.row(str(L.theta * deg) + "\u00b0", qs(j, L), L.a, str(L.alpha * deg) + "\u00b0")
+                else:
+                    table.row(qs(j, L), L.d, L.a, str(L.alpha * deg) + "\u00b0")
+        
+        s = str(table)
 
-        rpy = self.tool.rpy()
+        table = table = ANSITable(
+            Column("", colalign=">"),
+            Column("", colalign="<"), border="thin", header=False)
+        table.row("base", self.base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
+        table.row("tool", self.tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
 
-        for i in range(3):
-            if rpy[i] == 0:
-                rpy[i] = 0
+        for name, q in self._configdict.items():
+            qlist = []
+            for i, L in enumerate(self):
+                if L.isprismatic():
+                    qlist.append(f"{q[i]:.3g}")
+                else:
+                    qlist.append(f"{q[i] * deg:.3g}\u00b0")
+            table.row(name, ', '.join(qlist))
 
-        model = '\n%s (%s): %d axis, %s, %s\n'\
-            'Parameters:\n'\
-            '%s\n'\
-            'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
-                self.name, self.manufacturer, self.n, axes, dh,
-                L,
-                self.tool.A[0, 3], self.tool.A[1, 3],
-                self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
-            )
+        return s + "\n" + str(table)
 
-        return model
+        # axes = ''
+        # L = ''
+
+        # for i in range(self.n):
+        #     L += str(self.links[i]) + '\n'
+
+        #     if not self.links[i].sigma:
+        #         axes += 'R'
+        #     else:
+        #         axes += 'P'
+
+        # if not self.mdh:
+        #     dh = 'std DH'
+        # else:
+        #     dh = 'mod DH'
+
+        # rpy = self.tool.rpy()
+
+        # for i in range(3):
+        #     if rpy[i] == 0:
+        #         rpy[i] = 0
+
+        # model = '\n%s (%s): %d axis, %s, %s\n'\
+        #     'Parameters:\n'\
+        #     '%s\n'\
+        #     'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
+        #         self.name, self.manufacturer, self.n, axes, dh,
+        #         L,
+        #         self.tool.A[0, 3], self.tool.A[1, 3],
+        #         self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
+        #     )
+
+        # return model
 
     def __add__(self, L):
         nlinks = []
@@ -220,68 +274,29 @@ class DHRobot(Dynamics):
 
     def _check_rne(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            if not args[0]._rne_init or args[0]._rne_changed:
+        def wrapper_check_rne(*args, **kwargs):
+            if args[0]._rne_ob is None or args[0]._rne_changed:
+                args[0].delete_rne()
                 args[0]._init_rne()
-                args[0]._rne_init = True
-                args[0]._rne_changed = False
+            args[0]._rne_changed = False
             return func(*args, **kwargs)
-        return wrapper
+        return wrapper_check_rne
 
-    def _listen_rne(func):
-        @wraps(func)
-        def wrapper(*args):
-            args[0]._rne_changed = True
-            return func(*args)
-        return wrapper
 
-    @property
-    def name(self):
-        return self._name
 
-    @property
-    def manufacturer(self):
-        return self._manufacturer
-
-    @property
-    def links(self):
-        return self._links
-
-    @property
-    def base(self):
-        return self._base
-
-    @property
-    def tool(self):
-        return self._tool
-
-    @property
-    def gravity(self):
-        return self._gravity
-
-    @property
-    def n(self):
-        return self._n
+    def delete_rne(self):
+        """
+        Frees the memory holding the robot object in c if the robot object
+        has been initialised in c.
+        """
+        if self._rne_ob is not None:
+            delete(self._rne_ob)
+            self._rne_changed = False
+            self._rne_ob = None
 
     @property
     def mdh(self):
         return self._mdh
-
-    @property
-    def q(self):
-        return self._q
-
-    @property
-    def qd(self):
-        return self._qd
-
-    @property
-    def qdd(self):
-        return self._qdd
-
-    @property
-    def control_type(self):
-        return self._control_type
 
     @property
     def d(self):
@@ -325,50 +340,6 @@ class DHRobot(Dynamics):
             v = np.c_[v, self.links[i].qlim]
         return v
 
-    @manufacturer.setter
-    def manufacturer(self, manufacturer_new):
-        self._manufacturer = manufacturer_new
-
-    @control_type.setter
-    def control_type(self, cn):
-        if cn == 'p' or cn == 'v' or cn == 'a':
-            self._control_type = cn
-        else:
-            raise ValueError(
-                'Control type must be one of \'p\', \'v\', or \'a\'')
-
-    @gravity.setter
-    @_listen_rne
-    def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3, 'col')
-
-    @name.setter
-    def name(self, name_new):
-        self._name = name_new
-
-    @base.setter
-    def base(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._base = T
-
-    @tool.setter
-    def tool(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._tool = T
-
-    @q.setter
-    def q(self, q_new):
-        self._q = getvector(q_new, self.n)
-
-    @qd.setter
-    def qd(self, qd_new):
-        self._qd = getvector(qd_new, self.n)
-
-    @qdd.setter
-    def qdd(self, qdd_new):
-        self._qdd = getvector(qdd_new, self.n)
 
     def A(self, joints, q=None):
         """
@@ -520,6 +491,19 @@ class DHRobot(Dynamics):
 
         return p
 
+    def config(self):
+        """
+        Return the joint configuration string
+
+        :return: joint configuration string
+        :rtype: str
+
+        A string with one letter per joint, the letter is ``R`` for a revolute
+        joint, and ``P`` for a prismatic joint.  A Puma560 robot is "RRRRRR"
+        and the Stanford arm is "RRPRRR".
+        """
+        return ''.join(['R' if L.isrevolute() else 'P' for L in self])
+
     def todegrees(self, q=None):
         """
         Convert joint angles to degrees.
@@ -600,26 +584,28 @@ class DHRobot(Dynamics):
 
         T = self.fkine_all(q)
         tw = Twist3.Alloc(self.n)
-        if not self.mdh:
+        if self.mdh:
+            # MDH case
+            for j, link in enumerate(self):
+                if link.sigma == 0:
+                    tw[j] = Twist3.R(T[j].a, T[j].t)
+                else:
+                    tw[j] = Twist3.P(T[j].a, T[j].t)
+        else:
             # DH case
-            for j in range(self.n):
+            for j, link in enumerate(self):
                 if j == 0:
-                    if self.links[j].sigma == 0:
+                    # first link case
+                    if link.sigma == 0:
                         tw[j] = Twist3.R([0, 0, 1], [0, 0, 0])  # revolute
                     else:
                         tw[j] = Twist3.P([0, 0, 1])  # prismatic
                 else:
-                    if self.links[j].sigma == 0:
+                    # subsequent links
+                    if link.sigma == 0:
                         tw[j] = Twist3.R(T[j-1].a, T[j-1].t)  # revolute
                     else:
                         tw[j] = Twist3.P(T[j-1].a)  # prismatic
-        else:
-            # MDH case
-            for j in range(self.n):
-                if self.links[j].sigma == 0:
-                    tw[j] = Twist3.R(T[j].a, T[j].t)
-                else:
-                    tw[j] = Twist3.P(T[j].a, T[j].t)
 
         return tw, T[-1]
 
@@ -2085,7 +2071,6 @@ class DHRobot(Dynamics):
             - If a model has no dynamic parameters set the result is zero.
 
         """
-
         trajn = 1
 
         try:
@@ -2100,11 +2085,13 @@ class DHRobot(Dynamics):
 
         if grav is None:
             grav = self.gravity
+        else:
+            grav = getvector(grav, 3)
 
         # The c function doesn't handle base rotation, so we need to hack the
         # gravity vector instead
         grav = self.base.R.T @ grav
-        grav = getvector(grav, 3)
+        
 
         if fext is None:
             fext = np.zeros(6)
@@ -2121,17 +2108,6 @@ class DHRobot(Dynamics):
             return tau[0, :]
         else:
             return tau
-
-    def delete_rne(self):
-        """
-        Frees the memory holding the robot object in c if the robot object
-        has been initialised in c.
-        """
-        if self._rne_init:
-            delete(self._rne_ob)
-            self._rne_init = False
-            self._rne_changed = False
-            self._rne_ob = None
 
     def jacob_dot(self, q=None, qd=None):
         '''

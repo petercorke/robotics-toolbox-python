@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 @author: Peter Corke
 @author: Samuel Drew
@@ -30,34 +31,36 @@ class Ball(DHRobot):
     behaves like a script and writes to the global workspace.
     '''
 
-    def __init__(self, N=None):
+    def __init__(self, N=10):
 
         links = []
-        self._qz = []
-        if not N:
-            N = 10
-        self.N = N
+        q1 = []
 
-        for i in range(self.N):
+        for i in range(N):
             links.append(RevoluteDH(a=0.1, alpha=pi/2))
-            self._qz.append(self.fract(i+1))
+            q1.append(self._fract(i+1))
 
         # and build a serial link manipulator
         super(Ball, self).__init__(links, name='ball')
 
-    @property
-    def qz(self):
-        return self._qz
+        # zero angles, L shaped pose
+        self.addconfiguration("qz", np.zeros(N,))
+        self.addconfiguration("q1", q1)
 
-    def fract(self, i):
+    def _fract(self, i):
         theta1 = 1
         theta2 = -2/3
 
         out = i % 3
         if out < 1:
-            f = self.fract(i/3)
+            f = self._fract(i / 3)
         elif out < 2:
             f = theta1
         else:
             f = theta2
         return f
+
+if __name__ == '__main__':
+
+    ball = Ball()
+    print(ball)

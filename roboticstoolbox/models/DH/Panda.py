@@ -107,17 +107,9 @@ class Panda(DHRobot):
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0, 0])
-        # self.qr = np.array([0, -90, -90, 90, 0, -90, 90]) * deg
-        self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
+        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0, 0])
+        self.addconfiguration("qr", np.r_[0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
-    @property
-    def qz(self):
-        return self._qz
-
-    @property
-    def qr(self):
-        return self._qr
 
 if __name__ == '__main__':
 

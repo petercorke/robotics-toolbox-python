@@ -118,7 +118,7 @@ For a robot with N joints you must define N joint instances.
 Next we call the superclass constructor to do the heavy lifting.
 
 ```python
-        super(Puma560, self).__init__(
+        super().__init__(
             [L0, L1, L2, L3, L4, L5],
             name="MYROBOT",
             manufacturer="COMPANY THAT BUILDS MYROBOTs")
@@ -127,7 +127,7 @@ Next we call the superclass constructor to do the heavy lifting.
 We pass in an ordered list of all the joint objects we created earlier, and add 
 some metadata.  The name gets used in plots.
 
-Finally, we might like to define some useful joint configurations, maybe the home position, or where it goes to pick up a widget.  You can 
+We might like to define some useful joint configurations, maybe the home position, or where it goes to pick up a widget.  You can 
 define as many of these as you like, but the pattern looks like this:
 
 ```python
@@ -146,6 +146,38 @@ Many of the
 Toolbox models have a configuration called `qz` which is the set of zero
 joint angles.
 
+Finally, we can make the robot definition an executable script.  We do that by adding a hashbang line at the top of the file
+
+```python
+#!/usr/bin/env python
+```
+
+and a main code block at the bottom
+
+```python
+if __name__ == '__main__':
+
+    robot = MYROBOT()
+    print(robot)
+```
+
+so if you run it from your shell
+
+```
+% ./Puma560.py 
+┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━┓
+┃   θⱼ    ┃   dⱼ    ┃   aⱼ   ┃  ⍺ⱼ   ┃
+┣━━━━━━━━━╋━━━━━━━━━╋━━━━━━━━╋━━━━━━━┫
+┃q0 + 0.0 ┃   0.672 ┃      0 ┃  90.0 ┃
+┃q1 + 0.0 ┃       0 ┃ 0.4318 ┃   0.0 ┃
+┃q2 + 0.0 ┃ 0.15005 ┃ 0.0203 ┃ -90.0 ┃
+┃q3 + 0.0 ┃  0.4318 ┃      0 ┃  90.0 ┃
+┃q4 + 0.0 ┃       0 ┃      0 ┃ -90.0 ┃
+┃q5 + 0.0 ┃       0 ┃      0 ┃   0.0 ┃
+┗━━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┻━━━━━━━┛
+```
+
+we see the table of Denavit-Hartenberg parameters.
 
 ### Adding your model to the Toolbox
 
@@ -159,7 +191,10 @@ and then add `'MYROBOT'` to the list that defines `__all__`.
 
 ### Testing
 
-Now to test your class
+If you made your definition an executable Python script as above, then run it
+and check that the parameters are what you expect them to be.
+
+If you defined some configurations you can also test that they are correct.
 
 ```python
     myrobot = MYROBOT()  # instantiate an instance of your model

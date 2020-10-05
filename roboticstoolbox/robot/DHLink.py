@@ -3,10 +3,7 @@
 @author: Jesse Haviland
 """
 
-# TODO why are these here?
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
 
 import copy
 import numpy as np
@@ -14,9 +11,10 @@ from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, \
     isscalar, isvector, ismatrix
 import roboticstoolbox as rp
+from roboticstoolbox.robot.Link import Link
+from functools import wraps
 
-
-class DHLink():
+class DHLink(Link):
     """
     A link superclass for all link types. A Link object holds all information
     related to a robot joint and link such as kinematics parameters,
@@ -79,12 +77,15 @@ class DHLink():
             Jm=0.0,
             B=0.0,
             Tc=np.zeros(2),
-            G=1.0):
+            G=1.0,
+            **kwargs):
 
         # TODO
         #  probably should make DHLink(link) return a copy
         #  probably should enforce keyword arguments, easy to make an 
         #    error with positional args
+        super().__init__(**kwargs)
+        self._robot = None
 
         # Kinematic parameters
         self.sigma = sigma
@@ -107,6 +108,7 @@ class DHLink():
         self.B = B
         self.Tc = Tc
         self.G = G
+
 
     def __add__(self, L):
         if isinstance(L, DHLink):
@@ -147,6 +149,14 @@ class DHLink():
 
     def __repr__(self):
         return str(self)
+
+    def _listen_dyn(func):
+        @wraps(func)
+        def wrapper_listen_dyn(*args):
+            if args[0]._robot is not None:
+                args[0]._robot.dynchanged()
+            return func(*args)
+        return wrapper_listen_dyn
 
     @property
     def d(self):
@@ -213,6 +223,7 @@ class DHLink():
         return self._G
 
     @d.setter
+    @_listen_dyn
     def d(self, d_new):
         if self.sigma and d_new != 0.0:
             raise ValueError("f is not valid for prismatic joints")
@@ -220,10 +231,12 @@ class DHLink():
             self._d = d_new
 
     @alpha.setter
+    @_listen_dyn
     def alpha(self, alpha_new):
         self._alpha = alpha_new
 
     @theta.setter
+    @_listen_dyn
     def theta(self, theta_new):
         if not self.sigma and theta_new != 0.0:
             raise ValueError("theta is not valid for revolute joints")
@@ -231,14 +244,17 @@ class DHLink():
             self._theta = theta_new
 
     @a.setter
+    @_listen_dyn
     def a(self, a_new):
         self._a = a_new
 
     @sigma.setter
+    @_listen_dyn
     def sigma(self, sigma_new):
         self._sigma = sigma_new
 
     @mdh.setter
+    @_listen_dyn
     def mdh(self, mdh_new):
         self._mdh = int(mdh_new)
 
@@ -255,14 +271,17 @@ class DHLink():
         self._flip = flip_new
 
     @m.setter
+    @_listen_dyn
     def m(self, m_new):
         self._m = m_new
 
     @r.setter
+    @_listen_dyn
     def r(self, r_new):
         self._r = getvector(r_new, 3, out='col')
 
     @I.setter
+    @_listen_dyn
     def I(self, I_new):  # noqa
 
         if ismatrix(I_new, (3,3)):
@@ -294,10 +313,12 @@ class DHLink():
         self._I = I_new
 
     @Jm.setter
+    @_listen_dyn
     def Jm(self, Jm_new):
         self._Jm = Jm_new
 
     @B.setter
+    @_listen_dyn
     def B(self, B_new):
         if isscalar(B_new):
             self._B = B_new
@@ -305,6 +326,7 @@ class DHLink():
             raise TypeError("B must be a scalar")
 
     @Tc.setter
+    @_listen_dyn
     def Tc(self, Tc_new):
 
         try:
@@ -322,6 +344,7 @@ class DHLink():
         self._Tc = Tc_new
 
     @G.setter
+    @_listen_dyn
     def G(self, G_new):
         self._G = G_new
 

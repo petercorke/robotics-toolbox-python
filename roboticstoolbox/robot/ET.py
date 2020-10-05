@@ -6,6 +6,7 @@
 from collections import UserList, namedtuple
 import numpy as np
 from spatialmath import SE3
+from spatialmath.base import getvector
 
 
 class ET(UserList):   # TODO should be ETS
@@ -87,6 +88,38 @@ class ET(UserList):   # TODO should be ETS
             return self.data[0].T
         else:
             return self.axis_func(q)
+
+    def joints(self):
+        """
+        Get index of joint transforms
+
+        :return: indices of transforms that are joints
+        :rtype: list
+        """
+        return np.where([e.jtype == self.VARIABLE for e in self])[0]
+
+    def eval(self, q):
+        """
+        Evaluate an ETS with joint coordinate substitution
+
+        :param q: joint coordinates
+        :type q: array-like
+        :return: product of transformations
+        :rtype: SE3
+
+        Effectively the forward-kinematics of the ET sequence.  Compounds the
+        transforms left to right, and substitutes in joint coordinates as 
+        needed from consecutive elements of ``q``.
+        """
+        T = SE3()
+
+        q = getvector(q, out='sequence')
+        for e in self:
+            if e.jtype == self.VARIABLE:
+                T *= e.T(q.pop(0))
+            else:
+                T *= e.T()
+        return T
 
     def __str__(self):
         """
@@ -262,15 +295,16 @@ class ET(UserList):   # TODO should be ETS
         return cls(SE3.Tz, axis='tz', eta=eta)
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     from math import pi
+    l1 = 0.672
+    l2 = -0.2337
+    l3 = 0.4318
+    l4 = 0.0203
+    l5 = 0.0837
+    l6 = 0.4318
 
-#     e = ET.rx(pi/2)
-#     print(e)
+    e = ET.tz(l1) * ET.rz() * ET.ry() * ET.ty(l2) * ET.tz(l3) * ET.ry() * ET.tx(l4) * ET.ty(l5) * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
+    print(e.joints())
+    print(e.eval(np.zeros((6,))))
 
-#     e = ET.rx(pi/2) * ET.tx(0.3) * ET.ty(0.4) * ET.rx(-pi/2)
-#     print(e)
-
-#     e = ET.rx(pi/2) * ET.tx() * ET.ty() * ET.rx(-pi/2)
-#     print(e)

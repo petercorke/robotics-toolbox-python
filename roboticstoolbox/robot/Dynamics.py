@@ -305,7 +305,7 @@ class Dynamics:
             qdI = np.zeros((self.n, self.n))
             qddI = np.eye(self.n)
 
-            m = self.rne(qI, qdI, qddI, grav=[0, 0, 0])
+            M = self.rne(qI, qdI, qddI, grav=[0, 0, 0])
 
             # Compute gravity and coriolis torque torques resulting from zero
             # acceleration at given velocity & with gravity acting.
@@ -313,7 +313,7 @@ class Dynamics:
 
             inter = np.expand_dims((torque[i, :] - tau), axis=1)
 
-            qdd[i, :] = (np.linalg.inv(m) @ inter).flatten()
+            qdd[i, :] = np.linalg.solve(M, inter).flatten()
 
         if trajn == 1:
             return qdd[0, :]
@@ -339,8 +339,8 @@ class Dynamics:
         """
 
         # shallow copy the robot object
+        self.delete_rne()  # remove the inherited C pointers
         nf = copy.copy(self)
-        nf.delete_rne()  # remove the inherited C pointers
         nf.name = 'NF/' + self.name
 
         # add the modified links (copies)

@@ -23,9 +23,9 @@ class LWR4(DHRobot):
 
         # deg = np.pi/180
         mm = 1e-3
-        tool_offset = (103)*mm
+        tool_offset = (103) * mm
 
-        flange = 0*mm
+        flange = 0 * mm
         # d7 = (58.4)*mm
 
         # This Kuka model is defined using modified
@@ -92,12 +92,8 @@ class LWR4(DHRobot):
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0, 0])
+        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0, 0])
 
-
-    @property
-    def qz(self):
-        return self._qz
 
 if __name__ == '__main__':
 

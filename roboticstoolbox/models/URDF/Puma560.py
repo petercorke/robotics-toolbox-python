@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 import roboticstoolbox as rp
 from pathlib import Path
 from math import pi
 
 
-class Puma560(ETS):
+class Puma560(ERobot):
 
     def __init__(self):
 
@@ -19,7 +19,7 @@ class Puma560(ETS):
         args = super(Puma560, self).urdf_to_ets_args(
             (fpath / fname).as_posix())
 
-        super(Puma560, self).__init__(
+        super().__init__(
             args[0],
             name=args[1])
 
@@ -27,29 +27,18 @@ class Puma560(ETS):
         # self.ee_link = self.ets[9]
 
         # zero angles, L shaped pose
-        self._qz = np.array([0, 0, 0, 0, 0, 0])
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
         # ready pose, arm up
-        self._qr = np.array([0, pi/2, -pi/2, 0, 0, 0])
+        self.addconfiguration("qr", np.array([0, pi/2, -pi/2, 0, 0, 0]))
 
         # straight and horizontal
-        self._qs = np.array([0, 0, -pi/2, 0, 0, 0])
+        self.addconfiguration("qs", np.array([0, 0, -pi/2, 0, 0, 0]))
 
         # nominal table top picking pose
-        self._qn = np.array([0, pi/4, pi, 0, pi/4, 0])
+        self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
-    @property
-    def qz(self):
-        return self._qz
+if __name__ == '__main__':
 
-    @property
-    def qr(self):
-        return self._qr
-
-    @property
-    def qs(self):
-        return self._qs
-
-    @property
-    def qn(self):
-        return self._qn
+    robot = Puma560()
+    print(robot)

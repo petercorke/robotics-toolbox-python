@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ELink import ELink
 
 
-class Frankie(ETS):
+class Frankie(ERobot):
     """
     A class representing the Franka Emika Panda robot arm. ETS taken from [1]
     based on https://frankaemika.github.io/docs/control_parameters.html
@@ -101,18 +101,17 @@ class Frankie(ETS):
 
         ets = [b0, b1, l0, l1, l2, l3, l4, l5, l6, ee]
 
-        super(Frankie, self).__init__(
+        super().__init__(
             ets,
             name='Frankie',
-            manufacturer='Franka Emika, Omron')
+            manufacturer='Franka Emika, Omron',
+            keywords=('mobile',))
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-        self._qr = np.array([0, 0, -90, -90, 90, 0, -90, 90]) * deg
 
-    @property
-    def qz(self):
-        return self._qz
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration("qr", np.array([0, 0, 0, -90, -90, 90, 0, -90, 90]) * deg)
 
-    @property
-    def qr(self):
-        return self._qr
+if __name__ == '__main__':
+
+    robot = Frankie()
+    print(robot)

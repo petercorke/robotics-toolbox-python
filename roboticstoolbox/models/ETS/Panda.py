@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ELink import ELink
 
 
-class Panda(ETS):
+class Panda(ERobot):
     """
     Create model of Franka-Emika Panda manipulator
 
@@ -78,18 +78,16 @@ class Panda(ETS):
 
         ets = [l0, l1, l2, l3, l4, l5, l6, ee]
 
-        super(Panda, self).__init__(
+        super().__init__(
             ets,
             name='Panda',
             manufacturer='Franka Emika')
 
-        self._qz = np.array([0, 0, 0, 0, 0, 0, 0])
-        self._qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
-    @property
-    def qz(self):
-        return self._qz
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
 
-    @property
-    def qr(self):
-        return self._qr
+if __name__ == '__main__':
+
+    robot = Panda()
+    print(robot)

@@ -85,8 +85,11 @@ class Puma560(DHRobot):
                 d=0, a=0.4318, alpha=0,
                 I=[0.13, 0.524, 0.539, 0, 0, 0],
                 r=[-0.3638, 0.006, 0.2275],
-                m=17.4, Jm=200e-6, G=107.815,
-                B=.817e-3, Tc=[0.126, -0.071],
+                m=17.4,
+                Jm=200e-6,
+                G=107.815,
+                B=.817e-3,
+                Tc=[0.126, -0.071],
                 qlim=[-45*deg, 225*deg]
             ),
 
@@ -94,72 +97,71 @@ class Puma560(DHRobot):
                 d=0.15005, a=0.0203, alpha=-pi/2,
                 I=[0.066, 0.086, 0.0125, 0, 0, 0],
                 r=[-0.0203, -0.0141, 0.070],
-                m=4.8, Jm=200e-6, G=-53.7063,
-                B=1.38e-3, Tc=[0.132, -0.105],
+                m=4.8,
+                Jm=200e-6,
+                G=-53.7063,
+                B=1.38e-3,
+                Tc=[0.132, -0.105],
                 qlim=[-225*deg, 45*deg]
             ),
 
             RevoluteDH(
-                    d=0.4318, a=0, alpha=pi/2,
-                    I=[1.8e-3, 1.3e-3, 1.8e-3, 0, 0, 0],
-                    r=[0, 0.019, 0],
-                    m=0.82, Jm=33e-6, G=76.0364,
-                    B=71.2e-6, Tc=[11.2e-3, -16.9e-3],
-                    qlim=[-110*deg, 170*deg]
-                    ),
+                d=0.4318, a=0, alpha=pi/2,
+                I=[1.8e-3, 1.3e-3, 1.8e-3, 0, 0, 0],
+                r=[0, 0.019, 0],
+                m=0.82,
+                Jm=33e-6,
+                G=76.0364,
+                B=71.2e-6,
+                Tc=[11.2e-3, -16.9e-3],
+                qlim=[-110*deg, 170*deg]
+            ),
 
-                RevoluteDH(
-                    d=0, a=0, alpha=-pi/2,
-                    I=[0.3e-3, 0.4e-3, 0.3e-3, 0, 0, 0],
-                    r=[0, 0, 0], m=0.34,
-                    Jm=33e-6, G=71.923, B=82.6e-6,
-                    Tc=[9.26e-3, -14.5e-3],
-                    qlim=[-100*deg, 100*deg]
-                    ),
+            RevoluteDH(
+                d=0, a=0, alpha=-pi/2,
+                I=[0.3e-3, 0.4e-3, 0.3e-3, 0, 0, 0],
+                r=[0, 0, 0],
+                m=0.34,
+                Jm=33e-6,
+                G=71.923,
+                B=82.6e-6,
+                Tc=[9.26e-3, -14.5e-3],
+                qlim=[-100*deg, 100*deg]
+            ),
 
-                RevoluteDH(
-                    d=0, a=0, alpha=0,
-                    I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
-                    r=[0, 0, 0.032], m=0.09, Jm=33e-6,
-                    G=76.686, B=36.7e-6, Tc=[3.96e-3, -10.5e-3],
-                    qlim=[-266*deg, 266*deg]
-                    )
+            RevoluteDH(
+                d=0, a=0, alpha=0,
+                I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
+                r=[0, 0, 0.032],
+                m=0.09,
+                Jm=33e-6,
+                G=76.686,
+                B=36.7e-6,
+                Tc=[3.96e-3, -10.5e-3],
+                qlim=[-266*deg, 266*deg]
+            )
         ]
-
-        # zero angles, L shaped pose
-        self._qz = np.array([0, 0, 0, 0, 0, 0])
-
-        # ready pose, arm up
-        self._qr = np.array([0, pi/2, -pi/2, 0, 0, 0])
-
-        # straight and horizontal
-        self._qs = np.array([0, 0, -pi/2, 0, 0, 0])
-
-        # nominal table top picking pose
-        self._qn = np.array([0, pi/4, pi, 0, pi/4, 0])
 
         super().__init__(
             L,
             name="Puma 560",
-            manufacturer="Unimation")
+            manufacturer="Unimation",
+            keywords=('dynamics',))
 
-    @property
-    def qz(self):
-        return self._qz
+        # zero angles, L shaped pose
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
-    @property
-    def qr(self):
-        return self._qr
+        # ready pose, arm up
+        self.addconfiguration("qr", np.array([0, pi/2, -pi/2, 0, 0, 0]))
 
-    @property
-    def qs(self):
-        return self._qs
+        # straight and horizontal
+        self.addconfiguration("qs", np.array([0, 0, -pi/2, 0, 0, 0]))
 
-    @property
-    def qn(self):
-        return self._qn
+        # nominal table top picking pose
+        self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
 if __name__ == '__main__':
 
     puma = Puma560()
     print(puma)
+

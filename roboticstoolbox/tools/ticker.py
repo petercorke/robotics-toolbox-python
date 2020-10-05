@@ -29,23 +29,24 @@ class Ticker(threading.Thread):
         self.done = True
         self.join()
 
-t = Ticker(0.1)
+if __name__ == "__main__":
+    t = Ticker(0.1)
 
-tprev = time.time()
-tmax = 0
-tsum = 0
-N = 100
+    tprev = time.time()
+    tmax = 0
+    tsum = 0
+    N = 100
 
-t.start()
-for i in range(100):
-    t.wait()
-    tnow = time.time()
-    dt = tnow - tprev
-    tprev = tnow
-    terr = abs(dt - 0.1) * 1000 # error in ms
-    if i > 0:
-        tsum += terr
-        tmax = max(tmax, terr)
-    print('.', end='', flush=True)
-t.stop()
-print(f"\nmean = {tsum/(N-1):.2f}, max = {tmax:.2f}")
+    t.start()
+    for i in range(100):
+        t.wait()
+        tnow = time.time()
+        dt = tnow - tprev
+        tprev = tnow
+        terr = abs(dt - 0.1) * 1000 # error in ms
+        if i > 0:
+            tsum += terr
+            tmax = max(tmax, terr)
+        print('.', end='', flush=True)
+    t.stop()
+    print(f"\nmean = {tsum/(N-1):.2f}, max = {tmax:.2f}")

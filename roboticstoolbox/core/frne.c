@@ -43,17 +43,20 @@ static PyMethodDef frneMethods[] = {
     {
         "init",
         (PyCFunction)init,
-        METH_VARARGS, "Create Robot"
+        METH_VARARGS,
+        "Create Robot"
     },
     {
         "frne",
         (PyCFunction)frne,
-        METH_VARARGS, "Fast rne"
+        METH_VARARGS,
+        "Fast rne"
     },
     {
         "delete",
         (PyCFunction)delete,
-        METH_VARARGS, "Delete robot memory"
+        METH_VARARGS,
+        "Delete robot memory"
     },
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
@@ -88,14 +91,14 @@ static PyObject *delete(PyObject *self, PyObject *args) {
     }
 
     for (int i = 0; i < robot->njoints; i++) {
-        free(robot->links[i].I);
-        free(robot->links[i].Tc);
-        free(robot->links[i].rbar);
+        PyMem_RawFree(robot->links[i].I);
+        PyMem_RawFree(robot->links[i].Tc);
+        PyMem_RawFree(robot->links[i].rbar);
     }
 
-    free(robot->gravity);
-    free(robot->links);
-    free(robot);
+    PyMem_RawFree(robot->gravity);
+    PyMem_RawFree(robot->links);
+    PyMem_RawFree(robot);
     return Py_BuildValue("i", 1);
 }
 
@@ -120,11 +123,11 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     njoints = robot->njoints;
 
     // Allocate memory for joints
-    q = (double *)calloc(njoints, sizeof(double));
-    qd = (double *)calloc(njoints, sizeof(double));
-    qdd = (double *)calloc(njoints, sizeof(double));
-    fext = (double *)calloc(6, sizeof(double));
-    // grav = (Vect *)malloc(sizeof(Vect));
+    q = (double *)PyMem_RawCalloc(njoints, sizeof(double));
+    qd = (double *)PyMem_RawCalloc(njoints, sizeof(double));
+    qdd = (double *)PyMem_RawCalloc(njoints, sizeof(double));
+    fext = (double *)PyMem_RawCalloc(6, sizeof(double));
+    // grav = (Vect *)PyMem_RawMalloc(sizeof(Vect));
 
     // Create iterators for arrays
     PyObject *iq = PyObject_GetIter(qO);
@@ -152,7 +155,7 @@ static PyObject *frne(PyObject *self, PyObject *args) {
 
     // Create a matrix for the return argument */
     double  *tau;
-    tau = (double *)calloc(njoints, sizeof(double));
+    tau = (double *)PyMem_RawCalloc(njoints, sizeof(double));
 
 
     #define MEL(x,R,C)  (x[(R)+(C)*nq])
@@ -179,19 +182,18 @@ static PyObject *frne(PyObject *self, PyObject *args) {
 
     newton_euler(robot, tau, qd, qdd, fext, nq);
 
-    free(q);
-    free(qd);
-    free(qdd);
-    // free(grav);
-    free(fext);
+    PyMem_RawFree(q);
+    PyMem_RawFree(qd);
+    PyMem_RawFree(qdd);
+    // PyMem_RawFree(grav);
+    PyMem_RawFree(fext);
 
     PyObject* ret = PyList_New(njoints);
     for (int i = 0; i < njoints; ++i) {
         PyObject* python_float = Py_BuildValue("d", tau[i]);
         PyList_SetItem(ret, i, python_float);
     }
-
-    free(tau);
+    PyMem_RawFree(tau);
 
     return ret;
 }
@@ -209,7 +211,7 @@ static PyObject *init(PyObject *self, PyObject *args) {
     }
 
     // Allocate memory for the robot
-    robot = (Robot *)malloc(sizeof(Robot));
+    robot = (Robot *)PyMem_RawMalloc(sizeof(Robot));
 
     // Fill out the robot structure
     robot->njoints = njoints;
@@ -218,14 +220,14 @@ static PyObject *init(PyObject *self, PyObject *args) {
     robot->dhtype = (DHType)mdh;
 
     // Build link structure
-    robot->links = (Link *)calloc(njoints, sizeof(Link));
+    robot->links = (Link *)PyMem_RawCalloc(njoints, sizeof(Link));
 
     // Create iterators for arrays
     PyObject *iter_L = PyObject_GetIter(L);
     PyObject *iter_grav = PyObject_GetIter(gravity);
 
     // Create the gravity vector
-    robot->gravity = (Vect *)malloc(sizeof(Vect));
+    robot->gravity = (Vect *)PyMem_RawMalloc(sizeof(Vect));
     robot->gravity->x = PyFloat_AsDouble(PyIter_Next(iter_grav));
     robot->gravity->y = PyFloat_AsDouble(PyIter_Next(iter_grav));
     robot->gravity->z = PyFloat_AsDouble(PyIter_Next(iter_grav));
@@ -235,9 +237,9 @@ static PyObject *init(PyObject *self, PyObject *args) {
         Link    *l = &robot->links[i];
 
         // Allocate memory for Vectors
-        l->rbar = (Vect *)malloc(sizeof(Vect));
-        l->I = (double *)calloc(9, sizeof(double));
-        l->Tc = (double *)calloc(2, sizeof(double));
+        l->rbar = (Vect *)PyMem_RawMalloc(sizeof(Vect));
+        l->I = (double *)PyMem_RawCalloc(9, sizeof(double));
+        l->Tc = (double *)PyMem_RawCalloc(2, sizeof(double));
 
         l->alpha =  PyFloat_AsDouble(PyIter_Next(iter_L));
         l->A =      PyFloat_AsDouble(PyIter_Next(iter_L));
