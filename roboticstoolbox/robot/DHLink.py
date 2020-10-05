@@ -154,7 +154,7 @@ class DHLink(Link):
         @wraps(func)
         def wrapper_listen_dyn(*args):
             if args[0]._robot is not None:
-                args[0]._robot._dynchanged()
+                args[0]._robot.dynchanged()
             return func(*args)
         return wrapper_listen_dyn
 
