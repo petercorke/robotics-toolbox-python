@@ -62,6 +62,8 @@ class VPython(Connector):
 
         super().step()
 
+        # Position mode
+
         # Update positions to new frame
 
     def reset(self):
@@ -102,14 +104,17 @@ class VPython(Connector):
 
         super().restart()
 
-        self.close()
-        self._create_empty_session()
-        for settings in self.canvas_settings:
-            # Create the canvas with the given information
-            if settings[0]:
-                self.canvases.append(GraphicsCanvas3D(settings[1], settings[2], settings[3], settings[4], settings[5]))
-            else:
-                self.canvases.append(GraphicsCanvas2D(settings[1], settings[2], settings[3], settings[4], settings[5]))
+        # self.close()
+        # self._create_empty_session()
+        # for settings in self.canvas_settings:
+        #     # Create the canvas with the given information
+        #     if settings[0]:
+        #         self.canvases.append(GraphicsCanvas3D(settings[1], settings[2], settings[3], settings[4], settings[5]))
+        #     else:
+        #         self.canvases.append(GraphicsCanvas2D(settings[1], settings[2], settings[3], settings[4], settings[5]))
+
+        # Program on close terminates execution, so just run reset
+        self.reset()
 
     def close(self):
         """
