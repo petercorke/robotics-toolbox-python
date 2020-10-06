@@ -17,9 +17,15 @@ except ImportError:
 
 try:
     import trimesh
+    import pybullet as p
+    cid = p.connect(p.SHARED_MEMORY)
+    if (cid < 0):
+        p.connect(p.DIRECT)
+
     _trimesh = True
 except ImportError:
     _trimesh = False
+
 
 class Shape(object):
 
@@ -85,8 +91,9 @@ class Shape(object):
 
     def _update_fcl(self):
         if _fcl and self.co is not None:
-            tf = fcl.Transform(self.wT.R, self.wT.t)
-            self.co.setTransform(tf)
+            q = r2q(self.wT.R)
+            rot = [q[1], q[2], q[3], q[0]]
+            p.resetBasePositionAndOrientation(self.co, self.wT.t, rot)
 
     @property
     def v(self):
@@ -165,9 +172,17 @@ class Shape(object):
     @classmethod
     def Box(cls, scale, base=None):
 
+        if base is None:
+            base = SE3()
+
         if _fcl:
-            obj = fcl.Box(scale[0], scale[1], scale[2])
-            co = fcl.CollisionObject(obj, fcl.Transform())
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_BOX, halfExtents=np.array(scale)/2)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
         else:
             co = None
 
@@ -177,9 +192,17 @@ class Shape(object):
     @classmethod
     def Cylinder(cls, radius, length, base=None):
 
+        if base is None:
+            base = SE3()
+
         if _fcl:
-            obj = fcl.Cylinder(radius, length)
-            co = fcl.CollisionObject(obj, fcl.Transform())
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_CYLINDER, radius=radius, height=length)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
         else:
             co = None
 
@@ -190,34 +213,49 @@ class Shape(object):
     @classmethod
     def Sphere(cls, radius, base=None):
 
+        if base is None:
+            base = SE3()
+
         if _fcl:
-            obj = fcl.Sphere(radius)
-            co = fcl.CollisionObject(obj, fcl.Transform())
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_SPHERE, radius=radius)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
         else:
             co = None
 
         return cls(True, base=base, radius=radius, co=co, stype='sphere')
 
     @classmethod
-    def Mesh(cls, filename, base=None, scale=None):
+    def Mesh(cls, filename, base=None, scale=[1, 1, 1]):
+
+        if base is None:
+            base = SE3()
 
         name, file_extension = os.path.splitext(filename)
 
         if _fcl and _trimesh and \
                 (file_extension == '.stl' or file_extension == '.STL'):
 
-            tmesh = trimesh.load(filename)
-            m = fcl.BVHModel()
-            m.beginModel(len(tmesh.vertices), len(tmesh.faces))
-            m.addSubModel(tmesh.vertices, tmesh.faces)
-            m.endModel()
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_MESH,
+                fileName=filename,
+                meshScale=scale)
 
-            co = fcl.CollisionObject(m, fcl.Transform())
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
+
         else:
             co = None
 
         return cls(
-            False, filename=filename, base=base, co=co, scale=scale, stype='mesh')
+            False, filename=filename, base=base, co=co,
+            scale=scale, stype='mesh')
 
 
 # class Mesh(Shape):

@@ -8,7 +8,7 @@ import spatialmath as sm
 import numpy as np
 import time
 import qpsolvers as qp
-import fcl
+import pybullet as p
 
 problems = np.array([
     [0, 1],
@@ -203,6 +203,7 @@ T[:3, :3] = R
 T = sm.SE3(T)
 # r.base = sm.SE3(0.10682493448257446, -0.09225612878799438, 0.0) * T
 r.base = sm.SE3(0, -0.09225612878799438, 0.0) * T
+# r.base = sm.SE3(0, 0, 0.0) * T
 
 env.add(r)
 # env.add(r, show_robot=False, show_collision=True)
@@ -251,7 +252,7 @@ def plane_int(t0, t1, ob):
 
     res = line.intersect_plane(plane)
 
-    off = 0.04
+    off = 0.1
 
     if normal[2]:
         if res is None:
@@ -295,66 +296,20 @@ def plane_int(t0, t1, ob):
         return False
 
 
-def shape(T, ob):
-    # if not isinstance(ob, rp.Shape.Box):
-    #     return False
-
-    ret = True
-
-    # request = fcl.DistanceRequest()
-    # result = fcl.DistanceResult()
-    # ret = fcl.distance(link.collision[0].co, ob.co, request, result)
-
-    # wTlp = link.collision[0].base * sm.SE3(result.nearest_points[0])
-    # wTcp = ob.base * sm.SE3(result.nearest_points[1])
-    # lpTcp = wTlp.inv() * wTcp
-
-    # if ret != np.linalg.norm(lpTcp.t):
-    #     wTcp = sm.SE3(wTlp.t) * sm.SE3(0, 0, -ret)
-    #     lpTcp = wTlp.inv() * wTcp
-
-    # if not wTlp.t[2] > wTcp.t[2]:
-    #     return False
-    
-    # print()
-    # print(wTlp.t)
-    # print(wTcp.t)
-    # if not wTlp.t[0] > wTcp.t[0]:
-    #     return False
-
-    if not T.t[2] > ob.base.t[2]:
-        return False
-
-    if not T.t[0] < ob.base.t[0]:
-        return False
-
-    return ret
-#     l = np.argmin(ob.scale)
-
-
-def link_calc(link, col, ob, q, norm):
-    di = 0.16
+def link_calc(link, col, ob, q):
+    di = 0.3
     ds = 0.02
 
-    request = fcl.DistanceRequest()
-    result = fcl.DistanceResult()
-    ret = fcl.distance(col.co, ob.co, request, result)
+    ret = p.getClosestPoints(col.co, ob.co, di)
 
-    wTlp = col.base * sm.SE3(result.nearest_points[0])
-    wTcp = ob.base * sm.SE3(result.nearest_points[1])
-    lpTcp = wTlp.inv() * wTcp
+    if len(ret) > 0:
+        ret = ret[0]
+        wTlp = sm.SE3(ret[5])
+        wTcp = sm.SE3(ret[6])
+        lpTcp = wTlp.inv() * wTcp
 
-    # if ret != np.linalg.norm(lpTcp.t):
-    #     wTcp = sm.SE3(wTlp.t) * sm.SE3(ret * norm)
-    #     # wTcp = sm.SE3(wTlp.t) * sm.SE3(0, 0, -ret)
-    #     lpTcp = wTlp.inv() * wTcp
+        d = ret[8]
 
-    d = ret
-
-    if d < di:
-        # print()
-        # print(d)
-        # print(np.linalg.norm(lpTcp.t))
         n = lpTcp.t / d
         nh = np.expand_dims(np.r_[n, 0, 0, 0], axis=0)
 
@@ -367,8 +322,10 @@ def link_calc(link, col, ob, q, norm):
     else:
         l_Ain = None
         l_bin = None
+        d = 1000
+        wTcp = None
 
-    return l_Ain, l_bin, ret, wTcp
+    return l_Ain, l_bin, d, wTcp
 
 
 def servo(q0, q1, it):
@@ -377,6 +334,7 @@ def servo(q0, q1, it):
     tep = l2._fk.t
 
     r.q[i0:i1] = q0
+    r.fkine_all()
     r.qd = np.zeros(r.n)
     env.step(1)
 
@@ -386,14 +344,11 @@ def servo(q0, q1, it):
     i = 0
     Q = 0.1 * np.eye(n + 6)
 
-    # s0.base = sm.SE3(l1._fk.t) * sm.SE3.Tx(0.25)  #r.fkine_graph(r.q[:i1], to_link=l1)
     s0.base = sm.SE3(tep)
-    # s0.v = [-0.1, 0, 0, 0, 0, 0]
-
 
     while not arrived and i < it:
         q = r.q[i0:i1]
-        v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 0.5)
+        v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 1, 0.25)
 
         se._wT = l1._fk
         # v = np.array([-0.1, 0, 0, 0, 0, 0])
@@ -402,13 +357,11 @@ def servo(q0, q1, it):
         eTep = r.fkine_graph(q, l0, l1).inv() * Tep
         e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
 
-        Q[n:, n:] = 2000 * (1 / e) * np.eye(6)
-        # [1/100, 1/100, 1/100, 1/100, 1/100, 1/100] * (100 * np.eye(6))
+        Q[n:, n:] = (1 / e) * np.eye(6)
         Aeq = np.c_[r.jacobe(q, l0, l1), np.eye(6)]
         beq = v.reshape((6,))
         Jm = r.jacobm(q, from_link=l0, to_link=l1).reshape(7,)
         c = np.r_[-Jm, np.zeros(6)]
-        # c = np.zeros(13)
 
         Ain = None
         bin = None
@@ -423,10 +376,7 @@ def servo(q0, q1, it):
 
             for col in link.collision:
                 for obj in s:
-                    l_Ain, l_bin, ret, _ = link_calc(link, col, obj, q[:j], np.array([0, 0, -1]))
-                    # if ret < closest:
-                    #     closest = ret
-                    #     closest_obj = obj
+                    l_Ain, l_bin, ret, _ = link_calc(link, col, obj, q[:j])
 
                     if l_Ain is not None and l_bin is not None:
                         if Ain is None:
@@ -440,7 +390,7 @@ def servo(q0, q1, it):
                             bin = np.r_[bin, l_bin]
 
         for obj in s:
-            l_Ain, l_bin, ret, wTcp = link_calc(l1, se, obj, r.q[i0:i1], np.array([0, 0, -1]))
+            l_Ain, l_bin, ret, wTcp = link_calc(l1, se, obj, r.q[i0:i1])
             if ret < closest:
                 closest = ret
                 closest_obj = obj
@@ -460,8 +410,8 @@ def servo(q0, q1, it):
         s00.base = closest_p
         if plane_int(se.wT.t, tep, closest_obj):
             # v = np.array([-0.1, 0, 0, 0, 0, 0])
-            v[0] = -0.1
-            v[2] /= 10
+            v[0] = -0.3
+            # v[2] /= 10
             beq = v.reshape((6,))
             Aeq = np.c_[r.jacob0(q, l0, l1), np.eye(6)]
 
@@ -470,9 +420,11 @@ def servo(q0, q1, it):
         except (ValueError, TypeError):
             print("Value Error")
             break
+
         r.qd[i0:i1] = qd[:n]
 
         i += 1
+
         env.step(50)
 
     return arrived
@@ -483,20 +435,21 @@ it_max = 20000
 probs = 66
 j = 0
 
-start = 6
+start = 3
 
 for i in range(start, probs):
     print(problems[i, 0], problems[i, 1], i)
-    ret = servo(qs[problems[i, 0]], qs[problems[i, 1]], 300)
+    ret = servo(qs[problems[i, 0]], qs[problems[i, 1]], 500)
 
     print(ret)
     if ret:
         j += 1
+    print(j)
 
 # i = 5
 # print(problems[i, 0], problems[i, 1], i)
 # ret = servo(qs[problems[i, 0]], qs[problems[i, 1]], 300)
-
+# env.step(1)
 # print(j)
 
 # Problems

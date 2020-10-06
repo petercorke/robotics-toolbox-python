@@ -79,18 +79,20 @@ if (cid < 0):
 
 
 c1 = p.createCollisionShape(shapeType=p.GEOM_SPHERE, radius=0.1)
-c2 = p.createCollisionShape(shapeType=p.GEOM_BOX, halfExtents=[0.1, 0.1, 0.1])
+c2 = p.createCollisionShape(shapeType=p.GEOM_BOX, halfExtents=[1, 0.5, 0.1])
 
 b1 = p.createMultiBody(baseMass=1,
                     baseInertialFramePosition=[0, 0, 0],
                     baseCollisionShapeIndex=c1,
-                    basePosition=[0, 0, 1],
+                    basePosition=[0, 0, 0],
                     useMaximalCoordinates=True)
+
+# p.resetBasePositionAndOrientation(b1, [0, 0, 1], [1, 0, 0, 0])
 
 b2 = p.createMultiBody(baseMass=1,
                     baseInertialFramePosition=[0, 0, 0],
                     baseCollisionShapeIndex=c2,
-                    basePosition=[1, 0, 1],
+                    basePosition=[0, 0, 1],
                     useMaximalCoordinates=True)
 
 print(p.getClosestPoints(b1, b2, 2))
