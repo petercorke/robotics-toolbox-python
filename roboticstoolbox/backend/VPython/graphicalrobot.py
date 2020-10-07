@@ -487,6 +487,10 @@ class GraphicalRobot:
             # else: assume no base joint
             # Create the joints
             i = 0
+            all_poses = [
+                SE3(),
+                all_poses
+            ]
             for link in self.robot.links:
                 # Get info
                 if link.isprismatic():
