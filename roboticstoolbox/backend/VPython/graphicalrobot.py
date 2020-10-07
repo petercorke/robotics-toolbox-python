@@ -487,10 +487,6 @@ class GraphicalRobot:
             # else: assume no base joint
             # Create the joints
             i = 0
-            all_poses = [
-                SE3(),
-                all_poses
-            ]
             for link in self.robot.links:
                 # Get info
                 if link.isprismatic():
@@ -499,12 +495,18 @@ class GraphicalRobot:
                     j_type = 'r'
                 else:
                     j_type = 's'
-                pose = all_poses[i+1]  # Pose
+                pose = all_poses[i]  # Pose
                 if link.mesh is None:
-                    x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]
-                    y1, y2 = all_poses[i].t[1], all_poses[i + 1].t[1]
-                    z1, z2 = all_poses[i].t[2], all_poses[i + 1].t[2]
-                    length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                    if i == 0:
+                        x1, x2 = SE3().t[0], all_poses[i].t[0]
+                        y1, y2 = SE3().t[1], all_poses[i].t[1]
+                        z1, z2 = SE3().t[2], all_poses[i].t[2]
+                        length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
+                    else:
+                        x1, x2 = all_poses[i - 1].t[0], all_poses[i].t[0]
+                        y1, y2 = all_poses[i - 1].t[1], all_poses[i].t[1]
+                        z1, z2 = all_poses[i - 1].t[2], all_poses[i].t[2]
+                        length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
                 else:
                     length = str(link.mesh)
                 angle_lims = link.qlim  # Angle limits
