@@ -459,10 +459,10 @@ class GraphicalRobot:
     :type graphics_canvas: class:`GraphicsCanvas`
     :param name: The name of the robot to identify it
     :type name: `str`
-    :param seriallink: A serial link object to create a robot on
-    :type seriallink: class:`roboticstoolbox.robot.serial_link.SerialLink`
+    :param robot: A serial link object to create a robot on
+    :type robot: class:`roboticstoolbox.robot.serial_link.SerialLink`
     """
-    def __init__(self, graphics_canvas, name, seriallink=None):
+    def __init__(self, graphics_canvas, name, robot=None):
         self.joints = []
         self.num_joints = 0
         self.rob_shown = True
@@ -472,22 +472,22 @@ class GraphicalRobot:
         self.__scene = graphics_canvas
 
         self.angles = []
-        self.seriallink = seriallink
+        self.robot = robot
 
-        # If seriallink given, create the robot
-        if self.seriallink is not None:
+        # If Robot given, create the robot
+        if self.robot is not None:
             # Update name
-            self.name = self.seriallink.name
+            self.name = self.robot.name
             # Get initial poses
-            zero_angles = [0] * len(self.seriallink.links)
-            all_poses = self.seriallink.fkine(zero_angles, alltout=True)
+            zero_angles = [0] * self.robot.n
+            all_poses = self.robot.fkine_all(zero_angles)
             # Create the base
-            if seriallink.basemesh is not None:
-                self.append_link("s", all_poses[0], str(seriallink.basemesh), [0, 0], 0)
+            if robot.basemesh is not None:
+                self.append_link("s", all_poses[0], str(robot.basemesh), [0, 0], 0)
             # else: assume no base joint
             # Create the joints
             i = 0
-            for link in self.seriallink.links:
+            for link in self.robot.links:
                 # Get info
                 j_type = link.jointtype  # Type of
                 pose = all_poses[i+1]  # Pose

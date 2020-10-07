@@ -15,6 +15,7 @@ class Robot:
             tool=None,
             gravity=None,
             meshdir=None,
+            meshfiletype=None,
             keywords=()):
 
         self.name = name
@@ -45,6 +46,16 @@ class Robot:
         self._configdict = {}
 
         self._dynchange = True
+
+        # Search mesh dir for meshes
+        if meshdir is not None:
+            # Obtain the base mesh
+            self.basemesh = meshdir + '\\link_1.' + meshfiletype
+            # Save the respective meshes to each link
+            for idx in range(2, self.n + 2):
+                self._links[idx].mesh = meshdir + '\\link_' + str(idx) + '.' + meshfiletype
+        else:
+            self.basemesh = None
 
     def __getitem__(self, i):
         return self._links[i]
