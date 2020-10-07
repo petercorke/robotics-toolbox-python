@@ -9,7 +9,7 @@ import time
 env = rp.backend.VPython()
 env.launch()
 
-puma = rp.models.Puma560()
+puma = rp.models.DH.Puma560()
 env.add(0, 'Puma', puma)
 
 time.sleep(1)

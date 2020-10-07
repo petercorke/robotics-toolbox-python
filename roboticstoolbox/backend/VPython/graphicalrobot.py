@@ -489,7 +489,12 @@ class GraphicalRobot:
             i = 0
             for link in self.robot.links:
                 # Get info
-                j_type = link.jointtype  # Type of
+                if link.isprismatic():
+                    j_type = 'p'
+                elif link.isrevolute():
+                    j_type = 'r'
+                else:
+                    j_type = 's'
                 pose = all_poses[i+1]  # Pose
                 if link.mesh is None:
                     x1, x2 = all_poses[i].t[0], all_poses[i + 1].t[0]

@@ -53,7 +53,7 @@ class Robot:
             self.basemesh = meshdir + '\\link_1.' + meshfiletype
             # Save the respective meshes to each link
             for idx in range(2, self.n + 2):
-                self._links[idx].mesh = meshdir + '\\link_' + str(idx) + '.' + meshfiletype
+                self._links[idx-2].mesh = meshdir + '\\link_' + str(idx) + '.' + meshfiletype
         else:
             self.basemesh = None
 

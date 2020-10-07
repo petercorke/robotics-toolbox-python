@@ -148,7 +148,7 @@ class Puma560(DHRobot):
             name="Puma 560",
             manufacturer="Unimation",
             keywords=('dynamics',),
-            meshdir=PurePath(__file__).parent / 'xacro' / 'puma560_description' / 'meshes',
+            meshdir=str(PurePath(__file__).parent.parent / 'xacro' / 'puma560_description' / 'meshes'),
             meshfiletype='stl'
         )
 
