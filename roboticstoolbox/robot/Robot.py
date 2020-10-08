@@ -3,6 +3,9 @@ import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
+from os.path import splitext
+from roboticstoolbox.backend import URDF
+from roboticstoolbox.backend import xacro
 
 class Robot:
 
@@ -14,8 +17,7 @@ class Robot:
             base=None,
             tool=None,
             gravity=None,
-            meshdir=None,
-            meshfiletype=None,
+            urdfdir=None,
             keywords=()):
 
         self.name = name
@@ -48,17 +50,35 @@ class Robot:
         self._dynchange = True
 
         # Search mesh dir for meshes
-        if meshdir is not None:
+        if urdfdir is not None:
+            # Parse the URDF to obtain file paths and scales
+            data = self._get_stl_file_paths_and_scales(urdfdir)
             # Obtain the base mesh
-            self.basemesh = meshdir + '\\link_1.' + meshfiletype
+            self.basemesh = data[0]
             # Save the respective meshes to each link
-            for idx in range(2, self.n + 2):
-                self._links[idx-2].mesh = meshdir + '\\link_' + str(idx) + '.' + meshfiletype
+            for idx in range(1, self.n):
+                self._links[idx].mesh = data[idx]
         else:
             self.basemesh = None
 
     def __getitem__(self, i):
         return self._links[i]
+
+    @staticmethod
+    def _get_stl_file_paths_and_scales(urdf_path):
+        data = [[], []]  # [ [filenames] , [scales] ]
+
+        name, ext = splitext(urdf_path)
+
+        if ext == '.xacro':
+            urdf_string = xacro.main(urdf_path)
+            urdf = URDF.loadstr(urdf_string, urdf_path)
+
+            for link in urdf.links:
+                data[0].append(link.visuals[0].geometry.mesh.filename)
+                data[1].append(link.visuals[0].geometry.mesh.scale)
+
+        return data
 
     def dynchanged(self):
         self._dynchanged = True
