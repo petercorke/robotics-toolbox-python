@@ -36,10 +36,10 @@ class DefaultJoint:
 
     def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
 
-        if not isinstance(structure, float) and not isinstance(structure, str):
+        if not isinstance(structure, float) and not isinstance(structure, list):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
-                        "or a file path to an STL (str)"
-            raise TypeError(error_str.format(float, str, type(structure)))
+                        "or meshdata [filepath, scale]"
+            raise TypeError(error_str.format(float, list, type(structure)))
 
         self.qlim = qlim
         self.theta = theta
