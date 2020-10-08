@@ -53,12 +53,10 @@ class Robot:
         if urdfdir is not None:
             # Parse the URDF to obtain file paths and scales
             data = self._get_stl_file_paths_and_scales(urdfdir)
-            print(data)
             # Obtain the base mesh
             self.basemesh = [data[0][0], data[1][0]]
             # Save the respective meshes to each link
             for idx in range(1, self.n):
-                print(idx)
                 self._links[idx].mesh = [data[0][idx], data[1][idx]]
         else:
             self.basemesh = None
