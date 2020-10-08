@@ -700,8 +700,8 @@ class GraphicalRobot:
         :type joint_angles: `list`
         """
         # If seriallink object, run it's fkine
-        if self.seriallink is not None:
-            return self.seriallink.fkine_all(joint_angles)
+        if self.robot is not None:
+            return self.robot.fkine_all(joint_angles)
         # Else TODO
         else:
             pass
