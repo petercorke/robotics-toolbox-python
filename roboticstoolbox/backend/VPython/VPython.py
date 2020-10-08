@@ -6,6 +6,7 @@
 from roboticstoolbox.backend.Connector import Connector
 
 from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox.robot import Robot
 
 from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, GraphicsCanvas2D
 from roboticstoolbox.backend.VPython.graphicalrobot import GraphicalRobot
@@ -58,7 +59,7 @@ class VPython(Connector):
         by the robot object, and not all robot objects support all control
         types.
 
-        :param id: The Identification of the robot to remove. Can be either the DHLink or GraphicalRobot
+        :param id: The Identification of the robot to remove. Can be either the DHRobot or GraphicalRobot
         :type id: class:`roboticstoolbox.robot.DHRobot.DHRobot`,
                   class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
         :param q: The joint angles/configuration of the robot (Optional, if not supplied will use the stored q values).
@@ -75,15 +76,16 @@ class VPython(Connector):
         if fig_num < 0 or fig_num >= len(self.canvases):
             raise ValueError("Figure number must be between 0 and total number of canvases")
 
-        # If DHLink given
-        if isinstance(id, DHLink):
+        # If DHRobot given
+        if issubclass(type(id), Robot):
             robot = None
             # Find first occurrence of it that is in the correct canvas
             for i in range(len(self.robots)):
-                if self.robots[i].seriallink.equal(id) and self.canvases[fig_num].is_robot_in(self.robots[i]):
+                if self.robots[i].robot is id and self.canvases[fig_num].is_robot_in_canvas(self.robots[i]):
                     robot = self.robots[i]
                     break
             if robot is None:
+                print("No robot")
                 return
             else:
                 poses = robot.fkine(q)
@@ -95,7 +97,7 @@ class VPython(Connector):
                 id.set_joint_poses(poses)
         # Else
         else:
-            raise TypeError("Input must be a DHLink or GraphicalRobot")
+            raise TypeError("Input must be a Robot (or subclass) or GraphicalRobot, given {0}".format(type(id)))
 
     def reset(self):
         """
