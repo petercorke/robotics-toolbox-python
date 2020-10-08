@@ -6,7 +6,7 @@
 from roboticstoolbox.backend.Connector import Connector
 
 from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.robot import Robot
+import roboticstoolbox.robot.Robot as r
 
 from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, GraphicsCanvas2D
 from roboticstoolbox.backend.VPython.graphicalrobot import GraphicalRobot
@@ -77,7 +77,7 @@ class VPython(Connector):
             raise ValueError("Figure number must be between 0 and total number of canvases")
 
         # If DHRobot given
-        if issubclass(type(id), Robot):
+        if isinstance(id, r.Robot):
             robot = None
             # Find first occurrence of it that is in the correct canvas
             for i in range(len(self.robots)):
