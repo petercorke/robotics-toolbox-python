@@ -9,18 +9,21 @@ from roboticstoolbox.backend.VPython.common_functions import *
 from stl import mesh
 
 
-def import_object_from_numpy_stl(filename, scene):
+def import_object_from_numpy_stl(meshdata, scene):
     """
     Import either an ASCII or BINARY file format of an STL file.
     The triangles will be combined into a single compound entity.
 
-    :param filename: Path of the stl file to import.
-    :type filename: `str`
+    :param meshdata: Path of the stl file to import.
+    :type meshdata: `str`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
     :return: Compound object of a collection of triangles formed from an stl file.
     :rtype: class:`vpython.compound`
     """
+    filename = meshdata[0]
+    scale = meshdata[1]
+
     # Load the mesh using NumPy-STL
     the_mesh = mesh.Mesh.from_file(filename)
 
@@ -65,6 +68,9 @@ def import_object_from_numpy_stl(filename, scene):
 
     # Return a compound of the triangles
     visual_mesh = compound(triangles, origin=vector(0, 0, 0), canvas=scene)
+    visual_mesh.length *= scale[0]
+    visual_mesh.height *= scale[1]
+    visual_mesh.width *= scale[2]
     return visual_mesh
 
 

@@ -22,8 +22,8 @@ class DefaultJoint:
 
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
-    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float`, `str`
+    :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
+    :type structure: `float`, `list`
     :param g_canvas: The canvas in which to add the link
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param qlim: A list of the angle limits for the joint
@@ -325,8 +325,8 @@ class RotationalJoint(DefaultJoint):
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
-    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float`, `str`
+    :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
+    :type structure: `float`, `list`
     :param qlim: A list of the angle limits for the joint
     :type qlim: `list`
     :param theta: The current angle of the joint in radians
@@ -357,8 +357,8 @@ class PrismaticJoint(DefaultJoint):
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
-    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float`, `str`
+    :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
+    :type structure: `float`, `list`
     :param qlim: A list of the angle limits for the joint
     :type qlim: `list`
     :param theta: The current angle of the joint in radians
@@ -394,8 +394,8 @@ class StaticJoint(DefaultJoint):
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
-    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float`, `str`
+    :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
+    :type structure: `float`, `list`
     :param qlim: A list of the angle limits for the joint
     :type qlim: `list`
     :param theta: The current angle of the joint in radians
@@ -426,8 +426,8 @@ class Gripper(DefaultJoint):
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
-    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
-    :type structure: `float`, `str`
+    :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
+    :type structure: `float`, `list`
     :param qlim: A list of the angle limits for the joint
     :type qlim: `list`
     :param theta: The current angle of the joint in radians
@@ -483,7 +483,7 @@ class GraphicalRobot:
             all_poses = self.robot.fkine_all(zero_angles)
             # Create the base
             if robot.basemesh is not None:
-                self.append_link("s", all_poses[0], str(robot.basemesh), [0, 0], 0)
+                self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
             # else: assume no base joint
             # Create the joints
             i = 0
@@ -508,7 +508,7 @@ class GraphicalRobot:
                         z1, z2 = all_poses[i - 1].t[2], all_poses[i].t[2]
                         length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1))  # Length
                 else:
-                    length = str(link.mesh)
+                    length = link.mesh
                 angle_lims = link.qlim  # Angle limits
                 theta = link.theta  # Current angle
                 i += 1
@@ -541,8 +541,8 @@ class GraphicalRobot:
         :type typeof: `str`
         :param pose: SE3 object for the pose of the joint
         :type pose: class:`spatialmath.pose3d.SE3`
-        :param structure: either a float of the length of the joint, or a str of the filepath to an STL to load
-        :type structure: `float`, `str`
+        :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
+        :type structure: `float`, `list`
         :param qlim: A list of the angle limits for the joint
         :type qlim: `list`
         :param theta: The current angle of the joint in radians
