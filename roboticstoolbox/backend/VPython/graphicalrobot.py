@@ -648,6 +648,12 @@ class GraphicalRobot:
                 self.joints[idx].update_pose(all_poses[idx+1])
             return
 
+        # If given all poses excluding a base pose
+        if self.num_joints - 1 == len(all_poses):
+            for idx in range(2, self.num_joints):
+                self.joints[idx].update_pose(all_poses[idx-1])
+            return
+
         # If incorrect number of joints
         if self.num_joints != len(all_poses):
             err = "Number of given poses {0} does not equal number of joints {1}"
