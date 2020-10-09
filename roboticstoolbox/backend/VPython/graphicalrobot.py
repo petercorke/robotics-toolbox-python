@@ -649,7 +649,7 @@ class GraphicalRobot:
 
         # If given all poses excluding a base pose
         if self.num_joints - 1 == len(all_poses):
-            for idx in range(2, self.num_joints):
+            for idx in range(1, self.num_joints):
                 self.joints[idx].update_pose(all_poses[idx-1])
             return
 
