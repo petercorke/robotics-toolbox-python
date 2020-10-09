@@ -54,10 +54,10 @@ class Robot:
             # Parse the URDF to obtain file paths and scales
             data = self._get_stl_file_paths_and_scales(urdfdir)
             # Obtain the base mesh
-            self.basemesh = [data[0][0], data[1][0]]
+            self.basemesh = [data[0][0], data[1][0], data[2][0]]
             # Save the respective meshes to each link
-            for idx in range(1, self.n):
-                self._links[idx].mesh = [data[0][idx], data[1][idx]]
+            for idx in range(1, self.n+1):
+                self._links[idx-1].mesh = [data[0][idx], data[1][idx], data[2][idx]]
         else:
             self.basemesh = None
 
@@ -66,7 +66,7 @@ class Robot:
 
     @staticmethod
     def _get_stl_file_paths_and_scales(urdf_path):
-        data = [[], []]  # [ [filenames] , [scales] ]
+        data = [[], [], []]  # [ [filenames] , [scales] , [origins] ]
 
         name, ext = splitext(urdf_path)
 
@@ -77,6 +77,7 @@ class Robot:
             for link in urdf.links:
                 data[0].append(link.visuals[0].geometry.mesh.filename)
                 data[1].append(link.visuals[0].geometry.mesh.scale)
+                data[2].append(SE3(link.visuals[0].origin))
 
         return data
 
