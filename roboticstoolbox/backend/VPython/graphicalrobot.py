@@ -58,9 +58,8 @@ class DefaultJoint:
         # Set the other reference frame vectors
         self.__graphic_ref = draw_reference_frame_axes(self.__pose, self.__scene)
 
-        # Apply the initial pose if not given an STL (STL may need origin updating)
-        if isinstance(structure, float):
-            self.update_pose(self.__pose)
+        # Apply the initial pose
+        self.update_pose(self.__pose)
 
     def update_position(self, se_object):
         """
@@ -483,7 +482,7 @@ class GraphicalRobot:
             all_poses = self.robot.fkine_all(zero_angles)
             # Create the base
             if robot.basemesh is not None:
-                self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
+                self.append_link("s", SE3(), robot.basemesh, [0, 0], 0)
             # else: assume no base joint
             # Create the joints
             i = 0
