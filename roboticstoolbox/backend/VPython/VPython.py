@@ -192,7 +192,7 @@ class VPython(Connector):
 
         # Add robot to canvas
         self.robots.append(GraphicalRobot(self.canvases[fig_num], name, dhrobot))
-        self.canvases[fig_num].add_robot(self.robots[len(self.robots)-1])
+        # self.canvases[fig_num].add_robot(self.robots[len(self.robots)-1])
 
     def remove(self, id, fig_num=0):
         """
