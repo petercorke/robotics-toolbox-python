@@ -8,7 +8,7 @@ from roboticstoolbox.robot import Robot, DHRobot #, DHLink
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
-    getvector, ismatrix, isscalar, verifymatrix
+    getvector, ismatrix, isscalar, verifymatrix, getmatrix
 from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3, Twist3
 from scipy.optimize import minimize, Bounds, LinearConstraint
@@ -637,39 +637,29 @@ class DHRobot(Robot, Dynamics):
               kinematics are computed.
 
         '''
-
-        cols = 0
         if q is None:
             q = np.copy(self.q)
-        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[0] > 1:
-            cols = q.shape[0]
-            ismatrix(q, (cols, self.n))
-        else:
-            q = getvector(q, self.n)
 
-        if cols == 0:
-            # Single configuration
-            t = self.base
-            for i in range(self.n):
-                t = t * self.links[i].A(q[i])
-            t = t * self.tool
-        else:
-            # Trajectory
+        T = SE3.Empty()
+        for qr in getmatrix(q, (None, self.n)):
 
-            for i in range(cols):
-                tr = self.base
-                for j in range(self.n):
-                    tr *= self.links[j].A(q[j, i])
-                tr = tr * self.tool
-
-                if i == 0:
-                    t = SE3(tr)
+            first = True
+            for q, L in zip(qr, self.links):
+                if first:
+                    Tr = L.A(q)
+                    first = False
                 else:
-                    t.append(tr)
+                    Tr *= L.A(q)
 
-        return t
+            if self.base is not None:
+                Tr = self.base * Tr
+            if self.tool is not None:
+                Tr = Tr * self.tool
+            T.append(Tr)
 
-    def fkine_all(self, q=None):
+        return T
+
+    def fkine_all(self, q=None, old=True):
         '''
         Tall = allfkine(q) evaluates fkine for each joint within a robot and
         returns a sequence of link frame poses.
@@ -693,20 +683,27 @@ class DHRobot(Robot, Dynamics):
         '''
 
         if q is None:
-            q = np.copy(self.q)
+            qr = np.copy(self.q)
         else:
-            q = getvector(q, self.n)
+            qr = getvector(q, self.n)
 
-        t = self.base
-        Tall = SE3()
-        for i in range(self.n):
-            t = t * self.links[i].A(q[i])
-
-            if i == 0:
-                Tall = SE3(t)
+        if self.base is not None:
+            Tj = self.base
+        else:
+            Tj = SE3()
+        first = True
+        Tall = Tj
+        for q, L in zip(qr, self.links):
+            if first:
+                Tj *= L.A(q)
+                if old:
+                    Tall = Tj
+                else:
+                    Tall.append(Tj)
+                first = False
             else:
-                Tall.append(t)
-
+                Tj *= L.A(q)
+                Tall.append(Tj)
         return Tall
 
     def jacobe(self, q=None):
