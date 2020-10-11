@@ -573,7 +573,7 @@ class DHLink(Link):
 
         return link
 
-    def friction(self, qd):
+    def friction(self, qd, coulomb=True):
         """
         ``tau = friction(qd)`` Calculates the joint friction force/torque (n)
         for joint velocity qd (n). The friction model includes:
@@ -607,10 +607,11 @@ class DHLink(Link):
 
         tau = self.B * np.abs(self.G) * qd
 
-        if qd > 0:
-            tau += self.Tc[0]
-        elif qd < 0:
-            tau += self.Tc[1]
+        if coulomb:
+            if qd > 0:
+                tau += self.Tc[0]
+            elif qd < 0:
+                tau += self.Tc[1]
 
         # Scale up by gear ratio
         tau = -np.abs(self.G) * tau
