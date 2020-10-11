@@ -9,7 +9,7 @@ from spatialmath import SE3
 from spatialmath.base import getvector
 
 
-class ET(UserList):   # TODO should be ETS
+class ET(UserList):
     """
     This class implements a single elementary transform (ET)
 

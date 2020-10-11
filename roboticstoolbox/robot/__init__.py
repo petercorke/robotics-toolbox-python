@@ -5,7 +5,7 @@ from roboticstoolbox.robot.DHLink import DHLink, RevoluteDH, PrismaticDH, \
     RevoluteMDH, PrismaticMDH
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ETS import ET
 from roboticstoolbox.robot.Shape import Shape
 
 __all__ = [
