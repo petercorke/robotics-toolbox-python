@@ -306,7 +306,7 @@ class DHLink(Link):
     @r.setter
     @_listen_dyn
     def r(self, r_new):
-        self._r = getvector(r_new, 3, out='col')
+        self._r = getvector(r_new, 3)
 
     @I.setter
     @_listen_dyn
@@ -425,7 +425,7 @@ class DHLink(Link):
             "G     =  {:8.2g} \n" \
             "qlim  =  {:8.2g} to {:8.2g}".format(
                 self.m,
-                self.r[0, 0], self.r[1, 0], self.r[2, 0],
+                self.r[0], self.r[1], self.r[2],
                 self.I[0, 0], self.I[0, 1], self.I[0, 2],
                 self.I[1, 0], self.I[1, 1], self.I[1, 2],
                 self.I[2, 0], self.I[2, 1], self.I[2, 2],

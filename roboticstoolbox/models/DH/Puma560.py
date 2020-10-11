@@ -153,7 +153,8 @@ class Puma560(DHRobot):
             L,
             name="Puma 560",
             manufacturer="Unimation",
-            keywords=('dynamics', 'symbolic'))
+            keywords=('dynamics', 'symbolic'),
+            symbolic=symbolic)
 
         # zero angles, L shaped pose
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))

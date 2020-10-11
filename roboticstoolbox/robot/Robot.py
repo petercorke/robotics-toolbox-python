@@ -15,17 +15,19 @@ class Robot:
             tool=None,
             gravity=None,
             meshdir=None,
-            keywords=()):
+            keywords=(),
+            symbolic=False):
 
         self.name = name
         self.manufacturer = manufacturer
-
+        self.symbolic = symbolic
         self.base = base
         self.tool = tool
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
         else:
             self.keywords = keywords
+
         if gravity is None:
             gravity = np.array([0, 0, 9.81])
         self.gravity = gravity
@@ -121,7 +123,7 @@ class Robot:
 
     @gravity.setter
     def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3, 'col')
+        self._gravity = getvector(gravity_new, 3)
         self.dynchanged()
 
     # --------------------------------------------------------------------- #
