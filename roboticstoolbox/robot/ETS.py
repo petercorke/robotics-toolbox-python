@@ -77,7 +77,7 @@ class ET(UserList):
 
     @property
     def config(self):
-       """
+        """
         Joint configuration string
 
         :return: A string indicating the joint types
