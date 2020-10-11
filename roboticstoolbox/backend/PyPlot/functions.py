@@ -67,7 +67,7 @@ def _plot(
         for i in range(trajn):
             robot.q = q[:, i]
             env.step()
-            time.sleep(dt/1000)
+            #time.sleep(dt/1000)
             
             if movie is not None:
                 # render the frame and save as a PIL image in the list
