@@ -72,11 +72,17 @@ class Robot:
 
     @property
     def base(self):
-        return self._base
+        if self._base is None:
+            return SE3()
+        else:
+            return self._base
 
     @property
     def tool(self):
-        return self._tool
+        if self._tool is None:
+            return SE3()
+        else:
+            return self._tool
 
     @property
     def gravity(self):
@@ -96,6 +102,8 @@ class Robot:
         #     T = SE3(T)
         if T is None or isinstance(T, SE3):
             self._base = T
+        elif SE3.isvalid(T):
+            self._tool = SE3(T, check=False)
         else:
             raise ValueError('base must be set to None (no tool) or an SE3')
 
@@ -106,6 +114,8 @@ class Robot:
         # this is allowed to be none, it's helpful for symbolics rather than having an identity matrix
         if T is None or isinstance(T, SE3):
             self._tool = T
+        elif SE3.isvalid(T):
+            self._tool = SE3(T, check=False)
         else:
             raise ValueError('tool must be set to None (no tool) or an SE3')
 
