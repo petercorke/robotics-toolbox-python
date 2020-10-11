@@ -8,7 +8,8 @@ import numpy as np
 from spatialmath import SE2
 from spatialmath.base import getvector
 
-
+# TODO, nicer if jtype was 'R' 'P' or None
+# TODO, should this class be called ET2?  Typically would be used exclusively to ET
 class ET(UserList):
     """
     This class implements a single elementary transform (ET)
@@ -97,6 +98,19 @@ class ET(UserList):
         :rtype: list
         """
         return np.where([e.jtype == self.VARIABLE for e in self])[0]
+
+    @property
+    def config(self):
+        """
+        Joint configuration string
+
+        :return: A string indicating the joint types
+        :rtype: str
+
+        A string comprising the characters 'R' or 'P' which indicate the types
+        of joints in order from root to tip.
+        """
+        return ''.join(['R' if self.data[i].axis[0] == 'R' else 'P' for i in self.joints()])
 
     def eval(self, q):
         """

@@ -8,6 +8,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base import getvector
 
+# TODO, nicer if jtype was 'R' 'P' or None
 
 class ET(UserList):
     """
@@ -73,6 +74,19 @@ class ET(UserList):
     @property
     def jtype(self):
         return self.data[0].jtype
+
+    @property
+    def config(self):
+       """
+        Joint configuration string
+
+        :return: A string indicating the joint types
+        :rtype: str
+
+        A string comprising the characters 'R' or 'P' which indicate the types
+        of joints in order from root to tip.
+        """
+        return ''.join(['R' if self.data[i].axis[0] == 'R' else 'P' for i in self.joints()])
 
     def T(self, q=None):
         """
@@ -306,5 +320,6 @@ if __name__ == "__main__":
 
     e = ET.tz(l1) * ET.rz() * ET.ry() * ET.ty(l2) * ET.tz(l3) * ET.ry() * ET.tx(l4) * ET.ty(l5) * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
     print(e.joints())
+    print(e.config)
     print(e.eval(np.zeros((6,))))
 
