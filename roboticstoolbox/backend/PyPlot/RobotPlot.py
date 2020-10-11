@@ -5,7 +5,7 @@
 
 import numpy as np
 import roboticstoolbox as rp
-import spatialmath as sm
+from spatialmath import SE3
 
 
 class RobotPlot(object):
@@ -65,9 +65,9 @@ class RobotPlot(object):
         joints = np.zeros((3, self.robot.n))
 
         # Axes arrow transforms
-        Tjx = sm.SE3.Tx(0.06)
-        Tjy = sm.SE3.Ty(0.06)
-        Tjz = sm.SE3.Tz(0.06)
+        Tjx = SE3.Tx(0.06)
+        Tjy = SE3.Ty(0.06)
+        Tjz = SE3.Tz(0.06)
 
         # ee axes arrows
         Tex = Te * Tjx
