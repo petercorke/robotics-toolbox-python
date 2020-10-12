@@ -5,11 +5,12 @@
 """
 from collections import UserList, namedtuple
 import numpy as np
-from spatialmath import SE3
+from spatialmath import SE2
 from spatialmath.base import getvector
 
-
-class ET(UserList):   # TODO should be ETS
+# TODO, nicer if jtype was 'R' 'P' or None
+# TODO, should this class be called ET2?  Typically would be used exclusively to ET
+class ET(UserList):
     """
     This class implements a single elementary transform (ET)
 
@@ -81,7 +82,7 @@ class ET(UserList):   # TODO should be ETS
         :param q: Is used if this ET is variable (a joint)
         :type q: float (radians), required for variable ET's
         :return: The transformation matrix of the ET
-        :rtype: SE3
+        :rtype: SE2
 
         """
         if self.jtype is self.STATIC:
@@ -98,6 +99,19 @@ class ET(UserList):   # TODO should be ETS
         """
         return np.where([e.jtype == self.VARIABLE for e in self])[0]
 
+    @property
+    def config(self):
+        """
+        Joint configuration string
+
+        :return: A string indicating the joint types
+        :rtype: str
+
+        A string comprising the characters 'R' or 'P' which indicate the types
+        of joints in order from root to tip.
+        """
+        return ''.join(['R' if self.data[i].axis[0] == 'R' else 'P' for i in self.joints()])
+
     def eval(self, q):
         """
         Evaluate an ETS with joint coordinate substitution
@@ -105,13 +119,13 @@ class ET(UserList):   # TODO should be ETS
         :param q: joint coordinates
         :type q: array-like
         :return: product of transformations
-        :rtype: SE3
+        :rtype: SE2
 
         Effectively the forward-kinematics of the ET sequence.  Compounds the
         transforms left to right, and substitutes in joint coordinates as 
         needed from consecutive elements of ``q``.
         """
-        T = SE3()
+        T = SE2()
 
         q = getvector(q, out='sequence')
         for e in self:
@@ -174,7 +188,7 @@ class ET(UserList):   # TODO should be ETS
         return str(self)
 
     @classmethod
-    def rx(cls, eta=None):
+    def r(cls, eta=None):
         """
         An elementary transform (ET). A pure rotation of eta about the x-axis.
 
@@ -192,47 +206,7 @@ class ET(UserList):   # TODO should be ETS
         :rtype: ET
 
         """
-        return cls(SE3.Rx, axis='Rx', eta=eta)
-
-    @classmethod
-    def ry(cls, eta=None):
-        """
-        An elementary transform (ET). A pure rotation of eta about the y-axis.
-
-        L = TRy(eta) will instantiate an ET object which represents a pure
-        rotation about the y-axis by amount eta.
-
-        L = TRy() as above except this ET representation a variable
-        rotation, i.e. a joint
-
-        :param eta: The amount of rotation about the y-axis
-        :type eta: float (radians)
-        :param joint: The joint number within the robot
-        :type joint: int
-        :return: An ET object
-        :rtype: ET
-
-        """
-        return cls(SE3.Ry, axis='Ry', eta=eta)
-
-    @classmethod
-    def rz(cls, eta=None):
-        """
-        An elementary transform (ET). A pure rotation of eta about the z-axis.
-
-        L = TRz(eta) will instantiate an ET object which represents a pure
-        rotation about the z-axis by amount eta.
-
-        L = TRz() as above except this ET representation a variable
-        rotation, i.e. a joint
-
-        :param eta: The amount of rotation about the z-axis
-        :type eta: float (radians)
-        :return: An ET object
-        :rtype: ET
-
-        """
-        return cls(SE3.Rz, axis='Rz', eta=eta)
+        return cls(lambda theta: SE2(theta), axis='R', eta=eta)
 
     @classmethod
     def tx(cls, eta=None):
@@ -252,7 +226,7 @@ class ET(UserList):   # TODO should be ETS
         :rtype: ET
 
         """
-        return cls(SE3.Tx, axis='tx', eta=eta)
+        return cls(lambda x: SE2(x, 0), axis='tx', eta=eta)
 
     @classmethod
     def ty(cls, eta=None):
@@ -272,39 +246,12 @@ class ET(UserList):   # TODO should be ETS
         :rtype: ET
 
         """
-        return cls(SE3.Ty, axis='ty', eta=eta)
-
-    @classmethod
-    def tz(cls, eta=None):
-        """
-        An elementary transform (ET). A pure translation of eta along the
-        z-axis
-
-        L = Ttz(eta) will instantiate an ET object which represents a pure
-        translation along the z-axis by amount eta.
-
-        L = Ttz() as above except this ET representation a variable
-        translation, i.e. a joint
-
-        :param eta: The amount of translation along the x-axis
-        :type eta: float (metres)
-        :return: An ET object
-        :rtype: ET
-
-        """
-        return cls(SE3.Tz, axis='tz', eta=eta)
-
+        return cls(lambda y: SE2(0, y), axis='ty', eta=eta)
 
 if __name__ == "__main__":
+    from math import pi
 
-    l1 = 0.672
-    l2 = -0.2337
-    l3 = 0.4318
-    l4 = 0.0203
-    l5 = 0.0837
-    l6 = 0.4318
-
-    e = ET.tz(l1) * ET.rz() * ET.ry() * ET.ty(l2) * ET.tz(l3) * ET.ry() * ET.tx(l4) * ET.ty(l5) * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
+    e = ET.tx(1) * ET.r() * ET.ty(2) * ET.r(pi / 2)
     print(e.joints())
-    print(e.eval(np.zeros((6,))))
+    print(e.eval([0]))
 

@@ -1,0 +1,7 @@
+numpy
+sympy
+scipy
+matplotlib
+spatialmath-python
+ansitable
+

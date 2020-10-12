@@ -18,21 +18,19 @@ class Robot:
             tool=None,
             gravity=None,
             urdfdir=None,
-            keywords=()):
+            keywords=(),
+            symbolic=False):
 
         self.name = name
         self.manufacturer = manufacturer
-
-        if base is None:
-            base = SE3()
-        if tool is None:
-            tool = SE3()
+        self.symbolic = symbolic
         self.base = base
         self.tool = tool
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
         else:
             self.keywords = keywords
+
         if gravity is None:
             gravity = np.array([0, 0, 9.81])
         self.gravity = gravity
@@ -110,11 +108,17 @@ class Robot:
 
     @property
     def base(self):
-        return self._base
+        if self._base is None:
+            return SE3()
+        else:
+            return self._base
 
     @property
     def tool(self):
-        return self._tool
+        if self._tool is None:
+            return SE3()
+        else:
+            return self._tool
 
     @property
     def gravity(self):
@@ -130,19 +134,30 @@ class Robot:
 
     @base.setter
     def base(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._base = T
+        # if not isinstance(T, SE3):
+        #     T = SE3(T)
+        if T is None or isinstance(T, SE3):
+            self._base = T
+        elif SE3.isvalid(T):
+            self._tool = SE3(T, check=False)
+        else:
+            raise ValueError('base must be set to None (no tool) or an SE3')
 
     @tool.setter
     def tool(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._tool = T
+        # if not isinstance(T, SE3):
+        #     T = SE3(T)
+        # this is allowed to be none, it's helpful for symbolics rather than having an identity matrix
+        if T is None or isinstance(T, SE3):
+            self._tool = T
+        elif SE3.isvalid(T):
+            self._tool = SE3(T, check=False)
+        else:
+            raise ValueError('tool must be set to None (no tool) or an SE3')
 
     @gravity.setter
     def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3, 'col')
+        self._gravity = getvector(gravity_new, 3)
         self.dynchanged()
 
     # --------------------------------------------------------------------- #

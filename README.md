@@ -1,10 +1,17 @@
-![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg)[![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
+![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
+[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+<!---
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
+--->
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
 [![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
 [![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+
 # Robotics Toolbox for Python
+
+![RTB-P logo](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/RobToolBox_RoundLogoB.png)
 
 This is a Python implementation of the [Robotics Toolbox for MATLAB<sup>&reg;</sup>](https://github.com/petercorke/robotics-toolbox-matlab).
 
@@ -37,16 +44,24 @@ The MATLAB version of this Toolbox dates back to 1993.
 >>> p560 = rtb.models.DH.Puma560()
 >>> print(p560)
 
-Puma 560 (Unimation): 6 axis, RRRRRR, std DH
-Parameters:
-Revolute   theta=q1 + 0.00,  d= 0.00,  a= 0.00,  alpha= 1.57
-Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,  alpha= 0.00
-Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,  alpha=-1.57
-Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,  alpha= 1.57
-Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,  alpha=-1.57
-Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,  alpha= 0.00
+┏━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━┓
+┃θⱼ ┃   dⱼ    ┃   aⱼ   ┃  ⍺ⱼ  ┃
+┣━━━╋━━━━━━━━━╋━━━━━━━━╋━━━━━━┫
+┃q1 ┃   0.672 ┃      0 ┃ None ┃
+┃q2 ┃       0 ┃ 0.4318 ┃ None ┃
+┃q3 ┃ 0.15005 ┃ 0.0203 ┃ None ┃
+┃q4 ┃  0.4318 ┃      0 ┃ None ┃
+┃q5 ┃       0 ┃      0 ┃ None ┃
+┃q6 ┃       0 ┃      0 ┃ None ┃
+┗━━━┻━━━━━━━━━┻━━━━━━━━┻━━━━━━┛
 
-tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg
+┌───┬────────────────────────────┐
+│qz │ 0°, 0°, 0°, 0°, 0°, 0°     │
+│qr │ 0°, 90°, -90°, 0°, 0°, 0°  │
+│qs │ 0°, 0°, -90°, 0°, 0°, 0°   │
+│qn │ 0°, 45°, 180°, 0°, 45°, 0° │
+└───┴────────────────────────────┘
+
  
 >>> p560.fkine([0, 0, 0, 0, 0, 0])  # forward kinematics
    1           0           0           0.4521       
@@ -103,3 +118,5 @@ pip3 install roboticstoolbox-python
 ## Run some examples
 
 The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub.
+
+Or you can run them, and experiment with them, at [mybinder.org](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks).

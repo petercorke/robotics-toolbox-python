@@ -14,6 +14,34 @@ import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link
 from functools import wraps
 
+_eps = np.finfo(np.float64).eps
+
+# ---------------------------------------------------------------------------------------#
+
+try:  # pragma: no cover
+    # print('Using SymPy')
+    import sympy as sym
+
+    def _issymbol(x):
+        return isinstance(x, sym.Expr)
+except ImportError:
+    def _issymbol(x):  # pylint: disable=unused-argument
+        return False
+
+def _cos(theta):
+    if _issymbol(theta):
+        return sym.cos(theta)
+    else:
+        return np.cos(theta)
+
+def _sin(theta):
+    if _issymbol(theta):
+        return sym.sin(theta)
+    else:
+        return np.sin(theta)
+
+# ---------------------------------------------------------------------------------------#
+
 class DHLink(Link):
     """
     A link superclass for all link types. A Link object holds all information
@@ -278,7 +306,7 @@ class DHLink(Link):
     @r.setter
     @_listen_dyn
     def r(self, r_new):
-        self._r = getvector(r_new, 3, out='col')
+        self._r = getvector(r_new, 3)
 
     @I.setter
     @_listen_dyn
@@ -397,7 +425,7 @@ class DHLink(Link):
             "G     =  {:8.2g} \n" \
             "qlim  =  {:8.2g} to {:8.2g}".format(
                 self.m,
-                self.r[0, 0], self.r[1, 0], self.r[2, 0],
+                self.r[0], self.r[1], self.r[2],
                 self.I[0, 0], self.I[0, 1], self.I[0, 2],
                 self.I[1, 0], self.I[1, 1], self.I[1, 2],
                 self.I[2, 0], self.I[2, 1], self.I[2, 2],
@@ -439,8 +467,8 @@ class DHLink(Link):
 
         """
 
-        sa = np.sin(self.alpha)
-        ca = np.cos(self.alpha)
+        sa = _sin(self.alpha)
+        ca = _cos(self.alpha)
 
         if self.flip:
             q = -q + self.offset
@@ -449,13 +477,13 @@ class DHLink(Link):
 
         if self.sigma == 0:
             # revolute
-            st = np.sin(q)
-            ct = np.cos(q)
+            st = _sin(q)
+            ct = _cos(q)
             d = self.d
         else:
             # prismatic
-            st = np.sin(self.theta)
-            ct = np.cos(self.theta)
+            st = _sin(self.theta)
+            ct = _cos(self.theta)
             d = q
 
         if self.mdh == 0:
@@ -475,7 +503,7 @@ class DHLink(Link):
                 [0, 0, 0, 1]
             ])
 
-        return SE3(T)
+        return SE3(T, check=False)
 
     def islimit(self, q):
         """
@@ -545,7 +573,7 @@ class DHLink(Link):
 
         return link
 
-    def friction(self, qd):
+    def friction(self, qd, coulomb=True):
         """
         ``tau = friction(qd)`` Calculates the joint friction force/torque (n)
         for joint velocity qd (n). The friction model includes:
@@ -579,10 +607,11 @@ class DHLink(Link):
 
         tau = self.B * np.abs(self.G) * qd
 
-        if qd > 0:
-            tau += self.Tc[0]
-        elif qd < 0:
-            tau += self.Tc[1]
+        if coulomb:
+            if qd > 0:
+                tau += self.Tc[0]
+            elif qd < 0:
+                tau += self.Tc[1]
 
         # Scale up by gear ratio
         tau = -np.abs(self.G) * tau

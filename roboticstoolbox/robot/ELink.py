@@ -7,7 +7,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ETS import ET
 from roboticstoolbox.robot.Link import Link
 
 

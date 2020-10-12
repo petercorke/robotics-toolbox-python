@@ -12,6 +12,7 @@ import signal
 from roboticstoolbox.backend.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath.base.argcheck import getvector
+# from roboticstoolbox.tools import Ticker
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -75,9 +76,10 @@ class PyPlot(Connector):
         plt.ion()
         plt.show()
 
-        # Set the signal handler and a 0.1 second plot updater
-        signal.signal(signal.SIGALRM, self._plot_handler)
-        signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
+        # # Set the signal handler and a 0.1 second plot updater
+        # signal.signal(signal.SIGALRM, self._plot_handler)
+        # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
+        # TODO still need to finish this, and get Jupyter animation working
 
     def step(self, dt=50):
         '''
@@ -98,11 +100,13 @@ class PyPlot(Connector):
 
         self._step_robots(dt)
 
-        plt.ioff()
+        # plt.ioff()
         self._draw_ellipses()
         self._draw_robots()
         self._set_axes_equal()
-        plt.ion()
+        # plt.ion()
+        plt.draw()
+        plt.pause(dt / 1000)
 
         self._update_robots()
 
@@ -151,7 +155,7 @@ class PyPlot(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ETS):
+        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
             self.robots.append(
                 RobotPlot(
                     ob, self.ax, readonly, display,

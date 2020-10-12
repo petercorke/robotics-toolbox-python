@@ -8,9 +8,10 @@ from roboticstoolbox.robot import Robot, DHRobot #, DHLink
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
-    getvector, ismatrix, isscalar, verifymatrix
+    getvector, ismatrix, isscalar, verifymatrix, getmatrix
 from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3, Twist3
+import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from frne import init, frne, delete
 from roboticstoolbox.backend.PyPlot.functions import \
@@ -19,7 +20,6 @@ from roboticstoolbox.backend.PyPlot.functions import \
 from roboticstoolbox.robot.Dynamics import Dynamics
 from ansitable import ANSITable, Column
 from functools import wraps
-
 
 class DHRobot(Robot, Dynamics):
     """
@@ -123,6 +123,12 @@ class DHRobot(Robot, Dynamics):
                 else:
                     return f"q{j:d} + {L.offset * deg:}\u00b0"
 
+        def angle(theta):
+            if sym.issymbol(theta):
+                return "<<red>>" + str(L.alpha)
+            else:
+                str(L.alpha * deg) + "\u00b0"
+
         if self.mdh:
             table = ANSITable(
                 Column("aⱼ₋₁", headalign="^"),
@@ -133,9 +139,9 @@ class DHRobot(Robot, Dynamics):
                 )
             for j, L in enumerate(self):
                 if L.isprismatic():
-                    table.row(L.a, str(L.alpha * deg) + "\u00b0", str(L.theta * deg) + "\u00b0", qs(j, L))
+                    table.row(L.a, angle(L.alpha), angle(L.theta ), qs(j, L))
                 else:
-                    table.row(L.a, str(L.alpha * deg) + "\u00b0", qs(j, L), L.d)
+                    table.row(L.a, angle(L.alpha), qs(j, L), L.d)
         else:
             # DH format
             table = ANSITable(
@@ -147,17 +153,19 @@ class DHRobot(Robot, Dynamics):
                 )
             for j, L in enumerate(self):
                 if L.isprismatic():
-                    table.row(str(L.theta * deg) + "\u00b0", qs(j, L), L.a, str(L.alpha * deg) + "\u00b0")
+                    table.row(angle(L.theta), qs(j, L), L.a, angle(L.alpha * deg))
                 else:
-                    table.row(qs(j, L), L.d, L.a, str(L.alpha * deg) + "\u00b0")
+                    table.row(qs(j, L), L.d, L.a, angle(L.alpha))
         
         s = str(table)
 
         table = table = ANSITable(
             Column("", colalign=">"),
             Column("", colalign="<"), border="thin", header=False)
-        table.row("base", self.base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
-        table.row("tool", self.tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
+        if self._base is not None:
+            table.row("base", self._base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
+        if self._tool is not None:
+            table.row("tool", self._tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
 
         for name, q in self._configdict.items():
             qlist = []
@@ -637,39 +645,29 @@ class DHRobot(Robot, Dynamics):
               kinematics are computed.
 
         '''
-
-        cols = 0
         if q is None:
             q = np.copy(self.q)
-        elif isinstance(q, np.ndarray) and q.ndim == 2 and q.shape[0] > 1:
-            cols = q.shape[0]
-            ismatrix(q, (cols, self.n))
-        else:
-            q = getvector(q, self.n)
 
-        if cols == 0:
-            # Single configuration
-            t = self.base
-            for i in range(self.n):
-                t = t * self.links[i].A(q[i])
-            t = t * self.tool
-        else:
-            # Trajectory
+        T = SE3.Empty()
+        for qr in getmatrix(q, (None, self.n)):
 
-            for i in range(cols):
-                tr = self.base
-                for j in range(self.n):
-                    tr *= self.links[j].A(q[j, i])
-                tr = tr * self.tool
-
-                if i == 0:
-                    t = SE3(tr)
+            first = True
+            for q, L in zip(qr, self.links):
+                if first:
+                    Tr = L.A(q)
+                    first = False
                 else:
-                    t.append(tr)
+                    Tr *= L.A(q)
 
-        return t
+            if self._base is not None:
+                Tr = self._base * Tr
+            if self._tool is not None:
+                Tr = Tr * self._tool
+            T.append(Tr)
 
-    def fkine_all(self, q=None):
+        return T
+
+    def fkine_all(self, q=None, old=True):
         '''
         Tall = allfkine(q) evaluates fkine for each joint within a robot and
         returns a sequence of link frame poses.
@@ -693,20 +691,27 @@ class DHRobot(Robot, Dynamics):
         '''
 
         if q is None:
-            q = np.copy(self.q)
+            qr = np.copy(self.q)
         else:
-            q = getvector(q, self.n)
+            qr = getvector(q, self.n)
 
-        t = self.base
-        Tall = SE3()
-        for i in range(self.n):
-            t = t * self.links[i].A(q[i])
-
-            if i == 0:
-                Tall = SE3(t)
+        if self._base is not None:
+            Tj = self._base
+        else:
+            Tj = SE3()
+        first = True
+        Tall = Tj
+        for q, L in zip(qr, self.links):
+            if first:
+                Tj *= L.A(q)
+                if old:
+                    Tall = Tj
+                else:
+                    Tall.append(Tj)
+                first = False
             else:
-                Tall.append(t)
-
+                Tj *= L.A(q)
+                Tall.append(Tj)
         return Tall
 
     def jacobe(self, q=None):

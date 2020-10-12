@@ -55,9 +55,17 @@ class Puma560(DHRobot):
 
     """
 
-    def __init__(self):
+    def __init__(self, symbolic=False):
 
-        deg = pi/180
+        if symbolic:
+            import spatialmath.base.symbolic as sym
+            zero = sym.zero()
+            pi = sym.pi()
+        else:
+            from math import pi
+            zero = 0.0
+
+        deg = pi / 180
 
         base = 0.672      # from mounting surface to shoulder axis
 
@@ -83,7 +91,7 @@ class Puma560(DHRobot):
             ),
 
             RevoluteDH(
-                d=0, a=0.4318, alpha=0,
+                d=0, a=0.4318, alpha=zero,
                 I=[0.13, 0.524, 0.539, 0, 0, 0],
                 r=[-0.3638, 0.006, 0.2275],
                 m=17.4,
@@ -131,7 +139,7 @@ class Puma560(DHRobot):
             ),
 
             RevoluteDH(
-                d=0, a=0, alpha=0,
+                d=0, a=0, alpha=zero,
                 I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
                 r=[0, 0, 0.032],
                 m=0.09,
@@ -147,8 +155,9 @@ class Puma560(DHRobot):
             L,
             name="Puma 560",
             manufacturer="Unimation",
-            keywords=('dynamics',),
-            urdfdir=str(PurePath(__file__).parent.parent / 'xacro' / 'puma560_description' / 'urdf') + '\\puma560_robot.urdf.xacro',
+            keywords=('dynamics', 'symbolic'),
+            symbolic=symbolic,
+            urdfdir=str(PurePath(__file__).parent.parent / 'xacro' / 'puma560_description' / 'urdf') + '\\puma560_robot.urdf.xacro'
         )
 
         # zero angles, L shaped pose
@@ -165,6 +174,6 @@ class Puma560(DHRobot):
 
 if __name__ == '__main__':
 
-    puma = Puma560()
+    puma = Puma560(symbolic=True)
     print(puma)
 

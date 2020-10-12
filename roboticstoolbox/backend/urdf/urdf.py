@@ -1344,7 +1344,10 @@ class Joint(URDFType):
             value = np.asanyarray(value, dtype=np.float64)
             if value.shape != (3,):    # pragma nocover
                 raise ValueError('Invalid shape for axis, should be (3,)')
-            value = value / np.linalg.norm(value)
+            norm = np.linalg.norm(value)
+            # HACK, why do I need to this next bit?
+            if norm != 0:
+                value = value / norm
         self._axis = value
 
     @property
