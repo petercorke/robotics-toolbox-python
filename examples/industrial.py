@@ -202,7 +202,7 @@ T = np.eye(4)
 T[:3, :3] = R
 T = sm.SE3(T)
 # r.base = sm.SE3(0.10682493448257446, -0.09225612878799438, 0.0) * T
-r.base = sm.SE3(0, -0.09225612878799438, 0.0) * T
+r.base = sm.SE3(0, -0.05225612878799438, 0.0) * T
 # r.base = sm.SE3(0, 0, 0.0) * T
 
 env.add(r)
@@ -298,7 +298,7 @@ def plane_int(t0, t1, ob):
 
 def link_calc(link, col, ob, q):
     di = 0.3
-    ds = 0.02
+    ds = 0.0
 
     ret = p.getClosestPoints(col.co, ob.co, di)
 
@@ -318,7 +318,7 @@ def link_calc(link, col, ob, q):
         dp = nh @ ob.v
         l_Ain = np.zeros((1, 13))
         l_Ain[0, :n] = nh @ Je
-        l_bin = (1 * (d - ds) / (di - ds)) + dp
+        l_bin = (5 * (d - ds) / (di - ds)) + dp
     else:
         l_Ain = None
         l_bin = None
@@ -348,7 +348,7 @@ def servo(q0, q1, it):
 
     while not arrived and i < it:
         q = r.q[i0:i1]
-        v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 1, 0.25)
+        v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 0.5, 0.25)
 
         se._wT = l1._fk
         # v = np.array([-0.1, 0, 0, 0, 0, 0])
@@ -357,7 +357,7 @@ def servo(q0, q1, it):
         eTep = r.fkine_graph(q, l0, l1).inv() * Tep
         e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
 
-        Q[n:, n:] = (1 / e) * np.eye(6)
+        Q[n:, n:] = 10 * (1 / e) * np.eye(6)
         Aeq = np.c_[r.jacobe(q, l0, l1), np.eye(6)]
         beq = v.reshape((6,))
         Jm = r.jacobm(q, from_link=l0, to_link=l1).reshape(7,)
@@ -435,7 +435,7 @@ it_max = 20000
 probs = 66
 j = 0
 
-start = 3
+start = 0
 
 for i in range(start, probs):
     print(problems[i, 0], problems[i, 1], i)

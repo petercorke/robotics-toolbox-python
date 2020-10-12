@@ -609,6 +609,12 @@ class ERobot(object):
         else:
             self.ets[0]._fk = self.base * self.ets[0].A()
 
+        for col in self.ets[0].collision:
+            col.wT = self.ets[0]._fk
+
+        for gi in self.ets[0].geometry:
+            gi.wT = self.ets[0]._fk
+
         for i in range(1, self.M):
             if self.ets[i].jtype == self.ets[i].VARIABLE:
                 t = self.ets[i].A(q[j])

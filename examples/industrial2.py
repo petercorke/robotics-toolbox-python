@@ -159,6 +159,11 @@ se = rp.Shape.Sphere(
     base=sm.SE3(0.18, 0.01, 0)
 )
 
+se1 = rp.Shape.Box(
+    scale=[0.14, 0.05, 0.03],
+    base=sm.SE3(0.08, 0.025, 0)
+)
+
 env = rp.backend.Swift()
 env.launch()
 
@@ -182,6 +187,7 @@ r.base = sm.SE3(-0.0048143863677978516, 0.039366304874420166, 0.0) * T
 env.add(r)
 # env.add(r, show_robot=False, show_collision=True)
 env.add(se)
+env.add(se1)
 env.add(s00)
 env.add(s0)
 env.add(s1)
@@ -291,7 +297,7 @@ def plane_int(t0, t1, ob):
 
 def link_calc(link, col, ob, q):
     di = 0.3
-    ds = 0.01
+    ds = 0.0
 
     ret = p.getClosestPoints(col.co, ob.co, di)
 
@@ -344,13 +350,14 @@ def servo(q0, q1, it):
         v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 1, 0.25)
 
         se._wT = l1._fk
+        se1._wT = l1._fk
         # v = np.array([-0.1, 0, 0, 0, 0, 0])
         # v[2] = 0
 
         eTep = r.fkine_graph(q, l0, l1).inv() * Tep
         e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
 
-        Q[n:, n:] = (1 / e) * np.eye(6)
+        Q[n:, n:] = 10 * (1 / e) * np.eye(6)
         Aeq = np.c_[r.jacobe(q, l0, l1), np.eye(6)]
         beq = v.reshape((6,))
         Jm = r.jacobm(q, from_link=l0, to_link=l1).reshape(7,)
@@ -381,6 +388,20 @@ def servo(q0, q1, it):
                             bin = np.array(l_bin)
                         else:
                             bin = np.r_[bin, l_bin]
+
+        for obj in s:
+            l_Ain, l_bin, ret, wTcp = link_calc(l1, se1, obj, r.q[i0:i1])
+
+            if l_Ain is not None and l_bin is not None:
+                if Ain is None:
+                    Ain = l_Ain
+                else:
+                    Ain = np.r_[Ain, l_Ain]
+
+                if bin is None:
+                    bin = np.array(l_bin)
+                else:
+                    bin = np.r_[bin, l_bin]
 
         for obj in s:
             l_Ain, l_bin, ret, wTcp = link_calc(l1, se, obj, r.q[i0:i1])

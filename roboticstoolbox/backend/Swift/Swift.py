@@ -114,7 +114,6 @@ class Swift(Connector):  # pragma nocover
             self.shapes.append(ob)
             return id
 
-
     def remove(self):
         '''
         id = remove(robot) removes the robot to the external environment.

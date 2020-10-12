@@ -235,7 +235,7 @@ def link_calc(link, col, ob, q):
         dp = nh @ ob.v
         l_Ain = np.zeros((1, 13))
         l_Ain[0, :n] = nh @ Je
-        l_bin = (1 * (d - ds) / (di - ds)) + dp
+        l_bin = (5 * (d - ds) / (di - ds)) + dp
     else:
         l_Ain = None
         l_bin = None
@@ -271,7 +271,7 @@ def servo(q0, q1, it):
         eTep = r.fkine_graph(q, l0, l1).inv() * Tep
         e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
 
-        Q[n:, n:] = (1 / e) * np.eye(6)
+        Q[n:, n:] = 10 * (1 / e) * np.eye(6)
         Aeq = np.c_[r.jacobe(q, l0, l1), np.eye(6)]
         beq = v.reshape((6,))
         Jm = r.jacobm(q, from_link=l0, to_link=l1).reshape(7,)
@@ -348,9 +348,9 @@ def servo(q0, q1, it):
 it_max = 20000
 
 probs = 45
-j = 0
+j = 20
 
-for i in range(probs):
+for i in range(j, probs):
     print(problems[i, 0], problems[i, 1])
     ret = servo(qs[problems[i, 0]], qs[problems[i, 1]], 500)
 
