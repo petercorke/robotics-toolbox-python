@@ -77,7 +77,9 @@ class Robot:
             for link in urdf.links:
                 data[0].append(link.visuals[0].geometry.mesh.filename)
                 data[1].append(link.visuals[0].geometry.mesh.scale)
-                data[2].append(SE3(link.visuals[0].origin))
+            for joint in urdf.joints:
+                data[2].append(SE3(joint.origin))
+            data[2].append(SE3())
 
         return data
 
