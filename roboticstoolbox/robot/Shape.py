@@ -16,12 +16,11 @@ except ImportError:
     _fcl = False
 
 try:
-    import trimesh
     import pybullet as p
     cid = p.connect(p.SHARED_MEMORY)
     if (cid < 0):
         p.connect(p.DIRECT)
-
+    import trimesh
     _trimesh = True
 except ImportError:
     _trimesh = False
