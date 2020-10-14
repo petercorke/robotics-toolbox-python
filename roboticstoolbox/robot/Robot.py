@@ -17,7 +17,7 @@ class Robot:
             base=None,
             tool=None,
             gravity=None,
-            urdfdir=None,
+            meshdir=None,
             keywords=(),
             symbolic=False):
 
@@ -26,6 +26,7 @@ class Robot:
         self.symbolic = symbolic
         self.base = base
         self.tool = tool
+        self.basemesh = None
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
         else:
@@ -47,39 +48,46 @@ class Robot:
 
         self._dynchange = True
 
-        # Search mesh dir for meshes
-        if urdfdir is not None:
-            # Parse the URDF to obtain file paths and scales
-            data = self._get_stl_file_paths_and_scales(urdfdir)
-            # Obtain the base mesh
-            self.basemesh = [data[0][0], data[1][0], data[2][0]]
-            # Save the respective meshes to each link
-            for idx in range(1, self.n+1):
-                self._links[idx-1].mesh = [data[0][idx], data[1][idx], data[2][idx]]
-        else:
-            self.basemesh = None
+        if meshdir is not None:
+            self.basemesh = meshdir + "\\link0.stl"
+            i = 1
+            for link in self._links:
+                link.mesh = meshdir + "\\link" + str(i) + ".stl"
+                i += 1
+
+        # URDF Parser Attempt
+        # # Search mesh dir for meshes
+        # if urdfdir is not None:
+        #     # Parse the URDF to obtain file paths and scales
+        #     data = self._get_stl_file_paths_and_scales(urdfdir)
+        #     # Obtain the base mesh
+        #     self.basemesh = [data[0][0], data[1][0], data[2][0]]
+        #     # Save the respective meshes to each link
+        #     for idx in range(1, self.n+1):
+        #         self._links[idx-1].mesh = [data[0][idx], data[1][idx], data[2][idx]]
+        # else:
+        #     self.basemesh = None
 
     def __getitem__(self, i):
         return self._links[i]
 
-    @staticmethod
-    def _get_stl_file_paths_and_scales(urdf_path):
-        data = [[], [], []]  # [ [filenames] , [scales] , [origins] ]
-
-        name, ext = splitext(urdf_path)
-
-        if ext == '.xacro':
-            urdf_string = xacro.main(urdf_path)
-            urdf = URDF.loadstr(urdf_string, urdf_path)
-
-            for link in urdf.links:
-                data[0].append(link.visuals[0].geometry.mesh.filename)
-                data[1].append(link.visuals[0].geometry.mesh.scale)
-            for joint in urdf.joints:
-                data[2].append(SE3(joint.origin))
-            data[2].append(SE3())
-
-        return data
+    # URDF Parser Attempt
+    # @staticmethod
+    # def _get_stl_file_paths_and_scales(urdf_path):
+    #     data = [[], [], []]  # [ [filenames] , [scales] , [origins] ]
+    #
+    #     name, ext = splitext(urdf_path)
+    #
+    #     if ext == '.xacro':
+    #         urdf_string = xacro.main(urdf_path)
+    #         urdf = URDF.loadstr(urdf_string, urdf_path)
+    #
+    #         for link in urdf.links:
+    #             data[0].append(link.visuals[0].geometry.mesh.filename)
+    #             data[1].append(link.visuals[0].geometry.mesh.scale)
+    #             data[2].append(SE3(link.visuals[0].origin))
+    #
+    #     return data
 
     def dynchanged(self):
         self._dynchanged = True
