@@ -157,7 +157,7 @@ class Puma560(DHRobot):
             manufacturer="Unimation",
             keywords=('dynamics', 'symbolic'),
             symbolic=symbolic,
-            urdfdir=str(PurePath(__file__).parent.parent / 'xacro' / 'puma560_description' / 'urdf') + '\\puma560_robot.urdf.xacro'
+            meshdir=str(PurePath(__file__).parent / 'meshes' / 'UNIMATE' / 'puma560')
         )
 
         # zero angles, L shaped pose
