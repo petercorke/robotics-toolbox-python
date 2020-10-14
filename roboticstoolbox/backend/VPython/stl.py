@@ -8,25 +8,25 @@ from roboticstoolbox.backend.VPython.common_functions import *
 from stl import mesh
 
 
-def import_object_from_numpy_stl(meshdata, scene):
+def import_object_from_numpy_stl(filename, scene):
     """
     Import either an ASCII or BINARY file format of an STL file.
     The triangles will be combined into a single compound entity.
 
-    :param meshdata: Mesh data: path str, scales, origin SE3
-    :type meshdata: `list`
+    :param filename: Path of the stl file to import.
+    :type filename: `str`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
     :return: Compound object of a collection of triangles formed from an stl file.
     :rtype: class:`vpython.compound`
     """
-    filename = meshdata[0]
-    scale = meshdata[1]
-    origin = meshdata[2]
-    origin_pos = get_pose_pos(origin)
-    origin_x = get_pose_x_vec(origin)
-    origin_y = get_pose_y_vec(origin)
-    origin_z = get_pose_z_vec(origin)
+    # filename = meshdata[0]
+    # scale = meshdata[1]
+    # origin = meshdata[2]
+    # origin_pos = get_pose_pos(origin)
+    # origin_x = get_pose_x_vec(origin)
+    # origin_y = get_pose_y_vec(origin)
+    # origin_z = get_pose_z_vec(origin)
 
     # Load the mesh using NumPy-STL
     the_mesh = mesh.Mesh.from_file(filename)
@@ -71,16 +71,11 @@ def import_object_from_numpy_stl(meshdata, scene):
         triangles.append(triangle(canvas=scene, vs=vertices))
 
     # Return a compound of the triangles
-    visual_mesh = compound(
-        triangles,
-        origin=origin_pos,
-        canvas=scene,
-        axis=origin_x,
-        up=origin_y
-    )
-    visual_mesh.length *= scale[0]
-    visual_mesh.height *= scale[1]
-    visual_mesh.width *= scale[2]
+    visual_mesh = compound(triangles, origin=vec(0, 0, 0), canvas=scene)
+    # visual_mesh.length *= scale[0]
+    # visual_mesh.height *= scale[1]
+    # visual_mesh.width *= scale[2]
+
     return visual_mesh
 
 
