@@ -4,7 +4,7 @@
 """
 
 
-from vpython import box, compound, color, sqrt
+from vpython import box, compound, color, sqrt, sphere
 from roboticstoolbox.backend.VPython.canvas import draw_reference_frame_axes
 from roboticstoolbox.backend.VPython.common_functions import *
 from roboticstoolbox.backend.VPython.stl import set_stl_origin, import_object_from_numpy_stl
@@ -22,8 +22,8 @@ class DefaultJoint:
 
     :param initial_se3: Pose to set the joint to initially
     :type initial_se3: class:`spatialmath.pose3d.SE3`
-    :param structure: either a float of the length of the joint, or a list of str of the filepath and scale
-    :type structure: `float`, `list`
+    :param structure: A variable representing the joint length (float) or a file path to an STL (str)
+    :type structure: `float`, `str`
     :param g_canvas: The canvas in which to add the link
     :type g_canvas: class:`graphics.graphics_canvas.graphicscanvas3d`
     :param qlim: A list of the angle limits for the joint
@@ -36,10 +36,10 @@ class DefaultJoint:
 
     def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
 
-        if not isinstance(structure, float) and not isinstance(structure, list):
+        if not isinstance(structure, float) and not isinstance(structure, str):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
-                        "or meshdata [filepath, scale]"
-            raise TypeError(error_str.format(float, list, type(structure)))
+                        "or meshdata [filepath, scale, origindata]"
+            raise TypeError(error_str.format(float, str, type(structure)))
 
         self.qlim = qlim
         self.theta = theta
@@ -48,6 +48,7 @@ class DefaultJoint:
         self.__pose = initial_se3
 
         # Set the graphic
+        # self.stl_offset = None
         self.__graphic_obj = self.__set_graphic(structure, axis_through)
         self.visible = True
 
@@ -102,6 +103,12 @@ class DefaultJoint:
         :param se_object: SE3 pose representation of the joint
         :type se_object: class:`spatialmath.pose3d.SE3`
         """
+        # if self.stl_offset is not None:
+        #     calc_se3 = se_object * self.stl_offset
+        # else:
+        #     calc_se3 = se_object
+
+        # print(se_object, self.__stl_offset, calc_se3, "\n==============================================\n")
         # Get the new pose details
         new_x_axis = get_pose_x_vec(se_object)
         new_y_axis = get_pose_y_vec(se_object)
@@ -202,6 +209,7 @@ class DefaultJoint:
 
             return graphic_obj
         else:
+            # self.stl_offset = structure[2]
             return import_object_from_numpy_stl(structure, self.__scene)
 
     def set_texture(self, colour=None, texture_link=None):
@@ -494,7 +502,7 @@ class GraphicalRobot:
                     j_type = 'r'
                 else:
                     j_type = 's'
-                pose = all_poses[i]  # Pose
+                pose = all_poses[i]   # Pose
                 if link.mesh is None:
                     if i == 0:
                         x1, x2 = SE3().t[0], all_poses[i].t[0]
