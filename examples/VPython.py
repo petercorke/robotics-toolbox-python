@@ -12,14 +12,14 @@ env.launch()
 puma = rp.models.DH.Puma560()
 env.add(0, 'Puma', puma)
 
-time.sleep(1)
+time.sleep(3)
 env.step(puma, puma.qr, 0)
 
-time.sleep(1)
+time.sleep(3)
 env.step(puma, puma.qs, 0)
 
-time.sleep(1)
+time.sleep(3)
 env.step(puma, puma.qn, 0)
 
-time.sleep(1)
+time.sleep(3)
 env.step(puma, puma.qz, 0)
