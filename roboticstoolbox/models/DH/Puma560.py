@@ -19,21 +19,29 @@ import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
 
 class Puma560(DHRobot):
-    """
+    r"""
     Create model of Puma 560 manipulator
 
-    puma = Puma560() is a script which creates a puma SerialLink object
-    describing the kinematic and dynamic characteristics of a Unimation Puma
-    560 manipulator using standard DH conventions.
+    :return: instance of a Puma560 robot
+    :rtype: DHRobot instance
+
+    - ``Puma560()`` is an instance of a ``DHRobot`` object
+      describing the kinematic and dynamic characteristics of a Unimation Puma
+      560 manipulator using standard DH conventions.
+    - ``Puma560(symbolic=True)`` as above but uses symbolic values of 
+      :math:`\alpha_j` which helps with SymPy symbolic operations for kinematics
+      and dynamics.
 
     Also define some joint configurations:
-    - qz, zero joint angle configuration, 'L' shaped configuration
-    - qr, vertical 'READY' configuration
+
+    - qz, zero-joint angle configuration, 'L' shaped configuration
+    - qr, vertical READY configuration
     - qs, arm is stretched out in the X direction
     - qn, arm is at a nominal non-singular configuration
 
     :notes:
         - SI units are used.
+        - Standard Denavit-Hartenberg parameters are used.
         - The model includes armature inertia and gear ratios.
         - The value of m1 is given as 0 here.  Armstrong found no value for it
           and it does not appear in the equation for tau1 after the
@@ -50,7 +58,6 @@ class Puma560(DHRobot):
         - "A combined optimization method for solving the inverse kinematics
            problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
            (for joint angle limits)
-
     """
 
     def __init__(self, symbolic=False):
