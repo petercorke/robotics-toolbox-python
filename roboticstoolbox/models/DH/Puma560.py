@@ -15,7 +15,6 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from pathlib import PurePath
 from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
@@ -157,7 +156,7 @@ class Puma560(DHRobot):
             manufacturer="Unimation",
             keywords=('dynamics', 'symbolic'),
             symbolic=symbolic,
-            meshdir=str(PurePath(__file__).parent / 'meshes' / 'UNIMATE' / 'puma560')
+            meshdir="meshes/UNIMATE/puma560"
         )
 
         # zero angles, L shaped pose

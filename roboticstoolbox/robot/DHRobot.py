@@ -21,6 +21,7 @@ from roboticstoolbox.robot.Dynamics import Dynamics
 from ansitable import ANSITable, Column
 from functools import wraps
 
+
 class DHRobot(Robot, Dynamics):
     """
     A superclass for arm type robots. A concrete class that represents a
@@ -701,8 +702,10 @@ class DHRobot(Robot, Dynamics):
             Tj = SE3()
         first = True
         Tall = Tj
+        print(Tj)
         for q, L in zip(qr, self.links):
             if first:
+                print(q, L.A(q))
                 Tj *= L.A(q)
                 if old:
                     Tall = Tj

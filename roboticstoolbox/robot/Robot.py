@@ -3,9 +3,10 @@ import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
-from os.path import splitext
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.backend import xacro
+from pathlib import PurePath, PurePosixPath, Path
+import sys
 
 class Robot:
 
@@ -49,11 +50,11 @@ class Robot:
         self._dynchange = True
 
         if meshdir is not None:
-            self.basemesh = meshdir + "\\link0.stl"
-            i = 1
-            for link in self._links:
-                link.mesh = meshdir + "\\link" + str(i) + ".stl"
-                i += 1
+            classpath = sys.modules[self.__module__].__file__
+            self.meshdir = PurePath(classpath).parent / PurePosixPath(meshdir)
+            self.basemesh = self.meshdir / "link0.stl"
+            for j, link in enumerate(self._links, start=1):
+                link.mesh = self.meshdir / "link{:d}.stl".format(j)
 
         # URDF Parser Attempt
         # # Search mesh dir for meshes

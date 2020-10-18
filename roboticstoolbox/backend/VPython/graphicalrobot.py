@@ -10,7 +10,7 @@ from roboticstoolbox.backend.VPython.common_functions import *
 from roboticstoolbox.backend.VPython.stl import set_stl_origin, import_object_from_numpy_stl
 from time import perf_counter
 from spatialmath import SE3
-
+from pathlib import PurePath
 
 class DefaultJoint:
     """
@@ -36,7 +36,7 @@ class DefaultJoint:
 
     def __init__(self, initial_se3, structure, g_canvas, qlim, theta, axis_through=array([1, 0, 0])):
 
-        if not isinstance(structure, float) and not isinstance(structure, str):
+        if not isinstance(structure, float) and not isinstance(structure, PurePath):
             error_str = "structure must be of type {0} or {1}. Given {2}. Either give a length (float)," \
                         "or meshdata [filepath, scale, origindata]"
             raise TypeError(error_str.format(float, str, type(structure)))
