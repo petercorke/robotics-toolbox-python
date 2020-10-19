@@ -168,6 +168,19 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     y_coords = arange(min_y_coord, max_y_coord + scale, scale)
     z_coords = arange(min_z_coord, max_z_coord + scale, scale)
 
+    # If the grid has given too many objects
+    if len(x_coords) > num_squares + 1:
+        x_coords = x_coords[0:num_squares + 1]
+    if len(y_coords) > num_squares + 1:
+        y_coords = y_coords[0:num_squares + 1]
+    if len(z_coords) > num_squares + 1:
+        z_coords = z_coords[0:num_squares + 1]
+
+    # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
+    x_middle = x_coords.mean()
+    y_middle = y_coords.mean()
+    z_middle = z_coords.mean()
+
     # If input is empty, append new, otherwise update current
     append = len(numbers_list) == 0
     # Dimensions don't change between updates, so indexing shall remain the same
@@ -195,11 +208,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     # Draw the axis label at the centre of the axes numbers
     txt = "X"
     if (sign(camera_axes.y) * -1) > 0:
-        x = (max_x_coord + min_x_coord) / 2
+        x = x_middle
         y = max_y_coord + scale * 2
         pos = vector(x, y, z_origin)
     else:
-        x = (max_x_coord + min_x_coord) / 2
+        x = x_middle
         y = min_y_coord - scale * 2
         pos = vector(x, y, z_origin)
     if append:
@@ -234,11 +247,11 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     txt = "Y"
     if (sign(camera_axes.x) * -1) > 0:
         x = max_x_coord + scale * 2
-        y = (max_y_coord + min_y_coord) / 2
+        y = y_middle
         pos = vector(x, y, z_origin)
     else:
         x = min_x_coord - scale * 2
-        y = (max_y_coord + min_y_coord) / 2
+        y = y_middle
         pos = vector(x, y, z_origin)
 
     if append:
@@ -273,9 +286,9 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
     txt = "Z"
     if (sign(camera_axes.x) * -1) > 0:
-        pos = vector(max_x_coord + scale * 2, y_origin, (max_z_coord + min_z_coord) / 2)
+        pos = vector(max_x_coord + scale * 2, y_origin, z_middle)
     else:
-        pos = vector(min_x_coord - scale * 2, y_origin, (max_z_coord + min_z_coord) / 2)
+        pos = vector(min_x_coord - scale * 2, y_origin, z_middle)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
