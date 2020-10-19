@@ -296,6 +296,10 @@ class GraphicsGrid:
         """
         Update the grid axes and numbers if the camera position/rotation has changed.
         """
+        # If invisible, skip the updating (Unnecessary)
+        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible:
+            return
+
         # Obtain the new camera settings
         new_camera_pos = vector(self.__scene.camera.pos)
         new_camera_axes = vector(self.__scene.camera.axis)
@@ -389,6 +393,10 @@ class GraphicsGrid:
         :param value: The value to set the scale to
         :type value: `float`
         """
+        # If invisible, skip the updating (Unnecessary)
+        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible:
+            return
+
         value = max(min(value, 100), 0.1)  # Between 0.1 and 100
         self.__scale = value
         # Turn off grid then delete
