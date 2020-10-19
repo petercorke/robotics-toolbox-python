@@ -5,3 +5,5 @@ try:
     from roboticstoolbox.backend.Swift import *
 except ImportError:
     pass
+
+from roboticstoolbox.backend.VPython import VPython

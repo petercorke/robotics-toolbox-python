@@ -15,6 +15,7 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
+from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
 
@@ -50,6 +51,7 @@ class Puma560(DHRobot):
         - "A combined optimization method for solving the inverse kinematics
            problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
            (for joint angle limits)
+        - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
     """
 
@@ -70,7 +72,7 @@ class Puma560(DHRobot):
         L = [
             
             RevoluteDH(
-                d=base,          # link length (Dennavit-Hartenberg notation)
+                d=0,  # d=base,          # link length (Dennavit-Hartenberg notation)
                 a=0,          # link offset (Dennavit-Hartenberg notation)
                 alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
                 I=[0, 0.35, 0, 0, 0, 0],  # inertia tensor of link with respect to
@@ -97,7 +99,7 @@ class Puma560(DHRobot):
                 G=107.815,
                 B=.817e-3,
                 Tc=[0.126, -0.071],
-                qlim=[-45*deg, 225*deg]
+                qlim=[-110*deg, 110*deg],  # qlim=[-45*deg, 225*deg]
             ),
 
             RevoluteDH(
@@ -109,7 +111,7 @@ class Puma560(DHRobot):
                 G=-53.7063,
                 B=1.38e-3,
                 Tc=[0.132, -0.105],
-                qlim=[-225*deg, 45*deg]
+                qlim=[-135*deg, 135*deg]  # qlim=[-225*deg, 45*deg]
             ),
 
             RevoluteDH(
@@ -121,7 +123,7 @@ class Puma560(DHRobot):
                 G=76.0364,
                 B=71.2e-6,
                 Tc=[11.2e-3, -16.9e-3],
-                qlim=[-110*deg, 170*deg]
+                qlim=[-266*deg, 266*deg]  # qlim=[-110*deg, 170*deg]
             ),
 
             RevoluteDH(
@@ -154,7 +156,9 @@ class Puma560(DHRobot):
             name="Puma 560",
             manufacturer="Unimation",
             keywords=('dynamics', 'symbolic'),
-            symbolic=symbolic)
+            symbolic=symbolic,
+            meshdir="meshes/UNIMATE/puma560"
+        )
 
         # zero angles, L shaped pose
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
