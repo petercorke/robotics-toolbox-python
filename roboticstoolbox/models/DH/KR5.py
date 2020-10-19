@@ -34,30 +34,38 @@ class KR5(DHRobot):
     '''
 
     def __init__(self):
+        deg = pi / 180
+
         L1 = RevoluteDH(a=0.18, d=0.4,
                         alpha=pi / 2,
+                        qlim=[-155 * deg, 155 * deg]
                         # mesh='KUKA/KR5_arc/link1.stl'
                         )
         L2 = RevoluteDH(a=0.6, d=0.135,
                         alpha=pi,
+                        qlim=[-180 * deg, 65 * deg]
                         # mesh='KUKA/KR5_arc/link2.stl'
                         )
         L3 = RevoluteDH(a=0.12,
                         d=0.135,
                         alpha=-pi / 2,
+                        qlim=[-110 * deg, 170 * deg]
                         # mesh='KUKA/KR5_arc/link3.stl'
                         )
         L4 = RevoluteDH(a=0.0,
                         d=0.62,
                         alpha=pi / 2,
+                        qlim=[-165 * deg, 165 * deg]
                         # mesh='KUKA/KR5_arc/link4.stl'
                         )
         L5 = RevoluteDH(a=0.0,
                         d=0.0,
                         alpha=-pi / 2,
+                        qlim=[-140 * deg, 140 * deg]
                         # mesh='KUKA/KR5_arc/link5.stl'
                         )
-        L6 = RevoluteDH(# mesh='KUKA/KR5_arc/link6.stl'
+        L6 = RevoluteDH(qlim=[-180 * deg, 180 * deg]
+                        # mesh='KUKA/KR5_arc/link6.stl'
         )
 
         L = [L1, L2, L3, L4, L5, L6]
