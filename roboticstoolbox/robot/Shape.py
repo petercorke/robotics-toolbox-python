@@ -10,7 +10,9 @@ import numpy as np
 import os
 
 try:
-    import pybullet as p
+    from contextlib import redirect_stdlog
+    with redirect_stdlog(None):
+        import pybullet as p
     cid = p.connect(p.SHARED_MEMORY)
     if (cid < 0):
         p.connect(p.DIRECT)
