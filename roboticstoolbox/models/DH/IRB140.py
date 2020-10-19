@@ -97,13 +97,12 @@ class IRB140(DHRobot):
             )
         ]
 
-
-
         super().__init__(
             L,
             # basemesh="ABB/IRB140/link0.stl",
             name='IRB 140',
-            manufacturer='ABB')
+            manufacturer='ABB',
+            meshdir="meshes/ABB/IRB140")
 
         self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
         self.addconfiguration("qd", [0, -90*deg, 180*deg, 0, 0, -90*deg])

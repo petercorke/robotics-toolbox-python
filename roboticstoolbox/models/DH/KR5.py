@@ -32,44 +32,50 @@ class KR5(DHRobot):
     Contain DH parameters for KUKA KR5 robot
     All link lenghts and offsets are measured in cm
     '''
-    def __init__(self):
 
+    def __init__(self):
         L1 = RevoluteDH(a=0.18, d=0.4,
-                        alpha=pi/2,
-                        mesh='KUKA/KR5_arc/link1.stl')
+                        alpha=pi / 2,
+                        # mesh='KUKA/KR5_arc/link1.stl'
+                        )
         L2 = RevoluteDH(a=0.6, d=0.135,
                         alpha=pi,
-                        mesh='KUKA/KR5_arc/link2.stl')
+                        # mesh='KUKA/KR5_arc/link2.stl'
+                        )
         L3 = RevoluteDH(a=0.12,
                         d=0.135,
-                        alpha=-pi/2,
-                        mesh='KUKA/KR5_arc/link3.stl')
+                        alpha=-pi / 2,
+                        # mesh='KUKA/KR5_arc/link3.stl'
+                        )
         L4 = RevoluteDH(a=0.0,
                         d=0.62,
-                        alpha=pi/2,
-                        mesh='KUKA/KR5_arc/link4.stl')
+                        alpha=pi / 2,
+                        # mesh='KUKA/KR5_arc/link4.stl'
+                        )
         L5 = RevoluteDH(a=0.0,
                         d=0.0,
-                        alpha=-pi/2,
-                        mesh='KUKA/KR5_arc/link5.stl')
-        L6 = RevoluteDH(mesh='KUKA/KR5_arc/link6.stl')
+                        alpha=-pi / 2,
+                        # mesh='KUKA/KR5_arc/link5.stl'
+                        )
+        L6 = RevoluteDH(# mesh='KUKA/KR5_arc/link6.stl'
+        )
 
         L = [L1, L2, L3, L4, L5, L6]
-
 
         # Create SerialLink object
         super().__init__(
             L,
-            meshdir="KUKA/KR5_arc",
+            # meshdir="KUKA/KR5_arc",
             name='KR5',
-            manufacturer='KUKA')
+            manufacturer='KUKA',
+            meshdir="meshes/KUKA/KR5_arc")
 
         self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
-        self.addconfiguration("qk1", [pi/4, pi/3, pi/4, pi/6, pi/4, pi/6])
-        self.addconfiguration("qk2", [pi/4, pi/3, pi/6, pi/3, pi/4, pi/6])
-        self.addconfiguration("qk3", [pi/6, pi/3, pi/6, pi/3, pi/6, pi/3])
+        self.addconfiguration("qk1", [pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
+        self.addconfiguration("qk2", [pi / 4, pi / 3, pi / 6, pi / 3, pi / 4, pi / 6])
+        self.addconfiguration("qk3", [pi / 6, pi / 3, pi / 6, pi / 3, pi / 6, pi / 3])
+
 
 if __name__ == '__main__':
-
     robot = KR5()
     print(robot)
