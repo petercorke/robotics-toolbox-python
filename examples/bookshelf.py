@@ -111,7 +111,7 @@ s0 = rp.Shape.Sphere(
 )
 
 s00 = rp.Shape.Sphere(
-    radius=0.05
+    radius=0.0001
 )
 
 se = rp.Shape.Sphere(
@@ -235,7 +235,7 @@ def link_calc(link, col, ob, q):
         dp = nh @ ob.v
         l_Ain = np.zeros((1, 13))
         l_Ain[0, :n] = nh @ Je
-        l_bin = (5 * (d - ds) / (di - ds)) + dp
+        l_bin = (1 * (d - ds) / (di - ds)) + dp
     else:
         l_Ain = None
         l_bin = None
@@ -265,7 +265,7 @@ def servo(q0, q1, it):
 
     while not arrived and i < it:
         q = r.q[i0:i1]
-        v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 1, 0.25)
+        v, arrived = rp.p_servo(r.fkine_graph(q, l0, l1), Tep, 1, 0.05)
         se._wT = l1._fk
 
         eTep = r.fkine_graph(q, l0, l1).inv() * Tep
@@ -348,7 +348,7 @@ def servo(q0, q1, it):
 it_max = 20000
 
 probs = 45
-j = 20
+j = 0
 
 for i in range(j, probs):
     print(problems[i, 0], problems[i, 1])
@@ -358,6 +358,8 @@ for i in range(j, probs):
     if ret:
         j += 1
         print(j)
+
+    time.sleep(2)
 
 print(j)
 

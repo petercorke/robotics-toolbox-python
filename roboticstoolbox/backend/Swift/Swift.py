@@ -165,10 +165,10 @@ class Swift(Connector):  # pragma nocover
 
         for i in range(len(self.robots)):
             self.robots[i].fkine_all()
-            self.swift.robot_poses([i, self.robots[i].fk_dict()])
+        #     self.swift.robot_poses([i, self.robots[i].fk_dict()])
 
-        for i in range(len(self.shapes)):
-            self.swift.shape_poses([i, self.shapes[i].fk_dict()])
+        # for i in range(len(self.shapes)):
+        #     self.swift.shape_poses([i, self.shapes[i].fk_dict()])
 
     def record_start(self, file):
         self.swift.record_start(file)
