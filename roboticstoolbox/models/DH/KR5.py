@@ -25,7 +25,7 @@ class KR5(DHRobot):
     - Includes an 11.5cm tool in the z-direction
 
     Reference::
-    - qlims, https://www.kuka.com/-/media/kuka-downloads/imported/6b77eecacfe542d3b736af377562ecaa/pf0012_kr_5_arc_hw_en.pdf
+    - https://github.com/4rtur1t0/ARTE/blob/master/robots/KUKA/KR5_arc/parameters.m
 
     Author::
     - Gautam Sinha,
@@ -39,37 +39,36 @@ class KR5(DHRobot):
     def __init__(self):
         deg = pi / 180
 
+        # Updated values form ARTE git. Old values left as comments
+
         L1 = RevoluteDH(a=0.18, d=0.4,
-                        alpha=pi / 2,
+                        alpha=-pi/2,  # alpha=pi / 2,
                         qlim=[-155 * deg, 155 * deg]
-                        # mesh='KUKA/KR5_arc/link1.stl'
                         )
-        L2 = RevoluteDH(a=0.6, d=0.135,
-                        alpha=pi,
+        L2 = RevoluteDH(a=0.6, d=0,  # d=0.135,
+                        alpha=0,  # alpha=pi,
                         qlim=[-180 * deg, 65 * deg]
-                        # mesh='KUKA/KR5_arc/link2.stl'
                         )
         L3 = RevoluteDH(a=0.12,
-                        d=0.135,
-                        alpha=-pi / 2,
-                        qlim=[-110 * deg, 170 * deg]
-                        # mesh='KUKA/KR5_arc/link3.stl'
+                        d=0,  # d=0.135,
+                        alpha=pi/2,  # alpha=-pi / 2,
+                        qlim=[-15 * deg, 158 * deg]
                         )
         L4 = RevoluteDH(a=0.0,
-                        d=0.62,
-                        alpha=pi / 2,
-                        qlim=[-165 * deg, 165 * deg]
-                        # mesh='KUKA/KR5_arc/link4.stl'
+                        d=-0.62,  # d=0.62,
+                        alpha=-pi/2,  # alpha=pi / 2,
+                        qlim=[-350 * deg, 350 * deg]
                         )
         L5 = RevoluteDH(a=0.0,
                         d=0.0,
-                        alpha=-pi / 2,
-                        qlim=[-140 * deg, 140 * deg]
-                        # mesh='KUKA/KR5_arc/link5.stl'
+                        alpha=pi/2,  # alpha=-pi / 2,
+                        qlim=[-130 * deg, 130 * deg]
                         )
-        L6 = RevoluteDH(qlim=[-180 * deg, 180 * deg]
-                        # mesh='KUKA/KR5_arc/link6.stl'
-        )
+        L6 = RevoluteDH(a=0,
+                        d=-0.115,
+                        alpha=pi,
+                        qlim=[-350 * deg, 350 * deg]
+                        )
 
         L = [L1, L2, L3, L4, L5, L6]
 

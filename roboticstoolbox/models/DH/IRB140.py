@@ -26,7 +26,7 @@ class IRB140(DHRobot):
     - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
       System Design and Reconfiguration Alternatives"
       A. Djuric and R. J. Urbanic
-    - qlims, https://library.e.abb.com/public/2893a5756d204e19aba0d37c2a2cadc6/3HAC041346%20PS%20IRB%20140-en.pdf
+    - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
 
     Notes::
     - SI units of metres are used.
@@ -44,6 +44,7 @@ class IRB140(DHRobot):
         d6 = 0.065
 
         # Create Links
+        # Updated values form ARTE git. Old values left as comments
 
         L = [
             RevoluteDH(
@@ -67,39 +68,39 @@ class IRB140(DHRobot):
                 I=np.array([94817914.40, -3859712.77, 37932017.01,
                             -3859712.77, 328604163.24, -1088970.86,
                             37932017.01, -1088970.86, 277463004.88])*1e-9,
-                qlim=[-90 * deg, 110 * deg]
+                qlim=[-100 * deg, 100 * deg]
             ),
 
             RevoluteDH(
                 d=0,
                 a=0,
-                alpha=pi/2,
+                alpha=-pi/2,  # alpha=pi/2,
                 m=20862.05e-3,
                 r=np.array([-4.56, -79.96, -5.86]),
                 I=np.array([500060915.95, -1863252.17, 934875.78,
                             -1863252.17, 75152670.69, -15204130.09,
                             934875.78, -15204130.09, 515424754.34])*1e-9,
-                qlim=[-230 * deg, 50 * deg]
+                qlim=[-220 * deg, 60 * deg]
             ),
 
             RevoluteDH(
                 d=d4,
                 a=0,
-                alpha=-pi/2,
+                alpha=pi/2,  # alpha=-pi/2,
                 qlim=[-200 * deg, 200 * deg]
             ),
 
             RevoluteDH(
                 d=0,
                 a=0,
-                alpha=pi/2,
-                qlim=[-115 * deg, 115 * deg]
+                alpha=-pi/2,  # alpha=pi/2,
+                qlim=[-120 * deg, 120 * deg]
             ),
 
             RevoluteDH(
                 d=d6,
                 a=0,
-                alpha=pi/2,
+                alpha=0,  # alpha=pi/2,
                 qlim=[-400 * deg, 400 * deg]
             )
         ]
