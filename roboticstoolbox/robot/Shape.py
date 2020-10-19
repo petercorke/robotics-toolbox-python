@@ -239,6 +239,8 @@ class Shape(object):
         if _fcl and _trimesh and \
                 (file_extension == '.stl' or file_extension == '.STL'):
 
+            print(filename)
+
             col = p.createCollisionShape(
                 shapeType=p.GEOM_MESH,
                 fileName=filename,
