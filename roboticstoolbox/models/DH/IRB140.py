@@ -26,6 +26,7 @@ class IRB140(DHRobot):
     - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
       System Design and Reconfiguration Alternatives"
       A. Djuric and R. J. Urbanic
+    - qlims, https://library.e.abb.com/public/2893a5756d204e19aba0d37c2a2cadc6/3HAC041346%20PS%20IRB%20140-en.pdf
 
     Notes::
     - SI units of metres are used.

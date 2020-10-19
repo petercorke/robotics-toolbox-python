@@ -24,6 +24,9 @@ class KR5(DHRobot):
     - SI units of metres are used.
     - Includes an 11.5cm tool in the z-direction
 
+    Reference::
+    - qlims, https://www.kuka.com/-/media/kuka-downloads/imported/6b77eecacfe542d3b736af377562ecaa/pf0012_kr_5_arc_hw_en.pdf
+
     Author::
     - Gautam Sinha,
       Indian Institute of Technology, Kanpur.
