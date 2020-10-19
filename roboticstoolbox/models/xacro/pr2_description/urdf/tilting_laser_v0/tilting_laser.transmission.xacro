@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="pr2_tilting_laser_transmission_v0" params="name">
+    <transmission type="pr2_mechanism_model/SimpleTransmission" name="${name}_mount_trans">
+      <actuator name="${name}_mount_motor" />
+      <joint name="${name}_mount_joint" />
+      <mechanicalReduction>-6.05</mechanicalReduction>
+    </transmission>
+  </xacro:macro>
+</robot>

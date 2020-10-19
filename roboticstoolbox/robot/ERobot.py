@@ -18,9 +18,15 @@ from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.robot.Robot import Robot
 
+try:
+    import fcl
+    _fcl = True
+except ImportError:
+    _fcl = False
+
 class ERobot(Robot):
     """
-    The Elementary Transform Sequence (ETS). A superclass which represents the
+    The ERobot. A superclass which represents the
     kinematics of a serial-link manipulator
 
     :param et_list: List of elementary transforms which represent the robot
@@ -82,7 +88,7 @@ class ERobot(Robot):
 
         # If the base link is not defined, use the root of the tree
         if base_link is None:
-            self._base_link = self.root[0]   # Needs to be private attrib
+            self._base_link = self.root      # Needs to be private attrib
         else:
             self._base_link = base_link      # Needs to be private attrib
 
@@ -99,7 +105,7 @@ class ERobot(Robot):
 
             lst.append(link)
 
-        # Figure out the order of links with respect to joint variables
+        # Figure out the order of links with resepect to joint variables
         self.bfs_link(
             lambda link: add_links(link, self._ets, self._q_idx))
         self._n = len(self._q_idx)
@@ -114,26 +120,38 @@ class ERobot(Robot):
         self.control_type = 'v'
 
 
-
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path
         self._fkpath = self.dfs_path(self.base_link, self.ee_link)
 
-    def bfs_link(self, func):
-        queue = self.root
+    # def bfs_link(self, func):
+    #     queue = self.root
 
-        for li in queue:
-            func(li)
+    #     for li in queue:
+    #         func(li)
+
+    #     def vis_children(link):
+    #         for li in link.child:
+    #             if li not in queue:
+    #                 queue.append(li)
+    #                 func(li)
+
+    #     while len(queue) > 0:
+    #         link = queue.pop(0)
+    #         vis_children(link)
+
+    def bfs_link(self, func):
+        visited = [self.root]
 
         def vis_children(link):
-            for li in link.child:
-                if li not in queue:
-                    queue.append(li)
-                    func(li)
+            visited.append(link)
+            func(link)
 
-        while len(queue) > 0:
-            link = queue.pop(0)
-            vis_children(link)
+            for li in link.child:
+                if li not in visited:
+                    vis_children(li)
+
+        vis_children(self.root)
 
     def dfs_path(self, l1, l2):
         path = []
@@ -168,28 +186,23 @@ class ERobot(Robot):
             li = {
                 'axis': [],
                 'eta': [],
-                'q_idx': link.q_idx,
                 'geometry': [],
-                't': link._fk.t.tolist(),
-                'q': r2q(link._fk.R).tolist()
+                'collision': []
             }
 
             for et in link.ets:
                 li['axis'].append(et.axis)
                 li['eta'].append(et.eta)
 
+            if link.v is not None:
+                li['axis'].append(link.v.axis)
+                li['eta'].append(link.v.eta)
+
             for gi in link.geometry:
-                g_fk = link._fk * gi.base
-                if gi.scale is not None:
-                    scale = gi.scale.tolist()
-                else:
-                    scale = [1, 1, 1]
-                li['geometry'].append({
-                    'filename': gi.filename,
-                    'scale': scale,
-                    't': g_fk.t.tolist(),
-                    'q': r2q(g_fk.R).tolist()
-                })
+                li['geometry'].append(gi.to_dict())
+
+            for gi in link.collision:
+                li['collision'].append(gi.to_dict())
 
             ob['links'].append(li)
 
@@ -201,14 +214,19 @@ class ERobot(Robot):
         }
 
         self.fkine_all()
-        # print(Tall)
 
         for link in self.ets:
 
             li = {
-                't': link._fk.t.tolist(),
-                'q': r2q(link._fk.R).tolist()
+                'geometry': [],
+                'collision': []
             }
+
+            for gi in link.geometry:
+                li['geometry'].append(gi.fk_dict())
+
+            for gi in link.collision:
+                li['collision'].append(gi.fk_dict())
 
             ob['links'].append(li)
 
@@ -222,17 +240,17 @@ class ERobot(Robot):
     #         urdf_string = xacro.main(file_path)
     #         urdf = URDF.loadstr(urdf_string, file_path)
 
-    #     return ETS(
+    #     return ERobot(
     #         urdf.elinks,
     #         name=urdf.name
     #     )
 
     @staticmethod
-    def urdf_to_ets_args(file_path):
+    def urdf_to_ets_args(file_path, tld=None):
         name, ext = splitext(file_path)
 
         if ext == '.xacro':
-            urdf_string = xacro.main(file_path)
+            urdf_string = xacro.main(file_path, tld)
             urdf = URDF.loadstr(urdf_string, file_path)
 
         return urdf.elinks, urdf.name
@@ -241,7 +259,7 @@ class ERobot(Robot):
     # def dh_to_ets(cls, robot):
     #     """
     #     Converts a robot modelled with standard or modified DH parameters to an
-    #     ETS representation
+    #     ERobot representation
 
     #     :param robot: The robot model to be converted
     #     :type robot: SerialLink
@@ -309,6 +327,10 @@ class ERobot(Robot):
                 j += 1
 
         return v
+
+    @property
+    def elinks(self):
+        return self._elinks
 
     @property
     def base_link(self):
@@ -411,7 +433,7 @@ class ERobot(Robot):
 
     @tool.setter
     def tool(self, T):
-        if not isinstance(T, SE3): # pragma nocover
+        if not isinstance(T, SE3):  # pragma nocover
             T = SE3(T)
         self._tool = T
 
@@ -496,6 +518,32 @@ class ERobot(Robot):
 
         return t
 
+    def fkine_graph(self, q=None, from_link=None, to_link=None):
+
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if q is None:
+            q = self.q
+
+        path, _ = self.get_path(from_link, to_link)
+        j = 0
+        tr = self.base.A
+
+        for link in path:
+            if link.jtype == link.VARIABLE:
+                T = link.A(q[j], fast=True)
+                j += 1
+            else:
+                T = link.A(fast=True)
+
+            tr = tr @ T
+
+        return SE3(tr)
+
     def fkine_all(self, q=None):
         '''
         Tall = fkine_all(q) evaluates fkine for each joint within a robot and
@@ -536,6 +584,12 @@ class ERobot(Robot):
         else:
             self.ets[0]._fk = self.base * self.ets[0].A()
 
+        for col in self.ets[0].collision:
+            col.wT = self.ets[0]._fk
+
+        for gi in self.ets[0].geometry:
+            gi.wT = self.ets[0]._fk
+
         for i in range(1, self.M):
             if self.ets[i].jtype == self.ets[i].VARIABLE:
                 t = self.ets[i].A(q[j])
@@ -543,116 +597,190 @@ class ERobot(Robot):
             else:
                 t = self.ets[i].A()
 
-            self.ets[i]._fk = self.ets[i].parent[0]._fk * t
+            self.ets[i]._fk = self.ets[i].parent._fk * t
 
-    def jacob0(self, q=None):
-        """
-        J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity. v = J0*qd in the
-        base frame.
+            # Update the collision objects transform as well
+            for col in self.ets[i].collision:
+                col.wT = self.ets[i]._fk
 
-        J0 = jacob0() as above except uses the stored q value of the
-        robot object.
+            for gi in self.ets[i].geometry:
+                gi.wT = self.ets[i]._fk
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+    # def jacob0(self, q=None):
+    #     """
+    #     J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
+    #     velocity to end-effector spatial velocity. v = J0*qd in the
+    #     base frame.
 
-        :return J: The manipulator Jacobian in ee frame
-        :rtype: float ndarray(6,n)
+    #     J0 = jacob0() as above except uses the stored q value of the
+    #     robot object.
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+    #     :param q: The joint angles/configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+
+    #     :return J: The manipulator Jacobian in ee frame
+    #     :rtype: float ndarray(6,n)
+
+    #     :references:
+    #         - Kinematic Derivatives using the Elementary Transform
+    #           Sequence, J. Haviland and P. Corke
+    #     """
+
+    #     if q is None:
+    #         q = np.copy(self.q)
+    #     else:
+    #         q = getvector(q, self.n)
+
+    #     T = (self.base.inv() * self.fkine(q)).A
+    #     U = np.eye(4)
+    #     j = 0
+    #     J = np.zeros((6, self.n))
+
+    #     for link in self._fkpath:
+
+    #         for k in range(link.M):
+
+    #             if k != link.q_idx:
+    #                 U = U @ link.ets[k].T().A
+    #             else:
+    #                 # self._jacoblink(link, k, T)
+    #                 U = U @ link.ets[k].T(q[j]).A
+    #                 Tu = np.linalg.inv(U) @ T
+    #                 n = U[:3, 0]
+    #                 o = U[:3, 1]
+    #                 a = U[:3, 2]
+    #                 x = Tu[0, 3]
+    #                 y = Tu[1, 3]
+    #                 z = Tu[2, 3]
+
+    #                 if link.ets[k].axis == 'Rz':
+    #                     J[:3, j] = (o * x) - (n * y)
+    #                     J[3:, j] = a
+
+    #                 elif link.ets[k].axis == 'Ry':
+    #                     J[:3, j] = (n * z) - (a * x)
+    #                     J[3:, j] = o
+
+    #                 elif link.ets[k].axis == 'Rx':
+    #                     J[:3, j] = (a * y) - (o * z)
+    #                     J[3:, j] = n
+
+    #                 elif link.ets[k].axis == 'tx':
+    #                     J[:3, j] = n
+    #                     J[3:, j] = np.array([0, 0, 0])
+
+    #                 elif link.ets[k].axis == 'ty':
+    #                     J[:3, j] = o
+    #                     J[3:, j] = np.array([0, 0, 0])
+
+    #                 elif link.ets[k].axis == 'tz':
+    #                     J[:3, j] = a
+    #                     J[3:, j] = np.array([0, 0, 0])
+
+    #                 j += 1
+
+    #     return J
+
+    def get_path(self, from_link, to_link):
+        path = []
+        n = 0
+        link = to_link
+
+        path.append(link)
+        if link.jtype is link.VARIABLE:
+            n += 1
+
+        while link != from_link:
+            link = link.parent
+            path.append(link)
+            if link.jtype is link.VARIABLE:
+                n += 1
+
+        path.reverse()
+
+        return path, n
+
+    def jacob0(
+            self, q=None, from_link=None, to_link=None,
+            offset=None, T=None):
+
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if offset is None:
+            offset = SE3()
+
+        path, n = self.get_path(from_link, to_link)
 
         if q is None:
             q = np.copy(self.q)
         else:
-            q = getvector(q, self.n)
+            try:
+                q = getvector(q, n)
+            except ValueError:
+                q = getvector(q, self.n)
 
-        T = (self.base.inv() * self.fkine(q)).A
+        if T is None:
+            T = (self.base.inv()
+                 * self.fkine_graph(q, from_link=from_link, to_link=to_link)
+                 * offset)
+
+        T = T.A
         U = np.eye(4)
         j = 0
-        J = np.zeros((6, self.n))
+        J = np.zeros((6, n))
 
-        for link in self._fkpath:
+        for link in path:
 
-            for k in range(link.M):
+            if link.jtype is link.STATIC:
+                U = U @ link.A(fast=True)
+            else:
+                U = U @ link.A(q[j], fast=True)
 
-                if k != link.q_idx:
-                    U = U @ link.ets[k].T().A
-                else:
-                    if link.ets[k].axis == 'Rz':
-                        U = U @ link.ets[k].T(q[j]).A
-                        Tu = np.linalg.inv(U) @ T
+                if link == to_link:
+                    U = U @ offset.A
 
-                        n = U[:3, 0]
-                        o = U[:3, 1]
-                        a = U[:3, 2]
-                        y = Tu[1, 3]
-                        x = Tu[0, 3]
+                Tu = np.linalg.inv(U) @ T
+                n = U[:3, 0]
+                o = U[:3, 1]
+                a = U[:3, 2]
+                x = Tu[0, 3]
+                y = Tu[1, 3]
+                z = Tu[2, 3]
 
-                        J[:3, j] = (o * x) - (n * y)
-                        J[3:, j] = a
+                if link.v.axis == 'Rz':
+                    J[:3, j] = (o * x) - (n * y)
+                    J[3:, j] = a
 
-                        j += 1
-                    if link.ets[k].axis == 'Ry':
-                        U = U @ link.ets[k].T(q[j]).A
-                        Tu = np.linalg.inv(U) @ T
+                elif link.v.axis == 'Ry':
+                    J[:3, j] = (n * z) - (a * x)
+                    J[3:, j] = o
 
-                        n = U[:3, 0]
-                        o = U[:3, 1]
-                        a = U[:3, 2]
-                        z = Tu[2, 3]
-                        x = Tu[0, 3]
+                elif link.v.axis == 'Rx':
+                    J[:3, j] = (a * y) - (o * z)
+                    J[3:, j] = n
 
-                        J[:3, j] = (n * z) - (a * x)
-                        J[3:, j] = o
+                elif link.v.axis == 'tx':
+                    J[:3, j] = n
+                    J[3:, j] = np.array([0, 0, 0])
 
-                        j += 1
-                    if link.ets[k].axis == 'Rx':
-                        U = U @ link.ets[k].T(q[j]).A
-                        Tu = np.linalg.inv(U) @ T
+                elif link.v.axis == 'ty':
+                    J[:3, j] = o
+                    J[3:, j] = np.array([0, 0, 0])
 
-                        n = U[:3, 0]
-                        o = U[:3, 1]
-                        a = U[:3, 2]
-                        y = Tu[1, 3]
-                        z = Tu[2, 3]
+                elif link.v.axis == 'tz':
+                    J[:3, j] = a
+                    J[3:, j] = np.array([0, 0, 0])
 
-                        J[:3, j] = (a * y) - (o * z)
-                        J[3:, j] = n
-
-                        j += 1
-                    elif link.ets[k].axis == 'tx':
-                        U = U @ link.ets[k].T(q[j]).A
-                        n = U[:3, 0]
-
-                        J[:3, j] = n
-                        J[3:, j] = np.array([0, 0, 0])
-
-                        j += 1
-                    elif link.ets[k].axis == 'ty':
-                        U = U @ link.ets[k].T(q[j]).A
-                        o = U[:3, 1]
-
-                        J[:3, j] = o
-                        J[3:, j] = np.array([0, 0, 0])
-
-                        j += 1
-                    elif link.ets[k].axis == 'tz':
-                        U = U @ link.ets[k].T(q[j]).A
-                        a = U[:3, 2]
-
-                        J[:3, j] = a
-                        J[3:, j] = np.array([0, 0, 0])
-
-                        j += 1
+                j += 1
 
         return J
 
-    def jacobe(self, q=None):
+    def jacobe(self, q=None, from_link=None, to_link=None, offset=None):
         """
         Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
         velocity to end-effector spatial velocity. v = Je*qd in the
@@ -670,16 +798,29 @@ class ERobot(Robot):
 
         """
 
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if offset is None:
+            offset = SE3()
+
         if q is None:
             q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        # else:
+        #     q = getvector(q, n)
 
-        J0 = self.jacob0(q)
-        Je = self.jacobev(q) @ J0
+        T = (self.base.inv()
+             * self.fkine_graph(q, from_link=from_link, to_link=to_link)
+             * offset)
+
+        J0 = self.jacob0(q, from_link, to_link, offset, T)
+        Je = self.jacobev(q, from_link, to_link, offset, T) @ J0
         return Je
 
-    def hessian0(self, q=None, J0=None):
+    def hessian0(self, q=None, J0=None, from_link=None, to_link=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
@@ -699,20 +840,28 @@ class ERobot(Robot):
               Sequence, J. Haviland and P. Corke
         """
 
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        path, n = self.get_path(from_link, to_link)
+
         if J0 is None:
             if q is None:
                 q = np.copy(self.q)
             else:
-                q = getvector(q, self.n)
+                q = getvector(q, n)
 
-            J0 = self.jacob0(q)
+            J0 = self.jacob0(q, from_link, to_link)
         else:
-            verifymatrix(J0, (6, self.n))
+            verifymatrix(J0, (6, n))
 
-        H = np.zeros((6, self.n, self.n))
+        H = np.zeros((6, n, n))
 
-        for j in range(self.n):
-            for i in range(j, self.n):
+        for j in range(n):
+            for i in range(j, n):
 
                 H[:3, i, j] = np.cross(J0[3:, j], J0[:3, i])
                 H[3:, i, j] = np.cross(J0[3:, j], J0[3:, i])
@@ -722,7 +871,7 @@ class ERobot(Robot):
 
         return H
 
-    def manipulability(self, q=None, J=None):
+    def manipulability(self, q=None, J=None, from_link=None, to_link=None):
         """
         Calculates the manipulability index (scalar) robot at the joint
         configuration q. It indicates dexterity, that is, how isotropic the
@@ -748,19 +897,27 @@ class ERobot(Robot):
 
         """
 
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        path, n = self.get_path(from_link, to_link)
+
         if J is None:
             if q is None:
                 q = np.copy(self.q)
             else:
-                q = getvector(q, self.n)
+                q = getvector(q, n)
 
-            J = self.jacob0(q)
+            J = self.jacob0(q, from_link, to_link)
         else:
-            verifymatrix(J, (6, self.n))
+            verifymatrix(J, (6, n))
 
         return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
-    def jacobm(self, q=None, J=None, H=None):
+    def jacobm(self, q=None, J=None, H=None, from_link=None, to_link=None):
         """
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
@@ -782,26 +939,35 @@ class ERobot(Robot):
               Sequence, J. Haviland and P. Corke
         """
 
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        path, n = self.get_path(from_link, to_link)
+
         if J is None:
             if q is None:
                 q = np.copy(self.q)
             else:
-                q = getvector(q, self.n)
+                q = getvector(q, n)
 
-            J = self.jacob0(q)
+            J = self.jacob0(q, from_link, to_link)
         else:
-            verifymatrix(J, (6, self.n))
+            verifymatrix(J, (6, n))
 
         if H is None:
-            H = self.hessian0(J0=J)
+            H = self.hessian0(J0=J, from_link=from_link, to_link=to_link)
         else:
-            verifymatrix(H, (6, self.n, self.n))
+            verifymatrix(H, (6, n, n))
 
-        manipulability = self.manipulability(J=J)
+        manipulability = self.manipulability(
+            J=J, from_link=from_link, to_link=to_link)
         b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((self.n, 1))
+        Jm = np.zeros((n, 1))
 
-        for i in range(self.n):
+        for i in range(n):
             c = J @ np.transpose(H[:, :, i])
             Jm[i, 0] = manipulability * \
                 np.transpose(c.flatten('F')) @ b.flatten('F')
@@ -838,7 +1004,9 @@ class ERobot(Robot):
 
     #     return model
 
-    def jacobev(self, q=None):
+    def jacobev(
+            self, q=None, from_link=None, to_link=None,
+            offset=None, T=None):
         """
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the base frame to the
@@ -856,8 +1024,21 @@ class ERobot(Robot):
 
         """
 
-        r = (self.base.inv() * self.fkine(q)).R
-        r = np.linalg.inv(r)
+        if from_link is None:
+            from_link = self.base_link
+
+        if to_link is None:
+            to_link = self.ee_link
+
+        if offset is None:
+            offset = SE3()
+
+        if T is None:
+            r = (self.base.inv() * self.fkine_graph(
+                    q, from_link, to_link) * offset).R
+            r = np.linalg.inv(r)
+        else:
+            r = np.linalg.inv(T.R)
 
         Jv = np.zeros((6, 6))
         Jv[:3, :3] = r
@@ -890,6 +1071,7 @@ class ERobot(Robot):
         Jv[3:, 3:] = r
 
         return Jv
+
 
     # def teach(
     #         self, block=True, q=None, limits=None,

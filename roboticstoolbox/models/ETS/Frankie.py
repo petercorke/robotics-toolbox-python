@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ERobot import ERobot
-from roboticstoolbox.robot.ETS import ET
 from roboticstoolbox.robot.ELink import ELink
 
 
@@ -40,69 +40,76 @@ class Frankie(ERobot):
         tool_offset = (103)*mm
 
         b0 = ELink(
-            ET.rz(),
+            v=ETS.rz(),
             name='base0',
             parent=None
         )
 
         b1 = ELink(
-            ET.tx(),
+            v=ETS.tx(),
             name='base1',
             parent=b0
         )
 
         l0 = ELink(
-            ET.tz(0.333) * ET.rz(),
+            ETS.tz(0.333),
+            ETS.rz(),
             name='link0',
             parent=b1
         )
 
         l1 = ELink(
-            ET.rx(-90*deg) * ET.rz(),
+            ETS.rx(-90*deg),
+            ETS.rz(),
             name='link1',
             parent=l0
         )
 
         l2 = ELink(
-            ET.rx(90*deg) * ET.tz(0.316) * ET.rz(),
+            ETS.rx(90*deg) * ETS.tz(0.316),
+            ETS.rz(),
             name='link2',
             parent=l1
         )
 
         l3 = ELink(
-            ET.tx(0.0825) * ET.rx(90*deg) * ET.rz(),
+            ETS.tx(0.0825) * ETS.rx(90*deg),
+            ETS.rz(),
             name='link3',
             parent=l2
         )
 
         l4 = ELink(
-            ET.tx(-0.0825) * ET.rx(-90*deg) * ET.tz(0.384) * ET.rz(),
+            ETS.tx(-0.0825) * ETS.rx(-90*deg) * ETS.tz(0.384),
+            ETS.rz(),
             name='link4',
             parent=l3
         )
 
         l5 = ELink(
-            ET.rx(90*deg) * ET.rz(),
+            ETS.rx(90*deg),
+            ETS.rz(),
             name='link5',
             parent=l4
         )
 
         l6 = ELink(
-            ET.tx(0.088) * ET.rx(90*deg) * ET.tz(0.107) * ET.rz(),
+            ETS.tx(0.088) * ETS.rx(90*deg) * ETS.tz(0.107),
+            ETS.rz(),
             name='link6',
             parent=l5
         )
 
         ee = ELink(
-            ET.tz(tool_offset) * ET.rz(-np.pi/4),
+            ETS.tz(tool_offset) * ETS.rz(-np.pi/4),
             name='ee',
             parent=l6
         )
 
-        ets = [b0, b1, l0, l1, l2, l3, l4, l5, l6, ee]
+        elinks = [b0, b1, l0, l1, l2, l3, l4, l5, l6, ee]
 
-        super().__init__(
-            ets,
+        super(Frankie, self).__init__(
+            elinks,
             name='Frankie',
             manufacturer='Franka Emika, Omron',
             keywords=('mobile',))

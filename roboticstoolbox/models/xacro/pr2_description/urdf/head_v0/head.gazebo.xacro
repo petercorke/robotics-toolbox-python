@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="pr2_head_gazebo_v0" params="name">
+    <gazebo reference="${name}_plate_frame">
+      <material value="Gazebo/Grey" />
+    </gazebo>
+  </xacro:macro>
+
+
+
+</robot>

@@ -4,6 +4,7 @@ from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
 
+
 class Robot:
 
     def __init__(
@@ -163,4 +164,3 @@ class Robot:
         else:
             raise ValueError(
                 'Control type must be one of \'p\', \'v\', or \'a\'')
-        

@@ -10,7 +10,8 @@ from spatialmath.base import getvector
 
 # TODO, nicer if jtype was 'R' 'P' or None
 
-class ET(UserList):
+
+class ETS(UserList):
     """
     This class implements a single elementary transform (ET)
 
@@ -32,7 +33,7 @@ class ET(UserList):
     # TODO should probably prefix with __
     STATIC = 0
     VARIABLE = 1
-    et = namedtuple('ET', 'eta axis_func axis jtype T')
+    ets = namedtuple('ETS', 'eta axis_func axis jtype T')
 
     def __init__(self, axis_func=None, axis=None, eta=None):
 
@@ -54,7 +55,7 @@ class ET(UserList):
             T = None
 
         # Save all the params in a named tuple
-        e = self.et(eta, axis_func, axis, jtype, T)
+        e = self.ets(eta, axis_func, axis, jtype, T)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -164,18 +165,18 @@ class ET(UserList):
 
     # redefine * operator to concatenate the internal lists
     def __mul__(self, rest):
-        prod = ET()
+        prod = ETS()
         prod.data = self.data + rest.data
         return prod
 
     def __rmul__(self, rest):
-        prod = ET()
+        prod = ETS()
         prod.data = self.data + rest
         return prod
 
     # redefine so that indexing returns an ET type
     def __getitem__(self, i):
-        item = ET()
+        item = ETS()
         data = self.data[i]  # can be [2] or slice, eg. [3:5]
         # ensure that data is always a list
         if isinstance(data, list):
@@ -206,7 +207,15 @@ class ET(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Rx, axis='Rx', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, 0],
+                [0, np.cos(eta), -np.sin(eta), 0],
+                [0, np.sin(eta), np.cos(eta), 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='Rx', eta=eta)
 
     @classmethod
     def ry(cls, eta=None):
@@ -227,7 +236,15 @@ class ET(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Ry, axis='Ry', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [np.cos(eta), 0, np.sin(eta), 0],
+                [0, 1, 0, 0],
+                [-np.sin(eta), 0, np.cos(eta), 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='Ry', eta=eta)
 
     @classmethod
     def rz(cls, eta=None):
@@ -246,7 +263,15 @@ class ET(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Rz, axis='Rz', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [np.cos(eta), -np.sin(eta), 0, 0],
+                [np.sin(eta), np.cos(eta), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='Rz', eta=eta)
 
     @classmethod
     def tx(cls, eta=None):
@@ -266,7 +291,15 @@ class ET(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Tx, axis='tx', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, eta],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='tx', eta=eta)
 
     @classmethod
     def ty(cls, eta=None):
@@ -286,7 +319,17 @@ class ET(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Ty, axis='ty', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, 0],
+                [0, 1, 0, eta],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='ty', eta=eta)
+
+        # return cls(SE3.Ty, axis='ty', eta=eta)
 
     @classmethod
     def tz(cls, eta=None):
@@ -306,7 +349,15 @@ class ET(UserList):
         :rtype: ET
 
         """
-        return cls(SE3.Tz, axis='tz', eta=eta)
+        def axis_func(eta):
+            return np.array([
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, eta],
+                [0, 0, 0, 1]
+            ])
+
+        return cls(axis_func, axis='tz', eta=eta)
 
 
 if __name__ == "__main__":
@@ -322,4 +373,3 @@ if __name__ == "__main__":
     print(e.joints())
     print(e.config)
     print(e.eval(np.zeros((6,))))
-
