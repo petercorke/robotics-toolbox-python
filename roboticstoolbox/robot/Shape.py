@@ -5,6 +5,25 @@
 
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
+from spatialmath.base import r2q
+import numpy as np
+import os
+
+try:
+    import fcl
+    _fcl = True
+except ImportError:
+    _fcl = False
+
+try:
+    import pybullet as p
+    cid = p.connect(p.SHARED_MEMORY)
+    if (cid < 0):
+        p.connect(p.DIRECT)
+    import trimesh
+    _trimesh = True
+except ImportError:
+    _trimesh = False
 
 
 class Shape(object):
@@ -16,12 +35,83 @@ class Shape(object):
             radius=0,
             length=0,
             scale=[1, 1, 1],
-            filename=None):
+            filename=None,
+            co=None,
+            stype=None):
 
+        self._wT = SE3()
+        self.co = co
         self.base = base
+        self.wT = None
         self.primitive = primitive
         self.scale = scale
+        self.radius = radius
+        self.length = length
         self.filename = filename
+        self.stype = stype
+        self.v = np.zeros(6)
+
+    def to_dict(self):
+
+        if self.stype == 'cylinder':
+            fk = self.wT * SE3.Rx(np.pi/2)
+        else:
+            fk = self.wT
+
+        shape = {
+            'stype': self.stype,
+            'scale': self.scale.tolist(),
+            'filename': self.filename,
+            'radius': self.radius,
+            'length': self.length,
+            't': fk.t.tolist(),
+            'q': r2q(fk.R).tolist(),
+            'v': self.v.tolist()
+        }
+
+        return shape
+
+    def fk_dict(self):
+
+        if self.stype == 'cylinder':
+            fk = self.wT * SE3.Rx(np.pi/2)
+        else:
+            fk = self.wT
+
+        shape = {
+            't': fk.t.tolist(),
+            'q': r2q(fk.R).tolist()
+        }
+
+        return shape
+
+    def __repr__(self):
+        return f'{self.stype},\n{self.base}'
+
+    def _update_fcl(self):
+        if _fcl and self.co is not None:
+            q = r2q(self.wT.R)
+            rot = [q[1], q[2], q[3], q[0]]
+            p.resetBasePositionAndOrientation(self.co, self.wT.t, rot)
+
+    @property
+    def v(self):
+        return self._v
+
+    @v.setter
+    def v(self, value):
+        self._v = getvector(value, 6)
+
+    @property
+    def wT(self):
+        return self._wT * self.base
+
+    @wT.setter
+    def wT(self, T):
+        if not isinstance(T, SE3):
+            T = SE3(T)
+        self._wT = T
+        self._update_fcl()
 
     @property
     def base(self):
@@ -43,6 +133,8 @@ class Shape(object):
     def scale(self, value):
         if value is not None:
             value = getvector(value, 3)
+        else:
+            value = getvector([1, 1, 1], 3)
         self._scale = value
 
     @property
@@ -74,22 +166,97 @@ class Shape(object):
         if not isinstance(T, SE3):
             T = SE3(T)
         self._base = T
+        self._update_fcl()
 
     @classmethod
     def Box(cls, scale, base=None):
-        return cls(True, base=base, scale=scale)
+
+        if base is None:
+            base = SE3()
+
+        if _fcl:
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_BOX, halfExtents=np.array(scale)/2)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
+        else:
+            co = None
+
+        return cls(
+            True, base=base, scale=scale, co=co, stype='box')
 
     @classmethod
     def Cylinder(cls, radius, length, base=None):
-        return cls(True, base=base, radius=radius, length=length)
+
+        if base is None:
+            base = SE3()
+
+        if _fcl:
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_CYLINDER, radius=radius, height=length)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
+        else:
+            co = None
+
+        return cls(
+            True, base=base, radius=radius, length=length, co=co,
+            stype='cylinder')
 
     @classmethod
     def Sphere(cls, radius, base=None):
-        return cls(True, base=base, radius=radius)
+
+        if base is None:
+            base = SE3()
+
+        if _fcl:
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_SPHERE, radius=radius)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
+        else:
+            co = None
+
+        return cls(True, base=base, radius=radius, co=co, stype='sphere')
 
     @classmethod
-    def Mesh(cls, filename, base=None, scale=None):
-        return cls(False, filename=filename, base=base, scale=scale)
+    def Mesh(cls, filename, base=None, scale=[1, 1, 1]):
+
+        if base is None:
+            base = SE3()
+
+        name, file_extension = os.path.splitext(filename)
+
+        if _fcl and _trimesh and \
+                (file_extension == '.stl' or file_extension == '.STL'):
+
+            print(filename)
+
+            col = p.createCollisionShape(
+                shapeType=p.GEOM_MESH,
+                fileName=filename,
+                meshScale=scale)
+
+            co = p.createMultiBody(
+                baseMass=1,
+                baseInertialFramePosition=[0, 0, 0],
+                baseCollisionShapeIndex=col)
+
+        else:
+            co = None
+
+        return cls(
+            False, filename=filename, base=base, co=co,
+            scale=scale, stype='mesh')
 
 
 # class Mesh(Shape):

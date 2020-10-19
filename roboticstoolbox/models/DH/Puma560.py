@@ -15,33 +15,26 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
+from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
 
 class Puma560(DHRobot):
-    r"""
+    """
     Create model of Puma 560 manipulator
 
-    :return: instance of a Puma560 robot
-    :rtype: DHRobot instance
-
-    - ``Puma560()`` is an instance of a ``DHRobot`` object
-      describing the kinematic and dynamic characteristics of a Unimation Puma
-      560 manipulator using standard DH conventions.
-    - ``Puma560(symbolic=True)`` as above but uses symbolic values of 
-      :math:`\alpha_j` which helps with SymPy symbolic operations for kinematics
-      and dynamics.
+    puma = Puma560() is a script which creates a puma SerialLink object
+    describing the kinematic and dynamic characteristics of a Unimation Puma
+    560 manipulator using standard DH conventions.
 
     Also define some joint configurations:
-
-    - qz, zero-joint angle configuration, 'L' shaped configuration
-    - qr, vertical READY configuration
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
     - qs, arm is stretched out in the X direction
     - qn, arm is at a nominal non-singular configuration
 
     :notes:
         - SI units are used.
-        - Standard Denavit-Hartenberg parameters are used.
         - The model includes armature inertia and gear ratios.
         - The value of m1 is given as 0 here.  Armstrong found no value for it
           and it does not appear in the equation for tau1 after the
@@ -58,6 +51,8 @@ class Puma560(DHRobot):
         - "A combined optimization method for solving the inverse kinematics
            problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
            (for joint angle limits)
+        - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
+
     """
 
     def __init__(self, symbolic=False):
@@ -77,7 +72,7 @@ class Puma560(DHRobot):
         L = [
             
             RevoluteDH(
-                d=base,          # link length (Dennavit-Hartenberg notation)
+                d=0,  # d=base,          # link length (Dennavit-Hartenberg notation)
                 a=0,          # link offset (Dennavit-Hartenberg notation)
                 alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
                 I=[0, 0.35, 0, 0, 0, 0],  # inertia tensor of link with respect to
@@ -104,7 +99,7 @@ class Puma560(DHRobot):
                 G=107.815,
                 B=.817e-3,
                 Tc=[0.126, -0.071],
-                qlim=[-45*deg, 225*deg]
+                qlim=[-110*deg, 110*deg],  # qlim=[-45*deg, 225*deg]
             ),
 
             RevoluteDH(
@@ -116,7 +111,7 @@ class Puma560(DHRobot):
                 G=-53.7063,
                 B=1.38e-3,
                 Tc=[0.132, -0.105],
-                qlim=[-225*deg, 45*deg]
+                qlim=[-135*deg, 135*deg]  # qlim=[-225*deg, 45*deg]
             ),
 
             RevoluteDH(
@@ -128,7 +123,7 @@ class Puma560(DHRobot):
                 G=76.0364,
                 B=71.2e-6,
                 Tc=[11.2e-3, -16.9e-3],
-                qlim=[-110*deg, 170*deg]
+                qlim=[-266*deg, 266*deg]  # qlim=[-110*deg, 170*deg]
             ),
 
             RevoluteDH(
@@ -161,7 +156,9 @@ class Puma560(DHRobot):
             name="Puma 560",
             manufacturer="Unimation",
             keywords=('dynamics', 'symbolic'),
-            symbolic=symbolic)
+            symbolic=symbolic,
+            meshdir="meshes/UNIMATE/puma560"
+        )
 
         # zero angles, L shaped pose
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))

@@ -103,6 +103,7 @@ class Panda(DHRobot):
             L,
             name='Panda',
             manufacturer='Franka Emika',
+            meshdir='meshes/FRANKA-EMIKA/Panda',
             tool=tool)
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)

@@ -26,6 +26,7 @@ class IRB140(DHRobot):
     - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
       System Design and Reconfiguration Alternatives"
       A. Djuric and R. J. Urbanic
+    - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
 
     Notes::
     - SI units of metres are used.
@@ -43,6 +44,7 @@ class IRB140(DHRobot):
         d6 = 0.065
 
         # Create Links
+        # Updated values form ARTE git. Old values left as comments
 
         L = [
             RevoluteDH(
@@ -53,7 +55,8 @@ class IRB140(DHRobot):
                 r=np.array([27.87, 43.12, -89.03])*1e-3,
                 I=np.array([512052539.74, 1361335.88, 51305020.72,
                             1361335.88, 464074688.59, 70335556.04,
-                            51305020.72, 70335556.04, 462745526.12])*1e-9
+                            51305020.72, 70335556.04, 462745526.12])*1e-9,
+                qlim=[-180 * deg, 180 * deg]
             ),
 
             RevoluteDH(
@@ -64,46 +67,50 @@ class IRB140(DHRobot):
                 r=np.array([198.29, 9.73, 92.43])*1e03,
                 I=np.array([94817914.40, -3859712.77, 37932017.01,
                             -3859712.77, 328604163.24, -1088970.86,
-                            37932017.01, -1088970.86, 277463004.88])*1e-9
+                            37932017.01, -1088970.86, 277463004.88])*1e-9,
+                qlim=[-100 * deg, 100 * deg]
             ),
 
             RevoluteDH(
                 d=0,
                 a=0,
-                alpha=pi/2,
+                alpha=-pi/2,  # alpha=pi/2,
                 m=20862.05e-3,
                 r=np.array([-4.56, -79.96, -5.86]),
                 I=np.array([500060915.95, -1863252.17, 934875.78,
                             -1863252.17, 75152670.69, -15204130.09,
                             934875.78, -15204130.09, 515424754.34])*1e-9,
+                qlim=[-220 * deg, 60 * deg]
             ),
 
             RevoluteDH(
                 d=d4,
                 a=0,
-                alpha=-pi/2
+                alpha=pi/2,  # alpha=-pi/2,
+                qlim=[-200 * deg, 200 * deg]
             ),
 
             RevoluteDH(
                 d=0,
                 a=0,
-                alpha=pi/2
+                alpha=-pi/2,  # alpha=pi/2,
+                qlim=[-120 * deg, 120 * deg]
             ),
 
             RevoluteDH(
                 d=d6,
                 a=0,
-                alpha=pi/2
+                alpha=0,  # alpha=pi/2,
+                qlim=[-400 * deg, 400 * deg]
             )
         ]
-
-
 
         super().__init__(
             L,
             # basemesh="ABB/IRB140/link0.stl",
             name='IRB 140',
-            manufacturer='ABB')
+            manufacturer='ABB',
+            meshdir="meshes/ABB/IRB140")
 
         self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
         self.addconfiguration("qd", [0, -90*deg, 180*deg, 0, 0, -90*deg])

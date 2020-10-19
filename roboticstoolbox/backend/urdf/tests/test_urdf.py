@@ -13,18 +13,19 @@ import numpy.testing as nt
 
 class TestURDF(unittest.TestCase):
 
-    def test_urdfpy(self):
+    # def test_urdfpy(self):
 
-        # Load
-        u = URDF.load('roboticstoolbox/backend/urdf/tests/data/ur5.urdf')
+    #     # Load
+    #     # u = URDF.load('roboticstoolbox/backend/urdf/tests/data/ur5.urdf')
+    #     u = URDF.load('roboticstoolbox/models/xacro/ur_description/urdf/ur5_joint_limited_robot.urdf.xacro')
 
-        self.assertIsInstance(u, URDF)
-        for j in u.joints:
-            self.assertIsInstance(j, Joint)
-        for ln in u.links:
-            self.assertIsInstance(ln, Link)
-        for t in u.transmissions:
-            self.assertIsInstance(t, Transmission)
+    #     self.assertIsInstance(u, URDF)
+    #     for j in u.joints:
+    #         self.assertIsInstance(j, Joint)
+    #     for ln in u.links:
+    #         self.assertIsInstance(ln, Link)
+    #     for t in u.transmissions:
+    #         self.assertIsInstance(t, Transmission)
 
     def test_urdf_visuals(self):
 

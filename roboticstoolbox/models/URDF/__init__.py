@@ -13,6 +13,7 @@ from roboticstoolbox.models.URDF.wx200 import wx200
 from roboticstoolbox.models.URDF.wx250 import wx250
 from roboticstoolbox.models.URDF.wx250s import wx250s
 from roboticstoolbox.models.URDF.j2n4s300 import j2n4s300
+from roboticstoolbox.models.URDF.PR2 import PR2
 
 __all__ = [
     'Panda',
@@ -29,5 +30,6 @@ __all__ = [
     'wx200',
     'wx250',
     'wx250s',
-    'j2n4s300'
+    'j2n4s300',
+    'PR2'
 ]
