@@ -17,7 +17,6 @@ from spatialmath.base import \
     getvector, verifymatrix, isscalar, removesmall, getmatrix, t2r, r2t
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
-from time import time
 
 class Dynamics:
 
@@ -1091,7 +1090,7 @@ class Dynamics:
 
         return r2
 
-    def rne_dh(self, Q, QD=None, QDD=None, grav=None, fext=None, debug=False, basewrench=False):
+    def rne_python(self, Q, QD=None, QDD=None, grav=None, fext=None, debug=False, basewrench=False):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
@@ -1218,12 +1217,22 @@ class Dynamics:
                     # prismatic
                     Tj = link.A(link.theta).A
                     d = q_k[j]
-                Rm.append(t2r(Tj))
 
                 # compute pstar: 
                 #   O_{j-1} to O_j in {j}, negative inverse of link xform
                 alpha = link.alpha
-                pstarm[:,j] = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
+                if self.mdh:
+                    pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
+                    if j == 0:
+                        if self._base:
+                            Tj = self._base.A @ Tj
+                            pstar = self._base.A @ pstar
+                else:
+                    pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
+
+                # stash them for later
+                Rm.append(t2r(Tj))
+                pstarm[:,j] = pstar
 
             # -----------------  the forward recursion ----------------------- #
 
@@ -1235,22 +1244,47 @@ class Dynamics:
 
                 # statement order is important here
 
-                if link.isrevolute() == 0:
-                    # revolute axis
-                    wd = Rt @ (wd + z0 * qdd_k[j] \
-                         + _cross(w, z0 * qd_k[j]))
-                    w = Rt @ (w + z0 * qd_k[j])
-                    vd = _cross(wd, pstar) \
-                         + _cross(w, _cross(w, pstar)) \
-                         + Rt @ vd
+                if self.mdh:
+                    if link.isrevolute():
+                        # revolute axis
+                        w_ = Rt @ w + z0 * qd_k[j]
+                        wd_ = Rt @ wd \
+                              + z0 * qdd_k[j] \
+                              + _cross(Rt @ w, z0 * qd_k[j])
+                        vd_ = Rt @ _cross(wd, pstar) \
+                              + _cross(w, _cross(w, pstar)) \
+                              + vd
+                    else:
+                        # prismatic axis
+                        w_ = Rt @ w
+                        wd_ = Rt @ wd
+                        vd_ = Rt @ (_cross(wd, pstar) \
+                                    +  _cross(w, _cross(w, pstar)) \
+                                    + vd \
+                                    ) \
+                              + 2 * _cross(Rt @ w, z0 * qd_k[j]) \
+                              + z0 * qdd_k[j]
+                    # trailing underscore means new value, update here
+                    w = w_
+                    wd = wd_
+                    vd = vd_
                 else:
-                    # prismatic axis
-                    w = Rt @ w
-                    wd = Rt @ wd
-                    vd = Rt @  (z0 * qdd_k[j] + vd) \
-                         + _cross(wd, pstar) \
-                         + 2 * _cross(w, Rt @ z0 * qd_k[j]) \
-                         + _cross(w, _cross(w, pstar))
+                    if link.isrevolute():
+                        # revolute axis
+                        wd = Rt @ (wd + z0 * qdd_k[j] \
+                            + _cross(w, z0 * qd_k[j]))
+                        w = Rt @ (w + z0 * qd_k[j])
+                        vd = _cross(wd, pstar) \
+                            + _cross(w, _cross(w, pstar)) \
+                            + Rt @ vd
+                    else:
+                        # prismatic axis
+                        w = Rt @ w
+                        wd = Rt @ wd
+                        vd = Rt @  (z0 * qdd_k[j] + vd) \
+                            + _cross(wd, pstar) \
+                            + 2 * _cross(w, Rt @ z0 * qd_k[j]) \
+                            + _cross(w, _cross(w, pstar))
 
                 vhat = _cross(wd, r) \
                        + _cross(w, _cross(w, r)) \
@@ -1276,34 +1310,59 @@ class Dynamics:
 
             for j in range(n - 1, -1, -1):
                 link = self.links[j]
-                pstar = pstarm[:,j]
-                
+                r = link.r
+
                 #
                 # order of these statements is important, since both
                 # nn and f are functions of previous f.
                 #
-                if j == (n - 1):
-                    R = np.eye(3, dtype=dtype)
-                else:
-                    R = Rm[j + 1]
+                if self.mdh:
+                    if j == (n - 1):
+                        R = np.eye(3, dtype=dtype)
+                        pstar = np.zeros((3,), dtype=dtype)
+                    else:
+                        R = Rm[j + 1]
+                        pstar = pstarm[:,j + 1]
 
-                r = link.r
-                nn = R @ (nn + _cross(R.T @ pstar, f)) \
-                     + _cross(pstar + r, Fm[:,j]) \
-                     + Nm[:,j]
-                f = R @ f + Fm[:,j]
+                    f_ = R @ f + Fm[:,j]
+                    nn_ = R @ nn \
+                          + _cross(pstar, R @ f) \
+                          + _cross(pstar, Fm[:,j]) \
+                          + Nm[:,j]
+                    f = f_
+                    nn = nn_
+
+                else:
+                    pstar = pstarm[:,j]
+                    if j == (n - 1):
+                        R = np.eye(3, dtype=dtype)
+                    else:
+                        R = Rm[j + 1]
+
+                    nn = R @ (nn + _cross(R.T @ pstar, f)) \
+                        + _cross(pstar + r, Fm[:,j]) \
+                        + Nm[:,j]
+                    f = R @ f + Fm[:,j]
 
                 if debug:
                     print('f: ', removesmall(f))
                     print('n: ', removesmall(nn))
 
                 R = Rm[j]
-                if link.isrevolute():
-                    # revolute axis
-                    t = nn @ (R.T @ z0)
+                if self.mdh:
+                    if link.isrevolute():
+                        # revolute axis
+                        t = nn @ z0
+                    else:
+                        # prismatic
+                        t = f @ z0
                 else:
-                    # prismatic
-                    t = f @ (R.T @ z0)
+                    if link.isrevolute():
+                        # revolute axis
+                        t = nn @ (R.T @ z0)
+                    else:
+                        # prismatic
+                        t = f @ (R.T @ z0)
                 
                 # add joint inertia and friction
                 #  no Coulomb friction if model is symbolic
@@ -1323,21 +1382,20 @@ class Dynamics:
 
         if self.symbolic:
             # simplify symbolic expressions
-            print('start simplification')
-            t0 = time()
+            print('start symbolic simplification, this might take a while...')
             from sympy import trigsimp
 
-            tau = trigsimp(tau)
+            # tau = trigsimp(tau)
             # consider using multiprocessing to spread over cores
             #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
-            print(f'done simplification after {time() - t0:} sec')
+            print('done')
             if tau.shape[0] == 1:
-                return tau.flatten()
+                return tau.reshape(self.n)
             else:
                 return tau
 
         if tau.shape[0] == 1:
-            return tau #.flatten()
+            return tau.flatten()
         else:
             return tau
 
@@ -1361,6 +1419,7 @@ if __name__ == "__main__":
     from spatialmath.base import symbolic as sym
 
     puma = rtb.models.DH.Puma560()
+    
     # for j, link in enumerate(puma):
     #     print(f'joint {j:}::')
     #     print(link.dyn(indent=4))
@@ -1375,15 +1434,28 @@ if __name__ == "__main__":
     # tau = puma.rne_dh([0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0])
     # print(tau)
 
-    puma = rtb.models.DH.Puma560(symbolic=True)
-    print(puma)
-    g = sym.symbol('g')
-    puma.gravity = [0, 0, g]
-    q = sym.symbol('q_:6')
-    qd = sym.symbol('qd_:6')
-    qdd = sym.symbol('qdd_:6')
+    # puma = rtb.models.DH.Puma560(symbolic=True)
+    # print(puma)
+    # g = sym.symbol('g')
+    # puma.gravity = [0, 0, g]
+    # q = sym.symbol('q_:6')
+    # qd = sym.symbol('qd_:6')
+    # qdd = sym.symbol('qdd_:6')
 
-    tau = puma.rne_dh(q, qd, qdd, debug=False)
+    # tau = puma.rne_dh(q, qd, qdd, debug=False)
 
-    print(tau[0].coeff(qdd[0]))
-    print(tau[0].expand().coeff(qdd[0]))
+    # print(tau[0].coeff(qdd[0]))
+    # print(tau[0].expand().coeff(qdd[0]))
+
+    q = puma.qz
+    qd = puma.qz
+    qdd = puma.qz
+    ones = np.ones((6,))
+    qd = ones
+    qdd = ones
+
+    print(puma.rne(q, qd, qdd))
+    print(puma.rne_python(q, qd, qdd, debug=False))
+
+    print(puma.gravity)
+    print([link.isrevolute() for link in puma])

@@ -9,6 +9,7 @@ from roboticstoolbox.backend.Connector import Connector
 import zerorpc
 import roboticstoolbox as rp
 import numpy as np
+import spatialmath as sm
 
 
 class Swift(Connector):  # pragma nocover
@@ -32,6 +33,7 @@ class Swift(Connector):  # pragma nocover
         super().launch()
 
         self.robots = []
+        self.shapes = []
 
         self.swift = zerorpc.Client()
         self.swift.connect("tcp://127.0.0.1:4242")
@@ -54,11 +56,10 @@ class Swift(Connector):  # pragma nocover
         super().step
 
         self._step_robots(dt)
+        self._step_shapes(dt)
 
         # self._draw_ellipses()
-        self._draw_robots()
-
-        # self._update_robots()
+        self._draw_all()
 
     def reset(self):
         '''
@@ -90,7 +91,7 @@ class Swift(Connector):  # pragma nocover
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob):
+    def add(self, ob, show_robot=True, show_collision=False):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -100,10 +101,17 @@ class Swift(Connector):  # pragma nocover
 
         super().add()
 
-        if isinstance(ob, rp.ETS):
+        if isinstance(ob, rp.ERobot):
             robot = ob.to_dict()
+            robot['show_robot'] = show_robot
+            robot['show_collision'] = show_collision
             id = self.swift.robot(robot)
             self.robots.append(ob)
+            return id
+        elif isinstance(ob, rp.Shape):
+            shape = ob.to_dict()
+            id = self.swift.shape(shape)
+            self.shapes.append(ob)
             return id
 
     def remove(self):
@@ -126,7 +134,8 @@ class Swift(Connector):  # pragma nocover
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt / 1000)
 
-                    if np.any(robot.qlim[:, i] != 0):
+                    if np.any(robot.qlim[:, i] != 0) and \
+                            not np.any(np.isnan(robot.qlim[:, i])):
                         robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
                         robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
 
@@ -139,11 +148,27 @@ class Swift(Connector):  # pragma nocover
                     'Invalid robot.control_type. '
                     'Must be one of \'p\', \'v\', or \'a\'')
 
-    def _draw_robots(self):
+    def _step_shapes(self, dt):
+
+        for shape in self.shapes:
+
+            T = shape.base
+            t = T.t
+            r = T.rpy('rad')
+
+            t += shape.v[:3] * (dt / 1000)
+            r += shape.v[3:] * (dt / 1000)
+
+            shape.base = sm.SE3(t) * sm.SE3.RPY(r)
+
+    def _draw_all(self):
 
         for i in range(len(self.robots)):
             self.robots[i].fkine_all()
-            self.swift.poses([i, self.robots[i].fk_dict()])
+        #     self.swift.robot_poses([i, self.robots[i].fk_dict()])
+
+        # for i in range(len(self.shapes)):
+        #     self.swift.shape_poses([i, self.shapes[i].fk_dict()])
 
     def record_start(self, file):
         self.swift.record_start(file)

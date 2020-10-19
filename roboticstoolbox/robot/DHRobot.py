@@ -160,7 +160,7 @@ class DHRobot(Robot, Dynamics):
         
         s = str(table)
 
-        table = table = ANSITable(
+        table = ANSITable(
             Column("", colalign=">"),
             Column("", colalign="<"), border="thin", header=False)
         if self._base is not None:
@@ -279,7 +279,7 @@ class DHRobot(Robot, Dynamics):
             L[j + 21] = self.links[i].B
             L[j + 22:j + 24] = self.links[i].Tc.flatten()
 
-        self._rne_ob = init(self.n, self.mdh, L, self.gravity[:, 0])
+        self._rne_ob = init(self.n, self.mdh, L, self.gravity)
 
     def _check_rne(func):
         @wraps(func)
@@ -599,7 +599,7 @@ class DHRobot(Robot, Dynamics):
                 if link.sigma == 0:
                     tw[j] = Twist3.R(T[j].a, T[j].t)
                 else:
-                    tw[j] = Twist3.P(T[j].a, T[j].t)
+                    tw[j] = Twist3.P(T[j].a)
         else:
             # DH case
             for j, link in enumerate(self):
@@ -742,7 +742,7 @@ class DHRobot(Robot, Dynamics):
 
         n = self.n
         L = self.links
-        J = np.zeros((6, self.n))
+        J = np.zeros((6, self.n), dtype=q.dtype)
 
         U = self.tool.A
 
@@ -754,17 +754,17 @@ class DHRobot(Robot, Dynamics):
             if not L[j].sigma:
                 # revolute axis
                 d = np.array([
-                    [-U[0, 0] * U[1, 3] + U[1, 0] * U[0, 3]],
-                    [-U[0, 1] * U[1, 3] + U[1, 1] * U[0, 3]],
-                    [-U[0, 2] * U[1, 3] + U[1, 2] * U[0, 3]]
+                    -U[0, 0] * U[1, 3] + U[1, 0] * U[0, 3],
+                    -U[0, 1] * U[1, 3] + U[1, 1] * U[0, 3],
+                    -U[0, 2] * U[1, 3] + U[1, 2] * U[0, 3]
                 ])
-                delta = np.expand_dims(U[2, :3], axis=1)  # nz oz az
+                delta = U[2, :3]   # nz oz az
             else:
                 # prismatic axis
-                d = np.expand_dims(U[2, :3], axis=1)      # nz oz az
-                delta = np.zeros((3, 1))
+                d = U[2, :3]      # nz oz az
+                delta = np.zeros((3,))
 
-            J[:, j] = np.squeeze(np.concatenate((d, delta)))
+            J[:, j] = np.r_[d, delta]
 
             if self.mdh != 0:
                 # modified DH convention
@@ -822,11 +822,11 @@ class DHRobot(Robot, Dynamics):
         else:
             q = getvector(q, self.n)
 
-        r = self.fkine(q).R
+        R = self.fkine(q).R
 
-        Jv = np.zeros((6, 6))
-        Jv[:3, :3] = r
-        Jv[3:, 3:] = r
+        Jv = np.zeros((6, 6), dtype=R.dtype)
+        Jv[:3, :3] = R
+        Jv[3:, 3:] = R
 
         return Jv
 
@@ -853,12 +853,11 @@ class DHRobot(Robot, Dynamics):
         else:
             q = getvector(q, self.n)
 
-        r = self.fkine(q).R
-        r = np.linalg.inv(r)
+        R = self.fkine(q).R
 
-        Jv = np.zeros((6, 6))
-        Jv[:3, :3] = r
-        Jv[3:, 3:] = r
+        Jv = np.zeros((6, 6), dtype=R.dtype)
+        Jv[:3, :3] = R.T
+        Jv[3:, 3:] = R.T
 
         return Jv
 
@@ -2240,46 +2239,45 @@ class DHRobot(Robot, Dynamics):
 
         return Jdot
 
-    def maniplty(self, q=None, method='yoshikawa', axes=[1, 1, 1, 1, 1, 1]):
+    def manipulability(self, q=None, method='yoshikawa', axes='all'):
         '''
         Manipulability measure
-
-        m = maniplty(q) is the yoshikawa manipulability index (scalar) for the
-        robot at the joint configuration q (n) where n is the number of robot
-        joints.  It indicates dexterity, that is, how isotropic the robot's
-        motion is with respect to the 6 degrees of Cartesian motion. The
-        measure is high when the manipulator is capable of equal motion in all
-        directions and low when the manipulator is close to a singularity.
-        Yoshikawa's manipulability measure is based on the shape of the
-        velocity ellipsoid and depends only on kinematic parameters.
-
-        m = maniplty(q, method='asada') as above except computes the asada
-        manipulability measure. Asada's manipulability measure is based on the
-        shape of the acceleration ellipsoid which in turn is a function of the
-        Cartesian inertia matrix and the dynamic parameters. The scalar
-        measure computed here is the ratio of the smallest/largest ellipsoid
-        axis. Ideally the ellipsoid would be spherical, giving a ratio of 1,
-        but in practice will be less than 1.
-
-        m = maniplty(q, method, axes) as above except axes specity which of
-        the 6 degrees-of-freedom to concider in the measurement. For example
-        set axes=[1, 1, 1, 0, 0, 0] to consider only translation or
-        axes=[0, 0, 0, 1, 1, 1] to consider only rotation. Defaults to all
-        motion.
-
-        If q is a matrix (mxn) then m (mx1) is a vector of manipulability
-        indices for each joint configuration specified by a row of q.
-
-        [m, CI] = maniplty(q, OPTIONS) as above, but for the case of the Asada
-        measure returns the Cartesian inertia matrix CI.
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
         :param method: Which method to use, 'yoshikawa' (default) or 'asada'
         :type method: string
-        :param axes: The degrees-of-freedom to be included for manipulability
-        :type axes: int list
+        :param axes: Task space axes to consider: "all" [default], "trans", "rot"
+        :type axes: str
+
+        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar) for the
+          robot at the joint configuration q (n) where n is the number of robot
+          joints.  It indicates dexterity, that is, how isotropic the robot's
+          motion is with respect to the 6 degrees of Cartesian motion. The
+          measure is high when the manipulator is capable of equal motion in all
+          directions and low when the manipulator is close to a singularity.
+          Yoshikawa's manipulability measure is based on the shape of the
+          velocity ellipsoid and depends only on kinematic parameters.
+
+        - ``manipulability(q, method='asada')`` as above except computes the Asada
+          manipulability measure. Asada's manipulability measure is based on the
+          shape of the acceleration ellipsoid which in turn is a function of the
+          Cartesian inertia matrix and the dynamic parameters. The scalar
+          measure computed here is the ratio of the smallest/largest ellipsoid
+          axis. Ideally the ellipsoid would be spherical, giving a ratio of 1,
+          but in practice will be less than 1.
+
+        - ``maniplty(q, method, axes)`` as above except axes specify which of
+          the 6 degrees-of-freedom to consider in the measurement. For example
+          ``axes="trans"`` to consider only translation or
+          ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
+          motion.
+
+        If q is a matrix (mxn) then m (mx1) is a vector of manipulability
+        indices for each joint configuration specified by a row of q.
+
+
 
         :notes:
             - The 'all' option includes rotational and translational
@@ -2302,14 +2300,21 @@ class DHRobot(Robot, Dynamics):
             - Robotics, Vision & Control, P. Corke, Springer 2011.
 
         '''
+        if axes == 'all':
+            axes = [1, 1, 1, 1, 1, 1]
+        elif axes.startswith('trans'):
+            axes = [1, 1, 1, 0, 0, 0]
+        elif axes.startswith('rot'):
+            axes = [0, 0, 0, 1, 1, 1]
+        else:
+            raise ValueError('axes must be all, trans or rot')
 
         def yoshi(robot, q, axes):
             J = robot.jacob0(q)
             J = J[axes, :]
             m2 = np.linalg.det(J @ J.T)
-            m2 = np.maximum(0.0, m2)  # clip it to positive
-            m = np.sqrt(m2)
-            return m
+            # m2 = np.maximum(0.0, m2)  # clip it to positive
+            return np.sqrt(abs(m2))
 
         def asada(robot, q, axes, dof):
             J = robot.jacob0(q)
@@ -2324,9 +2329,8 @@ class DHRobot(Robot, Dynamics):
             Mx = Mx[d]
             Mx = Mx[:, d.tolist()]
             e, _ = np.linalg.eig(Mx)
-            m = np.min(e) / np.max(e)
 
-            return m, Mx
+            return np.min(e) / np.max(e)
 
         axes = getvector(axes, 6)
         axes = axes > 0
@@ -2924,3 +2928,15 @@ class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
+
+
+if __name__ == "__main__":
+
+    import roboticstoolbox as rtb
+    import spatialmath.base.symbolic as sym
+
+    puma = rtb.models.DH.Puma560()
+    J = puma.jacob0(puma.qn)
+    print(J)
+    print(puma.manipulability(puma.qn))
+    print(puma.manipulability(puma.qn, 'asada')[0])

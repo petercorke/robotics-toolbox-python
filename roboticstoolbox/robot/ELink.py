@@ -7,7 +7,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ETS import ET
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 
 
@@ -17,8 +17,8 @@ class ELink(Link):
     related to a robot joint and link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
 
-    :param ETS: kinematic - The elementary transforms which make up the link
-    :type ETS: list (ET)
+    :param ets: kinematic - The elementary transforms which make up the link
+    :type ets: ETS
 
     :param qlim: joint variable limits [min max]
     :type qlim: float ndarray(2)
@@ -46,7 +46,8 @@ class ELink(Link):
 
     def __init__(
             self,
-            ets=ET(),
+            ets=ETS(),
+            v=None,
             name='',
             parent=None,
             qlim=np.zeros(2),
@@ -65,24 +66,20 @@ class ELink(Link):
         self.STATIC = 0
         self.VARIABLE = 1
 
-        if isinstance(ets, ET):
+        if isinstance(ets, ETS):
             self._ets = ets
         else:
             raise TypeError(
                 'The ets argument must be of type ETS')
 
-        self._q_idx = []
-
         self._name = name
 
-        if isinstance(parent, ELink):
-            parent = [parent]
-        elif parent is None:
-            parent = []
-        elif not isinstance(parent, list):
+        if isinstance(parent, list):
             raise TypeError(
-                'The parent link must be of type ELink'
-                ' or list of Elink')
+                'Only one parent link can be present')
+        elif not isinstance(parent, ELink) and parent is not None:
+            raise TypeError(
+                'Parent must be of type ELink')
 
         self._parent = parent
         self._child = []
@@ -91,21 +88,34 @@ class ELink(Link):
         self._M = len(self._ets)
 
         # Initialise joints
-        for i in range(self.M):
-            if ets[i].jtype is not ets[i].STATIC:
-                ets[i].j = len(self._q_idx)
-                self._q_idx.append(i)
+        if isinstance(ets, ETS):
+            self._Ts = SE3()
+            for i in range(self.M):
+                if ets[i].jtype is not ets[i].STATIC:
+                    raise ValueError('The transforms in ets must be constant')
 
-        if len(self._q_idx) > 1:
+                if not isinstance(ets[i].T(), SE3):
+                    self._Ts *= SE3(ets[i].T())
+                else:
+                    self._Ts *= ets[i].T()
+
+        elif isinstance(ets, SE3):
+            self._Ts = ets
+
+        # Check the variable joint
+        if v is None:
+            self._jtype = self.STATIC
+        elif not isinstance(v, ETS):
+            raise TypeError('v must be of type ETS')
+        elif v[0].jtype is v[0].STATIC:
+            raise ValueError('v must be a variable ETS')
+        elif len(v) > 1:
             raise ValueError(
                 "An elementary link can only have one joint variable")
-        elif len(self._q_idx) == 0:
-            self._jtype = self.STATIC
-            self._q_idx = None
         else:
             self._jtype = self.VARIABLE
-            self._q_idx = self._q_idx[0]
 
+        self._v = v
         self.qlim = qlim
         self.geometry = geometry
         self.collision = collision
@@ -118,6 +128,17 @@ class ELink(Link):
         self.B = B
         self.Tc = Tc
         self.G = G
+
+    def __repr__(self):
+        return self.name
+
+    @property
+    def v(self):
+        return self._v
+
+    @property
+    def Ts(self):
+        return self._Ts
 
     @property
     def collision(self):
@@ -190,10 +211,6 @@ class ELink(Link):
     @property
     def G(self):
         return self._G
-
-    @property
-    def q_idx(self):
-        return self._q_idx
 
     @collision.setter
     def collision(self, coll):
@@ -360,7 +377,7 @@ class ELink(Link):
 
         return s
 
-    def A(self, q=None):
+    def A(self, q=None, fast=False):
         """
         Link transform matrix
 
@@ -375,23 +392,31 @@ class ELink(Link):
 
         """
 
-        j = 0
-        tr = SE3()
+        # j = 0
+        # tr = SE3()
 
-        if self.q_idx is not None and q is None:
+        if self.jtype == self.VARIABLE and q is None:
             raise ValueError("q is required for variable joints")
 
-        for k in range(self.M):
-            if self.ets[k].jtype == self.ets[k].VARIABLE:
-                T = self.ets[k].T(q)
-                j += 1
+        # for k in range(self.M):
+        #     if self.ets[k].jtype == self.ets[k].VARIABLE:
+        #         T = self.ets[k].T(q)
+        #         j += 1
+        #     else:
+        #         T = self.ets[k].T()
+
+        #     tr = tr * T
+
+        if self.v is not None:
+            if fast:
+                return self.Ts.A @ self.v.T(q)
             else:
-                T = self.ets[k].T()
-
-            tr = tr * T
-
-            
-        return tr
+                return SE3(self.Ts.A @ self.v.T(q), check=False)
+        else:
+            if fast:
+                return self.Ts.A
+            else:
+                return self.Ts
 
     def islimit(self, q):
         """

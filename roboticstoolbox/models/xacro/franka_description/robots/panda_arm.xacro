@@ -267,7 +267,7 @@
       <collision>
         <origin xyz="0 0 0.08" rpy="0 0 0"/>
         <geometry>
-          <sphere radius="${0.04+safety_distance}"  />
+          <sphere radius="${0.025+safety_distance}"  />
         </geometry>
       </collision>
       <collision>
