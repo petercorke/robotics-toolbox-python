@@ -4,10 +4,10 @@
 """
 
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, \
-    sqrt, cos, button, menu, checkbox, slider, wtext, degrees
+    sqrt, cos, button, menu, checkbox, slider, wtext, degrees, vector
 from roboticstoolbox.backend.VPython.common_functions import \
-    get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, get_pose_pos, \
-    vpython_to_se3, wrap_to_pi, close_localhost_session
+    get_pose_x_vec, get_pose_y_vec, get_pose_pos, \
+    x_axis_vector, y_axis_vector, z_axis_vector
 from roboticstoolbox.backend.VPython.grid import GraphicsGrid, create_line, \
     create_segmented_line, create_marker
 from enum import Enum
@@ -42,8 +42,8 @@ class GraphicsCanvas3D:
     """
 
     def __init__(self, height=500, width=888, title='', caption='', grid=True):
-    # def __init__(self, height=360, width=640, title='', caption='',
-    #   grid=True):
+        # def __init__(self, height=360, width=640, title='', caption='',
+        #   grid=True):
 
         # Create a new independent scene
         self.scene = canvas()
