@@ -4,11 +4,11 @@
 """
 
 import numpy as np
-from roboticstoolbox.robot import Robot, DHRobot #, DHLink
+from roboticstoolbox.robot import Robot  # DHLink
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
-    getvector, ismatrix, isscalar, verifymatrix, getmatrix
+    getvector, isscalar, verifymatrix, getmatrix
 from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
@@ -140,7 +140,7 @@ class DHRobot(Robot, Dynamics):
                 )
             for j, L in enumerate(self):
                 if L.isprismatic():
-                    table.row(L.a, angle(L.alpha), angle(L.theta ), qs(j, L))
+                    table.row(L.a, angle(L.alpha), angle(L.theta), qs(j, L))
                 else:
                     table.row(L.a, angle(L.alpha), qs(j, L), L.d)
         else:
@@ -154,19 +154,24 @@ class DHRobot(Robot, Dynamics):
                 )
             for j, L in enumerate(self):
                 if L.isprismatic():
-                    table.row(angle(L.theta), qs(j, L), L.a, angle(L.alpha * deg))
+                    table.row(
+                        angle(L.theta), qs(j, L), L.a, angle(L.alpha * deg))
                 else:
                     table.row(qs(j, L), L.d, L.a, angle(L.alpha))
-        
+
         s = str(table)
 
         table = ANSITable(
             Column("", colalign=">"),
             Column("", colalign="<"), border="thin", header=False)
         if self._base is not None:
-            table.row("base", self._base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
+            table.row(
+                "base", self._base.printline(
+                    orient="rpy/xyz", fmt="{:.2g}", file=None))
         if self._tool is not None:
-            table.row("tool", self._tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None))
+            table.row(
+                "tool", self._tool.printline(
+                    orient="rpy/xyz", fmt="{:.2g}", file=None))
 
         for name, q in self._configdict.items():
             qlist = []
@@ -233,11 +238,11 @@ class DHRobot(Robot, Dynamics):
 
         return DHRobot(
             nlinks,
-            name = self.name,
-            manufacturer = self.manufacturer,
-            base = self.base,
-            tool = self.tool,
-            gravity = self.gravity)
+            name=self.name,
+            manufacturer=self.manufacturer,
+            base=self.base,
+            tool=self.tool,
+            gravity=self.gravity)
 
     def _copy(self):
         L = []
@@ -247,11 +252,11 @@ class DHRobot(Robot, Dynamics):
 
         r2 = DHRobot(
             L,
-            name = self.name,
-            manufacturer=  self.manufacturer,
-            base = self.base,
-            tool = self.tool,
-            gravity = self.gravity)
+            name=self.name,
+            manufacturer=self.manufacturer,
+            base=self.base,
+            tool=self.tool,
+            gravity=self.gravity)
 
         r2.q = self.q
         r2.qd = self.qd
@@ -290,8 +295,6 @@ class DHRobot(Robot, Dynamics):
             args[0]._rne_changed = False
             return func(*args, **kwargs)
         return wrapper_check_rne
-
-
 
     def delete_rne(self):
         """
@@ -348,7 +351,6 @@ class DHRobot(Robot, Dynamics):
         for i in range(1, self.n):
             v = np.c_[v, self.links[i].qlim]
         return v
-
 
     def A(self, joints, q=None):
         """
@@ -580,11 +582,11 @@ class DHRobot(Robot, Dynamics):
 
         - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
           represent the axes of the joints for the robot with joint coordinates
-          ``q`` (n). Also returns T0 which is an SE3 object representing the pose of
-          the tool.
+          ``q`` (n). Also returns T0 which is an SE3 object representing the
+          pose of the tool.
 
-        - ``tw, T0 = twists()`` as above but the joint coordinates are taken to be
-          zero.
+        - ``tw, T0 = twists()`` as above but the joint coordinates are taken
+          to be zero.
 
         """
 
@@ -2098,7 +2100,6 @@ class DHRobot(Robot, Dynamics):
         # The c function doesn't handle base rotation, so we need to hack the
         # gravity vector instead
         grav = self.base.R.T @ grav
-        
 
         if fext is None:
             fext = np.zeros(6)
@@ -2248,25 +2249,26 @@ class DHRobot(Robot, Dynamics):
         :type q: float ndarray(n)
         :param method: Which method to use, 'yoshikawa' (default) or 'asada'
         :type method: string
-        :param axes: Task space axes to consider: "all" [default], "trans", "rot"
+        :param axes: Task space axes to consider: "all" [default],
+            "trans", "rot"
         :type axes: str
 
-        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar) for the
-          robot at the joint configuration q (n) where n is the number of robot
-          joints.  It indicates dexterity, that is, how isotropic the robot's
-          motion is with respect to the 6 degrees of Cartesian motion. The
-          measure is high when the manipulator is capable of equal motion in all
-          directions and low when the manipulator is close to a singularity.
-          Yoshikawa's manipulability measure is based on the shape of the
-          velocity ellipsoid and depends only on kinematic parameters.
+        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar)
+          for the robot at the joint configuration q (n) where n is the number
+          of robot joints.  It indicates dexterity, that is, how isotropic the
+          robot's motion is with respect to the 6 degrees of Cartesian motion.
+          The measure is high when the manipulator is capable of equal motion
+          in all directions and low when the manipulator is close to a
+          singularity. Yoshikawa's manipulability measure is based on the shape
+          of the velocity ellipsoid and depends only on kinematic parameters.
 
-        - ``manipulability(q, method='asada')`` as above except computes the Asada
-          manipulability measure. Asada's manipulability measure is based on the
-          shape of the acceleration ellipsoid which in turn is a function of the
-          Cartesian inertia matrix and the dynamic parameters. The scalar
-          measure computed here is the ratio of the smallest/largest ellipsoid
-          axis. Ideally the ellipsoid would be spherical, giving a ratio of 1,
-          but in practice will be less than 1.
+        - ``manipulability(q, method='asada')`` as above except computes the
+          Asada manipulability measure. Asada's manipulability measure is based
+          on the shape of the acceleration ellipsoid which in turn is a
+          function of the Cartesian inertia matrix and the dynamic parameters.
+          The scalar measure computed here is the ratio of the smallest/largest
+          ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
+          ratio of 1, but in practice will be less than 1.
 
         - ``maniplty(q, method, axes)`` as above except axes specify which of
           the 6 degrees-of-freedom to consider in the measurement. For example
@@ -2569,7 +2571,7 @@ class DHRobot(Robot, Dynamics):
         :type shadow: bool
         :param name: (Plot Option) Plot the name of the robot near its base
         :type name: bool
-        :param movie: name of file in which to save an animated GIF 
+        :param movie: name of file in which to save an animated GIF
         :type movie: str
 
         :retrun: A reference to the PyPlot object which controls the
@@ -2924,6 +2926,7 @@ class DHRobot(Robot, Dynamics):
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
 
+
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
@@ -2933,7 +2936,7 @@ class SerialLink(DHRobot):
 if __name__ == "__main__":
 
     import roboticstoolbox as rtb
-    import spatialmath.base.symbolic as sym
+    # import spatialmath.base.symbolic as sym
 
     puma = rtb.models.DH.Puma560()
     J = puma.jacob0(puma.qn)
