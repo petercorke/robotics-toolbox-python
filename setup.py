@@ -6,9 +6,11 @@ here = path.abspath(path.dirname(__file__))
 
 req = [
     'numpy',
+    'numpy-stl',
     'spatialmath-python>=0.8.2',
     'scipy',
-    'matplotlib'
+    'matplotlib',
+    'vpython'
 ]
 
 dev_req = [
