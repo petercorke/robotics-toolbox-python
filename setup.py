@@ -8,7 +8,8 @@ req = [
     'numpy',
     'spatialmath-python>=0.8.2',
     'scipy',
-    'matplotlib'
+    'matplotlib',
+    'ansitable'
 ]
 
 vp_req = [
