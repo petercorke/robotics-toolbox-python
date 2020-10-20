@@ -6,11 +6,14 @@ here = path.abspath(path.dirname(__file__))
 
 req = [
     'numpy',
-    'numpy-stl',
     'spatialmath-python>=0.8.2',
     'scipy',
-    'matplotlib',
-    'vpython'
+    'matplotlib'
+]
+
+vp_req = [
+    'vpython',
+    'numpy-stl'
 ]
 
 dev_req = [
@@ -86,5 +89,6 @@ setup(
     extras_require={
         'dev': dev_req,
         'docs': docs_req,
+        'vpython': vp_req
     }
 )
