@@ -9,20 +9,20 @@ import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
-from spatialmath.base import tr2rpy, r2q
 from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.backend.PyPlot.functions import \
-    _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
-    _plot2, _teach2
+# from roboticstoolbox.backend.PyPlot.functions import \
+#     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
+#     _plot2, _teach2
 from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.robot.Robot import Robot
 
-try:
-    import fcl
-    _fcl = True
-except ImportError:
-    _fcl = False
+# try:
+#     import pybullet as p
+#     _pyb = True
+# except ImportError:
+#     _pyb = False
+
 
 class ERobot(Robot):
     """
@@ -118,7 +118,6 @@ class ERobot(Robot):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
-
 
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path
@@ -258,8 +257,8 @@ class ERobot(Robot):
     # @classmethod
     # def dh_to_ets(cls, robot):
     #     """
-    #     Converts a robot modelled with standard or modified DH parameters to an
-    #     ERobot representation
+    #     Converts a robot modelled with standard or modified DH parameters to
+    #     an ERobot representation
 
     #     :param robot: The robot model to be converted
     #     :type robot: SerialLink
@@ -976,7 +975,8 @@ class ERobot(Robot):
 
     # def __str__(self):
     #     """
-    #     Pretty prints the ETS Model of the robot. Will output angles in degrees
+    #     Pretty prints the ETS Model of the robot. Will output angles in
+    #     degrees
 
     #     :return: Pretty print of the robot model
     #     :rtype: str
@@ -1072,7 +1072,6 @@ class ERobot(Robot):
 
         return Jv
 
-
     # def teach(
     #         self, block=True, q=None, limits=None,
     #         jointaxes=True, eeframe=True, shadow=True, name=True):
@@ -1082,12 +1081,12 @@ class ERobot(Robot):
     #     env = teach() creates a matplotlib plot which allows the user to
     #     "drive" a graphical robot using a graphical slider panel. The
     #     robot's inital joint configuration is robot.q. This will block the
-    #     programs execution. The plot will autoscale with an aspect ratio of 1.
+    #     programs execution. The plot will autoscale with an aspect ratio of 1.  # noqa
 
     #     env = teach(q) as above except the robot's initial configuration is
     #     set to q.
 
-    #     env = teach(block=False) as avove except the plot is non-blocking. Note
+    #     env = teach(block=False) as avove except the plot is non-blocking. Note  # noqa
     #     that the plot will exit when the python script finishes executing.
 
     #     :param block: Block operation of the code and keep the figure open
@@ -1149,9 +1148,9 @@ class ERobot(Robot):
     #     joins the origins of the link coordinate frames. This method will be
     #     blocking. The plot will autoscale with an aspect ratio of 1.
 
-    #     env = plot(q) as above except the robot is plotted with joint angles q
+    #     env = plot(q) as above except the robot is plotted with joint angles q  # noqa
 
-    #     env = plot(block=False) as avove except the plot in non-blocking. Note
+    #     env = plot(block=False) as avove except the plot in non-blocking. Note  # noqa
     #     that the plot will exit when the python script finishes executing.
 
     #     env = plot(q, dt) as above except q is an nxm trajectory of joint
@@ -1217,9 +1216,9 @@ class ERobot(Robot):
     #     joins the origins of the link coordinate frames. This method will be
     #     blocking. The plot will autoscale with an aspect ratio of 1.
 
-    #     env = plot2(q) as above except the robot is plotted with joint angles q
+    #     env = plot2(q) as above except the robot is plotted with joint angles q  # noqa
 
-    #     env = plot2(block=False) as avove except the plot in non-blocking. Note
+    #     env = plot2(block=False) as avove except the plot in non-blocking. Note  # noqa
     #     that the plot will exit when the python script finishes executing.
 
     #     env = plot2(q, dt) as above except q is an nxm trajectory of joint
@@ -1275,7 +1274,7 @@ class ERobot(Robot):
     #     env = teach2() creates a 2D matplotlib plot which allows the user to
     #     "drive" a graphical robot using a graphical slider panel. The
     #     robot's inital joint configuration is robot.q. This will block the
-    #     programs execution. The plot will autoscale with an aspect ratio of 1.
+    #     programs execution. The plot will autoscale with an aspect ratio of 1.  # noqa
 
     #     env = teach2(q) as above except the robot's initial configuration is
     #     set to q.
@@ -1395,7 +1394,7 @@ class ERobot(Robot):
     #     '''
     #     Plot the velocity ellipsoid for seriallink manipulator
 
-    #     env = plot_vellipse() displays the velocity ellipsoid for the robot at
+    #     env = plot_vellipse() displays the velocity ellipsoid for the robot at  # noqa
     #     pose robot.q. The ellipsoid is centered at the origin. This method
     #     will be blocking. The plot will autoscale with an aspect ratio of 1.
 
@@ -1403,7 +1402,7 @@ class ERobot(Robot):
     #     non-blocking. Note that the plot will exit when the python script
     #     finishes executing.
 
-    #     env = plot_vellipse(q) as above except the robot is plotted with joint
+    #     env = plot_vellipse(q) as above except the robot is plotted with joint  # noqa
     #     angles q
 
     #     env = plot_vellipse(vellipse) specifies a custon ellipse to plot. If
@@ -1479,7 +1478,7 @@ class ERobot(Robot):
     #     non-blocking. Note that the plot will exit when the python script
     #     finishes executing.
 
-    #     env = plot_fellipse(q) as above except the robot is plotted with joint
+    #     env = plot_fellipse(q) as above except the robot is plotted with joint  # noqa
     #     angles q
 
     #     env = plot_fellipse(fellipse) specifies a custon ellipse to plot. If

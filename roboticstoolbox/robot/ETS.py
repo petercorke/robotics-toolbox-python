@@ -87,7 +87,11 @@ class ETS(UserList):
         A string comprising the characters 'R' or 'P' which indicate the types
         of joints in order from root to tip.
         """
-        return ''.join(['R' if self.data[i].axis[0] == 'R' else 'P' for i in self.joints()])
+        return ''.join(
+            [
+                'R' if self.data[i].axis[0] == 'R' else 'P'
+                for i in self.joints()
+            ])
 
     def T(self, q=None):
         """
@@ -123,7 +127,7 @@ class ETS(UserList):
         :rtype: SE3
 
         Effectively the forward-kinematics of the ET sequence.  Compounds the
-        transforms left to right, and substitutes in joint coordinates as 
+        transforms left to right, and substitutes in joint coordinates as
         needed from consecutive elements of ``q``.
         """
         T = SE3()
@@ -369,7 +373,8 @@ if __name__ == "__main__":
     l5 = 0.0837
     l6 = 0.4318
 
-    e = ET.tz(l1) * ET.rz() * ET.ry() * ET.ty(l2) * ET.tz(l3) * ET.ry() * ET.tx(l4) * ET.ty(l5) * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
+    e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2) * ETS.tz(l3) * ETS.ry() \
+        * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz() * ETS.ry() * ETS.rz()
     print(e.joints())
     print(e.config)
     print(e.eval(np.zeros((6,))))

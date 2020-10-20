@@ -3,10 +3,13 @@
 @author Micah Huth
 """
 
-from vpython import canvas, color, arrow, compound, keysdown, rate, norm, sqrt, cos, button, menu, checkbox, slider, \
-    wtext, degrees
-from roboticstoolbox.backend.VPython.common_functions import *
-from roboticstoolbox.backend.VPython.grid import GraphicsGrid, create_line, create_segmented_line, create_marker
+from vpython import canvas, color, arrow, compound, keysdown, rate, norm, \
+    sqrt, cos, button, menu, checkbox, slider, wtext, degrees, vector
+from roboticstoolbox.backend.VPython.common_functions import \
+    get_pose_x_vec, get_pose_y_vec, get_pose_pos, \
+    x_axis_vector, y_axis_vector, z_axis_vector
+from roboticstoolbox.backend.VPython.grid import GraphicsGrid, create_line, \
+    create_segmented_line, create_marker
 from enum import Enum
 
 
@@ -27,16 +30,20 @@ class GraphicsCanvas3D:
     :type height: `int`, optional
     :param width: Width of the canvas on screen (Pixels), defaults to 640.
     :type width: `int`, optional
-    :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
+    :param title: Title of the plot. Gets displayed above canvas, defaults
+        to ''.
     :type title: `str`, optional
-    :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
+    :param caption: Caption (subtitle) of the plot. Gets displayed below the
+        canvas, defaults to ''.
     :type caption: `str`, optional
-    :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
+    :param grid: Whether a grid should be displayed in the plot, defaults
+        to `True`.
     :type grid: `bool`, optional
     """
 
     def __init__(self, height=500, width=888, title='', caption='', grid=True):
-    # def __init__(self, height=360, width=640, title='', caption='', grid=True):
+        # def __init__(self, height=360, width=640, title='', caption='',
+        #   grid=True):
 
         # Create a new independent scene
         self.scene = canvas()
@@ -48,9 +55,12 @@ class GraphicsCanvas3D:
         self.scene.autoscale = False
 
         # Disable default controls
-        self.scene.userpan = False  # Remove shift+mouse panning (not very good controls)
-        self.scene.userzoom = True  # Keep zoom controls (scrollwheel)
-        self.scene.userspin = True  # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
+        # Remove shift+mouse panning (not very good controls)
+        self.scene.userpan = False
+        # Keep zoom controls (scrollwheel)
+        self.scene.userzoom = True
+        # Keep ctrl+mouse enabled to rotate (keyboard rotation more tedious)
+        self.scene.userspin = True
 
         # Apply HTML title/caption
         if title != '':
@@ -64,7 +74,8 @@ class GraphicsCanvas3D:
         # Disable the arrow keys from scrolling in the browser
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
 
-        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
+        # Prevent the space bar from toggling the active checkbox/button/etc
+        # (default browser behaviour)
         # https://stackoverflow.com/questions/22280139/prevent-space-button-from-triggering-any-other-button-click-in-jquery
 
         self.__default_caption = caption

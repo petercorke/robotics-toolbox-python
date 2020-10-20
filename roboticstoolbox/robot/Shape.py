@@ -10,20 +10,13 @@ import numpy as np
 import os
 
 try:
-    import fcl
-    _fcl = True
-except ImportError:
-    _fcl = False
-
-try:
     import pybullet as p
     cid = p.connect(p.SHARED_MEMORY)
     if (cid < 0):
         p.connect(p.DIRECT)
-    import trimesh
-    _trimesh = True
+    _pyb = True
 except ImportError:
-    _trimesh = False
+    _pyb = False
 
 
 class Shape(object):
@@ -88,8 +81,8 @@ class Shape(object):
     def __repr__(self):
         return f'{self.stype},\n{self.base}'
 
-    def _update_fcl(self):
-        if _fcl and self.co is not None:
+    def _update_pyb(self):
+        if _pyb and self.co is not None:
             q = r2q(self.wT.R)
             rot = [q[1], q[2], q[3], q[0]]
             p.resetBasePositionAndOrientation(self.co, self.wT.t, rot)
@@ -111,7 +104,7 @@ class Shape(object):
         if not isinstance(T, SE3):
             T = SE3(T)
         self._wT = T
-        self._update_fcl()
+        self._update_pyb()
 
     @property
     def base(self):
@@ -166,7 +159,7 @@ class Shape(object):
         if not isinstance(T, SE3):
             T = SE3(T)
         self._base = T
-        self._update_fcl()
+        self._update_pyb()
 
     @classmethod
     def Box(cls, scale, base=None):
@@ -174,7 +167,7 @@ class Shape(object):
         if base is None:
             base = SE3()
 
-        if _fcl:
+        if _pyb:
             col = p.createCollisionShape(
                 shapeType=p.GEOM_BOX, halfExtents=np.array(scale)/2)
 
@@ -194,7 +187,7 @@ class Shape(object):
         if base is None:
             base = SE3()
 
-        if _fcl:
+        if _pyb:
             col = p.createCollisionShape(
                 shapeType=p.GEOM_CYLINDER, radius=radius, height=length)
 
@@ -215,7 +208,7 @@ class Shape(object):
         if base is None:
             base = SE3()
 
-        if _fcl:
+        if _pyb:
             col = p.createCollisionShape(
                 shapeType=p.GEOM_SPHERE, radius=radius)
 
@@ -236,10 +229,8 @@ class Shape(object):
 
         name, file_extension = os.path.splitext(filename)
 
-        if _fcl and _trimesh and \
+        if _pyb and \
                 (file_extension == '.stl' or file_extension == '.STL'):
-
-            print(filename)
 
             col = p.createCollisionShape(
                 shapeType=p.GEOM_MESH,

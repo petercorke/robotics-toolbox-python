@@ -9,7 +9,8 @@ from numpy import array
 from spatialmath import SE3
 
 """
-global variables that can be used to easily reference X, Y, and Z axis directions.
+global variables that can be used to easily reference X, Y, and Z axis
+directions.
 """
 x_axis_vector = vector(1, 0, 0)
 y_axis_vector = vector(0, 1, 0)
@@ -70,7 +71,8 @@ def get_pose_pos(se3_obj):
 
 def vpython_to_se3(graphic_object):
     """
-    This function will take in a graphics object and output it's pose as an SE3 object
+    This function will take in a graphics object and output it's pose as an
+    SE3 object
 
     :param graphic_object: A VPython graphic object
     :type graphic_object: class:`vpython.object`
@@ -88,7 +90,7 @@ def vpython_to_se3(graphic_object):
         [x_vec.x, y_vec.x, z_vec.x, pos.x],
         [x_vec.y, y_vec.y, z_vec.y, pos.y],
         [x_vec.z, y_vec.z, z_vec.z, pos.z],
-        [      0,       0,       0,     1]
+        [0,       0,       0,     1]
     ])
 
     return SE3(T)
@@ -102,7 +104,8 @@ def wrap_to_pi(angle_type, angle):
     :type angle_type: `str`
     :param angle: The angle to wrap
     :type angle: `float`
-    :raises ValueError: Throws the error if the given string is not "deg" or "rad"
+    :raises ValueError: Throws the error if the given string is not "deg"
+        or "rad"
     :return: The wrapped angle
     :rtype: `float`
     """
@@ -127,8 +130,9 @@ def close_localhost_session(canvas):
     Terminate the local host session through JavaScript
 
     :param canvas: The scene to append the JS to the caption
-    :type canvas: class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas3D`,
-                  class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas2D`
+    :type canvas:
+        class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas3D`,
+        class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas2D`
     """
     canvas.scene.append_to_caption('''
         <script type="text/javascript">

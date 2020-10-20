@@ -6,4 +6,7 @@ try:
 except ImportError:
     pass
 
-from roboticstoolbox.backend.VPython import VPython
+try:
+    from roboticstoolbox.backend.VPython import *
+except ImportError:
+    pass
