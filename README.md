@@ -1,4 +1,4 @@
-![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg)[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
+![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 <!---
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)

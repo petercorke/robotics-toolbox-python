@@ -1,5 +1,5 @@
-This folder contains the graphics functionality of the toolbox.
-Instructions on how to use the graphical section of the toolbox below.
+This folder contains the VPython graphics backend of the toolbox.
+Instructions on how to use VPython, and the fundamentals of how it works are below.
 (Pictures to come)
 
 # Scene Controls
@@ -41,44 +41,38 @@ Instructions on how to use the graphical section of the toolbox below.
    
 
 # How To
-## Importing
-To use the graphics, simply import it. For these examples, it is assumed the graphics are imported into the namespace 'gph'.
+## Setup
+To use VPython, simply select is as your backend.
+Note: 2D functionality is currently not implemented via the backend. It can still be used outside the backend, however.
 ```python
-import graphics as gph
+import roboticstoolbox as rp
+
+env = rp.backend.VPython()
 ```
 
-## Common Functionality
-VPython has its own data types that can be used. Firstly, the `radians()`, and `degrees()` functions convert between radians and degrees.
-The `vector` class is also very crucial to the graphics. It can either represent a vector or a 3D point.
-
-For convenience, some functions and variables are provided for easy use. `wrap_to_pi()` takes in an angle, and specification on degrees or radians. It returns the respective angle between -pi and pi.
-Three vectors are also supplied for readability to ensure correct axes are used when referencing. `x_axis_vector`, `y_axis_vector`, `z_axis_vector` can be used to get vectors of an object, for example.
-```python
-# Wrap an angle (deg) to the range [-pi pi]. use "rad" instead of "deg" for radian angles.
-gph.wrap_to_pi("deg", 450)
-# Obtain the Z vector representation of the robot link
-my_link.get_axis_vector(z_axis_vector)
-```
-
-## Setting Up The Scene
+## Setting Up The Backend
 Any use of VPython objects requires a scene.
 
-To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
+To create a scene to draw objects to, a canvas must be created. Upon creation, a localhost http server will be opened. 
+If launched through Jupyter Notebooks, it will be displayed where executed.
 
-Different attributes can be supplied to the function for some customisation. The display width, height, title, and caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
+Different attributes can be supplied to the environment for some customisation. The display width, height, title, and
+caption can be manually input. Lastly, booleans representing the dimensions, and grid visibility can be set.
 
-Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D capabilities)
+Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
+capabilities)
 ```python
-# Create a default canvas (360*640, with grid displayed, no title or caption)
-g_canvas = gph.GraphicsCanvas3D()
-g_canvas = gph.GraphicsCanvas2D()
+# Create a default canvas (3D, 500*888, with grid displayed, no title or caption)
+env.launch()
 
 # Alternatively create a grid with specified parameters
-g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
-g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+env.launch(is_3d=True, height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+env.launch(is_3d=False, height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
 ``` 
+Multiple scenes can be created, simply execute `launch` for every scene required. Keeping note of the order for future
+reference.
 
-The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
+Each scene has a GUI. It gives an interface with canvas controls and a Teachpanel.
 The same functionality can be done in code as will be mentioned.
 
 3D options:
@@ -94,9 +88,94 @@ The same functionality can be done in code as will be mentioned.
  * Toggle grid dynamic/static positioning
 
 2D options:
- * TBA
+ * Toggle grid visibility
+ * Toggle camera lock
+ * Toggle grid dynamic/static positioning
 
-\
+
+## Closing The Backend
+You can restart VPython to the initial state of "launch" through `reset`. There is no way to close and reopen a new
+session. Thus, `restart` simply calls `reset`. To end the session, simply execute `close`.
+```python
+# Put VPython back to the state defined by "launch"
+env.reset()
+
+# Restart does the same as reset()
+env.restart()
+
+# Close the session
+env.close()
+```
+
+## Using Robots in VPython
+To add a robot to the scene, you require a `Robot` object.
+There must also be a scene loaded through `launch`.
+Robots can be added to any scene.
+`add` takes in a scene number (0-indexed, a name for the robot, and a `Robot` object.
+```python
+# Add a Puma560 robot to the default scene
+from roboticstoolbox.models.DH.Puma560 import Puma560
+puma = Puma560()
+env.add(0, 'Puma560', puma)
+```
+
+Robots can also be removed from a scene. Through a similar procedure, they can be removed given a `Robot` object and a
+figure (defaults to 0) to delete from. `VPython.GraphicalRobot` is also accepted in lue of a `Robot`. `GraphicalRobot`s
+can be obtained through the `env.robots` list. 
+```python
+# Remove the Puma560 robot from scene 0
+env.remove(puma, 0)
+```
+
+The `step` function will update a specific robots pose given a set of joint angles.
+The function accepts a `Robot`. The joint angles and figure number are optional.
+If no joint angles given, it will default to the joint angles internally in the `Robot`. Figure number defaults to 0.
+```python
+# Set the pose of the Puma560 to the "ready" position
+env.step(puma, puma.qr, 0)
+```
+&nbsp;
+
+&nbsp;
+________________________________________________________________________________________________________________________
+
+The following section is not required to know to use the VPython backend in the toolbox. This is documentation for how
+to use VPython outside of the backend.
+________________________________________________________________________________________________________________________
+# VPython Documentation
+## Common Functionality
+VPython has its own data types that can be used. Firstly, the `radians()`, and `degrees()` functions convert between
+radians and degrees.
+The `vector` class is also very crucial to the graphics. It can either represent a vector or a 3D point.
+
+For convenience, some functions and variables are provided for easy use. `wrap_to_pi()` takes in an angle, and
+specification on degrees or radians. It returns the respective angle between -pi and pi.
+Three vectors are also supplied for readability to ensure correct axes are used when referencing. `x_axis_vector`,
+`y_axis_vector`, `z_axis_vector` can be used to get vectors of an object, for example.
+```python
+# Wrap an angle (deg) to the range [-pi pi]. use "rad" instead of "deg" for radian angles.
+gph.wrap_to_pi("deg", 450)
+# Obtain the Z vector representation of the robot link
+my_link.get_axis_vector(z_axis_vector)
+```
+
+## Setting up the scene
+To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
+Different attributes can be supplied to the function for some customisation. The display width, height, title, and
+caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
+
+Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
+capabilities). The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
+```python
+# Create a default canvas (500*888, with grid displayed, no title or caption)
+g_canvas = GraphicalCanvas3D()
+g_canvas = GraphicalCanvas2D()
+
+# Alternatively create a grid with specified parameters
+g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+```
+
 The GraphicsGrid object has functions to toggle grid visibility.
 ```python
 # Turn off the grid display
@@ -104,9 +183,9 @@ g_canvas.grid_visibility(False)
 ```
 Now that the scene is created, a robot must be created to be displayed.
 
-At anytime you can clear the scene of all robots (The grid will remain if visible). Note: This will note delete the objects,
-they still exist, and can be rendered visible afterwards. However, overwriting/deleting the variables will free the memory.
-If an object is overwritten/deleted while still visible, the objects will remain in the scene.
+At anytime you can clear the scene of all robots (The grid will remain if visible). Note: This will note delete the
+objects, they still exist, and can be rendered visible afterwards. However, overwriting/deleting the variables will
+free the memory. If an object is overwritten/deleted while still visible, the objects will remain in the scene.
 
 Isolated joint objects will not be cleared. Only robots in the scene.
 ```python
@@ -115,29 +194,31 @@ g_canvas.clear_scene()
 
 # 3D Functionality
 ## Creating Robots
-If you want to use the example puma560 robot, simply call the creation function that will return a `GraphicalRobot` object.
+If you want to use the example puma560 robot, simply add the `Robot` to the scene.
 It will be displayed in the scene that is provided.
 ```python
-# Import the puma560 models and return a GraphicalRobot object
-from roboticstoolbox.models.graphical_puma560 import import_puma_560
-puma560 = import_puma_560(g_canvas)
+# Add the Puma560 to the scene
+from roboticstoolbox.models.DH.Puma560 import Puma560
+puma = Puma560()
+g_canvas.add_robot(puma)
 ```
 Otherwise, robots can be manually created using the `GraphicalRobot` class.
 The joints for the robot can be manually or automatically created.
 Creation takes in the canvas object to be displayed in, as well as a name for the robot.
 
-The `GraphicalRobot` optionally takes in a `SerialLink` object. If given in the initialiser, no joints have
-to be made, they are automatically created. The name clause is also overridden by the name specified in the SerialLink object.
+The `GraphicalRobot` optionally takes in a `Robot` object. If given in the initialiser, no joints have to be made,
+they are automatically created. The name clause is also overridden by the name specified in the Robot object.
 
 Firstly, create a `GraphicalRobot` object
 ```python
 # Create an empty robot
-my_robot = gph.GraphicalRobot(g_canvas, 'My Robot')
+my_robot = GraphicalRobot(g_canvas, 'My Robot')
 
 # Create a robot based on a SerialLink object.
-my_robot = gph.GraphicalRobot(g_canvas, '', seriallink=serial_link_obj)
+my_robot = GraphicalRobot(g_canvas, '', seriallink=serial_link_obj)
 ```
-Now we can add joints. The joints added to the robot act like a stack. First joints added will be last to be removed (if called to).
+Now we can add joints. The joints added to the robot act like a stack. First joints added will be last to be removed
+(if called to).
 
 ### Automatically
 If you wish to automatically add joints, use `append_link()`. Add the joints from base to gripper.
