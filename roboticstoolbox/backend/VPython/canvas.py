@@ -1395,3 +1395,7 @@ def draw_reference_frame_axes(se3_pose, scene):
     frame_ref.up = y_axis
 
     return frame_ref
+
+
+def take_screenshot(g_canvas):
+    g_canvas.scene.capture("test")
