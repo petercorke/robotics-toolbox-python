@@ -211,7 +211,7 @@ class RobotPlot(object):
         # Plot the robot links
         self.links = self.ax.plot(
             loc[0, :], loc[1, :], loc[2, :], linewidth=5, color='#E16F6D')
-  # noqa  # noqa
+
     def init2(self):
 
         self.drawn = True

@@ -59,27 +59,31 @@ class ERobot(Robot):
         super().__init__(elinks, **kwargs)
 
         self._ets = []
+        self._elinks = {}
         self._n = 0
         self._M = 0
         self._q_idx = []
+
+        # Verify elinks
+        if not isinstance(elinks, list):
+            raise TypeError('The links must be stored in a list.')
 
         # Set up a dictionary for looking up links by name
         for link in elinks:
             if isinstance(link, ELink):
                 self._M += 1
+                self._elinks[link.name] = link
             else:
                 raise TypeError("Input can be only ELink")
 
         # Set up references between links, a bi-directional linked list
         # Also find the top of the tree
-        self.root = []
         self.end = []
         for link in elinks:
-            for li in link.parent:
-                li._child.append(link)
-
-            if len(link.parent) == 0:
-                self.root.append(link)
+            if link.parent is None:
+                self.root = link
+            else:
+                link.parent._child.append(link)
 
         # Find the bottom of the tree
         for link in elinks:

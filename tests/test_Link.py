@@ -135,7 +135,7 @@ class TestDHLink(unittest.TestCase):
         l0 = rp.DHLink()
 
         self.assertEqual(l0.m, 0.0)
-        nt.assert_array_almost_equal(l0.r, np.zeros((3, 1)))
+        nt.assert_array_almost_equal(l0.r, np.zeros(3))
         self.assertEqual(l0.Jm, 0.0)
 
     def test_str(self):
@@ -156,7 +156,7 @@ class TestDHLink(unittest.TestCase):
         puma = rp.models.DH.Puma560()
 
         s0 = puma.links[0].dyn()
-        
+
         self.assertEqual(
             s0,
             r"""m     =         0 
