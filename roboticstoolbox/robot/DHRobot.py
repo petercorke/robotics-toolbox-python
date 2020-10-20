@@ -60,30 +60,28 @@ class DHRobot(Robot, Dynamics):
             L,
             **kwargs):
 
-        super().__init__(L, **kwargs)
-
         # Verify L
         if not isinstance(L, list):
             raise TypeError('The links L must be stored in a list.')
 
-        length = len(L)
-        self._links = []
+        links = []
         self._n = 0
 
-        for i in range(length):
+        for i in range(len(L)):
             if isinstance(L[i], DHLink):
-                self._links.append(L[i])
+                links.append(L[i])
                 self._n += 1
                 L[i].id = self._n
 
             elif isinstance(L[i], DHRobot):
                 for j in range(L[i].n):
-                    self._links.append(L[i].links[j])
+                    links.append(L[i].links[j])
                     self._n += 1
                     L[i].id = self._n
-
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
+
+        super().__init__(links, **kwargs)
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -704,7 +702,7 @@ class DHRobot(Robot, Dynamics):
             Tj = SE3()
         first = True
         Tall = Tj
-        print(Tj)
+        # print(Tj)
         for q, L in zip(qr, self.links):
             if first:
                 print(q, L.A(q))
@@ -2322,7 +2320,7 @@ class DHRobot(Robot, Dynamics):
             J = robot.jacob0(q)
 
             if np.linalg.matrix_rank(J) < 6:
-                return 0, np.zeros((dof, dof))
+                return 0
 
             Ji = np.linalg.pinv(J)
             M = robot.inertia(q)
@@ -2361,15 +2359,14 @@ class DHRobot(Robot, Dynamics):
 
         elif method == 'asada':
             dof = np.sum(axes)
-            mx = np.zeros((dof, dof, trajn))
 
             for i in range(trajn):
-                w[i], mx[:, :, i] = asada(self, q[i, :], axes, dof)
+                w[i] = asada(self, q[i, :], axes, dof)
 
             if trajn == 1:
-                return w[0], mx[:, :, 0]
+                return w[0]
             else:
-                return w, mx
+                return w
 
         else:
             raise ValueError(
