@@ -45,43 +45,43 @@ class TestVPython(unittest.TestCase):
             time.sleep(1)
 
     #####################################################################
-    # def test_get_pose_x_vector(self):
-    #     self.assertEqual(get_pose_x_vec(self.se3), vector(1, 0, 0))
+    def test_get_pose_x_vector(self):
+        self.assertEqual(get_pose_x_vec(self.se3), vector(1, 0, 0))
 
-    # def test_get_pose_y_vector(self):
-    #     self.assertEqual(get_pose_y_vec(self.se3), vector(0, 1, 0))
+    def test_get_pose_y_vector(self):
+        self.assertEqual(get_pose_y_vec(self.se3), vector(0, 1, 0))
 
-    # def test_get_pose_z_vector(self):
-    #     self.assertEqual(get_pose_z_vec(self.se3), vector(0, 0, 1))
+    def test_get_pose_z_vector(self):
+        self.assertEqual(get_pose_z_vec(self.se3), vector(0, 0, 1))
 
-    # def test_get_pose_pos(self):
-    #     self.assertEqual(get_pose_pos(self.se3), vector(3, 0, 0))
+    def test_get_pose_pos(self):
+        self.assertEqual(get_pose_pos(self.se3), vector(3, 0, 0))
 
-    # def test_vpython_to_se3(self):
-    #     # Create a scene
-    #     scene = GraphicsCanvas3D(title="TEST VPYTHON TO SE3")
+    def test_vpython_to_se3(self):
+        # Create a scene
+        scene = GraphicsCanvas3D(title="TEST VPYTHON TO SE3")
 
-    #     # Create a basic entity
-    #     # pos = 1, 2, 3
-    #     # X = 0, 0, -1
-    #     # Y = -1, 0, 0
-    #     # Z = 0, 1, 0
-    #     entity = box(
-    #         pos=vector(1, 2, 3),
-    #         axis=vector(0, 0, -1),
-    #         up=vector(-1, 0, 0)
-    #     )
-    #     scene.scene.waitfor("draw_complete")
+        # Create a basic entity
+        # pos = 1, 2, 3
+        # X = 0, 0, -1
+        # Y = -1, 0, 0
+        # Z = 0, 1, 0
+        entity = box(
+            pos=vector(1, 2, 3),
+            axis=vector(0, 0, -1),
+            up=vector(-1, 0, 0)
+        )
+        scene.scene.waitfor("draw_complete")
 
-    #     # Check resulting SE3
-    #     arr = array([
-    #         [0, -1, 0, 1],
-    #         [0, 0, 1, 2],
-    #         [-1, 0, 0, 3],
-    #         [0, 0, 0, 1]
-    #     ])
-    #     expected = SE3(arr)
-    #     self.assertEqual(vpython_to_se3(entity), expected)
+        # Check resulting SE3
+        arr = array([
+            [0, -1, 0, 1],
+            [0, 0, 1, 2],
+            [-1, 0, 0, 3],
+            [0, 0, 0, 1]
+        ])
+        expected = SE3(arr)
+        self.assertEqual(vpython_to_se3(entity), expected)
 
     # def test_wrap_to_pi(self):
     #     tests = [

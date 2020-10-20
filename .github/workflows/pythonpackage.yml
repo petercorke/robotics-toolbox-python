@@ -27,7 +27,6 @@ jobs:
     - name: Test with pytest
       run: |
         pip install .[dev,vpython]
-        pip install pytest-xvfb
         pip install pytest-timeout
         pytest --timeout=20 --timeout_method thread
   codecov:
