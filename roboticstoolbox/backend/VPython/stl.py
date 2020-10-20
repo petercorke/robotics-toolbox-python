@@ -5,9 +5,9 @@
 
 from vpython import vec, vertex, color, triangle, compound
 from roboticstoolbox.backend.VPython.common_functions import *
-from contextlib import redirect_stdlog
-with redirect_stdlog(None):
-    from stl import mesh
+from roboticstoolbox.tools.stdout_supress import stdout_supress
+# with stdout_supress():
+from stl import mesh
 
 
 def import_object_from_numpy_stl(filename, scene):

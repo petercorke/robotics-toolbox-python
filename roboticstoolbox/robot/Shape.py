@@ -6,13 +6,14 @@
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from spatialmath.base import r2q
+from roboticstoolbox.tools.stdout_supress import stdout_supress
 import numpy as np
 import os
 
 try:
-    from contextlib import redirect_stdlog
-    with redirect_stdlog(None):
+    with stdout_supress():
         import pybullet as p
+
     cid = p.connect(p.SHARED_MEMORY)
     if (cid < 0):
         p.connect(p.DIRECT)
