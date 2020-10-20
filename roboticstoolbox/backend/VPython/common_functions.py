@@ -134,8 +134,10 @@ def close_localhost_session(canvas):
         class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas3D`,
         class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas2D`
     """
+
     canvas.scene.append_to_caption('''
         <script type="text/javascript">
             close();
         </script>
         ''')
+
