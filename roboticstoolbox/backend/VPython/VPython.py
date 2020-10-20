@@ -6,11 +6,14 @@
 from roboticstoolbox.backend.Connector import Connector
 
 from roboticstoolbox.robot.DHLink import DHLink
-import roboticstoolbox.robot.Robot as r
+from roboticstoolbox.robot.Robot import Robot as r
 
-from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, GraphicsCanvas2D
-from roboticstoolbox.backend.VPython.graphicalrobot import GraphicalRobot
-from roboticstoolbox.backend.VPython.common_functions import close_localhost_session
+from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, \
+    GraphicsCanvas2D
+from roboticstoolbox.backend.VPython.graphicalrobot import \
+    GraphicalRobot
+from roboticstoolbox.backend.VPython.common_functions import \
+    close_localhost_session
 
 
 class VPython(Connector):
