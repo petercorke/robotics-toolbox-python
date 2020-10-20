@@ -5,6 +5,8 @@
 
 from vpython import vec, vertex, color, triangle, compound
 from roboticstoolbox.backend.VPython.common_functions import *
+from roboticstoolbox.tools.stdout_supress import stdout_supress
+# with stdout_supress():
 from stl import mesh
 
 

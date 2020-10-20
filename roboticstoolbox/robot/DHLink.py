@@ -3,12 +3,10 @@
 @author: Jesse Haviland
 """
 
-
-
 import copy
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix, \
+from spatialmath.base.argcheck import getvector, \
     isscalar, isvector, ismatrix
 import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link
@@ -16,7 +14,7 @@ from functools import wraps
 
 _eps = np.finfo(np.float64).eps
 
-# ---------------------------------------------------------------------------------------#
+# --------------------------------------------------------------#
 
 try:  # pragma: no cover
     # print('Using SymPy')
@@ -28,11 +26,13 @@ except ImportError:
     def _issymbol(x):  # pylint: disable=unused-argument
         return False
 
+
 def _cos(theta):
     if _issymbol(theta):
         return sym.cos(theta)
     else:
         return np.cos(theta)
+
 
 def _sin(theta):
     if _issymbol(theta):
@@ -40,7 +40,8 @@ def _sin(theta):
     else:
         return np.sin(theta)
 
-# ---------------------------------------------------------------------------------------#
+# --------------------------------------------------------------#
+
 
 class DHLink(Link):
     """
@@ -110,7 +111,7 @@ class DHLink(Link):
 
         # TODO
         #  probably should make DHLink(link) return a copy
-        #  probably should enforce keyword arguments, easy to make an 
+        #  probably should enforce keyword arguments, easy to make an
         #    error with positional args
         super().__init__(**kwargs)
         self._robot = None
@@ -137,7 +138,6 @@ class DHLink(Link):
         self.Tc = Tc
         self.G = G
 
-
     def __add__(self, L):
         if isinstance(L, DHLink):
             return rp.DHRobot([self, L])
@@ -153,11 +153,11 @@ class DHLink(Link):
 
             return rp.DHRobot(
                 nlinks,
-                name = L.name,
-                manufacturer = L.manufacturer,
-                base = L.base,
-                tool = L.tool,
-                gravity = L.gravity)
+                name=L.name,
+                manufacturer=L.manufacturer,
+                base=L.base,
+                tool=L.tool,
+                gravity=L.gravity)
 
         else:
             raise TypeError("Cannot add a Link with a non Link object")
@@ -312,7 +312,7 @@ class DHLink(Link):
     @_listen_dyn
     def I(self, I_new):  # noqa
 
-        if ismatrix(I_new, (3,3)):
+        if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
             if np.any(np.abs(I_new - I_new.T) > 1e-8):
                 raise ValueError('3x3 matrix is not symmetric')
@@ -324,7 +324,8 @@ class DHLink(Link):
                 raise ValueError('3x3 matrix is not symmetric')
 
         elif isvector(I_new, 6):
-            # 6-vector passed, moments and products of inertia, [Ixx Iyy Izz Ixy Iyz Ixz]
+            # 6-vector passed, moments and products of inertia,
+            # [Ixx Iyy Izz Ixy Iyz Ixz]
             I_new = np.array([
                 [I_new[0], I_new[3], I_new[5]],
                 [I_new[3], I_new[1], I_new[4]],
@@ -436,9 +437,10 @@ class DHLink(Link):
                 self.qlim[0], self.qlim[1]
             )
 
-        if indent >0:
+        if indent > 0:
             # insert indentations into the string
-            # TODO there is probably a tidier way to integrate this step with above
+            # TODO there is probably a tidier way to integrate this step with
+            # above
             sp = ' ' * indent
             s = sp + s.replace('\n', '\n' + sp)
 
@@ -549,12 +551,12 @@ class DHLink(Link):
 
     def nofriction(self, coulomb=True, viscous=False):
         """
-        ``l2 = nofriction(coulomb, viscous)`` copies the link and returns a link
-        with the same parameters except, the Coulomb and/or viscous friction
-        parameter to zero.
+        ``l2 = nofriction(coulomb, viscous)`` copies the link and returns a
+        link with the same parameters except, the Coulomb and/or viscous
+        friction parameter to zero.
 
-        ``l2 = nofriction()`` as above except the the Coulomb parameter is set to
-        zero.
+        ``l2 = nofriction()`` as above except the the Coulomb parameter is set
+        to zero.
 
         :param coulomb: if True, will set the Coulomb friction to 0
         :type coulomb: bool
@@ -618,6 +620,7 @@ class DHLink(Link):
 
         return tau
 
+
 class RevoluteDH(DHLink):
     r"""
     Class for revolute links using standard DH convention
@@ -662,8 +665,8 @@ class RevoluteDH(DHLink):
     The link transform is
 
     .. math::
-    
-        \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)
+
+        \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)  # noqa
 
     where :math:`q_i` is the joint variable.
 
@@ -689,8 +692,9 @@ class RevoluteDH(DHLink):
         mdh = False
 
         super().__init__(
-            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh, 
+            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh,
             offset=offset, qlim=qlim, flip=flip, **kwargs)
+
 
 class PrismaticDH(DHLink):
     r"""
@@ -738,8 +742,8 @@ class PrismaticDH(DHLink):
     The link transform is
 
     .. math::
-    
-        \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)
+
+        \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)  # noqa
 
     where :math:`q_i` is the joint variable.
 
@@ -765,8 +769,9 @@ class PrismaticDH(DHLink):
         mdh = False
 
         super().__init__(
-            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh, 
+            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh,
             offset=offset, qlim=qlim, flip=flip, **kwargs)
+
 
 class RevoluteMDH(DHLink):
     r"""
@@ -812,8 +817,8 @@ class RevoluteMDH(DHLink):
     The link transform is
 
     .. math::
-    
-        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) 
+
+        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i)  # noqa
 
     where :math:`q_i` is the joint variable.
 
@@ -839,8 +844,9 @@ class RevoluteMDH(DHLink):
         mdh = True
 
         super().__init__(
-            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh, 
+            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh,
             offset=offset, qlim=qlim, flip=flip, **kwargs)
+
 
 class PrismaticMDH(DHLink):
     r"""
@@ -886,10 +892,10 @@ class PrismaticMDH(DHLink):
     parameters, motor and transmission parameters.
 
     The link transform is
-    
+
     .. math::
-    
-        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}}
+
+        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}}  # noqa
 
     where :math:`q_i` is the joint variable.
 
@@ -915,5 +921,5 @@ class PrismaticMDH(DHLink):
         mdh = True
 
         super().__init__(
-            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh, 
+            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh,
             offset=offset, qlim=qlim, flip=flip, **kwargs)

@@ -14,9 +14,10 @@ import copy
 from collections import namedtuple
 import numpy as np
 from spatialmath.base import \
-    getvector, verifymatrix, isscalar, removesmall, getmatrix, t2r, r2t
+    getvector, verifymatrix, isscalar, getmatrix, t2r
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
+
 
 class Dynamics:
 
@@ -1090,7 +1091,9 @@ class Dynamics:
 
         return r2
 
-    def rne_python(self, Q, QD=None, QDD=None, grav=None, fext=None, debug=False, basewrench=False):
+    def rne_python(
+            self, Q, QD=None, QDD=None,
+            grav=None, fext=None, debug=False, basewrench=False):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
@@ -1111,12 +1114,13 @@ class Dynamics:
 
         Recursive Newton-Euler for standard Denavit-Hartenberg notation.
 
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is the
-        number of robot joints.  The result has shape (n,).
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (m,n) where n is the
-        number of robot joints and where m is the number of steps in the joint
+        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n
+            is the number of robot joints.  The result has shape (n,).
+        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (m,n) where n
+            is the number of robot joints and where m is the number of steps in
+            the joint
         trajectory.  The result has shape (m,n).
-        - ``rne_dh(p)`` where the input is a 1D array ``p`` = [q, qd, qdd] with 
+        - ``rne_dh(p)`` where the input is a 1D array ``p`` = [q, qd, qdd] with
         shape (3n,), and the result has shape (n,).
         - ``rne_dh(p)`` where the input is a 2D array ``p`` = [q, qd, qdd] with
         shape (m,3n) and the result has shape (m,n).
@@ -1172,7 +1176,7 @@ class Dynamics:
 
         tau = np.zeros((nk, n), dtype=dtype)
         if basewrench:
-            wbase = np.zeros((nk,n), dtype=dtype)
+            wbase = np.zeros((nk, n), dtype=dtype)
 
         for k in range(nk):
             # take the k'th row of data
@@ -1188,22 +1192,24 @@ class Dynamics:
 
             # joint vector quantities stored columwise in matrix
             #  m suffix for matrix
-            Fm = np.zeros((3,n), dtype=dtype)
-            Nm = np.zeros((3,n), dtype=dtype)
+            Fm = np.zeros((3, n), dtype=dtype)
+            Nm = np.zeros((3, n), dtype=dtype)
             # if robot.issym
             #     pstarm = sym([]);
             # else
             #     pstarm = [];
-            pstarm = np.zeros((3,n), dtype=dtype)
+            pstarm = np.zeros((3, n), dtype=dtype)
             Rm = []
-            
+
             # rotate base velocity and acceleration into L1 frame
             Rb = t2r(self.base.A).T
-            w = Rb @ np.zeros((3,), dtype=dtype)   # base has zero angular velocity
-            wd = Rb @ np.zeros((3,), dtype=dtype)  # base has zero angular acceleration
+            # base has zero angular velocity
+            w = Rb @ np.zeros((3,), dtype=dtype)
+            # base has zero angular acceleration
+            wd = Rb @ np.zeros((3,), dtype=dtype)
             vd = Rb @ grav
 
-            # ----------------  initialize some variables -------------------- #
+            # ----------------  initialize some variables ----------------- #
 
             for j in range(n):
                 link = self.links[j]
@@ -1218,28 +1224,30 @@ class Dynamics:
                     Tj = link.A(link.theta).A
                     d = q_k[j]
 
-                # compute pstar: 
+                # compute pstar:
                 #   O_{j-1} to O_j in {j}, negative inverse of link xform
                 alpha = link.alpha
                 if self.mdh:
-                    pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
+                    pstar = np.r_[
+                        link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
                     if j == 0:
                         if self._base:
                             Tj = self._base.A @ Tj
                             pstar = self._base.A @ pstar
                 else:
-                    pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
+                    pstar = np.r_[
+                        link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
 
                 # stash them for later
                 Rm.append(t2r(Tj))
-                pstarm[:,j] = pstar
+                pstarm[:, j] = pstar
 
-            # -----------------  the forward recursion ----------------------- #
+            # -----------------  the forward recursion -------------------- #
 
             for j, link in enumerate(self.links):
 
                 Rt = Rm[j].T    # transpose!!
-                pstar = pstarm[:,j]
+                pstar = pstarm[:, j]
                 r = link.r
 
                 # statement order is important here
@@ -1249,21 +1257,22 @@ class Dynamics:
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
                         wd_ = Rt @ wd \
-                              + z0 * qdd_k[j] \
-                              + _cross(Rt @ w, z0 * qd_k[j])
+                            + z0 * qdd_k[j] \
+                            + _cross(Rt @ w, z0 * qd_k[j])
                         vd_ = Rt @ _cross(wd, pstar) \
-                              + _cross(w, _cross(w, pstar)) \
-                              + vd
+                            + _cross(w, _cross(w, pstar)) \
+                            + vd
                     else:
                         # prismatic axis
                         w_ = Rt @ w
                         wd_ = Rt @ wd
-                        vd_ = Rt @ (_cross(wd, pstar) \
-                                    +  _cross(w, _cross(w, pstar)) \
-                                    + vd \
-                                    ) \
-                              + 2 * _cross(Rt @ w, z0 * qd_k[j]) \
-                              + z0 * qdd_k[j]
+                        vd_ = Rt @ (
+                            _cross(wd, pstar)
+                            + _cross(w, _cross(w, pstar))
+                            + vd
+                            ) \
+                            + 2 * _cross(Rt @ w, z0 * qd_k[j]) \
+                            + z0 * qdd_k[j]
                     # trailing underscore means new value, update here
                     w = w_
                     wd = wd_
@@ -1271,7 +1280,8 @@ class Dynamics:
                 else:
                     if link.isrevolute():
                         # revolute axis
-                        wd = Rt @ (wd + z0 * qdd_k[j] \
+                        wd = Rt @ (
+                            wd + z0 * qdd_k[j]
                             + _cross(w, z0 * qd_k[j]))
                         w = Rt @ (w + z0 * qd_k[j])
                         vd = _cross(wd, pstar) \
@@ -1287,10 +1297,10 @@ class Dynamics:
                             + _cross(w, _cross(w, pstar))
 
                 vhat = _cross(wd, r) \
-                       + _cross(w, _cross(w, r)) \
-                       + vd
-                Fm[:,j] = link.m * vhat
-                Nm[:,j] = link.I @ wd + _cross(w, link.I @ w)
+                    + _cross(w, _cross(w, r)) \
+                    + vd
+                Fm[:, j] = link.m * vhat
+                Nm[:, j] = link.I @ wd + _cross(w, link.I @ w)
 
                 if debug:
                     print('w:     ', removesmall(w))
@@ -1303,7 +1313,7 @@ class Dynamics:
                 print('Fm\n', Fm)
                 print('Nm\n', Nm)
 
-            # -----------------  the backward recursion ----------------------- #
+            # -----------------  the backward recursion -------------------- #
 
             f = fext[:3]      # force/moments on end of arm
             nn = fext[3:]
@@ -1322,27 +1332,27 @@ class Dynamics:
                         pstar = np.zeros((3,), dtype=dtype)
                     else:
                         R = Rm[j + 1]
-                        pstar = pstarm[:,j + 1]
+                        pstar = pstarm[:, j + 1]
 
-                    f_ = R @ f + Fm[:,j]
+                    f_ = R @ f + Fm[:, j]
                     nn_ = R @ nn \
-                          + _cross(pstar, R @ f) \
-                          + _cross(pstar, Fm[:,j]) \
-                          + Nm[:,j]
+                        + _cross(pstar, R @ f) \
+                        + _cross(pstar, Fm[:, j]) \
+                        + Nm[:, j]
                     f = f_
                     nn = nn_
 
                 else:
-                    pstar = pstarm[:,j]
+                    pstar = pstarm[:, j]
                     if j == (n - 1):
                         R = np.eye(3, dtype=dtype)
                     else:
                         R = Rm[j + 1]
 
                     nn = R @ (nn + _cross(R.T @ pstar, f)) \
-                        + _cross(pstar + r, Fm[:,j]) \
-                        + Nm[:,j]
-                    f = R @ f + Fm[:,j]
+                        + _cross(pstar + r, Fm[:, j]) \
+                        + Nm[:, j]
+                    f = R @ f + Fm[:, j]
 
                 if debug:
                     print('f: ', removesmall(f))
@@ -1363,14 +1373,14 @@ class Dynamics:
                     else:
                         # prismatic
                         t = f @ (R.T @ z0)
-                
+
                 # add joint inertia and friction
                 #  no Coulomb friction if model is symbolic
                 tau[k, j] = t \
-                            + link.G ** 2 * link.Jm * qdd_k[j] \
-                            - link.friction(qd_k[j], coulomb=not self.symbolic)
+                    + link.G ** 2 * link.Jm * qdd_k[j] \
+                    - link.friction(qd_k[j], coulomb=not self.symbolic)
                 if debug:
-                    print(f'j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}')
+                    print(f'j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}')  # noqa
                     print()
 
             # compute the base wrench and save it
@@ -1378,12 +1388,12 @@ class Dynamics:
                 R = Rm[0]
                 nn = R @ nn
                 f = R @ f
-                wbase[k,:] = np.r_[f, nn]
+                wbase[k, :] = np.r_[f, nn]
 
         if self.symbolic:
             # simplify symbolic expressions
             print('start symbolic simplification, this might take a while...')
-            from sympy import trigsimp
+            # from sympy import trigsimp
 
             # tau = trigsimp(tau)
             # consider using multiprocessing to spread over cores
@@ -1409,17 +1419,21 @@ def _printProgressBar(
     bar = fill * filledLength + '-' * (length - filledLength)
     print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
 
+
 def _cross(a, b):
-    return np.r_[ a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+    return np.r_[
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]]
 
 
 if __name__ == "__main__":
 
     import roboticstoolbox as rtb
-    from spatialmath.base import symbolic as sym
+    # from spatialmath.base import symbolic as sym
 
     puma = rtb.models.DH.Puma560()
-    
+
     # for j, link in enumerate(puma):
     #     print(f'joint {j:}::')
     #     print(link.dyn(indent=4))

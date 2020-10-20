@@ -11,6 +11,11 @@ req = [
     'matplotlib'
 ]
 
+vp_req = [
+    'vpython',
+    'numpy-stl'
+]
+
 dev_req = [
     'pytest',
     'pytest-cov',
@@ -84,5 +89,6 @@ setup(
     extras_require={
         'dev': dev_req,
         'docs': docs_req,
+        'vpython': vp_req
     }
 )

@@ -9,7 +9,10 @@ from spatialmath import SE2
 from spatialmath.base import getvector
 
 # TODO, nicer if jtype was 'R' 'P' or None
-# TODO, should this class be called ET2?  Typically would be used exclusively to ET
+# TODO, should this class be called ET2?  Typically would be used exclusively
+# to ET
+
+
 class ET(UserList):
     """
     This class implements a single elementary transform (ET)
@@ -110,7 +113,11 @@ class ET(UserList):
         A string comprising the characters 'R' or 'P' which indicate the types
         of joints in order from root to tip.
         """
-        return ''.join(['R' if self.data[i].axis[0] == 'R' else 'P' for i in self.joints()])
+        return ''.join(
+            [
+                'R' if self.data[i].axis[0] == 'R' else 'P'
+                for i in self.joints()
+            ])
 
     def eval(self, q):
         """
@@ -122,7 +129,7 @@ class ET(UserList):
         :rtype: SE2
 
         Effectively the forward-kinematics of the ET sequence.  Compounds the
-        transforms left to right, and substitutes in joint coordinates as 
+        transforms left to right, and substitutes in joint coordinates as
         needed from consecutive elements of ``q``.
         """
         T = SE2()
@@ -248,10 +255,10 @@ class ET(UserList):
         """
         return cls(lambda y: SE2(0, y), axis='ty', eta=eta)
 
+
 if __name__ == "__main__":
     from math import pi
 
     e = ET.tx(1) * ET.r() * ET.ty(2) * ET.r(pi / 2)
     print(e.joints())
     print(e.eval([0]))
-

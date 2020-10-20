@@ -1,11 +1,11 @@
 import numpy as np
-import roboticstoolbox as rtb
+# import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.backend import URDF
-from roboticstoolbox.backend import xacro
-from pathlib import PurePath, PurePosixPath, Path
+# from roboticstoolbox.backend import URDF
+# from roboticstoolbox.backend import xacro
+from pathlib import PurePath, PurePosixPath
 import sys
 
 
@@ -66,7 +66,8 @@ class Robot:
         #     self.basemesh = [data[0][0], data[1][0], data[2][0]]
         #     # Save the respective meshes to each link
         #     for idx in range(1, self.n+1):
-        #         self._links[idx-1].mesh = [data[0][idx], data[1][idx], data[2][idx]]
+        #         self._links[idx-1].mesh = [data[0][idx], data[1][idx],
+        #         data[2][idx]]
         # else:
         #     self.basemesh = None
 
@@ -157,7 +158,8 @@ class Robot:
     def tool(self, T):
         # if not isinstance(T, SE3):
         #     T = SE3(T)
-        # this is allowed to be none, it's helpful for symbolics rather than having an identity matrix
+        # this is allowed to be none, it's helpful for symbolics rather than
+        # having an identity matrix
         if T is None or isinstance(T, SE3):
             self._tool = T
         elif SE3.isvalid(T):
