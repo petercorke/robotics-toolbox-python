@@ -27,7 +27,9 @@ jobs:
     - name: Test with pytest
       run: |
         pip install .[dev,vpython]
-        pytest
+        pip install pytest-xvfb
+        pip install pytest-timeout
+        pytest --timeout=20 --timeout_method thread
   codecov:
     # If all tests pass:
     # Run coverage and upload to codecov
