@@ -93,6 +93,8 @@ class GraphicsCanvas3D:
         self.__grid_visibility = grid
         self.__camera_lock = False
         self.__grid_relative = True
+        # Screen Shot tally
+        self._ss_tally = 0
 
         # Create the UI
         self.__ui_mode = UImode.CANVASCONTROL
@@ -114,6 +116,7 @@ class GraphicsCanvas3D:
         self.__idx_sld_opc = 7  # Opacity Slider
         self.__idx_btn_del = 8  # Delete button
         self.__idx_btn_clr = 9  # Clear button
+        self.__idx_btn_ss = 10
 
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
@@ -456,6 +459,9 @@ class GraphicsCanvas3D:
         btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
         self.scene.append_to_caption('\t')
 
+        btn_ss = button(bind=self.__screenshot, text="Take Screenshot")
+        self.scene.append_to_caption('\n')
+
         chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
         self.scene.append_to_caption('\t')
 
@@ -528,7 +534,7 @@ class GraphicsCanvas3D:
         self.scene.append_to_caption(controls_str)
 
         return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
-                btn_clr]
+                btn_clr, btn_ss]
 
     def __setup_joint_sliders(self):
         """
@@ -703,6 +709,14 @@ class GraphicsCanvas3D:
                 continue
             string = "{:.2f} rad ({:.2f} deg)".format(joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
             joint[self.__idx_text].text = string
+
+    def __screenshot(self, b):
+        """
+        Take a screencap
+        """
+        filename = "vp_ss_{:04d}.png".format(self._ss_tally)
+        self.take_screenshot(filename)
+        self._ss_tally += 1
 
 
 class GraphicsCanvas2D:
