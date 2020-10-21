@@ -1,3 +1,5 @@
+# Robotics Toolbox for Python
+
 ![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
 <!---
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
@@ -11,7 +13,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-# Robotics Toolbox for Python
+
 
 <table style="border:0px">
 <tr style="border:0px">
@@ -31,7 +33,7 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 
 ## Synopsis
 
-This toolbox brings robotics specific functionality to Python, and leverages the advantages of Python such as portability, ubiquity and support, and the capability of the Python ecosystem for linear algebra (numpy, scipy),  graphics (matplotlib, three.js), interactive development (jupyter, jupyterlab), documentation (sphinx).
+This toolbox brings robotics specific functionality to Python, and leverages the Python's advantages of portability, ubiquity and support, and the capability of the open-source ecosystem for linear algebra (numpy, scipy),  graphics (matplotlib, three.js, WebGL), interactive development (jupyter, jupyterlab, mybinder.org), and documentation (sphinx).
 
 The Toolbox provides tools for representing the kinematics and dynamics of serial-link manipulators  - you can create your own in Denavit-Hartenberg form, import a URDF file, or use supplied models for well known robots from Franka-Emika, Kinova, Universal Robotics, Rethink as well as classical robots such as the Puma 560 and the Stanford arm.
 
@@ -41,7 +43,7 @@ The Toolbox provides:
 
   * code that is mature and provides a point of comparison for other implementations of the same algorithms;
   * routines which are generally written in a straightforward manner which allows for easy understanding, perhaps at the expense of computational efficiency.
-  * source code which can read understanding and teaching.
+  * source code which can be read for learning and teaching.
   
 ## Code Example
 
