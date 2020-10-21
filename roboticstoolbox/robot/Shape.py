@@ -6,7 +6,7 @@
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from spatialmath.base import r2q
-from roboticstoolbox.tools.stdout_supress import stdout_supress
+# from roboticstoolbox.tools.stdout_supress import stdout_supress
 import numpy as np
 import os
 
