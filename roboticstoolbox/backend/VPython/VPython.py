@@ -3,6 +3,11 @@
 @author Micah Huth
 """
 
+import threading
+from time import perf_counter
+import cv2
+from pathlib import PurePath, PurePosixPath
+
 from roboticstoolbox.backend.Connector import Connector
 
 from roboticstoolbox.robot.DHLink import DHLink
@@ -29,6 +34,9 @@ class VPython(Connector):
         self.canvases = []
         self.canvas_settings = []  # 2D array of [is_3d, height, width, title, caption, grid] per canvas
         self.robots = []
+        self._recording = False
+        self._recording_thread = None
+        self._thread_lock = threading.Lock()
 
         self._create_empty_session()
 
@@ -236,6 +244,45 @@ class VPython(Connector):
             raise TypeError("Input must be a DHLink or GraphicalRobot")
 
     #
+    # Public non-standard methods
+    #
+    def record_start(self, fps, scene_num=0):
+        """
+        Start recording screencaps of a scene
+        """
+        self._thread_lock.acquire()
+
+        if not self._recording:
+            self._recording = True
+            # Spawn a thread
+            self._recording_thread = threading.Thread(target=self._record_scene, args=(scene_num, fps,))
+            self._recording_thread.start()
+
+        self._thread_lock.release()
+
+    def record_stop(self, filename, filetype):
+        """
+        Stop recording screencaps of a scene and combine them into a movie
+        """
+        #
+        self._thread_lock.acquire()
+        if self._recording:
+            self._recording = False
+        else:
+            self._thread_lock.release()
+            return
+        self._thread_lock.release()
+
+        # Wait for thread to finish
+        self._recording_thread.join()
+
+        # Get downloads directory
+        path = ''
+
+        # Save all images as a gif
+        
+
+    #
     #  Private Methods
     #
 
@@ -255,3 +302,36 @@ class VPython(Connector):
                 gs.innerHTML = '';
             </script>
         ''')
+
+    def _record_scene(self, scene_num, fps):
+        """
+        Thread-called function to continuously record screenshots
+        """
+        frame_num = 0
+        if fps <= 0:
+            raise ValueError("fps must be greater than 0.")
+        f = 1 / fps
+
+        self._thread_lock.acquire()
+        recording = self._recording
+        self._thread_lock.release()
+
+        while recording:
+            # Get current time
+            t_start = perf_counter()
+
+            # Take screenshot
+            filename = "vpython/{:04d}.png".format(frame_num)
+            self.canvases[scene_num].take_screenshot(filename)
+
+            # Get current time
+            t_stop = perf_counter()
+
+            # Wait for time of frame to finish
+            # If saving takes longer than frame frequency, this while is skipped
+            while t_stop - t_start < f:
+                t_stop = perf_counter()
+
+            self._thread_lock.acquire()
+            recording = self._recording
+            self._thread_lock.release()
