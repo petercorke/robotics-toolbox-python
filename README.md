@@ -1,5 +1,7 @@
 ![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
+<!---
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
+--->
 <!---
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 --->
@@ -11,14 +13,20 @@
 
 # Robotics Toolbox for Python
 
-![RTB-P logo](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/RobToolBox_RoundLogoB.png)
-
-This is a Python implementation of the [Robotics Toolbox for MATLAB<sup>&reg;</sup>](https://github.com/petercorke/robotics-toolbox-matlab).
-
-* GitHub repository [https://github.com/petercorke/robotics-toolbox-python](https://github.com/petercorke/robotics-toolbox-python)
-* Examples and details: [https://github.com/petercorke/robotics-toolbox-python/wiki](https://github.com/petercorke/robotics-toolbox-python/wiki)    
-* Documentation [https://petercorke.github.io/robotics-toolbox-python](https://petercorke.github.io/robotics-toolbox-python)
-
+<table style="border:0px">
+<tr style="border:0px">
+<td style="border:0px">
+<img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/RobToolBox_RoundLogoB.png" width="200"></td>
+<td style="border:0px">
+A Python implementation of the <a href="https://github.com/petercorke/robotics-toolbox-matlab">Robotics Toolbox for MATLAB<sup>&reg;</sup></a>
+<ul>
+<li><a href="https://github.com/petercorke/robotics-toolbox-python">GitHub repository </a></li>
+<li><a href="https://petercorke.github.io/robotics-toolbox-python">Documentation</a></li>
+<li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Examples and details</a></li>
+</ul>
+</td>
+</tr>
+</table>
 
 
 ## Synopsis
@@ -27,16 +35,14 @@ This toolbox brings robotics specific functionality to Python, and leverages the
 
 The Toolbox provides tools for representing the kinematics and dynamics of serial-link manipulators  - you can create your own in Denavit-Hartenberg form, import a URDF file, or use supplied models for well known robots from Franka-Emika, Kinova, Universal Robotics, Rethink as well as classical robots such as the Puma 560 and the Stanford arm.
 
-The toolbox also supports mobile robots with functions for robot motion models (unicycle, bicycle), path planning algorithms (bug, distance transform, D*, PRM), kinodynamic planning (lattice, RRT), localization (EKF, particle filter), map building (EKF) and simultaneous localization and mapping (EKF), and a Simulink model a of non-holonomic vehicle.  The Toolbox also including a detailed Simulink model for a quadrotor flying robot.
+The toolbox also supports mobile robots with functions for robot motion models (unicycle, bicycle), path planning algorithms (bug, distance transform, D*, PRM), kinodynamic planning (lattice, RRT), localization (EKF, particle filter), map building (EKF) and simultaneous localization and mapping (EKF).
 
-Advantages of the Toolbox are that:
+The Toolbox provides:
 
-  * the code is mature and provides a point of comparison for other implementations of the same algorithms;
-  * the routines are generally written in a straightforward manner which allows for easy understanding, perhaps at the expense of computational efficiency. If you feel strongly about computational efficiency then you can always rewrite the function to be more efficient, compile the M-file using the MATLAB compiler, or create a MEX version;
-  * since source code is available there is a benefit for understanding and teaching.
+  * code that is mature and provides a point of comparison for other implementations of the same algorithms;
+  * routines which are generally written in a straightforward manner which allows for easy understanding, perhaps at the expense of computational efficiency.
+  * source code which can read understanding and teaching.
   
-The MATLAB version of this Toolbox dates back to 1993.
-
 ## Code Example
 
 ```python
@@ -62,7 +68,6 @@ The MATLAB version of this Toolbox dates back to 1993.
 │qn │ 0°, 45°, 180°, 0°, 45°, 0° │
 └───┴────────────────────────────┘
 
- 
 >>> p560.fkine([0, 0, 0, 0, 0, 0])  # forward kinematics
    1           0           0           0.4521       
    0           1           0          -0.15005      
@@ -97,15 +102,7 @@ env.add(p560)
 
 ## Installing
 
-### From GitHub
-
-Requires Python ≥ 3.5.
-
-```shell script
-git clone https://github.com/petercorke/robotics-toolbox-python.git
-cd robotics-toolbox-python
-pip3 install -e .
-```
+You will need Python >= 3.6
 
 ### Using pip
 
@@ -114,6 +111,29 @@ Install a snapshot from PyPI
 ```shell script
 pip3 install roboticstoolbox-python
 ```
+
+Available options are:
+
+- `vpython` install [VPython](https://vpython.org) backend
+- `collision` install collision checking with [pybullet](https://pybullet.org)
+
+Put the options in a comma separated list like
+
+```shell script
+pip3 install roboticstoolbox-python[optionlist]
+```
+
+### From GitHub
+
+To install the bleeding-edge version from GitHub
+
+```shell script
+git clone https://github.com/petercorke/robotics-toolbox-python.git
+cd robotics-toolbox-python
+pip3 install -e .
+```
+
+### Installing Swift
 
 ## Run some examples
 

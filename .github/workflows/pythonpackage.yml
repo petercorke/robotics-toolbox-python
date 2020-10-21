@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,8 +26,9 @@ jobs:
         python -m pip install --upgrade pip
     - name: Test with pytest
       run: |
-        pip install .[dev]
-        pytest
+        pip install .[dev,vpython]
+        pip install pytest-timeout
+        pytest --timeout=20 --timeout_method thread
   codecov:
     # If all tests pass:
     # Run coverage and upload to codecov
@@ -44,7 +45,7 @@ jobs:
         python -m pip install --upgrade pip
     - name: Run coverage
       run: |
-        pip install -e .[dev]
+        pip install -e .[dev,vpython]
         pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
         coverage report
     - name: upload coverage to Codecov
