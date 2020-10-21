@@ -11,8 +11,8 @@ import numpy as np
 import os
 
 try:
-    with stdout_supress():
-        import pybullet as p
+    # with stdout_supress():
+    import pybullet as p
 
     cid = p.connect(p.SHARED_MEMORY)
     if (cid < 0):
