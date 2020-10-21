@@ -102,12 +102,12 @@ class Stanford(DHRobot):
             name="Stanford arm",
             manufacturer="Victor Scheinman",
             keywords=('dynamics',))
-            
+
         # zero angles, L shaped pose
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':  # pragma nocover
 
     stanford = Stanford()
     print(stanford)
-

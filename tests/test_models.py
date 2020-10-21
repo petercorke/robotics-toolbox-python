@@ -9,12 +9,17 @@ import unittest
 
 class TestModels(unittest.TestCase):
 
+    def test_list(self):
+        rp.models.list()
+        rp.models.list('UR', 6)
+
     def test_puma(self):
         puma = rp.models.DH.Puma560()
         puma.qr
         puma.qz
         puma.qs
         puma.qn
+        puma = rp.models.DH.Puma560(symbolic=True)
 
     def test_pumaURDF(self):
         puma = rp.models.Puma560()
@@ -97,3 +102,45 @@ class TestModels(unittest.TestCase):
         r = rp.models.j2n4s300()
         r.qr
         r.qz
+
+    def test_ball(self):
+        r = rp.models.DH.Ball()
+        r.qz
+        r.q1
+
+    def test_stanford(self):
+        r = rp.models.DH.Stanford()
+        r.qz
+
+    def test_planar3(self):
+        r = rp.models.DH.Planar3()
+        r.qz
+
+    def test_planar2(self):
+        r = rp.models.DH.Planar2()
+        r.qz
+
+    def test_orion5(self):
+        r = rp.models.DH.Orion5()
+        r.qz
+        r.qv
+        r.qh
+
+    def test_lwr4(self):
+        r = rp.models.DH.LWR4()
+        r.qz
+
+    def test_kr5(self):
+        r = rp.models.DH.KR5()
+        r.qz
+
+    def test_irb140(self):
+        r = rp.models.DH.IRB140()
+        r.qz
+
+    def test_cobra600(self):
+        r = rp.models.DH.Cobra600()
+        r.qz
+
+    def test_pr2(self):
+        rp.models.PR2()

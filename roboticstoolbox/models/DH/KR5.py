@@ -81,11 +81,14 @@ class KR5(DHRobot):
             meshdir="meshes/KUKA/KR5_arc")
 
         self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
-        self.addconfiguration("qk1", [pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
-        self.addconfiguration("qk2", [pi / 4, pi / 3, pi / 6, pi / 3, pi / 4, pi / 6])
-        self.addconfiguration("qk3", [pi / 6, pi / 3, pi / 6, pi / 3, pi / 6, pi / 3])
+        self.addconfiguration(
+          "qk1", [pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
+        self.addconfiguration(
+          "qk2", [pi / 4, pi / 3, pi / 6, pi / 3, pi / 4, pi / 6])
+        self.addconfiguration(
+          "qk3", [pi / 6, pi / 3, pi / 6, pi / 3, pi / 6, pi / 3])
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
     robot = KR5()
     print(robot)

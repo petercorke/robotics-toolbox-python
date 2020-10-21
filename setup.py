@@ -22,6 +22,7 @@ dev_req = [
     'pytest-cov',
     'flake8',
     'pyyaml',
+    'sympy'
 ]
 
 docs_req = [

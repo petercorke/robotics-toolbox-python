@@ -48,10 +48,10 @@ class Panda(DHRobot):
         # Denavit-Hartenberg parameters
         L = [
                 RevoluteMDH(
-                a=0.0,
-                d=0.333,
-                alpha=0.0,
-                qlim=np.array([-2.8973, 2.8973])
+                    a=0.0,
+                    d=0.333,
+                    alpha=0.0,
+                    qlim=np.array([-2.8973, 2.8973])
                 ),
 
                 RevoluteMDH(
@@ -62,10 +62,10 @@ class Panda(DHRobot):
                 ),
 
                 RevoluteMDH(
-                a=0.0,
-                d=0.316,
-                alpha=np.pi/2,
-                qlim=np.array([-2.8973, 2.8973])
+                    a=0.0,
+                    d=0.316,
+                    alpha=np.pi/2,
+                    qlim=np.array([-2.8973, 2.8973])
                  ),
 
                 RevoluteMDH(
@@ -112,7 +112,7 @@ class Panda(DHRobot):
         self.addconfiguration("qr", np.r_[0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     panda = Panda()
     print(panda)

@@ -1,6 +1,7 @@
 from roboticstoolbox.robot.Robot import Robot
 from ansitable import ANSITable, Column
-import importlib
+# import importlib
+
 
 def list(keywords=None, dof=None):
     """
@@ -10,7 +11,7 @@ def list(keywords=None, dof=None):
     :type keywords: tuple of str, optional
     :param dof: number of DoF to filter on, defaults to None
     :type dof: int, optional
-    
+
     - ``list()`` displays a list of all models provided by the Toolbox.  It
       lists the name, manufacturer, model type, number of DoF, and keywords.
 
@@ -21,14 +22,15 @@ def list(keywords=None, dof=None):
       degrees of freedom.
 
     The filters can be combined
-    
+
     - ``list(keywords=KW, dof=N)`` are those models that have a keyword in
       ``KW`` and have ``N`` degrees of freedom.
     """
 
     import roboticstoolbox.models as m
-    # module = importlib.import_module('.' + os.path.splitext(file)[0], package='bdsim.blocks')
-    
+    # module = importlib.import_module(
+    #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
+
     table = ANSITable(
         Column("class", headalign="^", colalign="<"),
         Column("model", headalign="^", colalign="<"),
@@ -43,33 +45,34 @@ def list(keywords=None, dof=None):
         group = m.__dict__[category]
         for cls in group.__dict__.values():
             if isinstance(cls, type) and issubclass(cls, Robot):
-                    # we found a Robot subclass, instantiate it
-                    robot = cls()
-                    try:
-                        config = robot.config()
-                    except:
-                        config = ""
-                    
-                    # apply filters
-                    if keywords is not None:
-                        if len(set(keywords) & set(robot.keywords)) == 0:
-                            continue
-                    if dof is not None and robot.n != dof:
-                        continue
+                # we found a Robot subclass, instantiate it
+                robot = cls()
+                try:
+                    config = robot.config()
+                except BaseException:
+                    config = ""
 
-                    # add the row
-                    table.row(
-                        cls.__name__,
-                        robot.name,
-                        robot.manufacturer,
-                        category,
-                        robot.n,
-                        config,
-                        ', '.join(robot.keywords)
-                    )
+                # apply filters
+                if keywords is not None:
+                    if len(set(keywords) & set(robot.keywords)) == 0:
+                        continue
+                if dof is not None and robot.n != dof:
+                    continue     # pragma nocover
+
+                # add the row
+                table.row(
+                    cls.__name__,
+                    robot.name,
+                    robot.manufacturer,
+                    category,
+                    robot.n,
+                    config,
+                    ', '.join(robot.keywords)
+                )
     table.print()
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":   # pragma nocover
     list()
     list(keywords=('dynamics',))
     list(dof=6)

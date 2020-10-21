@@ -1213,7 +1213,7 @@ class Transmission(URDFType):
         if node.find('type') is not None:
             kwargs['trans_type'] = node.find('type').text
         else:
-            kwargs['trans_type'] = ' '
+            kwargs['trans_type'] = ' '    # pragma nocover
 
         return Transmission(**kwargs)
 
@@ -1861,7 +1861,7 @@ class URDF(URDFType):
         return self._actuated_joints
 
     @staticmethod
-    def load(file_obj):
+    def load(file_obj):     # pragma nocover
         """Load a URDF from a file.
         Parameters
         ----------
@@ -1880,9 +1880,9 @@ class URDF(URDFType):
                 parser = ET.XMLParser()
                 tree = ET.parse(file_obj, parser=parser)
                 path, _ = os.path.split(file_obj)
-            else:   # pragma nocover
+            else:
                 raise ValueError('{} is not a file'.format(file_obj))
-        else:   # pragma nocover
+        else:
             parser = ET.XMLParser()
             tree = ET.parse(file_obj, parser=parser)
             path, _ = os.path.split(file_obj.name)

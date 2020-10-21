@@ -38,7 +38,8 @@ class Puma560(ERobot):
         # nominal table top picking pose
         self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':   # pragma nocover
 
     robot = Puma560()
     print(robot)

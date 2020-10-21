@@ -60,7 +60,8 @@ class Ball(DHRobot):
             f = theta2
         return f
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':   # pragma nocover
 
     ball = Ball()
     print(ball)

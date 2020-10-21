@@ -18,16 +18,18 @@ class px100(ERobot):
             (fpath / fname).as_posix())
 
         super().__init__(
-            args[0],
-            name=args[1],
-            manufacturer = 'Interbotix'
+                args[0],
+                name=args[1],
+                manufacturer='Interbotix'
             )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
+        self.addconfiguration(
+            "qz", np.array([0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration(
+            "qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     robot = px100()
     print(robot)
