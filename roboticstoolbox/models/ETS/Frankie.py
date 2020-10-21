@@ -114,11 +114,13 @@ class Frankie(ERobot):
             manufacturer='Franka Emika, Omron',
             keywords=('mobile',))
 
+        self.addconfiguration(
+            "qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration(
+            "qr", np.array([0, 0, 0, -90, -90, 90, 0, -90, 90]) * deg)
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([0, 0, 0, -90, -90, 90, 0, -90, 90]) * deg)
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     robot = Frankie()
     print(robot)

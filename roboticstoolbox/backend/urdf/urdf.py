@@ -1861,7 +1861,7 @@ class URDF(URDFType):
         return self._actuated_joints
 
     @staticmethod
-    def load(file_obj):
+    def load(file_obj):     # pragma nocover
         """Load a URDF from a file.
         Parameters
         ----------
@@ -1875,14 +1875,14 @@ class URDF(URDFType):
         urdf : :class:`.URDF`
             The parsed URDF.
         """
-        if isinstance(file_obj, str):     # pragma nocover
+        if isinstance(file_obj, str):
             if os.path.isfile(file_obj):
                 parser = ET.XMLParser()
                 tree = ET.parse(file_obj, parser=parser)
                 path, _ = os.path.split(file_obj)
-            else:   # pragma nocover
+            else:
                 raise ValueError('{} is not a file'.format(file_obj))
-        else:   # pragma nocover
+        else:
             parser = ET.XMLParser()
             tree = ET.parse(file_obj, parser=parser)
             path, _ = os.path.split(file_obj.name)

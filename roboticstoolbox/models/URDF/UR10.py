@@ -17,16 +17,18 @@ class UR10(ERobot):
         args = super(UR10, self).urdf_to_ets_args((fpath / fname).as_posix())
 
         super().__init__(
-            args[0],
-            name=args[1],
-            manufacturer = 'Universal Robotics'
+                args[0],
+                name=args[1],
+                manufacturer='Universal Robotics'
             )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([np.pi, 0, 0, 0, np.pi/2, 0]))
+        self.addconfiguration(
+            "qz", np.array([0, 0, 0, 0, 0, 0]))
+        self.addconfiguration(
+            "qr", np.array([np.pi, 0, 0, 0, np.pi/2, 0]))
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     robot = UR10()
     print(robot)

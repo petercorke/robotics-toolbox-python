@@ -28,7 +28,7 @@ class Panda(ERobot):
         self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0]))
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     robot = Panda()
     print(robot)

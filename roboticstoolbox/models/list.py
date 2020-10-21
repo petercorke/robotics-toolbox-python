@@ -57,7 +57,7 @@ def list(keywords=None, dof=None):
                     if len(set(keywords) & set(robot.keywords)) == 0:
                         continue
                 if dof is not None and robot.n != dof:
-                    continue
+                    continue     # pragma nocover
 
                 # add the row
                 table.row(
@@ -72,7 +72,7 @@ def list(keywords=None, dof=None):
     table.print()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma nocover
     list()
     list(keywords=('dynamics',))
     list(dof=6)

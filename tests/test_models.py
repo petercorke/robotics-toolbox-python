@@ -9,6 +9,10 @@ import unittest
 
 class TestModels(unittest.TestCase):
 
+    def test_list(self):
+        rp.models.list()
+        rp.models.list('UR', 6)
+
     def test_puma(self):
         puma = rp.models.DH.Puma560()
         puma.qr
@@ -137,3 +141,6 @@ class TestModels(unittest.TestCase):
     def test_cobra600(self):
         r = rp.models.DH.Cobra600()
         r.qz
+
+    def test_pr2(self):
+        rp.models.PR2()

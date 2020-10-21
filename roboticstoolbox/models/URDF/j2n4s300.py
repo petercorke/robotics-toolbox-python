@@ -18,16 +18,18 @@ class j2n4s300(ERobot):
             (fpath / fname).as_posix())
 
         super().__init__(
-            args[0],
-            name=args[1],
-            manufacturer = 'Kinova'
+                args[0],
+                name=args[1],
+                manufacturer='Kinova'
             )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi/180)
+        self.addconfiguration(
+            "qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration(
+            "qr", np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi/180)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     robot = j2n4s300()
     print(robot)
