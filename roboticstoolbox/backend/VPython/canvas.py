@@ -4,7 +4,7 @@
 """
 
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, \
-    sqrt, cos, button, menu, checkbox, slider, wtext, degrees, vector
+    sqrt, cos, button, menu, checkbox, slider, wtext, degrees, vector, radians
 from roboticstoolbox.backend.VPython.common_functions import \
     get_pose_x_vec, get_pose_y_vec, get_pose_pos, \
     x_axis_vector, y_axis_vector, z_axis_vector
