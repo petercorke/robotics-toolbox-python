@@ -3,7 +3,7 @@
 from roboticstoolbox.tools.null import null
 from roboticstoolbox.tools.p_servo import p_servo
 from roboticstoolbox.tools.ticker import Ticker
-from roboticstoolbox.tools.stdout_supress import stdout_supress
+# from roboticstoolbox.tools.stdout_supress import stdout_supress
 
 __all__ = [
     # 'is_vector',
@@ -19,6 +19,6 @@ __all__ = [
     # 'xyzrpy_to_trans',
     'null',
     'p_servo',
-    'trajectory',
-    'stdout_supress'
+    'trajectory'
+    # 'stdout_supress'
 ]
