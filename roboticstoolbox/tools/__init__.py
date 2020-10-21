@@ -19,6 +19,6 @@ __all__ = [
     # 'xyzrpy_to_trans',
     'null',
     'p_servo',
-    'trajectory',
+    'trajectory'
     # 'stdout_supress'
 ]
