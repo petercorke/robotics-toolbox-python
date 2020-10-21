@@ -4,9 +4,10 @@
 """
 
 import threading
-from time import perf_counter
+from time import perf_counter, sleep
 import cv2
-from pathlib import PurePath, PurePosixPath
+import os
+import glob
 
 from roboticstoolbox.backend.Connector import Connector
 
@@ -36,6 +37,7 @@ class VPython(Connector):
         self.robots = []
         self._recording = False
         self._recording_thread = None
+        self._recording_fps = None
         self._thread_lock = threading.Lock()
 
         self._create_empty_session()
@@ -88,7 +90,7 @@ class VPython(Connector):
             raise ValueError("Figure number must be between 0 and total number of canvases")
 
         # If DHRobot given
-        if isinstance(id, r.Robot):
+        if isinstance(id, r):
             robot = None
             # Find first occurrence of it that is in the correct canvas
             for i in range(len(self.robots)):
@@ -253,14 +255,16 @@ class VPython(Connector):
         self._thread_lock.acquire()
 
         if not self._recording:
+            print("VPython Recording...")
             self._recording = True
+            self._recording_fps = fps
             # Spawn a thread
             self._recording_thread = threading.Thread(target=self._record_scene, args=(scene_num, fps,))
             self._recording_thread.start()
 
         self._thread_lock.release()
 
-    def record_stop(self, filename, filetype):
+    def record_stop(self, filename):
         """
         Stop recording screencaps of a scene and combine them into a movie
         """
@@ -268,6 +272,8 @@ class VPython(Connector):
         self._thread_lock.acquire()
         if self._recording:
             self._recording = False
+            print("VPython Recording Stopped...")
+            print("VPython Recording Saving... DO NOT EXIT")
         else:
             self._thread_lock.release()
             return
@@ -276,11 +282,31 @@ class VPython(Connector):
         # Wait for thread to finish
         self._recording_thread.join()
 
-        # Get downloads directory
-        path = ''
+        # Wait a bit longer to ensure downloads complete
+        sleep(3)
 
-        # Save all images as a gif
-        
+        # Get downloads directory
+        path_in = os.path.join(os.getenv('USERPROFILE'), 'downloads')
+        path_out = filename
+        fps = self._recording_fps
+        size = None
+
+        frames = []
+
+        for file in glob.glob(path_in + "/vpython_*.png"):
+            frame = cv2.imread(file)
+            height, width, layers = frame.shape
+            size = (width, height)
+            frames.append(frame)
+            os.remove(file)
+
+        out = cv2.VideoWriter(path_out, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
+        for f in frames:
+            out.write(f)
+        out.release()
+
+        print("VPython Recording Saved... It is safe to exit")
+
 
     #
     #  Private Methods
@@ -321,8 +347,9 @@ class VPython(Connector):
             t_start = perf_counter()
 
             # Take screenshot
-            filename = "vpython/{:04d}.png".format(frame_num)
+            filename = "vpython_{:04d}.png".format(frame_num)
             self.canvases[scene_num].take_screenshot(filename)
+            frame_num += 1
 
             # Get current time
             t_stop = perf_counter()
