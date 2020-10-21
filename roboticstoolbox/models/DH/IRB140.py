@@ -1,10 +1,9 @@
-
 """
 @author: Peter Corke
 @author: Samuel Drew
 """
 
-from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
+from roboticstoolbox import DHRobot, RevoluteDH
 from math import pi
 import numpy as np
 
@@ -116,7 +115,8 @@ class IRB140(DHRobot):
         self.addconfiguration("qd", [0, -90*deg, 180*deg, 0, 0, -90*deg])
         self.addconfiguration("qr", [0, -90*deg, 90*deg, 0, 90*deg, -90*deg])
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':   # pragma nocover
 
     robot = IRB140()
     print(robot)

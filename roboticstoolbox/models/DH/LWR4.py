@@ -33,10 +33,10 @@ class LWR4(DHRobot):
 
         L = [
                 RevoluteDH(
-                a=0.0,
-                d=0,
-                alpha=np.pi/2,
-                qlim=np.array([-2.8973, 2.8973])
+                    a=0.0,
+                    d=0,
+                    alpha=np.pi/2,
+                    qlim=np.array([-2.8973, 2.8973])
                 ),
 
                 RevoluteDH(
@@ -95,7 +95,7 @@ class LWR4(DHRobot):
         self.addconfiguration("qz", [0, 0, 0, 0, 0, 0, 0])
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma nocover
 
     robot = LWR4()
     print(robot)

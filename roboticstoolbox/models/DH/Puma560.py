@@ -15,9 +15,10 @@
 
 # all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
 
-from math import pi
+# from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
+
 
 class Puma560(DHRobot):
     """
@@ -67,26 +68,28 @@ class Puma560(DHRobot):
 
         deg = pi / 180
 
-        base = 0.672      # from mounting surface to shoulder axis
+        # base = 0.672      # from mounting surface to shoulder axis
 
         L = [
-            
             RevoluteDH(
-                d=0,  # d=base,          # link length (Dennavit-Hartenberg notation)
+                d=0,  # d=base,  # link length (Dennavit-Hartenberg notation)
                 a=0,          # link offset (Dennavit-Hartenberg notation)
                 alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
-                I=[0, 0.35, 0, 0, 0, 0],  # inertia tensor of link with respect to
-                                        # center of mass I = [L_xx, L_yy, L_zz,
-                                        # L_xy, L_yz, L_xz]
-                r=[0, 0, 0],  # distance of ith origin to center of mass [x,y,z]
-                            # in link reference frame
+                I=[0, 0.35, 0, 0, 0, 0],
+                # inertia tensor of link with respect to
+                # center of mass I = [L_xx, L_yy, L_zz,
+                # L_xy, L_yz, L_xz]
+                r=[0, 0, 0],
+                # distance of ith origin to center of mass [x,y,z]
+                # in link reference frame
                 m=0,          # mass of link
                 Jm=200e-6,    # actuator inertia
                 G=-62.6111,   # gear ratio
                 B=1.48e-3,    # actuator viscous friction coefficient (measured
-                            # at the motor)
-                Tc=[0.395, -0.435],  # actuator Coulomb friction coefficient for
-                                    # direction [-,+] (measured at the motor)
+                              # at the motor)
+                Tc=[0.395, -0.435],
+                # actuator Coulomb friction coefficient for
+                # direction [-,+] (measured at the motor)
                 qlim=[-160*deg, 160*deg]    # minimum and maximum joint angle
             ),
 
@@ -172,8 +175,8 @@ class Puma560(DHRobot):
         # nominal table top picking pose
         self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':    # pragma nocover
 
     puma = Puma560(symbolic=True)
     print(puma)
-

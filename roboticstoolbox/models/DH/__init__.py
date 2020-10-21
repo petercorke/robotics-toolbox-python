@@ -8,6 +8,7 @@ from roboticstoolbox.models.DH.KR5 import KR5
 from roboticstoolbox.models.DH.Orion5 import Orion5
 from roboticstoolbox.models.DH.Planar3 import Planar3
 from roboticstoolbox.models.DH.Planar2 import Planar2
+from roboticstoolbox.models.DH.LWR4 import LWR4
 
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     'KR5',
     'Orion5',
     'Planar3',
-    'Planar2'
+    'Planar2',
+    'LWR4'
 ]

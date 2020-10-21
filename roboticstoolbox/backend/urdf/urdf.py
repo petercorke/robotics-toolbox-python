@@ -1213,7 +1213,7 @@ class Transmission(URDFType):
         if node.find('type') is not None:
             kwargs['trans_type'] = node.find('type').text
         else:
-            kwargs['trans_type'] = ' '
+            kwargs['trans_type'] = ' '    # pragma nocover
 
         return Transmission(**kwargs)
 
@@ -1875,7 +1875,7 @@ class URDF(URDFType):
         urdf : :class:`.URDF`
             The parsed URDF.
         """
-        if isinstance(file_obj, str):
+        if isinstance(file_obj, str):     # pragma nocover
             if os.path.isfile(file_obj):
                 parser = ET.XMLParser()
                 tree = ET.parse(file_obj, parser=parser)
