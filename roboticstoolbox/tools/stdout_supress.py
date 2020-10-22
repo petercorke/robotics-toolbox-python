@@ -80,10 +80,7 @@ from __future__ import print_function
 from contextlib import contextmanager
 import ctypes
 import errno
-try:
-    from fcntl import fcntl, F_GETFL, F_SETFL
-except ImportError:
-    pass
+from fcntl import fcntl, F_GETFL, F_SETFL
 import io
 import os
 
@@ -374,8 +371,3 @@ def pipes(stdout=PIPE, stderr=PIPE, encoding=_default_encoding):  # pragma: no c
             stdout_w.close()
         if stderr_pipe:
             stderr_w.close()
-
-
-@contextmanager
-def pipes_pass(stdout=None, stderr=None):
-    pass

@@ -14,7 +14,11 @@ from io import StringIO
 try:
     from roboticstoolbox.tools.stdout_supress import pipes
 except BaseException:
-    from roboticstoolbox.tools.stdout_supress import pipes_pass as pipes
+    from contextlib import contextmanager
+
+    @contextmanager
+    def pipes(stdout=None, stderr=None):
+        pass
 
 try:
     out = StringIO()
