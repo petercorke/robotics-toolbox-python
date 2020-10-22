@@ -134,6 +134,30 @@ If no joint angles given, it will default to the joint angles internally in the 
 # Set the pose of the Puma560 to the "ready" position
 env.step(puma, puma.qr, 0)
 ```
+
+## Recording VPython
+In order to record the canvas, there are unique backend functions to call: `record_start` and `record_stop`.
+The start function requires inputs of FPS, and a scene number (defaults to 0). The stop function requires a filename
+with extension. Files are saved relative to the roboticstoolbox home directory.
+
+**NOTE**: The scene is still interactive during recording. E.g. The teachpanel can be used to manipulate the robot while
+being recorded for later viewing.
+
+**WARNING**: Before trying to record, it is suggested to try the "Screenshot" button in the UI first. VPython uses the
+browsers download functionality, so enabling auto-download of the file types may be required. Otherwise you could be
+spammed with download requests. (Files get removed when converted to a video, so your downloads folder will be
+unmodified).
+```python
+env.record_start(10)  # Record scene 0 at 10 fps
+
+# Sleep for X seconds, and/or manipulate robot here
+# e.g.
+#   env.step(puma, puma.qn, 0)
+#   time.sleep(3)
+
+env.record_stop('my_video.avi')  # Save as an avi
+```
+
 &nbsp;
 
 &nbsp;
