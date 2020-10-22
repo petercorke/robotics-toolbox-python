@@ -6,7 +6,7 @@ from roboticstoolbox.robot.DHLink import DHLink, RevoluteDH, PrismaticDH, \
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.Shape import Shape
+from roboticstoolbox.robot.Shape import Shape, Cylinder
 
 __all__ = [
     'Robot',
@@ -22,5 +22,6 @@ __all__ = [
     'ELink',
     'ERobot',
     'ETS',
-    'Shape'
+    'Shape',
+    'Cylinder'
     ]
