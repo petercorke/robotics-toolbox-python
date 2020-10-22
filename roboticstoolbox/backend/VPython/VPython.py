@@ -7,6 +7,7 @@ import threading
 from time import perf_counter, sleep
 import cv2
 import os
+import platform
 import glob
 
 from roboticstoolbox.backend.Connector import Connector
@@ -283,10 +284,21 @@ class VPython(Connector):
         self._recording_thread.join()
 
         # Wait a bit longer to ensure downloads complete
+        # (Small file sizes so should be quick, but better safe than sorry)
         sleep(3)
 
         # Get downloads directory
-        path_in = os.path.join(os.getenv('USERPROFILE'), 'downloads')
+        opsys = platform.system()
+        if opsys == 'Windows':  # Windows
+            path_in = os.path.join(os.getenv('USERPROFILE'), 'downloads')
+
+        elif opsys == 'Linux' or opsys == 'Darwin':  # Linux / Mac
+            path_in = os.path.join(os.getenv('HOME'), 'downloads')
+
+        else:  # Undefined OS
+            # lets assume 'HOME' for now
+            path_in = os.path.join(os.getenv('HOME'), 'downloads')
+
         path_out = filename
         fps = self._recording_fps
         size = None
