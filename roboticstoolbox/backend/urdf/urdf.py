@@ -357,19 +357,19 @@ class Geometry(URDFType):
 
         if box is not None:
             self.box = box
-            self.ob = rp.Shape.Box(box.size)
+            self.ob = rp.Box(box.size)
 
         if cylinder is not None:
             self.cylinder = cylinder
-            self.ob = rp.Shape.Cylinder(cylinder.radius, cylinder.length)
+            self.ob = rp.Cylinder(cylinder.radius, cylinder.length)
 
         if sphere is not None:
             self.sphere = sphere
-            self.ob = rp.Shape.Sphere(sphere.radius)
+            self.ob = rp.Sphere(sphere.radius)
 
         if mesh is not None:
             self.mesh = mesh
-            self.ob = rp.Shape.Mesh(mesh.filename, scale=mesh.scale)
+            self.ob = rp.Mesh(mesh.filename, scale=mesh.scale)
 
     @property
     def box(self):

@@ -182,7 +182,6 @@ class TestELink(unittest.TestCase):
         self.assertIsInstance(col, rp.Shape)
 
         self.assertIsInstance(col.base, sm.SE3)
-        self.assertTrue(col.primitive)
         self.assertIsInstance(col.scale, np.ndarray)
 
         col.radius = 2
@@ -193,7 +192,7 @@ class TestELink(unittest.TestCase):
 
     def test_collision_fail(self):
         l0 = rp.ELink()
-        col = rp.Shape.Box([1, 1, 1])
+        col = rp.Box([1, 1, 1])
         l0.collision = col
 
         with self.assertRaises(TypeError):
@@ -204,7 +203,7 @@ class TestELink(unittest.TestCase):
 
     def test_geometry_fail(self):
         l0 = rp.ELink()
-        col = rp.Shape.Box([1, 1, 1])
+        col = rp.Box([1, 1, 1])
         l0.geometry = col
         l0.geometry = [col, col]
 
