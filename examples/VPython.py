@@ -7,7 +7,7 @@ import roboticstoolbox as rp
 import time
 
 env = rp.backend.VPython()
-env.launch()
+env.launch(g_col=[0.2, 0.2, 0.2], g_opc=0.3)
 
 #  PUMA560
 puma = rp.models.DH.Puma560()
