@@ -12,6 +12,11 @@ req = [
     'ansitable'
 ]
 
+swift_req = [
+    'zerorpc',
+    'pybullet'
+]
+
 vp_req = [
     'vpython',
     'numpy-stl'
@@ -89,6 +94,7 @@ setup(
     install_requires=req,
 
     extras_require={
+        'swift': swift_req,
         'dev': dev_req,
         'docs': docs_req,
         'vpython': vp_req

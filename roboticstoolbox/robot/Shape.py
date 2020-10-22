@@ -9,6 +9,7 @@ from spatialmath.base import r2q
 import numpy as np
 from functools import wraps
 from io import StringIO
+import os
 
 p = None
 _pyb = None
@@ -21,7 +22,7 @@ def _import_pyb():
 
     try:
         from roboticstoolbox.tools.stdout_supress import pipes
-    except BaseException:
+    except BaseException:  # pragma nocover
         from contextlib import contextmanager
 
         @contextmanager
@@ -33,14 +34,14 @@ def _import_pyb():
         try:
             with pipes(stdout=out, stderr=None):
                 p = importlib.import_module('pybullet')
-        except BaseException:
+        except BaseException:  # pragma nocover
             p = importlib.import_module('pybullet')
 
         cid = p.connect(p.SHARED_MEMORY)
         if (cid < 0):
             p.connect(p.DIRECT)
         _pyb = True
-    except ImportError:
+    except ImportError:   # pragma nocover
         _pyb = False
 
 
@@ -69,6 +70,12 @@ class Shape(object):
         self.pinit = False
 
     def to_dict(self):
+        '''
+        to_dict() returns the shapes information in dictionary form
+
+        :returns: All information about the shape
+        :rtype: dict
+        '''
 
         if self.stype == 'cylinder':
             fk = self.wT * SE3.Rx(np.pi/2)
@@ -89,6 +96,12 @@ class Shape(object):
         return shape
 
     def fk_dict(self):
+        '''
+        fk_dict() outputs shapes pose in dictionary form
+
+        :returns: The shape pose in translation and quternion form
+        :rtype: dict
+        '''
 
         if self.stype == 'cylinder':
             fk = self.wT * SE3.Rx(np.pi/2)
@@ -102,7 +115,7 @@ class Shape(object):
 
         return shape
 
-    def __repr__(self):
+    def __repr__(self):   # pragma nocover
         return f'{self.stype},\n{self.base}'
 
     def _update_pyb(self):
@@ -111,10 +124,10 @@ class Shape(object):
             rot = [q[1], q[2], q[3], q[0]]
             p.resetBasePositionAndOrientation(self.co, self.wT.t, rot)
 
-    def _init_pob(self):
+    def _init_pob(self):   # pragma nocover
         pass
 
-    def _check_pyb(func):
+    def _check_pyb(func):   # pragma nocover
         @wraps(func)
         def wrapper_check_pyb(*args, **kwargs):
             if _pyb is None:
@@ -193,7 +206,7 @@ class Shape(object):
         '''
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between self and shape, provided it is less than inf_dist.
-        It will also return the points on self and shape in their local frame
+        It will also return the points on self and shape in the world frame
         which connect the line of length distance between the shapes.
 
         :param shape: The shape to compare distance to
@@ -201,6 +214,10 @@ class Shape(object):
         :param inf_dist: The minimum distance within which to consider
             the shape
         :type inf_dist: float
+        :returns: d, p1, p2 where d is the distance between the shapes,
+            p1 and p2 are the points in the world frame on the respective
+            shapes
+        :rtype: float, SE3, SE3
         '''
 
         if not self.pinit:
@@ -211,14 +228,24 @@ class Shape(object):
             shape._init_pob()
             shape._update_pyb()
 
-        if not _pyb:
+        if not _pyb:  # pragma nocover
             raise ImportError(
                 'The package PyBullet is required for collision '
                 'functionality. Install using pip install pybullet')
 
         ret = p.getClosestPoints(self.co, shape.co, inf_dist)
 
-        return ret
+        if len(ret) == 0:
+            d = -1
+            p1 = SE3()
+            p2 = SE3()
+        else:
+            ret = ret[0]
+            d = ret[8]
+            p1 = SE3(ret[5])
+            p2 = SE3(ret[6])
+
+        return d, p1, p2
 
 
 class Mesh(Shape):
@@ -242,7 +269,8 @@ class Mesh(Shape):
             scale=scale, stype='mesh')
 
     def _init_pob(self):
-        if (self.filename == '.stl' or self.filename == '.STL'):
+        name, file_extension = os.path.splitext(self.filename)
+        if (file_extension == '.stl' or file_extension == '.STL'):
 
             col = p.createCollisionShape(
                 shapeType=p.GEOM_MESH,
