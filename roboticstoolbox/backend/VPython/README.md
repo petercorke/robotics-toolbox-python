@@ -57,17 +57,21 @@ To create a scene to draw objects to, a canvas must be created. Upon creation, a
 If launched through Jupyter Notebooks, it will be displayed where executed.
 
 Different attributes can be supplied to the environment for some customisation. The display width, height, title, and
-caption can be manually input. Lastly, booleans representing the dimensions, and grid visibility can be set.
+caption can be manually input. Booleans representing the number of dimensions, and grid visibility can be set. Finally,
+grid colour and opacity options can be set.
 
 Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
 capabilities)
 ```python
-# Create a default canvas (3D, 500*888, with grid displayed, no title or caption)
+# Create a default canvas (3D, 500*888, with grid displayed, no title or caption, black opaque grid)
 env.launch()
 
 # Alternatively create a grid with specified parameters
-env.launch(is_3d=True, height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
-env.launch(is_3d=False, height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+env.launch(is_3d=True, height=768, width=1024, title="Scene 1", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+
+env.launch(is_3d=False, height=768, width=1024, title="Scene 2", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
 ``` 
 Multiple scenes can be created, simply execute `launch` for every scene required. Keeping note of the order for future
 reference.
@@ -188,18 +192,22 @@ my_link.get_axis_vector(z_axis_vector)
 ## Setting up the scene
 To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
 Different attributes can be supplied to the function for some customisation. The display width, height, title, and
-caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
+caption can be manually input. The grid colour and opacity can also be set. Lastly, a boolean representing the grid
+visibility can be set.
 
 Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
 capabilities). The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
 ```python
-# Create a default canvas (500*888, with grid displayed, no title or caption)
+# Create a default canvas (500*888, with grid displayed, no title or caption, black opaque grid)
 g_canvas = GraphicalCanvas3D()
 g_canvas = GraphicalCanvas2D()
 
 # Alternatively create a grid with specified parameters
-g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
-g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+
+g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
 ```
 
 The GraphicsGrid object has functions to toggle grid visibility.
