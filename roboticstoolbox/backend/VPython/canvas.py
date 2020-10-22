@@ -39,9 +39,13 @@ class GraphicsCanvas3D:
     :param grid: Whether a grid should be displayed in the plot, defaults
         to `True`.
     :type grid: `bool`, optional
+    :param g_col: The RGB grid colour
+    :type g_col: `list`, optional
+    :param g_opc: The opacity value of the grid
+    :type g_opc: `float`, optional
     """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None, g_opc=1):
         # def __init__(self, height=360, width=640, title='', caption='',
         #   grid=True):
 
@@ -126,7 +130,7 @@ class GraphicsCanvas3D:
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        self.__graphics_grid = GraphicsGrid(self.scene)
+        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col, opacity=g_opc)
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
@@ -721,25 +725,29 @@ class GraphicsCanvas3D:
 
 class GraphicsCanvas2D:
     """
-        Set up the scene with initial conditions.
-            - White background
-            - Width, height
-            - Title, caption
-            - Axes drawn (if applicable)
+    Set up the scene with initial conditions.
+        - White background
+        - Width, height
+        - Title, caption
+        - Axes drawn (if applicable)
 
-        :param height: Height of the canvas on screen (Pixels), defaults to 360.
-        :type height: `int`, optional
-        :param width: Width of the canvas on screen (Pixels), defaults to 640.
-        :type width: `int`, optional
-        :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
-        :type title: `str`, optional
-        :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
-        :type caption: `str`, optional
-        :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
-        :type grid: `bool`, optional
-        """
+    :param height: Height of the canvas on screen (Pixels), defaults to 360.
+    :type height: `int`, optional
+    :param width: Width of the canvas on screen (Pixels), defaults to 640.
+    :type width: `int`, optional
+    :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
+    :type title: `str`, optional
+    :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
+    :type caption: `str`, optional
+    :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
+    :type grid: `bool`, optional
+    :param g_col: The RGB grid colour
+    :type g_col: `list`, optional
+    :param g_opc: The opacity value of the grid
+    :type g_opc: `float`, optional
+    """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None, g_opc=1):
 
         # Private lists
         self.__line_styles = [
@@ -825,7 +833,7 @@ class GraphicsCanvas2D:
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        self.__graphics_grid = GraphicsGrid(self.scene)
+        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col, opacity=g_opc)
         # Toggle grid to 2D
         # self.__graphics_grid.toggle_2d_3d()
         # Lock the grid
