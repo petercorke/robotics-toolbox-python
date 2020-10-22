@@ -78,6 +78,7 @@ The same functionality can be done in code as will be mentioned.
 3D options:
  * Toggle the UI mode between Canvas Controls, and a Teachpanel
    * The Teachpanel will have a slider for each joint to rotate between all available angles for that joint
+ * Take a screenshot of the scene. Saves to user's downloads folder.
  * Choose which robot to edit
  * Toggle robot/frame visibility
  * Change robot opacity
@@ -136,9 +137,10 @@ env.step(puma, puma.qr, 0)
 ```
 
 ## Recording VPython
-In order to record the canvas, there are unique backend functions to call: `record_start` and `record_stop`.
-The start function requires inputs of FPS, and a scene number (defaults to 0). The stop function requires a filename
-with extension. Files are saved relative to the roboticstoolbox home directory.
+In order to record the canvas, there are unique backend functions to call: `record_start` and `record_stop`. Currently,
+only one scene in the backend can be recorded at a time. The start function requires inputs of FPS, and a scene number
+(defaults to 0). The stop function requires a filename with extension. Files are saved relative to the roboticstoolbox
+home directory.
 
 **NOTE**: The scene is still interactive during recording. E.g. The teachpanel can be used to manipulate the robot while
 being recorded for later viewing.
