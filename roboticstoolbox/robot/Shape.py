@@ -6,22 +6,22 @@
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from spatialmath.base import r2q
-# from roboticstoolbox.tools.stdout_supress import stdout_supress
 import numpy as np
 import os
 
 from io import StringIO
-from wurlitzer import pipes, STDOUT
 
-# out = StringIO()
-# with pipes(stdout=out, stderr=STDOUT):
-#     call_some_c_function()
-
+try:
+    from roboticstoolbox.tools.stdout_supress import pipes
+except BaseException:
+    from roboticstoolbox.tools.stdout_supress import pipes_pass as pipes
 
 try:
     out = StringIO()
-    # with stdout_supress():
-    with pipes(stdout=out, stderr=STDOUT):
+    try:
+        with pipes(stdout=out, stderr=None):
+            import pybullet as p
+    except BaseException:
         import pybullet as p
 
     cid = p.connect(p.SHARED_MEMORY)
