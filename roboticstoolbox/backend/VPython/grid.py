@@ -18,7 +18,7 @@ class GraphicsGrid:
     :type scene: class:`vpython.canvas`
     """
 
-    def __init__(self, scene):
+    def __init__(self, scene, colour=None, opacity=1):
 
         # Save the scene the grid is placed in
         self.__scene = scene
@@ -43,6 +43,12 @@ class GraphicsGrid:
         self.__yz_plane_idx = 2
         self.__planes_idx = 0
         self.__labels_idx = 1
+
+        if colour is None:
+            colour = [0, 0, 0]
+        self._colour = colour
+
+        self._opacity = max(min(opacity, 1), 0)  # Ensure opacity between 0 and 1
 
         # Initialise a grid object
         # grid_object[0] will always be the 3 plane graphics. [XY, XZ, YZ] (alphabetical in order and connection)
@@ -151,7 +157,9 @@ class GraphicsGrid:
                 vector(x_point, y_origin, min_z_coord),
                 vector(x_point, y_origin, max_z_coord),
                 self.__scene,
-                thickness=line_thickness
+                thickness=line_thickness,
+                colour=self._colour,
+                opacity=self._opacity
             ))
         for z_point in z_coords:
             # Draw a line across each z coord, along the same y-axis, from min to max z coord
@@ -159,7 +167,9 @@ class GraphicsGrid:
                 vector(min_x_coord, y_origin, z_point),
                 vector(max_x_coord, y_origin, z_point),
                 self.__scene,
-                thickness=line_thickness
+                thickness=line_thickness,
+                colour=self._colour,
+                opacity=self._opacity
             ))
 
         # XY plane
@@ -169,7 +179,9 @@ class GraphicsGrid:
                 vector(x_point, min_y_coord, z_origin),
                 vector(x_point, max_y_coord, z_origin),
                 self.__scene,
-                thickness=line_thickness
+                thickness=line_thickness,
+                colour=self._colour,
+                opacity=self._opacity
             ))
         for y_point in y_coords:
             # Draw a line across each y coord, along the same z-axis, from min to max x coord
@@ -177,7 +189,9 @@ class GraphicsGrid:
                 vector(min_x_coord, y_point, z_origin),
                 vector(max_x_coord, y_point, z_origin),
                 self.__scene,
-                thickness=line_thickness
+                thickness=line_thickness,
+                colour=self._colour,
+                opacity=self._opacity
             ))
 
         # YZ plane
@@ -187,7 +201,9 @@ class GraphicsGrid:
                 vector(x_origin, y_point, min_z_coord),
                 vector(x_origin, y_point, max_z_coord),
                 self.__scene,
-                thickness=line_thickness
+                thickness=line_thickness,
+                colour=self._colour,
+                opacity=self._opacity
             ))
         for z_point in z_coords:
             # Draw a line across each z coord, along the same x-axis, from min to max y coord
@@ -195,7 +211,9 @@ class GraphicsGrid:
                 vector(x_origin, min_y_coord, z_point),
                 vector(x_origin, max_y_coord, z_point),
                 self.__scene,
-                thickness=line_thickness
+                thickness=line_thickness,
+                colour=self._colour,
+                opacity=self._opacity
             ))
 
         # Compound the lines together into respective objects
@@ -429,7 +447,7 @@ class GraphicsGrid:
         self.__init_grid()
 
 
-def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
+def create_line(pos1, pos2, scene, colour=None, thickness=0.01, opacity=1):
     """
     Create a line from position 1 to position 2.
 
@@ -443,6 +461,8 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
     :type colour: `list`
     :param thickness: Thickness of the line
     :type thickness: `float`
+    :param opacity: Opacity of the line
+    :type opacity: `float`
     :raises ValueError: RGB colour must be normalised between 0->1
     :raises ValueError: Thickness must be greater than 0
     :return: A box resembling a line
@@ -477,7 +497,8 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
                length=line_len,
                width=thickness,
                height=thickness,
-               color=vector(colour[0], colour[1], colour[2]))
+               color=vector(colour[0], colour[1], colour[2]),
+               opacity=opacity)
 
 
 def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness=0.01):
