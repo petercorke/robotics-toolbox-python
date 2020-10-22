@@ -9,7 +9,8 @@ req = [
     'spatialmath-python>=0.8.2',
     'scipy',
     'matplotlib',
-    'ansitable'
+    'ansitable',
+    'wurlitzer'
 ]
 
 vp_req = [

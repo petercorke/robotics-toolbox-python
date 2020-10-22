@@ -10,9 +10,19 @@ from spatialmath.base import r2q
 import numpy as np
 import os
 
+from io import StringIO
+from wurlitzer import pipes, STDOUT
+
+# out = StringIO()
+# with pipes(stdout=out, stderr=STDOUT):
+#     call_some_c_function()
+
+
 try:
+    out = StringIO()
     # with stdout_supress():
-    import pybullet as p
+    with pipes(stdout=out, stderr=STDOUT):
+        import pybullet as p
 
     cid = p.connect(p.SHARED_MEMORY)
     if (cid < 0):
