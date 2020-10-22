@@ -43,7 +43,7 @@ class VPython(Connector):
 
         self._create_empty_session()
 
-    def launch(self, is_3d=True, height=500, width=888, title='', caption='', grid=True):
+    def launch(self, is_3d=True, height=500, width=888, title='', caption='', grid=True, g_col=None, g_opc=1):
         """
         env = launch(args) launch the external program with an empty or
         specific scene as defined by args
@@ -52,13 +52,13 @@ class VPython(Connector):
 
         super().launch()
 
-        self.canvas_settings.append([is_3d, height, width, title, caption, grid])
+        self.canvas_settings.append([is_3d, height, width, title, caption, grid, g_col, g_opc])
 
         # Create the canvas with the given information
         if is_3d:
-            self.canvases.append(GraphicsCanvas3D(height, width, title, caption, grid))
+            self.canvases.append(GraphicsCanvas3D(height, width, title, caption, grid, g_col, g_opc))
         else:
-            self.canvases.append(GraphicsCanvas2D(height, width, title, caption, grid))
+            self.canvases.append(GraphicsCanvas2D(height, width, title, caption, grid, g_col, g_opc))
 
     def step(self, id, q=None, fig_num=0):
         """
