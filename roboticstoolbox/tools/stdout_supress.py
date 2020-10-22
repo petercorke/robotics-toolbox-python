@@ -80,7 +80,10 @@ from __future__ import print_function
 from contextlib import contextmanager
 import ctypes
 import errno
-from fcntl import fcntl, F_GETFL, F_SETFL
+try:
+    from fcntl import fcntl, F_GETFL, F_SETFL
+except ImportError:
+    pass
 import io
 import os
 
