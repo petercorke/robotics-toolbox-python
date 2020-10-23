@@ -331,6 +331,10 @@ class ERobot(Robot):
 
         return v
 
+    # @property
+    # def qdlim(self):
+    #     return self.qdlim
+
     @property
     def elinks(self):
         return self._elinks
@@ -1075,6 +1079,47 @@ class ERobot(Robot):
         Jv[3:, 3:] = r
 
         return Jv
+
+    def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):
+        '''
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into joint limits. Requires
+        the joint limits of the robot to be specified. See examples/mmc.py
+        for use case
+
+        :param ps: The minimum angle (in radians) in which the joint is
+            allowed to approach to its limit
+        :type ps: float
+        :param pi: The influence angle (in radians) in which the velocity
+            damper becomes active
+        :type pi: float
+        :param n: The number of joints to consider. Defaults to all joints
+        :type n: int
+        :param gain: The gain for the velocity damper
+        :type gain: float
+
+        :returns: Ain, bin as the inequality contraints for an optisator
+        :rtype: ndarray(6), ndarray(6)
+        '''
+
+        if n is None:
+            n = self.n
+
+        Ain = np.zeros((n, n))
+        bin = np.zeros(n)
+
+        for i in range(n):
+            if self.q[i] - self.qlim[0, i] <= pi:
+                bin[i] = -gain * (
+                    ((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
+                Ain[i, i] = -1
+            if self.qlim[1, i] - self.q[i] <= pi:
+                bin[i] = gain * (
+                    (self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
+                Ain[i, i] = 1
+
+        return Ain, bin
+
 
     # def teach(
     #         self, block=True, q=None, limits=None,
