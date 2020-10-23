@@ -30,7 +30,7 @@ class TestShape(unittest.TestCase):
         self.assertAlmostEqual(d0, 0.5)
         self.assertAlmostEqual(d1, 4.698463840213662e-13)
         self.assertAlmostEqual(d2, 2.5)
-        self.assertAlmostEqual(d3, -1)
+        self.assertAlmostEqual(d3, None)
 
     def test_to_dict(self):
         s1 = rp.Cylinder(1, 1)
@@ -67,3 +67,14 @@ class TestShape(unittest.TestCase):
     def test_mesh(self):
         ur = rp.models.UR5()
         ur.links[1].collision[0].closest_point(ur.links[2].collision[0])
+
+    def test_collision(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(0.5, 0, 0))
+        s2 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+
+        c0 = s0.collided(s1)
+        c1 = s0.collided(s2)
+
+        self.assertTrue(c0)
+        self.assertFalse(c1)

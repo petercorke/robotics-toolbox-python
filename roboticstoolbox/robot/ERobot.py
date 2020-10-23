@@ -1120,6 +1120,88 @@ class ERobot(Robot):
 
         return Ain, bin
 
+    # def link_collision_damper(self, link, col, ob, q):
+    #     dii = 5
+    #     di = 0.3
+    #     ds = 0.05
+
+    #     ret = p.getClosestPoints(col.co, ob.co, dii)
+
+    #     if len(ret) > 0:
+    #         ret = ret[0]
+    #         wTlp = sm.SE3(ret[5])
+    #         wTcp = sm.SE3(ret[6])
+    #         lpTcp = wTlp.inv() * wTcp
+
+    #         d = ret[8]
+
+    #     if d < di:
+    #         n = lpTcp.t / d
+    #         nh = np.expand_dims(np.r_[n, 0, 0, 0], axis=0)
+
+    #         Je = r.jacobe(q, from_link=r.base_link, to_link=link, offset=col.base)
+    #         n = Je.shape[1]
+    #         dp = nh @ ob.v
+    #         l_Ain = np.zeros((1, 13))
+    #         l_Ain[0, :n] = nh @ Je
+    #         l_bin = (0.8 * (d - ds) / (di - ds)) + dp
+    #     else:
+    #         l_Ain = None
+    #         l_bin = None
+
+    #     return l_Ain, l_bin, d, wTcp
+
+    def closest_point(self, shape, inf_dist=1.0):
+        '''
+        closest_point(shape, inf_dist) returns the minimum euclidean
+        distance between this robot and shape, provided it is less than
+        inf_dist. It will also return the points on self and shape in the
+        world frame which connect the line of length distance between the
+        shapes. If the distance is negative then the shapes are collided.
+
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param inf_dist: The minimum distance within which to consider
+            the shape
+        :type inf_dist: float
+        :returns: d, p1, p2 where d is the distance between the shapes,
+            p1 and p2 are the points in the world frame on the respective
+            shapes
+        :rtype: float, SE3, SE3
+        '''
+
+        d = 10000
+        p1 = None,
+        p2 = None
+
+        for link in self.links:
+            td, tp1, tp2 = link.closest_point(shape, inf_dist)
+
+            if td is not None and td < d:
+                d = td
+                p1 = tp1
+                p2 = tp2
+
+        if d == 10000:
+            d = None
+
+        return d, p1, p2
+
+    def collided(self, shape):
+        '''
+        collided(shape) checks if this robot and shape have collided
+
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :returns: True if shapes have collided
+        :rtype: bool
+        '''
+
+        for link in self.links:
+            if link.collided(shape):
+                return True
+
+        return False
 
     # def teach(
     #         self, block=True, q=None, limits=None,

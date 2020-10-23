@@ -207,7 +207,8 @@ class Shape(object):
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between self and shape, provided it is less than inf_dist.
         It will also return the points on self and shape in the world frame
-        which connect the line of length distance between the shapes.
+        which connect the line of length distance between the shapes. If the
+        distance is negative then the shapes are collided.
 
         :param shape: The shape to compare distance to
         :type shape: Shape
@@ -236,9 +237,9 @@ class Shape(object):
         ret = p.getClosestPoints(self.co, shape.co, inf_dist)
 
         if len(ret) == 0:
-            d = -1
-            p1 = SE3()
-            p2 = SE3()
+            d = None
+            p1 = None
+            p2 = None
         else:
             ret = ret[0]
             d = ret[8]
@@ -246,6 +247,23 @@ class Shape(object):
             p2 = SE3(ret[6])
 
         return d, p1, p2
+
+    def collided(self, shape):
+        '''
+        collided(shape) checks if self and shape have collided
+
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :returns: True if shapes have collided
+        :rtype: bool
+        '''
+
+        d, _, _ = self.closest_point(shape)
+
+        if d is not None and d <= 0:
+            return True
+        else:
+            return False
 
 
 class Mesh(Shape):

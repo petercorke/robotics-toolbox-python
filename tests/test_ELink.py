@@ -213,6 +213,31 @@ class TestELink(unittest.TestCase):
         with self.assertRaises(TypeError):
             l0.geometry = 1
 
+    def test_dist(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        p = rp.models.Panda()
+        link = p.links[3]
+
+        d0, _, _ = link.closest_point(s0)
+        d1, _, _ = link.closest_point(s1, 5)
+        d2, _, _ = link.closest_point(s1)
+
+        self.assertAlmostEqual(d0, -0.5599999999995913)
+        self.assertAlmostEqual(d1, 2.44)
+        self.assertAlmostEqual(d2, None)
+
+    def test_collided(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        p = rp.models.Panda()
+        link = p.links[3]
+        c0 = link.collided(s0)
+        c1 = link.collided(s1)
+
+        self.assertTrue(c0)
+        self.assertFalse(c1)
+
 
 if __name__ == '__main__':
 
