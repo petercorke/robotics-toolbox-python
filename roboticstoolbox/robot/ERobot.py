@@ -1120,10 +1120,13 @@ class ERobot(Robot):
 
         return Ain, bin
 
-    # def link_collision_damper(self, link, col, ob, q):
+    # def link_collision_damper(self, links=None, col, ob, q):
     #     dii = 5
     #     di = 0.3
     #     ds = 0.05
+
+    #     if links is None:
+    #         links = self.links[1:]
 
     #     ret = p.getClosestPoints(col.co, ob.co, dii)
 

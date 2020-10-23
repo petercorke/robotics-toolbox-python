@@ -100,6 +100,28 @@ while not arrived:
     # Form the joint limit velocity damper
     Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps, pi, n)
 
+    for link in links:
+        if link.jtype == link.VARIABLE:
+            j += 1
+        for col in link.collision:
+            obj = s0
+            l_Ain, l_bin, ret, wTcp = link_calc(link, col, obj, q[:j])
+            if ret < closest:
+                closest = ret
+                closest_obj = obj
+                closest_p = wTcp
+
+            if l_Ain is not None and l_bin is not None:
+                if Ain is None:
+                    Ain = l_Ain
+                else:
+                    Ain = np.r_[Ain, l_Ain]
+
+                if bin is None:
+                    bin = np.array(l_bin)
+                else:
+                    bin = np.r_[bin, l_bin]
+
     # Linear component of objective function: the manipulability Jacobian
     c = np.r_[-panda.jacobm().reshape((n,)), np.zeros(6)]
 
