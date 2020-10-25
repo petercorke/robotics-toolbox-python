@@ -1,15 +1,19 @@
-Arm Type Robots - ETS
-=====================
+Elementary transform sequence (ETS) models
+==========================================
 
 .. codeauthor:: Jesse Haviland
 
-A number of models are defined in terms of Denavit-Hartenberg parameters, either
-standard or modified.  They can be listed by:
+A number of models are defined in terms of elementary transform sequences.  
+They can be listed by:
 
 .. runblock:: pycon
 
    >>> import roboticstoolbox as rtb 
    >>> rtb.models.list(mtype="ETS")
+
+:references:
+
+   - https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters/
 
 ETS - 3D
 --------

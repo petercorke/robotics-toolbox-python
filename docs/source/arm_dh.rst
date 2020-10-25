@@ -1,15 +1,9 @@
-Arm Type Robots - DH
-====================
+Denavit-Hartenberg models
+=========================
 
 .. codeauthor:: Jesse Haviland
 
-A number of models are defined in terms of Denavit-Hartenberg parameters, either
-standard or modified.  They can be listed by:
 
-.. runblock:: pycon
-
-   >>> import roboticstoolbox as rtb 
-   >>> rtb.models.list(mtype="DH")
 
 DHRobot
 -------
@@ -20,7 +14,7 @@ DHRobot
 
 The various :ref:`DH Models` all subclass this class.
 
-.. automodule:: roboticstoolbox.robot.DHRobot
+.. automodule:: roboticstoolbox.robot.DHRobot.DHRobot
    :members:
    :undoc-members:
    :show-inheritance:
@@ -36,7 +30,7 @@ The ``DHRobot`` is defined by a list of ``DHLink`` subclass objects.
    :parts: 2
 
 
-.. automodule:: roboticstoolbox.robot.DHLink
+.. autoclass:: roboticstoolbox.robot.DHLink
    :members:
    :undoc-members:
    :show-inheritance:
@@ -44,42 +38,42 @@ The ``DHRobot`` is defined by a list of ``DHLink`` subclass objects.
 
 Revolute - standard DH
 ^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: roboticstoolbox.robot.RevoluteDH
-   :members:
-   :undoc-members:
+
+.. autoclass:: roboticstoolbox.robot.DHLink.RevoluteDH
    :show-inheritance:
-   :inherited-members:
 
 Prismatic - standard DH
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: roboticstoolbox.robot.PrismaticDH
-   :members:
-   :undoc-members:
+
+.. autoclass:: roboticstoolbox.robot.DHLink.PrismaticDH
    :show-inheritance:
-   :inherited-members:
    
 
 Revolute - modified DH
 ^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: roboticstoolbox.robot.RevoluteMDH
-   :members:
-   :undoc-members:
+
+.. autoclass:: roboticstoolbox.robot.DHLink.RevoluteMDH
    :show-inheritance:
-   :inherited-members:
    
 Prismatic - modified DH
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. automodule:: roboticstoolbox.robot.PrismaticMDH
-   :members:
-   :undoc-members:
+
+.. autoclass:: roboticstoolbox.robot.DHLink.PrismaticMDH
    :show-inheritance:
-   :inherited-members:
 
 
 .. _DH Models:
 
 Models
 ------
+
+A number of models are defined in terms of Denavit-Hartenberg parameters, either
+standard or modified.  They can be listed by:
+
+.. runblock:: pycon
+
+   >>> import roboticstoolbox as rtb 
+   >>> rtb.models.list(mtype="DH")
 
 .. automodule:: roboticstoolbox.models.DH
    :members:
