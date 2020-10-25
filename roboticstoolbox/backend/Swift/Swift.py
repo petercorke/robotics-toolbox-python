@@ -13,7 +13,32 @@ import spatialmath as sm
 
 
 class Swift(Connector):  # pragma nocover
+    """
+    Graphical backend using Swift
 
+    Swift is an Electron app built on three.js. It supports many 3D graphical
+    primitives including meshes, boxes, ellipsoids and lines. It can render
+    Collada objects in full color.
+
+    Example:
+
+    .. code-block:: python
+        :linenos:
+
+        import roboticstoolbox as rtb
+
+        robot = rtb.models.DH.Panda()  # create a robot
+
+        pyplot = rtb.backend.Swift()   # create a Swift backend
+        pyplot.add(robot)              # add the robot to the backend
+        robot.q = robot.qz             # set the robot configuration
+        pyplot.step()                  # update the backend and graphical view
+
+    :references:
+
+        - https://github.com/jhavl/swift
+        
+    """
     def __init__(self):
         super(Swift, self).__init__()
 
@@ -24,11 +49,13 @@ class Swift(Connector):  # pragma nocover
     #
 
     def launch(self):
-        '''
-        env = launch(args) launch the external program with an empty or
-        specific scene as defined by args
+        """
+        Launch a graphical backend in Swift
 
-        '''
+        ``env = launch(args)`` create a 3D scene in a running Swift instance as
+        defined by args, and returns a reference to the backend.
+
+        """
 
         super().launch()
 
@@ -39,20 +66,29 @@ class Swift(Connector):  # pragma nocover
         self.swift.connect("tcp://127.0.0.1:4242")
 
     def step(self, dt=50):
-        '''
-        state = step(args) triggers the external program to make a time step
-        of defined time updating the state of the environment as defined by
-        the robot's actions.
+        """
+        Update the graphical scene
 
-        The will go through each robot in the list and make them act based on
-        their control type (position, velocity, acceleration, or torque). Upon
-        acting, the other three of the four control types will be updated in
-        the internal state of the robot object. The control type is defined
-        by the robot object, and not all robot objects support all control
-        types.
+        :param dt: time step in milliseconds, defaults to 50
+        :type dt: int, optional
+ 
+        ``env.step(args)`` triggers an update of the 3D scene in the Swift
+        window referenced by ``env``.
 
-        '''
+        .. note:: 
 
+            - Each robot in the scene is updated based on
+              their control type (position, velocity, acceleration, or torque).
+            - Upon acting, the other three of the four control types will be
+              updated in the internal state of the robot object. 
+            - The control type is defined by the robot object, and not all robot
+              objects support all control types.
+            - Execution is blocked for the specified interval
+
+        """
+
+        # TODO how is the pose of shapes updated prior to step?
+        
         super().step
 
         self._step_robots(dt)
@@ -62,28 +98,36 @@ class Swift(Connector):  # pragma nocover
         self._draw_all()
 
     def reset(self):
-        '''
-        state = reset() triggers the external program to reset to the
-        original state defined by launch
+        """
+        Reset the graphical scene
 
-        '''
+        ``env.reset()`` triggers a reset of the 3D scene in the Swift window
+        referenced by ``env``. It is restored to the original state defined by
+        ``launch()``.
+
+        """
 
         super().reset
 
     def restart(self):
-        '''
-        state = restart() triggers the external program to close and relaunch
-        to thestate defined by launch
+        """
+        Restart the graphics display
 
-        '''
+        ``env.restart()`` triggers a restart of the Swift view referenced by
+        ``env``. It is closed and relaunched to the original state defined by
+        ``launch()``.
+
+        """
 
         super().restart
 
     def close(self):
-        '''
-        state = close() triggers the external program to gracefully close
+        """
+        Close the graphics display
 
-        '''
+        ``env.close()`` gracefully disconnectes from the Swift visualizer
+        referenced by ``env``.
+        """
 
         super().close()
 
@@ -92,12 +136,31 @@ class Swift(Connector):  # pragma nocover
     #
 
     def add(self, ob, show_robot=True, show_collision=False):
-        '''
-        id = add(robot) adds the robot to the external environment. robot must
-        be of an appropriate class. This adds a robot object to a list of
-        robots which will act upon the step() method being called.
+        """
+        Add a robot to the graphical scene
 
-        '''
+        :param ob: the object to add
+        :type ob: ???
+        :param show_robot: ????, defaults to True
+        :type show_robot: bool, optional
+        :param show_collision: ???, defaults to False
+        :type show_collision: bool, optional
+        :return: object id within visualizer
+        :rtype: int
+
+        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.
+
+        .. note::
+
+            - Adds the robot object to a list of robots which will be updated
+              when the ``step()`` method is called.
+
+        """
+        # id = add(robot) adds the robot to the external environment. robot must
+        # be of an appropriate class. This adds a robot object to a list of
+        # robots which will act upon the step() method being called.
+
+        # TODO can add more than a robot right?
 
         super().add()
 
@@ -115,10 +178,14 @@ class Swift(Connector):  # pragma nocover
             return id
 
     def remove(self):
-        '''
-        id = remove(robot) removes the robot to the external environment.
+        """
+        Remove a robot to the graphical scene
 
-        '''
+        ``env.remove(robot)`` removes the ``robot`` from the graphical environment.
+        """
+
+        # TODO - shouldn't this have an id argument? which robot does it remove
+        # TODO - it can remove any entity?
 
         super().remove()
 

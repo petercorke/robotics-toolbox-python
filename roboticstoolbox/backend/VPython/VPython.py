@@ -17,6 +17,34 @@ from roboticstoolbox.backend.VPython.common_functions import \
 
 
 class VPython(Connector):
+    """
+    Graphical backend using VPython
+
+    VPython is a Python API that connects to a JavaScript/WebGL 3D graphics
+    engine in a browser tab.  It supports many 3D graphical primitives including
+    meshes, boxes, ellipsoids and lines. It can not render in full color.
+
+    Example:
+
+    .. code-block:: python
+        :linenos:
+
+        import roboticstoolbox as rtb
+
+        robot = rtb.models.DH.Panda()  # create a robot
+
+        pyplot = rtb.backend.VPython() # create a VPython backend
+        pyplot.add(robot)              # add the robot to the backend
+        robot.q = robot.qz             # set the robot configuration
+        pyplot.step()                  # update the backend and graphical view
+
+    :references:
+
+        - https://vpython.org
+        
+    """
+    # TODO be able to add ellipsoids (vellipse, fellipse)
+    # TODO be able add lines (for end-effector paths)
 
     def __init__(self):
         """
@@ -34,8 +62,10 @@ class VPython(Connector):
 
     def launch(self, is_3d=True, height=500, width=888, title='', caption='', grid=True):
         """
-        env = launch(args) launch the external program with an empty or
-        specific scene as defined by args
+        Launch a graphical backend in a browser tab
+
+        ``env = launch(args)` create a 3D scene in a new browser tab as
+        defined by args, and returns a reference to the backend.
 
         """
 
@@ -51,26 +81,34 @@ class VPython(Connector):
 
     def step(self, id, q=None, fig_num=0):
         """
-        state = step(args) triggers the external program to make a time step
-        of defined time updating the state of the environment as defined by
-        the robot's actions.
+        Update the graphical scene
 
-        The will go through each robot in the list and make them act based on
-        their control type (position, velocity, acceleration, or torque). Upon
-        acting, the other three of the four control types will be updated in
-        the internal state of the robot object. The control type is defined
-        by the robot object, and not all robot objects support all control
-        types.
-
-        :param id: The Identification of the robot to remove. Can be either the DHRobot or GraphicalRobot
-        :type id: class:`roboticstoolbox.robot.DHRobot.DHRobot`,
-                  class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
-        :param q: The joint angles/configuration of the robot (Optional, if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param fig_num: The canvas index to delete the robot from, defaults to the initial one
-        :type fig_num: `int`, optional
-        :raises ValueError: Figure number must be between 0 and total number of canvases
+        :param id: The Identification of the robot to remove. Can be either the
+            DHRobot or GraphicalRobot
+        :type id: :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
+            :class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+        :param q: The joint angles/configuration of the robot (Optional, if not
+            supplied will use the stored q values). 
+        :type q: float ndarray(n) 
+        :param fig_num: The canvas index to delete the robot from, defaults to the
+            initial one 
+        :type fig_num: int, optional 
+        :raises ValueError: Figure number must be between 0 and total number of
+            canvases 
         :raises TypeError: Input must be a DHLink or GraphicalRobot
+
+        ``env.step(args)`` triggers an update of the 3D scene in the browser
+        window referenced by ``env``.
+
+        .. note:: 
+
+            - Each robot in the scene is updated based on
+              their control type (position, velocity, acceleration, or torque).
+            - Upon acting, the other three of the four control types will be
+              updated in the internal state of the robot object. 
+            - The control type is defined by the robot object, and not all robot
+              objects support all control types.
+            - Execution is blocked for the specified interval
 
         """
 
@@ -104,8 +142,11 @@ class VPython(Connector):
 
     def reset(self):
         """
-        state = reset() triggers the external program to reset to the
-        original state defined by launch
+        Reset the graphical scene
+
+        ``env.reset()`` triggers a reset of the 3D scene in the browser window
+        referenced by ``env``. It is restored to the original state defined by
+        ``launch()``.
 
         """
 
@@ -133,8 +174,11 @@ class VPython(Connector):
 
     def restart(self):
         """
-        state = restart() triggers the external program to close and relaunch
-        to the state defined by launch
+        Restart the graphics display
+
+        ``env.restart()`` triggers a restart of the browser view referenced by
+        ``env``. It is closed and relaunched to the original state defined by
+        ``launch()``.
 
         """
 
@@ -154,7 +198,10 @@ class VPython(Connector):
 
     def close(self):
         """
-        state = close() triggers the external program to gracefully close
+        Close the graphics display
+
+        ``env.close()`` gracefully closes the browser tab browser view
+        referenced by ``env``.
 
         """
 
@@ -173,19 +220,32 @@ class VPython(Connector):
 
     def add(self, fig_num, name, dhrobot):
         """
-        id = add(robot) adds the robot to the external environment. robot must
-        be of an appropriate class. This adds a robot object to a list of
-        robots which will act upon the step() method being called.
+        Add a robot to the graphical scene
 
-        :param fig_num: The canvas number to place the robot in
-        :type fig_num: `int`
-        :param name: The name of the robot
-        :type name: `str`
-        :param dhrobot: The DHRobot object (if applicable)
-        :type dhrobot: class:`roboticstoolbox.robot.DHRobot.DHRobot`, None
+        :param fig_num: The canvas number to place the robot in 
+        :type fig_num: int
+        :param name: The name of the robot 
+        :type name: `str` 
+        :param dhrobot: The ``DHRobot`` object (if applicable) 
+        :type dhrobot: class:`~roboticstoolbox.robot.DHRobot.DHRobot`, None 
         :raises ValueError: Figure number must be between 0 and number of figures created
+        :return: object id within visualizer
+        :rtype: int
+
+        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.
+
+        .. note::
+
+            - ``robot`` must be of an appropriate class. 
+            - Adds the robot object to a list of robots which will be updated
+              when the ``step()`` method is called.
 
         """
+
+        # TODO - name can come from the robot object, maybe an override name?
+        # TODO - why dhrobot "if applicable"?
+        # TODO - what about other classes of robot?
+        # TODO - what about adding ellipsoids?
 
         super().add()
 
@@ -199,15 +259,21 @@ class VPython(Connector):
 
     def remove(self, id, fig_num=0):
         """
-        id = remove(robot) removes the robot to the external environment.
+        Remove a robot to the graphical scene
 
-        :param id: The Identification of the robot to remove. Can be either the DHLink or GraphicalRobot
-        :type id: class:`roboticstoolbox.robot.DHRobot.DHRobot`,
+        :param id: The id of the robot to remove. Can be either the DHLink or 
+            GraphicalRobot
+        :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
                   class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
-        :param fig_num: The canvas index to delete the robot from, defaults to the initial one
-        :type fig_num: `int`, optional
-        :raises ValueError: Figure number must be between 0 and total number of canvases
+        :param fig_num: The canvas index to delete the robot from, defaults to
+             the initial one
+        :type fig_num: int, optional
+        :raises ValueError: Figure number must be between 0 and total number 
+            of canvases
         :raises TypeError: Input must be a DHLink or GraphicalRobot
+
+        ``env.remove(robot)`` removes the ``robot`` from the graphical environment.
+
         """
 
         super().remove()

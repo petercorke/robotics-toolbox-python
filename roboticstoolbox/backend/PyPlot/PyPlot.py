@@ -26,6 +26,30 @@ plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 
 class PyPlot(Connector):
+    """
+    Graphical backend using matplotlib
+
+    matplotlib is a common and highly portable graphics library for Python,
+    but has relatively limited 3D capability.  
+
+    Example:
+
+    .. code-block:: python
+        :linenos:
+
+        import roboticstoolbox as rtb
+
+        robot = rtb.models.DH.Panda()  # create a robot
+
+        pyplot = rtb.backend.PyPlot()  # create a PyPlot backend
+        pyplot.add(robot)              # add the robot to the backend
+        robot.q = robot.qz             # set the robot configuration
+        pyplot.step()                  # update the backend and graphical view
+
+    .. note::  PyPlot is the default backend, and ``robot.plot(q)`` effectively
+        performs lines 7-8 above.
+        
+    """
 
     def __init__(self):
 
@@ -34,10 +58,12 @@ class PyPlot(Connector):
         self.ellipses = []
 
     def launch(self, name=None, limits=None):
-        '''
-        env = launch() launchs a blank 3D matplotlib figure
+        """
+        Launch a graphical interface
 
-        '''
+        ```env = launch()``` creates a blank 3D matplotlib figure and returns
+        a reference to the backend.
+        """
 
         super().launch()
 
@@ -82,19 +108,26 @@ class PyPlot(Connector):
         # TODO still need to finish this, and get Jupyter animation working
 
     def step(self, dt=50):
-        '''
-        state = step(args) triggers the external program to make a time step
-        of defined time updating the state of the environment as defined by
-        the robot's actions.
+        """
+        Update the graphical scene
 
-        The will go through each robot in the list and make them act based on
-        their control type (position, velocity, acceleration, or torque). Upon
-        acting, the other three of the four control types will be updated in
-        the internal state of the robot object. The control type is defined
-        by the robot object, and not all robot objects support all control
-        types.
+        :param dt: time step in milliseconds, defaults to 50
+        :type dt: int, optional
+ 
+        ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
+        window referenced by ``env``.
 
-        '''
+        .. note:: 
+
+            - Each robot in the scene is updated based on
+              their control type (position, velocity, acceleration, or torque).
+            - Upon acting, the other three of the four control types will be
+              updated in the internal state of the robot object. 
+            - The control type is defined by the robot object, and not all robot
+              objects support all control types.
+            - Execution is blocked for the specified interval
+
+        """
 
         super().step()
 
@@ -111,28 +144,36 @@ class PyPlot(Connector):
         self._update_robots()
 
     def reset(self):
-        '''
-        state = reset() triggers the external program to reset to the
-        original state defined by launch
+        """
+        Reset the graphical scene
 
-        '''
+        ``env.reset()`` triggers a reset of the 3D scene in the matplotlib
+        window referenced by ``env``. It is restored to the original state
+        defined by ``launch()``.
+        """
+        # TODO what does this actually do for matplotlib??
 
         super().reset()
 
     def restart(self):
-        '''
-        state = restart() triggers the external program to close and relaunch
-        to thestate defined by launch
+        """
+        Restart the graphics display
 
-        '''
+        ``env.restart()`` triggers a restart of the matplotlib view referenced
+        by ``env``. It is closed and relaunched to the original state defined by
+        ``launch()``.
+
+        """
+        # TODO what does this actually do for matplotlib??
 
         super().restart()
 
     def close(self):
-        '''
-        close() closes the plot
-
-        '''
+        """
+        ``env.close()`` gracefully closes the matplotlib window
+        referenced by ``env``.
+        """
+        # TODO what does this actually do for matplotlib??
 
         super().close()
 
@@ -146,12 +187,37 @@ class PyPlot(Connector):
     def add(
             self, ob, readonly=False, display=True,
             jointaxes=True, eeframe=True, shadow=True, name=True):
-        '''
-        id = add(robot) adds the robot to the external environment. robot must
-        be of an appropriate class. This adds a robot object to a list of
-        robots which will act upon the step() method being called.
+        """
+        Add a robot to the graphical scene
 
-        '''
+        :param ob: [description]
+        :type ob: [type]
+        :param readonly: [description], defaults to False
+        :type readonly: bool, optional
+        :param display: [description], defaults to True
+        :type display: bool, optional
+        :param jointaxes: [description], defaults to True
+        :type jointaxes: bool, optional
+        :param eeframe: [description], defaults to True
+        :type eeframe: bool, optional
+        :param shadow: [description], defaults to True
+        :type shadow: bool, optional
+        :param name: [description], defaults to True
+        :type name: bool, optional
+
+        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.
+
+        .. note::
+
+            - ``robot`` must be of an appropriate class. 
+            - Adds the robot object to a list of robots which will be updated
+              when the ``step()`` method is called.
+
+        """
+        # TODO please fill in the options
+        # TODO it seems that add has different args for every backend, are
+        # any common ones?  If yes, they should be in the superclass and we
+        # pass kwargs to that
 
         super().add()
 
@@ -170,10 +236,23 @@ class PyPlot(Connector):
         self._set_axes_equal()
 
     def remove(self):
-        '''
-        id = remove(robot) removes the robot to the external environment.
+        """
+        Remove a robot to the graphical scene
 
-        '''
+        :param id: The id of the robot to remove. Can be either the DHLink or 
+            GraphicalRobot
+        :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
+                  class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+        :param fig_num: The canvas index to delete the robot from, defaults to
+             the initial one
+        :type fig_num: int, optional
+        :raises ValueError: Figure number must be between 0 and total number 
+            of canvases
+        :raises TypeError: Input must be a DHLink or GraphicalRobot
+
+        ``env.remove(robot)`` removes the ``robot`` from the graphical environment.
+        """
+        # TODO should be an id to remove?
 
         super().remove()
 
@@ -232,13 +311,13 @@ class PyPlot(Connector):
             pass
 
     def _set_axes_equal(self):
-        '''
+        """
         Make axes of 3D plot have equal scale so that spheres appear as
         spheres, cubes as cubes, etc..  This is one possible solution to
         Matplotlib's ax.set_aspect('equal') and ax.axis('equal') not
         working for 3D.
 
-        '''
+        """
 
         if self.limits is not None:
             return
