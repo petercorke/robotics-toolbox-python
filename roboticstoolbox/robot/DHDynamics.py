@@ -19,7 +19,7 @@ from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
 
 
-class Dynamics:
+class DHDynamics:
 
     def printdyn(self):
         """
@@ -1114,22 +1114,22 @@ class Dynamics:
 
         Recursive Newton-Euler for standard Denavit-Hartenberg notation.
 
-        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n
-            is the number of robot joints.  The result has shape (n,).
+        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is
+          the number of robot joints.  The result has shape (n,).
         - ``rne_dh(q, qd, qdd)`` where the arguments have shape (m,n) where n
-            is the number of robot joints and where m is the number of steps in
-            the joint
+          is the number of robot joints and where m is the number of steps in
+          the joint
         trajectory.  The result has shape (m,n).
         - ``rne_dh(p)`` where the input is a 1D array ``p`` = [q, qd, qdd] with
-        shape (3n,), and the result has shape (n,).
+          shape (3n,), and the result has shape (n,).
         - ``rne_dh(p)`` where the input is a 2D array ``p`` = [q, qd, qdd] with
-        shape (m,3n) and the result has shape (m,n).
+          shape (m,3n) and the result has shape (m,n).
 
-        .. notes::
-        - this is a pure Python implementation and slower than the .rne() which
-            is written in C.
-        - this version supports symbolic model parameters
-        - verified against MATLAB code
+        .. note::
+        - This is a pure Python implementation and slower than the .rne() which
+          is written in C.
+        - This version supports symbolic model parameters
+        - Verified against MATLAB code
         """
 
         def removesmall(x):
@@ -1390,19 +1390,19 @@ class Dynamics:
                 f = R @ f
                 wbase[k, :] = np.r_[f, nn]
 
-        if self.symbolic:
-            # simplify symbolic expressions
-            print('start symbolic simplification, this might take a while...')
-            # from sympy import trigsimp
+        # if self.symbolic:
+        #     # simplify symbolic expressions
+        #     print('start symbolic simplification, this might take a while...')
+        #     # from sympy import trigsimp
 
-            # tau = trigsimp(tau)
-            # consider using multiprocessing to spread over cores
-            #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
-            print('done')
-            if tau.shape[0] == 1:
-                return tau.reshape(self.n)
-            else:
-                return tau
+        #     # tau = trigsimp(tau)
+        #     # consider using multiprocessing to spread over cores
+        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
+        #     print('done')
+        #     if tau.shape[0] == 1:
+        #         return tau.reshape(self.n)
+        #     else:
+        #         return tau
 
         if tau.shape[0] == 1:
             return tau.flatten()

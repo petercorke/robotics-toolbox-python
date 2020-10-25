@@ -17,12 +17,12 @@ from frne import init, frne, delete
 from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
-from roboticstoolbox.robot.Dynamics import Dynamics
+from roboticstoolbox.robot.DHDynamics import DHDynamics
 from ansitable import ANSITable, Column
 from functools import wraps
 
 
-class DHRobot(Robot, Dynamics):
+class DHRobot(Robot, DHDynamics):
     """
     A superclass for arm type robots. A concrete class that represents a
     serial-link arm-type robot.  Each link and joint in the chain is
@@ -1373,6 +1373,51 @@ class DHRobot(Robot, Dynamics):
         else:
             return qt
 
+    def ikine_6s(self, T, config, _ikfunc):
+        # Undo base and tool transformations
+        if _self.base is not None:
+            T = self.base.inv() * T
+        if _self.tool is not None:
+            T = self.tool.inv() * T
+
+        q = np.zeros((len(T), 6))
+        for k, Tk in enumerate(T):
+            theta = self._ikfunc(Tk, config)
+
+            if not np.all(np.isnan(theta)):
+                # Solve for the wrist rotation
+                # We need to account for some random translations between the
+                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
+                # final frame.
+
+                # Transform of first 3 joints
+                T13 = self.A([0, 2], theta)
+
+                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
+                Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
+
+                # Tz(d6) Tx(a5) Rx(alpha6)
+                Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
+                    SE3.Rx(self.links[5].alpha)
+
+                R = np.linalg.inv(Td4.A) @ np.linalg.inv(T13.A) @ Ti @ \
+                    np.linalg.inv(Tt.A)
+
+                # The spherical wrist implements Euler angles
+                if f in config:
+                    theta[3:6] = tr2eul(R, flip=True)
+                else:
+                    theta[3:6] = tr2eul(R)
+
+                if self.links[3].alpha > 0:
+                    theta[4] = -theta[4]
+
+                # Remove the link offset angles
+                theta = [theta - link.offset for link in self.links]
+
+                q[k, :] = theta
+
+
     def ikine6s(self, T, left=True, elbow_up=True, wrist_flip=False):
         """
         Analytical inverse kinematics
@@ -2050,7 +2095,7 @@ class DHRobot(Robot, Dynamics):
         Inverse dynamics
 
         :param q: The joint angles/configuration of the robot (Optional,
-        if not supplied will use the stored q values).
+                  if not supplied will use the stored q values).
         :type q: float ndarray(n)
         :param qd: The joint velocities of the robot
         :type qd: float ndarray(n)
@@ -2059,7 +2104,7 @@ class DHRobot(Robot, Dynamics):
         :param grav: Gravity vector to overwrite robots gravity value
         :type grav: float ndarray(6)
         :param fext: Specify wrench acting on the end-effector
-             :math:`W=[F_x F_y F_z M_x M_y M_z]`
+                     :math:`W=[F_x F_y F_z M_x M_y M_z]`
         :type fext: float ndarray(6)
 
         ``tau = rne(q, qd, qdd, grav, fext)`` is the joint torque required for
@@ -2277,9 +2322,7 @@ class DHRobot(Robot, Dynamics):
         If q is a matrix (mxn) then m (mx1) is a vector of manipulability
         indices for each joint configuration specified by a row of q.
 
-
-
-        :notes:
+        .. note::
             - The 'all' option includes rotational and translational
               dexterity, but this involves adding different units. It can be
               more useful to look at the translational and rotational
@@ -2459,6 +2502,32 @@ class DHRobot(Robot, Dynamics):
         '''
         Graphical teach pendant
 
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint angles/configuration of the robot (Optional,
+                  if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param limits: Custom view limits for the plot. If not supplied will
+                       autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+                          which the joint revolves around(revolute joint) or 
+                          translates along (prismatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+                         at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
         env = teach() creates a matplotlib plot which allows the user to
         "drive" a graphical robot using a graphical slider panel. The
         robot's inital joint configuration is robot.q. This will block the
@@ -2470,31 +2539,7 @@ class DHRobot(Robot, Dynamics):
         env = teach(block=False) as avove except the plot is non-blocking. Note
         that the plot will exit when the python script finishes executing.
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
 
-        :retrun: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
 
         :notes:
             - The slider limits are derived from the joint limit properties.
