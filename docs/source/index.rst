@@ -12,3 +12,4 @@ Robotics Toolbox for Python
 
    arm_dh
    arm_ets
+   arm_urdf
