@@ -7,16 +7,32 @@ from roboticstoolbox import DHRobot, RevoluteDH
 
 class LWR4(DHRobot):
     """
-    A class representing the Kuka LWR-IV robot arm.
+    Class that models a LWR-IV manipulator
 
-    DH Parameters taken from
-    http://www.diag.uniroma1.it/~deluca/rob1_en/09_Exercise_DH_KukaLWR4.pdf
+    ``LWR4()`` is a class which models a Kuka LWR-IV robot and
+    describes its kinematic characteristics using standard DH
+    conventions.
 
+    .. runblock:: pycon
 
-    Example::
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.LWR4()
+        >>> print(robot)
 
-        >>> robot = LWR4()
+    Defined joint configurations are:
 
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
+    - qs, arm is stretched out in the X direction
+    - qn, arm is at a nominal non-singular configuration
+
+    .. note:: SI units are used.
+
+    :references:
+
+        - http://www.diag.uniroma1.it/~deluca/rob1_en/09_Exercise_DH_KukaLWR4.pdf
+
+    .. codeauthor:: Peter Corke
     """
 
     def __init__(self):

@@ -7,32 +7,27 @@ from roboticstoolbox import DHRobot, RevoluteMDH
 
 class Panda(DHRobot):
     """
-    A class representing the Franka Emika Panda robot arm.
+    A class representing the Panda robot arm.
 
-    DH Parameters taken from
-    https://frankaemika.github.io/docs/control_parameters.html
+    ``Panda()`` is a class which models a Franka-Emika Panda robot and
+    describes its kinematic characteristics using modified DH
+    conventions.
 
-    Attributes:
-    --------
-        name : string
-            Name of the robot
-        manufacturer : string
-            Manufacturer of the robot
-        links : List[n]
-            Series of links which define the robot
-        base : float np.ndarray(4,4)
-            Locaation of the base
-        tool : float np.ndarray(4,4)
-            Location of the tool
-        mdh : int
-            1: Pnada is modified D&H
-        n : int
-            Number of joints in the robot
+    .. runblock:: pycon
 
-    Examples::
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Panda()
+        >>> print(robot)
 
-        >>> panda = Panda()
+    .. note:: 
+        - SI units of metres are used.
+        - The model includes a tool offset.
 
+    :references:
+        - https://frankaemika.github.io/docs/control_parameters.html
+
+    .. codeauthor:: Samuel Drew
+    .. codeauthor:: Peter Corke
     """
 
     def __init__(self):

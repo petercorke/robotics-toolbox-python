@@ -3,40 +3,44 @@
 @author: Peter Corke
 """
 
-# Note::
-# - SI units are used.
-# - Gear ratios not currently known, though reflected armature inertia
-#   is known, so gear ratios are set to 1.
-#
-# References::
-# - Kinematic data from "Modelling, Trajectory calculation and Servoing of
-#   a computer controlled arm".  Stanford AIM-177.  Figure 2.3
-# - Dynamic data from "Robot manipulators: mathematics, programming and
-#   control"
-#   Paul 1981, Tables 6.5, 6.6
-# - Dobrotin & Scheinman, "Design of a computer controlled manipulator for
-#   robot research", IJCAI, 1973.
-
-# all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.
-
 from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
 from math import pi
 import numpy as np
 
-
 class Stanford(DHRobot):
     """
-    Create model of Stanford arm manipulator
+    Class that models a Stanford arm manipulator
 
-    puma = Puma560() is a script which creates a puma SerialLink object
-    describing the kinematic and dynamic characteristics of a Unimation Puma
-    560 manipulator using standard DH conventions.
+    ``Stanford()`` is a class which models a Unimation Puma560 robot and
+    describes its kinematic and dynamic characteristics using standard DH
+    conventions.
 
-    Also define some joint configurations:
-    - qz, zero joint angle configuration, 'L' shaped configuration
-    - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the X direction
-    - qn, arm is at a nominal non-singular configuration
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Stanford()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+        - qz, zero joint angle configuration
+
+    .. note::
+        - SI units are used.
+        - Gear ratios not currently known, though reflected armature inertia
+          is known, so gear ratios are set to 1.
+
+    :references:
+        - Kinematic data from "Modelling, Trajectory calculation and Servoing of
+          a computer controlled arm".  Stanford AIM-177.  Figure 2.3
+        - Dynamic data from "Robot manipulators: mathematics, programming and
+          control"
+          Paul 1981, Tables 6.5, 6.6
+        - Dobrotin & Scheinman, "Design of a computer controlled manipulator for
+          robot research", IJCAI, 1973.
+
+    .. codeauthor:: Peter Corke
+
     """
 
     def __init__(self):

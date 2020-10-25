@@ -10,26 +10,45 @@ import numpy as np
 
 
 class Ball(DHRobot):
-    '''
-    reate model of a ball manipulator
+    """
+    Class that models a ball manipulator
 
-    Ball() creates the workspace variable ball which describes the
-    kinematic characteristics of a serial link manipulator with 50 joints
+    ``Ball()`` is a class which models a ball robot and
+    describes its kinematic characteristics using standard DH
+    conventions.
+
+    The ball robot is an *abstract* robot with an arbitrary number of joints 
     that folds into a ball shape.
 
-    Ball(N) as above but creates a manipulator with N joints.
+    .. runblock:: pycon
 
-    Also define the workspace vectors:
-    q  joint angle vector for default ball configuration
-    Reference:
-    - "A divide and conquer articulated-body algorithm for parallel O(log(n))
-    calculation of rigid body dynamics, Part 2",
-    Int. J. Robotics Research, 18(9), pp 876-892.
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Ball()
+        >>> print(robot)
 
-    Notes:
-    - Unlike most other model scripts this one is actually a function that
-    behaves like a script and writes to the global workspace.
-    '''
+    Defined joint configurations are:
+
+        - qz, zero joint angles
+        - q1, ball shaped configuration
+        
+    .. note::
+        - SI units are used.
+        - The model includes armature inertia and gear ratios.
+        - The value of m1 is given as 0 here.  Armstrong found no value for it
+          and it does not appear in the equation for tau1 after the
+          substituion is made to inertia about link frame rather than COG
+          frame.
+        - Gravity load torque is the motor torque necessary to keep the joint
+          static, and is thus -ve of the gravity caused torque.
+
+    :references:
+    
+        - "A divide and conquer articulated-body algorithm for parallel O(log(n))
+          calculation of rigid body dynamics, Part 2",
+          Int. J. Robotics Research, 18(9), pp 876-892.
+
+    .. codeauthor:: Peter Corke
+    """
 
     def __init__(self, N=10):
 
@@ -43,7 +62,7 @@ class Ball(DHRobot):
         # and build a serial link manipulator
         super(Ball, self).__init__(links, name='ball')
 
-        # zero angles, L shaped pose
+        # zero angles, ball pose
         self.addconfiguration("qz", np.zeros(N,))
         self.addconfiguration("q1", q1)
 
