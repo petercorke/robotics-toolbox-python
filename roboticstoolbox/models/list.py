@@ -3,7 +3,7 @@ from ansitable import ANSITable, Column
 # import importlib
 
 
-def list(keywords=None, dof=None):
+def list(keywords=None, dof=None, mtype=None):
     """
     Display all robot models in summary form
 
@@ -14,6 +14,9 @@ def list(keywords=None, dof=None):
 
     - ``list()`` displays a list of all models provided by the Toolbox.  It
       lists the name, manufacturer, model type, number of DoF, and keywords.
+
+    - ``list(mtype=MT)`` as above, but only displays models of type ``MT`` where
+      ``MT`` is one of "DH", "ETS" or "URDF".
 
     - ``list(keywords=KW)`` as above, but only displays models that have a
       keyword in the tuple ``KW``.
@@ -41,7 +44,12 @@ def list(keywords=None, dof=None):
         Column("keywords", headalign="^", colalign="<"),
         border="thin"
     )
-    for category in ['DH', 'URDF', 'ETS']:
+
+    if mtype is not None:
+        categories = [mtype]
+    else:
+        categories = ['DH', 'URDF', 'ETS']
+    for category in categories:
         group = m.__dict__[category]
         for cls in group.__dict__.values():
             if isinstance(cls, type) and issubclass(cls, Robot):
