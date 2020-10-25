@@ -19,8 +19,8 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Robotics Toolbox Python'
-copyright = '2020, Jesse Haviland'
-author = 'Jesse Haviland'
+copyright = '2020, Jesse Haviland and Peter Corke'
+author = 'Jesse Haviland and Peter Corke'
 
 print(__file__)
 # The full version, including alpha/beta/rc tags
@@ -67,14 +67,17 @@ exclude_patterns = ['test_*']
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-    # 'logo': '../../../../figs/icon.png',
-    # 'github_user': 'jhavl',
-    # 'github_repo': 'roboticstoolbox',
-    # 'logo_name': False,
-    # 'description': 'Robotics Toolbox for Python',
-    'analytics_id': 'UA-102222819-4'
+'github_user': 'petercorke',
+    #'github_repo': 'spatialmath-python',
+    #'logo_name': False,
+    'logo_only': False,
+    #'description': 'Spatial maths and geometry for Python',
+    'display_version': True,
+    'prev_next_buttons_location': 'both',
+    'analytics_id': 'G-11Q6WJM565',
     }
-
+html_logo = '../figs/RobToolBox_RoundLogoB.png'
+html_last_updated_fmt = '%d-%b-%Y'
 show_authors = True
 
 # Add any paths that contain custom static files (such as style sheets) here,
