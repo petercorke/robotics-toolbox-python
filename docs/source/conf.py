@@ -38,12 +38,13 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx.ext.coverage',
-    'sphinx_markdown_tables',
     'sphinx.ext.doctest',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx_autorun',
     ]
     #'recommonmark',
     #'sphinx.ext.autosummary',
-    #    
+    #     'sphinx_markdown_tables',  
 
 
 autosummary_generate = True
@@ -85,3 +86,5 @@ show_authors = True
 
 # extensions = ['rst2pdf.pdfbuilder']
 # pdf_documents = [('index', u'rst2pdf', u'Sample rst2pdf doc', u'Your Name'),]
+autorun_languages = {}
+autorun_languages['pycon_output_encoding'] = 'UTF-8'
