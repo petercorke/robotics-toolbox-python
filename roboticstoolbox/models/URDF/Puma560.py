@@ -8,16 +8,34 @@ from math import pi
 
 
 class Puma560(ERobot):
+    """
+    Class that imports a Puma 560 URDF model
+
+    ``Puma560()`` is a class which imports a Unimation Puma560 robot definition
+    from a URDF file.  The model describes its kinematic and graphical 
+    characteristics.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.Puma560()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
+    - qs, arm is stretched out in the x-direction
+    - qn, arm is at a nominal non-singular configuration
+
+    .. codeauthor:: Jesse Haviland
+    .. sectionauthor:: Peter Corke
+    """
 
     def __init__(self):
 
-        mpath = Path(rp.__file__).parent
-        fpath = mpath / 'models' / 'xacro' / \
-            'puma560_description' / 'urdf'
-        fname = 'puma560_robot.urdf.xacro'
-
-        args = super(Puma560, self).urdf_to_ets_args(
-            (fpath / fname).as_posix())
+        args = super().urdf_to_ets_args(
+            "puma560_description/urdf/puma560_robot.urdf.xacro")
 
         super().__init__(
             args[0],

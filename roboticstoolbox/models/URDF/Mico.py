@@ -6,16 +6,32 @@ from pathlib import Path
 import roboticstoolbox as rp
 
 
-class j2n4s300(ERobot):
+class Mico(ERobot):
+    """
+    Class that imports a Mico URDF model
 
+    ``Panda()`` is a class which imports a Kinova Mico robot definition
+    from a URDF file.  The model describes its kinematic and graphical 
+    characteristics.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.Mico()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
+
+    .. codeauthor:: Jesse Haviland
+    .. sectionauthor:: Peter Corke
+    """
     def __init__(self):
 
-        mpath = Path(rp.__file__).parent
-        fpath = mpath / 'models' / 'xacro' / 'kinova_description' / 'urdf'
-        fname = 'j2n4s300_standalone.xacro'
-
         args = super().urdf_to_ets_args(
-            (fpath / fname).as_posix())
+            "kinova_description/urdf/j2n4s300_standalone.xacro")
 
         super().__init__(
                 args[0],

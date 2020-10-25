@@ -7,15 +7,34 @@ from pathlib import Path
 
 
 class px100(ERobot):
+    """
+    Class that imports a PX100 URDF model
 
+    ``px100()`` is a class which imports an Interbotix px100 robot definition
+    from a URDF file.  The model describes its kinematic and graphical 
+    characteristics.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.px100()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
+
+    :reference:
+        - http://www.support.interbotix.com/html/specifications/px100.html
+        
+    .. codeauthor:: Jesse Haviland
+    .. sectionauthor:: Peter Corke
+    """
     def __init__(self):
 
-        mpath = Path(rp.__file__).parent
-        fpath = mpath / 'models' / 'xacro' / 'interbotix_descriptions' / 'urdf'
-        fname = 'px100.urdf.xacro'
-
         args = super().urdf_to_ets_args(
-            (fpath / fname).as_posix())
+            "interbotix_descriptions/urdf/px100.urdf.xacro")
 
         super().__init__(
                 args[0],
@@ -32,4 +51,4 @@ class px100(ERobot):
 if __name__ == '__main__':   # pragma nocover
 
     robot = px100()
-    print(robot)
+    print(robot.links[0].mesh)

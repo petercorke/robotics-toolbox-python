@@ -4,6 +4,7 @@ Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
+import sys
 from os.path import splitext
 import numpy as np
 # import spatialmath as sp
@@ -16,6 +17,7 @@ from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.robot.Robot import Robot
+from pathlib import PurePath, PurePosixPath
 
 # try:
 #     import pybullet as p
@@ -248,13 +250,33 @@ class ERobot(Robot):
     #         name=urdf.name
     #     )
 
-    @staticmethod
-    def urdf_to_ets_args(file_path, tld=None):
+    def urdf_to_ets_args(self, file_path, tld=None):
+        """
+        [summary]
+
+        :param file_path: File path relative to the xacro folder
+        :type file_path: str, in Posix file path fprmat
+        :param tld: top-level directory, defaults to None
+        :type tld: str, optional
+        :return: Links and robot name
+        :rtype: tuple(ELink list, str)
+        """
+
+        # get the path to the class that defines the robot
+        classpath = sys.modules[self.__module__].__file__
+        # add on relative path to get to the URDF or xacro file
+        base_path = PurePath(classpath).parent.parent / 'xacro' 
+        file_path = base_path / PurePosixPath(file_path)
         name, ext = splitext(file_path)
 
         if ext == '.xacro':
+            # it's a xacro file, preprocess it
+            if tld is not None:
+                tld = base_path / PurePosixPath(tld)
             urdf_string = xacro.main(file_path, tld)
             urdf = URDF.loadstr(urdf_string, file_path)
+
+            ## QUERY: what happens if not a .xacro file, urdf is not set?
 
         return urdf.elinks, urdf.name
 

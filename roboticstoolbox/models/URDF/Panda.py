@@ -3,19 +3,36 @@
 import numpy as np
 import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
 
 
 class Panda(ERobot):
+    """
+    Class that imports a Panda URDF model
 
+    ``Panda()`` is a class which imports a Franka-Emika Panda robot definition
+    from a URDF file.  The model describes its kinematic and graphical 
+    characteristics.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.Panda()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
+    - qs, arm is stretched out in the x-direction
+    - qn, arm is at a nominal non-singular configuration
+
+    .. codeauthor:: Jesse Haviland
+    .. sectionauthor:: Peter Corke
+    """
     def __init__(self):
 
-        mpath = Path(rp.__file__).parent
-        fpath = mpath / 'models' / 'xacro' / 'franka_description' / 'robots'
-        fname = 'panda_arm_hand.urdf.xacro'
-
-        args = super(Panda, self).urdf_to_ets_args(
-            (fpath / fname).as_posix())
+        args = super().urdf_to_ets_args(
+            "franka_description/robots/panda_arm_hand.urdf.xacro")
 
         super().__init__(
             args[0],
@@ -36,4 +53,4 @@ class Panda(ERobot):
 if __name__ == '__main__':   # pragma nocover
 
     robot = Panda()
-    print(robot)
+    print(robot.links)

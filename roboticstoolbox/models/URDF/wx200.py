@@ -7,15 +7,34 @@ from pathlib import Path
 
 
 class wx200(ERobot):
+    """
+    Class that imports a WX200 URDF model
 
+    ``wx200()`` is a class which imports an Interbotix wx200 robot definition
+    from a URDF file.  The model describes its kinematic and graphical 
+    characteristics.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.wx200()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+    - qz, zero joint angle configuration, 'L' shaped configuration
+    - qr, vertical 'READY' configuration
+
+    :reference:
+        - http://www.support.interbotix.com/html/specifications/wx200.html
+
+    .. codeauthor:: Jesse Haviland
+    .. sectionauthor:: Peter Corke
+    """
     def __init__(self):
 
-        mpath = Path(rp.__file__).parent
-        fpath = mpath / 'models' / 'xacro' / 'interbotix_descriptions' / 'urdf'
-        fname = 'wx200.urdf.xacro'
-
         args = super().urdf_to_ets_args(
-            (fpath / fname).as_posix())
+            "interbotix_descriptions/urdf/wx200.urdf.xacro")
 
         super().__init__(
                 args[0],
