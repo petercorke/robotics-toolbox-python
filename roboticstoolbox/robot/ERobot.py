@@ -265,7 +265,7 @@ class ERobot(Robot):
         # get the path to the class that defines the robot
         classpath = sys.modules[self.__module__].__file__
         # add on relative path to get to the URDF or xacro file
-        base_path = PurePath(classpath).parent.parent / 'xacro' 
+        base_path = PurePath(classpath).parent.parent / 'xacro'
         file_path = base_path / PurePosixPath(file_path)
         name, ext = splitext(file_path)
 

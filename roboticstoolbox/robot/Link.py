@@ -5,6 +5,7 @@ from spatialmath.base.argcheck import getvector, \
     isscalar, isvector, ismatrix
 from ansitable import ANSITable, Column
 
+
 def _listen_dyn(func):
     """
     Decorator for property setters
@@ -29,6 +30,7 @@ def _listen_dyn(func):
             args[0]._robot.dynchanged()
         return func(*args)
     return wrapper_listen_dyn
+
 
 class Link:
     """
@@ -67,7 +69,8 @@ class Link:
         :parts: 2
     """
 
-    def __init__(self,             
+    def __init__(
+            self,
             name='',
             offset=0.0,
             qlim=np.zeros(2),
@@ -101,7 +104,6 @@ class Link:
         self.B = B
         self.Tc = Tc
         self.G = G
-
 
     def copy(self):
         """
@@ -407,7 +409,7 @@ class Link:
         - ``link.flip = ...`` checks and sets the joint flip status
 
         Joint flip defines the direction of motion of the joint.
-        
+
         ``flip = False`` is conventional motion direction:
 
             - revolute motion is a positive rotation about the z-axis
@@ -485,13 +487,14 @@ class Link:
 
         - ``link.I = ...`` checks and sets the link inertia
 
-        Link inertia is a symmetric 3x3 matrix describing the inertia with respect
-        to a frame with its origin at the centre of mass, and with axes parallel to those of
-        the link frame.
+        Link inertia is a symmetric 3x3 matrix describing the inertia with
+        respect to a frame with its origin at the centre of mass, and with
+        axes parallel to those of the link frame.
 
         The inertia matrix is
         
         :math:`\begin{bmatrix} I_{xx} & I_{xy} & I_{xz} \\ I_{xy} & I_{yy} & I_{yz} \\I_{xz} & I_{yz} & I_{zz} \end{bmatrix}`
+
 
         and can be specified as either:
 
