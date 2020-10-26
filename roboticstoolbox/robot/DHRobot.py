@@ -243,10 +243,8 @@ class DHRobot(Robot, DHDynamics):
             gravity=self.gravity)
 
     def _copy(self):
-        L = []
 
-        for i in range(self.n):
-            L.append(self.links[i]._copy())
+        L = [link.copy() for link in self]
 
         r2 = DHRobot(
             L,
