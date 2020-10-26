@@ -53,7 +53,7 @@ class Link:
     :type I: ndarray
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]
+    :param B: dynamic - motor viscous friction
     :type B: float, or ndarray(2,)
     :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
     :type Tc: ndarray(2,)
@@ -230,10 +230,15 @@ class Link:
 
     def islimit(self, q):
         """
-        Checks if the joint is exceeding a joint limit
+        Checks if joint exceeds limit
 
+        :param q: joint coordinate
+        :type q: float
         :return: True if joint is exceeded
         :rtype: bool
+
+        ``link.islimit(q)`` is True if ``q`` exceeds the joint limits defined
+        by ``link``.
 
         :seealso: :func:`qlim`
         """
@@ -245,17 +250,20 @@ class Link:
 
     def nofriction(self, coulomb=True, viscous=False):
         """
-        ``l2 = nofriction(coulomb, viscous)`` copies the link and returns a
-        link with the same parameters except, the Coulomb and/or viscous
-        friction parameter to zero.
-
-        ``l2 = nofriction()`` as above except the the Coulomb parameter is set
-        to zero.
+        Clone link without friction
 
         :param coulomb: if True, will set the Coulomb friction to 0
         :type coulomb: bool
         :param viscous: if True, will set the viscous friction to 0
         :type viscous: bool
+
+        ``link.nofriction()`` is a copy of the link instance with the same 
+        parameters except, the Coulomb and/or viscous friction parameters are
+        set to zero.
+
+        .. note:: For simulation it can be useful to remove Couloumb friction
+            which can cause problems for numerical integration.
+
         """
 
         # Copy the Link
