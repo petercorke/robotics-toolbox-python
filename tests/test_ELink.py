@@ -145,16 +145,16 @@ class TestELink(unittest.TestCase):
 
         self.assertEqual(
             s0,
-            "m     =  0.00 \n"
-            "r     =  0.00 0.00 0.00 \n"
-            "        | 0.00 0.00 0.00 | \n"
-            "I     = | 0.00 0.35 0.00 | \n"
-            "        | 0.00 0.00 0.00 | \n"
-            "Jm    =  0.00 \n"
-            "B     =  0.00 \n"
-            "Tc    =  0.40(+) -0.43(-) \n"
-            "G     =  -62.61 \n"
-            "qlim  =  -2.79 to 2.79")
+"""m     =         0 
+r     =         0        0        0 
+        |        0        0        0 | 
+I     = |        0     0.35        0 | 
+        |        0        0        0 | 
+Jm    =         0 
+B     =         0 
+Tc    =       0.4(+)    -0.43(-) 
+G     =       -63 
+qlim  =      -2.8 to      2.8""")
 
     def test_properties(self):
         l0 = rp.ELink()

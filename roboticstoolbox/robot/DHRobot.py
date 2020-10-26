@@ -13,43 +13,42 @@ from spatialmath.base.transforms3d import tr2delta, tr2eul
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds, LinearConstraint
-from frne import init, frne, delete
 from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
 from roboticstoolbox.robot.DHDynamics import DHDynamics
 from ansitable import ANSITable, Column
-from functools import wraps
 
 
 class DHRobot(Robot, DHDynamics):
     """
-    A superclass for arm type robots. A concrete class that represents a
-    serial-link arm-type robot.  Each link and joint in the chain is
-    described by a Link-class object using Denavit-Hartenberg parameters
-    (standard or modified).
+    Class for robots defined using Denavit-Hartenberg notation
 
-    :param L: Series of links which define the robot
+    :param L: List of links which define the robot
     :type L: list(n)
     :param name: Name of the robot
-    :type name: string
+    :type name: str
     :param manufacturer: Manufacturer of the robot
-    :type manufacturer: string
+    :type manufacturer: str
     :param base: Locaation of the base
     :type base: SE3
     :param tool: Location of the tool
     :type tool: SE3
     :param gravity: The gravity vector
-    :type n: ndarray(3)
+    :type gravity: ndarray(3)
 
-    :notes:
-        - Link subclass elements passed in must be all standard, or all
+    A concrete superclass for arm type robots defined using Denavit-Hartenberg
+    notation, that represents a serial-link arm-type robot.  Each link and joint
+    in the chain is described by a DHLink-class object using Denavit-Hartenberg
+    parameters (standard or modified).
+
+    .. note:: Link subclass elements passed in must be all standard, or all
           modified, DH parameters.
 
-    :references:
+    :reference:
+
         - Robotics, Vision & Control, Chaps 7-9,
           P. Corke, Springer 2011.
-
         - Robot, Modeling & Control,
           M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
 
@@ -97,7 +96,6 @@ class DHRobot(Robot, DHDynamics):
 
         # rne parameters
         self._rne_ob = None
-        self._dynchanged = True
 
     def __str__(self):
         """
@@ -182,39 +180,6 @@ class DHRobot(Robot, DHDynamics):
 
         return s + "\n" + str(table)
 
-        # axes = ''
-        # L = ''
-
-        # for i in range(self.n):
-        #     L += str(self.links[i]) + '\n'
-
-        #     if not self.links[i].sigma:
-        #         axes += 'R'
-        #     else:
-        #         axes += 'P'
-
-        # if not self.mdh:
-        #     dh = 'std DH'
-        # else:
-        #     dh = 'mod DH'
-
-        # rpy = self.tool.rpy()
-
-        # for i in range(3):
-        #     if rpy[i] == 0:
-        #         rpy[i] = 0
-
-        # model = '\n%s (%s): %d axis, %s, %s\n'\
-        #     'Parameters:\n'\
-        #     '%s\n'\
-        #     'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
-        #         self.name, self.manufacturer, self.n, axes, dh,
-        #         L,
-        #         self.tool.A[0, 3], self.tool.A[1, 3],
-        #         self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
-        #     )
-
-        # return model
 
     def __add__(self, L):
         nlinks = []
@@ -242,11 +207,11 @@ class DHRobot(Robot, DHDynamics):
             tool=self.tool,
             gravity=self.gravity)
 
-    def _copy(self):
+    def copy(self):
 
         L = [link.copy() for link in self]
 
-        r2 = DHRobot(
+        new = DHRobot(
             L,
             name=self.name,
             manufacturer=self.manufacturer,
@@ -254,60 +219,56 @@ class DHRobot(Robot, DHDynamics):
             tool=self.tool,
             gravity=self.gravity)
 
-        r2.q = self.q
-        r2.qd = self.qd
-        r2.qdd = self.qdd
+        new.q = self.q
+        new.qd = self.qd
+        new.qdd = self.qdd
 
-        return r2
+        return new
 
-    def _init_rne(self):
-        # Compress link data into a 1D array
-        L = np.zeros(24 * self.n)
 
-        for i in range(self.n):
-            j = i * 24
-            L[j] = self.links[i].alpha
-            L[j + 1] = self.links[i].a
-            L[j + 2] = self.links[i].theta
-            L[j + 3] = self.links[i].d
-            L[j + 4] = self.links[i].sigma
-            L[j + 5] = self.links[i].offset
-            L[j + 6] = self.links[i].m
-            L[j + 7:j + 10] = self.links[i].r.flatten()
-            L[j + 10:j + 19] = self.links[i].I.flatten()
-            L[j + 19] = self.links[i].Jm
-            L[j + 20] = self.links[i].G
-            L[j + 21] = self.links[i].B
-            L[j + 22:j + 24] = self.links[i].Tc.flatten()
-
-        self._rne_ob = init(self.n, self.mdh, L, self.gravity)
-
-    def _check_rne(func):
-        @wraps(func)
-        def wrapper_check_rne(*args, **kwargs):
-            if args[0]._rne_ob is None or args[0]._rne_changed:
-                args[0].delete_rne()
-                args[0]._init_rne()
-            args[0]._rne_changed = False
-            return func(*args, **kwargs)
-        return wrapper_check_rne
-
-    def delete_rne(self):
-        """
-        Frees the memory holding the robot object in c if the robot object
-        has been initialised in c.
-        """
-        if self._rne_ob is not None:
-            delete(self._rne_ob)
-            self._rne_changed = False
-            self._rne_ob = None
 
     @property
     def mdh(self):
+        """
+        Modified Denavit-Hartenberg status
+
+        :return: whether robot is defined using modified Denavit-Hartenberg
+            notation
+        :rtype: bool
+
+        Example:
+
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.mdh
+            >>> panda = rtb.models.DH.Panda()
+            >>> panda.mdh
+
+        """
         return self._mdh
 
     @property
     def d(self):
+        r"""
+        Link offset values
+
+        :return: List of link offset values :math:`d_j`.
+        :rtype: ndarray(n,)
+
+        The following are equivalent::
+
+                robot.links[j].d
+                robot.d[j]
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.d
+        """
         v = []
         for i in range(self.n):
             v.append(self.links[i].d)
@@ -315,6 +276,25 @@ class DHRobot(Robot, DHDynamics):
 
     @property
     def a(self):
+        r"""
+        Link length values
+
+        :return: List of link length values :math:`a_j`.
+        :rtype: ndarray(n,)
+
+        The following are equivalent::
+
+                robot.links[j].a
+                robot.a[j]
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.a
+        """
         v = []
         for i in range(self.n):
             v.append(self.links[i].a)
@@ -322,6 +302,51 @@ class DHRobot(Robot, DHDynamics):
 
     @property
     def theta(self):
+        r"""
+        Joint angle values
+
+        :return: List of joint angle values :math:`\theta_j`.
+        :rtype: ndarray(n,)
+
+        The following are equivalent::
+
+                robot.links[j].theta
+                robot.theta[j]
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.theta
+        """
+        v = []
+        for i in range(self.n):
+            v.append(self.links[i].theta)
+        return v
+
+    @property
+    def alpha(self):
+        r"""
+        Link twist values
+
+        :return: List of link twist values :math:`\alpha_j`.
+        :rtype: ndarray(n,)
+
+        The following are equivalent::
+
+                robot.links[j].alpha
+                robot.alpha[j]
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.alpha
+        """
         v = []
         for i in range(self.n):
             v.append(self.links[i].theta)
@@ -329,6 +354,21 @@ class DHRobot(Robot, DHDynamics):
 
     @property
     def r(self):
+        r"""
+        Link centre of mass values
+
+        :return: Array of link centre of mass values :math:`r_j`.
+        :rtype: ndarray(3,n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.r
+        """
+        # TODO tidyup
         v = np.copy(self.links[0].r)
         for i in range(1, self.n):
             v = np.c_[v, self.links[i].r]
@@ -336,6 +376,20 @@ class DHRobot(Robot, DHDynamics):
 
     @property
     def offset(self):
+        r"""
+        Joint offset values
+
+        :return: List of joint offset values :math:`\bar{q}_j`.
+        :rtype: ndarray(n,)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.offset
+        """
         v = []
         for i in range(self.n):
             v.append(self.links[i].offset)
@@ -343,55 +397,76 @@ class DHRobot(Robot, DHDynamics):
 
     @property
     def qlim(self):
+        r"""
+        Link offset values
+
+        :return: Array of link offset values.
+        :rtype: ndarray(2,n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.qlim
+        """
+        # TODO tidy up
         v = np.copy(self.links[0].qlim)
         for i in range(1, self.n):
             v = np.c_[v, self.links[i].qlim]
         return v
 
-    def A(self, joints, q=None):
+    @property
+    def reach(self):
+        r"""
+        Reach of the robot
+
+        :return: Maximum reach of the robot
+        :rtype: float
+
+        The reach is computed as :math:`\sum_j |a_j| + |d_j|`
+
+        .. note:: Probably an overestimate.
         """
-        Link forward kinematics.
+        return np.sum(np.abs([self.a, self.d]))
 
-        T = A(joints, q) transforms between link frames for the J'th joint.
-        q is a vector (n) of joint variables. For:
-        - standard DH parameters, this is from frame {J-1} to frame {J}.
-        - modified DH parameters, this is from frame {J} to frame {J+1}.
+    def A(self, j, q=None):
+        """
+        Link forward kinematics
 
-        T = A(joints) as above except uses the stored q value of the
-        robot object.
-
-        :param joints: Joints to transform to (int) or between (list/tuple)
-        :type joints: int, tuple or 2 element list
+        :param j: Joints to compute link transform for
+        :type j: int, 2-tuple
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
         :type q: float ndarray(1,n)
-
-        :return T: The transform between link 0 and joints or joints[0]
-            and joints[1]
+        :return T: The transform between link frames
         :rtype T: SE3
 
-        :notes:
-            - Base and tool transforms are not applied.
+        - ``robot.A(j, q)`` transform between link frames {0} and {n}.  ``q`` 
+          is a vector (n) of joint variables. 
+        - ``robot.A([j1, j2], q)`` as above between link frames {j1} and {j2}.
+        - ``robot.A(j)`` as above except uses the stored q value of the
+          robot object.
+
+        .. note:: Base and tool transforms are not applied.
 
         """
 
-        if not isscalar(joints):
-            joints = getvector(joints, 2)
-            j0 = int(joints[0])
-            jn = int(joints[1])
-        else:
+        if isscalar(j):
             j0 = 0
-            jn = int(joints)
+            jn = int(j)
+        else:
+            j = getvector(j, 2)
+            j0 = int(j[0])
+            jn = int(j[1])
 
         jn += 1
 
         if jn > self.n:
             raise ValueError("The joints value out of range")
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        q = self._getq(q)
 
         T = SE3()
 
@@ -402,44 +477,51 @@ class DHRobot(Robot, DHDynamics):
 
     def islimit(self, q=None):
         """
-        Joint limit test.
-
-        v = islimit(q) returns a list of boolean values indicating if the
-        joint configuration q is in vialation of the joint limits.
-
-        v = jointlimit() as above except uses the stored q value of the
-        robot object.
+        Joint limit test
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float ndarray(n)
-
-        :return v: is a vector of boolean values, one per joint, False if q[i]
-            is within the joint limits, else True
+        :type q: ndarray(n
+        :return v: is a vector of boolean values, one per joint, False if 
+            ``q[j]`` is within the joint limits, else True
         :rtype v: bool list
+
+        - ``robot.islimit(q)`` is a list of boolean values indicating if the
+          joint configuration ``q`` is in violation of the joint limits.
+
+        - ``robot.jointlimit()`` as above except uses the stored q value of the
+          robot object.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.islimit([0, 0, -4, 4, 0, 0])
 
         """
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
-
-        v = []
-
-        for i in range(self.n):
-            v.append(self.links[i].islimit(q[i]))
-
-        return v
+        qlim = self.qlim
+        q = self._getq(q)
+        
+        return (q < qlim[0,:]) | (q > qlim[1,:])
 
     def isspherical(self):
         """
-        Test for spherical wrist. Tests if the robot has a spherical wrist,
-        that is, the last 3 axes are revolute and their axes intersect at
-        a point.
-
+        Test for spherical wrist
+        
         :return: True if spherical wrist
         :rtype: bool
+        
+        Tests if the robot has a spherical wrist, that is, the last 3 axes are
+        revolute and their axes intersect at a point.
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.isspherical()
 
         """
         if self.n < 3:
@@ -449,46 +531,61 @@ class DHRobot(Robot, DHDynamics):
 
         alpha = [-np.pi / 2, np.pi / 2]
 
-        if L[0].a == 0 and L[1].a == 0 and L[1].d == 0 and (
-                (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
-                or (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
-        ) and L[0].sigma == 0 and L[1].sigma == 0 and L[2].sigma == 0:
-
-            return True
-        else:
-            return False
+        return  L[0].a == 0 \
+                and L[1].a == 0 \
+                and L[1].d == 0 \
+                and (
+                    (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
+                    or 
+                    (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
+                ) \
+                and L[0].sigma == 0 \
+                and L[1].sigma == 0 \
+                and L[2].sigma == 0
 
     def isprismatic(self):
         """
-        Identify prismatic joints.
-
-        p = isprismatic() returns a bool list identifying the prismatic joints
-        within the robot
+        Identify prismatic joints
 
         :return: a list of bool variables, one per joint, true if
             the corresponding joint is prismatic, otherwise false.
-        :rtype: bool list
+        :rtype: list of bool
 
+        ``robot.isprismatic()`` is a bool list identifying the prismatic joints
+        within the robot
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.isprismatic()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isprismatic()
         """
-
-        p = []
-
-        for i in range(self.n):
-            p.append(self.links[i].isprismatic())
-
-        return p
+        return [link.isprismatic() for link in self]
 
     def isrevolute(self):
         """
-        Identify revolute joints.
-
-        p = isrevolute() returns a bool list identifying the revolute joints
-        within the robot
+        Identify revolute joints
 
         :return: a list of bool variables, one per joint, true if
             the corresponding joint is revolute, otherwise false.
-        :rtype: bool list
+        :rtype: list of bool
 
+        ``robot.isrevolute()`` is a bool list identifying the revolute joints
+        within the robot
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.isprismatic()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isrevolute()
         """
 
         p = []
@@ -505,76 +602,98 @@ class DHRobot(Robot, DHDynamics):
         :return: joint configuration string
         :rtype: str
 
-        A string with one letter per joint, the letter is ``R`` for a revolute
-        joint, and ``P`` for a prismatic joint.  A Puma560 robot is "RRRRRR"
-        and the Stanford arm is "RRPRRR".
+        A string with one letter per joint: ``R`` for a revolute
+        joint, and ``P`` for a prismatic joint.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.config()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.config()
         """
         return ''.join(['R' if L.isrevolute() else 'P' for L in self])
 
     def todegrees(self, q=None):
         """
-        Convert joint angles to degrees.
-
-        qdeg = toradians(q) converts joint coordinates q to degrees.
-
-        qdeg = toradians() as above except uses the stored q value of the
-        robot object.
+        Convert joint angles to degrees
 
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values)
-        :type q: float ndarray(n)
+        :type q: ndarray(n)
+        :return: a vector of joint coordinates in degrees and metres
+        :rtype: ndarray(n)
 
-        :return: a vector of joint coordinates where those elements
-            corresponding to revolute joints are converted from radians to
-            degrees. Elements corresponding to prismatic joints are copied
-            unchanged.
-        :rtype: float ndarray(n)
+        ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
+        taking into account whether elements of ``q`` correspond to revolute
+        or prismatic joints, ie. prismatic joint values are not converted.
 
+        ``robot.todegrees()`` as above except uses the stored q value of the
+        robot object.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> from math import pi
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
         """
 
-        if q is None:
-            qdeg = np.copy(self.q)
-        else:
-            qdeg = getvector(q, self.n)
+        q = self._getq(q)
+        revolute = self.isrevolute()
 
-        k = self.isrevolute()
-        qdeg[k] *= 180 / np.pi
-        return qdeg
+        return np.array(
+            [q[k] * 180.0 / np.pi if revolute[k] else q[k] for k in range(len(q))]
+                    )
 
     def toradians(self, q):
         """
-        Convert joint angles to radians.
+        Convert joint angles to radians
 
-        qrad = toradians(q) converts joint coordinates q to radians.
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values)
+        :type q: ndarray(n)
+        :return: a vector of joint coordinates in radians and metres
+        :rtype: ndarray(n)
 
-        :param q: The joint angles/configuration of the robot (Not optional,
-            stored q is always radians)
-        :type q: float ndarray(n)
+        ``robot.toradians(q)`` converts joint coordinates ``q`` to radians
+        taking into account whether elements of ``q`` correspond to revolute
+        or prismatic joints, ie. prismatic joint values are not converted.
 
-        :return: a vector of joint coordinates where those elements
-            corresponding to revolute joints are converted from degrees to
-            radians. Elements corresponding to prismatic joints are copied
-            unchanged.
-        :rtype: float ndarray(n)
+        ``robot.toradians()`` as above except uses the stored q value of the
+        robot object.
 
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.toradians([10, 20, 2, 30, 40, 50])
         """
 
-        qrad = getvector(q, self.n)
+        q = self._getq(q)
+        revolute = self.isrevolute()
 
-        k = self.isrevolute()
-        qrad[k] *= np.pi / 180
-        return qrad
+        return np.array(
+            [q[k] * np.pi / 180.0 if revolute[k] else q[k] for k in range(len(q))]
+                    )
 
     def twists(self, q=None):
         """
-        Joint axis as  twists
+        Joint axes as  twists
 
         :param q: The joint angles/configuration of the robot
         :type q: array_like (n)
-        :return tw: a vector of Twist objects
-        :rtype tw: float ndarray(n,)
-        :return T0: Represents the pose of the tool
-        :rtype T0: SE3
+        :return: a vector of Twist objects
+        :rtype: float ndarray(n,)
+        :return: Represents the pose of the tool
+        :rtype: SE3 instance
 
         - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
           represent the axes of the joints for the robot with joint coordinates
@@ -583,6 +702,16 @@ class DHRobot(Robot, DHDynamics):
 
         - ``tw, T0 = twists()`` as above but the joint coordinates are taken
           to be zero.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> tw, T0 = robot.twists(robot.qz)
+            >>> tw
+            >>> T0
 
         """
 
@@ -617,35 +746,42 @@ class DHRobot(Robot, DHDynamics):
         return tw, T[-1]
 
     def fkine(self, q=None):
-        '''
-        T = fkine(q) evaluates forward kinematics for the robot at joint
-        configuration q.
+        """
+        Forward kinematics
 
-        T = fkine() as above except uses the stored q value of the
-        robot object.
+        :param q: The joint configuration (Optional,
+            if not supplied will use the stored q values). 
+        :type q: ndarray(n) or ndarray(m,n)
+        :return: Forward kinematics as an SE(3) matrix 
+        :rtype: SE3 instance
 
-        Trajectory operation:
-        for each point on a trajectory of joints q
+        - ``robot.fkine(q)`` computes the forward kinematics for the robot at 
+          joint configuration ``q``.
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values). If q is a matrix
-            the rows are interpreted as the generalized joint coordinates
-            for a sequence of points along a trajectory. q(j,i) is the
-            j'th joint parameter for the i'th trajectory point.
-        :type q: float ndarray(n) or (mxn)
+        - ``robot.fkine()`` as above except uses the stored ``q`` value of the
+          robot object.
 
-        :return T: Homogeneous transformation matrix or trajectory
-        :rtype T: SE3 or SE3 list
+        If q is a 2D array, the rows are interpreted as the generalized joint
+        coordinates for a sequence of points along a trajectory. ``q[k,j]`` is
+        the j'th joint coordinate for the k'th trajectory configuration, and
+        the returned ``SE3`` instance contains ``n`` values.
 
-        :notes:
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.fkine([0, 0, 0, 0, 0, 0])
+
+        .. note::
+
             - The robot's base or tool transform, if present, are incorporated
               into the result.
-            - Joint offsets, if defined, are added to q before the forward
+            - Joint offsets, if defined, are added to ``q`` before the forward
               kinematics are computed.
-
-        '''
-        if q is None:
-            q = np.copy(self.q)
+        """
+        q = self._getq(q)
 
         T = SE3.Empty()
         for qr in getmatrix(q, (None, self.n)):
@@ -667,32 +803,42 @@ class DHRobot(Robot, DHDynamics):
         return T
 
     def fkine_all(self, q=None, old=True):
-        '''
-        Tall = allfkine(q) evaluates fkine for each joint within a robot and
-        returns a sequence of link frame poses.
+        """
+        Forward kinematics for all link frames
 
-        Tall = allfkine() as above except uses the stored q value of the
-        robot object.
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values). 
+        :type q: ndarray(n) or ndarray(m,n)
+        :param old: "old" behaviour, defaults to True
+        :type old: bool, optional
+        :return: Forward kinematics as an SE(3) matrix 
+        :rtype: SE3 instance with ``n`` values
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        - ``fkine_all(q)`` evaluates fkine for each joint within a robot and
+          returns a sequence of link frame poses.
 
-        :return T: Homogeneous transformation trajectory
-        :rtype T: SE3 list
+        - ``fkine_all()`` as above except uses the stored q value of the
+          robot object.
 
-        :notes:
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> T = puma.fkine_all([0, 0, 0, 0, 0, 0])
+            >>> len(T)
+
+        .. note::
+            - Old behaviour is to return a list of ``n`` frames {1} to {n}, but
+              if ``old=False`` it returns ``n``+1 frames {0} to {n}, ie. it
+              includes the base frame.
             - The robot's base or tool transform, if present, are incorporated
               into the result.
             - Joint offsets, if defined, are added to q before the forward
               kinematics are computed.
-
-        '''
-
-        if q is None:
-            qr = np.copy(self.q)
-        else:
-            qr = getvector(q, self.n)
+        """
+        q = self._getq(q)
 
         if self._base is not None:
             Tj = self._base
@@ -701,9 +847,9 @@ class DHRobot(Robot, DHDynamics):
         first = True
         Tall = Tj
         # print(Tj)
-        for q, L in zip(qr, self.links):
+        for q, L in zip(q, self.links):
             if first:
-                print(q, L.A(q))
+                # print(q, L.A(q))
                 Tj *= L.A(q)
                 if old:
                     Tall = Tj
@@ -716,21 +862,31 @@ class DHRobot(Robot, DHDynamics):
         return Tall
 
     def jacobe(self, q=None):
-        """
-        Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity. v = Je*qd in the
-        end-effector frame.
+        r"""
+        Manipulator Jacobian in end-effector frame
 
-        Je = jacobe() as above except uses the stored q value of the
-        robot object.
-
-        :param q: The joint angles/configuration of the robot (Optional,
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        :type q: ndarray(n)
+        :return J: The manipulator Jacobian in the end-effector frame
+        :rtype: ndarray(6,n)
 
-        :return J: The manipulator Jacobian in ee frame
-        :rtype: float ndarray(6,n)
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint
+          velocity to end-effector spatial velocity.
 
+        - ``robot.jacobe(q)` as above except uses the stored q value of the
+          robot object.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.jacobe([0, 0, 0, 0, 0, 0])
         """
 
         if q is None:
@@ -771,21 +927,31 @@ class DHRobot(Robot, DHDynamics):
         return J
 
     def jacob0(self, q=None):
-        """
-        J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity. v = J0*qd in the
-        base frame.
+        r"""
+        Manipulator Jacobian in world frame
 
-        J0 = jacob0() as above except uses the stored q value of the
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: ndarray(n)
+        :return J: The manipulator Jacobian in the world frame
+        :rtype: ndarray(6,n)
+
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint
+          velocity to end-effector spatial velocity.
+
+        - ``robot.jacobe()`` as above except uses the stored q value of the
         robot object.
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.
 
-        :return J: The manipulator Jacobian in ee frame
-        :rtype: float ndarray(6,n)
+        Example:
 
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.jacob0([0, 0, 0, 0, 0, 0])
         """
 
         if q is None:
@@ -859,380 +1025,7 @@ class DHRobot(Robot, DHDynamics):
 
         return Jv
 
-    def ikcon(self, T, q0=None):
-        """
-        Inverse kinematics by optimization with joint limits
 
-        q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
-        corresponding to the robot end-effector pose T which is an SE3 object
-        or homogenenous transform matrix (4x4), and N is the number of robot
-        joints. Initial joint coordinates Q0 used for the minimisation.
-
-        q, success, err = ikcon(T) as above but q0 is set to 0.
-
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is mxn
-        where n is the number of robot joints. The initial estimate of q
-        for each time step is taken as the solution from the previous time
-        step. Retruns trajectory of joints q (mxn), list of success (m) and
-        list of errors (m)
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param q0: initial joint configuration (default all zeros)
-        :type q0: float ndarray(n) (default all zeros)
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: Final pose error
-        :rtype error: float
-
-        :notes:
-            - Joint limits are considered in this solution.
-            - Can be used for robots with arbitrary degrees of freedom.
-            - In the case of multiple feasible solutions, the solution
-              returned depends on the initial choice of q0.
-            - Works by minimizing the error between the forward kinematics
-              of the joint angle solution and the end-effector frame as an
-              optimisation.
-            - The objective function (error) is described as:
-              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-              Where omega is some gain matrix, currently not modifiable.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-
-        try:
-            if q0 is not None:
-                q0 = getvector(q0, self.n, 'row')
-            else:
-                q0 = np.zeros((trajn, self.n))
-        except ValueError:
-            verifymatrix(q0, (trajn, self.n))
-
-        # create output variables
-        qstar = np.zeros((trajn, self.n))
-        error = []
-        exitflag = []
-
-        reach = np.sum(np.abs([self.a, self.d]))
-        omega = np.diag([1, 1, 1, 3 / reach])
-
-        def cost(q, T, omega):
-            return np.sum(
-                (
-                    (np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @
-                    omega) ** 2
-            )
-
-        bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
-
-        for i in range(trajn):
-            Ti = T[i]
-            res = minimize(
-                lambda q: cost(q, Ti, omega),
-                q0[i, :], bounds=bnds, options={'gtol': 1e-6})
-            qstar[i, :] = res.x
-            error.append(res.fun)
-            exitflag.append(res.success)
-
-        if trajn > 1:
-            return qstar, exitflag, error
-        else:
-            return qstar[0, :], exitflag[0], error[0]
-
-    def ikine(
-            self, T,
-            ilimit=500,
-            rlimit=100,
-            tol=1e-10,
-            Y=0.1,
-            Ymin=0,
-            mask=None,
-            q0=None,
-            search=False,
-            slimit=100,
-            transpose=None):
-        """
-        Inverse kinematics by optimization without joint limits
-
-        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)
-        corresponding to the robot end-effector pose ``T`` which is an ``SE3``
-        instance. ``failure`` is True if the solver failed, and ``reason``
-        contains details of the failure.
-
-        This method can be used for robots with any number of degrees of
-        freedom.
-
-        Trajectory operation:
-        If ``T`` contains multiple values, ie. a trajectory, then returns the
-        joint coordinates corresponding to each of the pose values in ``T``.
-        ``q`` is mxn where n is the number of robot joints. The initial
-        estimate of ``q`` for each time step is taken as the solution from the
-        previous time step. Returns trajectory of joints ``q`` (mxn), list of
-        failure (m) and list of error reasons (m).
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param ilimit: maximum number of iterations
-        :type ilimit: int (default 500)
-        :param rlimit: maximum number of consecutive step rejections
-        :type rlimit: int (default 100)
-        :param tol: final error tolerance
-        :type tol: float (default 1e-10)
-        :param Y: initial value of lambda
-        :type Y: float (default 0.1)
-        :param Ymin: minimum allowable value of lambda
-        :type Ymin: float (default 0)
-        :param mask: mask vector that correspond to translation in X, Y and Z
-            and rotation about X, Y and Z respectively.
-        :type mask: float ndarray(6)
-        :param q0: initial joint configuration (default all zeros)
-        :type q0: float ndarray(n) (default all zeros)
-        :param search: search over all configurations
-        :type search: bool
-        :param slimit: maximum number of search attempts
-        :type slimit: int (default 100)
-        :param transpose: use Jacobian transpose with step size A, rather
-            than Levenberg-Marquadt
-        :type transpose: float
-
-        :return q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :return failure: IK solver failed
-        :rtype failure: bool or list of bool
-        :return error: If failed, what went wrong
-        :rtype error: List of str
-
-        Underactuated robots:
-        For the case where the manipulator has fewer than 6 DOF the
-        solution space has more dimensions than can be spanned by the
-        manipulator joint coordinates.
-
-        In this case we specify the 'mask' option where the mask vector (1x6)
-        specifies the Cartesian DOF (in the wrist coordinate frame) that will
-        be ignored in reaching a solution.  The mask vector has six elements
-        that correspond to translation in X, Y and Z, and rotation about X, Y
-        and Z respectively. The value should be 0 (for ignore) or 1. The
-        number of non-zero elements should equal the number of manipulator
-        DOF.
-
-        For example when using a 3 DOF manipulator rotation orientation might
-        be unimportant in which case use the option: mask = [1 1 1 0 0 0].
-
-        For robots with 4 or 5 DOF this method is very difficult to use since
-        orientation is specified by T in world coordinates and the achievable
-        orientations are a function of the tool position.
-
-        :notes:
-            - Solution is computed iteratively.
-            - Implements a Levenberg-Marquadt variable step size solver.
-            - The tolerance is computed on the norm of the error between
-              current and desired tool pose.  This norm is computed from
-              distances and angles without any kind of weighting.
-            - The inverse kinematic solution is generally not unique, and
-              depends on the initial guess q0 (defaults to 0).
-            - The default value of q0 is zero which is a poor choice for most
-              manipulators (eg. puma560, twolink) since it corresponds to a
-              kinematic singularity.
-            - Such a solution is completely general, though much less
-              efficient than specific inverse kinematic solutions derived
-              symbolically, like ikine6s or ikine3.
-            - This approach allows a solution to be obtained at a singularity,
-              but the joint angles within the null space are arbitrarily
-              assigned.
-            - Joint offsets, if defined, are added to the inverse kinematics
-              to generate q.
-            - Joint limits are not considered in this solution.
-            - The 'search' option peforms a brute-force search with initial
-              conditions chosen from the entire configuration space.
-            - If the search option is used any prismatic joint must have
-              joint limits defined.
-
-        :references:
-            - Robotics, Vision & Control, P. Corke, Springer 2011,
-              Section 8.4.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-        err = []
-
-        try:
-            if q0 is not None:
-                if trajn == 1:
-                    q0 = getvector(q0, self.n, 'row')
-                else:
-                    verifymatrix(q0, (trajn, self.n))
-            else:
-                q0 = np.zeros((trajn, self.n))
-        except ValueError:
-            verifymatrix(q0, (trajn, self.n))
-
-        if mask is not None:
-            mask = getvector(mask, 6)
-        else:
-            mask = np.ones(6)
-
-        if search:
-            # Randomised search for a starting point
-            search = False
-            # quiet = True
-
-            for k in range(slimit):
-
-                q0n = np.zeros(self.n)
-                for j in range(self.n):
-                    qlim = self.links[j].qlim
-                    if np.sum(np.abs(qlim)) == 0:
-                        if not self.links[j].sigma:
-                            q0n[j] = np.random.rand() * 2 * np.pi - np.pi
-                        else:
-                            raise ValueError('For a prismatic joint, '
-                                             'search requires joint limits')
-                    else:
-                        q0n[j] = np.random.rand() * (qlim[1] - qlim[0]) + \
-                            qlim[0]
-
-                # fprintf('Trying q = %s\n', num2str(q))
-
-                q, _, _ = self.ikine(
-                    T,
-                    ilimit,
-                    rlimit,
-                    tol,
-                    Y,
-                    Ymin,
-                    mask,
-                    q0n,
-                    search,
-                    slimit,
-                    transpose)
-
-                if not np.sum(np.abs(q)) == 0:
-                    return q, True, err
-
-            q = np.array([])
-            return q, False, err
-
-        if not self.n >= np.sum(mask):
-            raise ValueError('Number of robot DOF must be >= the same number '
-                             'of 1s in the mask matrix')
-        W = np.diag(mask)
-
-        # Preallocate space for results
-        qt = np.zeros((len(T), self.n))
-
-        # Total iteration count
-        tcount = 0
-
-        # Rejected step count
-        rejcount = 0
-
-        failed = []
-        nm = 0
-
-        revolutes = []
-        for i in range(self.n):
-            revolutes.append(not self.links[i].sigma)
-
-        for i in range(len(T)):
-            iterations = 0
-            q = np.copy(q0[i, :])
-            Yl = Y
-
-            while True:
-                # Update the count and test against iteration limit
-                iterations += 1
-
-                if iterations > ilimit:
-                    err.append('ikine: iteration limit {0} exceeded '
-                               ' (pose {1}), final err {2}'.format(
-                                   ilimit, i, nm))
-                    failed.append(True)
-                    break
-
-                e = tr2delta(self.fkine(q).A, T[i].A)
-
-                # Are we there yet
-                if np.linalg.norm(W @ e) < tol:
-                    # print(iterations)
-                    failed.append(False)
-                    break
-
-                # Compute the Jacobian
-                J = self.jacobe(q)
-
-                JtJ = J.T @ W @ J
-
-                if transpose is not None:
-                    # Do the simple Jacobian transpose with constant gain
-                    dq = transpose * J.T @ e
-                else:
-                    # Do the damped inverse Gauss-Newton with
-                    # Levenberg-Marquadt
-                    dq = np.linalg.inv(
-                        JtJ + ((Yl + Ymin) * np.eye(self.n))
-                    ) @ J.T @ W @ e
-
-                    # Compute possible new value of
-                    qnew = q + dq
-
-                    # And figure out the new error
-                    enew = tr2delta(self.fkine(qnew).A, T[i].A)
-
-                    # Was it a good update?
-                    if np.linalg.norm(W @ enew) < np.linalg.norm(W @ e):
-                        # Step is accepted
-                        q = qnew
-                        e = enew
-                        Yl = Yl / 2
-                        rejcount = 0
-                    else:
-                        # Step is rejected, increase the damping and retry
-                        Yl = Yl * 2
-                        rejcount += 1
-                        if rejcount > rlimit:
-                            err.append(
-                                'ikine: rejected-step limit {0} exceeded '
-                                '(pose {1}), final err {2}'.format(
-                                    rlimit, i, np.linalg.norm(W @ enew)))
-                            failed.append(True)
-                            break
-
-                # Wrap angles for revolute joints
-                k = (q > np.pi) & revolutes
-                q[k] -= 2 * np.pi
-
-                k = (q < -np.pi) & revolutes
-                q[k] += + 2 * np.pi
-
-                nm = np.linalg.norm(W @ e)
-
-            qt[i, :] = q
-            tcount += iterations
-
-        if any(failed):
-            err.append(
-                'failed to converge: try a different '
-                'initial value of joint coordinates')
-
-        if trajn == 1:
-            qt = qt[0, :]
-            failed = failed[0]
-
-        return qt, failed, err
 
     def ikine3(self, T, left=True, elbow_up=True):
         """
@@ -2000,163 +1793,6 @@ class DHRobot(Robot, DHDynamics):
         else:
             return qt, success, err
 
-    def ikunc(self, T, q0=None, ilimit=1000):
-        """
-        Inverse manipulator by optimization without joint limits
-
-        q, success, err = ikunc(T) are the joint coordinates (n) corresponding
-        to the robot end-effector pose T which is an SE3 object or
-        homogenenous transform matrix (4x4), and n is the number of robot
-        joints. Also returns success and err which is the scalar final value
-        of the objective function.
-
-        q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the
-        initial joint coordinates q0 used for the minimisation.
-
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects (m) or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is mxn
-        where n is the number of robot joints. The initial estimate of q
-        for each time step is taken as the solution from the previous time
-        step.
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param ilimit: Iteration limit (default 1000)
-        :type ilimit: bool
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: Final pose error
-        :rtype error: float
-
-        :notes:
-            - Joint limits are not considered in this solution.
-            - Can be used for robots with arbitrary degrees of freedom.
-            - In the case of multiple feasible solutions, the solution
-              returned depends on the initial choice of q0
-            - Works by minimizing the error between the forward kinematics of
-              the joint angle solution and the end-effector frame as an
-              optimisation.
-            - The objective function (error) is described as:
-              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-              Where omega is some gain matrix, currently not modifiable.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-
-        if q0 is None:
-            q0 = np.zeros((trajn, self.n))
-
-        verifymatrix(q0, (trajn, self.n))
-
-        qt = np.zeros((trajn, self.n))
-        success = []
-        err = []
-
-        reach = np.sum(np.abs([self.a, self.d]))
-        omega = np.diag([1, 1, 1, 3 / reach])
-
-        def sumsqr(arr):
-            return np.sum(np.power(arr, 2))
-
-        for i in range(trajn):
-
-            Ti = T[i]
-
-            res = minimize(
-                lambda q: sumsqr(((
-                    np.linalg.inv(Ti.A) @ self.fkine(q).A) - np.eye(4)) @
-                    omega),
-                q0[i, :],
-                options={'gtol': 1e-6, 'maxiter': ilimit})
-
-            qt[i, :] = res.x
-            success.append(res.success)
-            err.append(res.fun)
-
-        if trajn == 1:
-            return qt[0, :], success[0], err[0]
-        else:
-            return qt, success, err
-
-    @_check_rne
-    def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
-        r"""
-        Inverse dynamics
-
-        :param q: The joint angles/configuration of the robot (Optional,
-                  if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param qd: The joint velocities of the robot
-        :type qd: float ndarray(n)
-        :param qdd: The joint accelerations of the robot
-        :type qdd: float ndarray(n)
-        :param grav: Gravity vector to overwrite robots gravity value
-        :type grav: float ndarray(6)
-        :param fext: Specify wrench acting on the end-effector
-                     :math:`W=[F_x F_y F_z M_x M_y M_z]`
-        :type fext: float ndarray(6)
-
-        ``tau = rne(q, qd, qdd, grav, fext)`` is the joint torque required for
-        the robot to achieve the specified joint position ``q`` (1xn), velocity
-        ``qd`` (1xn) and acceleration ``qdd`` (1xn), where n is the number of
-        robot joints. ``fext`` describes the wrench acting on the end-effector
-
-        Trajectory operation:
-        If q, qd and qdd (mxn) are matrices with m cols representing a
-        trajectory then tau (mxn) is a matrix with cols corresponding to each
-        trajectory step.
-
-        :notes:
-            - The torque computed contains a contribution due to armature
-              inertia and joint friction.
-            - If a model has no dynamic parameters set the result is zero.
-
-        """
-        trajn = 1
-
-        try:
-            q = getvector(q, self.n, 'row')
-            qd = getvector(qd, self.n, 'row')
-            qdd = getvector(qdd, self.n, 'row')
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-            verifymatrix(qd, (trajn, self.n))
-            verifymatrix(qdd, (trajn, self.n))
-
-        if grav is None:
-            grav = self.gravity
-        else:
-            grav = getvector(grav, 3)
-
-        # The c function doesn't handle base rotation, so we need to hack the
-        # gravity vector instead
-        grav = self.base.R.T @ grav
-
-        if fext is None:
-            fext = np.zeros(6)
-        else:
-            fext = getvector(fext, 6)
-
-        tau = np.zeros((trajn, self.n))
-
-        for i in range(trajn):
-            tau[i, :] = frne(
-                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], grav, fext)
-
-        if trajn == 1:
-            return tau[0, :]
-        else:
-            return tau
 
     def jacob_dot(self, q=None, qd=None):
         '''
@@ -2979,7 +2615,8 @@ if __name__ == "__main__":
     # import spatialmath.base.symbolic as sym
 
     puma = rtb.models.DH.Puma560()
-    J = puma.jacob0(puma.qn)
-    print(J)
-    print(puma.manipulability(puma.qn))
-    print(puma.manipulability(puma.qn, 'asada')[0])
+    # J = puma.jacob0(puma.qn)
+    # print(J)
+    # print(puma.manipulability(puma.qn))
+    # print(puma.manipulability(puma.qn, 'asada'))
+    tw, T0 = puma.twists(puma.qz)
