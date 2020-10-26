@@ -41,9 +41,10 @@ def _sin(theta):
 
 class DHLink(Link):
     """
-    A link superclass for all link types. A Link object holds all information
-    related to a robot joint and link such as kinematics parameters,
-    rigid-body inertial parameters, motor and transmission parameters.
+    A link superclass for all robots defined using Denavit-Hartenberg notation.
+    A Link object holds all information related to a robot joint and link such
+    as kinematics parameters, rigid-body inertial parameters, motor and
+    transmission parameters.
 
     :param theta: kinematic: joint angle
     :type theta: float
