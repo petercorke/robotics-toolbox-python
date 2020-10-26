@@ -1744,7 +1744,7 @@ class URDF(URDFType):
         # Store the visuals, collisions, and inertials
         for i in range(len(joints)):
             link = self._link_map[joints[i].child]
-            elinks[i].r = link.inertial.origin
+            elinks[i].r = link.inertial.origin[:3, 3]
             elinks[i].m = link.inertial.mass
             elinks[i].inertia = link.inertial.inertia
 

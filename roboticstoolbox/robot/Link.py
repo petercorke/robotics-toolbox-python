@@ -4,6 +4,7 @@ from functools import wraps
 from spatialmath.base.argcheck import getvector, \
     isscalar, isvector, ismatrix
 
+
 def _listen_dyn(func):
     @wraps(func)
     def wrapper_listen_dyn(*args):
@@ -12,9 +13,11 @@ def _listen_dyn(func):
         return func(*args)
     return wrapper_listen_dyn
 
+
 class Link:
 
-    def __init__(self,             
+    def __init__(
+            self,
             name='',
             offset=0.0,
             qlim=np.zeros(2),
@@ -48,7 +51,6 @@ class Link:
         self.B = B
         self.Tc = Tc
         self.G = G
-
 
     def copy(self):
         """
@@ -278,7 +280,7 @@ class Link:
         - ``link.flip = ...`` checks and sets the joint flip status
 
         Joint flip defines the direction of motion of the joint.
-        
+
         ``flip = False`` is conventional motion direction:
 
             - revolute motion is a positive rotation about the z-axis
@@ -350,12 +352,12 @@ class Link:
             :rtype: ndarray(3,3)
         - ``link.I = ...`` checks and sets the link inertia
 
-        Link inertia is a symmetric 3x3 matrix describing the inertia with respect
-        to a frame with its origin at the centre of mass, and with axes parallel to those of
-        the link frame.
+        Link inertia is a symmetric 3x3 matrix describing the inertia with
+        respect to a frame with its origin at the centre of mass, and with
+        axes parallel to those of the link frame.
 
         The inertia matrix is
-        
+
         .. math::
 
             \begin{bmatrix} I_{xx} & I_{xy} & I_{xz} \\
@@ -435,7 +437,8 @@ class Link:
             :rtype: float
         - ``link.B = ...`` checks and sets the motor viscous friction
 
-        .. note:: Viscous friction is the same for positive and negative motion.
+        .. note:: Viscous friction is the same for positive and negative
+            motion.
         """
         return self._B
 
@@ -455,7 +458,7 @@ class Link:
         Get/set motor Coulomb friction
 
         - ``link.Tc`` is the motor Coulomb friction
-            :return: motor Coulomb friction 
+            :return: motor Coulomb friction
             :rtype: ndarray(2)
         - ``link.Tc = ...`` checks and sets the motor Coulomb friction. If a
           scalar is given the value is set to [T, -T], if a 2-vector it is
@@ -470,7 +473,8 @@ class Link:
                 \tau_C^+ & \mbox{if $\dot{q} > 0$} \\
                 \tau_C^- & \mbox{if $\dot{q} < 0$} \end{array} \right.
 
-        .. note:: :math:`\tau_C^+` must be :math:`> 0`, and :math:`\tau_C^-` must be :math:`< 0`.
+        .. note:: :math:`\tau_C^+` must be :math:`> 0`, and :math:`\tau_C^-`
+            must be :math:`< 0`.
         """
         return self._Tc
 
@@ -513,4 +517,3 @@ class Link:
     @_listen_dyn
     def G(self, G_new):
         self._G = G_new
-

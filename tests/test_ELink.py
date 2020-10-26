@@ -160,7 +160,7 @@ class TestELink(unittest.TestCase):
         l0 = rp.ELink()
 
         self.assertEqual(l0.m, 0.0)
-        nt.assert_array_almost_equal(l0.r.A, np.eye(4))
+        nt.assert_array_almost_equal(l0.r, np.zeros(3))
         self.assertEqual(l0.Jm, 0.0)
 
     def test_fail_parent(self):

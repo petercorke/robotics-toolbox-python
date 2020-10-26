@@ -1427,7 +1427,7 @@ def _cross(a, b):
         a[0] * b[1] - a[1] * b[0]]
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma nocover
 
     import roboticstoolbox as rtb
     # from spatialmath.base import symbolic as sym

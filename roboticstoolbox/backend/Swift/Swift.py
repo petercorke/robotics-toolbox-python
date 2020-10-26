@@ -38,7 +38,7 @@ class Swift(Connector):  # pragma nocover
     :references:
 
         - https://github.com/jhavl/swift
-        
+
     """
     def __init__(self):
         super(Swift, self).__init__()
@@ -72,11 +72,11 @@ class Swift(Connector):  # pragma nocover
 
         :param dt: time step in milliseconds, defaults to 50
         :type dt: int, optional
- 
+
         ``env.step(args)`` triggers an update of the 3D scene in the Swift
         window referenced by ``env``.
 
-        .. note:: 
+        .. note::
 
             - Each robot in the scene is updated based on
               their control type (position, velocity, acceleration, or torque).
@@ -89,7 +89,7 @@ class Swift(Connector):  # pragma nocover
         """
 
         # TODO how is the pose of shapes updated prior to step?
-        
+
         super().step
 
         self._step_robots(dt)
