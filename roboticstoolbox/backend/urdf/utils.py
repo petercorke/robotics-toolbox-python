@@ -57,7 +57,7 @@ def parse_origin(node):
         if 'rpy' in origin_node.attrib:
             rpy = np.fromstring(origin_node.attrib['rpy'], sep=' ')
             matrix.A[:3, :3] = sm.SE3.RPY(rpy).R
-   
+
     return matrix.A, rpy
 
 
