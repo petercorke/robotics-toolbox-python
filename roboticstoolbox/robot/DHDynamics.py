@@ -12,11 +12,24 @@ so must be subclassed by ``SerialLink`` class.
 """
 import copy
 from collections import namedtuple
+from functools import wraps
 import numpy as np
 from spatialmath.base import \
     getvector, verifymatrix, isscalar, getmatrix, t2r
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
+from frne import init, frne, delete
+
+def _check_rne(func):
+    @wraps(func)
+    def wrapper_check_rne(*args, **kwargs):
+        if args[0]._rne_ob is None or args[0]._dynchanged:
+            args[0].delete_rne()
+            args[0]._init_rne()
+        args[0]._rne_changed = False
+        return func(*args, **kwargs)
+    return wrapper_check_rne
+
 
 
 class DHDynamics:
@@ -31,6 +44,110 @@ class DHDynamics:
         for j, link in enumerate(self.links):
             print("\nLink {:d}::".format(j), link)
             print(link.dyn(indent=2))
+
+    def delete_rne(self):
+        """
+        Frees the memory holding the robot object in c if the robot object
+        has been initialised in c.
+        """
+        if self._rne_ob is not None:
+            delete(self._rne_ob)
+            self._dynchanged = False
+            self._rne_ob = None
+
+    def _init_rne(self):
+        # Compress link data into a 1D array
+        L = np.zeros(24 * self.n)
+
+        for i in range(self.n):
+            j = i * 24
+            L[j] = self.links[i].alpha
+            L[j + 1] = self.links[i].a
+            L[j + 2] = self.links[i].theta
+            L[j + 3] = self.links[i].d
+            L[j + 4] = self.links[i].sigma
+            L[j + 5] = self.links[i].offset
+            L[j + 6] = self.links[i].m
+            L[j + 7:j + 10] = self.links[i].r.flatten()
+            L[j + 10:j + 19] = self.links[i].I.flatten()
+            L[j + 19] = self.links[i].Jm
+            L[j + 20] = self.links[i].G
+            L[j + 21] = self.links[i].B
+            L[j + 22:j + 24] = self.links[i].Tc.flatten()
+
+        self._rne_ob = init(self.n, self.mdh, L, self.gravity)
+
+
+    @_check_rne
+    def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
+        r"""
+        Inverse dynamics
+
+        :param q: The joint angles/configuration of the robot (Optional,
+                  if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param qd: The joint velocities of the robot
+        :type qd: float ndarray(n)
+        :param qdd: The joint accelerations of the robot
+        :type qdd: float ndarray(n)
+        :param grav: Gravity vector to overwrite robots gravity value
+        :type grav: float ndarray(6)
+        :param fext: Specify wrench acting on the end-effector
+                     :math:`W=[F_x F_y F_z M_x M_y M_z]`
+        :type fext: float ndarray(6)
+
+        ``tau = rne(q, qd, qdd, grav, fext)`` is the joint torque required for
+        the robot to achieve the specified joint position ``q`` (1xn), velocity
+        ``qd`` (1xn) and acceleration ``qdd`` (1xn), where n is the number of
+        robot joints. ``fext`` describes the wrench acting on the end-effector
+
+        Trajectory operation:
+        If q, qd and qdd (mxn) are matrices with m cols representing a
+        trajectory then tau (mxn) is a matrix with cols corresponding to each
+        trajectory step.
+
+        :notes:
+            - The torque computed contains a contribution due to armature
+              inertia and joint friction.
+            - If a model has no dynamic parameters set the result is zero.
+
+        """
+        trajn = 1
+
+        try:
+            q = getvector(q, self.n, 'row')
+            qd = getvector(qd, self.n, 'row')
+            qdd = getvector(qdd, self.n, 'row')
+        except ValueError:
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(qd, (trajn, self.n))
+            verifymatrix(qdd, (trajn, self.n))
+
+        if grav is None:
+            grav = self.gravity
+        else:
+            grav = getvector(grav, 3)
+
+        # The c function doesn't handle base rotation, so we need to hack the
+        # gravity vector instead
+        grav = self.base.R.T @ grav
+
+        if fext is None:
+            fext = np.zeros(6)
+        else:
+            fext = getvector(fext, 6)
+
+        tau = np.zeros((trajn, self.n))
+
+        for i in range(trajn):
+            tau[i, :] = frne(
+                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], grav, fext)
+
+        if trajn == 1:
+            return tau[0, :]
+        else:
+            return tau
 
     def fdyn(
             self, T, q0, torqfun=None, targs=None, qd0=None,
@@ -1079,7 +1196,7 @@ class DHDynamics:
 
         '''
 
-        r2 = self._copy()
+        r2 = self.copy()
         r2.name = 'P/' + self.name
 
         for i in range(self.n):
