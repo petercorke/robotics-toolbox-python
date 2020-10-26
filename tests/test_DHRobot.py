@@ -102,7 +102,7 @@ class TestDHRobot(unittest.TestCase):
         self.assertEqual(r0.theta, ans)
 
     def test_r(self):
-        r = np.array([[1], [2], [3]])
+        r = np.r_[1, 2, 3]
         l0 = rp.PrismaticDH(r=r)
         l1 = rp.RevoluteDH(r=r)
         l2 = rp.PrismaticDH(r=r)
@@ -332,10 +332,10 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
-        ans = [False, True, True, True, True, True, True]
+        ans = np.r_[False, True, True, True, True, True, True]
 
-        self.assertEqual(panda.islimit(q), ans)
-        self.assertEqual(panda.islimit(), ans)
+        nt.assert_array_equal(panda.islimit(q), ans)
+        nt.assert_array_equal(panda.islimit(), ans)
 
     def test_isspherical(self):
         l0 = rp.RevoluteDH()
