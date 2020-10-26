@@ -190,6 +190,24 @@ qlim  =      -2.8 to      2.8""")
         with self.assertRaises(TypeError):
             l0.B = [1, 2]
 
+    def test_robot(self):
+        l0 = rp.RevoluteDH()
+        r = rp.Robot([l0])
+
+        self.assertIs(l0._robot, r)
+
+    def test_copy(self):
+
+        l0 = rp.RevoluteDH()
+        r = rp.Robot([l0])
+        l1 = l0.copy()
+        l0.m = 4
+        l0.r[1] = 5
+        self.assertEqual(l1.m, 0)
+        self.assertEqual(l1.r[1], 0)
+        self.assertIs(l0._robot, r)
+        self.assertIs(l1._robot, r)
+
 if __name__ == '__main__':
 
     unittest.main()
