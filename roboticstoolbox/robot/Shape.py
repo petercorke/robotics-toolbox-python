@@ -59,7 +59,7 @@ class Shape(object):
         self._wT = SE3()
         self.co = None
         self.base = base
-        self.wT = None
+        # self.wT = None
         self.scale = scale
         self.radius = radius
         self.length = length

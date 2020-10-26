@@ -5,9 +5,24 @@
 
 from vpython import vec, vertex, color, triangle, compound
 from roboticstoolbox.backend.VPython.common_functions import *
-# from roboticstoolbox.tools.stdout_supress import stdout_supress
-# with stdout_supress():
-from stl import mesh
+from io import StringIO
+
+try:
+    from roboticstoolbox.tools.stdout_supress import pipes
+except BaseException:  # pragma nocover
+    from contextlib import contextmanager
+
+    @contextmanager
+    def pipes(stdout=None, stderr=None):
+        pass
+
+_out = StringIO()
+_err = StringIO()
+try:
+    with pipes(stdout=_out, stderr=_err):
+        from stl import mesh
+except BaseException:  # pragma nocover
+    from stl import mesh
 
 
 def import_object_from_numpy_stl(filename, scene):

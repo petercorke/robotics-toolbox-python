@@ -47,10 +47,10 @@ wx250.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(2.1)
 wx250s = rp.models.wx250s()
 wx250s.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(2.4)
 
-# Kinova robots
-j2n4s300 = rp.models.j2n4s300()
-j2n4s300.base = sm.SE3.Tx(1.2) * sm.SE3.Ty(0)
-j2n4s300.q = j2n4s300.qr
+# # Kinova robots
+# j2n4s300 = rp.models.j2n4s300()
+# j2n4s300.base = sm.SE3.Tx(1.2) * sm.SE3.Ty(0)
+# j2n4s300.q = j2n4s300.qr
 
 # Launch Sim
 env = rp.backend.Swift()
@@ -60,17 +60,17 @@ env.launch()
 env.add(ur3)
 env.add(ur5)
 env.add(ur10)
-# env.add(puma560)
-# env.add(panda)
+env.add(puma560)
+env.add(panda)
 
-# env.add(px100)
-# env.add(px150)
-# env.add(rx150)
-# env.add(rx200)
-# env.add(vx300)
-# env.add(vx300s)
-# env.add(wx200)
-# env.add(wx250)
-# env.add(wx250s)
+env.add(px100)
+env.add(px150)
+env.add(rx150)
+env.add(rx200)
+env.add(vx300)
+env.add(vx300s)
+env.add(wx200)
+env.add(wx250)
+env.add(wx250s)
 
 # env.add(j2n4s300)

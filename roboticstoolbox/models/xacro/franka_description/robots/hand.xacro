@@ -61,7 +61,6 @@
     </link>
     <link name="${ns}_rightfinger">
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
