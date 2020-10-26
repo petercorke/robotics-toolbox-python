@@ -14,7 +14,7 @@ DHRobot
 
 The various :ref:`DH Models` all subclass this class.
 
-.. automodule:: roboticstoolbox.robot.DHRobot.DHRobot
+.. autoclass:: roboticstoolbox.robot.DHRobot.DHRobot
    :members:
    :undoc-members:
    :show-inheritance:
