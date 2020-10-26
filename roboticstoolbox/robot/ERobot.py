@@ -1120,7 +1120,7 @@ class ERobot(Robot):
         :param gain: The gain for the velocity damper
         :type gain: float
 
-        :returns: Ain, bin as the inequality contraints for an optisator
+        :returns: Ain, Bin as the inequality contraints for an optisator
         :rtype: ndarray(6), ndarray(6)
         '''
 
@@ -1128,19 +1128,19 @@ class ERobot(Robot):
             n = self.n
 
         Ain = np.zeros((n, n))
-        bin = np.zeros(n)
+        Bin = np.zeros(n)
 
         for i in range(n):
             if self.q[i] - self.qlim[0, i] <= pi:
-                bin[i] = -gain * (
+                Bin[i] = -gain * (
                     ((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
             if self.qlim[1, i] - self.q[i] <= pi:
-                bin[i] = gain * (
+                Bin[i] = gain * (
                     (self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
-        return Ain, bin
+        return Ain, Bin
 
     # def link_collision_damper(self, links=None, col, ob, q):
     #     dii = 5

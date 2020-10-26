@@ -21,7 +21,6 @@ panda.q = panda.qr
 
 # Add the Panda to the simulator
 env.add(panda)
-time.sleep(1)
 
 # Number of joint in the panda which we are controlling
 n = 7

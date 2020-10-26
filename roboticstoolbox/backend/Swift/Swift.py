@@ -10,6 +10,7 @@ import zerorpc
 import roboticstoolbox as rp
 import numpy as np
 import spatialmath as sm
+import time
 
 
 class Swift(Connector):  # pragma nocover
@@ -169,6 +170,12 @@ class Swift(Connector):  # pragma nocover
             robot['show_robot'] = show_robot
             robot['show_collision'] = show_collision
             id = self.swift.robot(robot)
+
+            loaded = False
+            while not loaded:
+                loaded = self.swift.is_loaded(id)
+                time.sleep(0.1)
+
             self.robots.append(ob)
             return id
         elif isinstance(ob, rp.Shape):
