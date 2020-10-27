@@ -1143,7 +1143,7 @@ class ERobot(Robot):
         return Ain, Bin
 
     def link_collision_damper(
-            self, shape, q=None, di=0.3, ds=0.05,
+            self, shape, q=None, di=0.3, ds=0.05, xi=1.0,
             from_link=None, to_link=None):
 
         if from_link is None:
@@ -1178,7 +1178,7 @@ class ERobot(Robot):
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, n))
                 l_Ain[0, :n_dim] = norm_h @ Je
-                l_bin = (0.8 * (d - ds) / (di - ds)) + dp
+                l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:
                 l_Ain = None
                 l_bin = None

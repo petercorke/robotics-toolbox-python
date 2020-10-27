@@ -7,7 +7,6 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
-import time
 
 # Launch the simulator Swift
 env = rtb.backend.Swift()
@@ -17,8 +16,6 @@ env.launch()
 panda = rtb.models.Panda()
 
 # Set joint angles to ready configuration
-# panda.q = [
-    # -0.5653, -0.1941, -1.2602, -0.7896, -2.3227, -0.3919, -2.5173, 0.0, 0.0]
 panda.q = panda.qr
 
 # Number of joint in the panda which we are controlling
@@ -27,9 +24,9 @@ n = 7
 # Make two obstacles with velocities
 s0 = rtb.Sphere(
     radius=0.05,
-    base=sm.SE3(0.45, 0.4, 0.3)
+    base=sm.SE3(0.52, 0.4, 0.3)
 )
-s0.v = [0.01, -0.2, 0, 0, 0, 0]
+s0.v = [0, -0.2, 0, 0, 0, 0]
 
 s1 = rtb.Sphere(
     radius=0.05,
@@ -89,42 +86,38 @@ while not arrived:
     Aeq = np.c_[panda.jacobe(), np.eye(6)]
     beq = v.reshape((6,))
 
-    # # The inequality constraints for joint limit avoidance
-    # Ain = np.zeros((n + 6, n + 6))
-    # bin = np.zeros(n + 6)
+    # The inequality constraints for joint limit avoidance
+    Ain = np.zeros((n + 6, n + 6))
+    bin = np.zeros(n + 6)
 
-#     # The minimum angle (in radians) in which the joint is allowed to approach
-#     # to its limit
-#     ps = 0.05
+    # The minimum angle (in radians) in which the joint is allowed to approach
+    # to its limit
+    ps = 0.05
 
-#     # The influence angle (in radians) in which the velocity damper
-#     # becomes active
-#     pi = 0.9
+    # The influence angle (in radians) in which the velocity damper
+    # becomes active
+    pi = 0.9
 
-#     # Form the joint limit velocity damper
-#     Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps, pi, n)
+    # Form the joint limit velocity damper
+    Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps, pi, n)
 
-    Ain = None
-    bin = None
-
+    # For each collision in the scene
     for collision in collisions:
 
+        # Form the velocity damper inequality contraint for each collision
+        # object on the robot to the collision in the scene
         c_Ain, c_bin = panda.link_collision_damper(
-            collision, panda.q[:n], 0.3, 0.05,
+            collision, panda.q[:n], 0.3, 0.05, 1.0,
             panda.elinks['panda_joint1'], panda.elinks['panda_hand_joint'])
 
+        # If there are any parts of the robot within the influence distance
+        # to the collision in the scene
         if c_Ain is not None and c_bin is not None:
             c_Ain = np.c_[c_Ain, np.zeros((c_Ain.shape[0], 6))]
 
-            if Ain is None:
-                Ain = c_Ain
-            else:
-                Ain = np.r_[Ain, c_Ain]
-
-            if bin is None:
-                bin = np.array(c_bin)
-            else:
-                bin = np.r_[bin, c_bin]
+            # Stack the inequality constraints
+            Ain = np.r_[Ain, c_Ain]
+            bin = np.r_[bin, c_bin]
 
     # Linear component of objective function: the manipulability Jacobian
     c = np.r_[-panda.jacobm().reshape((n,)), np.zeros(6)]

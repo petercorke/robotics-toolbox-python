@@ -7,7 +7,6 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
-import time
 
 # Launch the simulator Swift
 env = rtb.backend.Swift()
