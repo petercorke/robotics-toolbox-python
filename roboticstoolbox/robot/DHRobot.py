@@ -180,28 +180,41 @@ class DHRobot(Robot, DHDynamics):
 
         s = str(table)
 
-        table = ANSITable(
-            Column("", colalign=">"),
-            Column("", colalign="<"), border="thin", header=False)
-        if self._base is not None:
-            table.row(
-                "base", self._base.printline(
-                    orient="rpy/xyz", fmt="{:.2g}", file=None))
-        if self._tool is not None:
-            table.row(
-                "tool", self._tool.printline(
-                    orient="rpy/xyz", fmt="{:.2g}", file=None))
+        # show tool and base
+        if self._tool is not None or self._tool is not None:
+            table = ANSITable(
+                Column("", colalign=">"),
+                Column("", colalign="<"),
+                border="thin", header=False)
+            if self._base is not None:
+                table.row(
+                    "base", self._base.printline(
+                        orient="rpy/xyz", fmt="{:.2g}", file=None))
+            if self._tool is not None:
+                table.row(
+                    "tool", self._tool.printline(
+                        orient="rpy/xyz", fmt="{:.2g}", file=None))
+            s += "\n" + str(table)
 
-        for name, q in self._configdict.items():
-            qlist = []
-            for i, L in enumerate(self):
-                if L.isprismatic():
-                    qlist.append(f"{q[i]:.3g}")
-                else:
-                    qlist.append(f"{q[i] * deg:.3g}\u00b0")
-            table.row(name, ', '.join(qlist))
+        # show named configurations
+        if len(self._configdict) > 0:
+            table = ANSITable(
+                Column("name", colalign=">"),
+                *[Column(f"q{j:d}", colalign="<", headalign="<") for j in range(self.n)],
+                border="thin")
 
-        return s + "\n" + str(table)
+            for name, q in self._configdict.items():
+                qlist = []
+                for i, L in enumerate(self):
+                    if L.isprismatic():
+                        qlist.append(f"{q[i]:.3g}")
+                    else:
+                        qlist.append(angle(q[i]))
+                table.row(name, *qlist)
+
+            s += "\n" + str(table)
+
+        return s
 
 
     def __add__(self, L):
