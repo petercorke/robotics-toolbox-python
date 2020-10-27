@@ -58,17 +58,12 @@ class ERobot(Robot):
             **kwargs
             ):
 
-        super().__init__(elinks, **kwargs)
 
         self._ets = []
         self._elinks = {}
         self._n = 0
         self._M = 0
         self._q_idx = []
-
-        # Verify elinks
-        if not isinstance(elinks, list):
-            raise TypeError('The links must be stored in a list.')
 
         # Set up a dictionary for looking up links by name
         for link in elinks:
@@ -111,7 +106,7 @@ class ERobot(Robot):
 
             lst.append(link)
 
-        # Figure out the order of links with resepect to joint variables
+        # Figure out the order of links with respect to joint variables
         self.bfs_link(
             lambda link: add_links(link, self._ets, self._q_idx))
         self._n = len(self._q_idx)
@@ -124,6 +119,9 @@ class ERobot(Robot):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
+
+        super().__init__(elinks, **kwargs)
+
 
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path
@@ -357,114 +355,21 @@ class ERobot(Robot):
     # def qdlim(self):
     #     return self.qdlim
 
-    @property
-    def elinks(self):
-        return self._elinks
-
-    @property
-    def base_link(self):
-        return self._base_link
-
-    @property
-    def ee_link(self):
-        return self._ee_link
-
-    @property
-    def q(self):
-        return self._q
-
-    @property
-    def qd(self):
-        return self._qd
-
-    @property
-    def qdd(self):
-        return self._qdd
-
-    @property
-    def control_type(self):
-        return self._control_type
-
-    @property
-    def ets(self):
-        return self._ets
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def manufacturer(self):
-        return self._manufacturer
-
-    @property
-    def base(self):
-        return self._base
-
-    @property
-    def tool(self):
-        return self._tool
+# --------------------------------------------------------------------- #
 
     @property
     def n(self):
         return self._n
+# --------------------------------------------------------------------- #
 
     @property
-    def M(self):
-        return self._M
+    def elinks(self):
+        return self._elinks
+# --------------------------------------------------------------------- #
 
     @property
-    def q_idx(self):
-        return self._q_idx
-
-    @property
-    def gravity(self):
-        return self._gravity
-
-    @name.setter
-    def name(self, name_new):
-        self._name = name_new
-
-    @manufacturer.setter
-    def manufacturer(self, manufacturer_new):
-        self._manufacturer = manufacturer_new
-
-    @gravity.setter
-    def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3, 'col')
-
-    @q.setter
-    def q(self, q_new):
-        q_new = getvector(q_new, self.n)
-        self._q = q_new
-
-    @qd.setter
-    def qd(self, qd_new):
-        self._qd = getvector(qd_new, self.n)
-
-    @qdd.setter
-    def qdd(self, qdd_new):
-        self._qdd = getvector(qdd_new, self.n)
-
-    @control_type.setter
-    def control_type(self, cn):
-        if cn == 'p' or cn == 'v' or cn == 'a':
-            self._control_type = cn
-        else:
-            raise ValueError(
-                'Control type must be one of \'p\', \'v\', or \'a\'')
-
-    @base.setter
-    def base(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._base = T
-
-    @tool.setter
-    def tool(self, T):
-        if not isinstance(T, SE3):  # pragma nocover
-            T = SE3(T)
-        self._tool = T
+    def base_link(self):
+        return self._base_link
 
     @base_link.setter
     def base_link(self, link):
@@ -473,6 +378,11 @@ class ERobot(Robot):
         else:
             self._base_link = self.ets[link]
         self._reset_fk_path()
+# --------------------------------------------------------------------- #
+
+    @property
+    def ee_link(self):
+        return self._ee_link
 
     @ee_link.setter
     def ee_link(self, link):
@@ -481,6 +391,22 @@ class ERobot(Robot):
         else:
             self._ee_link = self.ets[link]
         self._reset_fk_path()
+# --------------------------------------------------------------------- #
+
+    @property
+    def ets(self):
+        return self._ets
+# --------------------------------------------------------------------- #
+
+    @property
+    def M(self):
+        return self._M
+# --------------------------------------------------------------------- #
+
+    @property
+    def q_idx(self):
+        return self._q_idx
+# --------------------------------------------------------------------- #
 
     def fkine(self, q=None):
         '''
@@ -1142,69 +1068,39 @@ class ERobot(Robot):
 
         return Ain, Bin
 
-    def link_collision_damper(
-            self, shape, q=None, di=0.3, ds=0.05, xi=1.0,
-            from_link=None, to_link=None):
+    # def link_collision_damper(self, links=None, col, ob, q):
+    #     dii = 5
+    #     di = 0.3
+    #     ds = 0.05
 
-        if from_link is None:
-            from_link = self.base_link
+    #     if links is None:
+    #         links = self.links[1:]
 
-        if to_link is None:
-            to_link = self.ee_link
+    #     ret = p.getClosestPoints(col.co, ob.co, dii)
 
-        links, n = self.get_path(from_link, to_link)
+    #     if len(ret) > 0:
+    #         ret = ret[0]
+    #         wTlp = sm.SE3(ret[5])
+    #         wTcp = sm.SE3(ret[6])
+    #         lpTcp = wTlp.inv() * wTcp
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, n)
+    #         d = ret[8]
 
-        j = 0
-        Ain = None
-        bin = None
+    #     if d < di:
+    #         n = lpTcp.t / d
+    #         nh = np.expand_dims(np.r_[n, 0, 0, 0], axis=0)
 
-        def indiv_calculation(link, link_col, q):
-            d, wTlp, wTcp = link_col.closest_point(shape, di)
+    #         Je = r.jacobe(q, from_link=r.base_link, to_link=link, offset=col.base)
+    #         n = Je.shape[1]
+    #         dp = nh @ ob.v
+    #         l_Ain = np.zeros((1, 13))
+    #         l_Ain[0, :n] = nh @ Je
+    #         l_bin = (0.8 * (d - ds) / (di - ds)) + dp
+    #     else:
+    #         l_Ain = None
+    #         l_bin = None
 
-            if d is not None:
-                lpTcp = wTlp.inv() * wTcp
-                norm = lpTcp.t / d
-                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
-
-                Je = self.jacobe(
-                    q, from_link=self.base_link, to_link=link,
-                    offset=link_col.base)
-                n_dim = Je.shape[1]
-                dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
-                l_Ain[0, :n_dim] = norm_h @ Je
-                l_bin = (xi * (d - ds) / (di - ds)) + dp
-            else:
-                l_Ain = None
-                l_bin = None
-
-            return l_Ain, l_bin, d, wTcp
-
-        for link in links:
-            if link.jtype == link.VARIABLE:
-                j += 1
-
-            for link_col in link.collision:
-                l_Ain, l_bin, d, wTcp = indiv_calculation(
-                                                link, link_col, q[:j])
-
-                if l_Ain is not None and l_bin is not None:
-                    if Ain is None:
-                        Ain = l_Ain
-                    else:
-                        Ain = np.r_[Ain, l_Ain]
-
-                    if bin is None:
-                        bin = np.array(l_bin)
-                    else:
-                        bin = np.r_[bin, l_bin]
-
-        return Ain, bin
+    #     return l_Ain, l_bin, d, wTcp
 
     def closest_point(self, shape, inf_dist=1.0):
         '''

@@ -1,4 +1,5 @@
 import sys
+import copy
 import numpy as np
 # import roboticstoolbox as rtb
 from spatialmath import SE3
@@ -10,7 +11,10 @@ from spatialmath.base.transforms3d import tr2delta, tr2eul
 # from roboticstoolbox.backend import xacro
 from pathlib import PurePath, PurePosixPath
 from scipy.optimize import minimize, Bounds, LinearConstraint
+from roboticstoolbox.tools.null import null
 
+# TODO maybe this needs to be abstract
+# ikine functions need: fkine, jacobe, qlim methods from subclass
 
 class Robot:
 
@@ -41,6 +45,7 @@ class Robot:
             gravity = np.array([0, 0, 9.81])
         self.gravity = gravity
 
+        # validate the links, must be a list of Link subclass objects
         if not isinstance(links, list):
             raise TypeError('The links must be stored in a list.')
         for link in links:
@@ -48,6 +53,13 @@ class Robot:
                 raise TypeError('links should all be Link subclass')
             link._robot = self
         self._links = links
+
+        # Current joint angles of the robot
+        self.q = np.zeros(self.n)
+        self.qd = np.zeros(self.n)
+        self.qdd = np.zeros(self.n)
+
+        self.control_type = 'v'
 
         self._configdict = {}
 
@@ -77,7 +89,7 @@ class Robot:
 
     def __getitem__(self, i):
         """
-        Get link
+        Get link (Robot superclass)
 
         :param i: link number
         :type i: int
@@ -117,7 +129,7 @@ class Robot:
 
     def dynchanged(self):
         """
-        Dynamic parameters have changed
+        Dynamic parameters have changed (Robot superclass)
 
         Called from a property setter to inform the robot that the cache of
         dynamic parameters is invalid.
@@ -128,7 +140,7 @@ class Robot:
 
     def _getq(self, q=None):
         """
-        Get joint coordinates
+        Get joint coordinates (Robot superclass)
 
         :param q: passed value, defaults to None
         :type q: array_like, optional
@@ -145,7 +157,7 @@ class Robot:
     @property
     def n(self):
         """
-        Number of joints
+        Number of joints (Robot superclass)
 
         :return: Number of joints
         :rtype: int
@@ -159,11 +171,11 @@ class Robot:
             >>> robot.n
 
         """
-        return len(self._links)
+        return self._n
 
     def addconfiguration(self, name, q):
         """
-        Add a named joint configuration
+        Add a named joint configuration (Robot superclass)
 
         :param name: Name of the joint configuration
         :type name: str
@@ -186,7 +198,7 @@ class Robot:
 
     def dyntable(self):
         """
-        Pretty print the dynamic parameters
+        Pretty print the dynamic parameters (Robot superclass)
 
         Example:
 
@@ -204,7 +216,7 @@ class Robot:
     @property
     def name(self):
         """
-        Get/set robot name
+        Get/set robot name (Robot superclass)
 
         - ``robot.name`` is the robot name
 
@@ -224,7 +236,7 @@ class Robot:
     @property
     def manufacturer(self):
         """
-        Get/set robot manufacturer's name
+        Get/set robot manufacturer's name (Robot superclass)
 
         - ``robot.manufacturer`` is the robot manufacturer's name
 
@@ -243,7 +255,7 @@ class Robot:
     @property
     def links(self):
         """
-        Robot links
+        Robot links (Robot superclass)
 
         :return: A list of link objects
         :rtype: list of Link subclass instances
@@ -261,7 +273,7 @@ class Robot:
     @property
     def base(self):
         """
-        Get/set robot base transform
+        Get/set robot base transform (Robot superclass)
 
         - ``robot.base`` is the robot base transform
 
@@ -294,7 +306,7 @@ class Robot:
     @property
     def tool(self):
         """
-        Get/set robot tool transform
+        Get/set robot tool transform (Robot superclass)
 
         - ``robot.tool`` is the robot name
 
@@ -330,7 +342,7 @@ class Robot:
     @property
     def gravity(self):
         """
-        Get/set default gravitational acceleration
+        Get/set default gravitational acceleration (Robot superclass)
 
         - ``robot.name`` is the default gravitational acceleration
 
@@ -350,13 +362,44 @@ class Robot:
         self._gravity = getvector(gravity_new, 3)
         self.dynchanged()
 
+# --------------------------------------------------------------------- #
+
+    @property
+    def qlim(self):
+        r"""
+        Joint limits (Robot superclass)
+
+        :return: Array of joint limit values
+        :rtype: ndarray(2,n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.qlim
+        """
+        # TODO tidy up
+        limits = np.zeros((2,self.n))
+        for j, link in enumerate(self):
+            if link.qlim is None:
+                if link.isrevolute():
+                    v = np.r_[-np.pi, np.pi]
+                else:
+                    raise ValueError('undefined prismatic joint limit')
+            else:
+                v = link.qlim
+            limits[:,j] = v
+        return limits
+
 # TODO, the remaining functions, I have only a hazy understanding of how they work
 # --------------------------------------------------------------------- #
 
     @property
     def q(self):
         """
-        Get/set robot joint configuration
+        Get/set robot joint configuration (Robot superclass)
 
         - ``robot.q`` is the robot joint configuration
 
@@ -377,7 +420,7 @@ class Robot:
     @property
     def qd(self):
         """
-        Get/set robot joint velocity
+        Get/set robot joint velocity (Robot superclass)
 
         - ``robot.qd`` is the robot joint velocity
 
@@ -398,7 +441,7 @@ class Robot:
     @property
     def qdd(self):
         """
-        Get/set robot joint acceleration
+        Get/set robot joint acceleration (Robot superclass)
 
         - ``robot.qdd`` is the robot joint acceleration
 
@@ -419,7 +462,7 @@ class Robot:
     @property
     def control_type(self):
         """
-        Get/set robot control mode
+        Get/set robot control mode (Robot superclass)
 
         - ``robot.control_type`` is the robot control mode
 
@@ -440,94 +483,7 @@ class Robot:
             raise ValueError(
                 'Control type must be one of \'p\', \'v\', or \'a\'')
 
-    def ikcon(self, T, q0=None):
-        """
-        Inverse kinematics by optimization with joint limits
-
-        q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
-        corresponding to the robot end-effector pose T which is an SE3 object
-        or homogenenous transform matrix (4x4), and N is the number of robot
-        joints. Initial joint coordinates Q0 used for the minimisation.
-
-        q, success, err = ikcon(T) as above but q0 is set to 0.
-
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is mxn
-        where n is the number of robot joints. The initial estimate of q
-        for each time step is taken as the solution from the previous time
-        step. Retruns trajectory of joints q (mxn), list of success (m) and
-        list of errors (m)
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param q0: initial joint configuration (default all zeros)
-        :type q0: float ndarray(n) (default all zeros)
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: Final pose error
-        :rtype error: float
-
-        :notes:
-            - Joint limits are considered in this solution.
-            - Can be used for robots with arbitrary degrees of freedom.
-            - In the case of multiple feasible solutions, the solution
-              returned depends on the initial choice of q0.
-            - Works by minimizing the error between the forward kinematics
-              of the joint angle solution and the end-effector frame as an
-              optimisation.
-            - The objective function (error) is described as:
-              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-              Where omega is some gain matrix, currently not modifiable.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-
-        try:
-            if q0 is not None:
-                q0 = getvector(q0, self.n, 'row')
-            else:
-                q0 = np.zeros((trajn, self.n))
-        except ValueError:
-            verifymatrix(q0, (trajn, self.n))
-
-        # create output variables
-        qstar = np.zeros((trajn, self.n))
-        error = []
-        exitflag = []
-
-        omega = np.diag([1, 1, 1, 3 / self.reach])
-
-        def cost(q, T, omega):
-            return np.sum(
-                (
-                    (np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @
-                    omega) ** 2
-            )
-
-        bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
-
-        for i in range(trajn):
-            Ti = T[i]
-            res = minimize(
-                lambda q: cost(q, Ti, omega),
-                q0[i, :], bounds=bnds, options={'gtol': 1e-6})
-            qstar[i, :] = res.x
-            error.append(res.fun)
-            exitflag.append(res.success)
-
-        if trajn > 1:
-            return qstar, exitflag, error
-        else:
-            return qstar[0, :], exitflag[0], error[0]
+# ===================================================================== #
 
     def ikine(
             self, T,
@@ -541,27 +497,12 @@ class Robot:
             search=False,
             slimit=100,
             transpose=None):
+
         """
-        Inverse kinematics by optimization without joint limits
-
-        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)
-        corresponding to the robot end-effector pose ``T`` which is an ``SE3``
-        instance. ``failure`` is True if the solver failed, and ``reason``
-        contains details of the failure.
-
-        This method can be used for robots with any number of degrees of
-        freedom.
-
-        Trajectory operation:
-        If ``T`` contains multiple values, ie. a trajectory, then returns the
-        joint coordinates corresponding to each of the pose values in ``T``.
-        ``q`` is mxn where n is the number of robot joints. The initial
-        estimate of ``q`` for each time step is taken as the solution from the
-        previous time step. Returns trajectory of joints ``q`` (mxn), list of
-        failure (m) and list of error reasons (m).
+        Numerical inverse kinematics by optimization (Robot superclass)
 
         :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
+        :type T: SE3 with 1 or ``m`` values
         :param ilimit: maximum number of iterations
         :type ilimit: int (default 500)
         :param rlimit: maximum number of consecutive step rejections
@@ -592,12 +533,30 @@ class Robot:
         :return error: If failed, what went wrong
         :rtype error: List of str
 
-        Underactuated robots:
+        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)
+        corresponding to the robot end-effector pose ``T`` which is an ``SE3``
+        instance. ``failure`` is True if the solver failed, and ``reason``
+        contains details of the failure.
+
+        This method can be used for robots with any number of degrees of
+        freedom.
+
+        **Trajectory operation:**
+
+        If ``T`` contains ``m`` > 1 values, ie. a trajectory, then returns the
+        joint coordinates corresponding to each of the pose values in ``T``.
+        ``q`` (m,n) where ``n`` is the number of robot joints. The initial
+        estimate of ``q`` for each time step is taken as the solution from the
+        previous time step. Returns trajectory of joints ``q`` (m,n), list of
+        failure (m) and list of error reasons (m).
+
+        **Underactuated robots:**
+
         For the case where the manipulator has fewer than 6 DOF the
         solution space has more dimensions than can be spanned by the
         manipulator joint coordinates.
 
-        In this case we specify the 'mask' option where the mask vector (1x6)
+        In this case we specify the ``mask`` option where the ``mask`` vector (6)
         specifies the Cartesian DOF (in the wrist coordinate frame) that will
         be ignored in reaching a solution.  The mask vector has six elements
         that correspond to translation in X, Y and Z, and rotation about X, Y
@@ -612,7 +571,8 @@ class Robot:
         orientation is specified by T in world coordinates and the achievable
         orientations are a function of the tool position.
 
-        :notes:
+        .. note::
+
             - Solution is computed iteratively.
             - Implements a Levenberg-Marquadt variable step size solver.
             - The tolerance is computed on the norm of the error between
@@ -640,7 +600,6 @@ class Robot:
         :references:
             - Robotics, Vision & Control, P. Corke, Springer 2011,
               Section 8.4.
-
         """
 
         if not isinstance(T, SE3):
@@ -670,20 +629,11 @@ class Robot:
             search = False
             # quiet = True
 
-            for k in range(slimit):
+            qlim = self.qlim
+            qspan = qlim[1] - qlim[0]  # range of joint motion
 
-                q0n = np.zeros(self.n)
-                for j in range(self.n):
-                    qlim = self.links[j].qlim
-                    if np.sum(np.abs(qlim)) == 0:
-                        if not self.links[j].sigma:
-                            q0n[j] = np.random.rand() * 2 * np.pi - np.pi
-                        else:
-                            raise ValueError('For a prismatic joint, '
-                                             'search requires joint limits')
-                    else:
-                        q0n[j] = np.random.rand() * (qlim[1] - qlim[0]) + \
-                            qlim[0]
+            for k in range(slimit):
+                q0n = np.random.rand(self.n) * qspan + qlim[0,:]
 
                 # fprintf('Trying q = %s\n', num2str(q))
 
@@ -814,9 +764,11 @@ class Robot:
 
         return qt, failed, err
 
+# --------------------------------------------------------------------- #
+
     def ikunc(self, T, q0=None, ilimit=1000):
         """
-        Inverse manipulator by optimization without joint limits
+        Inverse manipulator by optimization without joint limits (Robot superclass)
 
         q, success, err = ikunc(T) are the joint coordinates (n) corresponding
         to the robot end-effector pose T which is an SE3 object or
@@ -847,7 +799,7 @@ class Robot:
         :retrun error: Final pose error
         :rtype error: float
 
-        :notes:
+        .. note::
             - Joint limits are not considered in this solution.
             - Can be used for robots with arbitrary degrees of freedom.
             - In the case of multiple feasible solutions, the solution
@@ -899,3 +851,261 @@ class Robot:
             return qt[0, :], success[0], err[0]
         else:
             return qt, success, err
+
+# --------------------------------------------------------------------- #
+
+    def ikcon(self, T, q0=None):
+        """
+        Inverse kinematics by optimization with joint limits (Robot superclass)
+
+        q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
+        corresponding to the robot end-effector pose T which is an SE3 object
+        or homogenenous transform matrix (4x4), and N is the number of robot
+        joints. Initial joint coordinates Q0 used for the minimisation.
+
+        q, success, err = ikcon(T) as above but q0 is set to 0.
+
+        Trajectory operation:
+        In all cases if T is a vector of SE3 objects or a homogeneous
+        transform sequence (4x4xm) then returns the joint coordinates
+        corresponding to each of the transforms in the sequence. q is mxn
+        where n is the number of robot joints. The initial estimate of q
+        for each time step is taken as the solution from the previous time
+        step. Retruns trajectory of joints q (mxn), list of success (m) and
+        list of errors (m)
+
+        :param T: The desired end-effector pose
+        :type T: SE3 or SE3 trajectory
+        :param q0: initial joint configuration (default all zeros)
+        :type q0: float ndarray(n) (default all zeros)
+
+        :retrun q: The calculated joint values
+        :rtype q: float ndarray(n)
+        :retrun success: IK solved (True) or failed (False)
+        :rtype success: bool
+        :retrun error: Final pose error
+        :rtype error: float
+
+        .. note::
+            - Joint limits are considered in this solution.
+            - Can be used for robots with arbitrary degrees of freedom.
+            - In the case of multiple feasible solutions, the solution
+              returned depends on the initial choice of q0.
+            - Works by minimizing the error between the forward kinematics
+              of the joint angle solution and the end-effector frame as an
+              optimisation.
+            - The objective function (error) is described as:
+              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+              Where omega is some gain matrix, currently not modifiable.
+
+        """
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        trajn = len(T)
+
+        try:
+            if q0 is not None:
+                q0 = getvector(q0, self.n, 'row')
+            else:
+                q0 = np.zeros((trajn, self.n))
+        except ValueError:
+            verifymatrix(q0, (trajn, self.n))
+
+        # create output variables
+        qstar = np.zeros((trajn, self.n))
+        error = []
+        exitflag = []
+
+        omega = np.diag([1, 1, 1, 3 / self.reach])
+
+        def cost(q, T, omega):
+            return np.sum(
+                (
+                    (np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @
+                    omega) ** 2
+            )
+
+        bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
+
+        for i in range(trajn):
+            Ti = T[i]
+            res = minimize(
+                lambda q: cost(q, Ti, omega),
+                q0[i, :], bounds=bnds, options={'gtol': 1e-6})
+            qstar[i, :] = res.x
+            error.append(res.fun)
+            exitflag.append(res.success)
+
+        if trajn > 1:
+            return qstar, exitflag, error
+        else:
+            return qstar[0, :], exitflag[0], error[0]
+
+# --------------------------------------------------------------------- #
+
+    def qmincon(self, q=None):
+            """
+            Move away from joint limits
+
+            :param q: Joint coordinates
+            :type q: ndarray(n)
+            :retrun qs: The calculated joint values
+            :rtype qs: ndarray(n)
+            :return: Optimisation solved (True) or failed (False)
+            :rtype: bool
+            :return: Final value of the objective function
+            :rtype: float
+
+            ``qs, success, err = qmincon(q)`` exploits null space motion and returns
+            a set of joint angles ``qs`` (n) that result in the same end-effector
+            pose but are away from the joint coordinate limits. ``n`` is the number
+            of robot joints. ``success`` is True for successful optimisation.
+            ``err`` is the scalar final value of the objective function.
+
+            **Trajectory operation**
+            
+            In all cases if ``q`` is (m,n) it is taken as a pose sequence and
+            ``qmincon()`` returns the adjusted joint coordinates (m,n) corresponding
+            to each of the configurations in the sequence.
+
+            ``err`` and ``success`` are also (m) and indicate the results of
+            optimisation for the corresponding trajectory step.
+
+            .. note:: Robot must be redundant.
+
+            """
+
+            def sumsqr(A):
+                return np.sum(A**2)
+
+            def cost(x, ub, lb, qm, N):
+                return sumsqr(
+                    (2 * (N @ x + qm) - ub - lb) / (ub - lb))
+
+            q = getmatrix(q, (None, self.n))
+
+            qstar = np.zeros((q.shape[0], self.n))
+            error = np.zeros(q.shape[0])
+            success = np.zeros(q.shape[0])
+
+            lb = self.qlim[0, :]
+            ub = self.qlim[1, :]
+
+            for k, qk in enumerate(q):
+
+                J = self.jacobe(qk)
+
+                N = null(J)
+
+                x0 = np.zeros(N.shape[1])
+                A = np.r_[N, -N]
+                b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
+
+                con = LinearConstraint(A, -np.inf, b)
+
+                res = minimize(
+                    lambda x: cost(x, ub, lb, qk, N),
+                    x0, constraints=con)
+
+                qstar[k,:] = qk + N @ res.x
+                error[k] = res.fun
+                success[k] = res.success
+
+            if q.shape[0] == 1:
+                return qstar[0,:], success[0], error[0]
+            else:
+                return qstar, success, error
+
+# --------------------------------------------------------------------- #
+
+    def friction(self, qd):
+        """
+        Manipulator joint friction (Robot superclass)
+
+        :param qd: The joint velocities of the robot
+        :type qd: ndarray(n)
+
+        :return: The joint friction forces/torques for the robot
+        :rtype: ndarray(n,)
+
+        ``robot.friction(qd)`` is a vector of joint friction
+        forces/torques for the robot moving with joint velocities ``qd``.
+
+        The friction model includes:
+
+        - Viscous friction which is a linear function of velocity.
+        - Coulomb friction which is proportional to sign(qd).
+
+        .. math::
+
+            \tau_j = G^2 B \dot{q}_j + |G_j| \left\{ \begin{array}{ll}
+                \tau_{C,j}^+ & \mbox{if $\dot{q}_j > 0$} \\
+                \tau_{C,j}^- & \mbox{if $\dot{q}_j < 0$} \end{array} \right.
+
+        .. note::
+
+            - The friction value should be added to the motor output torque to 
+              determine the nett torque. It has a negative value when qd > 0.
+            - The returned friction value is referred to the output of the
+              gearbox.
+            - The friction parameters in the Link object are referred to the
+              motor.
+            - Motor viscous friction is scaled up by :math:`G^2`.
+            - Motor Coulomb friction is scaled up by math:`G`.
+            - The appropriate Coulomb friction value to use in the
+              non-symmetric case depends on the sign of the joint velocity,
+              not the motor velocity.
+            - Coulomb friction is zero for zero joint velocity, stiction is
+              not modeled.
+            - The absolute value of the gear ratio is used.  Negative gear
+              ratios are tricky: the Puma560 robot has negative gear ratio for
+              joints 1 and 3.
+            - The absolute value of the gear ratio is used. Negative gear
+              ratios are tricky: the Puma560 has negative gear ratio for
+              joints 1 and 3.
+
+        :seealso: :func:`Robot.nofriction`, :func:`Link.friction`
+        """
+
+        qd = getvector(qd, self.n)
+        tau = np.zeros(self.n)
+
+        for i in range(self.n):
+            tau[i] = self.links[i].friction(qd[i])
+
+        return tau
+
+# --------------------------------------------------------------------- #
+
+    def nofriction(self, coulomb=True, viscous=False):
+        """
+        Remove manipulator joint friction (Robot superclass)
+
+        NFrobot = nofriction(coulomb, viscous) copies the robot and returns
+        a robot with the same parameters except, the Coulomb and/or viscous
+        friction parameter set to zero
+
+        NFrobot = nofriction(coulomb, viscous) copies the robot and returns
+        a robot with the same parameters except the Coulomb friction parameter
+        is set to zero
+
+        :param coulomb: if True, will set the coulomb friction to 0
+        :type coulomb: bool
+
+        :return: A copy of the robot with dynamic parameters perturbed
+        :rtype: DHRobot
+
+        :seealso: :func:`Robot.friction`, :func:`Link.nofriction`
+        """
+
+        # shallow copy the robot object
+        self.delete_rne()  # remove the inherited C pointers
+        nf = copy.copy(self)
+        nf.name = 'NF/' + self.name
+
+        # add the modified links (copies)
+        nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
+
+        return nf

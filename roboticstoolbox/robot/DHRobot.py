@@ -6,10 +6,9 @@
 import numpy as np
 from roboticstoolbox.robot import Robot  # DHLink
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
-from roboticstoolbox.tools.null import null
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
-from spatialmath.base.transforms3d import tr2delta, tr2eul
+from spatialmath.base.transforms3d import tr2delta, tr2eul, tr2jac, trinv
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds, LinearConstraint
@@ -66,28 +65,26 @@ class DHRobot(Robot, DHDynamics):
         links = []
         self._n = 0
 
+        # TODO rewrite using extend
         for i in range(len(L)):
             if isinstance(L[i], DHLink):
+                # got a link
                 links.append(L[i])
                 self._n += 1
                 L[i].id = self._n
 
             elif isinstance(L[i], DHRobot):
+                # got a robot
                 for j in range(L[i].n):
                     links.append(L[i].links[j])
                     self._n += 1
                     L[i].id = self._n
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
-
+            
         super().__init__(links, **kwargs)
 
-        # Current joint angles of the robot
-        self.q = np.zeros(self.n)
-        self.qd = np.zeros(self.n)
-        self.qdd = np.zeros(self.n)
 
-        self.control_type = 'v'
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
@@ -208,6 +205,12 @@ class DHRobot(Robot, DHDynamics):
             gravity=self.gravity)
 
     def copy(self):
+        """
+        Copy a robot
+
+        :return: A deepish copy of the robot
+        :rtype: Robot subclass instance
+        """
 
         L = [link.copy() for link in self]
 
@@ -224,8 +227,6 @@ class DHRobot(Robot, DHDynamics):
         new.qdd = self.qdd
 
         return new
-
-
 
     @property
     def mdh(self):
@@ -396,28 +397,6 @@ class DHRobot(Robot, DHDynamics):
         return v
 
     @property
-    def qlim(self):
-        r"""
-        Link offset values
-
-        :return: Array of link offset values.
-        :rtype: ndarray(2,n)
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.qlim
-        """
-        # TODO tidy up
-        v = np.copy(self.links[0].qlim)
-        for i in range(1, self.n):
-            v = np.c_[v, self.links[i].qlim]
-        return v
-
-    @property
     def reach(self):
         r"""
         Reach of the robot
@@ -437,7 +416,7 @@ class DHRobot(Robot, DHDynamics):
 
         :param j: Joints to compute link transform for
         :type j: int, 2-tuple
-        :param q: The joint angles/configuration of the robot (Optional,
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values)
         :type q: float ndarray(1,n)
         :return T: The transform between link frames
@@ -479,7 +458,7 @@ class DHRobot(Robot, DHDynamics):
         """
         Joint limit test
 
-        :param q: The joint angles/configuration of the robot (Optional,
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values)
         :type q: ndarray(n
         :return v: is a vector of boolean values, one per joint, False if 
@@ -501,11 +480,9 @@ class DHRobot(Robot, DHDynamics):
             >>> robot.islimit([0, 0, -4, 4, 0, 0])
 
         """
-
-        qlim = self.qlim
         q = self._getq(q)
         
-        return (q < qlim[0,:]) | (q > qlim[1,:])
+        return [link.islimit(qk) for (link, qk) in zip(self, q)]
 
     def isspherical(self):
         """
@@ -621,7 +598,7 @@ class DHRobot(Robot, DHDynamics):
         """
         Convert joint angles to degrees
 
-        :param q: The joint angles/configuration of the robot (Optional,
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values)
         :type q: ndarray(n)
         :return: a vector of joint coordinates in degrees and metres
@@ -655,7 +632,7 @@ class DHRobot(Robot, DHDynamics):
         """
         Convert joint angles to radians
 
-        :param q: The joint angles/configuration of the robot (Optional,
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values)
         :type q: ndarray(n)
         :return: a vector of joint coordinates in radians and metres
@@ -688,7 +665,7 @@ class DHRobot(Robot, DHDynamics):
         """
         Joint axes as  twists
 
-        :param q: The joint angles/configuration of the robot
+        :param q: The joint configuration of the robot
         :type q: array_like (n)
         :return: a vector of Twist objects
         :rtype: float ndarray(n,)
@@ -953,78 +930,747 @@ class DHRobot(Robot, DHDynamics):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
         """
+        q = self._getq(q)
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
-
-        J0 = self.jacob0v(q) @ self.jacobe(q)
+        T = self.fkine(q)
+        J0 = tr2jac(trinv(T.A)) @ self.jacobe(q)
 
         return J0
 
-    def jacob0v(self, q=None):
+    def manipulability(self, q=None, method='yoshikawa', axes='all'):
         """
-        Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
-        configuration q, which relates the velocity in the end-effector frame
-        to velocity in the base frame
+        Manipulability measure
 
-        Jv = jacob0v() as above except uses the stored q value of the
-        robot object.
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: ndarray(n), or ndarray(m,n)
+        :param method: method to use, "yoshikawa" (default) or "asada"
+        :type method: str
+        :param axes: Task space axes to consider: "all" [default],
+            "trans", "rot"
+        :type axes: str
+        :return: manipulability
+        :rtype: float or ndarray(m)
 
-        :param q: The joint angles/configuration of the robot (Optional,
+        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar)
+          for the robot at the joint configuration ``q``.  It indicates
+          dexterity, that is, how isotropic the robot's motion is with respect
+          to the 6 degrees of Cartesian motion. The measure is high when the
+          manipulator is capable of equal motion in all directions and low when
+          the manipulator is close to a singularity. Yoshikawa's manipulability
+          measure is based on the shape of the velocity ellipsoid and depends
+          only on kinematic parameters.
+
+        - ``manipulability(q, method='asada')`` as above except computes the
+          Asada manipulability measure. Asada's manipulability measure is based
+          on the shape of the acceleration ellipsoid which in turn is a
+          function of the Cartesian inertia matrix and the dynamic parameters.
+          The scalar measure computed here is the ratio of the smallest/largest
+          ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
+          ratio of 1, but in practice will be less than 1.
+
+        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which of
+          the 6 degrees-of-freedom to consider in the measurement. For example
+          ``axes="trans"`` to consider only translation or
+          ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
+          motion.
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        .. note::
+            - The "all" option includes rotational and translational
+              dexterity, but this involves adding different units. It can be
+              more useful to look at the translational and rotational
+              manipulability separately.
+            - Examples in the RVC book (1st edition) can be replicated by
+              using the "all" option
+
+        :references:
+            - Analysis and control of robot manipulators with redundancy,
+              T. Yoshikawa,
+              Robotics Research: The First International Symposium
+              (M. Brady and R. Paul, eds.),
+              pp. 735-747, The MIT press, 1984.
+            - A geometrical representation of manipulator dynamics and its
+              application to arm design, H. Asada,
+              Journal of Dynamic Systems, Measurement, and Control,
+              vol. 105, p. 131, 1983.
+            - Robotics, Vision & Control, P. Corke, Springer 2011.
+
+        """
+        if axes == 'all':
+            axes = [1, 1, 1, 1, 1, 1]
+        elif axes.startswith('trans'):
+            axes = [1, 1, 1, 0, 0, 0]
+        elif axes.startswith('rot'):
+            axes = [0, 0, 0, 1, 1, 1]
+        else:
+            raise ValueError('axes must be all, trans or rot')
+
+        def yoshi(robot, q, axes):
+            J = robot.jacob0(q)
+            J = J[axes, :]
+            m2 = np.linalg.det(J @ J.T)
+            # m2 = np.maximum(0.0, m2)  # clip it to positive
+            return np.sqrt(abs(m2))
+
+        def asada(robot, q, axes, dof):
+            J = robot.jacob0(q)
+
+            if np.linalg.matrix_rank(J) < 6:
+                return 0
+
+            Ji = np.linalg.pinv(J)
+            M = robot.inertia(q)
+            Mx = Ji.T @ M @ Ji
+            d = np.where(axes)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = np.linalg.eig(Mx)
+
+            return np.min(e) / np.max(e)
+
+        axes = getvector(axes, 6)
+        axes = axes > 0
+
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'row')
+        except ValueError:
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+
+        w = np.zeros(trajn)
+
+        if method == 'yoshikawa':
+            for i in range(trajn):
+                w[i] = yoshi(self, q[i, :], axes)
+
+            if trajn == 1:
+                return w[0]
+            else:
+                return w
+
+        elif method == 'asada':
+            dof = np.sum(axes)
+
+            for i in range(trajn):
+                w[i] = asada(self, q[i, :], axes, dof)
+
+            if trajn == 1:
+                return w[0]
+            else:
+                return w
+
+        else:
+            raise ValueError(
+                'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
+
+    def jacob_dot(self, q=None, qd=None):
+        """
+        Derivative of Jacobian
+
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
+        :param qd: The joint configuration of the robot (Optional,
+            if not supplied will use the stored qd values).
+        :type qd: ndarray(n)
+        :return: The derivative of the manipulator Jacobian
+        :rtype:  ndarray(n)
 
-        :returns J: The velocity Jacobian in 0 frame
-        :rtype J: float ndarray(6,6)
+        ``robot.jacob_dot(q, qd)`` computes the product (6) of the temporal
+        derivative of the manipulator Jacobian (in the world frame) and the
+        joint rates :math:`\frac{d}{dt} \dot{\mathbf{J}}(q) \dot{q}`.
+
+        .. note::
+            - This term appears in the formulation for operational space
+              control :math:`\ddot{x} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q}`.
+            - Written as per the reference and not very efficient.
+
+        :references:
+            - Fundamentals of Robotics Mechanical Systems (2nd ed)
+              J. Angleles, Springer 2003.
+            - A unified approach for motion and force control of robot
+              manipulators: The operational space formulation
+              O Khatib, IEEE Journal on Robotics and Automation, 1987.
 
         """
 
         if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+            q = self.q
 
-        R = self.fkine(q).R
+        if qd is None:
+            qd = self.qd
 
-        Jv = np.zeros((6, 6), dtype=R.dtype)
-        Jv[:3, :3] = R
-        Jv[3:, 3:] = R
+        q = getvector(q, self.n)
+        qd = getvector(qd, self.n)
 
-        return Jv
+        # Using the notation of Angeles:
+        #   [Q,a] ~ [R,t] the per link transformation
+        #   P ~ R   the cumulative rotation t2r(Tj) in world frame
+        #   e       the last column of P, the local frame z axis in world
+        #           coordinates
+        #   w       angular velocity in base frame
+        #   ed      deriv of e
+        #   r       is distance from final frame
+        #   rd      deriv of r
+        #   ud      ??
 
-    def jacobev(self, q=None):
+        Q = np.zeros((3, 3, self.n))
+        a = np.zeros((3, self.n))
+        P = np.zeros((3, 3, self.n))
+        e = np.zeros((3, self.n))
+        w = np.zeros((3, self.n))
+        ed = np.zeros((3, self.n))
+        rd = np.zeros((3, self.n))
+        r = np.zeros((3, self.n))
+        ud = np.zeros((3, self.n))
+        v = np.zeros((6, self.n))
+
+        for i in range(self.n):
+            T = self.links[i].A(q[i])
+            Q[:, :, i] = T.R
+            a[:, i] = T.t
+
+        P[:, :, 0] = Q[:, :, 0]
+        e[:, 0] = [0, 0, 1]
+
+        for i in range(1, self.n):
+            P[:, :, i] = P[:, :, i - 1] @ Q[:, :, i]
+            e[:, i] = P[:, 2, i]
+
+        # Step 1
+        w[:, 0] = qd[0] * e[:, 0]
+
+        for i in range(self.n - 1):
+            w[:, i + 1] = (
+                qd[i + 1] *
+                np.array([0, 0, 1]) +
+                Q[:, :, i].T @ w[:, i])
+
+        # Step 2
+        ed[:, 0] = np.array([0, 0, 1])
+
+        for i in range(1, self.n):
+            ed[:, i] = np.cross(w[:, i], e[:, i])
+
+        # Step 3
+        rd[:, self.n - 1] = np.cross(w[:, self.n - 1], a[:, self.n - 1])
+
+        for i in range(self.n - 2, -1, -1):
+            rd[:, i] = np.cross(w[:, i], a[:, i]) + Q[:, :, i] @ rd[:, i + 1]
+
+        r[:, self.n - 1] = a[:, self.n - 1]
+
+        for i in range(self.n - 2, -1, -1):
+            r[:, i] = a[:, i] + Q[:, :, i] @ r[:, i + 1]
+
+        ud[:, 0] = np.cross(e[:, 0], rd[:, 0])
+
+        for i in range(1, self.n):
+            ud[:, i] = \
+                np.cross(ed[:, i], r[:, i]) + np.cross(e[:, i], rd[:, i])
+
+        # Step 4
+        # Swap ud and ed
+        v[:, self.n - 1] = \
+            qd[self.n - 1] * np.r_[ud[:, self.n - 1], ed[:, self.n - 1]]
+
+        for i in range(self.n - 2, -1, -1):
+            Ui = np.r_[
+                np.c_[Q[:, :, i], np.zeros((3, 3))],
+                np.c_[np.zeros((3, 3)), Q[:, :, i]]]
+
+            v[:, i] = (
+                qd[i] *
+                np.r_[ud[:, i], ed[:, i]] +
+                Ui @ v[:, i + 1])
+
+        Jdot = v[:, 0]
+
+        return Jdot
+
+    def plot(
+            self, q=None, block=True, dt=0.050, limits=None,
+            vellipse=False, fellipse=False,
+            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
         """
-        Jv = jacobev(q) is the spatial velocity Jacobian, at joint
-        configuration q, which relates the velocity in the base frame to the
-        velocity in the end-effector frame.
+        Graphical display and animation
 
-        Jv = jacobev() as above except uses the stored q value of the
-        robot object.
-
-        :param q: The joint angles/configuration of the robot (Optional,
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            seconds between frames
+        :type dt: float
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+        :param movie: name of file in which to save an animated GIF
+        :type movie: str
 
-        :returns J: The velocity Jacobian in ee frame
-        :rtype J: float ndarray(6,6)
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        - ``robot.plot(q)`` displays a graphical view of a robot based on the
+          kinematic model and the joint configuration ``q``. This is a stick
+          figure polyline which joins the origins of the link coordinate frames. 
+          The plot will autoscale with an aspect ratio of 1.
+
+        - ``robot.plot()`` as above but use the stored ``q`` value.
+
+        If ``q`` (m,n) representing a joint-space trajectory it will create an
+        animation with a pause of ``dt`` seconds between each frame.
+
+        .. note::
+            - By default this method will block until the figure is dismissed.
+              To avoid this set ``block=False``.
+            - The polyline joins the origins of the link frames, but for
+              some Denavit-Hartenberg models those frames may not actually
+              be on the robot, ie. the lines to not neccessarily represent
+              the links of the robot.
+
+        :seealso: :func:`teach`
+        """
+
+        # try:
+        return _plot(
+            self, block, q, int(dt * 1000), limits,
+            vellipse=vellipse, fellipse=fellipse,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,
+            movie=movie)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')
+
+    def teach(
+            self, q=None, block=True, limits=None,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
+        """
+        Graphical teach pendant
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+                  if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param limits: Custom view limits for the plot. If not supplied will
+                       autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+                          which the joint revolves around(revolute joint) or 
+                          translates along (prismatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+                         at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        - ``robot.teach(q)`` creates a matplotlib plot which allows the user to
+          "drive" a graphical robot using a graphical slider panel. The robot's
+          inital joint configuration is ``q``. The plot will autoscale with an
+          aspect ratio of 1.
+
+        - ``robot.teach()`` as above except the robot's stored value of ``q`` is used.
+
+        .. note:: 
+            - Program execution is blocked until the teach window is 
+              dismissed.  If ``block=False`` the method is non-blocking but
+              you need to poll the window manager to ensure that the window
+              remains responsive.
+            - The slider limits are derived from the joint limit properties.
+              If not set then:
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+        """
+
+        if q is not None:
+            self.q = q
+
+        # try:
+        return _teach(
+            self, block, limits=limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')
+
+    def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+        """
+        Create a velocity ellipsoid object for plotting
+
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational velocity ellipsoid
+        :type opt: string
+        :param centre:
+        :type centre: list or str('ee')
+
+        :return: An EllipsePlot object
+        :rtype: EllipsePlot
+
+        - ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
+          pose ``q``. The ellipsoid is centered at the origin.
+
+        - ``robot.vellipse()`` as above except the joint configuration is that
+          stored in the robot object.
+
+        .. note:: 
+            - By default the ellipsoid related to translational motion is
+              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+              ellipsoid.
+            - By default the ellipsoid is drawn at the origin.  The option
+              ``centre`` allows its origin to set to set to the specified
+              3-vector, or the string "ee" ensures it is drawn at the 
+              end-effector position.
+        """
+
+        return _vellipse(self, q=q, opt=opt, centre=centre)
+
+    def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+        '''
+        Create a force ellipsoid object for plotting
+
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational force ellipsoid
+        :type opt: string
+        :param centre:
+        :type centre: list or str('ee')
+
+        :return: An EllipsePlot object
+        :rtype: EllipsePlot
+
+        - ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
+          pose ``q``. The ellipsoid is centered at the origin.
+
+        - ``robot.fellipse()`` as above except the joint configuration is that
+          stored in the robot object.
+
+        .. note:: 
+            - By default the ellipsoid related to translational motion is
+              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+              ellipsoid.
+            - By default the ellipsoid is drawn at the origin.  The option
+              ``centre`` allows its origin to set to set to the specified
+              3-vector, or the string "ee" ensures it is drawn at the 
+              end-effector position.
+
+        '''
+
+        return _fellipse(self, q=q, opt=opt, centre=centre)
+
+    def plot_vellipse(
+            self, q=None, block=True, vellipse=None,
+            limits=None, opt='trans', centre=[0, 0, 0],
+            jointaxes=True, eeframe=True, shadow=True, name=True):
+        """
+        Plot the velocity ellipsoid for manipulator
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param vellipse: the vellocity ellipsoid to plot
+        :type vellipse: EllipsePlot
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational velocity ellipsoid
+        :type opt: string
+        :param centre: The coordinates to plot the vellipse [x, y, z] or "ee"
+            to plot at the end-effector location
+        :type centre: array_like or str
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        - ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the
+          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
+
+        - ``plot_vellipse()`` as above except the robot is plotted with joint
+          coordinates stored in the robot object.
+
+        - ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot. 
+
+        .. note:: 
+            - By default the ellipsoid related to translational motion is
+              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+              ellipsoid.
+            - By default the ellipsoid is drawn at the origin.  The option
+              ``centre`` allows its origin to set to set to the specified
+              3-vector, or the string "ee" ensures it is drawn at the 
+              end-effector position.
+        """
+
+        if q is not None:
+            self.q = q
+
+        if vellipse is None:
+            vellipse = self.vellipse(q=q, opt=opt, centre=centre)
+
+        return _plot_ellipse(
+            vellipse, block, limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+    def plot_fellipse(
+            self, q=None, block=True, fellipse=None,
+            limits=None, opt='trans', centre=[0, 0, 0],
+            jointaxes=True, eeframe=True, shadow=True, name=True):
+        """
+        Plot the force ellipsoid for manipulator
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param fellipse: the vellocity ellipsoid to plot
+        :type fellipse: EllipsePlot
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param opt: 'trans' or 'rot' will plot either the translational or
+            rotational force ellipsoid
+        :type opt: string
+        :param centre: The coordinates to plot the fellipse [x, y, z] or "ee"
+            to plot at the end-effector location
+        :type centre: array_like or str
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        - ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the
+          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
+
+        - ``plot_fellipse()`` as above except the robot is plotted with joint
+          coordinates stored in the robot object.
+
+        - ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot. 
+
+        .. note:: 
+            - By default the ellipsoid related to translational motion is
+              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+              ellipsoid.
+            - By default the ellipsoid is drawn at the origin.  The option
+              ``centre`` allows its origin to set to set to the specified
+              3-vector, or the string "ee" ensures it is drawn at the 
+              end-effector position.
+        """
+
+        if q is not None:
+            self.q = q
+
+        if fellipse is None:
+            fellipse = self.fellipse(q=q, opt=opt, centre=centre)
+
+        return _plot_ellipse(
+            fellipse, block, limits,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+    def plot2(
+            self, q=None, block=True, dt=50, limits=None,
+            vellipse=False, fellipse=False,
+            eeframe=True, name=False):
+        """
+        2D Graphical display and animation
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            milliseconds between frames
+        :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on the
+          kinematic model and the joint configuration ``q``. This is a stick
+          figure polyline which joins the origins of the link coordinate frames. 
+          The plot will autoscale with an aspect ratio of 1.
+
+        - ``robot.plot2()`` as above but use the stored ``q`` value.
+
+        If ``q`` (m,n) representing a joint-space trajectory it will create an
+        animation with a pause of ``dt`` seconds between each frame.
+
+        .. note::
+            - By default this method will block until the figure is dismissed.
+              To avoid this set ``block=False``.
+            - The polyline joins the origins of the link frames, but for
+              some Denavit-Hartenberg models those frames may not actually
+              be on the robot, ie. the lines to not neccessarily represent
+              the links of the robot.
+
+        :seealso: :func:`teach2`
 
         """
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        # try:
+        return _plot2(
+            self, block, q, dt, limits,
+            vellipse=vellipse, fellipse=fellipse,
+            eeframe=eeframe, name=name)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')
 
-        R = self.fkine(q).R
+    def teach2(
+            self, q=None, block=True, limits=None,
+            eeframe=True, name=False):
+        '''
+        2D Graphical teach pendant
 
-        Jv = np.zeros((6, 6), dtype=R.dtype)
-        Jv[:3, :3] = R.T
-        Jv[3:, 3:] = R.T
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
-        return Jv
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
 
+        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the user
+          to "drive" a graphical robot using a graphical slider panel. The
+          robot's inital joint configuration is ``q``. The plot will autoscale
+          with an aspect ratio of 1.
+
+        - ``robot.teach2()`` as above except the robot's stored value of ``q``
+          is used.
+
+        .. note:: 
+            - Program execution is blocked until the teach window is 
+              dismissed.  If ``block=False`` the method is non-blocking but
+              you need to poll the window manager to ensure that the window
+              remains responsive.
+            - The slider limits are derived from the joint limit properties.
+              If not set then:
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+              If not set then
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+
+        '''
+
+        if q is not None:
+            self.q = q
+
+        # try:
+        return _teach2(
+            self, block, limits=limits,
+            eeframe=eeframe, name=name)
+        # except ModuleNotFoundError:
+        #     print(
+        #         'Could not find matplotlib.'
+        #         ' Matplotlib required for this function')
 
 
     def ikine3(self, T, left=True, elbow_up=True):
@@ -1730,6 +2376,7 @@ class DHRobot(Robot, DHDynamics):
         if not isinstance(T, SE3):
             T = SE3(T)
 
+        # TODO use getmatrix
         trajn = len(T)
 
         if q0 is None:
@@ -1794,829 +2441,86 @@ class DHRobot(Robot, DHDynamics):
             return qt, success, err
 
 
-    def jacob_dot(self, q=None, qd=None):
-        '''
-        Jqd = jacob_dot(q, qd) is the product (6) of the derivative of the
-        manipulator Jacobian (in the world frame) and the joint rates.
+    # def jacob0v(self, q=None):
+    #     """
+    #     Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
+    #     configuration q, which relates the velocity in the end-effector frame
+    #     to velocity in the base frame
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param qd: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored qd values).
-        :type qd: float ndarray(n)
+    #     Jv = jacob0v() as above except uses the stored q value of the
+    #     robot object.
 
-        :retrun Jdot: The derivative of the manipulator Jacobian
-        :rtype Jdot: float ndarray(n)
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
 
-        :notes:
-            - This term appears in the formulation for operational space
-              control xdd = J(q)qdd + Jdot(q)qd
-            - Written as per the reference and not very efficient.
+    #     :returns J: The velocity Jacobian in 0 frame
+    #     :rtype J: float ndarray(6,6)
 
-        :references:
-            - Fundamentals of Robotics Mechanical Systems (2nd ed)
-              J. Angleles, Springer 2003.
-            - A unified approach for motion and force control of robot
-              manipulators: The operational space formulation
-              O Khatib, IEEE Journal on Robotics and Automation, 1987.
+    #     """
 
-        '''
+    #     if q is None:
+    #         q = np.copy(self.q)
+    #     else:
+    #         q = getvector(q, self.n)
 
-        if q is None:
-            q = self.q
+    #     R = self.fkine(q).R
 
-        if qd is None:
-            qd = self.qd
+    #     Jv = np.zeros((6, 6), dtype=R.dtype)
+    #     Jv[:3, :3] = R
+    #     Jv[3:, 3:] = R
 
-        q = getvector(q, self.n)
-        qd = getvector(qd, self.n)
+    #     return Jv
 
-        # Using the notation of Angeles:
-        #   [Q,a] ~ [R,t] the per link transformation
-        #   P ~ R   the cumulative rotation t2r(Tj) in world frame
-        #   e       the last column of P, the local frame z axis in world
-        #           coordinates
-        #   w       angular velocity in base frame
-        #   ed      deriv of e
-        #   r       is distance from final frame
-        #   rd      deriv of r
-        #   ud      ??
+    # def jacobev(self, q=None):
+    #     """
+    #     Jv = jacobev(q) is the spatial velocity Jacobian, at joint
+    #     configuration q, which relates the velocity in the base frame to the
+    #     velocity in the end-effector frame.
 
-        Q = np.zeros((3, 3, self.n))
-        a = np.zeros((3, self.n))
-        P = np.zeros((3, 3, self.n))
-        e = np.zeros((3, self.n))
-        w = np.zeros((3, self.n))
-        ed = np.zeros((3, self.n))
-        rd = np.zeros((3, self.n))
-        r = np.zeros((3, self.n))
-        ud = np.zeros((3, self.n))
-        v = np.zeros((6, self.n))
+    #     Jv = jacobev() as above except uses the stored q value of the
+    #     robot object.
 
-        for i in range(self.n):
-            T = self.links[i].A(q[i])
-            Q[:, :, i] = T.R
-            a[:, i] = T.t
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
 
-        P[:, :, 0] = Q[:, :, 0]
-        e[:, 0] = [0, 0, 1]
+    #     :returns J: The velocity Jacobian in ee frame
+    #     :rtype J: float ndarray(6,6)
 
-        for i in range(1, self.n):
-            P[:, :, i] = P[:, :, i - 1] @ Q[:, :, i]
-            e[:, i] = P[:, 2, i]
+    #     """
 
-        # Step 1
-        w[:, 0] = qd[0] * e[:, 0]
+    #     if q is None:
+    #         q = np.copy(self.q)
+    #     else:
+    #         q = getvector(q, self.n)
 
-        for i in range(self.n - 1):
-            w[:, i + 1] = (
-                qd[i + 1] *
-                np.array([0, 0, 1]) +
-                Q[:, :, i].T @ w[:, i])
+    #     R = self.fkine(q).R
 
-        # Step 2
-        ed[:, 0] = np.array([0, 0, 1])
+    #     Jv = np.zeros((6, 6), dtype=R.dtype)
+    #     Jv[:3, :3] = R.T
+    #     Jv[3:, 3:] = R.T
 
-        for i in range(1, self.n):
-            ed[:, i] = np.cross(w[:, i], e[:, i])
-
-        # Step 3
-        rd[:, self.n - 1] = np.cross(w[:, self.n - 1], a[:, self.n - 1])
-
-        for i in range(self.n - 2, -1, -1):
-            rd[:, i] = np.cross(w[:, i], a[:, i]) + Q[:, :, i] @ rd[:, i + 1]
-
-        r[:, self.n - 1] = a[:, self.n - 1]
-
-        for i in range(self.n - 2, -1, -1):
-            r[:, i] = a[:, i] + Q[:, :, i] @ r[:, i + 1]
-
-        ud[:, 0] = np.cross(e[:, 0], rd[:, 0])
-
-        for i in range(1, self.n):
-            ud[:, i] = \
-                np.cross(ed[:, i], r[:, i]) + np.cross(e[:, i], rd[:, i])
-
-        # Step 4
-        # Swap ud and ed
-        v[:, self.n - 1] = \
-            qd[self.n - 1] * np.r_[ud[:, self.n - 1], ed[:, self.n - 1]]
-
-        for i in range(self.n - 2, -1, -1):
-            Ui = np.r_[
-                np.c_[Q[:, :, i], np.zeros((3, 3))],
-                np.c_[np.zeros((3, 3)), Q[:, :, i]]]
-
-            v[:, i] = (
-                qd[i] *
-                np.r_[ud[:, i], ed[:, i]] +
-                Ui @ v[:, i + 1])
-
-        Jdot = v[:, 0]
-
-        return Jdot
-
-    def manipulability(self, q=None, method='yoshikawa', axes='all'):
-        '''
-        Manipulability measure
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param method: Which method to use, 'yoshikawa' (default) or 'asada'
-        :type method: string
-        :param axes: Task space axes to consider: "all" [default],
-            "trans", "rot"
-        :type axes: str
-
-        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar)
-          for the robot at the joint configuration q (n) where n is the number
-          of robot joints.  It indicates dexterity, that is, how isotropic the
-          robot's motion is with respect to the 6 degrees of Cartesian motion.
-          The measure is high when the manipulator is capable of equal motion
-          in all directions and low when the manipulator is close to a
-          singularity. Yoshikawa's manipulability measure is based on the shape
-          of the velocity ellipsoid and depends only on kinematic parameters.
-
-        - ``manipulability(q, method='asada')`` as above except computes the
-          Asada manipulability measure. Asada's manipulability measure is based
-          on the shape of the acceleration ellipsoid which in turn is a
-          function of the Cartesian inertia matrix and the dynamic parameters.
-          The scalar measure computed here is the ratio of the smallest/largest
-          ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
-          ratio of 1, but in practice will be less than 1.
-
-        - ``maniplty(q, method, axes)`` as above except axes specify which of
-          the 6 degrees-of-freedom to consider in the measurement. For example
-          ``axes="trans"`` to consider only translation or
-          ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
-          motion.
-
-        If q is a matrix (mxn) then m (mx1) is a vector of manipulability
-        indices for each joint configuration specified by a row of q.
-
-        .. note::
-            - The 'all' option includes rotational and translational
-              dexterity, but this involves adding different units. It can be
-              more useful to look at the translational and rotational
-              manipulability separately.
-            - Examples in the RVC book (1st edition) can be replicated by
-              using the 'all' option
-
-        :references:
-            - Analysis and control of robot manipulators with redundancy,
-              T. Yoshikawa,
-              Robotics Research: The First International Symposium
-              (M. Brady and R. Paul, eds.),
-              pp. 735-747, The MIT press, 1984.
-            - A geometrical representation of manipulator dynamics and its
-              application to arm design, H. Asada,
-              Journal of Dynamic Systems, Measurement, and Control,
-              vol. 105, p. 131, 1983.
-            - Robotics, Vision & Control, P. Corke, Springer 2011.
-
-        '''
-        if axes == 'all':
-            axes = [1, 1, 1, 1, 1, 1]
-        elif axes.startswith('trans'):
-            axes = [1, 1, 1, 0, 0, 0]
-        elif axes.startswith('rot'):
-            axes = [0, 0, 0, 1, 1, 1]
-        else:
-            raise ValueError('axes must be all, trans or rot')
-
-        def yoshi(robot, q, axes):
-            J = robot.jacob0(q)
-            J = J[axes, :]
-            m2 = np.linalg.det(J @ J.T)
-            # m2 = np.maximum(0.0, m2)  # clip it to positive
-            return np.sqrt(abs(m2))
-
-        def asada(robot, q, axes, dof):
-            J = robot.jacob0(q)
-
-            if np.linalg.matrix_rank(J) < 6:
-                return 0
-
-            Ji = np.linalg.pinv(J)
-            M = robot.inertia(q)
-            Mx = Ji.T @ M @ Ji
-            d = np.where(axes)[0]
-            Mx = Mx[d]
-            Mx = Mx[:, d.tolist()]
-            e, _ = np.linalg.eig(Mx)
-
-            return np.min(e) / np.max(e)
-
-        axes = getvector(axes, 6)
-        axes = axes > 0
-
-        trajn = 1
-
-        if q is None:
-            q = self.q
-
-        try:
-            q = getvector(q, self.n, 'row')
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-
-        w = np.zeros(trajn)
-
-        if method == 'yoshikawa':
-            for i in range(trajn):
-                w[i] = yoshi(self, q[i, :], axes)
-
-            if trajn == 1:
-                return w[0]
-            else:
-                return w
-
-        elif method == 'asada':
-            dof = np.sum(axes)
-
-            for i in range(trajn):
-                w[i] = asada(self, q[i, :], axes, dof)
-
-            if trajn == 1:
-                return w[0]
-            else:
-                return w
-
-        else:
-            raise ValueError(
-                'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
-
-    def qmincon(self, q=None):
-        '''
-        qs, success, err = qmincon(q) exploits null space motion and returns
-        a set of joint angles qs (n) that result in the same end-effector
-        pose but are away from the joint coordinate limits. n is the number
-        of robot joints. Success retruns True for successful optimisation.
-        err which is the scalar final value of the objective function.
-
-        Trajectory operation:
-        In all cases if q is mxn it is taken as a pose sequence and qmincon()
-        returns the adjusted joint coordinates (mxn) corresponding to each of
-        the poses in the sequence.
-
-        err and success are also m and indicate the results of optimisation
-        for the corresponding trajectory step.
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :retrun qs: The calculated joint values
-        :rtype qs: float ndarray(n)
-        :retrun success: Optimisation solved (True) or failed (False)
-        :rtype success: bool
-        :retrun err: Final value of the objective function
-        :rtype err: float
-
-        :notes:
-            - Robot must be redundant.
-
-        '''
-
-        def sumsqr(A):
-            return np.sum(A**2)
-
-        def cost(x, ub, lb, qm, N):
-            return sumsqr(
-                (2 * (N @ x + qm) - ub - lb) / (ub - lb))
-
-        trajn = 1
-
-        if q is None:
-            q = self.q
-
-        try:
-            q = getvector(q, self.n, 'col')
-        except ValueError:
-            trajn = q.shape[1]
-
-        qstar = np.zeros((self.n, trajn))
-        error = np.zeros(trajn)
-        success = np.zeros(trajn)
-
-        lb = self.qlim[0, :]
-        ub = self.qlim[1, :]
-
-        for i in range(trajn):
-
-            qm = q[:, i]
-            J = self.jacobe(qm)
-
-            N = null(J)
-
-            x0 = np.zeros(N.shape[1])
-            A = np.r_[N, -N]
-            b = np.r_[ub - qm, qm - lb].reshape(A.shape[0],)
-
-            con = LinearConstraint(A, -np.inf, b)
-
-            res = minimize(
-                lambda x: cost(x, ub, lb, qm, N),
-                x0, constraints=con)
-
-            qstar[:, i] = qm + N @ res.x
-            error[i] = res.fun
-            success[i] = res.success
-
-        if trajn == 1:
-            return qstar[:, 0], success[0], error[0]
-        else:
-            return qstar, success, error
-
-    def teach(
-            self, q=None, block=True, limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        '''
-        Graphical teach pendant
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-                  if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-                       autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-                          which the joint revolves around(revolute joint) or 
-                          translates along (prismatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-                         at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        env = teach() creates a matplotlib plot which allows the user to
-        "drive" a graphical robot using a graphical slider panel. The
-        robot's inital joint configuration is robot.q. This will block the
-        programs execution. The plot will autoscale with an aspect ratio of 1.
-
-        env = teach(q) as above except the robot's initial configuration is
-        set to q.
-
-        env = teach(block=False) as avove except the plot is non-blocking. Note
-        that the plot will exit when the python script finishes executing.
-
-
-
-        :notes:
-            - The slider limits are derived from the joint limit properties.
-              If not set then
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-
-        '''
-
-        if q is not None:
-            self.q = q
-
-        # try:
-        return _teach(
-            self, block, limits=limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
-    def plot(
-            self, q=None, block=True, dt=50, limits=None,
-            vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
-        '''
-        Graphical display and animation
-
-        env = plot() displays a graphical view of a robot based on the
-        kinematic model, at it's stored q value. A stick figure polyline
-        joins the origins of the link coordinate frames. This method will be
-        blocking. The plot will autoscale with an aspect ratio of 1.
-
-        env = plot(q) as above except the robot is plotted with joint angles q
-
-        env = plot(block=False) as avove except the plot in non-blocking. Note
-        that the plot will exit when the python script finishes executing.
-
-        env = plot(q, dt) as above except q is an mxn trajectory of joint
-        angles. This creates an animation of the robot moving through the
-        trajectories with a gap dt milliseconds in between.
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-        :param movie: name of file in which to save an animated GIF
-        :type movie: str
-
-        :retrun: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        '''
-
-        # try:
-        return _plot(
-            self, block, q, dt, limits,
-            vellipse=vellipse, fellipse=fellipse,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,
-            movie=movie)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
-    def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
-        '''
-        Create a velocity ellipsoid object for plotting
-
-        env = vellipse() creates a velocity ellipsoid for the robot at
-        pose robot.q. The ellipsoid is centered at the origin.
-
-        env = vellipse(q) as above except the robot is plotted with joint
-        angles q
-
-        env = vellipse(opt) as above except opt is 'trans' or 'rot' will
-        plot either the translational or rotational velocity ellipsoid.
-
-        env = vellipse(centre) as above except centre is either a 3
-        vector or 'ee' which is the centre location of the ellipsoid
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        :type opt: string
-        :param centre:
-        :type centre: list or str('ee')
-
-        :retrun: An EllipsePlot object
-        :rtype: EllipsePlot
-
-        '''
-
-        return _vellipse(self, q=q, opt=opt, centre=centre)
-
-    def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
-        '''
-        Create a force ellipsoid object for plotting
-
-        env = fellipse() creates a force ellipsoid for the robot at
-        pose robot.q. The ellipsoid is centered at the origin.
-
-        env = fellipse(q) as above except the robot is plotted with joint
-        angles q
-
-        env = fellipse(opt) as above except opt is 'trans' or 'rot' will
-        plot either the translational or rotational force ellipsoid.
-
-        env = fellipse(centre) as above except centre is either a 3
-        vector or 'ee' which is the centre location of the ellipsoid
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        :type opt: string
-        :param centre:
-        :type centre: list or str('ee')
-
-        :retrun: An EllipsePlot object
-        :rtype: EllipsePlot
-
-        '''
-
-        return _fellipse(self, q=q, opt=opt, centre=centre)
-
-    def plot_vellipse(
-            self, q=None, block=True, vellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        '''
-        Plot the velocity ellipsoid for seriallink manipulator
-
-        env = plot_vellipse() displays the velocity ellipsoid for the robot at
-        pose robot.q. The ellipsoid is centered at the origin. This method
-        will be blocking. The plot will autoscale with an aspect ratio of 1.
-
-        env = plot_vellipse(block=False) as avove except the plot in
-        non-blocking. Note that the plot will exit when the python script
-        finishes executing.
-
-        env = plot_vellipse(q) as above except the robot is plotted with joint
-        angles q
-
-        env = plot_vellipse(vellipse) specifies a custon ellipse to plot. If
-        not supplied this function calculates the vellipse based on q
-
-        env = plot_vellipse(limits) as above except the view limits of the
-        plot are set by limits.
-
-        env = plot_vellipse(opt) as above except opt is 'trans' or 'rot' will
-        plot either the translational or rotational velocity ellipsoid.
-
-        env = plot_vellipse(centre) as above except centre is either a 3
-        vector or 'ee' which is the centre location of the ellipsoid
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param vellipse: the vellocity ellipsoid to plot
-        :type vellipse: EllipsePlot
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        :type opt: string
-        :param centre: The coordinates to plot the vellipse [x, y, z] or 'ee'
-            to plot at the end-effector location
-        :type centre: list or str('ee')
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :retrun: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        '''
-
-        if q is not None:
-            self.q = q
-
-        if vellipse is None:
-            vellipse = self.vellipse(q=q, opt=opt, centre=centre)
-
-        return _plot_ellipse(
-            vellipse, block, limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-    def plot_fellipse(
-            self, q=None, block=True, fellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        '''
-        Plot the force ellipsoid for seriallink manipulator
-
-        env = plot_fellipse() displays the force ellipsoid for the robot at
-        pose robot.q. The ellipsoid is centered at the origin. This method
-        will be blocking. The plot will autoscale with an aspect ratio of 1.
-
-        env = plot_fellipse(block=False) as avove except the plot in
-        non-blocking. Note that the plot will exit when the python script
-        finishes executing.
-
-        env = plot_fellipse(q) as above except the robot is plotted with joint
-        angles q
-
-        env = plot_fellipse(fellipse) specifies a custon ellipse to plot. If
-        not supplied this function calculates the fellipse based on q
-
-        env = plot_fellipse(limits) as above except the view limits of the
-        plot are set by limits.
-
-        env = plot_fellipse(opt) as above except opt is 'trans' or 'rot' will
-        plot either the translational or rotational force ellipsoid.
-
-        env = plot_fellipse(centre) as above except centre is either a 3
-        vector or 'ee' which is the centre location of the ellipsoid
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param fellipse: the vellocity ellipsoid to plot
-        :type fellipse: EllipsePlot
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        :type opt: string
-        :param centre: The coordinates to plot the fellipse [x, y, z] or 'ee'
-            to plot at the end-effector location
-        :type centre: list or str('ee')
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :retrun: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        '''
-
-        if q is not None:
-            self.q = q
-
-        if fellipse is None:
-            fellipse = self.fellipse(q=q, opt=opt, centre=centre)
-
-        return _plot_ellipse(
-            fellipse, block, limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-    def plot2(
-            self, q=None, block=True, dt=50, limits=None,
-            vellipse=False, fellipse=False,
-            eeframe=True, name=False):
-        '''
-        2D Graphical display and animation
-
-        env = plot2() displays a 2D graphical view of a robot based on the
-        kinematic model, at it's stored q value. A stick figure polyline
-        joins the origins of the link coordinate frames. This method will be
-        blocking. The plot will autoscale with an aspect ratio of 1.
-
-        env = plot2(q) as above except the robot is plotted with joint angles q
-
-        env = plot2(block=False) as avove except the plot in non-blocking. Note
-        that the plot will exit when the python script finishes executing.
-
-        env = plot2(q, dt) as above except q is an mxn trajectory of joint
-        angles. This creates an animation of the robot moving through the
-        trajectories with a gap dt milliseconds in between.
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :retrun: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        '''
-
-        # try:
-        return _plot2(
-            self, block, q, dt, limits,
-            vellipse=vellipse, fellipse=fellipse,
-            eeframe=eeframe, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
-    def teach2(
-            self, q=None, block=True, limits=None,
-            eeframe=True, name=False):
-        '''
-        2D Graphical teach pendant
-
-        env = teach2() creates a 2D matplotlib plot which allows the user to
-        "drive" a graphical robot using a graphical slider panel. The
-        robot's inital joint configuration is robot.q. This will block the
-        programs execution. The plot will autoscale with an aspect ratio of 1.
-
-        env = teach2(q) as above except the robot's initial configuration is
-        set to q.
-
-        env = teach2(block=False) as avove except the plot is non-blocking.
-        Note that the plot will exit when the python script finishes
-        executing.
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :retrun: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        :notes:
-            - The slider limits are derived from the joint limit properties.
-              If not set then
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-
-        '''
-
-        if q is not None:
-            self.q = q
-
-        # try:
-        return _teach2(
-            self, block, limits=limits,
-            eeframe=eeframe, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
+    #     return Jv
 
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
 
+    
 
 if __name__ == "__main__":
 
     import roboticstoolbox as rtb
     # import spatialmath.base.symbolic as sym
 
-    puma = rtb.models.DH.Puma560()
+    puma = rtb.models.DH.Planar2()
     # J = puma.jacob0(puma.qn)
     # print(J)
     # print(puma.manipulability(puma.qn))
     # print(puma.manipulability(puma.qn, 'asada'))
-    tw, T0 = puma.twists(puma.qz)
+    #tw, T0 = puma.twists(puma.qz)
+    print(puma.qlim)
+    print(puma[0].qlim)
+    print(puma.islimit([0, -5]))

@@ -192,14 +192,14 @@ qlim  =      -2.8 to      2.8""")
 
     def test_robot(self):
         l0 = rp.RevoluteDH()
-        r = rp.Robot([l0])
+        r = rp.DHRobot([l0])
 
         self.assertIs(l0._robot, r)
 
     def test_copy(self):
 
         l0 = rp.RevoluteDH()
-        r = rp.Robot([l0])
+        r = rp.DHRobot([l0])
         l1 = l0.copy()
         l0.m = 4
         l0.r[1] = 5

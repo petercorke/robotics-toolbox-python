@@ -73,7 +73,7 @@ class Link:
             self,
             name='',
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             m=0.0,
             r=np.zeros((3,)),
@@ -240,13 +240,14 @@ class Link:
         ``link.islimit(q)`` is True if ``q`` exceeds the joint limits defined
         by ``link``.
 
+        .. note:: If no limits are set always return False.
+
         :seealso: :func:`qlim`
         """
-
-        if q < self.qlim[0] or q > self.qlim[1]:
-            return True
-        else:
+        if self.qlim is None:
             return False
+        else:
+            return q < self.qlim[0] or q > self.qlim[1]
 
     def nofriction(self, coulomb=True, viscous=False):
         """
@@ -388,11 +389,13 @@ class Link:
         - ``link.qlim`` is the joint limits
 
         :return: joint limits
-        :rtype: ndarray(2,)
+        :rtype: ndarray(2,) or Nine
 
-        - ``link.a = ...`` checks and sets the joint limits
+        - ``link.qlim = ...`` checks and sets the joint limits
 
-        .. note:: The limits are not widely enforced within the toolbox.
+        .. note::
+            - The limits are not widely enforced within the toolbox.
+            - If no joint limits are specified the value is ``None``
 
         :seealso: :func:`~islimit`
         """
@@ -400,7 +403,10 @@ class Link:
 
     @qlim.setter
     def qlim(self, qlim_new):
-        self._qlim = getvector(qlim_new, 2)
+        if qlim_new is None:
+            self._qlim = None
+        else:
+            self._qlim = getvector(qlim_new, 2)
 
 # -------------------------------------------------------------------------- #
 
