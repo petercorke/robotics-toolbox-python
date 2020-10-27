@@ -438,7 +438,7 @@ class RevoluteDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):
@@ -509,7 +509,7 @@ class PrismaticDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):
@@ -578,7 +578,7 @@ class RevoluteMDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):
@@ -649,7 +649,7 @@ class PrismaticMDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):

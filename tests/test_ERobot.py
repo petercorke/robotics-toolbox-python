@@ -21,7 +21,7 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(panda.qr, qr)
         nt.assert_array_almost_equal(panda.qz, qz)
         nt.assert_array_almost_equal(
-            panda.gravity, np.array([[0], [0], [9.81]]))
+            panda.gravity, np.r_[0, 0, 9.81])
 
     def test_q(self):
         panda = rp.models.ETS.Panda()
@@ -390,21 +390,21 @@ class TestETS(unittest.TestCase):
             ValueError, panda.jacobm, [1, 3], panda.jacob0(q1),
             np.array([1, 2, 3]))
 
-    def test_jacobev(self):
-        pdh = rp.models.DH.Panda()
-        panda = rp.models.ETS.Panda()
-        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        panda.q = q1
+    # def test_jacobev(self):
+    #     pdh = rp.models.DH.Panda()
+    #     panda = rp.models.ETS.Panda()
+    #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+    #     panda.q = q1
 
-        nt.assert_array_almost_equal(panda.jacobev(), pdh.jacobev(q1))
+    #     nt.assert_array_almost_equal(panda.jacobev(), pdh.jacobev(q1))
 
-    def test_jacob0v(self):
-        pdh = rp.models.DH.Panda()
-        panda = rp.models.ETS.Panda()
-        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        panda.q = q1
+    # def test_jacob0v(self):
+    #     pdh = rp.models.DH.Panda()
+    #     panda = rp.models.ETS.Panda()
+    #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+    #     panda.q = q1
 
-        nt.assert_array_almost_equal(panda.jacob0v(), pdh.jacob0v(q1))
+    #     nt.assert_array_almost_equal(panda.jacob0v(), pdh.jacob0v(q1))
 
     def test_jacobe(self):
         pdh = rp.models.DH.Panda()
