@@ -289,12 +289,17 @@ class ETS(UserList):
         es = []
         joint = 0
 
+        show_q = len(self.joints()) > 1
+
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self:
 
             if et.isjoint:
-                s = '%s(q%d)' % (et.axis, joint)
+                if show_q:
+                    s = '%s(q%d)' % (et.axis, joint)
+                else:
+                    s = '%s()' % (et.axis,)
                 joint += 1
             else:
                 if et.isrevolute:
@@ -368,6 +373,31 @@ class ETS(UserList):
             item.data = data
         else:
             item.data = [data]
+        return item
+
+    def pop(self, i=-1):
+        """
+        Pop value
+
+        :param i: item in the list to pop, default is last
+        :type i: int
+        :return: the popped value
+        :rtype: instance of same type
+        :raises IndexError: if there are no values to pop
+
+        Removes a value from the value list and returns it.  The original
+        instance is modified. 
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
+            >>> tail = e.pop()
+            >>> tail
+            >>> e
+        """
+        item = ETS()
+        item.data = [super().pop(i)]
         return item
 
     def __repr__(self):
@@ -537,6 +567,8 @@ if __name__ == "__main__":
     e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
     print(e.eval([0, 0]))
     print(e.eval([90, -90], 'deg'))
+    a = e.pop()
+    print(a)
     
     # l1 = 0.672
     # l2 = -0.2337

@@ -53,14 +53,20 @@ class ELink(Link):
             collision=[],
             **kwargs):
 
+        # process common options
         super(ELink, self).__init__(**kwargs)
 
+        # check we have an ETS
         if isinstance(ets, ETS):
             self._ets = ets
         else:
             raise TypeError(
                 'The ets argument must be of type ETS')
 
+        if v is None and ets[-1].isjoint:
+            v = ets.pop()
+
+        # TODO simplify this logic, can be ELink class or None
         if isinstance(parent, list):
             raise TypeError(
                 'Only one parent link can be present')
@@ -71,7 +77,7 @@ class ELink(Link):
         self._parent = parent
         self._child = []
 
-        # Number of transforms in the ETS
+        # Number of transforms in the ETS excluding the joint variable
         self._M = len(self._ets)
 
         # Initialise joints

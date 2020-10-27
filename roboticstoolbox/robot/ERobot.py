@@ -60,7 +60,7 @@ class ERobot(Robot):
 
 
         self._ets = []
-        self._elinks = {}
+        self._linkdict = {}
         self._n = 0
         self._M = 0
         self._q_idx = []
@@ -69,7 +69,7 @@ class ERobot(Robot):
         for link in elinks:
             if isinstance(link, ELink):
                 self._M += 1
-                self._elinks[link.name] = link
+                self._linkdict[link.name] = link
             else:
                 raise TypeError("Input can be only ELink")
 
@@ -364,7 +364,7 @@ class ERobot(Robot):
 
     @property
     def elinks(self):
-        return self._elinks
+        return self._linkdict
 # --------------------------------------------------------------------- #
 
     @property
