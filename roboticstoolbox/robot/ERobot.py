@@ -101,7 +101,7 @@ class ERobot(Robot):
 
         def add_links(link, lst, q_idx):
 
-            if link.jtype == link.VARIABLE:
+            if link.isjoint:
                 q_idx.append(len(lst))
 
             lst.append(link)
@@ -345,7 +345,7 @@ class ERobot(Robot):
         j = 0
 
         for i in range(self.M):
-            if self.ets[i].jtype == self.ets[i].VARIABLE:
+            if self.ets[i].isjoint:
                 v[:, j] = self.ets[i].qlim
                 j += 1
 
@@ -456,7 +456,7 @@ class ERobot(Robot):
             tr = self.base
 
             for link in self._fkpath:
-                if link.jtype == link.VARIABLE:
+                if link.isjoint:
                     T = link.A(q[j, i])
                     j += 1
                 else:
@@ -489,7 +489,7 @@ class ERobot(Robot):
         tr = self.base.A
 
         for link in path:
-            if link.jtype == link.VARIABLE:
+            if link.isjoint:
                 T = link.A(q[j], fast=True)
                 j += 1
             else:
@@ -533,7 +533,7 @@ class ERobot(Robot):
         # Tall = SE3()
         j = 0
 
-        if self.ets[0].jtype == self.ets[0].VARIABLE:
+        if self.ets[0].isjoint:
             self.ets[0]._fk = self.base * self.ets[0].A(q[j])
             j += 1
         else:
@@ -546,7 +546,7 @@ class ERobot(Robot):
             gi.wT = self.ets[0]._fk
 
         for i in range(1, self.M):
-            if self.ets[i].jtype == self.ets[i].VARIABLE:
+            if self.ets[i].isjoint:
                 t = self.ets[i].A(q[j])
                 j += 1
             else:
@@ -643,13 +643,13 @@ class ERobot(Robot):
         link = to_link
 
         path.append(link)
-        if link.jtype is link.VARIABLE:
+        if link.isjoint:
             n += 1
 
         while link != from_link:
             link = link.parent
             path.append(link)
-            if link.jtype is link.VARIABLE:
+            if link.isjoint:
                 n += 1
 
         path.reverse()
@@ -691,9 +691,7 @@ class ERobot(Robot):
 
         for link in path:
 
-            if link.jtype is link.STATIC:
-                U = U @ link.A(fast=True)
-            else:
+            if link.isjoint:
                 U = U @ link.A(q[j], fast=True)
 
                 if link == to_link:
@@ -732,6 +730,9 @@ class ERobot(Robot):
                     J[3:, j] = np.array([0, 0, 0])
 
                 j += 1
+            else:
+                U = U @ link.A(fast=True)
+
 
         return J
 

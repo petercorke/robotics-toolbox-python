@@ -55,9 +55,6 @@ class ELink(Link):
 
         super(ELink, self).__init__(**kwargs)
 
-        self.STATIC = 0
-        self.VARIABLE = 1
-
         if isinstance(ets, ETS):
             self._ets = ets
         else:
@@ -81,7 +78,7 @@ class ELink(Link):
         if isinstance(ets, ETS):
             self._Ts = SE3()
             for i in range(self.M):
-                if ets[i].jtype is not ets[i].STATIC:
+                if ets[i].isjoint:
                     raise ValueError('The transforms in ets must be constant')
 
                 if not isinstance(ets[i].T(), SE3):
@@ -94,16 +91,16 @@ class ELink(Link):
 
         # Check the variable joint
         if v is None:
-            self._jtype = self.STATIC
+            self._joint = False
         elif not isinstance(v, ETS):
             raise TypeError('v must be of type ETS')
-        elif v[0].jtype is v[0].STATIC:
+        elif not v[0].isjoint:
             raise ValueError('v must be a variable ETS')
         elif len(v) > 1:
             raise ValueError(
                 "An elementary link can only have one joint variable")
         else:
-            self._jtype = self.VARIABLE
+            self._joint = True
 
         self._v = v
 
@@ -130,14 +127,12 @@ class ELink(Link):
         return self._geometry
 
     @property
-    def jtype(self):
-        return self._jtype
+    def isjoint(self):
+        return self._joint
 
     @property
     def ets(self):
         return self._ets
-
-
 
     # @property
     # def parent_name(self):
@@ -233,7 +228,7 @@ class ELink(Link):
         # j = 0
         # tr = SE3()
 
-        if self.jtype == self.VARIABLE and q is None:
+        if self.isjoint and q is None:
             raise ValueError("q is required for variable joints")
 
         # for k in range(self.M):
