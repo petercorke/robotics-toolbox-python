@@ -57,13 +57,13 @@ class Element:
             if not (sRest[-1] == ")" and sRest[0] == "("):
                 raise ValueError("brackets")
 
-            i = 0
-            while i < 6:
-                if sType.lower == self.typeName[i].lower:
-                    break
-                i += 1
-            if i >= 6:
-                raise ValueError("bad transform name" + sType)
+            match = False
+            for i in range(6):
+                check = self.typeName[i].lower()
+                if sType.lower == check:
+                    match = True
+            if not match:
+                raise ValueError("bad transform name: " + sType)
             self.eltype = i
 
             sRest = sRest[1:-2]     # get the argument from between brackets

@@ -6,7 +6,7 @@ here = path.abspath(path.dirname(__file__))
 
 req = [
     'numpy',
-    'spatialmath-python>=0.8.2',
+    'spatialmath-python>=0.8.3',
     'scipy',
     'matplotlib',
     'ansitable'
