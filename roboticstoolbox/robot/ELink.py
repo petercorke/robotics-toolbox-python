@@ -63,7 +63,7 @@ class ELink(Link):
             raise TypeError(
                 'The ets argument must be of type ETS')
 
-        if v is None and ets[-1].isjoint:
+        if v is None and len(ets) > 0 and ets[-1].isjoint:
             v = ets.pop()
 
         # TODO simplify this logic, can be ELink class or None
