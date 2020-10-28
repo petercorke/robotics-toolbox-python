@@ -10,7 +10,7 @@ import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
-from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.ELink import ELink, ETS
 # from roboticstoolbox.backend.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
 #     _plot2, _teach2
@@ -18,6 +18,7 @@ from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.robot.Robot import Robot
 from pathlib import PurePath, PurePosixPath
+from ansitable import ANSITable, Column
 
 # try:
 #     import pybullet as p
@@ -64,6 +65,35 @@ class ERobot(Robot):
         self._n = 0
         self._M = 0
         self._q_idx = []
+
+        if isinstance(elinks, ETS):
+            # were passed an ETS string
+            ets = elinks
+            elinks = []
+            # for j, k in enumerate(ets.joints()):
+            #     if j == 0:
+            #         parent = None
+            #     else:
+            #         parent = elinks[-1]
+            #     print(ets[:k+1])
+            #     elink = ELink(ets[:k+1], parent=parent, name=f"link{j:d}")
+            #     elinks.append(elink)
+            #     ets = ets[k+1:]
+
+            start = 0
+            for j, k in enumerate(ets.joints()):
+                ets_j = ets[start:k+1]
+                start = k + 1
+                if j == 0:
+                    parent = None
+                else:
+                    parent = elinks[-1]
+                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                elinks.append(elink)
+            
+            tool = ets[start:]
+            if len(tool) > 0:
+                elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
 
         # Set up a dictionary for looking up links by name
         for link in elinks:
@@ -930,36 +960,29 @@ class ERobot(Robot):
 
         return Jm
 
-    # def __str__(self):
-    #     """
-    #     Pretty prints the ETS Model of the robot. Will output angles in
-    #     degrees
+    def __str__(self):
+        """
+        Pretty prints the ETS Model of the robot. Will output angles in
+        degrees
 
-    #     :return: Pretty print of the robot model
-    #     :rtype: str
-    #     """
-    #     axes = ''
-
-    #     for i in range(self.n):
-    #         axes += self.ets[self.q_idx[i]].axis
-
-    #     rpy = tr2rpy(self.tool.A, unit='deg')
-
-    #     for i in range(3):
-    #         if rpy[i] == 0:
-    #             rpy[i] = 0
-
-    #     model = '\n%s (%s): %d axis, %s, ETS\n'\
-    #         'Elementary Transform Sequence:\n'\
-    #         '%s\n'\
-    #         'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
-    #             self.name, self.manuf, self.n, axes,
-    #             self.ets,
-    #             self.tool.A[0, 3], self.tool.A[1, 3],
-    #             self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
-    #         )
-
-    #     return model
+        :return: Pretty print of the robot model
+        :rtype: str
+        """
+        table = ANSITable(
+            Column("link"),
+            Column("parent"),
+            Column("ETS", headalign="^", colalign="<"),
+            border="thin")
+        for link in self:
+            if link.isjoint:
+                color = ""
+            else:
+                color = "<<blue>>"
+            table.row(color + link.name, 
+                link.parent.name if link.parent is not None else "-", 
+                link.ets * link.v if link.v is not None else link.ets)
+        return str(table)
+ 
 
     def jacobev(
             self, q=None, from_link=None, to_link=None,
