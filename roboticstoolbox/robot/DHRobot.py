@@ -117,11 +117,14 @@ class DHRobot(Robot, DHDynamics):
                 else:
                     return f"q{j:d} + {L.offset * deg:}\u00b0"
 
-        def angle(theta):
+        def angle(theta, fmt=None):
             if sym.issymbol(theta):
                 return "<<red>>" + str(theta)
             else:
-                return str(theta * deg) + "\u00b0"
+                if fmt is not None:
+                    return fmt.format(theta * deg) + "\u00b0"
+                else:
+                    return str(theta * deg) + "\u00b0"
 
         has_qlim = any([link._qlim is not None for link in self])
         if has_qlim:
@@ -209,7 +212,7 @@ class DHRobot(Robot, DHDynamics):
                     if L.isprismatic():
                         qlist.append(f"{q[i]:.3g}")
                     else:
-                        qlist.append(angle(q[i]))
+                        qlist.append(angle(q[i], "{:.3g}"))
                 table.row(name, *qlist)
 
             s += "\n" + str(table)

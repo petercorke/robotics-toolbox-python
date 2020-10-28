@@ -138,19 +138,30 @@ class DHLink(Link):
 
     def __str__(self):
 
-        if not self.sigma:
-            s = "Revolute   theta=q{} +{: .2f},  d={: .2f},  a={: .2f},  " \
-                "alpha={: .2f}".format(
-                    self.id, self.offset, self.d, self.a, self.alpha)
+        if self.offset == 0:
+            offset = ""
         else:
-            s = "Prismatic  theta={: .2f},  d=q{} +{: .2f},  a={: .2f},  " \
+            offset = f" + {self.offset}"
+        if self.isrevolute():
+            s = f"Revolute:   theta=q{self.id}{offset},  d={self.d}, " \
+                f"a={self.a}, alpha={self.alpha}"
+        else:
+            s = "Prismatic:  theta={: .2f},  d=q{} +{: .2f},  a={: .2f},  " \
                 "alpha={: .2f}".format(
                     self.theta, self.id, self.offset, self.a, self.alpha, )
-
         return s
 
     def __repr__(self):
-        return str(self)
+        name = self.__class__.__name__
+        args = []
+        if self.isrevolute():
+            self._format(args, "d")
+        else:
+            self._format(args, "theta")
+        self._format(args, "a")
+        self._format(args, "alpha")
+        args.extend(super()._params())
+        return name + "(" + ", ".join(args) + ")"
 
 
     @property

@@ -1,4 +1,5 @@
 import copy
+from abc import ABC
 import numpy as np
 from functools import wraps
 from spatialmath.base.argcheck import getvector, \
@@ -32,12 +33,13 @@ def _listen_dyn(func):
     return wrapper_listen_dyn
 
 
-class Link:
+class Link(ABC):
     """
     Link superclass
 
     :param name: name of the link
     :type name: str
+
     :param offset: kinematic - joint variable offset
     :type offset: float
     :param qlim: joint variable limits [min, max]
@@ -51,6 +53,7 @@ class Link:
     :type r:  float ndarray(3)
     :param I: dynamic - inertia of link with respect to COM
     :type I: ndarray
+
     :param Jm: dynamic - motor inertia
     :type Jm: float
     :param B: dynamic - motor viscous friction
@@ -60,14 +63,28 @@ class Link:
     :param G: dynamic - gear ratio
     :type G: float
 
-    This class holds the set of parameters that are common to all links.
+    An abstract link superclass for all link types. 
 
     .. inheritance-diagram:: roboticstoolbox.RevoluteDH
         roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH 
         roboticstoolbox.PrismaticMDH roboticstoolbox.ELink
         :top-classes: roboticstoolbox.robot.Link
         :parts: 2
+    
+    It holds metadata related to:
+    
+    - a robot link, such as rigid-body inertial parameters defined in the link
+      frame, and link name
+    - a robot joint, that connects this link to its parent, such as joint
+      limits, direction of motion, motor and transmission parameters.
+
+    .. note:: 
+        - For a more sophisticated actuator model use the ``actuator``
+          attribute which is not initialized or used by this Toolbox.
+        - There is no ability to name a joint as supported by URDF
+
     """
+
 
     def __init__(
             self,
@@ -83,27 +100,38 @@ class Link:
             Tc=np.zeros((2,)),
             G=1.0,
             mesh=None,
+            geometry=[],
+            collision=[],
             **kwargs):
 
         self._robot = None  # reference to owning robot
 
         self._name = name
 
+        # Joint angle parameters
         self.offset = offset
         self.flip = flip
         self.qlim = qlim
 
-        # TODO fix the path
+        # Link geometry
+        self.geometry = geometry
+        self.collision = collision
+
+        # TODO this is a leftover from VPython development, should be
+        # using geometry instead
         self.mesh = mesh
 
-        # Dynamic Parameters
+        # Link dynamic Parameters
         self.m = m
         self.r = r
         self.I = I  # noqa
+
+        # Motor dynamic parameters
         self.Jm = Jm
         self.B = B
         self.Tc = Tc
         self.G = G
+        self.actuator = None  # reference to more advanced actuator model
 
     def copy(self):
         """
@@ -192,7 +220,7 @@ class Link:
         :rtype: string
 
         ``link.dyntable()`` pretty-prints the inertial properties of the link
-        object in a table using unicode characters. The properties shown are
+        object in a table using Unicode characters. The properties shown are
         mass, centre of mass, inertia, friction, gear ratio and motor
         properties.
 
@@ -227,6 +255,38 @@ class Link:
         table.row("Tc", format(fmt, self.Tc))
         table.row("G", format(fmt, self.G))
         table.print()
+
+    def _format(self, l, name, ignorevalue=0, indices=None):
+        v = getattr(self, name)
+        s = None
+        if v is None:
+            return
+        if isscalar(v) and v != ignorevalue:
+            s = f"{name}={v}"
+        elif isinstance(v, np.ndarray):
+            if np.linalg.norm(v, ord=np.inf) > 0:
+                if indices is not None:
+                    flat = v.flatten()
+                    v = np.r_[[flat[k] for k in indices]]
+                s = f"{name}=[" + ", ".join([str(x) for x in v]) +"]"
+        if s is not None:
+            l.append(s)
+
+    def _params(self):
+        l = []
+        self._format(l, "name")
+        self._format(l, "flip", False)
+        self._format(l, "offset")
+        self._format(l, "qlim")
+        self._format(l, "m")
+        self._format(l, "r")
+        self._format(l, "I", indices=[0, 4, 8, 1, 2, 5])
+        self._format(l, "Jm")
+        self._format(l, "B")
+        self._format(l, "Tc")
+        self._format(l, "G")
+
+        return l
 
     def islimit(self, q):
         """
@@ -683,5 +743,16 @@ class Link:
 
 if __name__ == "__main__":
 
-    pass
+    import roboticstoolbox as rtb
+    from spatialmath.base import sym
+    
+    ET = rtb.ETS
 
+
+
+
+    d, a, theta = sym.symbol('d, a, theta')
+
+    e = ET.tx(d) * ET.ty(a) * ET.rz(theta)
+    print(e)
+    link = rtb.ELink()

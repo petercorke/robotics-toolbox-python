@@ -6,7 +6,7 @@
 from collections import UserList, namedtuple
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base import getvector, getunit, trotx, troty, trotz
+from spatialmath.base import getvector, getunit, trotx, troty, trotz, issymbol
 
 
 class ETS(UserList):
@@ -82,8 +82,8 @@ class ETS(UserList):
             >>> e = ETS.ty()
             >>> e.eta
 
-        .. note:: If the value was given in degrees it will be converted to
-            radians.
+        .. note:: If the value was given in degrees it will be converted and
+            stored internally in radians 
         """
         return self.data[0].eta
 
@@ -255,7 +255,6 @@ class ETS(UserList):
         Example:
 
         .. runblock:: pycon
-            :linenos:
 
             >>> from roboticstoolbox import ETS
             >>> e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
@@ -280,11 +279,25 @@ class ETS(UserList):
 
     def __str__(self):
         """
-        Pretty prints the ET. Will output angles in degrees
+        Pretty prints the ETS
 
-        :return: The transformation matrix of the ET
+        :return: Pretty printed ETS
         :rtype: str
 
+        Angular parameters are converted to degrees, except if they are 
+        symbolic.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> from spatialmath.base import symbol
+            >>> theta, d = symbol('theta, d')
+            >>> e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
+            >>> str(e)
+
+        :SymPy: supported
         """
         es = []
         joint = 0
@@ -297,15 +310,18 @@ class ETS(UserList):
 
             if et.isjoint:
                 if show_q:
-                    s = '%s(q%d)' % (et.axis, joint)
+                    s = f"{et.axis}(q{joint})"
                 else:
-                    s = '%s()' % (et.axis,)
+                    s = f"{et.axis}()"
                 joint += 1
             else:
                 if et.isrevolute:
-                    s = '%s(%g)' % (et.axis, et.eta * 180 / np.pi)
+                    if issymbol(et.eta):
+                        s = f"{et.axis}({et.eta})"
+                    else:
+                        s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
                 else:
-                    s = '%s(%g)' % (et.axis, et.eta)
+                    s = f"{et.axis}({et.eta})"
 
             es.append(s)
 
@@ -421,6 +437,7 @@ class ETS(UserList):
           angle, i.e. a revolute robot joint
 
         :seealso: :func:`ETS`
+        :SymPy: supported
         """
         return cls(trotx, axis='Rx', eta=eta, unit=unit)
 
@@ -442,7 +459,7 @@ class ETS(UserList):
           angle, i.e. a revolute robot joint
 
         :seealso: :func:`ETS`
-
+        :SymPy: supported
         """
         return cls(troty, axis='Ry', eta=eta, unit=unit)
 
@@ -464,6 +481,7 @@ class ETS(UserList):
           angle, i.e. a revolute robot joint
 
         :seealso: :func:`ETS`
+        :SymPy: supported
         """
         return cls(trotz, axis='Rz', eta=eta, unit=unit)
 
@@ -483,6 +501,7 @@ class ETS(UserList):
           variable distance, i.e. a prismatic robot joint
 
         :seealso: :func:`ETS`
+        :SymPy: supported
         """
 
         # this method is 3x faster than using lambda x: transl(x, 0, 0)
@@ -512,7 +531,7 @@ class ETS(UserList):
           variable distance, i.e. a prismatic robot joint
 
         :seealso: :func:`ETS`
-
+        :SymPy: supported
         """
         def axis_func(eta):
             return np.array([
@@ -542,6 +561,7 @@ class ETS(UserList):
           variable distance, i.e. a prismatic robot joint
 
         :seealso: :func:`ETS`
+        :SymPy: supported
         """
         def axis_func(eta):
             return np.array([
@@ -569,6 +589,13 @@ if __name__ == "__main__":
     print(e.eval([90, -90], 'deg'))
     a = e.pop()
     print(a)
+
+    from spatialmath.base import symbol
+
+    theta, d = symbol('theta, d')
+
+    e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
+    print(e)
     
     # l1 = 0.672
     # l2 = -0.2337

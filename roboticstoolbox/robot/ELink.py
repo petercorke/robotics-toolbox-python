@@ -13,9 +13,7 @@ from roboticstoolbox.robot.Link import Link
 
 class ELink(Link):
     """
-    A link superclass for all link types. A Link object holds all information
-    related to a robot joint and link such as kinematics parameters,
-    rigid-body inertial parameters, motor and transmission parameters.
+    ETS link class
 
     :param ets: kinematic - The elementary transforms which make up the link
     :type ets: ETS
@@ -38,10 +36,18 @@ class ELink(Link):
     :param G: dynamic - gear ratio
     :type G: float
 
+    The ELink object holds all information related to a robot link and can form
+    a serial-connected chain or a rigid-body tree.
+    
+    It inherits from the Link class which provides common functionality such
+    as joint and link such as kinematics parameters,
+    .
+
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
 
+    :seealso: :class:`Link`, :class:`DHLink`
     """
 
     def __init__(
@@ -49,8 +55,6 @@ class ELink(Link):
             ets=ETS(),
             v=None,
             parent=None,
-            geometry=[],
-            collision=[],
             **kwargs):
 
         # process common options
@@ -110,11 +114,26 @@ class ELink(Link):
 
         self._v = v
 
-        self.geometry = geometry
-        self.collision = collision
-
     def __repr__(self):
-        return self.name
+        name = self.__class__.__name__
+        s = "ets=" + str(self.ets)
+        if self.parent is not None:
+            s += ", parent=" + str(self.parent.name)
+        args = [s] + super()._params()
+        return name + "(" + ", ".join(args) + ")"
+
+    def __str__(self):
+        """
+        Pretty prints the ETS Model of the link. Will output angles in degrees
+
+        :return: Pretty print of the robot link
+        :rtype: str
+        """
+        if self.parent is None:
+            parent = ""
+        else:
+            parent = f" [{self.parent.name}]"
+        return f"{self.name}{parent}: {self.ets}"
 
     @property
     def v(self):
@@ -203,15 +222,6 @@ class ELink(Link):
     #     self._r = T
 
  
-
-    def __str__(self):
-        """
-        Pretty prints the ETS Model of the link. Will output angles in degrees
-
-        :return: Pretty print of the robot link
-        :rtype: str
-        """
-        return str(self._ets)
 
 
 
