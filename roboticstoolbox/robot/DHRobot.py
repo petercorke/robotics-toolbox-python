@@ -119,23 +119,41 @@ class DHRobot(Robot, DHDynamics):
 
         def angle(theta):
             if sym.issymbol(theta):
-                return "<<red>>" + str(L.alpha)
+                return "<<red>>" + str(theta)
             else:
-                str(L.alpha * deg) + "\u00b0"
+                return str(theta * deg) + "\u00b0"
 
+        has_qlim = any([link._qlim is not None for link in self])
+        if has_qlim:
+            qlim_columns = [
+                Column("q⁻", headalign="^"), Column("q⁺", headalign="^"),
+            ]
+            qlim = self.qlim
+
+        else:
+            qlim_columns = []
         if self.mdh:
+            # MDH format
             table = ANSITable(
                 Column("aⱼ₋₁", headalign="^"),
                 Column("⍺ⱼ₋₁", headalign="^"),
                 Column("θⱼ", headalign="^"),
                 Column("dⱼ", headalign="^"),
+                *qlim_columns, 
                 border="thick"
                 )
             for j, L in enumerate(self):
-                if L.isprismatic():
-                    table.row(L.a, angle(L.alpha), angle(L.theta), qs(j, L))
+                if has_qlim:
+                    if L.isprismatic():
+                        ql = [qlim[0, j], qlim[1, j]]
+                    else:
+                        ql = [angle(qlim[k, j]) for k in [0, 1]]
                 else:
-                    table.row(L.a, angle(L.alpha), qs(j, L), L.d)
+                    ql = []
+                if L.isprismatic():
+                    table.row(L.a, angle(L.alpha), angle(L.theta), qs(j, L), *ql)
+                else:
+                    table.row(L.a, angle(L.alpha), qs(j, L), L.d, *ql)
         else:
             # DH format
             table = ANSITable(
@@ -143,39 +161,60 @@ class DHRobot(Robot, DHDynamics):
                 Column("dⱼ", headalign="^"),
                 Column("aⱼ", headalign="^"),
                 Column("⍺ⱼ", headalign="^"),
+                *qlim_columns,
                 border="thick"
                 )
             for j, L in enumerate(self):
+                if has_qlim:
+                    if L.isprismatic():
+                        ql = [qlim[0, j], qlim[1, j]]
+                    else:
+                        ql = [angle(qlim[k, j]) for k in [0, 1]]
+                else:
+                    ql = []
                 if L.isprismatic():
                     table.row(
-                        angle(L.theta), qs(j, L), L.a, angle(L.alpha * deg))
+                        angle(L.theta), qs(j, L), L.a, angle(L.alpha), *ql)
                 else:
-                    table.row(qs(j, L), L.d, L.a, angle(L.alpha))
+                    table.row(qs(j, L), L.d, L.a, angle(L.alpha), *ql)
 
         s = str(table)
 
-        table = ANSITable(
-            Column("", colalign=">"),
-            Column("", colalign="<"), border="thin", header=False)
-        if self._base is not None:
-            table.row(
-                "base", self._base.printline(
-                    orient="rpy/xyz", fmt="{:.2g}", file=None))
-        if self._tool is not None:
-            table.row(
-                "tool", self._tool.printline(
-                    orient="rpy/xyz", fmt="{:.2g}", file=None))
+        # show tool and base
+        if self._tool is not None or self._tool is not None:
+            table = ANSITable(
+                Column("", colalign=">"),
+                Column("", colalign="<"),
+                border="thin", header=False)
+            if self._base is not None:
+                table.row(
+                    "base", self._base.printline(
+                        orient="rpy/xyz", fmt="{:.2g}", file=None))
+            if self._tool is not None:
+                table.row(
+                    "tool", self._tool.printline(
+                        orient="rpy/xyz", fmt="{:.2g}", file=None))
+            s += "\n" + str(table)
 
-        for name, q in self._configdict.items():
-            qlist = []
-            for i, L in enumerate(self):
-                if L.isprismatic():
-                    qlist.append(f"{q[i]:.3g}")
-                else:
-                    qlist.append(f"{q[i] * deg:.3g}\u00b0")
-            table.row(name, ', '.join(qlist))
+        # show named configurations
+        if len(self._configdict) > 0:
+            table = ANSITable(
+                Column("name", colalign=">"),
+                *[Column(f"q{j:d}", colalign="<", headalign="<") for j in range(self.n)],
+                border="thin")
 
-        return s + "\n" + str(table)
+            for name, q in self._configdict.items():
+                qlist = []
+                for i, L in enumerate(self):
+                    if L.isprismatic():
+                        qlist.append(f"{q[i]:.3g}")
+                    else:
+                        qlist.append(angle(q[i]))
+                table.row(name, *qlist)
+
+            s += "\n" + str(table)
+
+        return s
 
 
     def __add__(self, L):
@@ -2515,12 +2554,13 @@ if __name__ == "__main__":
     import roboticstoolbox as rtb
     # import spatialmath.base.symbolic as sym
 
-    puma = rtb.models.DH.Planar2()
+    planar = rtb.models.DH.Planar2()
     # J = puma.jacob0(puma.qn)
     # print(J)
     # print(puma.manipulability(puma.qn))
     # print(puma.manipulability(puma.qn, 'asada'))
     #tw, T0 = puma.twists(puma.qz)
-    print(puma.qlim)
-    print(puma[0].qlim)
-    print(puma.islimit([0, -5]))
+    print(planar)
+
+    puma = rtb.models.DH.Puma560()
+    print(puma)
