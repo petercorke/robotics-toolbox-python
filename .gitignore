@@ -1,6 +1,7 @@
 # Vim
 *.sw*
 
+.idea/*
 
 ### VisualStudioCode ###
 .vscode/*
