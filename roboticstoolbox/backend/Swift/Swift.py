@@ -212,9 +212,11 @@ class Swift(Connector):  # pragma nocover
             robot['show_collision'] = show_collision
             id = self._send_socket('robot', robot)
 
-            loaded = False
-            while not loaded:
-                loaded = self._send_socket('is_loaded', id)
+            loaded = 0
+            while loaded == 0:
+                loaded = int(self._send_socket('is_loaded', id))
+                print('loafr')
+                print(loaded)
                 time.sleep(0.1)
 
             self.robots.append(ob)
