@@ -1,0 +1,243 @@
+/* body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: auto;
+  max-width: 38rem;
+  padding: 2rem;
+} */
+
+body {
+  color: #cccccc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size:13px;
+  text-align:center;
+
+  background-color: rgba(0,0,0,0);
+  margin: 0px;
+  overflow: hidden;
+}
+
+.sidenav {
+  height: 100%;
+  width: 1.5cm;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #1e1e1e;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.playercontrol {
+  height: 0.5cm;
+  width: 3cm;
+  position: absolute;
+  top: 32px;
+  margin: 0 auto;
+  z-index: 1;
+  left: 50%;
+  transform: translate(-50%, 0);
+  border-radius: 0px 0px 5px 5px;
+  /* top: 0; */
+  /* left: 0; */
+  background-color: #1e1e1e;
+  /* overflow-x: hidden; */
+  /* padding-top: 20px; */
+}
+
+.toolbar{
+  position: fixed;
+  display: block;
+  z-index: 10000;
+  height: 32px;
+  width: 100%;
+  background-color: #1e1e1e;
+}
+
+#drag-region {
+  width: 100%;
+  height: 100%;
+  -webkit-app-region: drag;
+}
+
+#window-controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  width: 90px;
+  height: 32px;
+}
+
+#sim-controls {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: inline-block;
+  width: 110px;
+  height: 32px;
+  background: linear-gradient(90deg, rgba(30,30,30,1) 0%, rgba(37,37,37,1) 17%, rgba(37,37,37,1) 87%, rgba(30,30,30,1) 100%);
+}
+
+#window-controls .button {
+  position: fixed;
+  top: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+#sim-controls .button {
+  position: fixed;
+  top: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+#close-button {
+  left: 4px;
+}
+
+#play-button {
+  /* display: none; */
+  left: 14px;
+}
+
+#pause-button {
+  display: none;
+  left: 14px;
+}
+
+#restore-button {
+  left: 36px;
+}
+
+#refresh-button {
+  left: 44px;
+}
+
+#max-button {
+  left: 68px;
+}
+
+#min-button {
+  display: none;
+  left: 68px;
+}
+
+#stop-button {
+  left: 74px;
+}
+
+.sim-icon {
+  display: block;
+  margin: auto;
+}
+
+#window-controls {
+  -webkit-app-region: no-drag;
+}
+
+#sim-controls {
+  -webkit-app-region: no-drag;
+}
+
+#window-controls .button {
+  user-select: none;
+}
+
+#close-button:hover {
+  background: rgba(255, 68, 58, 0.3);
+}
+
+#stop-button:hover {
+  background: rgba(255, 68, 58, 0.3);
+}
+
+#stop-button:hover * {
+  fill: rgb(255, 68, 58);
+}
+
+#play-button:hover {
+  background: rgba(50, 215, 75, 0.3);
+}
+
+#play-button:hover * {
+  fill: rgb(50, 215, 75)
+}
+
+#pause-button:hover {
+  background: rgba(10, 132, 255, 0.3);
+}
+
+#pause-button:hover * {
+  fill: rgb(130, 216, 250)
+}
+
+#refresh-button:hover {
+  background: rgba(10, 132, 255, 0.3);
+}
+
+#refresh-button:hover * {
+  fill: rgb(130, 216, 250)
+}
+
+#close-button:hover {
+  background: rgba(255, 68, 58, 0.3);
+}
+
+#restore-button:hover {
+  background: rgba(215, 214, 10, 0.5);
+}
+
+#max-button:hover {
+  background: rgba(50, 215, 75, 0.2);
+}
+
+#min-button:hover {
+  background: rgba(50, 215, 75, 0.2);
+}
+
+#window-controls .button:hover * {
+  stroke: #ffffff;
+}
+
+#window-controls .button:active {
+  background: rgba(255, 255, 255, 0.63);
+}
+
+#sim-controls .button:active {
+  background: rgba(255, 255, 255, 0.63);
+}
+
+
+.info {
+  float: right;
+  /* display: inline-block; */
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  height: 32px;
+  color: #969696;
+  text-align: left;
+}
+
+.info #fps {
+  position: absolute;
+  top: 50%;
+  width: 60px;
+  display: inline-block;
+  transform: translateY(-50%);
+  right: 0px;
+}
+
+.info #sim-time {
+  position: absolute;
+  top: 50%;
+  width: 80px;
+  display: inline-block;
+  transform: translateY(-50%);
+  right: 60px;
+}

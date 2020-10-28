@@ -3,14 +3,22 @@
 @author Jesse Haviland
 """
 
-import os
 from subprocess import call, Popen
 from roboticstoolbox.backend.Connector import Connector
-import zerorpc
 import roboticstoolbox as rp
 import numpy as np
 import spatialmath as sm
 import time
+import websockets
+import asyncio
+from threading import Thread
+from queue import Queue, Empty
+import webbrowser as wb
+import json
+import http.server
+import socketserver
+from pathlib import Path
+import os
 
 
 class Swift(Connector):  # pragma nocover
@@ -43,7 +51,10 @@ class Swift(Connector):  # pragma nocover
     def __init__(self):
         super(Swift, self).__init__()
 
-        # Popen(['npm', 'start', '--prefix', os.environ['SIM_ROOT']])
+        self.robots = []
+        self.shapes = []
+        self.outq = Queue()
+        self.inq = Queue()
 
     #
     #  Basic methods to do with the state of the external program
@@ -60,11 +71,40 @@ class Swift(Connector):  # pragma nocover
 
         super().launch()
 
-        self.robots = []
-        self.shapes = []
+        # Start a http server
+        self.server = Thread(
+            target=Server, args=(self.inq, ), daemon=True)
+        self.server.start()
+        http_port = self.inq.get()
 
-        self.swift = zerorpc.Client()
-        self.swift.connect("tcp://127.0.0.1:4242")
+        # Start our websocket server with a new clean port
+        self.socket = Thread(
+            target=Socket, args=(self.outq, self.inq, ), daemon=True)
+        self.socket.start()
+        port = self.inq.get()
+
+        # Launch the simulator
+        wb.open_new_tab('http://localhost:' + str(http_port))
+        # wb.open_new_tab('file:///home/jesse/swift/public/index.html')
+
+        # Let swift know which port to talk on using the common port
+        loop = asyncio.new_event_loop()
+
+        async def send_port(websocket, path):
+            await websocket.send(str(port))
+            await websocket.wait_closed()
+            loop.stop()
+
+        asyncio.set_event_loop(loop)
+        port_ws = websockets.serve(send_port, "localhost", 8997)
+        loop.run_until_complete(port_ws)
+        loop.run_forever()
+
+        try:
+            self.inq.get(timeout=10)
+        except Empty:
+            print('\nCould not connect to the Swift simulator \n')
+            raise
 
     def step(self, dt=50):
         """
@@ -81,9 +121,9 @@ class Swift(Connector):  # pragma nocover
             - Each robot in the scene is updated based on
               their control type (position, velocity, acceleration, or torque).
             - Upon acting, the other three of the four control types will be
-              updated in the internal state of the robot object. 
-            - The control type is defined by the robot object, and not all robot
-              objects support all control types.
+              updated in the internal state of the robot object.
+            - The control type is defined by the robot object, and not all
+              robot objects support all control types.
             - Execution is blocked for the specified interval
 
         """
@@ -149,7 +189,8 @@ class Swift(Connector):  # pragma nocover
         :return: object id within visualizer
         :rtype: int
 
-        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.
+        ``id = env.add(robot)`` adds the ``robot`` to the graphical
+            environment.
 
         .. note::
 
@@ -169,20 +210,21 @@ class Swift(Connector):  # pragma nocover
             robot = ob.to_dict()
             robot['show_robot'] = show_robot
             robot['show_collision'] = show_collision
-            id = self.swift.robot(robot)
+            id = self._send_socket('robot', robot)
 
             loaded = False
             while not loaded:
-                loaded = self.swift.is_loaded(id)
+                loaded = self._send_socket('is_loaded', id)
                 time.sleep(0.1)
 
             self.robots.append(ob)
             return id
-        elif isinstance(ob, rp.Shape):
-            shape = ob.to_dict()
-            id = self.swift.shape(shape)
-            self.shapes.append(ob)
-            return id
+        # elif isinstance(ob, rp.Shape):
+        #     shape = ob.to_dict()
+        #     id = self.swift.shape(shape)
+            # id = self._send_socket('shape', shape)
+        #     self.shapes.append(ob)
+        #     return id
 
     def remove(self):
         """
@@ -239,13 +281,108 @@ class Swift(Connector):  # pragma nocover
 
         for i in range(len(self.robots)):
             self.robots[i].fkine_all()
-            self.swift.robot_poses([i, self.robots[i].fk_dict()])
+            # self.swift.robot_poses([i, self.robots[i].fk_dict()])
+            self._send_socket('robot_poses', [i, self.robots[i].fk_dict()])
 
         for i in range(len(self.shapes)):
-            self.swift.shape_poses([i, self.shapes[i].fk_dict()])
+            # self.swift.shape_poses([i, self.shapes[i].fk_dict()])
+            self._send_socket('shape_poses', [i, self.shapes[i].fk_dict()])
 
-    def record_start(self, file):
-        self.swift.record_start(file)
+    # def record_start(self, file):
+    #     self.swift.record_start(file)
 
-    def record_stop(self):
-        self.swift.record_stop(1)
+    # def record_stop(self):
+    #     self.swift.record_stop(1)
+
+    def _send_socket(self, code, data):
+        msg = [code, data]
+
+        self.outq.put(msg)
+        return self.inq.get()
+
+
+class Socket:
+
+    def __init__(self, outq, inq):
+        self.outq = outq
+        self.inq = inq
+        self.USERS = set()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        started = False
+        port = 51478
+
+        while not started and port < 62000:
+            try:
+                port += 1
+                start_server = websockets.serve(self.serve, "localhost", port)
+                loop.run_until_complete(start_server)
+                started = True
+            except OSError:
+                pass
+
+        self.inq.put(port)
+        loop.run_forever()
+
+    async def register(self, websocket):
+        self.USERS.add(websocket)
+
+    async def serve(self, websocket, path):
+
+        # Initial connection handshake
+        await(self.register(websocket))
+        recieved = await websocket.recv()
+        self.inq.put(recieved)
+
+        # Now onto send, recieve cycle
+        while True:
+            message = await self.producer()
+            await websocket.send(json.dumps(message))
+
+            recieved = await websocket.recv()
+            self.inq.put(recieved)
+            print(recieved)
+
+    async def producer(self):
+        data = self.outq.get()
+        return data
+
+
+class Server:
+
+    def __init__(self, inq):
+
+        PORT = 52000
+        self.inq = inq
+
+        root_dir = Path(rp.__file__).parent / 'public'
+        os.chdir(Path.home())
+
+        class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+            def do_GET(self):
+
+                home = str(Path.home())
+
+                if self.path == '/':
+                    self.path = str(root_dir / 'index.html')
+                elif self.path.endswith('css') or self.path.endswith('js'):
+                    self.path = str(root_dir) + self.path
+
+                if self.path.startswith(home):
+                    self.path = self.path[len(home):]
+
+                return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+        Handler = MyHttpRequestHandler
+
+        connected = False
+
+        while not connected and PORT < 62000:
+            try:
+                with socketserver.TCPServer(("", PORT), Handler) as httpd:
+                    self.inq.put(PORT)
+                    connected = True
+                    httpd.serve_forever()
+            except OSError:
+                PORT += 1
