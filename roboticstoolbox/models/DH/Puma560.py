@@ -169,7 +169,7 @@ class Puma560(DHRobot):
             L,
             name="Puma 560",
             manufacturer="Unimation",
-            keywords=('dynamics', 'symbolic', 'mesh'),
+            keywords=('dynamics', 'symbolic'),
             symbolic=symbolic,
             meshdir="meshes/UNIMATE/puma560"
         )

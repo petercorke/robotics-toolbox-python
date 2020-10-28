@@ -53,20 +53,17 @@ class ELink(Link):
             collision=[],
             **kwargs):
 
-        # process common options
         super(ELink, self).__init__(**kwargs)
 
-        # check we have an ETS
+        self.STATIC = 0
+        self.VARIABLE = 1
+
         if isinstance(ets, ETS):
             self._ets = ets
         else:
             raise TypeError(
                 'The ets argument must be of type ETS')
 
-        if v is None and ets[-1].isjoint:
-            v = ets.pop()
-
-        # TODO simplify this logic, can be ELink class or None
         if isinstance(parent, list):
             raise TypeError(
                 'Only one parent link can be present')
@@ -77,14 +74,14 @@ class ELink(Link):
         self._parent = parent
         self._child = []
 
-        # Number of transforms in the ETS excluding the joint variable
+        # Number of transforms in the ETS
         self._M = len(self._ets)
 
         # Initialise joints
         if isinstance(ets, ETS):
             self._Ts = SE3()
             for i in range(self.M):
-                if ets[i].isjoint:
+                if ets[i].jtype is not ets[i].STATIC:
                     raise ValueError('The transforms in ets must be constant')
 
                 if not isinstance(ets[i].T(), SE3):
@@ -97,16 +94,16 @@ class ELink(Link):
 
         # Check the variable joint
         if v is None:
-            self._joint = False
+            self._jtype = self.STATIC
         elif not isinstance(v, ETS):
             raise TypeError('v must be of type ETS')
-        elif not v[0].isjoint:
+        elif v[0].jtype is v[0].STATIC:
             raise ValueError('v must be a variable ETS')
         elif len(v) > 1:
             raise ValueError(
                 "An elementary link can only have one joint variable")
         else:
-            self._joint = True
+            self._jtype = self.VARIABLE
 
         self._v = v
 
@@ -133,12 +130,14 @@ class ELink(Link):
         return self._geometry
 
     @property
-    def isjoint(self):
-        return self._joint
+    def jtype(self):
+        return self._jtype
 
     @property
     def ets(self):
         return self._ets
+
+
 
     # @property
     # def parent_name(self):
@@ -234,7 +233,7 @@ class ELink(Link):
         # j = 0
         # tr = SE3()
 
-        if self.isjoint and q is None:
+        if self.jtype == self.VARIABLE and q is None:
             raise ValueError("q is required for variable joints")
 
         # for k in range(self.M):

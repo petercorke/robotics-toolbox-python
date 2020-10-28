@@ -10,7 +10,7 @@ import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
-from roboticstoolbox.robot.ELink import ELink, ETS
+from roboticstoolbox.robot.ELink import ELink
 # from roboticstoolbox.backend.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
 #     _plot2, _teach2
@@ -18,7 +18,6 @@ from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.robot.Robot import Robot
 from pathlib import PurePath, PurePosixPath
-from ansitable import ANSITable, Column
 
 # try:
 #     import pybullet as p
@@ -61,45 +60,16 @@ class ERobot(Robot):
 
 
         self._ets = []
-        self._linkdict = {}
+        self._elinks = {}
         self._n = 0
         self._M = 0
         self._q_idx = []
-
-        if isinstance(elinks, ETS):
-            # were passed an ETS string
-            ets = elinks
-            elinks = []
-            # for j, k in enumerate(ets.joints()):
-            #     if j == 0:
-            #         parent = None
-            #     else:
-            #         parent = elinks[-1]
-            #     print(ets[:k+1])
-            #     elink = ELink(ets[:k+1], parent=parent, name=f"link{j:d}")
-            #     elinks.append(elink)
-            #     ets = ets[k+1:]
-
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k+1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = elinks[-1]
-                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                elinks.append(elink)
-            
-            tool = ets[start:]
-            if len(tool) > 0:
-                elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
 
         # Set up a dictionary for looking up links by name
         for link in elinks:
             if isinstance(link, ELink):
                 self._M += 1
-                self._linkdict[link.name] = link
+                self._elinks[link.name] = link
             else:
                 raise TypeError("Input can be only ELink")
 
@@ -131,7 +101,7 @@ class ERobot(Robot):
 
         def add_links(link, lst, q_idx):
 
-            if link.isjoint:
+            if link.jtype == link.VARIABLE:
                 q_idx.append(len(lst))
 
             lst.append(link)
@@ -375,7 +345,7 @@ class ERobot(Robot):
         j = 0
 
         for i in range(self.M):
-            if self.ets[i].isjoint:
+            if self.ets[i].jtype == self.ets[i].VARIABLE:
                 v[:, j] = self.ets[i].qlim
                 j += 1
 
@@ -394,7 +364,7 @@ class ERobot(Robot):
 
     @property
     def elinks(self):
-        return self._linkdict
+        return self._elinks
 # --------------------------------------------------------------------- #
 
     @property
@@ -486,7 +456,7 @@ class ERobot(Robot):
             tr = self.base
 
             for link in self._fkpath:
-                if link.isjoint:
+                if link.jtype == link.VARIABLE:
                     T = link.A(q[j, i])
                     j += 1
                 else:
@@ -519,7 +489,7 @@ class ERobot(Robot):
         tr = self.base.A
 
         for link in path:
-            if link.isjoint:
+            if link.jtype == link.VARIABLE:
                 T = link.A(q[j], fast=True)
                 j += 1
             else:
@@ -563,7 +533,7 @@ class ERobot(Robot):
         # Tall = SE3()
         j = 0
 
-        if self.ets[0].isjoint:
+        if self.ets[0].jtype == self.ets[0].VARIABLE:
             self.ets[0]._fk = self.base * self.ets[0].A(q[j])
             j += 1
         else:
@@ -576,7 +546,7 @@ class ERobot(Robot):
             gi.wT = self.ets[0]._fk
 
         for i in range(1, self.M):
-            if self.ets[i].isjoint:
+            if self.ets[i].jtype == self.ets[i].VARIABLE:
                 t = self.ets[i].A(q[j])
                 j += 1
             else:
@@ -673,13 +643,13 @@ class ERobot(Robot):
         link = to_link
 
         path.append(link)
-        if link.isjoint:
+        if link.jtype is link.VARIABLE:
             n += 1
 
         while link != from_link:
             link = link.parent
             path.append(link)
-            if link.isjoint:
+            if link.jtype is link.VARIABLE:
                 n += 1
 
         path.reverse()
@@ -721,7 +691,9 @@ class ERobot(Robot):
 
         for link in path:
 
-            if link.isjoint:
+            if link.jtype is link.STATIC:
+                U = U @ link.A(fast=True)
+            else:
                 U = U @ link.A(q[j], fast=True)
 
                 if link == to_link:
@@ -760,9 +732,6 @@ class ERobot(Robot):
                     J[3:, j] = np.array([0, 0, 0])
 
                 j += 1
-            else:
-                U = U @ link.A(fast=True)
-
 
         return J
 
@@ -960,29 +929,36 @@ class ERobot(Robot):
 
         return Jm
 
-    def __str__(self):
-        """
-        Pretty prints the ETS Model of the robot. Will output angles in
-        degrees
+    # def __str__(self):
+    #     """
+    #     Pretty prints the ETS Model of the robot. Will output angles in
+    #     degrees
 
-        :return: Pretty print of the robot model
-        :rtype: str
-        """
-        table = ANSITable(
-            Column("link"),
-            Column("parent"),
-            Column("ETS", headalign="^", colalign="<"),
-            border="thin")
-        for link in self:
-            if link.isjoint:
-                color = ""
-            else:
-                color = "<<blue>>"
-            table.row(color + link.name, 
-                link.parent.name if link.parent is not None else "-", 
-                link.ets * link.v if link.v is not None else link.ets)
-        return str(table)
- 
+    #     :return: Pretty print of the robot model
+    #     :rtype: str
+    #     """
+    #     axes = ''
+
+    #     for i in range(self.n):
+    #         axes += self.ets[self.q_idx[i]].axis
+
+    #     rpy = tr2rpy(self.tool.A, unit='deg')
+
+    #     for i in range(3):
+    #         if rpy[i] == 0:
+    #             rpy[i] = 0
+
+    #     model = '\n%s (%s): %d axis, %s, ETS\n'\
+    #         'Elementary Transform Sequence:\n'\
+    #         '%s\n'\
+    #         'tool:  t = (%g, %g, %g),  RPY/xyz = (%g, %g, %g) deg' % (
+    #             self.name, self.manuf, self.n, axes,
+    #             self.ets,
+    #             self.tool.A[0, 3], self.tool.A[1, 3],
+    #             self.tool.A[2, 3], rpy[0], rpy[1], rpy[2]
+    #         )
+
+    #     return model
 
     def jacobev(
             self, q=None, from_link=None, to_link=None,

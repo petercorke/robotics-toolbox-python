@@ -526,12 +526,12 @@ class Robot:
             than Levenberg-Marquadt
         :type transpose: float
 
-        :return: The calculated joint values
-        :rtype: float ndarray(n)
-        :return: IK solver failed
-        :rtype: bool or list of bool
-        :return: If failed, what went wrong
-        :rtype: List of str
+        :return q: The calculated joint values
+        :rtype q: float ndarray(n)
+        :return failure: IK solver failed
+        :rtype failure: bool or list of bool
+        :return error: If failed, what went wrong
+        :rtype error: List of str
 
         ``q, failure, reason = ikine(T)`` are the joint coordinates (n)
         corresponding to the robot end-effector pose ``T`` which is an ``SE3``

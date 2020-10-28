@@ -381,14 +381,6 @@ class DHDynamics:
 
         :math:`\ddot{q} = \mathbf{I}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)`
 
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.accel(puma.qz, 0.5 * np.ones(6), np.zeros(6))
-
         **Trajectory operation**
 
         If `q`, `qd`, torque are matrices (m,n) then ``qdd`` is a matrix (m,n)
