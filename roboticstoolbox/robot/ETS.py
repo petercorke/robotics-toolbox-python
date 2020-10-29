@@ -277,15 +277,39 @@ class ETS(UserList):
                 T = T @ e.T()
         return SE3(T)
 
-    def __str__(self):
+    def __str__(self, q=None):
         """
         Pretty prints the ETS
 
+        :param q: control how joint variables are displayed
+        :type q: str
         :return: Pretty printed ETS
         :rtype: str
 
-        Angular parameters are converted to degrees, except if they are 
-        symbolic.
+        ``q`` controls how the joint variables are displayed:
+
+        - None, format depends on number of joint variables
+            - one, display joint variable as q
+            - more, display joint variables as q0, q1, ...
+        - "", display all joint variables as empty parentheses ``()``
+        - "θ", display all joint variables as ``(θ)``
+        - format string with passed joint variables ``(j, j+1)``, so "θ{0}"
+          would display joint variables as θ0, θ1, ... while "θ{1}" would
+          display joint variables as θ1, θ2, ...
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rz() * ETS.tx(1) * ETS.rz()
+            >>> print(e[:2])
+            >>> print(e)
+            >>> print(e.__str__(""))
+            >>> print(e.__str__("θ{1}"))
+
+        .. note:: Angular parameters are converted to degrees, except if they
+            are symbolic.
 
         Example:
 
@@ -300,20 +324,25 @@ class ETS(UserList):
         :SymPy: supported
         """
         es = []
-        joint = 0
+        j = 0
 
-        show_q = len(self.joints()) > 1
+        if q is None:
+            if len(self.joints()) > 1:
+                q = "q{0}"
+            else:
+                q = "q"
 
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self:
 
             if et.isjoint:
-                if show_q:
-                    s = f"{et.axis}(q{joint})"
+                if q is not None:
+                    qvar = q.format(j, j+1)
                 else:
-                    s = f"{et.axis}()"
-                joint += 1
+                    qvar = ""
+                s = f"{et.axis}({qvar})"
+                j += 1
             else:
                 if et.isrevolute:
                     if issymbol(et.eta):
@@ -356,9 +385,9 @@ class ETS(UserList):
         prod.data = self.data + rest.data
         return prod
 
-    def __rmul__(self, rest):
+    def __imul__(self, rest):
         prod = ETS()
-        prod.data = self.data + rest
+        prod.data = self.data + rest.data
         return prod
 
     # redefine so that indexing returns an ET type
@@ -609,3 +638,11 @@ if __name__ == "__main__":
     # print(e.joints())
     # print(e.config)
     # print(e.eval(np.zeros((6,))))
+
+    e = ETS()
+    e *= ETS.rx()
+    e *= ETS.tz()
+    print(e)
+
+    print(e.__str__("θ{0}"))
+    print(e.__str__("θ{1}"))
