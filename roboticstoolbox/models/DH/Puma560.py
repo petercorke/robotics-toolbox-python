@@ -262,5 +262,5 @@ class Puma560(DHRobot):
 
 if __name__ == '__main__':    # pragma nocover
 
-    puma = Puma560()
+    puma = Puma560(symbolic=False)
     print(puma)

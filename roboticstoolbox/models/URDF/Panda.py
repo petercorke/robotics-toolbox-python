@@ -53,4 +53,4 @@ class Panda(ERobot):
 if __name__ == '__main__':   # pragma nocover
 
     robot = Panda()
-    print(robot.links)
+    print(robot)
