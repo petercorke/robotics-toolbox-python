@@ -177,12 +177,11 @@ class Swift(Connector):  # pragma nocover
 
             self.robots.append(ob)
             return id
-        # elif isinstance(ob, rp.Shape):
-        #     shape = ob.to_dict()
-        #     id = self.swift.shape(shape)
-            # id = self._send_socket('shape', shape)
-        #     self.shapes.append(ob)
-        #     return id
+        elif isinstance(ob, rp.Shape):
+            shape = ob.to_dict()
+            id = self._send_socket('shape', shape)
+            self.shapes.append(ob)
+            return id
 
     def remove(self):
         """

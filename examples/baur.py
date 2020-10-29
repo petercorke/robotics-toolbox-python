@@ -6,12 +6,13 @@
 import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
-import qpsolvers as qp
 
 """
 This is an implementation of the controller from:
-J. Haviland and P. Corke, “A purely-reactive manipulability-maximising
-motion controller,” arXiv preprint arXiv:2002.11901,2020.
+J. Baur, J. Pfaff, H. Ulbrich, and T. Villgrattner, “Design and development
+of a redundant modular multipurpose agricultural manipulator,” in 2012
+IEEE/ASME International Conference on Advanced Intelligent Mechatronics
+(AIM), 2012, pp. 823–830.
 """
 
 # Launch the simulator Swift
@@ -40,11 +41,8 @@ while not arrived:
     # The pose of the Panda's end-effector
     Te = panda.fkine()
 
-    # Transform from the end-effector to desired pose
-    eTep = Te.inv() * Tep
-
-    # Spatial error
-    e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
+    # The manipulator Jacobian in the end-effecotr frame
+    Je = panda.jacobe()
 
     # Calulate the required end-effector spatial velocity for the robot
     # to approach the goal. Gain is set to 1.0
@@ -53,22 +51,8 @@ while not arrived:
     # Gain term (lambda) for control minimisation
     Y = 0.01
 
-    # Quadratic component of objective function
-    Q = np.eye(n + 6)
-
-    # Joint velocity component of Q
-    Q[:n, :n] *= Y
-
-    # Slack component of Q
-    Q[n:, n:] = (1 / e) * np.eye(6)
-
-    # The equality contraints
-    Aeq = np.c_[panda.jacobe(), np.eye(6)]
-    beq = v.reshape((6,))
-
-    # The inequality constraints for joint limit avoidance
-    Ain = np.zeros((n + 6, n + 6))
-    bin = np.zeros(n + 6)
+    # The manipulability Jacobian
+    Jm = panda.jacobm()
 
     # The minimum angle (in radians) in which the joint is allowed to approach
     # to its limit
@@ -78,18 +62,28 @@ while not arrived:
     # becomes active
     pi = 0.9
 
-    # Form the joint limit velocity damper
-    Ain[:n, :n], bin[:n] = panda.joint_velocity_damper(ps, pi, n)
+    # Add cost to going in the direction of joint limits, if they are within
+    # the influence distance
+    b = np.zeros((n, 1))
 
-    # Linear component of objective function: the manipulability Jacobian
-    c = np.r_[-panda.jacobm().reshape((n,)), np.zeros(6)]
+    for i in range(n):
+        if panda.q[i] - panda.qlim[0, i] <= pi:
+            b[i, 0] = -1 * \
+                np.power(((panda.q[i] - panda.qlim[0, i]) - pi), 2) \
+                / np.power((ps - pi), 2)
+        if panda.qlim[1, i] - panda.q[i] <= pi:
+            b[i, 0] = 1 * \
+                np.power(((panda.qlim[1, i] - panda.q[i]) - pi), 2) \
+                / np.power((ps - pi), 2)
 
-    # The lower and upper bounds on the joint velocity and slack variable
-    lb = -np.r_[panda.qdlim[:n], 10 * np.ones(6)]
-    ub = np.r_[panda.qdlim[:n], 10 * np.ones(6)]
+    # Project the gradient of manipulability into the null-space of the
+    # differential kinematics
+    null = (
+        np.eye(n) - np.linalg.pinv(Je) @ Je
+    ) @ (Jm - b)
 
     # Solve for the joint velocities dq
-    qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq, lb=lb, ub=ub)
+    qd = np.linalg.pinv(Je) @ v + 1 / Y * null.flatten()
 
     # Apply the joint velocities to the Panda
     panda.qd[:n] = qd[:n]
