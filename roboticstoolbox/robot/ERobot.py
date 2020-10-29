@@ -98,8 +98,10 @@ class ERobot(Robot):
         # Set up a dictionary for looking up links by name
         for link in elinks:
             if isinstance(link, ELink):
-                self._M += 1
                 self._linkdict[link.name] = link
+                link._jindex = self._M
+                self._M += 1
+
             else:
                 raise TypeError("Input can be only ELink")
 
@@ -436,6 +438,30 @@ class ERobot(Robot):
     @property
     def q_idx(self):
         return self._q_idx
+# --------------------------------------------------------------------- #
+
+    # TODO would prefer this was called ets, but that name taken for
+    # a property earlier
+    def to_ets(self, ee=None):
+        if ee is None:
+            link = self.ee_link
+        else:
+            link = ee
+        # TODO what if multiple ee links?
+
+        ets = ETS()
+        
+        # build the ETS string from ee back to root
+        while link is not None:
+            if link.v is not None:
+                ets = link.v * ets
+            if link.ets is not None:
+                ets = link.ets * ets
+
+            link = link.parent
+
+        return ets
+
 # --------------------------------------------------------------------- #
 
     def fkine(self, q=None):
@@ -971,16 +997,14 @@ class ERobot(Robot):
         table = ANSITable(
             Column("link"),
             Column("parent"),
-            Column("ETS", headalign="^", colalign="<"),
-            border="thin")
+            Column("ETS", headalign="^", colalign=">"),
+            border="thin", color=self._color)
         for link in self:
-            if link.isjoint:
-                color = ""
-            else:
-                color = "<<blue>>"
+            color = "" if link.isjoint else "<<blue>>"
+            ets = link.ets * link.v if link.v is not None else link.ets
             table.row(color + link.name, 
                 link.parent.name if link.parent is not None else "-", 
-                link.ets * link.v if link.v is not None else link.ets)
+                ets.__str__(f"q{link._jindex}"))
         return str(table)
  
 
@@ -1644,3 +1668,28 @@ class ERobot(Robot):
     #     return _plot_ellipse(
     #         fellipse, block, limits,
     #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+
+if __name__ == "__main__":
+
+    import roboticstoolbox as rtb
+    np.set_printoptions(precision=4, suppress=True)
+
+    robot = rtb.models.ETS.Panda()
+    print(robot)
+    print(robot.base, robot.tool)
+    print(robot.q_idx)
+    print(robot.ee_link)
+    ets = robot.ets()
+    print(ets)
+    print('n', ets.n)
+    ets2 = ets.compile()
+    print(ets2)
+
+    q = np.random.rand(7)
+    # print(ets.eval(q))
+    # print(ets2.eval(q))
+
+    J1 = robot.jacob0(q)
+    J2 = ets2.jacob0(q)
+    print(J1-J2)
