@@ -59,6 +59,8 @@ This approach is general enough to be able to describe any serial-link robot
 manipulator.  For a branched manipulator we can use ETS to describe the
 connections between every parent and child link pair.
 
+The ETS inherits list-like properties and has methods like ``reverse`` and ``pop``.
+
 **Reference:**
 
    - `A simple and systematic approach to assigning Denavit-Hartenberg parameters <https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters>`_.
@@ -68,25 +70,15 @@ ETS - 3D
 --------
 
 .. autoclass:: roboticstoolbox.robot.ETS.ETS
-   :members: rx, ry, rz, tx, ty, tz, eta, eval, T, joints, axis, jtype, config, __getitem__, __mul__, __repr__, __str__
+   :members: rx, ry, rz, tx, ty, tz, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval, jacob0, hessian0
    :undoc-members:
    :show-inheritance:
 
 ETS - 2D
 --------
 
-.. autoclass:: roboticstoolbox.robot.ETS2.ETS
-   :members: rx, ry, rz, tx, ty, tz, eta, eval, T, joints, axis, jtype, config, __getitem__, __mul__, __repr__, __str__
+.. autoclass:: roboticstoolbox.robot.ETS.ETS2
+   :members: r, tx, ty, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval
    :undoc-members:
    :show-inheritance:
 
-ETS Robot models
-----------------
-
-A number of models are defined in terms of elementary transform sequences.  
-They can be listed by:
-
-.. runblock:: pycon
-
-   >>> import roboticstoolbox as rtb 
-   >>> rtb.models.list(mtype="ETS")
