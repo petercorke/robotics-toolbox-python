@@ -208,53 +208,45 @@ class Link(ABC):
 
         return s
 
-    def dyntable(self, fmt="{:.3g}", indent=0):
+    def _dyn2list(self, fmt="{: .3g}"):
         """
         Inertial properties of link as a string
 
         :param fmt: conversion format for each number
         :type fmt: str
-        :param indent: indent each line by this many spaces
-        :type indent: int
         :return: The string representation of the link dynamics
         :rtype: string
 
-        ``link.dyntable()`` pretty-prints the inertial properties of the link
-        object in a table using Unicode characters. The properties shown are
-        mass, centre of mass, inertia, friction, gear ratio and motor
-        properties.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.links[2].dyntable()
+        ``link.)_dyn2list()`` returns a list of pretty-printed inertial
+        properties of the link The properties included are mass, centre of mass,
+        inertia, friction, gear ratio and motor properties.
 
         :seealso: :func:`~dyn`
         """
         table = ANSITable(
             Column("Parameter", headalign="^"),
             Column("Value", headalign="^", colalign="<")
-        , border="thin", offset=indent)
+        , border="thin")
 
-        def format(fmt, val):
+        def format(l, fmt, val):
             if isinstance(val, np.ndarray):
                 s = ', '.join([fmt.format(v) for v in val])
             else:
                 s = fmt.format(val)
-            return s
+            l.append(s)
 
-        table.row("m", format(fmt, self.m))
-        table.row("r", format(fmt, self.r))
+        dyn = []
+        format(dyn, fmt, self.m)
+        format(dyn, fmt, self.r)
         I = self.I.flatten()
-        table.row("I", format(fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 2, 5]]]))
-        table.row("Jm", format(fmt, self.Jm))
-        table.row("B", format(fmt, self.B))
-        table.row("Tc", format(fmt, self.Tc))
-        table.row("G", format(fmt, self.G))
-        table.print()
+        format(dyn, fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 2, 5]]])
+        format(dyn, fmt, self.Jm)
+        format(dyn, fmt, self.B)
+        format(dyn, fmt, self.Tc)
+        format(dyn, fmt, self.G)
+        
+        return dyn
+        
 
     def _format(self, l, name, ignorevalue=0, indices=None):
         v = getattr(self, name)
