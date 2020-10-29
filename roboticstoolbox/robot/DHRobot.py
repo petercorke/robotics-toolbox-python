@@ -5,6 +5,7 @@
 
 import numpy as np
 from roboticstoolbox.robot import Robot  # DHLink
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
@@ -17,7 +18,6 @@ from roboticstoolbox.backend.PyPlot.functions import \
     _plot2, _teach2
 from roboticstoolbox.robot.DHDynamics import DHDynamics
 from ansitable import ANSITable, Column
-
 
 class DHRobot(Robot, DHDynamics):
     """
@@ -72,6 +72,7 @@ class DHRobot(Robot, DHDynamics):
                 links.append(L[i])
                 self._n += 1
                 L[i].id = self._n
+                L[i].name = f"link{self._n}"
 
             elif isinstance(L[i], DHRobot):
                 # got a robot
@@ -79,12 +80,11 @@ class DHRobot(Robot, DHDynamics):
                     links.append(L[i].links[j])
                     self._n += 1
                     L[i].id = self._n
+                    L[i].name = f"link{self._n}"
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
             
         super().__init__(links, **kwargs)
-
-
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
@@ -104,18 +104,21 @@ class DHRobot(Robot, DHDynamics):
         s = ""
         deg = 180 / np.pi
 
-        def qs(j, link):
+        def qstr(j, link):
             j += 1
-            if link.isprismatic():
-                if L.offset == 0:
-                    return f"q{j:d}"
-                else:
-                    return f"q{j:d} + {L.offset:}"
+            if link.flip:
+                s = f"-q{j:d}"
             else:
-                if L.offset == 0:
-                    return f"q{j:d}"
+                s = f" q{j:d}"
+
+            if L.offset != 0:
+                sign = "+" if L.offset > 0 else "-"
+                offset = abs(L.offset)
+                if link.isprismatic():
+                    s += f" {sign} {offset:}"
                 else:
-                    return f"q{j:d} + {L.offset * deg:}\u00b0"
+                    s += f" {sign} {offset * deg:.3g}\u00b0"
+            return s
 
         def angle(theta, fmt=None):
             if sym.issymbol(theta):
@@ -154,9 +157,9 @@ class DHRobot(Robot, DHDynamics):
                 else:
                     ql = []
                 if L.isprismatic():
-                    table.row(L.a, angle(L.alpha), angle(L.theta), qs(j, L), *ql)
+                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
                 else:
-                    table.row(L.a, angle(L.alpha), qs(j, L), L.d, *ql)
+                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
         else:
             # DH format
             table = ANSITable(
@@ -177,9 +180,9 @@ class DHRobot(Robot, DHDynamics):
                     ql = []
                 if L.isprismatic():
                     table.row(
-                        angle(L.theta), qs(j, L), L.a, angle(L.alpha), *ql)
+                        angle(L.theta), qstr(j, L), L.a, angle(L.alpha), *ql)
                 else:
-                    table.row(qs(j, L), L.d, L.a, angle(L.alpha), *ql)
+                    table.row(qstr(j, L), L.d, L.a, angle(L.alpha), *ql)
 
         s = str(table)
 
@@ -282,6 +285,7 @@ class DHRobot(Robot, DHDynamics):
         Example:
 
         .. runblock:: pycon
+
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.mdh
@@ -764,6 +768,48 @@ class DHRobot(Robot, DHDynamics):
 
         return tw, T[-1]
 
+    def ets(self):
+        ets = ETS()
+
+        for link in self:
+            if self.mdh:
+                # MDH format: a alpha theta d
+                if link.isrevolute():
+                    ets *= ETS.rz()
+                    if link.offset != 0:
+                        ets *= ETS.rz(link.offset)
+                    if link.d != 0:
+                        ets *= ETS.tz(link.d)
+                else:
+                    if link.theta != 0:
+                        ets *= ETS.tz(link.theta)
+                    ets *= ETS.tz()
+                    if link.offset != 0:
+                        ets *= ETS.tz(link.offset)
+                if link.a != 0:
+                    ets *= ETS.tx(link.a)
+                if link.alpha != 0:
+                    ets *= ETS.rx(link.alpha)
+            else:
+                # DH format: theta d a alpha
+                if link.a != 0:
+                    ets *= ETS.tx(link.a)
+                if link.alpha != 0:
+                    ets *= ETS.rx(link.alpha)
+                if link.isrevolute():
+                    ets *= ETS.rz()
+                    if link.offset != 0:
+                        ets *= ETS.rz(link.offset)
+                    if link.d != 0:
+                        ets *= ETS.tz(link.d)
+                else:
+                    if link.theta != 0:
+                        ets *= ETS.tz(link.theta)
+                    ets *= ETS.tz()
+                    if link.offset != 0:
+                        ets *= ETS.tz(link.offset)
+        return ets
+            
     def fkine(self, q=None):
         """
         Forward kinematics
@@ -945,13 +991,14 @@ class DHRobot(Robot, DHDynamics):
 
         return J
 
-    def jacob0(self, q=None):
+    def jacob0(self, q=None, T=None):
         r"""
         Manipulator Jacobian in world frame
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
+        :param q: Joint coordinate
         :type q: ndarray(n)
+        :param T: Forward kinematics if known, SE(3 matrix)
+        :type T: SE3 instance
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
@@ -974,10 +1021,10 @@ class DHRobot(Robot, DHDynamics):
         """
         q = self._getq(q)
 
-        T = self.fkine(q)
-        J0 = tr2jac(trinv(T.A)) @ self.jacobe(q)
+        if T is None:
+            T = self.fkine(q)
 
-        return J0
+        return tr2jac(trinv(T.A)) @ self.jacobe(q)
 
     def manipulability(self, q=None, method='yoshikawa', axes='all'):
         """
@@ -2567,3 +2614,13 @@ if __name__ == "__main__":
 
     puma = rtb.models.DH.Puma560()
     print(puma)
+    print(puma.ets())
+
+    puma[2].flip = True
+    puma[3].offset = 1
+    puma[4].flip = True
+    puma[4].offset = -1
+    print(puma)
+    print(puma.ets())
+
+    print(puma.dyntable())
