@@ -12,11 +12,14 @@ from spatialmath.base.transforms3d import tr2delta, tr2eul
 from pathlib import PurePath, PurePosixPath
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from roboticstoolbox.tools.null import null
+from ansitable import ANSITable, Column
 
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 class Robot:
+
+    _color = True
 
     def __init__(
             self,
@@ -200,17 +203,33 @@ class Robot:
         """
         Pretty print the dynamic parameters (Robot superclass)
 
+        The dynamic parameters are printed in a table, with one row per link.
+
         Example:
 
         .. runblock:: pycon
 
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
+            >>> robot.links[2].dyntable()
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
             >>> robot.dyntable()
         """
+        table = ANSITable(
+            Column("j", colalign=">", headalign="^"),
+            Column("m", colalign="<", headalign="^"),
+            Column("r", colalign="<", headalign="^"),
+            Column("I", colalign="<", headalign="^"),
+            Column("Jm", colalign="<", headalign="^"),
+            Column("B", colalign="<", headalign="^"),
+            Column("Tc", colalign="<", headalign="^"),
+            Column("G", colalign="<", headalign="^"), border="thin")
+
         for j, link in enumerate(self):
-            print(f"Link {j:d}")
-            link.dyntable(indent=4)
+            table.row(link.name, *link._dyn2list())
+        return str(table)
 
 # --------------------------------------------------------------------- #
     @property
@@ -1021,7 +1040,7 @@ class Robot:
 # --------------------------------------------------------------------- #
 
     def friction(self, qd):
-        """
+        r"""
         Manipulator joint friction (Robot superclass)
 
         :param qd: The joint velocities of the robot
@@ -1083,19 +1102,16 @@ class Robot:
         """
         Remove manipulator joint friction (Robot superclass)
 
-        NFrobot = nofriction(coulomb, viscous) copies the robot and returns
-        a robot with the same parameters except, the Coulomb and/or viscous
-        friction parameter set to zero
-
-        NFrobot = nofriction(coulomb, viscous) copies the robot and returns
-        a robot with the same parameters except the Coulomb friction parameter
-        is set to zero
-
-        :param coulomb: if True, will set the coulomb friction to 0
+        :param coulomb: set the Coulomb friction to 0
         :type coulomb: bool
-
+        :param viscous: set the viscous friction to 0
+        :type viscous: bool
         :return: A copy of the robot with dynamic parameters perturbed
-        :rtype: DHRobot
+        :rtype: Robot subclass
+
+        ``nofriction()`` copies the robot and returns
+        a robot with the same link parameters except the Coulomb and/or viscous
+        friction parameter are set to zero.
 
         :seealso: :func:`Robot.friction`, :func:`Link.nofriction`
         """
