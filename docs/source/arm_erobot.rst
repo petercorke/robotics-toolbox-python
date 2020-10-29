@@ -1,11 +1,11 @@
-URDF Robot models
-=================
+ERobot models
+=============
 
 .. codeauthor:: Jesse Haviland
 
 
 ERobot
--------
+------
 
 .. inheritance-diagram:: roboticstoolbox.ERobot
    :top-classes: roboticstoolbox.Robot
@@ -37,8 +37,27 @@ The ``ERobot`` is defined by a tree of ``ELink`` subclass objects.
 
 .. _E Models:
 
-Models
-------
+ERobot models
+-------------
+
+Defined using ETS
+^^^^^^^^^^^^^^^^^
+
+A number of models are defined in terms of elementary transform sequences.  
+They can be listed by:
+
+.. runblock:: pycon
+
+   >>> import roboticstoolbox as rtb 
+   >>> rtb.models.list(mtype="ETS")
+
+.. automodule:: roboticstoolbox.models.ETS
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Defined from URDF
+^^^^^^^^^^^^^^^^^
 
 A number of models are defined in terms of Denavit-Hartenberg parameters, either
 standard or modified.  They can be listed by:
