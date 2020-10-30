@@ -213,9 +213,9 @@ class DHRobot(Robot, DHDynamics):
                 qlist = []
                 for i, L in enumerate(self):
                     if L.isprismatic():
-                        qlist.append(f"{q[i]:.3g}")
+                        qlist.append(f"{q[i]: .3g}")
                     else:
-                        qlist.append(angle(q[i], "{:.3g}"))
+                        qlist.append(angle(q[i], "{: .3g}"))
                 table.row(name, *qlist)
 
             s += "\n" + str(table)
