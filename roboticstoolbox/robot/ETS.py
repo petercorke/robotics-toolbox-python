@@ -7,7 +7,8 @@ from collections import UserList, namedtuple
 from abc import ABC
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base import getvector, getunit, trotx, troty, trotz, issymbol
+from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
+    issymbol, tr2jac
 
 
 class SuperETS(UserList, ABC):
@@ -126,7 +127,7 @@ class SuperETS(UserList, ABC):
         n = 0
         for et in self:
             if et.isjoint:
-                et += 1
+                n += 1
 
         return n
 
@@ -304,19 +305,27 @@ class SuperETS(UserList, ABC):
             >>> e.eval([0, 0])
             >>> e.eval([90, -90], 'deg')
         """
-        T = np.eye(4)
         if q is not None:
-            q = getvector(q, out='sequence')
+            q = getvector(q, out='list')
+        first = True
         for et in self:
             if et.isjoint:
                 qj = q.pop(0)
                 if et.isrevolute and unit == 'deg':
                     qj *= np.pi / 180.0
-                T = T @ et.T(qj)
+                Tk = et.T(qj)
             else:
                 # for constants
-                T = T @ et.T()
-        return SE3(T)
+                Tk = et.T()
+            if first:
+                T = Tk
+                first = False
+            else:
+                T = T @ Tk
+        
+        T = SE3(T, check=False)
+        T.simplify()
+        return T
 
     def compile(self):
         """
@@ -784,8 +793,8 @@ class ETS(SuperETS):
         """       
 
         # TODO what is offset
-        if offset is None:
-            offset = SE3()
+        # if offset is None:
+        #     offset = SE3()
 
         n = self.n  # number of joints
         q = getvector(q, n)
