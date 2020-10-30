@@ -6,9 +6,9 @@
 from collections import UserList, namedtuple
 from abc import ABC
 import numpy as np
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac
+    issymbol, tr2jac, transl2, trot2
 
 
 class SuperETS(UserList, ABC):
@@ -323,7 +323,10 @@ class SuperETS(UserList, ABC):
             else:
                 T = T @ Tk
         
-        T = SE3(T, check=False)
+        if isinstance(self, ETS):
+            T = SE3(T, check=False)
+        elif isinstance(self, ETS2):
+            T = SE2(T, check=False)
         T.simplify()
         return T
 
@@ -1021,7 +1024,7 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         """
-        return cls(lambda theta: SE2(theta), axis='R', eta=eta, unit=unit)
+        return cls(lambda theta: trot2(theta), axis='R', eta=eta, unit=unit)
 
     @classmethod
     def tx(cls, eta=None):
@@ -1040,7 +1043,7 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         """
-        return cls(lambda x: SE2(x, 0), axis='tx', eta=eta)
+        return cls(lambda x: transl2(x, 0), axis='tx', eta=eta)
 
     @classmethod
     def ty(cls, eta=None):
@@ -1059,7 +1062,7 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`
         """
-        return cls(lambda y: SE2(0, y), axis='ty', eta=eta)
+        return cls(lambda y: transl2(0, y), axis='ty', eta=eta)
 
 
 if __name__ == "__main__":
