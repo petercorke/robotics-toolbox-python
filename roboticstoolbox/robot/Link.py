@@ -40,8 +40,6 @@ class Link(ABC):
     :param name: name of the link
     :type name: str
 
-    :param offset: kinematic - joint variable offset
-    :type offset: float
     :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
@@ -89,7 +87,6 @@ class Link(ABC):
     def __init__(
             self,
             name='',
-            offset=0.0,
             qlim=None,
             flip=False,
             m=0.0,
@@ -109,7 +106,6 @@ class Link(ABC):
         self._name = name
 
         # Joint angle parameters
-        self.offset = offset
         self.flip = flip
         self.qlim = qlim
 
@@ -268,7 +264,6 @@ class Link(ABC):
         l = []
         self._format(l, "name")
         self._format(l, "flip", False)
-        self._format(l, "offset")
         self._format(l, "qlim")
         self._format(l, "m")
         self._format(l, "r")
@@ -407,29 +402,6 @@ class Link(ABC):
     def name(self, name):
         self._name = name
 
-# -------------------------------------------------------------------------- #
-    @property
-    def offset(self):
-        """
-        Get/set joint variable offset
-
-        - ``link.offset`` is the joint variable offset
-
-        :return: joint variable offset
-        :rtype: float
-
-        - ``link.offset = ...`` checks and sets the joint variable offset
-
-        The offset is added to the joint angle before forward kinematics, and
-        subtracted after inverse kinematics.  It is used to define the joint
-        configuration for zero joint coordinates.
-
-        """
-        return self._offset
-
-    @offset.setter
-    def offset(self, offset_new):
-        self._offset = offset_new
 
 # -------------------------------------------------------------------------- #
 

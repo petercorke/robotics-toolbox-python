@@ -163,32 +163,7 @@ class DHLink(Link):
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 
-
-    @property
-    def d(self):
-        """
-        Get/set link offset
-
-        - ``link.d`` is the link offset
-            :return: link offset
-            :rtype: float
-        - ``link.d = ...`` checks and sets the link offset
-
-        """
-        return self._d
-
-    @property
-    def alpha(self):
-        """
-        Get/set link twist
-
-        - ``link.d`` is the link twist
-            :return: link twist
-            :rtype: float
-        - ``link.d = ...`` checks and sets the link twist
-
-        """
-        return self._alpha
+# -------------------------------------------------------------------------- #
 
     @property
     def theta(self):
@@ -203,6 +178,39 @@ class DHLink(Link):
         """
         return self._theta
 
+    @theta.setter
+    @_listen_dyn
+    def theta(self, theta_new):
+        if not self.sigma and theta_new != 0.0:
+            raise ValueError("theta is not valid for revolute joints")
+        else:
+            self._theta = theta_new
+
+# -------------------------------------------------------------------------- #
+
+    @property
+    def d(self):
+        """
+        Get/set link offset
+
+        - ``link.d`` is the link offset
+            :return: link offset
+            :rtype: float
+        - ``link.d = ...`` checks and sets the link offset
+
+        """
+        return self._d
+
+    @d.setter
+    @_listen_dyn
+    def d(self, d_new):
+        if self.sigma and d_new != 0.0:
+            raise ValueError("f is not valid for prismatic joints")
+        else:
+            self._d = d_new
+
+# -------------------------------------------------------------------------- #
+
     @property
     def a(self):
         """
@@ -215,6 +223,32 @@ class DHLink(Link):
 
         """
         return self._a
+
+    @a.setter
+    @_listen_dyn
+    def a(self, a_new):
+        self._a = a_new
+# -------------------------------------------------------------------------- #
+
+    @property
+    def alpha(self):
+        """
+        Get/set link twist
+
+        - ``link.d`` is the link twist
+            :return: link twist
+            :rtype: float
+        - ``link.d = ...`` checks and sets the link twist
+
+        """
+        return self._alpha
+
+    @alpha.setter
+    @_listen_dyn
+    def alpha(self, alpha_new):
+        self._alpha = alpha_new
+
+# -------------------------------------------------------------------------- #
 
     @property
     def sigma(self):
@@ -232,6 +266,12 @@ class DHLink(Link):
         """
         return self._sigma
 
+    @sigma.setter
+    @_listen_dyn
+    def sigma(self, sigma_new):
+        self._sigma = sigma_new
+# -------------------------------------------------------------------------- #
+
     @property
     def mdh(self):
         """
@@ -248,41 +288,37 @@ class DHLink(Link):
         """
         return self._mdh
 
-    @d.setter
-    @_listen_dyn
-    def d(self, d_new):
-        if self.sigma and d_new != 0.0:
-            raise ValueError("f is not valid for prismatic joints")
-        else:
-            self._d = d_new
-
-    @alpha.setter
-    @_listen_dyn
-    def alpha(self, alpha_new):
-        self._alpha = alpha_new
-
-    @theta.setter
-    @_listen_dyn
-    def theta(self, theta_new):
-        if not self.sigma and theta_new != 0.0:
-            raise ValueError("theta is not valid for revolute joints")
-        else:
-            self._theta = theta_new
-
-    @a.setter
-    @_listen_dyn
-    def a(self, a_new):
-        self._a = a_new
-
-    @sigma.setter
-    @_listen_dyn
-    def sigma(self, sigma_new):
-        self._sigma = sigma_new
-
     @mdh.setter
     @_listen_dyn
     def mdh(self, mdh_new):
         self._mdh = int(mdh_new)
+
+# -------------------------------------------------------------------------- #
+
+    @property
+    def offset(self):
+        """
+        Get/set joint variable offset
+
+        - ``link.offset`` is the joint variable offset
+
+        :return: joint variable offset
+        :rtype: float
+
+        - ``link.offset = ...`` checks and sets the joint variable offset
+
+        The offset is added to the joint angle before forward kinematics, and
+        subtracted after inverse kinematics.  It is used to define the joint
+        configuration for zero joint coordinates.
+
+        """
+        return self._offset
+
+    @offset.setter
+    def offset(self, offset_new):
+        self._offset = offset_new
+
+# -------------------------------------------------------------------------- #
 
     def A(self, q):
         r"""
