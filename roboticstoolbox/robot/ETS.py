@@ -14,9 +14,9 @@ from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
 class SuperETS(UserList, ABC):
  
     # T is a NumPy array (4,4) or None
-    ets = namedtuple('ETS3', 'eta axis_func axis joint T')
+    ets = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
-    def __init__(self, axis_func=None, axis=None, eta=None, unit='rad'):
+    def __init__(self, axis_func=None, axis=None, eta=None, unit='rad', j=None, flip=False):
 
         super().__init__()  # init UserList superclass
 
@@ -25,12 +25,6 @@ class SuperETS(UserList, ABC):
             # create instance with no values
             self.data = []
             return
-        elif isinstance(axis_func, np.ndarray):
-            # it's a constant element
-            T = axis_func
-            axis = "C"
-            joint = False
-            axis_func = None
 
         elif callable(axis_func):
             if eta is None:
@@ -39,17 +33,43 @@ class SuperETS(UserList, ABC):
                     raise ValueError('can only use radians for a variable transform')
                 joint = True
                 T = None
+
             else:
                 # constant value specified
                 joint = False
                 eta = getunit(eta, unit)
                 T = axis_func(eta)
+                if j is not None:
+                    raise ValueError('cannot specify joint index for a constant ET')
+                if flip:
+                    raise ValueError('cannot specify flip for a constant ET')
 
+        elif axis == 'C':
+            # it's a constant element  Ci
+            if isinstance(self, ETS):
+                # ETS
+                if not isinstance(eta, np.ndarray):
+                    T = eta.A
+                else:
+                    T = eta
+                if T.shape != (4,4):
+                    raise ValueError('argument must be ndarray(4,4) or SE3')
+            else:
+                # ETS2
+                if not isinstance(eta, np.ndarray):
+                    T = eta.A
+                else:
+                    T = eta
+                if T.shape != (3,3):
+                    raise ValueError('argument must be ndarray(3,3) or SE2')
+            axis = "C"
+            joint = False
+            axis_func = None
         else:
             raise ValueError('axis_func must be callable or ndarray')
 
         # Save all the params in a named tuple
-        e = self.ets(eta, axis_func, axis, joint, T)
+        e = self.ets(eta, axis_func, axis, joint, T, j, flip)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -150,6 +170,33 @@ class SuperETS(UserList, ABC):
             >>> e.isjoint
         """
         return self.data[0].joint
+
+    @property
+    def flip(self):
+        """
+        Test if ET joint is flipped
+
+        :return: True if joint is flipped
+        :rtype: bool
+
+        A flipped joint uses the negative of the joint variable, ie. it rotates
+        or moves in the opposite direction.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.tx()
+            >>> e.T(1)
+            >>> e = ETS.tx(flip=True)
+            >>> e.T(1)
+        """
+        return self.data[0].flip
+
+    @property
+    def jindex(self):
+        return self.data[0].jindex
 
     @property
     def isrevolute(self):
@@ -313,6 +360,8 @@ class SuperETS(UserList, ABC):
                 qj = q.pop(0)
                 if et.isrevolute and unit == 'deg':
                     qj *= np.pi / 180.0
+                if et.flip:
+                    qj = -qj
                 Tk = et.T(qj)
             else:
                 # for constants
@@ -391,11 +440,13 @@ class SuperETS(UserList, ABC):
         - None, format depends on number of joint variables
             - one, display joint variable as q
             - more, display joint variables as q0, q1, ...
+            - if a joint index was provided, use this value
         - "", display all joint variables as empty parentheses ``()``
         - "θ", display all joint variables as ``(θ)``
         - format string with passed joint variables ``(j, j+1)``, so "θ{0}"
           would display joint variables as θ0, θ1, ... while "θ{1}" would
-          display joint variables as θ1, θ2, ...
+          display joint variables as θ1, θ2, ...  ``j`` is either the joint
+          index, if provided, otherwise a sequential value.
 
         Example:
 
@@ -439,10 +490,17 @@ class SuperETS(UserList, ABC):
 
             if et.isjoint:
                 if q is not None:
-                    qvar = q.format(j, j+1)
+                    if et.jindex is None:
+                        _j = j
+                    else:
+                        _j = et.jindex
+                    qvar = q.format(_j, _j+1)
                 else:
                     qvar = ""
-                s = f"{et.axis}({qvar})"
+                if et.flip:
+                    s = f"{et.axis}(-{qvar})"
+                else:
+                    s = f"{et.axis}({qvar})"
                 j += 1
 
             elif et.isrevolute:
@@ -554,18 +612,24 @@ class SuperETS(UserList, ABC):
     def __repr__(self):
         return str(self)
 
+    @classmethod
+    def _CONST(cls, T):
+        return cls(None, axis='C', eta=T)
+
 class ETS(SuperETS):
     """
     This class implements an elementary transform sequence (ETS) for 3D
 
-    :param axis_func: The function which calculates the transform of the ET.
-    :type axis_func: static et.T__ function
+    :param arg: ET value as a function or SE(3)
+    :type arg: callable, ndarray(4,4), SE3
     :param η: The coordinate of the ET. If not supplied the ET corresponds
         to a variable ET which is a joint
-    :type eta: float, optional
-    :param joint: If this ET corresponds to a joint, this corresponds to the
-        joint number within the robot
+    :type η: float, optional
+    :param unit: angular unit, "rad" [default] or "deg"
+    :type unit: str
+    :param j: Explicit joint number within the robot
     :type joint: int, optional
+    :flip:
 
     An instance can contain an elementary transform (ET) or an elementary transform
     sequence (ETS). It has list-like properties by subclassing UserList, which
@@ -591,7 +655,7 @@ class ETS(SuperETS):
     """
 
     @classmethod
-    def rx(cls, eta=None, unit='rad'):
+    def rx(cls, eta=None, unit='rad', **kwargs):
         """
         Pure rotation about the x-axis
 
@@ -610,10 +674,10 @@ class ETS(SuperETS):
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
         """
-        return cls(trotx, axis='Rx', eta=eta, unit=unit)
+        return cls(trotx, axis='Rx', eta=eta, unit=unit, **kwargs)
 
     @classmethod
-    def ry(cls, eta=None, unit='rad'):
+    def ry(cls, eta=None, unit='rad', **kwargs):
         """
         Pure rotation about the y-axis
 
@@ -632,10 +696,10 @@ class ETS(SuperETS):
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
         """
-        return cls(troty, axis='Ry', eta=eta, unit=unit)
+        return cls(troty, axis='Ry', eta=eta, unit=unit, **kwargs)
 
     @classmethod
-    def rz(cls, eta=None, unit='rad'):
+    def rz(cls, eta=None, unit='rad', **kwargs):
         """
         Pure rotation about the z-axis
 
@@ -654,10 +718,10 @@ class ETS(SuperETS):
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
         """
-        return cls(trotz, axis='Rz', eta=eta, unit=unit)
+        return cls(trotz, axis='Rz', eta=eta, unit=unit, **kwargs)
 
     @classmethod
-    def tx(cls, eta=None):
+    def tx(cls, eta=None, **kwargs):
         """
         Pure translation along the x-axis
 
@@ -684,10 +748,10 @@ class ETS(SuperETS):
                 [0, 0, 0, 1]
             ])
 
-        return cls(axis_func, axis='tx', eta=eta)
+        return cls(axis_func, axis='tx', eta=eta, **kwargs)
 
     @classmethod
-    def ty(cls, eta=None):
+    def ty(cls, eta=None, **kwargs):
         """
         Pure translation along the y-axis
 
@@ -712,12 +776,12 @@ class ETS(SuperETS):
                 [0, 0, 0, 1]
             ])
 
-        return cls(axis_func, axis='ty', eta=eta)
+        return cls(axis_func, axis='ty', eta=eta, **kwargs)
 
         # return cls(SE3.Ty, axis='ty', eta=eta)
 
     @classmethod
-    def tz(cls, eta=None):
+    def tz(cls, eta=None, **kwargs):
         """
         Pure translation along the z-axis
 
@@ -742,11 +806,7 @@ class ETS(SuperETS):
                 [0, 0, 0, 1]
             ])
 
-        return cls(axis_func, axis='tz', eta=eta)
-
-    @classmethod
-    def _CONST(cls, T):
-        return cls(T)
+        return cls(axis_func, axis='tz', eta=eta, **kwargs)
 
     def jacob0(self, q=None, T=None):
         r"""
@@ -1004,7 +1064,7 @@ class ETS2(SuperETS):
     """
 
     @classmethod
-    def r(cls, eta=None, unit='rad'):
+    def r(cls, eta=None, unit='rad', **kwargs):
         """
         Pure rotation
 
@@ -1024,10 +1084,10 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         """
-        return cls(lambda theta: trot2(theta), axis='R', eta=eta, unit=unit)
+        return cls(lambda theta: trot2(theta), axis='R', eta=eta, unit=unit, **kwargs)
 
     @classmethod
-    def tx(cls, eta=None):
+    def tx(cls, eta=None, **kwargs):
         """
         Pure translation along the x-axis
 
@@ -1043,10 +1103,10 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         """
-        return cls(lambda x: transl2(x, 0), axis='tx', eta=eta)
+        return cls(lambda x: transl2(x, 0), axis='tx', eta=eta, **kwargs)
 
     @classmethod
-    def ty(cls, eta=None):
+    def ty(cls, eta=None, **kwargs):
         """
         Pure translation along the y-axis
 
@@ -1062,7 +1122,7 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`
         """
-        return cls(lambda y: transl2(0, y), axis='ty', eta=eta)
+        return cls(lambda y: transl2(0, y), axis='ty', eta=eta, **kwargs)
 
 
 if __name__ == "__main__":
@@ -1089,18 +1149,6 @@ if __name__ == "__main__":
     print(e)
 
     
-    # l1 = 0.672
-    # l2 = -0.2337
-    # l3 = 0.4318
-    # l4 = 0.0203
-    # l5 = 0.0837
-    # l6 = 0.4318
-
-    # e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2) * ETS.tz(l3) * ETS.ry() \
-    #     * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz() * ETS.ry() * ETS.rz()
-    # print(e.joints())
-    # print(e.config)
-    # print(e.eval(np.zeros((6,))))
 
     e = ETS()
     e *= ETS.rx()
@@ -1112,3 +1160,23 @@ if __name__ == "__main__":
 
     e = ETS.rx() * ETS._CONST(SE3()) * ETS.tx(0.3)
     print(e)
+
+
+    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rz(j=7,flip=True) * ETS.tx(1)
+    print(e)
+
+    l1 = 0.672
+    l2 = -0.2337
+    l3 = 0.4318
+    l4 = 0.0203
+    l5 = 0.0837
+    l6 = 0.4318
+
+    e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2) * ETS.tz(l3) * ETS.ry() \
+        * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz() * ETS.ry() * ETS.rz()
+    print(e.joints())
+    print(e.config)
+    print(e.eval(np.zeros(6)))
+    ec = e.compile()
+    print(ec)
+    print(ec.eval(np.zeros(6)))
