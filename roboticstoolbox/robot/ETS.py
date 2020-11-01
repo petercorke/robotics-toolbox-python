@@ -8,7 +8,7 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2
+    issymbol, tr2jac, transl2, trot2, removesmall
 
 
 class SuperETS(UserList, ABC):
@@ -626,6 +626,8 @@ class SuperETS(UserList, ABC):
         Removes a value from the value list and returns it.  The original
         instance is modified. 
 
+        Example:
+
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ETS
@@ -644,6 +646,56 @@ class SuperETS(UserList, ABC):
     @classmethod
     def _CONST(cls, T):
         return cls(None, axis='C', eta=T)
+
+    @classmethod
+    def SE3(cls, T, tol=100):
+        """
+        Convert an SE3 to an ETS
+
+        :param T: An SE(3) matrix
+        :type T: SE3 instance
+        :param tol: Elements small than this many eps are considered as 
+            being zero, defaults to 100
+        :type tol: int, optional
+        :return: ET sequence
+        :rtype: ETS
+
+        Create an ETS from the non-zero translational and rotational components
+        of the ETS.  
+
+        Example:
+        
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> ETS.SE3(SE3(1,2,3))
+            >>> ETS.SE3(SE3.Rx(90, 'deg'))
+
+        .. warning:: ``SE3.rpy()`` is used to determine rotation about the x-,
+            y- and z-axes.  For a y-axis rotation with magnitude greater than
+            180° this will result in a non-minimal representation with non-zero
+            amounts of x- and z-axis rotation.
+
+        :seealso: :func:`~SE3.rpy`
+        """
+        t = removesmall(T.t, tol)
+        ets = ETS()
+        if t[0] != 0:
+            ets *= ETS.tx(t[0])
+        if t[1] != 0:
+            ets *= ETS.ty(t[1])
+        if t[2] != 0:
+            ets *= ETS.tz(t[2])
+
+        rpy = removesmall(T.rpy(order='zyx'))
+        if rpy[2] != 0:
+            ets *= ETS.rz(rpy[2])
+        if rpy[1] != 0:
+            ets *= ETS.ry(rpy[1])
+        if rpy[0] != 0:
+            ets *= ETS.rx(rpy[0])
+
+        return ets
 
 class ETS(SuperETS):
     """
@@ -1280,3 +1332,5 @@ if __name__ == "__main__":
     ec = e.compile()
     print(ec)
     print(ec.eval(np.zeros(6)))
+
+    print(ETS.SE3(SE3.Rz(200, 'deg')))
