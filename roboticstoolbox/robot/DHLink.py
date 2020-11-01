@@ -95,6 +95,7 @@ class DHLink(Link):
             a=0.0,
             sigma=0,
             mdh=False,
+            offset=0,
             **kwargs):
 
         # TODO
@@ -110,7 +111,7 @@ class DHLink(Link):
         self.alpha = alpha
         self.a = a
         self.mdh = mdh
-        self.offset = 0
+        self.offset = offset
         self.id = None
 
 
@@ -144,13 +145,17 @@ class DHLink(Link):
             offset = ""
         else:
             offset = f" + {self.offset}"
+        if self.id is None:
+            qvar = "q"
+        else:
+            qvar = f"q{self.id}"
+        cls = self.__class__.__name__
         if self.isrevolute():
-            s = f"Revolute:   theta=q{self.id}{offset},  d={self.d}, " \
+            s = f"{cls}:   theta={qvar}{offset},  d={self.d}, " \
                 f"a={self.a}, alpha={self.alpha}"
         else:
-            s = "Prismatic:  theta={: .2f},  d=q{} +{: .2f},  a={: .2f},  " \
-                "alpha={: .2f}".format(
-                    self.theta, self.id, self.offset, self.a, self.alpha, )
+            s = f"{cls}:  theta={self.theta},  d={qvar}{offset},  a={self.a},  " \
+                f"alpha={self.alpha}"
         return s
 
     def __repr__(self):

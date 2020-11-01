@@ -491,7 +491,7 @@ class DHRobot(Robot, DHDynamics):
         if jn > self.n:
             raise ValueError("The joints value out of range")
 
-        q = getvector(q, jn)
+        q = getvector(q)
 
         T = SE3()
         for i in range(j0, jn):
