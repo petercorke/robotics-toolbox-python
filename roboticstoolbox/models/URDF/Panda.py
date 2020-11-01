@@ -31,23 +31,23 @@ class Panda(ERobot):
     """
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        elinks, name = super().urdf_to_ets_args(
             "franka_description/robots/panda_arm_hand.urdf.xacro")
 
         super().__init__(
-            args[0],
-            name=args[1])
-
-        self.manufacturer = 'Franka Emika'
-        self.ee_link = self.ets[9]
+            elinks,
+            name=name,
+            manufacturer = 'Franka Emika',
+            ee_links=elinks[8]
+            )
 
         self.qdlim = np.array([
             2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        self.addconfiguration("qz", np.array(
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array(
-            [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0]))
+        # self.addconfiguration("qz", np.array(
+        #     [0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        # self.addconfiguration("qr", np.array(
+        #     [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0]))
 
 
 if __name__ == '__main__':   # pragma nocover
