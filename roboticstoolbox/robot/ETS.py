@@ -172,7 +172,7 @@ class SuperETS(UserList, ABC):
         return self.data[0].joint
 
     @property
-    def flip(self):
+    def isflip(self):
         """
         Test if ET joint is flipped
 
@@ -189,13 +189,32 @@ class SuperETS(UserList, ABC):
             >>> from roboticstoolbox import ETS
             >>> e = ETS.tx()
             >>> e.T(1)
-            >>> e = ETS.tx(flip=True)
-            >>> e.T(1)
+            >>> eflip = ETS.tx(flip=True)
+            >>> eflip.T(1)
         """
         return self.data[0].flip
 
     @property
     def jindex(self):
+        """
+        Get ET joint index
+
+        :return: The assigmed joint index
+        :rtype: int or None
+
+        Allows an ET to be associated with a numbered joint in a robot.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.tx()
+            >>> print(e)
+            >>> e = ETS.tx(j=3)
+            >>> print(e)
+            >>> print(e.jindex)
+        """
         return self.data[0].jindex
 
     @property
@@ -340,6 +359,11 @@ class SuperETS(UserList, ABC):
         transforms left to right, and substitutes in joint coordinates as
         needed from consecutive elements of ``q``.
 
+        .. note:: if ETs have an explicit joint index, this is used to index
+            into the vector ``q``.
+
+        .. warning:: do not mix ETs with and without explicit joint index.
+
         Example:
 
         .. runblock:: pycon
@@ -351,16 +375,21 @@ class SuperETS(UserList, ABC):
             >>> e[1:3]
             >>> e.eval([0, 0])
             >>> e.eval([90, -90], 'deg')
+            >>> e = ETS.tx(j=1) * ETS.ty(j=0)
+            >>> e.eval([3, 4])
         """
         if q is not None:
             q = getvector(q, out='list')
         first = True
         for et in self:
             if et.isjoint:
-                qj = q.pop(0)
+                if et.jindex is None:
+                    qj = q.pop(0)
+                else:
+                    qj = q[et.jindex]
                 if et.isrevolute and unit == 'deg':
                     qj *= np.pi / 180.0
-                if et.flip:
+                if et.isflip:
                     qj = -qj
                 Tk = et.T(qj)
             else:
@@ -497,7 +526,7 @@ class SuperETS(UserList, ABC):
                     qvar = q.format(_j, _j+1)
                 else:
                     qvar = ""
-                if et.flip:
+                if et.isflip:
                     s = f"{et.axis}(-{qvar})"
                 else:
                     s = f"{et.axis}({qvar})"
@@ -620,21 +649,33 @@ class ETS(SuperETS):
     """
     This class implements an elementary transform sequence (ETS) for 3D
 
-    :param arg: ET value as a function or SE(3)
-    :type arg: callable, ndarray(4,4), SE3
+    :param arg: Function to compute ET value
+    :type arg: callable
     :param η: The coordinate of the ET. If not supplied the ET corresponds
         to a variable ET which is a joint
     :type η: float, optional
     :param unit: angular unit, "rad" [default] or "deg"
     :type unit: str
     :param j: Explicit joint number within the robot
-    :type joint: int, optional
-    :flip:
+    :type j: int, optional
+    :param flip: Joint moves in opposite direction
+    :type flip: bool
 
-    An instance can contain an elementary transform (ET) or an elementary transform
-    sequence (ETS). It has list-like properties by subclassing UserList, which
-    means we can perform indexing, slicing pop, insert, as well as using it as
-    an iterator over its values.
+    An instance can contain an elementary transform (ET) or an elementary
+    transform sequence (ETS). It has list-like properties by subclassing
+    UserList, which means we can perform indexing, slicing pop, insert, as well
+    as using it as an iterator over its values.
+
+    - ``ETS()`` an empty ETS list
+    - ``ETS.XY(η)`` is a constant elementary transform
+    - ``ETS.XY(η, 'deg')`` as above but the angle is expressed in degrees
+    - ``ETS.XY()`` is a joint variable, the value is left free until evaluation
+      time
+    - ``ETS.XY(j=J)`` as above but the joint index is explicitly given, this
+      might correspond to the joint number of a multi-joint robot.
+    - ``ETS.XY(flip=True)`` as above but the joint moves in the opposite sense
+
+    where ``XY`` is one of ``rx``, ``ry``, ``rz``, ``tx``, ``ty``, ``tz``. 
 
     Example:
 
@@ -663,13 +704,18 @@ class ETS(SuperETS):
         :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
         :type unit: str
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.rz(η)`` is an elementary rotation about the x-axis by a constant
+        - ``ETS.rx(η)`` is an elementary rotation about the x-axis by a constant
           angle η
-        - ``ETS.rz()`` is an elementary rotation about the x-axis by a variable
-          angle, i.e. a revolute robot joint
+        - ``ETS.rx()`` is an elementary rotation about the x-axis by a variable
+          angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
+          this case.
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
@@ -685,13 +731,18 @@ class ETS(SuperETS):
         :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
         :type unit: str
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.ry(η)`` is an elementary rotation about the y-axis by a constant
           angle η
         - ``ETS.ry()`` is an elementary rotation about the y-axis by a variable
-          angle, i.e. a revolute robot joint
+          angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
+          this case.
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
@@ -707,13 +758,18 @@ class ETS(SuperETS):
         :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
         :type unit: str
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.rz(η)`` is an elementary rotation about the z-axis by a constant
           angle η
         - ``ETS.rz()`` is an elementary rotation about the z-axis by a variable
-          angle, i.e. a revolute robot joint
+          angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
+          this case.
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
@@ -727,13 +783,18 @@ class ETS(SuperETS):
 
         :param η: translation distance along the z-axis
         :type η: float
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.tx(η)`` is an elementary translation along the x-axis by a 
           distance constant η
         - ``ETS.tx()`` is an elementary translation along the x-axis by a
-          variable distance, i.e. a prismatic robot joint
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
+          be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         :SymPy: supported
@@ -757,13 +818,18 @@ class ETS(SuperETS):
 
         :param η: translation distance along the y-axis
         :type η: float
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.ty(η)`` is an elementary translation along the y-axis by a 
           distance constant η
         - ``ETS.ty()`` is an elementary translation along the y-axis by a
-          variable distance, i.e. a prismatic robot joint
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
+          be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         :SymPy: supported
@@ -787,13 +853,18 @@ class ETS(SuperETS):
 
         :param η: translation distance along the z-axis
         :type η: float
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.tz(η)`` is an elementary translation along the z-axis by a 
           distance constant η
         - ``ETS.tz()`` is an elementary translation along the z-axis by a
-          variable distance, i.e. a prismatic robot joint
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
+          be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         :SymPy: supported
@@ -1031,19 +1102,33 @@ class ETS2(SuperETS):
     """
     This class implements an elementary transform sequence (ETS) for 2D
 
-    :param axis_func: The function which calculates the transform of the ET.
-    :type axis_func: static et.T__ function
-    :param eta: The coordinate of the ET. If not supplied the ET corresponds
+    :param arg: Function to compute ET value
+    :type arg: callable
+    :param η: The coordinate of the ET. If not supplied the ET corresponds
         to a variable ET which is a joint
-    :type eta: float, optional
-    :param joint: If this ET corresponds to a joint, this corresponds to the
-        joint number within the robot
-    :type joint: int, optional
+    :type η: float, optional
+    :param unit: angular unit, "rad" [default] or "deg"
+    :type unit: str
+    :param j: Explicit joint number within the robot
+    :type j: int, optional
+    :param flip: Joint moves in opposite direction
+    :type flip: bool
 
-    An instance can contain an elementary transform (ET) or an elementary transform
-    sequence (ETS). It has list-like properties by subclassing UserList, which
-    means we can perform indexing, slicing pop, insert, as well as using it as
-    an iterator over its values.
+    An instance can contain an elementary transform (ET) or an elementary
+    transform sequence (ETS). It has list-like properties by subclassing
+    UserList, which means we can perform indexing, slicing pop, insert, as well
+    as using it as an iterator over its values.
+
+    - ``ETS()`` an empty ETS list
+    - ``ETS.XY(η)`` is a constant elementary transform
+    - ``ETS.XY(η, 'deg')`` as above but the angle is expressed in degrees
+    - ``ETS.XY()`` is a joint variable, the value is left free until evaluation
+      time
+    - ``ETS.XY(j=J)`` as above but the joint index is explicitly given, this
+      might correspond to the joint number of a multi-joint robot.
+    - ``ETS.XY(flip=True)`` as above but the joint moves in the opposite sense
+
+    where ``XY`` is one of ``r``, ``tx``, ``ty``. 
 
     Example:
 
@@ -1072,12 +1157,17 @@ class ETS2(SuperETS):
         :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
         :type unit: str
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.r(η)`` is an elementary rotation by a constant angle η
         - ``ETS.r()`` is an elementary rotation by a variable angle, i.e. a
-          revolute robot joint
+          revolute robot joint. ``j`` or ``flip`` can be set in
+          this case.
 
         .. note:: In the 2D case this is rotation around the normal to the
             xy-plane.
@@ -1093,13 +1183,18 @@ class ETS2(SuperETS):
 
         :param η: translation distance along the z-axis
         :type η: float
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.tx(η)`` is an elementary translation along the x-axis by a 
           distance constant η
         - ``ETS.tx()`` is an elementary translation along the x-axis by a
-          variable distance, i.e. a prismatic robot joint
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
+          be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         """
@@ -1112,13 +1207,18 @@ class ETS2(SuperETS):
 
         :param η: translation distance along the y-axis
         :type η: float
+        :param j: Explicit joint number within the robot
+        :type j: int, optional
+        :param flip: Joint moves in opposite direction
+        :type flip: bool
         :return: An elementary transform
         :rtype: ETS instance
 
         - ``ETS.tx(η)`` is an elementary translation along the y-axis by a 
           distance constant η
         - ``ETS.tx()`` is an elementary translation along the y-axis by a
-          variable distance, i.e. a prismatic robot joint
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
+          be set in this case.
 
         :seealso: :func:`ETS`
         """
@@ -1162,7 +1262,7 @@ if __name__ == "__main__":
     print(e)
 
 
-    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rz(j=7,flip=True) * ETS.tx(1)
+    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7,flip=True) * ETS.tx(1)
     print(e)
 
     l1 = 0.672
