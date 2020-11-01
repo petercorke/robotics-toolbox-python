@@ -8,13 +8,13 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv
 
 
 class SuperETS(UserList, ABC):
  
     # T is a NumPy array (4,4) or None
-    ets = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
+    ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
     def __init__(self, axis_func=None, axis=None, eta=None, unit='rad', j=None, flip=False):
 
@@ -25,6 +25,17 @@ class SuperETS(UserList, ABC):
             # create instance with no values
             self.data = []
             return
+
+        elif isinstance(axis_func, ETS):
+            # copy constructor
+            e = axis_func
+            axis_func = e.axis_func
+            axis = e.axis
+            et = e.eta
+            j = e.jindex
+            flip = e.isflip
+            joint = e.isjoint
+            T = e.T
 
         elif callable(axis_func):
             if eta is None:
@@ -69,7 +80,7 @@ class SuperETS(UserList, ABC):
             raise ValueError('axis_func must be callable or ndarray')
 
         # Save all the params in a named tuple
-        e = self.ets(eta, axis_func, axis, joint, T, j, flip)
+        e = self.ets_tuple(eta, axis_func, axis, joint, T, j, flip)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -427,7 +438,6 @@ class SuperETS(UserList, ABC):
             >>> robot = rtb.models.ETS.Panda()
             >>> ets = robot.ets()
             >>> ets
-            tz(0.333) * Rz(q0) * Rx(-90°) * Rz(q1) * Rx(90°) * tz(0.316) * Rz(q2) * tx(0.0825) * Rx(90°) * Rz(q3) * tx(-0.0825) * Rx(-90°) * tz(0.384) * Rz(q4) * Rx(90°) * Rz(q5) * tx(0.088) * Rx(90°) * tz(0.107) * Rz(q6) * tz(0.10300000000000001) * Rz(-45°)
             >>> ets.compile()
 
         :seealso: :func:`isconstant`
@@ -486,7 +496,11 @@ class SuperETS(UserList, ABC):
             >>> print(e[:2])
             >>> print(e)
             >>> print(e.__str__(""))
-            >>> print(e.__str__("θ{1}"))
+            >>> print(e.__str__("θ{0}"))  # numbering from 0
+            >>> print(e.__str__("θ{1}"))  # numbering from 1
+            >>> e = ETS.rz(j=3) * ETS.tx(1) * ETS.rz(j=4) # explicit joint indices
+            >>> print(e)
+            >>> print(e.__str__("θ{0}"))
 
         .. note:: Angular parameters are converted to degrees, except if they
             are symbolic.
@@ -648,20 +662,25 @@ class SuperETS(UserList, ABC):
         return cls(None, axis='C', eta=T)
 
     @classmethod
-    def SE3(cls, T, tol=100):
+    def SE3(cls, t, rpy=None, tol=100):
         """
         Convert an SE3 to an ETS
 
-        :param T: An SE(3) matrix
-        :type T: SE3 instance
+        :param t: Translation vector, or an SE(3) matrix
+        :type t: array_like(3) or SE3 instance
+        :param rpy: roll-pitch-yaw angles in XYZ order
+        :type rpy: array_like(3)
         :param tol: Elements small than this many eps are considered as 
             being zero, defaults to 100
         :type tol: int, optional
         :return: ET sequence
-        :rtype: ETS
+        :rtype: ETS instance
 
-        Create an ETS from the non-zero translational and rotational components
-        of the ETS.  
+        Create an ETS from the non-zero translational and rotational components.
+
+        - ``SE3(t, rpy)`` convert translation ``t`` and rotation given by XYZ
+          roll-pitch-yaw angles ``rpy`` into an ETS.
+        - ``SE3(X)`` as above but convert from an SE3 instance ``X``.
 
         Example:
         
@@ -678,7 +697,11 @@ class SuperETS(UserList, ABC):
 
         :seealso: :func:`~SE3.rpy`
         """
-        t = removesmall(T.t, tol)
+        if isinstance(t, SE3):
+            T = t
+            t = removesmall(T.t, tol)
+            rpy = removesmall(T.rpy(order='zyx'))
+
         ets = ETS()
         if t[0] != 0:
             ets *= ETS.tx(t[0])
@@ -687,15 +710,63 @@ class SuperETS(UserList, ABC):
         if t[2] != 0:
             ets *= ETS.tz(t[2])
 
-        rpy = removesmall(T.rpy(order='zyx'))
-        if rpy[2] != 0:
-            ets *= ETS.rz(rpy[2])
-        if rpy[1] != 0:
-            ets *= ETS.ry(rpy[1])
-        if rpy[0] != 0:
-            ets *= ETS.rx(rpy[0])
+        if rpy is not None:
+            if rpy[2] != 0:
+                ets *= ETS.rz(rpy[2])
+            if rpy[1] != 0:
+                ets *= ETS.ry(rpy[1])
+            if rpy[0] != 0:
+                ets *= ETS.rx(rpy[0])
 
         return ets
+
+    def inv(self):
+        r"""
+        Inverse of ETS
+
+        :return: [description]
+        :rtype: ETS instance
+
+        The inverse of a given ETS.  It is computed as the inverse of the 
+        individual ETs in the reverse order.
+
+        .. math::
+
+            (\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rz(j=2) * ETS.tx(1) * ETS.rx(j=3,flip=True) * ETS.tx(1)
+            >>> print(e)
+            >>> print(e.inv())
+            >>> q = [1,2,3,4]
+            >>> print(e.eval(q) * e.inv().eval(q))
+
+        .. note:: It is essential to use explicit joint indices to account for
+            the reversed order of the transforms.
+        """
+
+        inv = ETS()
+        for e in reversed(self.data):
+            # get the named tuple from the list, and convert to a dict
+            etdict = e._asdict()
+
+            # update the dict to make this an inverse
+            if etdict['joint']:
+                etdict['flip'] ^= True   # toggle flip status
+            elif etdict['axis'][0] == 'C':
+                etdict['T'] = trinv(etdict['T'])
+            elif etdict['eta'] is not None:
+                etdict['T'] = trinv(etdict['T'])
+                etdict['eta'] = -etdict['eta']
+            et = ETS()  # create a new ETS instance
+            et.data = [self.ets_tuple(**etdict)]  # set it's data from the dict
+            inv *= et
+        return inv
+
 
 class ETS(SuperETS):
     """
@@ -1314,8 +1385,7 @@ if __name__ == "__main__":
     print(e)
 
 
-    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7,flip=True) * ETS.tx(1)
-    print(e)
+  
 
     l1 = 0.672
     l2 = -0.2337
@@ -1334,3 +1404,19 @@ if __name__ == "__main__":
     print(ec.eval(np.zeros(6)))
 
     print(ETS.SE3(SE3.Rz(200, 'deg')))
+
+
+    a = ETS.rx()
+    b = ETS(a)
+    print(b)
+    a = ETS.tz()
+    print(b)
+    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7,flip=True) * ETS.tx(1)
+    print(e)
+
+    print(e.inv())
+
+    q = [1,2,3,4,5,6,7,8]
+    print(e.eval(q))
+    print(e.inv().eval(q))
+    print(e.eval(q) * e.inv().eval(q))
