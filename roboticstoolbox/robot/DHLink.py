@@ -435,40 +435,48 @@ class DHLink(Link):
 
         if self.mdh:
             # MDH format: a alpha theta d
-            if self.isrevolute():
-                ets *= ETS.rz()
-                if self.offset != 0:
-                    ets *= ETS.rz(self.offset)
-                if self.d != 0:
-                    ets *= ETS.tz(self.d)
-            else:
-                if self.theta != 0:
-                    ets *= ETS.tz(self.theta)
-                ets *= ETS.tz()
-                if self.offset != 0:
-                    ets *= ETS.tz(self.offset)
             if self.a != 0:
                 ets *= ETS.tx(self.a)
             if self.alpha != 0:
                 ets *= ETS.rx(self.alpha)
+
+            if self.isrevolute():
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
+                ets *= ETS.rz(flip=self.flip)  # joint
+
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.rz(self.theta)
+
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+                ets *= ETS.tz(flip=self.flip)  # joint
+
         else:
             # DH format: theta d a alpha
-            if self.a != 0:
-                ets *= ETS.tx(self.a)
-            if self.alpha != 0:
-                ets *= ETS.rx(self.alpha)
+
             if self.isrevolute():
-                ets *= ETS.rz()
+                ets *= ETS.rz(flip=self.flip)
                 if self.offset != 0:
                     ets *= ETS.rz(self.offset)
+
                 if self.d != 0:
                     ets *= ETS.tz(self.d)
             else:
                 if self.theta != 0:
-                    ets *= ETS.tz(self.theta)
-                ets *= ETS.tz()
+                    ets *= ETS.rz(self.theta)
+                    
                 if self.offset != 0:
                     ets *= ETS.tz(self.offset)
+                ets *= ETS.tz(flip=self.flip)
+
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
         return ets
 
 # -------------------------------------------------------------------------- #

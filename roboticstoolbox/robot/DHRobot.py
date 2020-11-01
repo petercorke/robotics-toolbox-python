@@ -768,10 +768,21 @@ class DHRobot(Robot, DHDynamics):
         return tw, T[-1]
 
     def ets(self):
-        ets = ETS()
 
+        # optionally start with the base transform
+        if self._base is None:
+            ets = ETS()
+        else:
+            ets = ETS.SE3(self._base)
+
+        # add the links
         for link in self:
             ets *= link.ets()
+
+        # optionally add the base transform
+        if self._tool is not None:
+            ets *= ETS.SE3(self._tool)
+
         return ets
             
     def fkine(self, q=None):
@@ -2583,6 +2594,10 @@ if __name__ == "__main__":
 
     puma = rtb.models.DH.Puma560()
     print(puma)
+    puma.base = None
+    print('base', puma.base)
+    print('tool', puma.tool)
+
     print(puma.ets())
 
     puma[2].flip = True
