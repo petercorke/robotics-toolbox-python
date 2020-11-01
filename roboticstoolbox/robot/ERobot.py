@@ -135,8 +135,8 @@ class ERobot(Robot):
         # assign the joint indices
         if all([link.jindex is None for link in elinks]):
             # no jindex set, assign them
-            if len(self.ee_links) > 1:
-                raise ValueError('for a robot with multiple end-effectors must assign joint indices')
+            # if len(self.ee_links) > 1:
+            #     raise ValueError('for a robot with multiple end-effectors must assign joint indices')
             # maybe do the DFS in where somewhere
 
             jindex = [0]  # "mutable integer" hack
@@ -499,7 +499,7 @@ class ERobot(Robot):
         if isinstance(link, ELink):
             self._ee_links = [link]
         elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
-            self._ee_links = self.ets[link]
+            self._ee_links = link
         else:
             raise ValueError('expecting an ELink or list of ELinks')
         self._reset_fk_path()

@@ -1720,14 +1720,14 @@ class URDF(URDFType):
                     childlink.B = joint.dynamics.friction
 
                 # TODO Add damping
-                self.joints[i].dynamics.damping
+                joint.dynamics.damping
             except AttributeError:
                 pass
 
             # joint gear ratio
             # TODO, not sure if t.joint.name is a thing
             for t in self.transmissions:
-                if t.joint.name == joint.name:
+                if t.name == joint.name:
                     childlink.G = t.actuators[0].mechanicalReduction
 
             self.elinks = elinks
