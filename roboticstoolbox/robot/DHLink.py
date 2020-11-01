@@ -109,6 +109,7 @@ class DHLink(Link):
         self.alpha = alpha
         self.a = a
         self.mdh = mdh
+        self.offset = 0
         self.id = None
 
 
