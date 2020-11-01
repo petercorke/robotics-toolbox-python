@@ -8,6 +8,7 @@ import numpy as np
 from spatialmath import SE3
 import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link, _listen_dyn
+from roboticstoolbox.robot.ETS import ETS
 
 _eps = np.finfo(np.float64).eps
 
@@ -429,6 +430,46 @@ class DHLink(Link):
         else:
             return False
 
+    def ets(self):
+        ets = ETS()
+
+        if self.mdh:
+            # MDH format: a alpha theta d
+            if self.isrevolute():
+                ets *= ETS.rz()
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.tz(self.theta)
+                ets *= ETS.tz()
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
+        else:
+            # DH format: theta d a alpha
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
+            if self.isrevolute():
+                ets *= ETS.rz()
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.tz(self.theta)
+                ets *= ETS.tz()
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+        return ets
 
 # -------------------------------------------------------------------------- #
 class RevoluteDH(DHLink):

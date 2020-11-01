@@ -771,42 +771,7 @@ class DHRobot(Robot, DHDynamics):
         ets = ETS()
 
         for link in self:
-            if self.mdh:
-                # MDH format: a alpha theta d
-                if link.isrevolute():
-                    ets *= ETS.rz()
-                    if link.offset != 0:
-                        ets *= ETS.rz(link.offset)
-                    if link.d != 0:
-                        ets *= ETS.tz(link.d)
-                else:
-                    if link.theta != 0:
-                        ets *= ETS.tz(link.theta)
-                    ets *= ETS.tz()
-                    if link.offset != 0:
-                        ets *= ETS.tz(link.offset)
-                if link.a != 0:
-                    ets *= ETS.tx(link.a)
-                if link.alpha != 0:
-                    ets *= ETS.rx(link.alpha)
-            else:
-                # DH format: theta d a alpha
-                if link.a != 0:
-                    ets *= ETS.tx(link.a)
-                if link.alpha != 0:
-                    ets *= ETS.rx(link.alpha)
-                if link.isrevolute():
-                    ets *= ETS.rz()
-                    if link.offset != 0:
-                        ets *= ETS.rz(link.offset)
-                    if link.d != 0:
-                        ets *= ETS.tz(link.d)
-                else:
-                    if link.theta != 0:
-                        ets *= ETS.tz(link.theta)
-                    ets *= ETS.tz()
-                    if link.offset != 0:
-                        ets *= ETS.tz(link.offset)
+            ets *= link.ets()
         return ets
             
     def fkine(self, q=None):
