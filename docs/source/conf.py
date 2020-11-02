@@ -18,7 +18,7 @@ import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
-project = 'Robotics Toolbox Python'
+project = 'Robotics Toolbox for Python'
 copyright = '2020, Jesse Haviland and Peter Corke'
 author = 'Jesse Haviland and Peter Corke'
 
@@ -42,10 +42,6 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx_autorun',
     ]
-    #'recommonmark',
-    #'sphinx.ext.autosummary',
-    #     'sphinx_markdown_tables',  
-
 
 autosummary_generate = True
 autodoc_member_order = 'bysource'
@@ -53,21 +49,29 @@ autodoc_member_order = 'bysource'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['test_*']
 
+# options for spinx_autorun, used for inline examples
+#  choose UTF-8 encoding to allow for Unicode characters, eg. ansitable
+#  Python session setup, turn off color printing for SE3, set NumPy precision
+autorun_languages = {}
+autorun_languages['pycon_output_encoding'] = 'UTF-8'
+autorun_languages['pycon_input_encoding'] = 'UTF-8'
+autorun_languages['pycon_runfirst'] = """
+from spatialmath import SE3
+SE3._color = False
+import numpy as np
+np.set_printoptions(precision=4, suppress=True)
+from ansitable import ANSITable
+ANSITable._color = False
+"""
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-'github_user': 'petercorke',
+    'github_user': 'petercorke',
     #'github_repo': 'spatialmath-python',
     #'logo_name': False,
     'logo_only': False,
@@ -75,10 +79,16 @@ html_theme_options = {
     'display_version': True,
     'prev_next_buttons_location': 'both',
     'analytics_id': 'G-11Q6WJM565',
+    'style_external_links': True,
     }
 html_logo = '../figs/RobToolBox_RoundLogoB.png'
 html_last_updated_fmt = '%d-%b-%Y'
 show_authors = True
+
+# mathjax_config = {
+#     "jax": ["input/TeX","output/HTML-CSS"],
+#     "displayAlign": "left"
+# }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -87,13 +97,18 @@ show_authors = True
 
 # autodoc_mock_imports = ["numpy", "scipy"] 
 
-# extensions = ['rst2pdf.pdfbuilder']
-# pdf_documents = [('index', u'rst2pdf', u'Sample rst2pdf doc', u'Your Name'),]
-autorun_languages = {}
-autorun_languages['pycon_output_encoding'] = 'UTF-8'
-autorun_languages['pycon_initial_code'] = [
-        "from spatialmath import SE3", 
-        "SE3._color = False",
-        "import numpy as np",
-        "np.set_printoptions(precision=4, suppress=True)",
-        ]
+
+# -- Options for LaTeX/PDF output --------------------------------------------
+latex_engine = 'xelatex'
+# maybe need to set graphics path in here somewhere
+# \graphicspath{{figures/}{../figures/}{C:/Users/me/Documents/project/figures/}}
+# https://stackoverflow.com/questions/63452024/how-to-include-image-files-in-sphinx-latex-pdf-files
+latex_elements = {
+    # The paper size ('letterpaper' or 'a4paper').
+    'papersize': 'a4paper',
+    #'releasename':" ",
+    # Sonny, Lenny, Glenn, Conny, Rejne, Bjarne and Bjornstrup
+    # 'fncychap': '\\usepackage[Lenny]{fncychap}',
+    'fncychap': '\\usepackage{fncychap}',
+    'maketitle': "blah blah blah"
+}

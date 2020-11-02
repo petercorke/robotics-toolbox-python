@@ -3,7 +3,11 @@ Denavit-Hartenberg models
 
 .. codeauthor:: Jesse Haviland
 
+This class is used to model robots defined in terms of standard or modified
+Denavit-Hartenberg notation.
 
+.. note:: These classes are similar to MATLAB Toolbox ``SerialLink`` and
+   ``Link`` classes.
 
 DHRobot
 -------

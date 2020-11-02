@@ -18,6 +18,7 @@
 # from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
+from spatialmath import SE3
 
 
 class Puma560(DHRobot):
@@ -78,6 +79,7 @@ class Puma560(DHRobot):
             zero = 0.0
 
         deg = pi / 180
+        inch = 0.0254
 
         # base = 0.672      # from mounting surface to shoulder axis
 
@@ -164,6 +166,7 @@ class Puma560(DHRobot):
                 qlim=[-266*deg, 266*deg]
             )
         ]
+        base = SE3(0, 0, 26.45*inch)  # pedestal
 
         super().__init__(
             L,
@@ -171,7 +174,8 @@ class Puma560(DHRobot):
             manufacturer="Unimation",
             keywords=('dynamics', 'symbolic', 'mesh'),
             symbolic=symbolic,
-            meshdir="meshes/UNIMATE/puma560"
+            meshdir="meshes/UNIMATE/puma560",
+            base=base
         )
 
         # zero angles, L shaped pose
@@ -186,7 +190,7 @@ class Puma560(DHRobot):
         # nominal table top picking pose
         self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
-    def _kine(self, T, config):
+    def _ikine(self, T, config):
         # Puma model with shoulder and elbow offsets
         # - Inverse kinematics for a PUMA 560,
         #   Paul and Zhang,
@@ -257,10 +261,16 @@ class Puma560(DHRobot):
         
         return theta
 
-    def ikine_a(self, T, config):
-        return super.ikine_6s(T, config, _ikine)
+    def ikine_a(self, T, config="lun"):
+        return self.ikine_6s(T, config, self._ikine)
 
 if __name__ == '__main__':    # pragma nocover
 
-    puma = Puma560()
+    puma = Puma560(symbolic=False)
     print(puma)
+    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0,0,1], [1,0,0])
+    (q, failed, reason) = puma.ikine(T)
+    print(failed, q)
+    qq = puma.ikine_a(T)
+    print(qq)
+    print(puma.fkine(qq))

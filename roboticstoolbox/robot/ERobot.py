@@ -51,11 +51,14 @@ class ERobot(Robot):
           J. Haviland and P. Corke
     """
 
+    # TODO do we need tool and base as well?
+    # TODO doco for ee_link, can be a list
+
     def __init__(
             self,
             elinks,
             base_link=None,
-            ee_link=None,
+            ee_links=None,
             **kwargs
             ):
 
@@ -63,23 +66,17 @@ class ERobot(Robot):
         self._ets = []
         self._linkdict = {}
         self._n = 0
-        self._M = 0
-        self._q_idx = []
-
+        # self._M = 0
+        # self._q_idx = []
+        self._ee_links = []
+        self._base_link = None
+        
         if isinstance(elinks, ETS):
             # were passed an ETS string
             ets = elinks
             elinks = []
-            # for j, k in enumerate(ets.joints()):
-            #     if j == 0:
-            #         parent = None
-            #     else:
-            #         parent = elinks[-1]
-            #     print(ets[:k+1])
-            #     elink = ELink(ets[:k+1], parent=parent, name=f"link{j:d}")
-            #     elinks.append(elink)
-            #     ets = ets[k+1:]
 
+            # chop it up into segments, a link frame after every joint
             start = 0
             for j, k in enumerate(ets.joints()):
                 ets_j = ets[start:k+1]
@@ -90,58 +87,126 @@ class ERobot(Robot):
                     parent = elinks[-1]
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
                 elinks.append(elink)
+
+            n = len(ets.joints())
             
             tool = ets[start:]
             if len(tool) > 0:
                 elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
-
-        # Set up a dictionary for looking up links by name
-        for link in elinks:
-            if isinstance(link, ELink):
-                self._M += 1
-                self._linkdict[link.name] = link
-            else:
-                raise TypeError("Input can be only ELink")
-
-        # Set up references between links, a bi-directional linked list
-        # Also find the top of the tree
-        self.end = []
-        for link in elinks:
-            if link.parent is None:
-                self.root = link
-            else:
-                link.parent._child.append(link)
-
-        # Find the bottom of the tree
-        for link in elinks:
-            if len(link.child) == 0:
-                self.end.append(link)
-
-        # If the base link is not defined, use the root of the tree
-        if base_link is None:
-            self._base_link = self.root      # Needs to be private attrib
         else:
-            self._base_link = base_link      # Needs to be private attrib
+            # were passed a list of ELinks
+            
+            # check all the incoming ELink objects
+            n = 0
+            for link in elinks:
+                if isinstance(link, ELink):
+                    self._linkdict[link.name] = link
+                else:
+                    raise TypeError("Input can be only ELink")
+                if link.isjoint:
+                    n += 1
 
-        # If the ee link is not defined, use the bottom of the tree
-        if ee_link is None:
-            self._ee_link = self.end[-1]
+        self._n = n
+
+        # scan for base and ee links
+        ee = []
+        for link in elinks:
+            # is this a base link?
+            if link._parent is None:
+                if self._base_link is not None:
+                    raise ValueError('Multiple base links')
+                self._base_link = link
+            else:
+                # no, update children of this link's parent
+                link._parent._child.append(link)
+
+            # is this a leaf node?
+            if ee_links is None and  len(link.child) == 0:
+                # no children, must be an end-effector
+                ee.append(link)
+
+        if ee_links is not None:
+            # use the passed in value
+            self.ee_links = ee_links
         else:
-            self._ee_link = ee_link
+            # use the leaf links
+            self.ee_links = ee
 
-        def add_links(link, lst, q_idx):
+        # assign the joint indices
+        if all([link.jindex is None for link in elinks]):
+            # no jindex set, assign them
+            # if len(self.ee_links) > 1:
+            #     raise ValueError('for a robot with multiple end-effectors must assign joint indices')
+            # maybe do the DFS in where somewhere
 
-            if link.isjoint:
-                q_idx.append(len(lst))
+            jindex = [0]  # "mutable integer" hack
+            def visit_link(link, jindex):
+                # if it's a joint, assign it a jindex and increment it
+                if link.isjoint:
+                    link.jindex = jindex[0]
+                    jindex[0] += 1
 
-            lst.append(link)
+            # visit all links in BFS order
+            self.bfs_link(self.base_link, lambda link: visit_link(link, jindex))
+            #self._n = len(self._q_idx)
+
+            self._reset_fk_path()
+
+        elif all([link.jindex is not None for link in elinks]):
+            # jindex set on all, check they are unique and sequential
+            jset = set(range(n))
+            for link in elinks:
+                if link.jindex not in jset:
+                    raise ValueError('joint index {link.jindex} was repeated or out of range')
+                jset -= set(link.jindex)
+            if len(jset) > 0:
+                raise ValueError('joints {jset} were not assigned')
+        else:
+            # must be a mixture of ELinks with/without jindex
+            raise ValueError('all links must have a jindex, or none have a jindex')
+
+
+        # # Set up references between links, a bi-directional linked list
+        # # Also find the top of the tree
+        # self.end = []
+        # for link in elinks:
+        #     if link.parent is None:
+        #         self.root = link
+        #     else:
+        #         link.parent._child.append(link)
+
+        # # Find the bottom of the tree
+        # for link in elinks:
+        #     if len(link.child) == 0:
+        #         self.end.append(link)
+
+        # # If the base link is not defined, use the root of the tree
+        # if base_link is None:
+        #     self._base_link = self.root      # Needs to be private attrib
+        # else:
+        #     self._base_link = base_link      # Needs to be private attrib
+
+        # # If the ee link is not defined, use the bottom of the tree
+        # if ee_link is None:
+        #     self._ee_link = self.end[-1]
+        # else:
+        #     self._ee_link = [ee_link]
+
+        # scan for the base and ee links
+        # assign joint variables
+        # def add_links(link, lst, q_idx):
+
+        #     if link.isjoint:
+        #         q_idx.append(len(lst))
+
+        #     lst.append(link)
 
         # Figure out the order of links with respect to joint variables
-        self.bfs_link(
-            lambda link: add_links(link, self._ets, self._q_idx))
-        self._n = len(self._q_idx)
+        # self.bfs_link(
+        #     lambda link: add_links(link, self._ets, self._q_idx))
+        # self._n = len(self._q_idx)
 
-        self._reset_fk_path()
+        # self._reset_fk_path()
 
         # Current joint angles of the robot
         # TODO should go to Robot class?
@@ -155,7 +220,7 @@ class ERobot(Robot):
 
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path
-        self._fkpath = self.dfs_path(self.base_link, self.ee_link)
+        self._fkpath = self.dfs_path(self.base_link, self.ee_links)
 
     # def bfs_link(self, func):
     #     queue = self.root
@@ -173,8 +238,14 @@ class ERobot(Robot):
     #         link = queue.pop(0)
     #         vis_children(link)
 
-    def bfs_link(self, func):
-        visited = [self.root]
+    def bfs_link(self, start, func):
+        """
+        Visit each link in BFS order
+
+        :param func: [description]
+        :type func: [type]
+        """
+        visited = [start]
 
         def vis_children(link):
             visited.append(link)
@@ -184,7 +255,7 @@ class ERobot(Robot):
                 if li not in visited:
                     vis_children(li)
 
-        vis_children(self.root)
+        vis_children(start)
 
     def dfs_path(self, l1, l2):
         path = []
@@ -303,8 +374,8 @@ class ERobot(Robot):
                 tld = base_path / PurePosixPath(tld)
             urdf_string = xacro.main(file_path, tld)
             urdf = URDF.loadstr(urdf_string, file_path)
-
-            ## QUERY: what happens if not a .xacro file, urdf is not set?
+        else:
+            urdf = URDF.loadstr(open(file_path).read(), file_path)
 
         return urdf.elinks, urdf.name
 
@@ -394,7 +465,8 @@ class ERobot(Robot):
 
     @property
     def elinks(self):
-        return self._linkdict
+        # return self._linkdict
+        return self._links
 # --------------------------------------------------------------------- #
 
     @property
@@ -406,36 +478,73 @@ class ERobot(Robot):
         if isinstance(link, ELink):
             self._base_link = link
         else:
-            self._base_link = self.ets[link]
+            # self._base_link = self.ets[link]
+            raise ValueError('must be an ELink')
         self._reset_fk_path()
 # --------------------------------------------------------------------- #
 
     @property
-    def ee_link(self):
-        return self._ee_link
+    def ee_links(self):
+        return self._ee_links
 
-    @ee_link.setter
-    def ee_link(self, link):
+    # def add_ee(self, link):
+    #     if isinstance(link, ELink):
+    #         self._ee_link.append(link)
+    #     else:
+    #         raise ValueError('must be an ELink')
+    #     self._reset_fk_path()
+
+    @ee_links.setter
+    def ee_links(self, link):
         if isinstance(link, ELink):
-            self._ee_link = link
+            self._ee_links = [link]
+        elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
+            self._ee_links = link
         else:
-            self._ee_link = self.ets[link]
+            raise ValueError('expecting an ELink or list of ELinks')
         self._reset_fk_path()
 # --------------------------------------------------------------------- #
 
-    @property
-    def ets(self):
-        return self._ets
+    # @property
+    # def ets(self):
+    #     return self._ets
 # --------------------------------------------------------------------- #
 
-    @property
-    def M(self):
-        return self._M
+
+    # @property
+    # def M(self):
+    #     return self._M
 # --------------------------------------------------------------------- #
 
-    @property
-    def q_idx(self):
-        return self._q_idx
+    # @property
+    # def q_idx(self):
+    #     return self._q_idx
+# --------------------------------------------------------------------- #
+
+    # TODO would prefer this was called ets, but that name taken for
+    # a property earlier
+    def ets(self, ee=None):
+        if ee is None:
+            if len(self.ee_links) == 1:
+                link = self.ee_links[0]
+            else:
+                raise ValueError('robot has multiple end-effectors, specify one')
+        elif isinstance(ee, str) and ee in self._linkdict:
+            ee = self._linkdict[ee]
+        elif isinstance(ee, ELink) and ee in self._links:
+            link = ee
+        else:
+            raise ValueError('end-effector is not valid')
+
+        ets = ETS()
+        
+        # build the ETS string from ee back to root
+        while link is not None:
+            ets = link.ets() * ets
+            link = link.parent
+
+        return ets
+
 # --------------------------------------------------------------------- #
 
     def fkine(self, q=None):
@@ -967,22 +1076,54 @@ class ERobot(Robot):
 
         :return: Pretty print of the robot model
         :rtype: str
+
+        Constant links are shown in blue.
+        End-effector links are prefixed with an @
         """
         table = ANSITable(
-            Column("link"),
-            Column("parent"),
-            Column("ETS", headalign="^", colalign="<"),
-            border="thin")
-        for link in self:
-            if link.isjoint:
-                color = ""
-            else:
-                color = "<<blue>>"
-            table.row(color + link.name, 
+            Column("id", headalign="^"),
+            Column("link", headalign="^"),
+            Column("parent", headalign="^"),
+            Column("joint", headalign="^"),
+            Column("ETS", headalign="^", colalign=">"),
+            border="thin", color=self._color)
+        for k, link in enumerate(self):
+            color = "" if link.isjoint else "<<blue>>"
+            ee = "@" if link in self.ee_links else ""
+            ets = link.ets()
+            table.row(k,
+                color + ee + link.name, 
                 link.parent.name if link.parent is not None else "-", 
-                link.ets * link.v if link.v is not None else link.ets)
+                link._joint_name if link.parent is not None else "", 
+                ets.__str__(f"q{link._jindex}"))
         return str(table)
  
+    def hierarchy(self):
+        """
+        Pretty print the robot link hierachy
+
+        :return: Pretty print of the robot model
+        :rtype: str
+
+        Example:
+
+        .. runblock:: pycon
+
+            import roboticstoolbox as rtb 
+            robot = rtb.models.URDF.Panda()
+            robot.hierarchy()
+
+        """
+        link = self.base_link
+
+        def recurse(link, indent=0):
+            print(' ' * indent * 2, link.name)
+            for child in link.child:
+                recurse(child, indent+1)
+
+        recurse(self.base_link)
+        
+
 
     def jacobev(
             self, q=None, from_link=None, to_link=None,
@@ -1644,3 +1785,28 @@ class ERobot(Robot):
     #     return _plot_ellipse(
     #         fellipse, block, limits,
     #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+
+if __name__ == "__main__":
+
+    import roboticstoolbox as rtb
+    np.set_printoptions(precision=4, suppress=True)
+
+    robot = rtb.models.ETS.Panda()
+    print(robot)
+    print(robot.base, robot.tool)
+    print(robot.q_idx)
+    print(robot.ee_link)
+    ets = robot.ets()
+    print(ets)
+    print('n', ets.n)
+    ets2 = ets.compile()
+    print(ets2)
+
+    q = np.random.rand(7)
+    # print(ets.eval(q))
+    # print(ets2.eval(q))
+
+    J1 = robot.jacob0(q)
+    J2 = ets2.jacob0(q)
+    print(J1-J2)

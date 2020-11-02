@@ -40,8 +40,6 @@ class Link(ABC):
     :param name: name of the link
     :type name: str
 
-    :param offset: kinematic - joint variable offset
-    :type offset: float
     :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
@@ -89,7 +87,6 @@ class Link(ABC):
     def __init__(
             self,
             name='',
-            offset=0.0,
             qlim=None,
             flip=False,
             m=0.0,
@@ -109,7 +106,6 @@ class Link(ABC):
         self._name = name
 
         # Joint angle parameters
-        self.offset = offset
         self.flip = flip
         self.qlim = qlim
 
@@ -208,53 +204,45 @@ class Link(ABC):
 
         return s
 
-    def dyntable(self, fmt="{:.3g}", indent=0):
+    def _dyn2list(self, fmt="{: .3g}"):
         """
         Inertial properties of link as a string
 
         :param fmt: conversion format for each number
         :type fmt: str
-        :param indent: indent each line by this many spaces
-        :type indent: int
         :return: The string representation of the link dynamics
         :rtype: string
 
-        ``link.dyntable()`` pretty-prints the inertial properties of the link
-        object in a table using Unicode characters. The properties shown are
-        mass, centre of mass, inertia, friction, gear ratio and motor
-        properties.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.links[2].dyntable()
+        ``link.)_dyn2list()`` returns a list of pretty-printed inertial
+        properties of the link The properties included are mass, centre of mass,
+        inertia, friction, gear ratio and motor properties.
 
         :seealso: :func:`~dyn`
         """
         table = ANSITable(
             Column("Parameter", headalign="^"),
             Column("Value", headalign="^", colalign="<")
-        , border="thin", offset=indent)
+        , border="thin")
 
-        def format(fmt, val):
+        def format(l, fmt, val):
             if isinstance(val, np.ndarray):
                 s = ', '.join([fmt.format(v) for v in val])
             else:
                 s = fmt.format(val)
-            return s
+            l.append(s)
 
-        table.row("m", format(fmt, self.m))
-        table.row("r", format(fmt, self.r))
+        dyn = []
+        format(dyn, fmt, self.m)
+        format(dyn, fmt, self.r)
         I = self.I.flatten()
-        table.row("I", format(fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 2, 5]]]))
-        table.row("Jm", format(fmt, self.Jm))
-        table.row("B", format(fmt, self.B))
-        table.row("Tc", format(fmt, self.Tc))
-        table.row("G", format(fmt, self.G))
-        table.print()
+        format(dyn, fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 2, 5]]])
+        format(dyn, fmt, self.Jm)
+        format(dyn, fmt, self.B)
+        format(dyn, fmt, self.Tc)
+        format(dyn, fmt, self.G)
+        
+        return dyn
+        
 
     def _format(self, l, name, ignorevalue=0, indices=None):
         v = getattr(self, name)
@@ -276,7 +264,6 @@ class Link(ABC):
         l = []
         self._format(l, "name")
         self._format(l, "flip", False)
-        self._format(l, "offset")
         self._format(l, "qlim")
         self._format(l, "m")
         self._format(l, "r")
@@ -415,29 +402,6 @@ class Link(ABC):
     def name(self, name):
         self._name = name
 
-# -------------------------------------------------------------------------- #
-    @property
-    def offset(self):
-        """
-        Get/set joint variable offset
-
-        - ``link.offset`` is the joint variable offset
-
-        :return: joint variable offset
-        :rtype: float
-
-        - ``link.offset = ...`` checks and sets the joint variable offset
-
-        The offset is added to the joint angle before forward kinematics, and
-        subtracted after inverse kinematics.  It is used to define the joint
-        configuration for zero joint coordinates.
-
-        """
-        return self._offset
-
-    @offset.setter
-    def offset(self, offset_new):
-        self._offset = offset_new
 
 # -------------------------------------------------------------------------- #
 

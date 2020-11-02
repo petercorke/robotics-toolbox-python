@@ -5,7 +5,7 @@
 """
 
 import numpy as np
-import roboticstoolbox as rp
+import roboticstoolbox as rtb
 import copy
 import os
 import xml.etree.ElementTree as ET
@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .utils import (parse_origin, configure_origin)
 
-abspath = Path(rp.__file__).parent / 'models' / 'xacro'
+abspath = Path(rtb.__file__).parent / 'models' / 'xacro'
 
 
 class URDFType(object):
@@ -357,19 +357,19 @@ class Geometry(URDFType):
 
         if box is not None:
             self.box = box
-            self.ob = rp.Box(box.size)
+            self.ob = rtb.Box(box.size)
 
         if cylinder is not None:
             self.cylinder = cylinder
-            self.ob = rp.Cylinder(cylinder.radius, cylinder.length)
+            self.ob = rtb.Cylinder(cylinder.radius, cylinder.length)
 
         if sphere is not None:
             self.sphere = sphere
-            self.ob = rp.Sphere(sphere.radius)
+            self.ob = rtb.Sphere(sphere.radius)
 
         if mesh is not None:
             self.mesh = mesh
-            self.ob = rp.Mesh(mesh.filename, scale=mesh.scale)
+            self.ob = rtb.Mesh(mesh.filename, scale=mesh.scale)
 
     @property
     def box(self):
@@ -1607,6 +1607,14 @@ class URDF(URDFType):
         # if materials is None:
         #     materials = []
 
+        # TODO, what does this next line do?
+        # why arent the other things validated
+        try:
+            self._validate_transmissions()
+        except:
+            pass
+
+
         self.name = name
         self.other_xml = other_xml
 
@@ -1616,166 +1624,248 @@ class URDF(URDFType):
         self._transmissions = list(transmissions)
         # self._materials = list(materials)
 
-        # Set up private helper maps from name to value
-        self._link_map = {}
-        self._joint_map = {}
-        self._transmission_map = {}
-        # self._material_map = {}
+        # check for duplicate names 
 
-        for x in self._links:
-            if x.name in self._link_map:   # pragma nocover
-                raise ValueError(
-                  'Two links with name {} found'.format(x.name))
-            self._link_map[x.name] = x
-
-        for x in self._joints:
-            if x.name in self._joint_map:   # pragma nocover
-                raise ValueError('Two joints with name {} '
-                                 'found'.format(x.name))
-            self._joint_map[x.name] = x
-
-        for x in self._transmissions:
-            if x.name in self._transmission_map:   # pragma nocover
-                raise ValueError('Two transmissions with name {} '
-                                 'found'.format(x.name))
-            self._transmission_map[x.name] = x
+        if len(self._links) > len(set([x.name for x in self._links])):
+            raise ValueError('Duplicate link names')
+        if len(self._joints) > len(set([x.name for x in self._joints])):
+            raise ValueError('Duplicate joint names')
+        if len(self._transmissions) > len(set([x.name for x in self._transmissions])):
+            raise ValueError('Duplicate transmission names')           
 
         elinks = []
-        elinks_dict = {}
+        elinkdict = {}
+        jointdict = {}
 
-        for j in self.joints:
+        ## build the list of links in URDF file order
+        for link in self._links:
+            elink = rtb.ELink(name=link.name)
+            elinks.append(elink)
+            elinkdict[link.name] = elink
 
-            ets = rp.ETS()
-            T = sm.SE3(j.origin)
-            trans = T.t
-            rot = j.rpy
-            v = None
+            # add the inertial parameters
+            elink.r = link.inertial.origin[:3, 3]
+            elink.m = link.inertial.mass
+            elink.inertia = link.inertial.inertia
 
-            if trans[0] != 0:
-                ets = ets * rp.ETS.tx(trans[0])
-
-            if trans[1] != 0:
-                ets = ets * rp.ETS.ty(trans[1])
-
-            if trans[2] != 0:
-                ets = ets * rp.ETS.tz(trans[2])
-
-            if rot[0] != 0:
-                ets = ets * rp.ETS.rx(rot[0])
-
-            if rot[1] != 0:
-                ets = ets * rp.ETS.ry(rot[1])
-
-            if rot[2] != 0:
-                ets = ets * rp.ETS.rz(rot[2])
-
-            if j.joint_type == 'revolute' or \
-               j.joint_type == 'continuous':   # pragma nocover
-                if j.axis[0] == 1:
-                    v = rp.ETS.rx()
-                elif j.axis[0] == -1:
-                    ets = ets * rp.ETS.ry(np.pi)
-                    v = rp.ETS.rx()
-                elif j.axis[1] == 1:
-                    v = rp.ETS.ry()
-                elif j.axis[1] == -1:
-                    ets = ets * rp.ETS.rz(np.pi)
-                    v = rp.ETS.ry()
-                elif j.axis[2] == 1:
-                    v = rp.ETS.rz()
-                elif j.axis[2] == -1:
-                    ets = ets * rp.ETS.rx(np.pi)
-                    v = rp.ETS.rz()
-            elif j.joint_type == 'prismatic':   # pragma nocover
-                if j.axis[0] == 1:
-                    v = rp.ETS.tx()
-                elif j.axis[0] == -1:
-                    ets = ets * rp.ETS.ry(np.pi)
-                    v = rp.ETS.tx()
-                elif j.axis[1] == 1:
-                    v = rp.ETS.ty()
-                elif j.axis[1] == -1:
-                    ets = ets * rp.ETS.rz(np.pi)
-                    v = rp.ETS.ty()
-                elif j.axis[2] == 1:
-                    v = rp.ETS.tz()
-                elif j.axis[2] == -1:
-                    ets = ets * rp.ETS.rx(np.pi)
-                    v = rp.ETS.tz()
-
+            # add the visuals to visual list
             try:
-                qlim = [j.limit.lower, j.limit.upper]
+                elink.geometry = [v.geometry.ob for v in link.visuals]
+            except AttributeError:   # pragma nocover
+                pass
+
+            #  add collision objects to collision object list
+            try:
+                elink.collision = [col.geometry.ob for col in link.collisions]
+            except AttributeError:   # pragma nocover
+                pass
+
+        ## connect the links using joint info
+        for joint in self._joints:
+            # get references to joint's parent and child
+            childlink = elinkdict[joint.child]
+            parentlink = elinkdict[joint.parent]
+
+            childlink._parent = parentlink  # connect child link to parent
+            childlink._joint_name = joint.name
+
+            # constant part of link transform
+            trans = sm.SE3(joint.origin).t
+            # TODO, find where reverse is used and change it to [::-1] or do that here
+            rot = joint.rpy[::-1]
+            childlink._ets = rtb.ETS.SE3(trans, rot)
+
+            # variable part of link transform
+            if joint.joint_type in ('revolute', 'continuous'):   # pragma nocover
+                if joint.axis[0] == 1:
+                    var = rtb.ETS.rx()
+                elif joint.axis[0] == -1:
+                    var = rtb.ETS.rx(flip=True)
+                elif joint.axis[1] == 1:
+                    var = rtb.ETS.ry()
+                elif joint.axis[1] == -1:
+                    var = rtb.ETS.ry(flip=True)
+                elif joint.axis[2] == 1:
+                    var = rtb.ETS.rz()
+                elif joint.axis[2] == -1:
+                    var = rtb.ETS.rz(flip=True)
+            elif joint.joint_type == 'prismatic':   # pragma nocover
+                if joint.axis[0] == 1:
+                    var = rtb.ETS.tx()
+                elif joint.axis[0] == -1:
+                    var = rtb.ETS.tx(flip=True)
+                elif joint.axis[1] == 1:
+                    var = rtb.ETS.ty()
+                elif joint.axis[1] == -1:
+                    var = rtb.ETS.ty(flip=True)
+                elif joint.axis[2] == 1:
+                    var = rtb.ETS.tz()
+                elif joint.axis[2] == -1:
+                    var = rtb.ETS.tz(flip=True)
+            elif joint.joint_type == 'fixed':
+                var = None
+
+            childlink._v = var
+
+            # joint limit
+            try:
+                qlim = [joint.limit.lower, joint.limit.upper]
             except AttributeError:
-                qlim = [0, 0]
+                # no joint limits provided
+                qlim = None
 
-            elinks.append(
-                rp.ELink(
-                    ets,
-                    v,
-                    name=j.name,
-                    qlim=qlim
-                )
-            )
-            elinks_dict[elinks[-1].name] = elinks[-1]
-
-        for i in range(len(elinks)):
-            found = False
-            for j in range(len(elinks)):
-                if i != j:
-                    if self.joints[i].parent == self.joints[j].child:
-                        elinks[i]._parent = elinks[j]
-                        found = True
-
-            if not found:
-                link = self._link_map[self.joints[i].parent]
-                base_link = rp.ELink(
-                        rp.ETS(),
-                        name=link.name)
-                elinks[i]._parent = base_link
-                try:
-                    for visual in link.visuals:
-                        base_link.geometry.append(visual.geometry.ob)
-                except AttributeError:   # pragma nocover
-                    pass
-
-        elinks.append(base_link)
-        self.elinks = elinks
-
-        # Store the visuals, collisions, and inertials
-        for i in range(len(joints)):
-            link = self._link_map[joints[i].child]
-            elinks[i].r = link.inertial.origin[:3, 3]
-            elinks[i].m = link.inertial.mass
-            elinks[i].inertia = link.inertial.inertia
-
+            # joint friction
             try:
-                if self.joints[i].dynamics.friction is not None:
-                    elinks[i].B = self.joints[i].dynamics.friction
+                if joint.dynamics.friction is not None:
+                    childlink.B = joint.dynamics.friction
 
                 # TODO Add damping
-                self.joints[i].dynamics.damping
+                joint.dynamics.damping
             except AttributeError:
                 pass
 
-            try:
-                for visual in link.visuals:
-                    elinks[i].geometry.append(visual.geometry.ob)
-            except AttributeError:   # pragma nocover
-                pass
+            # joint gear ratio
+            # TODO, not sure if t.joint.name is a thing
+            for t in self.transmissions:
+                if t.name == joint.name:
+                    childlink.G = t.actuators[0].mechanicalReduction
 
-            try:
-                colls = []
-                for col in link.collisions:
-                    colls.append(col.geometry.ob)
-                elinks[i].collision = colls
-            except AttributeError:   # pragma nocover
-                pass
+            self.elinks = elinks
 
-        # Apply gear ratio
-        self._validate_transmissions()
-        for t in self.transmissions:
-            elinks_dict[self.joint_map[t.joints[0].name].name].G = \
-                t.actuators[0].mechanicalReduction
+            # TODO, why did you put the base_link on the end?
+            # easy to do it here
+
+        # for i in range(len(elinks)):
+        #     found = False
+        #     for joint in range(len(elinks)):
+        #         if i != joint:
+        #             if self.joints[i].parent == self.joints[joint].child:
+        #                 elinks[i]._parent = elinks[joint]
+        #                 found = True
+
+        #     if not found:
+        #         link = self._link_map[self.joints[i].parent]
+        #         base_link = rtb.ELink(
+        #                 rtb.ETS(),
+        #                 name=link.name)
+        #         elinks[i]._parent = base_link
+        #         try:
+        #             for visual in link.visuals:
+        #                 base_link.geometry.append(visual.geometry.ob)
+        #         except AttributeError:   # pragma nocover
+        #             pass
+
+        # for joint in self.joints:
+        #     # each joint has a reference to a parent and child link
+
+        #     ets = rtb.ETS()
+        #     T = sm.SE3(joint.origin)
+        #     trans = T.t
+        #     rot = joint.rpy
+        #     var = None
+
+        #     ets = ETS.SE3(trans, rot)
+        #     # if trans[0] != 0:
+        #     #     ets = ets * rtb.ETS.tx(trans[0])
+
+        #     # if trans[1] != 0:
+        #     #     ets = ets * rtb.ETS.ty(trans[1])
+
+        #     # if trans[2] != 0:
+        #     #     ets = ets * rtb.ETS.tz(trans[2])
+
+        #     # if rot[0] != 0:
+        #     #     ets = ets * rtb.ETS.rx(rot[0])
+
+        #     # if rot[1] != 0:
+        #     #     ets = ets * rtb.ETS.ry(rot[1])
+
+        #     # if rot[2] != 0:
+        #     #     ets = ets * rtb.ETS.rz(rot[2])
+
+        #     if joint.joint_type == 'revolute' or \
+        #        joint.joint_type == 'continuous':   # pragma nocover
+        #         if joint.axis[0] == 1:
+        #             var = rtb.ETS.rx()
+        #         elif joint.axis[0] == -1:
+        #             var = rtb.ETS.rx(flip=True)
+        #         elif joint.axis[1] == 1:
+        #             var = rtb.ETS.ry()
+        #         elif joint.axis[1] == -1:
+        #             var = rtb.ETS.ry(flip=True)
+        #         elif joint.axis[2] == 1:
+        #             var = rtb.ETS.rz()
+        #         elif joint.axis[2] == -1:
+        #             var = rtb.ETS.rz(flip=True)
+        #     elif joint.joint_type == 'prismatic':   # pragma nocover
+        #         if joint.axis[0] == 1:
+        #             var = rtb.ETS.tx()
+        #         elif joint.axis[0] == -1:
+        #             var = rtb.ETS.tx(flip=True)
+        #         elif joint.axis[1] == 1:
+        #             var = rtb.ETS.ty()
+        #         elif joint.axis[1] == -1:
+        #             var = rtb.ETS.ty(flip=True)
+        #         elif joint.axis[2] == 1:
+        #             var = rtb.ETS.tz()
+        #         elif joint.axis[2] == -1:
+        #             var = rtb.ETS.tz(flip=True)
+
+        #     try:
+        #         qlim = [joint.limit.lower, joint.limit.upper]
+        #     except AttributeError:
+        #         qlim = [0, 0]
+
+        #     elinks.append(
+        #         rtb.ELink(
+        #             ets,
+        #             var,
+        #             name=joint.name,
+        #             qlim=qlim
+        #         )
+        #     )
+        #     elinks_dict[elinks[-1].name] = elinks[-1]
+
+
+
+        # elinks.append(base_link)
+        # self.elinks = elinks
+
+        # Store the visuals, collisions, and inertials
+        # for i in range(len(joints)):
+        #     link = self._link_map[joints[i].child]
+        #     elinks[i].r = link.inertial.origin[:3, 3]
+        #     elinks[i].m = link.inertial.mass
+        #     elinks[i].inertia = link.inertial.inertia
+
+        #     try:
+        #         if self.joints[i].dynamics.friction is not None:
+        #             elinks[i].B = self.joints[i].dynamics.friction
+
+        #         # TODO Add damping
+        #         self.joints[i].dynamics.damping
+        #     except AttributeError:
+        #         pass
+
+        #     try:
+        #         for visual in link.visuals:
+        #             elinks[i].geometry.append(visual.geometry.ob)
+        #     except AttributeError:   # pragma nocover
+        #         pass
+
+        #     try:
+        #         colls = []
+        #         for col in link.collisions:
+        #             colls.append(col.geometry.ob)
+        #         elinks[i].collision = colls
+        #     except AttributeError:   # pragma nocover
+        #         pass
+
+        # # Apply gear ratio
+        # self._validate_transmissions()
+        # for t in self.transmissions:
+        #     elinks_dict[self.joint_map[t.joints[0].name].name].G = \
+        #         t.actuators[0].mechanicalReduction
 
     @property
     def name(self):

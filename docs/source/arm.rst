@@ -7,7 +7,7 @@ Manipulator arms
 
    arm_dh
    arm_ets
-   arm_urdf
+   arm_erobot
    arm_superclass
    arm_backend
    arm_trajectory

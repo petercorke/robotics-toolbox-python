@@ -8,6 +8,7 @@ import numpy as np
 from spatialmath import SE3
 import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link, _listen_dyn
+from roboticstoolbox.robot.ETS import ETS
 
 _eps = np.finfo(np.float64).eps
 
@@ -94,6 +95,7 @@ class DHLink(Link):
             a=0.0,
             sigma=0,
             mdh=False,
+            offset=0,
             **kwargs):
 
         # TODO
@@ -109,6 +111,7 @@ class DHLink(Link):
         self.alpha = alpha
         self.a = a
         self.mdh = mdh
+        self.offset = offset
         self.id = None
 
 
@@ -142,13 +145,17 @@ class DHLink(Link):
             offset = ""
         else:
             offset = f" + {self.offset}"
+        if self.id is None:
+            qvar = "q"
+        else:
+            qvar = f"q{self.id}"
+        cls = self.__class__.__name__
         if self.isrevolute():
-            s = f"Revolute:   theta=q{self.id}{offset},  d={self.d}, " \
+            s = f"{cls}:   theta={qvar}{offset},  d={self.d}, " \
                 f"a={self.a}, alpha={self.alpha}"
         else:
-            s = "Prismatic:  theta={: .2f},  d=q{} +{: .2f},  a={: .2f},  " \
-                "alpha={: .2f}".format(
-                    self.theta, self.id, self.offset, self.a, self.alpha, )
+            s = f"{cls}:  theta={self.theta},  d={qvar}{offset},  a={self.a},  " \
+                f"alpha={self.alpha}"
         return s
 
     def __repr__(self):
@@ -163,32 +170,7 @@ class DHLink(Link):
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 
-
-    @property
-    def d(self):
-        """
-        Get/set link offset
-
-        - ``link.d`` is the link offset
-            :return: link offset
-            :rtype: float
-        - ``link.d = ...`` checks and sets the link offset
-
-        """
-        return self._d
-
-    @property
-    def alpha(self):
-        """
-        Get/set link twist
-
-        - ``link.d`` is the link twist
-            :return: link twist
-            :rtype: float
-        - ``link.d = ...`` checks and sets the link twist
-
-        """
-        return self._alpha
+# -------------------------------------------------------------------------- #
 
     @property
     def theta(self):
@@ -203,6 +185,39 @@ class DHLink(Link):
         """
         return self._theta
 
+    @theta.setter
+    @_listen_dyn
+    def theta(self, theta_new):
+        if not self.sigma and theta_new != 0.0:
+            raise ValueError("theta is not valid for revolute joints")
+        else:
+            self._theta = theta_new
+
+# -------------------------------------------------------------------------- #
+
+    @property
+    def d(self):
+        """
+        Get/set link offset
+
+        - ``link.d`` is the link offset
+            :return: link offset
+            :rtype: float
+        - ``link.d = ...`` checks and sets the link offset
+
+        """
+        return self._d
+
+    @d.setter
+    @_listen_dyn
+    def d(self, d_new):
+        if self.sigma and d_new != 0.0:
+            raise ValueError("f is not valid for prismatic joints")
+        else:
+            self._d = d_new
+
+# -------------------------------------------------------------------------- #
+
     @property
     def a(self):
         """
@@ -215,6 +230,32 @@ class DHLink(Link):
 
         """
         return self._a
+
+    @a.setter
+    @_listen_dyn
+    def a(self, a_new):
+        self._a = a_new
+# -------------------------------------------------------------------------- #
+
+    @property
+    def alpha(self):
+        """
+        Get/set link twist
+
+        - ``link.d`` is the link twist
+            :return: link twist
+            :rtype: float
+        - ``link.d = ...`` checks and sets the link twist
+
+        """
+        return self._alpha
+
+    @alpha.setter
+    @_listen_dyn
+    def alpha(self, alpha_new):
+        self._alpha = alpha_new
+
+# -------------------------------------------------------------------------- #
 
     @property
     def sigma(self):
@@ -232,6 +273,12 @@ class DHLink(Link):
         """
         return self._sigma
 
+    @sigma.setter
+    @_listen_dyn
+    def sigma(self, sigma_new):
+        self._sigma = sigma_new
+# -------------------------------------------------------------------------- #
+
     @property
     def mdh(self):
         """
@@ -248,41 +295,37 @@ class DHLink(Link):
         """
         return self._mdh
 
-    @d.setter
-    @_listen_dyn
-    def d(self, d_new):
-        if self.sigma and d_new != 0.0:
-            raise ValueError("f is not valid for prismatic joints")
-        else:
-            self._d = d_new
-
-    @alpha.setter
-    @_listen_dyn
-    def alpha(self, alpha_new):
-        self._alpha = alpha_new
-
-    @theta.setter
-    @_listen_dyn
-    def theta(self, theta_new):
-        if not self.sigma and theta_new != 0.0:
-            raise ValueError("theta is not valid for revolute joints")
-        else:
-            self._theta = theta_new
-
-    @a.setter
-    @_listen_dyn
-    def a(self, a_new):
-        self._a = a_new
-
-    @sigma.setter
-    @_listen_dyn
-    def sigma(self, sigma_new):
-        self._sigma = sigma_new
-
     @mdh.setter
     @_listen_dyn
     def mdh(self, mdh_new):
         self._mdh = int(mdh_new)
+
+# -------------------------------------------------------------------------- #
+
+    @property
+    def offset(self):
+        """
+        Get/set joint variable offset
+
+        - ``link.offset`` is the joint variable offset
+
+        :return: joint variable offset
+        :rtype: float
+
+        - ``link.offset = ...`` checks and sets the joint variable offset
+
+        The offset is added to the joint angle before forward kinematics, and
+        subtracted after inverse kinematics.  It is used to define the joint
+        configuration for zero joint coordinates.
+
+        """
+        return self._offset
+
+    @offset.setter
+    def offset(self, offset_new):
+        self._offset = offset_new
+
+# -------------------------------------------------------------------------- #
 
     def A(self, q):
         r"""
@@ -392,6 +435,54 @@ class DHLink(Link):
         else:
             return False
 
+    def ets(self):
+        ets = ETS()
+
+        if self.mdh:
+            # MDH format: a alpha theta d
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
+
+            if self.isrevolute():
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
+                ets *= ETS.rz(flip=self.flip)  # joint
+
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.rz(self.theta)
+
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+                ets *= ETS.tz(flip=self.flip)  # joint
+
+        else:
+            # DH format: theta d a alpha
+
+            if self.isrevolute():
+                ets *= ETS.rz(flip=self.flip)
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
+
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.rz(self.theta)
+                    
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+                ets *= ETS.tz(flip=self.flip)
+
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
+        return ets
 
 # -------------------------------------------------------------------------- #
 class RevoluteDH(DHLink):

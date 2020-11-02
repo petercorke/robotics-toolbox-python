@@ -33,7 +33,7 @@ dev_req = [
 docs_req = [
     'sphinx',
     'sphinx_rtd_theme',
-    'sphinx_markdown_tables'
+    'sphinx-autorun',
 ]
 
 # Get the long description from the README file

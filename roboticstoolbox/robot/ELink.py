@@ -80,6 +80,8 @@ class ELink(Link):
 
         self._parent = parent
         self._child = []
+        self._joint_name = None
+        self._jindex = None
 
         # Number of transforms in the ETS excluding the joint variable
         self._M = len(self._ets)
@@ -116,7 +118,7 @@ class ELink(Link):
 
     def __repr__(self):
         name = self.__class__.__name__
-        s = "ets=" + str(self.ets)
+        s = "ets=" + str(self.ets())
         if self.parent is not None:
             s += ", parent=" + str(self.parent.name)
         args = [s] + super()._params()
@@ -129,11 +131,12 @@ class ELink(Link):
         :return: Pretty print of the robot link
         :rtype: str
         """
+        name = self.__class__.__name__
         if self.parent is None:
             parent = ""
         else:
             parent = f" [{self.parent.name}]"
-        return f"{self.name}{parent}: {self.ets}"
+        return f"name[{self.name}({parent}): {self.ets()}] "
 
     @property
     def v(self):
@@ -153,11 +156,19 @@ class ELink(Link):
 
     @property
     def isjoint(self):
-        return self._joint
+        return self._v is not None
 
     @property
-    def ets(self):
-        return self._ets
+    def jindex(self):
+        return self._jindex
+
+    @jindex.setter
+    def jindex(self, j):
+        self._jindex = j
+
+    # @property
+    # def ets(self):
+    #     return self._ets
 
     # @property
     # def parent_name(self):
@@ -266,6 +277,12 @@ class ELink(Link):
                 return self.Ts.A
             else:
                 return self.Ts
+
+    def ets(self):
+        if self.v is None:
+            return self._ets
+        else:
+            return self._ets * self.v 
 
 
     def closest_point(self, shape, inf_dist=1.0):
