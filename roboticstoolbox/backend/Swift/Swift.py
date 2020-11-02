@@ -16,9 +16,17 @@ class Swift(Connector):  # pragma nocover
     """
     Graphical backend using Swift
 
-    Swift is an Electron app built on three.js. It supports many 3D graphical
+    Swift is a web app built on three.js. It supports many 3D graphical
     primitives including meshes, boxes, ellipsoids and lines. It can render
     Collada objects in full color.
+
+    :param realtime: Force the simulator to display no faster than real time,
+        note that it may still run slower due to complexity
+    :type realtime: bool
+    :param display: Do not launch the graphical front-end of the simulator.
+        Will still simulate the robot. Runs faster due to not needing to
+        display anything.
+    :type display: bool
 
     Example:
 
@@ -39,13 +47,17 @@ class Swift(Connector):  # pragma nocover
         - https://github.com/jhavl/swift
 
     """
-    def __init__(self):
+    def __init__(self, realtime=True, display=True):
         super(Swift, self).__init__()
 
+        self.sim_time = 0.0
         self.robots = []
         self.shapes = []
         self.outq = Queue()
         self.inq = Queue()
+
+        self.realtime = realtime
+        self.display = display
 
     #
     #  Basic methods to do with the state of the external program
@@ -62,7 +74,9 @@ class Swift(Connector):  # pragma nocover
 
         super().launch()
 
-        start_servers(self.outq, self.inq)
+        if self.display:
+            start_servers(self.outq, self.inq)
+            self.last_time = time.time()
 
     def step(self, dt=50):
         """
@@ -93,8 +107,24 @@ class Swift(Connector):  # pragma nocover
         self._step_robots(dt)
         self._step_shapes(dt)
 
-        # self._draw_ellipses()
-        self._draw_all()
+        # Adjust sim time
+        self.sim_time += dt
+
+        # Send updated sim time to Swift
+        if self.display:
+
+            # If realtime is set, delay progress if we are running too quickly
+            if self.realtime:
+                time_taken = (time.time() - self.last_time) * 1000
+                diff = dt - time_taken
+
+                if diff > 0:
+                    time.sleep(diff / 1000)
+
+                self.last_time = time.time()
+
+            self._draw_all()
+            self._send_socket('sim_time', self.sim_time)
 
     def reset(self):
         """
@@ -168,18 +198,25 @@ class Swift(Connector):  # pragma nocover
             robot = ob.to_dict()
             robot['show_robot'] = show_robot
             robot['show_collision'] = show_collision
-            id = self._send_socket('robot', robot)
 
-            loaded = 0
-            while loaded == 0:
-                loaded = int(self._send_socket('is_loaded', id))
-                time.sleep(0.1)
+            if self.display:
+                id = self._send_socket('robot', robot)
+
+                loaded = 0
+                while loaded == 0:
+                    loaded = int(self._send_socket('is_loaded', id))
+                    time.sleep(0.1)
+            else:
+                id = len(self.robots)
 
             self.robots.append(ob)
             return id
         elif isinstance(ob, rp.Shape):
             shape = ob.to_dict()
-            id = self._send_socket('shape', shape)
+            if self.display:
+                id = self._send_socket('shape', shape)
+            else:
+                id = len(self.shapes)
             self.shapes.append(ob)
             return id
 
@@ -238,19 +275,10 @@ class Swift(Connector):  # pragma nocover
     def _draw_all(self):
 
         for i in range(len(self.robots)):
-            self.robots[i].fkine_all()
-            # self.swift.robot_poses([i, self.robots[i].fk_dict()])
             self._send_socket('robot_poses', [i, self.robots[i].fk_dict()])
 
         for i in range(len(self.shapes)):
-            # self.swift.shape_poses([i, self.shapes[i].fk_dict()])
             self._send_socket('shape_poses', [i, self.shapes[i].fk_dict()])
-
-    # def record_start(self, file):
-    #     self.swift.record_start(file)
-
-    # def record_stop(self):
-    #     self.swift.record_stop(1)
 
     def _send_socket(self, code, data):
         msg = [code, data]
