@@ -38,7 +38,7 @@ class ELink(Link):
 
     The ELink object holds all information related to a robot link and can form
     a serial-connected chain or a rigid-body tree.
-    
+
     It inherits from the Link class which provides common functionality such
     as joint and link such as kinematics parameters,
     .
@@ -118,7 +118,7 @@ class ELink(Link):
 
     def __repr__(self):
         name = self.__class__.__name__
-        s = "ets=" + str(self.ets())
+        s = "ets=" + str(self.ets)
         if self.parent is not None:
             s += ", parent=" + str(self.parent.name)
         args = [s] + super()._params()
@@ -136,7 +136,7 @@ class ELink(Link):
             parent = ""
         else:
             parent = f" [{self.parent.name}]"
-        return f"name[{self.name}({parent}): {self.ets()}] "
+        return f"name[{self.name}({parent}): {self.ets}] "
 
     @property
     def v(self):
@@ -225,17 +225,11 @@ class ELink(Link):
 
         self._geometry = new_geom
 
-
     # @r.setter
     # def r(self, T):
     #     if not isinstance(T, SE3):
     #         T = SE3(T)
     #     self._r = T
-
- 
-
-
-
 
     def A(self, q=None, fast=False):
         """
@@ -278,12 +272,12 @@ class ELink(Link):
             else:
                 return self.Ts
 
+    @property
     def ets(self):
         if self.v is None:
             return self._ets
         else:
-            return self._ets * self.v 
-
+            return self._ets * self.v
 
     def closest_point(self, shape, inf_dist=1.0):
         '''

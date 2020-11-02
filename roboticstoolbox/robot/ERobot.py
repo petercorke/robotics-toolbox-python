@@ -20,12 +20,6 @@ from roboticstoolbox.robot.Robot import Robot
 from pathlib import PurePath, PurePosixPath
 from ansitable import ANSITable, Column
 
-# try:
-#     import pybullet as p
-#     _pyb = True
-# except ImportError:
-#     _pyb = False
-
 
 class ERobot(Robot):
     """
@@ -62,7 +56,6 @@ class ERobot(Robot):
             **kwargs
             ):
 
-
         self._ets = []
         self._linkdict = {}
         self._n = 0
@@ -70,7 +63,7 @@ class ERobot(Robot):
         # self._q_idx = []
         self._ee_links = []
         self._base_link = None
-        
+
         if isinstance(elinks, ETS):
             # were passed an ETS string
             ets = elinks
@@ -89,13 +82,13 @@ class ERobot(Robot):
                 elinks.append(elink)
 
             n = len(ets.joints())
-            
+
             tool = ets[start:]
             if len(tool) > 0:
                 elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
         else:
             # were passed a list of ELinks
-            
+
             # check all the incoming ELink objects
             n = 0
             for link in elinks:
@@ -121,7 +114,7 @@ class ERobot(Robot):
                 link._parent._child.append(link)
 
             # is this a leaf node?
-            if ee_links is None and  len(link.child) == 0:
+            if ee_links is None and len(link.child) == 0:
                 # no children, must be an end-effector
                 ee.append(link)
 
@@ -140,6 +133,7 @@ class ERobot(Robot):
             # maybe do the DFS in where somewhere
 
             jindex = [0]  # "mutable integer" hack
+
             def visit_link(link, jindex):
                 # if it's a joint, assign it a jindex and increment it
                 if link.isjoint:
@@ -147,8 +141,9 @@ class ERobot(Robot):
                     jindex[0] += 1
 
             # visit all links in BFS order
-            self.bfs_link(self.base_link, lambda link: visit_link(link, jindex))
-            #self._n = len(self._q_idx)
+            self.bfs_link(
+                self.base_link, lambda link: visit_link(link, jindex))
+            # self._n = len(self._q_idx)
 
             self._reset_fk_path()
 
@@ -157,7 +152,9 @@ class ERobot(Robot):
             jset = set(range(n))
             for link in elinks:
                 if link.jindex not in jset:
-                    raise ValueError('joint index {link.jindex} was repeated or out of range')
+                    raise ValueError(
+                        'joint index {link.jindex} was '
+                        'repeated or out of range')
                 jset -= set(link.jindex)
             if len(jset) > 0:
                 raise ValueError('joints {jset} were not assigned')
@@ -216,7 +213,6 @@ class ERobot(Robot):
         self.control_type = 'v'
 
         super().__init__(elinks, **kwargs)
-
 
     def _reset_fk_path(self):
         # Pre-calculate the forward kinematics path
@@ -279,14 +275,12 @@ class ERobot(Robot):
         ob = {
             'links': [],
             'name': self.name,
-            'n': self.n,
-            'M': self.M,
-            'q_idx': self.q_idx
+            'n': self.n
         }
 
         self.fkine_all()
 
-        for link in self.ets:
+        for link in self.links:
             li = {
                 'axis': [],
                 'eta': [],
@@ -319,7 +313,7 @@ class ERobot(Robot):
 
         self.fkine_all()
 
-        for link in self.ets:
+        for link in self.links:
 
             li = {
                 'geometry': [],
@@ -445,9 +439,9 @@ class ERobot(Robot):
         v = np.zeros((2, self.n))
         j = 0
 
-        for i in range(self.M):
-            if self.ets[i].isjoint:
-                v[:, j] = self.ets[i].qlim
+        for i in range(len(self.links)):
+            if self.links[i].isjoint:
+                v[:, j] = self.links[i].qlim
                 j += 1
 
         return v
@@ -478,7 +472,7 @@ class ERobot(Robot):
         if isinstance(link, ELink):
             self._base_link = link
         else:
-            # self._base_link = self.ets[link]
+            # self._base_link = self.links[link]
             raise ValueError('must be an ELink')
         self._reset_fk_path()
 # --------------------------------------------------------------------- #
@@ -498,7 +492,8 @@ class ERobot(Robot):
     def ee_links(self, link):
         if isinstance(link, ELink):
             self._ee_links = [link]
-        elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
+        elif isinstance(link, list) and \
+                all([isinstance(x, ELink) for x in link]):
             self._ee_links = link
         else:
             raise ValueError('expecting an ELink or list of ELinks')
@@ -508,17 +503,19 @@ class ERobot(Robot):
     # @property
     # def ets(self):
     #     return self._ets
-# --------------------------------------------------------------------- #
 
+# --------------------------------------------------------------------- #
 
     # @property
     # def M(self):
     #     return self._M
+
 # --------------------------------------------------------------------- #
 
     # @property
     # def q_idx(self):
     #     return self._q_idx
+
 # --------------------------------------------------------------------- #
 
     # TODO would prefer this was called ets, but that name taken for
@@ -528,7 +525,8 @@ class ERobot(Robot):
             if len(self.ee_links) == 1:
                 link = self.ee_links[0]
             else:
-                raise ValueError('robot has multiple end-effectors, specify one')
+                raise ValueError(
+                    'robot has multiple end-effectors, specify one')
         elif isinstance(ee, str) and ee in self._linkdict:
             ee = self._linkdict[ee]
         elif isinstance(ee, ELink) and ee in self._links:
@@ -537,7 +535,7 @@ class ERobot(Robot):
             raise ValueError('end-effector is not valid')
 
         ets = ETS()
-        
+
         # build the ETS string from ee back to root
         while link is not None:
             ets = link.ets() * ets
@@ -547,78 +545,78 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def fkine(self, q=None):
-        '''
-        Evaluates the forward kinematics of a robot based on its ETS and
-        joint angles q.
+    # def fkine(self, q=None):
+    #     '''
+    #     Evaluates the forward kinematics of a robot based on its ETS and
+    #     joint angles q.
 
-        T = fkine(q) evaluates forward kinematics for the robot at joint
-        configuration q.
+    #     T = fkine(q) evaluates forward kinematics for the robot at joint
+    #     configuration q.
 
-        T = fkine() as above except uses the stored q value of the
-        robot object.
+    #     T = fkine() as above except uses the stored q value of the
+    #     robot object.
 
-        Trajectory operation:
-        Calculates fkine for each point on a trajectory of joints q where
-        q is (nxm) and the returning SE3 in (m)
+    #     Trajectory operation:
+    #     Calculates fkine for each point on a trajectory of joints q where
+    #     q is (nxm) and the returning SE3 in (m)
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :return: The transformation matrix representing the pose of the
-            end-effector
-        :rtype: SE3
+    #     :param q: The joint angles/configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :return: The transformation matrix representing the pose of the
+    #         end-effector
+    #     :rtype: SE3
 
-        :notes:
-            - The robot's base or tool transform, if present, are incorporated
-              into the result.
+    #     :notes:
+    #         - The robot's base or tool transform, if present, are incorporated
+    #           into the result.
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
+    #     :references:
+    #         - Kinematic Derivatives using the Elementary Transform
+    #           Sequence, J. Haviland and P. Corke
 
-        '''
+    #     '''
 
-        trajn = 1
+    #     trajn = 1
 
-        if q is None:
-            q = self.q
+    #     if q is None:
+    #         q = self.q
 
-        try:
-            q = getvector(q, self.n, 'col')
-        except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
+    #     try:
+    #         q = getvector(q, self.n, 'col')
+    #     except ValueError:
+    #         trajn = q.shape[1]
+    #         verifymatrix(q, (self.n, trajn))
 
-        for i in range(trajn):
-            j = 0
-            tr = self.base
+    #     for i in range(trajn):
+    #         j = 0
+    #         tr = self.base
 
-            for link in self._fkpath:
-                if link.isjoint:
-                    T = link.A(q[j, i])
-                    j += 1
-                else:
-                    T = link.A()
+    #         for link in self._fkpath:
+    #             if link.isjoint:
+    #                 T = link.A(q[j, i])
+    #                 j += 1
+    #             else:
+    #                 T = link.A()
 
-                tr = tr * T
+    #             tr = tr * T
 
-            tr = tr * self.tool
+    #         tr = tr * self.tool
 
-            if i == 0:
-                t = SE3(tr)
-            else:
-                t.append(tr)
+    #         if i == 0:
+    #             t = SE3(tr)
+    #         else:
+    #             t.append(tr)
 
-        return t
+    #     return t
 
-    def fkine_graph(self, q=None, from_link=None, to_link=None):
+    def fkine(self, q=None, from_link=None, to_link=None):
 
         if from_link is None:
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         if q is None:
             q = self.q
@@ -672,33 +670,33 @@ class ERobot(Robot):
         # Tall = SE3()
         j = 0
 
-        if self.ets[0].isjoint:
-            self.ets[0]._fk = self.base * self.ets[0].A(q[j])
+        if self.links[0].isjoint:
+            self.links[0]._fk = self.base * self.links[0].A(q[j])
             j += 1
         else:
-            self.ets[0]._fk = self.base * self.ets[0].A()
+            self.links[0]._fk = self.base * self.links[0].A()
 
-        for col in self.ets[0].collision:
-            col.wT = self.ets[0]._fk
+        for col in self.links[0].collision:
+            col.wT = self.links[0]._fk
 
-        for gi in self.ets[0].geometry:
-            gi.wT = self.ets[0]._fk
+        for gi in self.links[0].geometry:
+            gi.wT = self.links[0]._fk
 
-        for i in range(1, self.M):
-            if self.ets[i].isjoint:
-                t = self.ets[i].A(q[j])
+        for i in range(1, len(self.links)):
+            if self.links[i].isjoint:
+                t = self.links[i].A(q[j])
                 j += 1
             else:
-                t = self.ets[i].A()
+                t = self.links[i].A()
 
-            self.ets[i]._fk = self.ets[i].parent._fk * t
+            self.links[i]._fk = self.links[i].parent._fk * t
 
             # Update the collision objects transform as well
-            for col in self.ets[i].collision:
-                col.wT = self.ets[i]._fk
+            for col in self.links[i].collision:
+                col.wT = self.links[i]._fk
 
-            for gi in self.ets[i].geometry:
-                gi.wT = self.ets[i]._fk
+            for gi in self.links[i].geometry:
+                gi.wT = self.links[i]._fk
 
     # def jacob0(self, q=None):
     #     """
@@ -803,7 +801,7 @@ class ERobot(Robot):
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         if offset is None:
             offset = SE3()
@@ -820,7 +818,7 @@ class ERobot(Robot):
 
         if T is None:
             T = (self.base.inv()
-                 * self.fkine_graph(q, from_link=from_link, to_link=to_link)
+                 * self.fkine(q, from_link=from_link, to_link=to_link)
                  * offset)
 
         T = T.A
@@ -872,7 +870,6 @@ class ERobot(Robot):
             else:
                 U = U @ link.A(fast=True)
 
-
         return J
 
     def jacobe(self, q=None, from_link=None, to_link=None, offset=None):
@@ -897,7 +894,7 @@ class ERobot(Robot):
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         if offset is None:
             offset = SE3()
@@ -908,7 +905,7 @@ class ERobot(Robot):
         #     q = getvector(q, n)
 
         T = (self.base.inv()
-             * self.fkine_graph(q, from_link=from_link, to_link=to_link)
+             * self.fkine(q, from_link=from_link, to_link=to_link)
              * offset)
 
         J0 = self.jacob0(q, from_link, to_link, offset, T)
@@ -939,7 +936,7 @@ class ERobot(Robot):
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         path, n = self.get_path(from_link, to_link)
 
@@ -996,7 +993,7 @@ class ERobot(Robot):
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         path, n = self.get_path(from_link, to_link)
 
@@ -1038,7 +1035,7 @@ class ERobot(Robot):
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         path, n = self.get_path(from_link, to_link)
 
@@ -1091,13 +1088,14 @@ class ERobot(Robot):
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
-            table.row(k,
-                color + ee + link.name, 
-                link.parent.name if link.parent is not None else "-", 
-                link._joint_name if link.parent is not None else "", 
+            table.row(
+                k,
+                color + ee + link.name,
+                link.parent.name if link.parent is not None else "-",
+                link._joint_name if link.parent is not None else "",
                 ets.__str__(f"q{link._jindex}"))
         return str(table)
- 
+
     def hierarchy(self):
         """
         Pretty print the robot link hierachy
@@ -1109,11 +1107,12 @@ class ERobot(Robot):
 
         .. runblock:: pycon
 
-            import roboticstoolbox as rtb 
+            import roboticstoolbox as rtb
             robot = rtb.models.URDF.Panda()
             robot.hierarchy()
 
         """
+
         link = self.base_link
 
         def recurse(link, indent=0):
@@ -1122,8 +1121,6 @@ class ERobot(Robot):
                 recurse(child, indent+1)
 
         recurse(self.base_link)
-        
-
 
     def jacobev(
             self, q=None, from_link=None, to_link=None,
@@ -1149,13 +1146,13 @@ class ERobot(Robot):
             from_link = self.base_link
 
         if to_link is None:
-            to_link = self.ee_link
+            to_link = self.ee_links[0]
 
         if offset is None:
             offset = SE3()
 
         if T is None:
-            r = (self.base.inv() * self.fkine_graph(
+            r = (self.base.inv() * self.fkine(
                     q, from_link, to_link) * offset).R
             r = np.linalg.inv(r)
         else:
@@ -1795,8 +1792,7 @@ if __name__ == "__main__":
     robot = rtb.models.ETS.Panda()
     print(robot)
     print(robot.base, robot.tool)
-    print(robot.q_idx)
-    print(robot.ee_link)
+    print(robot.ee_links)
     ets = robot.ets()
     print(ets)
     print('n', ets.n)

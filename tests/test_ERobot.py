@@ -418,10 +418,9 @@ class TestETS(unittest.TestCase):
     def test_init(self):
         l0 = rp.ELink()
         l1 = rp.ELink(parent=l0)
-        r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_link=l0)
+        r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_links=l0)
         r.base_link = l1
         r.base_link = 0
-        r.ee_link = 1
 
         with self.assertRaises(TypeError):
             rp.ERobot(l0, base=sm.SE3.Rx(1.3))

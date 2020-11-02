@@ -176,7 +176,7 @@ qlim  =      -2.8 to      2.8""")
 
     def test_collision(self):
         p = rp.models.Panda()
-        link = p.ets[1]
+        link = p.links[1]
         col = link.collision[0]
 
         self.assertIsInstance(col, rp.Shape)

@@ -12,11 +12,13 @@ from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
 
 
 class SuperETS(UserList, ABC):
- 
+
     # T is a NumPy array (4,4) or None
     ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
-    def __init__(self, axis_func=None, axis=None, eta=None, unit='rad', j=None, flip=False):
+    def __init__(
+            self, axis_func=None, axis=None, eta=None,
+            unit='rad', j=None, flip=False):
 
         super().__init__()  # init UserList superclass
 
@@ -41,7 +43,8 @@ class SuperETS(UserList, ABC):
             if eta is None:
                 # no value, it's a variable joint
                 if unit != 'rad':
-                    raise ValueError('can only use radians for a variable transform')
+                    raise ValueError(
+                        'can only use radians for a variable transform')
                 joint = True
                 T = None
 
@@ -51,9 +54,11 @@ class SuperETS(UserList, ABC):
                 eta = getunit(eta, unit)
                 T = axis_func(eta)
                 if j is not None:
-                    raise ValueError('cannot specify joint index for a constant ET')
+                    raise ValueError(
+                        'cannot specify joint index for a constant ET')
                 if flip:
-                    raise ValueError('cannot specify flip for a constant ET')
+                    raise ValueError(
+                        'cannot specify flip for a constant ET')
 
         elif axis == 'C':
             # it's a constant element  Ci
@@ -63,7 +68,7 @@ class SuperETS(UserList, ABC):
                     T = eta.A
                 else:
                     T = eta
-                if T.shape != (4,4):
+                if T.shape != (4, 4):
                     raise ValueError('argument must be ndarray(4,4) or SE3')
             else:
                 # ETS2
@@ -71,7 +76,7 @@ class SuperETS(UserList, ABC):
                     T = eta.A
                 else:
                     T = eta
-                if T.shape != (3,3):
+                if T.shape != (3, 3):
                     raise ValueError('argument must be ndarray(3,3) or SE2')
             axis = "C"
             joint = False
@@ -106,7 +111,7 @@ class SuperETS(UserList, ABC):
             >>> e.eta
 
         .. note:: If the value was given in degrees it will be converted and
-            stored internally in radians 
+            stored internally in radians
         """
         return self.data[0].eta
 
@@ -152,7 +157,7 @@ class SuperETS(UserList, ABC):
             >>> from roboticstoolbox import ETS
             >>> e = ETS.rx() * ETS.tx(1) * ETS.tz()
             >>> e.n
-        
+
         :seealso: :func:`joints`
         """
         n = 0
@@ -248,7 +253,6 @@ class SuperETS(UserList, ABC):
         """
         return self.axis[0] == 'R'
 
-
     @property
     def isprismatic(self):
         """
@@ -288,7 +292,6 @@ class SuperETS(UserList, ABC):
         """
         return self.axis[0] == 'C'
 
-
     @property
     def config(self):
         """
@@ -309,7 +312,8 @@ class SuperETS(UserList, ABC):
             >>> e.config
 
         """
-        return ''.join(['R' if self.isrevolute else 'P' for i in self.joints()])
+        return ''.join(
+            ['R' if self.isrevolute else 'P' for i in self.joints()])
 
     def joints(self):
         """
@@ -328,7 +332,6 @@ class SuperETS(UserList, ABC):
 
         """
         return np.where([e.isjoint for e in self])[0]
-
 
     def T(self, q=None):
         """
@@ -353,7 +356,7 @@ class SuperETS(UserList, ABC):
         if self.isjoint:
             return self.axis_func(q)
         else:
-            return self.data[0].T  
+            return self.data[0].T
 
     def eval(self, q=None, unit='rad'):
         """
@@ -411,7 +414,7 @@ class SuperETS(UserList, ABC):
                 first = False
             else:
                 T = T @ Tk
-        
+
         if isinstance(self, ETS):
             T = SE3(T, check=False)
         elif isinstance(self, ETS2):
@@ -452,7 +455,7 @@ class SuperETS(UserList, ABC):
                     # flush the constant
                     ets *= ETS._CONST(const)
                     const = None
-                ets *= et # emit the joint ET
+                ets *= et  # emit the joint ET
             else:
                 # not a joint
                 if const is None:
@@ -462,7 +465,7 @@ class SuperETS(UserList, ABC):
 
         if const is not None:
             # flush the constant, tool transform
-            ets *= ETS._CONST(const)        
+            ets *= ETS._CONST(const)
         return ets
 
     def __str__(self, q=None):
@@ -498,7 +501,8 @@ class SuperETS(UserList, ABC):
             >>> print(e.__str__(""))
             >>> print(e.__str__("θ{0}"))  # numbering from 0
             >>> print(e.__str__("θ{1}"))  # numbering from 1
-            >>> e = ETS.rz(j=3) * ETS.tx(1) * ETS.rz(j=4) # explicit joint indices
+            >>> # explicit joint indices
+            >>> e = ETS.rz(j=3) * ETS.tx(1) * ETS.rz(j=4)
             >>> print(e)
             >>> print(e.__str__("θ{0}"))
 
@@ -512,7 +516,8 @@ class SuperETS(UserList, ABC):
             >>> from roboticstoolbox import ETS
             >>> from spatialmath.base import symbol
             >>> theta, d = symbol('theta, d')
-            >>> e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
+            >>> e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * \
+            >>>     ETS.ry(0.2) * ETS.ty(d)
             >>> str(e)
 
         :SymPy: supported
@@ -583,7 +588,7 @@ class SuperETS(UserList, ABC):
             >>> e = e1 * e2
             >>> len(e)
 
-        .. note:: The ``*`` operator implies composition, but actually the 
+        .. note:: The ``*`` operator implies composition, but actually the
             result is a new ETS instance that contains the concatenation of
             the left and right operands in an internal list. In this example
             we see the length of the product is 2.
@@ -638,7 +643,7 @@ class SuperETS(UserList, ABC):
         :raises IndexError: if there are no values to pop
 
         Removes a value from the value list and returns it.  The original
-        instance is modified. 
+        instance is modified.
 
         Example:
 
@@ -670,20 +675,21 @@ class SuperETS(UserList, ABC):
         :type t: array_like(3) or SE3 instance
         :param rpy: roll-pitch-yaw angles in XYZ order
         :type rpy: array_like(3)
-        :param tol: Elements small than this many eps are considered as 
+        :param tol: Elements small than this many eps are considered as
             being zero, defaults to 100
         :type tol: int, optional
         :return: ET sequence
         :rtype: ETS instance
 
-        Create an ETS from the non-zero translational and rotational components.
+        Create an ETS from the non-zero translational and rotational
+        components.
 
         - ``SE3(t, rpy)`` convert translation ``t`` and rotation given by XYZ
           roll-pitch-yaw angles ``rpy`` into an ETS.
         - ``SE3(X)`` as above but convert from an SE3 instance ``X``.
 
         Example:
-        
+
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ETS
@@ -727,7 +733,7 @@ class SuperETS(UserList, ABC):
         :return: [description]
         :rtype: ETS instance
 
-        The inverse of a given ETS.  It is computed as the inverse of the 
+        The inverse of a given ETS.  It is computed as the inverse of the
         individual ETs in the reverse order.
 
         .. math::
@@ -798,7 +804,7 @@ class ETS(SuperETS):
       might correspond to the joint number of a multi-joint robot.
     - ``ETS.XY(flip=True)`` as above but the joint moves in the opposite sense
 
-    where ``XY`` is one of ``rx``, ``ry``, ``rz``, ``tx``, ``ty``, ``tz``. 
+    where ``XY`` is one of ``rx``, ``ry``, ``rz``, ``tx``, ``ty``, ``tz``.
 
     Example:
 
@@ -815,7 +821,8 @@ class ETS(SuperETS):
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
 
-    :seealso: :func:`rx`, :func:`ry`, :func:`rz`, :func:`tx`, :func:`ty`, :func:`tz`
+    :seealso: :func:`rx`, :func:`ry`, :func:`rz`, :func:`tx`,
+        :func:`ty`, :func:`tz`
     """
 
     @classmethod
@@ -834,8 +841,8 @@ class ETS(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.rx(η)`` is an elementary rotation about the x-axis by a constant
-          angle η
+        - ``ETS.rx(η)`` is an elementary rotation about the x-axis by a
+          constant angle η
         - ``ETS.rx()`` is an elementary rotation about the x-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -861,8 +868,8 @@ class ETS(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.ry(η)`` is an elementary rotation about the y-axis by a constant
-          angle η
+        - ``ETS.ry(η)`` is an elementary rotation about the y-axis by a
+          constant angle η
         - ``ETS.ry()`` is an elementary rotation about the y-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -888,8 +895,8 @@ class ETS(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.rz(η)`` is an elementary rotation about the z-axis by a constant
-          angle η
+        - ``ETS.rz(η)`` is an elementary rotation about the z-axis by a
+          constant angle η
         - ``ETS.rz()`` is an elementary rotation about the z-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
@@ -913,11 +920,11 @@ class ETS(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.tx(η)`` is an elementary translation along the x-axis by a 
+        - ``ETS.tx(η)`` is an elementary translation along the x-axis by a
           distance constant η
         - ``ETS.tx()`` is an elementary translation along the x-axis by a
-          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
-          be set in this case.
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
+          can be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         :SymPy: supported
@@ -948,11 +955,11 @@ class ETS(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.ty(η)`` is an elementary translation along the y-axis by a 
+        - ``ETS.ty(η)`` is an elementary translation along the y-axis by a
           distance constant η
         - ``ETS.ty()`` is an elementary translation along the y-axis by a
-          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
-          be set in this case.
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
+          can be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         :SymPy: supported
@@ -983,11 +990,11 @@ class ETS(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.tz(η)`` is an elementary translation along the z-axis by a 
+        - ``ETS.tz(η)`` is an elementary translation along the z-axis by a
           distance constant η
         - ``ETS.tz()`` is an elementary translation along the z-axis by a
-          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
-          be set in this case.
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
+          can be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         :SymPy: supported
@@ -1016,8 +1023,9 @@ class ETS(SuperETS):
         ``jacob0(q)`` is the ETS Jacobian matrix which maps joint
         velocity to spatial velocity in the {0} frame.
 
-        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-        is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x,
+        \omega_y, \omega_z)^T` is related to joint velocity by
+        :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
 
         If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to
         reduce computation time.
@@ -1025,29 +1033,29 @@ class ETS(SuperETS):
         An ETS represents the relative pose from the {0} frame to the end frame
         {e}. This is the composition of many relative poses, some constant and
         some functions of the joint variables, which we can write as
-        :math:`\mathbf{E}(q)`.  
-        
+        :math:`\mathbf{E}(q)`.
+
         .. math::
-        
-            {}^0 T_e &= \mathbf{E}(q) \in \mbox{SE}(3) 
+
+            {}^0 T_e &= \mathbf{E}(q) \in \mbox{SE}(3)
 
         The temporal derivative of this is the spatial
         velocity :math:`\nu` which is a 6-vector is related to the rate of
-        change of joint coordinates by the Jacobian matrix.  
+        change of joint coordinates by the Jacobian matrix.
 
         .. math::
-        
+
             {}^0 \nu & = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
 
         This velocity can be expressed relative to the {0} frame or the {e}
         frame.
-        
+
         :references:
 
             - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke <https://arxiv.org/abs/2010.08696>`_
-        
+
         :seealso: :func:`jacobe`, :func:`hessian0`
-        """       
+        """
 
         # TODO what is offset
         # if offset is None:
@@ -1069,7 +1077,7 @@ class ETS(SuperETS):
 
             if et.isjoint:
                 # joint variable
-                #U = U @ link.A(q[j], fast=True)
+                # U = U @ link.A(q[j], fast=True)
                 U = U @ et.axis_func(q[j])
 
                 # TODO???
@@ -1162,18 +1170,18 @@ class ETS(SuperETS):
         An ETS represents the relative pose from the {0} frame to the end frame
         {e}. This is the composition of many relative poses, some constant and
         some functions of the joint variables, which we can write as
-        :math:`\mathbf{E}(q)`.  
-        
+        :math:`\mathbf{E}(q)`.
+
         .. math::
-        
-            {}^0 T_e &= \mathbf{E}(q) \in \mbox{SE}(3) 
+
+            {}^0 T_e &= \mathbf{E}(q) \in \mbox{SE}(3)
 
         The temporal derivative of this is the spatial
         velocity :math:`\nu` which is a 6-vector is related to the rate of
-        change of joint coordinates by the Jacobian matrix.  
+        change of joint coordinates by the Jacobian matrix.
 
         .. math::
-        
+
             {}^0 \nu & = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
 
         This velocity can be expressed relative to the {0} frame or the {e}
@@ -1181,23 +1189,24 @@ class ETS(SuperETS):
 
         The temporal derivative of spatial velocity is spatial acceleration,
         which again can be expressed with respect to the {0} or {e} frames
-        
+
         .. math::
-        
+
             {}^0 \dot{\nu} &= \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
                       &= \mathbf{J}(q) \ddot{q} + \dot{q}^T \mathbf{H}(q) \dot{q}
 
-        The manipulator Hessian tensor :math:`H` maps joint velocity to end-effector
-        spatial acceleration, expressed in the {0} coordinate frame. 
-        
+        The manipulator Hessian tensor :math:`H` maps joint velocity to
+        end-effector spatial acceleration, expressed in the {0} coordinate
+        frame.
+
         :references:
             - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke <https://arxiv.org/abs/2010.08696>`_
-        
+
         :seealso: :func:`jacob0`
         """
 
         n = self.n
-        
+
         if J0 is None:
             if q is None:
                 q = np.copy(self.q)
@@ -1220,6 +1229,7 @@ class ETS(SuperETS):
                     H[:3, j, i] = H[:3, i, j]
 
         return H
+
 
 class ETS2(SuperETS):
     """
@@ -1251,7 +1261,7 @@ class ETS2(SuperETS):
       might correspond to the joint number of a multi-joint robot.
     - ``ETS.XY(flip=True)`` as above but the joint moves in the opposite sense
 
-    where ``XY`` is one of ``r``, ``tx``, ``ty``. 
+    where ``XY`` is one of ``r``, ``tx``, ``ty``.
 
     Example:
 
@@ -1297,7 +1307,8 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         """
-        return cls(lambda theta: trot2(theta), axis='R', eta=eta, unit=unit, **kwargs)
+        return cls(
+            lambda theta: trot2(theta), axis='R', eta=eta, unit=unit, **kwargs)
 
     @classmethod
     def tx(cls, eta=None, **kwargs):
@@ -1313,11 +1324,11 @@ class ETS2(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.tx(η)`` is an elementary translation along the x-axis by a 
+        - ``ETS.tx(η)`` is an elementary translation along the x-axis by a
           distance constant η
         - ``ETS.tx()`` is an elementary translation along the x-axis by a
-          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
-          be set in this case.
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
+          can be set in this case.
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         """
@@ -1337,11 +1348,11 @@ class ETS2(SuperETS):
         :return: An elementary transform
         :rtype: ETS instance
 
-        - ``ETS.tx(η)`` is an elementary translation along the y-axis by a 
+        - ``ETS.tx(η)`` is an elementary translation along the y-axis by a
           distance constant η
         - ``ETS.tx()`` is an elementary translation along the y-axis by a
-          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip`` can
-          be set in this case.
+          variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
+          can be set in this case.
 
         :seealso: :func:`ETS`
         """
@@ -1371,8 +1382,6 @@ if __name__ == "__main__":
     e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
     print(e)
 
-    
-
     e = ETS()
     e *= ETS.rx()
     e *= ETS.tz()
@@ -1383,9 +1392,6 @@ if __name__ == "__main__":
 
     e = ETS.rx() * ETS._CONST(SE3()) * ETS.tx(0.3)
     print(e)
-
-
-  
 
     l1 = 0.672
     l2 = -0.2337
@@ -1405,18 +1411,17 @@ if __name__ == "__main__":
 
     print(ETS.SE3(SE3.Rz(200, 'deg')))
 
-
     a = ETS.rx()
     b = ETS(a)
     print(b)
     a = ETS.tz()
     print(b)
-    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7,flip=True) * ETS.tx(1)
+    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7, flip=True) * ETS.tx(1)
     print(e)
 
     print(e.inv())
 
-    q = [1,2,3,4,5,6,7,8]
+    q = [1, 2, 3, 4, 5, 6, 7, 8]
     print(e.eval(q))
     print(e.inv().eval(q))
     print(e.eval(q) * e.inv().eval(q))

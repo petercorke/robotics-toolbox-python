@@ -10,7 +10,7 @@ class Panda(ERobot):
     Class that imports a Panda URDF model
 
     ``Panda()`` is a class which imports a Franka-Emika Panda robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon
@@ -37,17 +37,18 @@ class Panda(ERobot):
         super().__init__(
             elinks,
             name=name,
-            manufacturer = 'Franka Emika',
+            manufacturer='Franka Emika',
             ee_links=elinks[8]
-            )
+        )
 
         self.qdlim = np.array([
             2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        # self.addconfiguration("qz", np.array(
-        #     [0, 0, 0, 0, 0, 0, 0, 0, 0]))
-        # self.addconfiguration("qr", np.array(
-        #     [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0]))
+        self.addconfiguration("qz", np.array(
+            [0, 0, 0, 0, 0, 0, 0, 0, 0]))
+
+        self.addconfiguration("qr", np.array(
+            [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0]))
 
 
 if __name__ == '__main__':   # pragma nocover

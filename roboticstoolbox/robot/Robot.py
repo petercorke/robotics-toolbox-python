@@ -6,7 +6,7 @@ from spatialmath import SE3
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
     verifymatrix
 from roboticstoolbox.robot.Link import Link
-from spatialmath.base.transforms3d import tr2delta, tr2eul
+from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.backend import URDF
 # from roboticstoolbox.backend import xacro
 from pathlib import PurePath, PurePosixPath
@@ -16,6 +16,7 @@ from ansitable import ANSITable, Column
 
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
+
 
 class Robot:
 
@@ -400,7 +401,7 @@ class Robot:
             >>> robot.qlim
         """
         # TODO tidy up
-        limits = np.zeros((2,self.n))
+        limits = np.zeros((2, self.n))
         for j, link in enumerate(self):
             if link.qlim is None:
                 if link.isrevolute():
@@ -409,10 +410,11 @@ class Robot:
                     raise ValueError('undefined prismatic joint limit')
             else:
                 v = link.qlim
-            limits[:,j] = v
+            limits[:, j] = v
         return limits
 
-# TODO, the remaining functions, I have only a hazy understanding of how they work
+# TODO, the remaining functions, I have only a hazy understanding
+# of how they work
 # --------------------------------------------------------------------- #
 
     @property
@@ -472,6 +474,7 @@ class Robot:
         .. note::  ???
         """
         return self._qdd
+
     @qdd.setter
     def qdd(self, qdd_new):
         self._qdd = getvector(qdd_new, self.n)
@@ -652,7 +655,7 @@ class Robot:
             qspan = qlim[1] - qlim[0]  # range of joint motion
 
             for k in range(slimit):
-                q0n = np.random.rand(self.n) * qspan + qlim[0,:]
+                q0n = np.random.rand(self.n) * qspan + qlim[0, :]
 
                 # fprintf('Trying q = %s\n', num2str(q))
 
@@ -787,7 +790,8 @@ class Robot:
 
     def ikunc(self, T, q0=None, ilimit=1000):
         """
-        Inverse manipulator by optimization without joint limits (Robot superclass)
+        Inverse manipulator by optimization without joint limits (Robot
+        superclass)
 
         q, success, err = ikunc(T) are the joint coordinates (n) corresponding
         to the robot end-effector pose T which is an SE3 object or
@@ -984,7 +988,7 @@ class Robot:
             ``err`` is the scalar final value of the objective function.
 
             **Trajectory operation**
-            
+
             In all cases if ``q`` is (m,n) it is taken as a pose sequence and
             ``qmincon()`` returns the adjusted joint coordinates (m,n) corresponding
             to each of the configurations in the sequence.
@@ -1028,12 +1032,12 @@ class Robot:
                     lambda x: cost(x, ub, lb, qk, N),
                     x0, constraints=con)
 
-                qstar[k,:] = qk + N @ res.x
+                qstar[k, :] = qk + N @ res.x
                 error[k] = res.fun
                 success[k] = res.success
 
             if q.shape[0] == 1:
-                return qstar[0,:], success[0], error[0]
+                return qstar[0, :], success[0], error[0]
             else:
                 return qstar, success, error
 
@@ -1065,7 +1069,7 @@ class Robot:
 
         .. note::
 
-            - The friction value should be added to the motor output torque to 
+            - The friction value should be added to the motor output torque to
               determine the nett torque. It has a negative value when qd > 0.
             - The returned friction value is referred to the output of the
               gearbox.

@@ -13,7 +13,6 @@ req = [
 ]
 
 swift_req = [
-    'zerorpc',
     'pybullet'
 ]
 
