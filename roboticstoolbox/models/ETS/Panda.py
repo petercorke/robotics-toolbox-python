@@ -118,7 +118,8 @@ if __name__ == '__main__':   # pragma nocover
             color = ""
         else:
             color = "<<blue>>"
-        table.row(color + link.name, 
-            link.parent.name if link.parent is not None else "-", 
+        table.row(
+            color + link.name,
+            link.parent.name if link.parent is not None else "-",
             link.ets * link.v if link.v is not None else link.ets)
     table.print()

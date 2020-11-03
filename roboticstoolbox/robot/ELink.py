@@ -3,9 +3,9 @@
 @author: Jesse Haviland
 """
 
-import numpy as np
+# import numpy as np
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
+# from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
@@ -83,23 +83,9 @@ class ELink(Link):
         self._joint_name = None
         self._jindex = None
 
-        # Number of transforms in the ETS excluding the joint variable
-        self._M = len(self._ets)
-
-        # Initialise joints
-        if isinstance(ets, ETS):
-            self._Ts = SE3()
-            for i in range(self.M):
-                if ets[i].isjoint:
-                    raise ValueError('The transforms in ets must be constant')
-
-                if not isinstance(ets[i].T(), SE3):
-                    self._Ts *= SE3(ets[i].T())
-                else:
-                    self._Ts *= ets[i].T()
-
-        elif isinstance(ets, SE3):
-            self._Ts = ets
+        # Initialise the static transform representing the constant
+        # component of the ETS
+        self._init_Ts()
 
         # Check the variable joint
         if v is None:
@@ -116,9 +102,28 @@ class ELink(Link):
 
         self._v = v
 
+    def _init_Ts(self):
+        # Number of transforms in the ETS excluding the joint variable
+        self._M = len(self._ets)
+
+        # Initialise joints
+        if isinstance(self._ets, ETS):
+            self._Ts = SE3()
+            for i in range(self.M):
+                if self._ets[i].isjoint:
+                    raise ValueError('The transforms in ets must be constant')
+
+                if not isinstance(self._ets[i].T(), SE3):
+                    self._Ts *= SE3(self._ets[i].T())
+                else:
+                    self._Ts *= self._ets[i].T()
+
+        elif isinstance(self._ets, SE3):
+            self._Ts = self._ets
+
     def __repr__(self):
         name = self.__class__.__name__
-        s = "ets=" + str(self.ets)
+        s = "ets=" + str(self.ets())
         if self.parent is not None:
             s += ", parent=" + str(self.parent.name)
         args = [s] + super()._params()
@@ -131,12 +136,12 @@ class ELink(Link):
         :return: Pretty print of the robot link
         :rtype: str
         """
-        name = self.__class__.__name__
+        # name = self.__class__.__name__
         if self.parent is None:
             parent = ""
         else:
             parent = f" [{self.parent.name}]"
-        return f"name[{self.name}({parent}): {self.ets}] "
+        return f"name[{self.name}({parent}): {self.ets()}] "
 
     @property
     def v(self):
@@ -189,7 +194,6 @@ class ELink(Link):
     @property
     def M(self):
         return self._M
-
 
     @collision.setter
     def collision(self, coll):
@@ -272,7 +276,6 @@ class ELink(Link):
             else:
                 return self.Ts
 
-    @property
     def ets(self):
         if self.v is None:
             return self._ets

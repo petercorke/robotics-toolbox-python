@@ -5,6 +5,7 @@
 """
 
 import numpy as np
+from spatialmath import base
 import roboticstoolbox as rtb
 import copy
 import os
@@ -1611,9 +1612,8 @@ class URDF(URDFType):
         # why arent the other things validated
         try:
             self._validate_transmissions()
-        except:
+        except BaseException:
             pass
-
 
         self.name = name
         self.other_xml = other_xml
@@ -1624,20 +1624,20 @@ class URDF(URDFType):
         self._transmissions = list(transmissions)
         # self._materials = list(materials)
 
-        # check for duplicate names 
-
+        # check for duplicate names
         if len(self._links) > len(set([x.name for x in self._links])):
             raise ValueError('Duplicate link names')
         if len(self._joints) > len(set([x.name for x in self._joints])):
             raise ValueError('Duplicate joint names')
-        if len(self._transmissions) > len(set([x.name for x in self._transmissions])):
-            raise ValueError('Duplicate transmission names')           
+        if len(self._transmissions) > len(
+                set([x.name for x in self._transmissions])):
+            raise ValueError('Duplicate transmission names')
 
         elinks = []
         elinkdict = {}
-        jointdict = {}
+        # jointdict = {}
 
-        ## build the list of links in URDF file order
+        # build the list of links in URDF file order
         for link in self._links:
             elink = rtb.ELink(name=link.name)
             elinks.append(elink)
@@ -1660,7 +1660,7 @@ class URDF(URDFType):
             except AttributeError:   # pragma nocover
                 pass
 
-        ## connect the links using joint info
+        # connect the links using joint info
         for joint in self._joints:
             # get references to joint's parent and child
             childlink = elinkdict[joint.child]
@@ -1671,12 +1671,14 @@ class URDF(URDFType):
 
             # constant part of link transform
             trans = sm.SE3(joint.origin).t
-            # TODO, find where reverse is used and change it to [::-1] or do that here
-            rot = joint.rpy[::-1]
+            # TODO, find where reverse is used and change
+            # it to [::-1] or do that here
+            rot = joint.rpy
             childlink._ets = rtb.ETS.SE3(trans, rot)
+            childlink._init_Ts()
 
             # variable part of link transform
-            if joint.joint_type in ('revolute', 'continuous'):   # pragma nocover
+            if joint.joint_type in ('revolute', 'continuous'):   # pragma nocover # noqa
                 if joint.axis[0] == 1:
                     var = rtb.ETS.rx()
                 elif joint.axis[0] == -1:
@@ -1825,8 +1827,6 @@ class URDF(URDFType):
         #         )
         #     )
         #     elinks_dict[elinks[-1].name] = elinks[-1]
-
-
 
         # elinks.append(base_link)
         # self.elinks = elinks

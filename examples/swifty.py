@@ -9,22 +9,40 @@ import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
 
-# Launch the simulator Swift
-env = rtb.backend.Swift()
-env.launch()
+# # Launch the simulator Swift
+# env = rtb.backend.Swift()
+# env.launch()
 
 # Create a Panda robot object
-panda = rtb.models.Panda()
+panda = rtb.models.ETS.Panda()
 
-# Set joint angles to ready configuration
-panda.q = panda.qr
+print(panda)
+print(panda.base_link)
+print(panda.ee_links)
+
+path, n = panda.get_path(panda.base_link, panda.ee_links[0])
+
+q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+panda.q = q1
+
+print(panda.fkine())
+
+for link in path:
+    print(link.name)
+
+# print(panda.get_path(panda.base_link, panda.ee_links[0])[0])
+
+# print(panda.links[5].A(0))
+
+# # Set joint angles to ready configuration
+# panda.q = panda.qr
 
 # Add the Panda to the simulator
-env.add(panda)
+# env.add(panda)
 
 
-while 1:
-    pass
+# while 1:
+#     pass
 
 
 

@@ -113,6 +113,7 @@ class ERobot(Robot):
                 # no, update children of this link's parent
                 link._parent._child.append(link)
 
+        for link in elinks:
             # is this a leaf node?
             if ee_links is None and len(link.child) == 0:
                 # no children, must be an end-effector
@@ -288,7 +289,7 @@ class ERobot(Robot):
                 'collision': []
             }
 
-            for et in link.ets:
+            for et in link.ets():
                 li['axis'].append(et.axis)
                 li['eta'].append(et.eta)
 
@@ -618,8 +619,7 @@ class ERobot(Robot):
         if to_link is None:
             to_link = self.ee_links[0]
 
-        if q is None:
-            q = self.q
+        q = self._getq(q)
 
         path, _ = self.get_path(from_link, to_link)
         j = 0
@@ -1083,7 +1083,7 @@ class ERobot(Robot):
             Column("parent", headalign="^"),
             Column("joint", headalign="^"),
             Column("ETS", headalign="^", colalign=">"),
-            border="thin", color=self._color)
+            border="thin")
         for k, link in enumerate(self):
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""

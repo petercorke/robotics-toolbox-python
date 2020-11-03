@@ -133,11 +133,11 @@ class TestETS(unittest.TestCase):
         r2 = pm.fkine_all()
 
         for i in range(7):
-            nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p._ets[i]._fk.A, r2[i].A)
 
         p.fkine_all(q)
         for i in range(7):
-            nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p._ets[i]._fk.A, r2[i].A)
 
     def test_jacob0(self):
         panda = rp.models.ETS.Panda()
