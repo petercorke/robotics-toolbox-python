@@ -19,6 +19,7 @@ from roboticstoolbox.backend.PyPlot.functions import \
 from roboticstoolbox.robot.DHDynamics import DHDynamics
 from ansitable import ANSITable, Column
 
+
 class DHRobot(Robot, DHDynamics):
     """
     Class for robots defined using Denavit-Hartenberg notation
@@ -468,8 +469,8 @@ class DHRobot(Robot, DHDynamics):
         :return T: The transform between link frames
         :rtype T: SE3
 
-        - ``robot.A(j, q)`` transform between link frames {0} and {n}.  ``q`` 
-          is a vector (n) of joint variables. 
+        - ``robot.A(j, q)`` transform between link frames {0} and {n}.  ``q``
+          is a vector (n) of joint variables.
         - ``robot.A([j1, j2], q)`` as above between link frames {j1} and {j2}.
         - ``robot.A(j)`` as above except uses the stored q value of the
           robot object.
@@ -506,7 +507,7 @@ class DHRobot(Robot, DHDynamics):
         :param q: The joint configuration of the robot (Optional,
             if not supplied will use the stored q values)
         :type q: ndarray(n
-        :return v: is a vector of boolean values, one per joint, False if 
+        :return v: is a vector of boolean values, one per joint, False if
             ``q[j]`` is within the joint limits, else True
         :rtype v: bool list
 
@@ -526,16 +527,16 @@ class DHRobot(Robot, DHDynamics):
 
         """
         q = self._getq(q)
-        
+
         return [link.islimit(qk) for (link, qk) in zip(self, q)]
 
     def isspherical(self):
         """
         Test for spherical wrist
-        
+
         :return: True if spherical wrist
         :rtype: bool
-        
+
         Tests if the robot has a spherical wrist, that is, the last 3 axes are
         revolute and their axes intersect at a point.
 
@@ -553,17 +554,17 @@ class DHRobot(Robot, DHDynamics):
 
         alpha = [-np.pi / 2, np.pi / 2]
 
-        return  L[0].a == 0 \
-                and L[1].a == 0 \
-                and L[1].d == 0 \
-                and (
-                    (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
-                    or 
-                    (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
-                ) \
-                and L[0].sigma == 0 \
-                and L[1].sigma == 0 \
-                and L[2].sigma == 0
+        return L[0].a == 0 \
+            and L[1].a == 0 \
+            and L[1].d == 0 \
+            and (
+                (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
+                or
+                (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
+            ) \
+            and L[0].sigma == 0 \
+            and L[1].sigma == 0 \
+            and L[2].sigma == 0
 
     def isprismatic(self):
         """
@@ -669,9 +670,10 @@ class DHRobot(Robot, DHDynamics):
         q = self._getq(q)
         revolute = self.isrevolute()
 
-        return np.array(
-            [q[k] * 180.0 / np.pi if revolute[k] else q[k] for k in range(len(q))]
-                    )
+        return np.array([
+            q[k] * 180.0 / np.pi if
+            revolute[k] else q[k] for k in range(len(q))
+        ])
 
     def toradians(self, q):
         """

@@ -14,21 +14,21 @@ import qpsolvers as qp
 # env.launch()
 
 # Create a Panda robot object
-panda = rtb.models.ETS.Panda()
+panda = rtb.models.Panda()
 
-print(panda)
-print(panda.base_link)
-print(panda.ee_links)
+# print(panda)
+# print(panda.base_link)
+# print(panda.ee_links)
 
-path, n = panda.get_path(panda.base_link, panda.ee_links[0])
+# path, n = panda.get_path(panda.base_link, panda.ee_links[0])
 
-q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-panda.q = q1
+# q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+# panda.q = q1
 
-print(panda.fkine())
+# print(panda.fkine())
 
-for link in path:
-    print(link.name)
+# for link in path:
+#     print(link.name)
 
 # print(panda.get_path(panda.base_link, panda.ee_links[0])[0])
 

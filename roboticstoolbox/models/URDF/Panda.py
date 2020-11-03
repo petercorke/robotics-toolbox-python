@@ -38,7 +38,8 @@ class Panda(ERobot):
             elinks,
             name=name,
             manufacturer='Franka Emika',
-            ee_links=elinks[8]
+            ee_links=elinks[7],
+            gripper_links=elinks[9]
         )
 
         self.qdlim = np.array([

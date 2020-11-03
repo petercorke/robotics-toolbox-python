@@ -17,6 +17,7 @@ from roboticstoolbox.robot.ELink import ELink, ETS
 from roboticstoolbox.backend import xacro
 from roboticstoolbox.backend import URDF
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath
 from ansitable import ANSITable, Column
 
@@ -52,15 +53,13 @@ class ERobot(Robot):
             self,
             elinks,
             base_link=None,
-            ee_links=None,
+            gripper_links=None,
             **kwargs
             ):
 
         self._ets = []
         self._linkdict = {}
         self._n = 0
-        # self._M = 0
-        # self._q_idx = []
         self._ee_links = []
         self._base_link = None
 
@@ -101,8 +100,7 @@ class ERobot(Robot):
 
         self._n = n
 
-        # scan for base and ee links
-        ee = []
+        # scan for base
         for link in elinks:
             # is this a base link?
             if link._parent is None:
@@ -113,18 +111,39 @@ class ERobot(Robot):
                 # no, update children of this link's parent
                 link._parent._child.append(link)
 
-        for link in elinks:
-            # is this a leaf node?
-            if ee_links is None and len(link.child) == 0:
-                # no children, must be an end-effector
-                ee.append(link)
-
-        if ee_links is not None:
-            # use the passed in value
-            self.ee_links = ee_links
+        # Set up the gripper, make a list containing the root of all
+        # grippers
+        if gripper_links is not None:
+            if isinstance(gripper_links, ELink):
+                gripper_links = [gripper_links]
         else:
-            # use the leaf links
-            self.ee_links = ee
+            gripper_links = []
+
+        # An empty list to hold all grippers
+        self.grippers = []
+
+        # Make a gripper object for each gripper
+        for link in gripper_links:
+            g_links = self.dfs_links(link)
+            self.grippers.append(Gripper(g_links))
+
+        # Subtract the n of the grippers from the n of the robot
+        for gripper in self.grippers:
+            self._n -= gripper.n
+
+        # Set the ee links
+        self.ee_links = []
+        if gripper_links is None:
+            for link in elinks:
+                # is this a leaf node? and do we not have any grippers
+                if len(link.child) == 0:
+                    # no children, must be an end-effector
+                    self.ee_links.append(link)
+        # else:
+        #     for link = self.gripper_links:
+        #         # use the passed in value
+        #         self.ee_links.append(link.)
+
 
         # assign the joint indices
         if all([link.jindex is None for link in elinks]):
@@ -141,12 +160,9 @@ class ERobot(Robot):
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
-            # visit all links in BFS order
-            self.bfs_link(
+            # visit all links in DFS order
+            self.dfs_links(
                 self.base_link, lambda link: visit_link(link, jindex))
-            # self._n = len(self._q_idx)
-
-            self._reset_fk_path()
 
         elif all([link.jindex is not None for link in elinks]):
             # jindex set on all, check they are unique and sequential
@@ -163,49 +179,6 @@ class ERobot(Robot):
             # must be a mixture of ELinks with/without jindex
             raise ValueError('all links must have a jindex, or none have a jindex')
 
-
-        # # Set up references between links, a bi-directional linked list
-        # # Also find the top of the tree
-        # self.end = []
-        # for link in elinks:
-        #     if link.parent is None:
-        #         self.root = link
-        #     else:
-        #         link.parent._child.append(link)
-
-        # # Find the bottom of the tree
-        # for link in elinks:
-        #     if len(link.child) == 0:
-        #         self.end.append(link)
-
-        # # If the base link is not defined, use the root of the tree
-        # if base_link is None:
-        #     self._base_link = self.root      # Needs to be private attrib
-        # else:
-        #     self._base_link = base_link      # Needs to be private attrib
-
-        # # If the ee link is not defined, use the bottom of the tree
-        # if ee_link is None:
-        #     self._ee_link = self.end[-1]
-        # else:
-        #     self._ee_link = [ee_link]
-
-        # scan for the base and ee links
-        # assign joint variables
-        # def add_links(link, lst, q_idx):
-
-        #     if link.isjoint:
-        #         q_idx.append(len(lst))
-
-        #     lst.append(link)
-
-        # Figure out the order of links with respect to joint variables
-        # self.bfs_link(
-        #     lambda link: add_links(link, self._ets, self._q_idx))
-        # self._n = len(self._q_idx)
-
-        # self._reset_fk_path()
-
         # Current joint angles of the robot
         # TODO should go to Robot class?
         self.q = np.zeros(self.n)
@@ -215,44 +188,33 @@ class ERobot(Robot):
 
         super().__init__(elinks, **kwargs)
 
-    def _reset_fk_path(self):
-        # Pre-calculate the forward kinematics path
-        self._fkpath = self.dfs_path(self.base_link, self.ee_links)
-
-    # def bfs_link(self, func):
-    #     queue = self.root
-
-    #     for li in queue:
-    #         func(li)
-
-    #     def vis_children(link):
-    #         for li in link.child:
-    #             if li not in queue:
-    #                 queue.append(li)
-    #                 func(li)
-
-    #     while len(queue) > 0:
-    #         link = queue.pop(0)
-    #         vis_children(link)
-
-    def bfs_link(self, start, func):
+    def dfs_links(self, start, func=None):
         """
-        Visit each link in BFS order
+        Visit all links from start in depth-first order and will apply
+        func to each visited link
 
-        :param func: [description]
-        :type func: [type]
+        :param start: the link to start at
+        :type start: ELink
+        :param func: An optional function to apply to each link as it is found
+        :type func: function
+
+        :returns: A list of links
+        :rtype: list of ELink
         """
-        visited = [start]
+        visited = []
 
         def vis_children(link):
             visited.append(link)
-            func(link)
+            if func is not None:
+                func(link)
 
             for li in link.child:
                 if li not in visited:
                     vis_children(li)
 
         vis_children(start)
+
+        return visited
 
     def dfs_path(self, l1, l2):
         path = []
@@ -475,7 +437,7 @@ class ERobot(Robot):
         else:
             # self._base_link = self.links[link]
             raise ValueError('must be an ELink')
-        self._reset_fk_path()
+        # self._reset_fk_path()
 # --------------------------------------------------------------------- #
 
     @property
@@ -498,7 +460,7 @@ class ERobot(Robot):
             self._ee_links = link
         else:
             raise ValueError('expecting an ELink or list of ELinks')
-        self._reset_fk_path()
+        # self._reset_fk_path()
 # --------------------------------------------------------------------- #
 
     # @property

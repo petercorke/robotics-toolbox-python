@@ -107,7 +107,7 @@ class TestETS(unittest.TestCase):
     def test_fkine_traj(self):
         panda = rp.models.ETS.Panda()
         q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        qq = np.c_[q, q, q, q]
+        qq = np.r_[q, q, q, q]
 
         ans = np.array([
             [-0.50827907, -0.57904589,  0.63746234,  0.44682295],
@@ -133,11 +133,11 @@ class TestETS(unittest.TestCase):
         r2 = pm.fkine_all()
 
         for i in range(7):
-            nt.assert_array_almost_equal(p._ets[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
 
         p.fkine_all(q)
         for i in range(7):
-            nt.assert_array_almost_equal(p._ets[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
 
     def test_jacob0(self):
         panda = rp.models.ETS.Panda()
@@ -420,7 +420,6 @@ class TestETS(unittest.TestCase):
         l1 = rp.ELink(parent=l0)
         r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_links=l0)
         r.base_link = l1
-        r.base_link = 0
 
         with self.assertRaises(TypeError):
             rp.ERobot(l0, base=sm.SE3.Rx(1.3))
