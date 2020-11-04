@@ -4,7 +4,7 @@
 @author Jesse Haviland
 """
 
-import roboticstoolbox as rtb
+import roboticstoolbox as rp
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
@@ -14,7 +14,15 @@ import qpsolvers as qp
 # env.launch()
 
 # Create a Panda robot object
-panda = rtb.models.ETS.Panda()
+# panda = rtb.models.ETS.Panda()
+
+rx = rp.ETS.rx(1.543)
+ry = rp.ETS.ry(1.543)
+tz = rp.ETS.tz(1)
+
+l0 = rp.ELink(rx * ry * tz)
+
+print(l0)
 
 # print(panda)
 # print(panda.base_link)

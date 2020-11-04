@@ -20,7 +20,7 @@ class TestELink(unittest.TestCase):
 
         l0 = rp.ELink(rx * ry * tz)
 
-        ans = 'Rx(88.4074) * Ry(88.4074) * tz(1)'
+        ans = 'name[(): Rx(88.41°) * Ry(88.41°) * tz(1)] '
 
         self.assertEqual(str(l0), ans)
 
@@ -223,7 +223,7 @@ qlim  =      -2.8 to      2.8""")
         d1, _, _ = link.closest_point(s1, 5)
         d2, _, _ = link.closest_point(s1)
 
-        self.assertAlmostEqual(d0, -0.5599999999995913)
+        self.assertAlmostEqual(d0, -0.49)
         self.assertAlmostEqual(d1, 2.44)
         self.assertAlmostEqual(d2, None)
 

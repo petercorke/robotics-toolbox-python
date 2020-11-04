@@ -1217,7 +1217,6 @@ class ERobot(Robot):
         make it impossible for the robot to run into joint limits. Requires
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case
-
         :param ps: The minimum angle (in radians) in which the joint is
             allowed to approach to its limit
         :type ps: float
@@ -1228,7 +1227,6 @@ class ERobot(Robot):
         :type n: int
         :param gain: The gain for the velocity damper
         :type gain: float
-
         :returns: Ain, Bin as the inequality contraints for an optisator
         :rtype: ndarray(6), ndarray(6)
         '''
@@ -1251,39 +1249,69 @@ class ERobot(Robot):
 
         return Ain, Bin
 
-    # def link_collision_damper(self, links=None, col, ob, q):
-    #     dii = 5
-    #     di = 0.3
-    #     ds = 0.05
+    def link_collision_damper(
+            self, shape, q=None, di=0.3, ds=0.05, xi=1.0,
+            from_link=None, to_link=None):
 
-    #     if links is None:
-    #         links = self.links[1:]
+        if from_link is None:
+            from_link = self.base_link
 
-    #     ret = p.getClosestPoints(col.co, ob.co, dii)
+        if to_link is None:
+            to_link = self.ee_link
 
-    #     if len(ret) > 0:
-    #         ret = ret[0]
-    #         wTlp = sm.SE3(ret[5])
-    #         wTcp = sm.SE3(ret[6])
-    #         lpTcp = wTlp.inv() * wTcp
+        links, n = self.get_path(from_link, to_link)
 
-    #         d = ret[8]
+        if q is None:
+            q = np.copy(self.q)
+        else:
+            q = getvector(q, n)
 
-    #     if d < di:
-    #         n = lpTcp.t / d
-    #         nh = np.expand_dims(np.r_[n, 0, 0, 0], axis=0)
+        j = 0
+        Ain = None
+        bin = None
 
-    #         Je = r.jacobe(q, from_link=r.base_link, to_link=link, offset=col.base)
-    #         n = Je.shape[1]
-    #         dp = nh @ ob.v
-    #         l_Ain = np.zeros((1, 13))
-    #         l_Ain[0, :n] = nh @ Je
-    #         l_bin = (0.8 * (d - ds) / (di - ds)) + dp
-    #     else:
-    #         l_Ain = None
-    #         l_bin = None
+        def indiv_calculation(link, link_col, q):
+            d, wTlp, wTcp = link_col.closest_point(shape, di)
 
-    #     return l_Ain, l_bin, d, wTcp
+            if d is not None:
+                lpTcp = wTlp.inv() * wTcp
+                norm = lpTcp.t / d
+                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
+
+                Je = self.jacobe(
+                    q, from_link=self.base_link, to_link=link,
+                    offset=link_col.base)
+                n_dim = Je.shape[1]
+                dp = norm_h @ shape.v
+                l_Ain = np.zeros((1, n))
+                l_Ain[0, :n_dim] = norm_h @ Je
+                l_bin = (xi * (d - ds) / (di - ds)) + dp
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin, d, wTcp
+
+        for link in links:
+            if link.jtype == link.VARIABLE:
+                j += 1
+
+            for link_col in link.collision:
+                l_Ain, l_bin, d, wTcp = indiv_calculation(
+                                                link, link_col, q[:j])
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = np.r_[Ain, l_Ain]
+
+                    if bin is None:
+                        bin = np.array(l_bin)
+                    else:
+                        bin = np.r_[bin, l_bin]
+
+        return Ain, bin
 
     def closest_point(self, shape, inf_dist=1.0):
         '''
@@ -1292,7 +1320,6 @@ class ERobot(Robot):
         inf_dist. It will also return the points on self and shape in the
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
-
         :param shape: The shape to compare distance to
         :type shape: Shape
         :param inf_dist: The minimum distance within which to consider
@@ -1324,7 +1351,6 @@ class ERobot(Robot):
     def collided(self, shape):
         '''
         collided(shape) checks if this robot and shape have collided
-
         :param shape: The shape to compare distance to
         :type shape: Shape
         :returns: True if shapes have collided
