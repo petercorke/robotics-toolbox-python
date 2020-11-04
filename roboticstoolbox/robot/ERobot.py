@@ -139,7 +139,7 @@ class ERobot(Robot):
 
         # Set the ee links
         self.ee_links = []
-        if gripper_links is None:
+        if len(gripper_links) == 0:
             for link in elinks:
                 # is this a leaf node? and do we not have any grippers
                 if len(link.child) == 0:
@@ -525,8 +525,6 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    # TODO would prefer this was called ets, but that name taken for
-    # a property earlier
     def ets(self, ee=None):
         if ee is None:
             if len(self.ee_links) == 1:
@@ -625,22 +623,35 @@ class ERobot(Robot):
         if to_link is None:
             to_link = self.ee_links[0]
 
-        q = self._getq(q)
+        trajn = 1
+
+        if q is None:
+            q = self.q
+
+        try:
+            q = getvector(q, self.n, 'col')
+        except ValueError:
+            trajn = q.shape[1]
+            verifymatrix(q, (self.n, trajn))
 
         path, _ = self.get_path(from_link, to_link)
-        j = 0
-        tr = self.base.A
 
-        for link in path:
-            if link.isjoint:
-                T = link.A(q[j], fast=True)
-                j += 1
+        for i in range(trajn):
+            tr = self.base.A
+            for link in path:
+                if link.isjoint:
+                    T = link.A(q[link.jindex, i], fast=True)
+                else:
+                    T = link.A(fast=True)
+
+                tr = tr @ T
+
+            if i == 0:
+                t = SE3(tr)
             else:
-                T = link.A(fast=True)
+                t.append(SE3(tr))
 
-            tr = tr @ T
-
-        return SE3(tr)
+        return t
 
     def fkine_all(self, q=None):
         '''

@@ -14,7 +14,7 @@ import qpsolvers as qp
 # env.launch()
 
 # Create a Panda robot object
-panda = rtb.models.Panda()
+panda = rtb.models.ETS.Panda()
 
 # print(panda)
 # print(panda.base_link)
