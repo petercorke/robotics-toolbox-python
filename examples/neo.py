@@ -108,7 +108,7 @@ while not arrived:
         # object on the robot to the collision in the scene
         c_Ain, c_bin = panda.link_collision_damper(
             collision, panda.q[:n], 0.3, 0.05, 1.0,
-            panda.elinks['panda_joint1'], panda.elinks['panda_hand_joint'])
+            panda.link_dict['panda_link1'], panda.link_dict['panda_hand'])
 
         # If there are any parts of the robot within the influence distance
         # to the collision in the scene

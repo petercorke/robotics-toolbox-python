@@ -471,6 +471,11 @@ class ERobot(Robot):
 # --------------------------------------------------------------------- #
 
     @property
+    def link_dict(self):
+        return self._linkdict
+# --------------------------------------------------------------------- #
+
+    @property
     def base_link(self):
         return self._base_link
 
