@@ -7,13 +7,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; Robotics Toolbox Python 0.3.7
+  <title>Python Module Index &mdash; Robotics Toolbox for Python 0.3.7
  documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
 
   
   
@@ -54,9 +55,12 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
           
 
+          
+            
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -86,8 +90,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Arm Type Robots - DH</a></li>
-<li class="toctree-l1"><a class="reference internal" href="arm_ets.html">Arm Type Robots - ETS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
 </ul>
 
             
@@ -103,14 +108,14 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Robotics Toolbox Python</a>
+          <a href="index.html">Robotics Toolbox for Python</a>
         
       </nav>
 
 
       <div class="wy-nav-content">
         
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
         
           
 
@@ -169,32 +174,52 @@
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="arm_ets.html#module-roboticstoolbox.robot.ETS"><code class="xref">roboticstoolbox.robot.ETS</code></a></td><td>
+       <a href="arm_backend_pyplot.html#module-roboticstoolbox.backend.PyPlot"><code class="xref">roboticstoolbox.backend.PyPlot</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="arm_dh.html#module-roboticstoolbox.robot.PrismaticDH"><code class="xref">roboticstoolbox.robot.PrismaticDH</code></a></td><td>
+       <a href="arm_backend_swift.html#module-roboticstoolbox.backend.Swift"><code class="xref">roboticstoolbox.backend.Swift</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="arm_dh.html#module-roboticstoolbox.robot.PrismaticMDH"><code class="xref">roboticstoolbox.robot.PrismaticMDH</code></a></td><td>
+       <a href="arm_dh.html#module-roboticstoolbox.models.DH"><code class="xref">roboticstoolbox.models.DH</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="arm_dh.html#module-roboticstoolbox.robot.RevoluteDH"><code class="xref">roboticstoolbox.robot.RevoluteDH</code></a></td><td>
+       <a href="arm_erobot.html#module-roboticstoolbox.models.ETS"><code class="xref">roboticstoolbox.models.ETS</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="arm_dh.html#module-roboticstoolbox.robot.RevoluteMDH"><code class="xref">roboticstoolbox.robot.RevoluteMDH</code></a></td><td>
+       <a href="arm_erobot.html#module-roboticstoolbox.models.URDF"><code class="xref">roboticstoolbox.models.URDF</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="arm_dh.html#module-roboticstoolbox.robot.SerialLink"><code class="xref">roboticstoolbox.robot.SerialLink</code></a></td><td>
+       <a href="arm_erobot.html#module-roboticstoolbox.robot.ELink"><code class="xref">roboticstoolbox.robot.ELink</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="arm_erobot.html#module-roboticstoolbox.robot.ERobot"><code class="xref">roboticstoolbox.robot.ERobot</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="mobile.html#module-roboticstoolbox.robot.ETS"><code class="xref">roboticstoolbox.robot.ETS</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="arm_superclass.html#module-roboticstoolbox.robot.Link"><code class="xref">roboticstoolbox.robot.Link</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="arm_superclass.html#module-roboticstoolbox.robot.Robot"><code class="xref">roboticstoolbox.robot.Robot</code></a></td><td>
        <em></em></td></tr>
    </table>
 
@@ -210,7 +235,10 @@
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2020, Jesse Haviland
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
 
     </p>
   </div>
@@ -249,7 +277,7 @@
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-102222819-4', 'auto');
+    ga('create', 'G-11Q6WJM565', 'auto');
     ga('send', 'pageview');
     </script>
 

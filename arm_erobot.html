@@ -1,0 +1,2725 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ERobot models &mdash; Robotics Toolbox for Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Superclasses" href="arm_superclass.html" />
+    <link rel="prev" title="Elementary transform sequence (ETS) models" href="arm_ets.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ERobot models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#erobot">ERobot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#elink">ELink</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#e-models">ERobot models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#defined-using-ets">Defined using ETS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#defined-from-urdf">Defined from URDF</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="arm.html">Manipulator arms</a> &raquo;</li>
+        
+      <li>ERobot models</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/arm_erobot.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="arm_superclass.html" class="btn btn-neutral float-right" title="Superclasses" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="arm_ets.html" class="btn btn-neutral float-left" title="Elementary transform sequence (ETS) models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="erobot-models">
+<h1>ERobot models<a class="headerlink" href="#erobot-models" title="Permalink to this headline">¶</a></h1>
+<p><em>Code author: Jesse Haviland</em></p>
+<div class="section" id="erobot">
+<h2>ERobot<a class="headerlink" href="#erobot" title="Permalink to this headline">¶</a></h2>
+<div class="graphviz"><img src="_images/inheritance-70ab6ebe28e11059e059198c081bf678e652c9fb.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
+<map id="inheritanced41b53372b" name="inheritanced41b53372b">
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="153,5,269,31"/>
+<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="5,5,105,31"/>
+</map><p>The various models <a class="reference internal" href="#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
+<span class="target" id="module-roboticstoolbox.robot.ERobot"></span><p>Created on Tue Apr 24 15:48:52 2020
+&#64;author: Jesse Haviland</p>
+<dl class="py class">
+<dt id="roboticstoolbox.robot.ERobot.ERobot">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ERobot.</code><code class="sig-name descname">ERobot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elinks</span></em>, <em class="sig-param"><span class="n">base_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gripper_links</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Robot.Robot</span></code></a></p>
+<p>The ERobot. A superclass which represents the
+kinematics of a serial-link manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et_list</strong> (<em>ET list</em>) – List of elementary transforms which represent the robot
+kinematics</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the robot</p></li>
+<li><p><strong>manufacturer</strong> (<em>str</em><em>, </em><em>optional</em>) – Manufacturer of the robot</p></li>
+<li><p><strong>base</strong> (<em>SE3</em><em>, </em><em>optional</em>) – Location of the base is the world frame</p></li>
+<li><p><strong>tool</strong> (<em>SE3</em><em>, </em><em>optional</em>) – Offset of the flange of the robot to the end-effector</p></li>
+<li><p><strong>gravity</strong> – The gravity vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform Sequence,
+J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.q">
+<em class="property">property </em><code class="sig-name descname">q</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint configuration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span></code> is the robot joint configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint configuration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint configuration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.qd">
+<em class="property">property </em><code class="sig-name descname">qd</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.qd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint velocity (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qd</span></code> is the robot joint velocity</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint velocity</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qd</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint velocity</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.qdd">
+<em class="property">property </em><code class="sig-name descname">qdd</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.qdd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint acceleration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span></code> is the robot joint acceleration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint acceleration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot joint acceleration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.control_type">
+<em class="property">property </em><code class="sig-name descname">control_type</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.control_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot control mode (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.control_type</span></code> is the robot control mode</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot control mode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.control_type</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot control mode</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.dfs_links">
+<code class="sig-name descname">dfs_links</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">func</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.dfs_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.dfs_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visit all links from start in depth-first order and will apply
+func to each visited link</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the link to start at</p></li>
+<li><p><strong>func</strong> (<em>function</em>) – An optional function to apply to each link as it is found</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of links</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of ELink</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.dfs_path">
+<code class="sig-name descname">dfs_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">l1</span></em>, <em class="sig-param"><span class="n">l2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.dfs_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.dfs_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.fk_dict">
+<code class="sig-name descname">fk_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.fk_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fk_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.urdf_to_ets_args">
+<code class="sig-name descname">urdf_to_ets_args</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span></em>, <em class="sig-param"><span class="n">tld</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.urdf_to_ets_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.urdf_to_ets_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>[summary]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em><em>, </em><em>in Posix file path fprmat</em>) – File path relative to the xacro folder</p></li>
+<li><p><strong>tld</strong> (<em>str</em><em>, </em><em>optional</em>) – top-level directory, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Links and robot name</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple(ELink list, str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.qlim">
+<em class="property">property </em><code class="sig-name descname">qlim</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.qlim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joint limits (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of joint limit values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,n)</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span>
+<span class="go">array([[-2.7925, -1.9199, -2.3562, -4.6426, -1.7453, -4.6426],</span>
+<span class="go">       [ 2.7925,  1.9199,  2.3562,  4.6426,  1.7453,  4.6426]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.n">
+<em class="property">property </em><code class="sig-name descname">n</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of joints (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of joints</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">n</span>
+<span class="go">6</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.elinks">
+<em class="property">property </em><code class="sig-name descname">elinks</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.elinks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.base_link">
+<em class="property">property </em><code class="sig-name descname">base_link</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.base_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ee_links">
+<em class="property">property </em><code class="sig-name descname">ee_links</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ee_links" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ets">
+<code class="sig-name descname">ets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ee</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.ets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.fkine">
+<code class="sig-name descname">fkine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.fkine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fkine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.fkine_all">
+<code class="sig-name descname">fkine_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.fkine_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fkine_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tall = fkine_all(q) evaluates fkine for each joint within a robot and
+returns a trajecotry of poses.</p>
+<p>Tall = fkine_all() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return T</dt>
+<dd class="field-even"><p>Homogeneous transformation trajectory</p>
+</dd>
+<dt class="field-odd">Rtype T</dt>
+<dd class="field-odd"><p>SE3 list</p>
+</dd>
+<dt class="field-even">Notes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>The robot’s base transform, if present, are incorporated
+into the result.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.get_path">
+<code class="sig-name descname">get_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">from_link</span></em>, <em class="sig-param"><span class="n">to_link</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.get_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.get_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0">
+<code class="sig-name descname">jacob0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jacobe">
+<code class="sig-name descname">jacobe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacobe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacobe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
+velocity to end-effector spatial velocity. v = Je*qd in the
+end-effector frame.</p>
+<p>Je = jacobe() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Return J</dt>
+<dd class="field-even"><p>The manipulator Jacobian in ee frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(6,n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.hessian0">
+<code class="sig-name descname">hessian0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.hessian0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.hessian0" title="Permalink to this definition">¶</a></dt>
+<dd><p>The manipulator Hessian tensor maps joint acceleration to end-effector
+spatial acceleration, expressed in the world-coordinate frame. This
+function calulcates this based on the ETS of the robot. One of J0 or q
+is required. Supply J0 if already calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J0</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian in the 0 frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulator Hessian in 0 frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(6,n,n)</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.manipulability">
+<code class="sig-name descname">manipulability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.manipulability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.manipulability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the manipulability index (scalar) robot at the joint
+configuration q. It indicates dexterity, that is, how isotropic the
+robot’s motion is with respect to the 6 degrees of Cartesian motion.
+The measure is high when the manipulator is capable of equal motion
+in all directions and low when the manipulator is close to a
+singularity. One of J or q is required. Supply J if already
+calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian in any frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulability index</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Analysis and control of robot manipulators with redundancy,
+T. Yoshikawa,</p></li>
+<li><p>Robotics Research: The First International Symposium (M. Brady
+and R. Paul, eds.), pp. 735-747, The MIT press, 1984.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jacobm">
+<code class="sig-name descname">jacobm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">H</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacobm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacobm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the manipulability Jacobian. This measure relates the rate
+of change of the manipulability to the joint velocities of the robot.
+One of J or q is required. Supply J and H if already calculated to
+save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>J</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian in any frame</p></li>
+<li><p><strong>H</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>,</em><em>n</em><em>)</em>) – The manipulator Hessian in any frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulability Jacobian</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">References</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.hierarchy">
+<code class="sig-name descname">hierarchy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.hierarchy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.hierarchy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty print the robot link hierachy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pretty print of the robot model</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">NameError: name &#39;rtb&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;t&#39; is not defined</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jacobev">
+<code class="sig-name descname">jacobev</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacobev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacobev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jv = jacobev(q) is the spatial velocity Jacobian, at joint
+configuration q, which relates the velocity in the base frame to the
+velocity in the end-effector frame.</p>
+<p>Jv = jacobev() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Returns J</dt>
+<dd class="field-even"><p>The velocity Jacobian in ee frame</p>
+</dd>
+<dt class="field-odd">Rtype J</dt>
+<dd class="field-odd"><p>float ndarray(6,6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0v">
+<code class="sig-name descname">jacob0v</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0v"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
+configuration q, which relates the velocity in the end-effector frame
+to velocity in the base frame</p>
+<p>Jv = jacob0v() as above except uses the stored q value of the
+robot object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional,
+if not supplied will use the stored q values).</p>
+</dd>
+<dt class="field-even">Returns J</dt>
+<dd class="field-even"><p>The velocity Jacobian in 0 frame</p>
+</dd>
+<dt class="field-odd">Rtype J</dt>
+<dd class="field-odd"><p>float ndarray(6,6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.joint_velocity_damper">
+<code class="sig-name descname">joint_velocity_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ps</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">pi</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gain</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.joint_velocity_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.joint_velocity_damper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formulates an inequality contraint which, when optimised for will
+make it impossible for the robot to run into joint limits. Requires
+the joint limits of the robot to be specified. See examples/mmc.py
+for use case
+:param ps: The minimum angle (in radians) in which the joint is</p>
+<blockquote>
+<div><p>allowed to approach to its limit</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pi</strong> (<em>float</em>) – The influence angle (in radians) in which the velocity
+damper becomes active</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – The number of joints to consider. Defaults to all joints</p></li>
+<li><p><strong>gain</strong> (<em>float</em>) – The gain for the velocity damper</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Ain, Bin as the inequality contraints for an optisator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6), ndarray(6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
+<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.closest_point">
+<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.closest_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
+distance between this robot and shape, provided it is less than
+inf_dist. It will also return the points on self and shape in the
+world frame which connect the line of length distance between the
+shapes. If the distance is negative then the shapes are collided.
+:param shape: The shape to compare distance to
+:type shape: Shape
+:param inf_dist: The minimum distance within which to consider</p>
+<blockquote>
+<div><p>the shape</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>d, p1, p2 where d is the distance between the shapes,
+p1 and p2 are the points in the world frame on the respective
+shapes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float, SE3, SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.collided">
+<code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.collided" title="Permalink to this definition">¶</a></dt>
+<dd><p>collided(shape) checks if this robot and shape have collided
+:param shape: The shape to compare distance to
+:type shape: Shape
+:returns: True if shapes have collided
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.addconfiguration">
+<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.addconfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a named joint configuration (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the joint configuration</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>)</em>) – Joint configuration</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">qz</span>
+<span class="go">array([0., 0., 0., 0., 0., 0.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;mypos&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">mypos</span>
+<span class="go">array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.base">
+<em class="property">property </em><code class="sig-name descname">base</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot base transform (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.base</span></code> is the robot base transform</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot tool transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>SE3 instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.base</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot base transform</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The private attribute <code class="docutils literal notranslate"><span class="pre">_base</span></code> will be None in the case of
+no base transform, but this property will return <code class="docutils literal notranslate"><span class="pre">SE3()</span></code> which
+is an identity matrix.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.dynchanged">
+<code class="sig-name descname">dynchanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.dynchanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dynamic parameters have changed (Robot superclass)</p>
+<p>Called from a property setter to inform the robot that the cache of
+dynamic parameters is invalid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">roboticstoolbox.Link._listen_dyn()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.dyntable">
+<code class="sig-name descname">dyntable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.dyntable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty print the dynamic parameters (Robot superclass)</p>
+<p>The dynamic parameters are printed in a table, with one row per link.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.friction">
+<code class="sig-name descname">friction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.friction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manipulator joint friction (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The joint friction forces/torques for the robot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.friction(qd)</span></code> is a vector of joint friction
+forces/torques for the robot moving with joint velocities <code class="docutils literal notranslate"><span class="pre">qd</span></code>.</p>
+<p>The friction model includes:</p>
+<ul class="simple">
+<li><p>Viscous friction which is a linear function of velocity.</p></li>
+<li><p>Coulomb friction which is proportional to sign(qd).</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau_j = G^2 B \dot{q}_j + |G_j| \left\{ \begin{array}{ll}
+    \tau_{C,j}^+ &amp; \mbox{if $\dot{q}_j &gt; 0$} \\
+    \tau_{C,j}^- &amp; \mbox{if $\dot{q}_j &lt; 0$} \end{array} \right.\end{split}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The friction value should be added to the motor output torque to
+determine the nett torque. It has a negative value when qd &gt; 0.</p></li>
+<li><p>The returned friction value is referred to the output of the
+gearbox.</p></li>
+<li><p>The friction parameters in the Link object are referred to the
+motor.</p></li>
+<li><p>Motor viscous friction is scaled up by <span class="math notranslate nohighlight">\(G^2\)</span>.</p></li>
+<li><p>Motor Coulomb friction is scaled up by math:<cite>G</cite>.</p></li>
+<li><p>The appropriate Coulomb friction value to use in the
+non-symmetric case depends on the sign of the joint velocity,
+not the motor velocity.</p></li>
+<li><p>Coulomb friction is zero for zero joint velocity, stiction is
+not modeled.</p></li>
+<li><p>The absolute value of the gear ratio is used.  Negative gear
+ratios are tricky: the Puma560 robot has negative gear ratio for
+joints 1 and 3.</p></li>
+<li><p>The absolute value of the gear ratio is used. Negative gear
+ratios are tricky: the Puma560 has negative gear ratio for
+joints 1 and 3.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.nofriction()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.friction()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.gravity">
+<em class="property">property </em><code class="sig-name descname">gravity</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.gravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set default gravitational acceleration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the default gravitational acceleration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets default gravitational
+acceleration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the z-axis is upward, out of the Earth, this should be
+a positive number.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ikcon">
+<code class="sig-name descname">ikcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikcon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
+<p>q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
+corresponding to the robot end-effector pose T which is an SE3 object
+or homogenenous transform matrix (4x4), and N is the number of robot
+joints. Initial joint coordinates Q0 used for the minimisation.</p>
+<p>q, success, err = ikcon(T) as above but q0 is set to 0.</p>
+<p>Trajectory operation:
+In all cases if T is a vector of SE3 objects or a homogeneous
+transform sequence (4x4xm) then returns the joint coordinates
+corresponding to each of the transforms in the sequence. q is mxn
+where n is the number of robot joints. The initial estimate of q
+for each time step is taken as the solution from the previous time
+step. Retruns trajectory of joints q (mxn), list of success (m) and
+list of errors (m)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em><em> or </em><em>SE3 trajectory</em>) – The desired end-effector pose</p></li>
+<li><p><strong>q0</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>) </em><em>(</em><em>default all zeros</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retrun q</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Rtype q</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Retrun success</dt>
+<dd class="field-even"><p>IK solved (True) or failed (False)</p>
+</dd>
+<dt class="field-odd">Rtype success</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Retrun error</dt>
+<dd class="field-even"><p>Final pose error</p>
+</dd>
+<dt class="field-odd">Rtype error</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Joint limits are considered in this solution.</p></li>
+<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
+<li><p>In the case of multiple feasible solutions, the solution
+returned depends on the initial choice of q0.</p></li>
+<li><p>Works by minimizing the error between the forward kinematics
+of the joint angle solution and the end-effector frame as an
+optimisation.</p></li>
+<li><p>The objective function (error) is described as:
+sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+Where omega is some gain matrix, currently not modifiable.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ikine">
+<code class="sig-name descname">ikine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">500</span></em>, <em class="sig-param"><span class="n">rlimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-10</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">Ymin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">search</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">slimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">transpose</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical inverse kinematics by optimization (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (SE3 with 1 or <code class="docutils literal notranslate"><span class="pre">m</span></code> values) – The desired end-effector pose</p></li>
+<li><p><strong>ilimit</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – maximum number of iterations</p></li>
+<li><p><strong>rlimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of consecutive step rejections</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em> (</em><em>default 1e-10</em><em>)</em>) – final error tolerance</p></li>
+<li><p><strong>Y</strong> (<em>float</em><em> (</em><em>default 0.1</em><em>)</em>) – initial value of lambda</p></li>
+<li><p><strong>Ymin</strong> (<em>float</em><em> (</em><em>default 0</em><em>)</em>) – minimum allowable value of lambda</p></li>
+<li><p><strong>mask</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>)</em>) – mask vector that correspond to translation in X, Y and Z
+and rotation about X, Y and Z respectively.</p></li>
+<li><p><strong>q0</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>) </em><em>(</em><em>default all zeros</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+<li><p><strong>search</strong> (<em>bool</em>) – search over all configurations</p></li>
+<li><p><strong>slimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of search attempts</p></li>
+<li><p><strong>transpose</strong> (<em>float</em>) – use Jacobian transpose with step size A, rather
+than Levenberg-Marquadt</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>IK solver failed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool or list of bool</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If failed, what went wrong</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of str</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">q,</span> <span class="pre">failure,</span> <span class="pre">reason</span> <span class="pre">=</span> <span class="pre">ikine(T)</span></code> are the joint coordinates (n)
+corresponding to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code>
+instance. <code class="docutils literal notranslate"><span class="pre">failure</span></code> is True if the solver failed, and <code class="docutils literal notranslate"><span class="pre">reason</span></code>
+contains details of the failure.</p>
+<p>This method can be used for robots with any number of degrees of
+freedom.</p>
+<p><strong>Trajectory operation:</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">T</span></code> contains <code class="docutils literal notranslate"><span class="pre">m</span></code> &gt; 1 values, ie. a trajectory, then returns the
+joint coordinates corresponding to each of the pose values in <code class="docutils literal notranslate"><span class="pre">T</span></code>.
+<code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n) where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints. The initial
+estimate of <code class="docutils literal notranslate"><span class="pre">q</span></code> for each time step is taken as the solution from the
+previous time step. Returns trajectory of joints <code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n), list of
+failure (m) and list of error reasons (m).</p>
+<p><strong>Underactuated robots:</strong></p>
+<p>For the case where the manipulator has fewer than 6 DOF the
+solution space has more dimensions than can be spanned by the
+manipulator joint coordinates.</p>
+<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector (6)
+specifies the Cartesian DOF (in the wrist coordinate frame) that will
+be ignored in reaching a solution.  The mask vector has six elements
+that correspond to translation in X, Y and Z, and rotation about X, Y
+and Z respectively. The value should be 0 (for ignore) or 1. The
+number of non-zero elements should equal the number of manipulator
+DOF.</p>
+<p>For example when using a 3 DOF manipulator rotation orientation might
+be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
+<p>For robots with 4 or 5 DOF this method is very difficult to use since
+orientation is specified by T in world coordinates and the achievable
+orientations are a function of the tool position.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Solution is computed iteratively.</p></li>
+<li><p>Implements a Levenberg-Marquadt variable step size solver.</p></li>
+<li><p>The tolerance is computed on the norm of the error between
+current and desired tool pose.  This norm is computed from
+distances and angles without any kind of weighting.</p></li>
+<li><p>The inverse kinematic solution is generally not unique, and
+depends on the initial guess q0 (defaults to 0).</p></li>
+<li><p>The default value of q0 is zero which is a poor choice for most
+manipulators (eg. puma560, twolink) since it corresponds to a
+kinematic singularity.</p></li>
+<li><p>Such a solution is completely general, though much less
+efficient than specific inverse kinematic solutions derived
+symbolically, like ikine6s or ikine3.</p></li>
+<li><p>This approach allows a solution to be obtained at a singularity,
+but the joint angles within the null space are arbitrarily
+assigned.</p></li>
+<li><p>Joint offsets, if defined, are added to the inverse kinematics
+to generate q.</p></li>
+<li><p>Joint limits are not considered in this solution.</p></li>
+<li><p>The ‘search’ option peforms a brute-force search with initial
+conditions chosen from the entire configuration space.</p></li>
+<li><p>If the search option is used any prismatic joint must have
+joint limits defined.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control, P. Corke, Springer 2011,
+Section 8.4.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ikunc">
+<code class="sig-name descname">ikunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse manipulator by optimization without joint limits (Robot
+superclass)</p>
+<p>q, success, err = ikunc(T) are the joint coordinates (n) corresponding
+to the robot end-effector pose T which is an SE3 object or
+homogenenous transform matrix (4x4), and n is the number of robot
+joints. Also returns success and err which is the scalar final value
+of the objective function.</p>
+<p>q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the
+initial joint coordinates q0 used for the minimisation.</p>
+<p>Trajectory operation:
+In all cases if T is a vector of SE3 objects (m) or a homogeneous
+transform sequence (4x4xm) then returns the joint coordinates
+corresponding to each of the transforms in the sequence. q is mxn
+where n is the number of robot joints. The initial estimate of q
+for each time step is taken as the solution from the previous time
+step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em><em> or </em><em>SE3 trajectory</em>) – The desired end-effector pose</p></li>
+<li><p><strong>ilimit</strong> (<em>bool</em>) – Iteration limit (default 1000)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retrun q</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Rtype q</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Retrun success</dt>
+<dd class="field-even"><p>IK solved (True) or failed (False)</p>
+</dd>
+<dt class="field-odd">Rtype success</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Retrun error</dt>
+<dd class="field-even"><p>Final pose error</p>
+</dd>
+<dt class="field-odd">Rtype error</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Joint limits are not considered in this solution.</p></li>
+<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
+<li><p>In the case of multiple feasible solutions, the solution
+returned depends on the initial choice of q0</p></li>
+<li><p>Works by minimizing the error between the forward kinematics of
+the joint angle solution and the end-effector frame as an
+optimisation.</p></li>
+<li><p>The objective function (error) is described as:
+sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+Where omega is some gain matrix, currently not modifiable.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.links">
+<em class="property">property </em><code class="sig-name descname">links</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Robot links (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of link objects</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of Link subclass instances</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is probably more concise to index the robot object rather
+than the list of links, ie. the following are equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">robot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.manufacturer">
+<em class="property">property </em><code class="sig-name descname">manufacturer</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.manufacturer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot manufacturer’s name (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.manufacturer</span></code> is the robot manufacturer’s name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot manufacturer’s name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.manufacturer</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the manufacturer’s name</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot name (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the robot name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets therobot name</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.nofriction">
+<code class="sig-name descname">nofriction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">viscous</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.nofriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove manipulator joint friction (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coulomb</strong> (<em>bool</em>) – set the Coulomb friction to 0</p></li>
+<li><p><strong>viscous</strong> (<em>bool</em>) – set the viscous friction to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Robot subclass</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">nofriction()</span></code> copies the robot and returns
+a robot with the same link parameters except the Coulomb and/or viscous
+friction parameter are set to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.friction()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.nofriction()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.qmincon">
+<code class="sig-name descname">qmincon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.qmincon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move away from joint limits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p>
+</dd>
+<dt class="field-even">Retrun qs</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Rtype qs</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Optimisation solved (True) or failed (False)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Final value of the objective function</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and returns
+a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same end-effector
+pose but are away from the joint coordinate limits. <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number
+of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for successful optimisation.
+<code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of the objective function.</p>
+<p><strong>Trajectory operation</strong></p>
+<p>In all cases if <code class="docutils literal notranslate"><span class="pre">q</span></code> is (m,n) it is taken as a pose sequence and
+<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n) corresponding
+to each of the configurations in the sequence.</p>
+<p><code class="docutils literal notranslate"><span class="pre">err</span></code> and <code class="docutils literal notranslate"><span class="pre">success</span></code> are also (m) and indicate the results of
+optimisation for the corresponding trajectory step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Robot must be redundant.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.tool">
+<em class="property">property </em><code class="sig-name descname">tool</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.tool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot tool transform (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.tool</span></code> is the robot name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot tool transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>SE3 instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.tool</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot tool transform</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The private attribute <code class="docutils literal notranslate"><span class="pre">_tool</span></code> will be None in the case of
+no tool transform, but this property will return <code class="docutils literal notranslate"><span class="pre">SE3()</span></code> which
+is an identity matrix.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="elink">
+<h2>ELink<a class="headerlink" href="#elink" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ERobot</span></code> is defined by a tree of <code class="docutils literal notranslate"><span class="pre">ELink</span></code> subclass objects.</p>
+<div class="graphviz"><img src="_images/inheritance-98370315927b43a8392d2b3d3148ea0626c31a1f.png" alt="Inheritance diagram of roboticstoolbox.ELink" usemap="#inheritancef10af52183" class="inheritance graphviz" /></div>
+<map id="inheritancef10af52183" name="inheritancef10af52183">
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.ELink.ELink" target="_top" title="ETS link class" alt="" coords="257,5,353,31"/>
+<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,5,209,31"/>
+</map><span class="target" id="module-roboticstoolbox.robot.ELink"></span><p>&#64;author: Jesse Haviland</p>
+<dl class="py class">
+<dt id="roboticstoolbox.robot.ELink.ELink">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ELink.</code><code class="sig-name descname">ELink</code><span class="sig-paren">(</span><em class="sig-param">ets=</em>, <em class="sig-param">v=None</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Link.Link</span></code></a></p>
+<p>ETS link class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ets</strong> (<a class="reference internal" href="mobile.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><em>ETS</em></a>) – kinematic - The elementary transforms which make up the link</p></li>
+<li><p><strong>qlim</strong> (<em>float ndarray</em><em>(</em><em>2</em><em>)</em>) – joint variable limits [min max]</p></li>
+<li><p><strong>m</strong> (<em>float</em>) – dynamic - link mass</p></li>
+<li><p><strong>r</strong> (<em>SE3</em>) – dynamic - position of COM with respect to link frame</p></li>
+<li><p><strong>I</strong> (<em>float ndarray</em><em>(</em><em>3</em><em>,</em><em>3</em><em>)</em>) – dynamic - inertia of link with respect to COM</p></li>
+<li><p><strong>Jm</strong> (<em>float</em>) – dynamic - motor inertia</p></li>
+<li><p><strong>B</strong> (<em>float</em>) – dynamic - motor viscous friction</p></li>
+<li><p><strong>Tc</strong> (<em>float ndarray</em><em>(</em><em>2</em><em>)</em>) – dynamic - motor Coulomb friction (1x2 or 2x1)</p></li>
+<li><p><strong>G</strong> (<em>float</em>) – dynamic - gear ratio</p></li>
+</ul>
+</dd>
+</dl>
+<p>The ELink object holds all information related to a robot link and can form
+a serial-connected chain or a rigid-body tree.</p>
+<p>It inherits from the Link class which provides common functionality such
+as joint and link such as kinematics parameters,
+.</p>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform Sequence,
+J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DHLink</span></code></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.v">
+<em class="property">property </em><code class="sig-name descname">v</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.v" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.Ts">
+<em class="property">property </em><code class="sig-name descname">Ts</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.Ts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.isjoint">
+<em class="property">property </em><code class="sig-name descname">isjoint</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.isjoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.jindex">
+<em class="property">property </em><code class="sig-name descname">jindex</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.jindex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.parent">
+<em class="property">property </em><code class="sig-name descname">parent</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.child">
+<em class="property">property </em><code class="sig-name descname">child</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.child" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.M">
+<em class="property">property </em><code class="sig-name descname">M</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.M" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.collision">
+<em class="property">property </em><code class="sig-name descname">collision</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.collision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.geometry">
+<em class="property">property </em><code class="sig-name descname">geometry</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.geometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.A">
+<code class="sig-name descname">A</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fast</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.A"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.A" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link transform matrix</p>
+<p>T = A(q) is the link homogeneous transformation matrix (4x4)
+corresponding to the link variable q</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float</em>) – Joint coordinate (radians or metres). Not required for links
+with no variable</p>
+</dd>
+<dt class="field-even">Return T</dt>
+<dd class="field-even"><p>link homogeneous transformation matrix</p>
+</dd>
+<dt class="field-odd">Rtype T</dt>
+<dd class="field-odd"><p>SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.B">
+<em class="property">property </em><code class="sig-name descname">B</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.B" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set motor viscous friction</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.B</span></code> is the motor viscous friction</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>motor viscous friction</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.B</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the motor viscous friction</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Referred to the motor side of the gearbox.</p></li>
+<li><p>Viscous friction is the same for positive and negative motion.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.G">
+<em class="property">property </em><code class="sig-name descname">G</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.G" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set gear ratio</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.G</span></code> is the transmission gear ratio</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>gear ratio</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.G</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the gear ratio</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The ratio of motor motion : link motion</p></li>
+<li><p>The gear ratio can be negative, see also the <code class="docutils literal notranslate"><span class="pre">flip</span></code> attribute.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink.flip" title="roboticstoolbox.robot.ELink.ELink.flip"><code class="xref py py-func docutils literal notranslate"><span class="pre">flip()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.I">
+<em class="property">property </em><code class="sig-name descname">I</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.I" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link inertia</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.I</span></code> is the link inertia</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link inertia</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3,3)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.I</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link inertia</p></li>
+</ul>
+<p>Link inertia is a symmetric 3x3 matrix describing the inertia with
+respect to a frame with its origin at the centre of mass, and with
+axes parallel to those of the link frame.</p>
+<p>The inertia matrix is</p>
+<p><span class="math notranslate nohighlight">\(\begin{bmatrix} I_{xx} &amp; I_{xy} &amp; I_{xz} \\ I_{xy} &amp; I_{yy} &amp; I_{yz} \\I_{xz} &amp; I_{yz} &amp; I_{zz} \end{bmatrix}\)</span></p>
+<p>and can be specified as either:</p>
+<ul class="simple">
+<li><p>a 3 ⨉ 3 symmetric matrix</p></li>
+<li><p>a 3-vector <span class="math notranslate nohighlight">\((I_{xx}, I_{yy}, I_{zz})\)</span></p></li>
+<li><p>a 6-vector <span class="math notranslate nohighlight">\((I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{yz}, I_{xz})\)</span></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Referred to the link side of the gearbox.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.Jm">
+<em class="property">property </em><code class="sig-name descname">Jm</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.Jm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set motor inertia</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Jm</span></code> is the motor inertia</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>motor inertia</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Jm</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the motor inertia</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Referred to the motor side of the gearbox.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.Tc">
+<em class="property">property </em><code class="sig-name descname">Tc</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.Tc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set motor Coulomb friction</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Tc</span></code> is the motor Coulomb friction</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>motor Coulomb friction</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Tc</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the motor Coulomb friction. If a
+scalar is given the value is set to [T, -T], if a 2-vector it is
+assumed to be in the order [Tc⁺, Tc⁻]</p></li>
+</ul>
+<p>Coulomb friction is a non-linear friction effect defined by two
+parameters such that</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau = \left\{ \begin{array}{ll}
+    \tau_C^+ &amp; \mbox{if $\dot{q} &gt; 0$} \\
+    \tau_C^- &amp; \mbox{if $\dot{q} &lt; 0$} \end{array} \right.\end{split}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Referred to the motor side of the gearbox.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\tau_C^+\)</span> must be <span class="math notranslate nohighlight">\(&gt; 0\)</span>, and <span class="math notranslate nohighlight">\(\tau_C^-\)</span> must 
+be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy of link object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Shallow copy of link object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.copy()</span></code> is a new Link subclass instance with a copy of all
+the parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.dyn">
+<code class="sig-name descname">dyn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.dyn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inertial properties of link as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indent</strong> (<em>int</em>) – indent each line by this many spaces</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The string representation of the link dynamics</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.dyn()</span></code> is a string representation the inertial properties of
+the link object in a multi-line format. The properties shown are mass,
+centre of mass, inertia, friction, gear ratio and motor properties.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
+<span class="go">RevoluteDH:   theta=q3,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
+<span class="go">m     =       4.8 </span>
+<span class="go">r     =     -0.02   -0.014     0.07 </span>
+<span class="go">        |    0.066        0        0 | </span>
+<span class="go">I     = |        0    0.086        0 | </span>
+<span class="go">        |        0        0    0.013 | </span>
+<span class="go">Jm    =    0.0002 </span>
+<span class="go">B     =    0.0014 </span>
+<span class="go">Tc    =      0.13(+)     -0.1(-) </span>
+<span class="go">G     =       -54 </span>
+<span class="go">qlim  =      -2.4 to      2.4</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">dyntable()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.flip">
+<em class="property">property </em><code class="sig-name descname">flip</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.flip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set joint flip</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.flip</span></code> is the joint flip status</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint flip</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.flip</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint flip status</p></li>
+</ul>
+<p>Joint flip defines the direction of motion of the joint.</p>
+<p><code class="docutils literal notranslate"><span class="pre">flip</span> <span class="pre">=</span> <span class="pre">False</span></code> is conventional motion direction:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>revolute motion is a positive rotation about the z-axis</p></li>
+<li><p>prismatic motion is a positive translation along the z-axis</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">flip</span> <span class="pre">=</span> <span class="pre">True</span></code> is the opposite motion direction:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>revolute motion is a negative rotation about the z-axis</p></li>
+<li><p>prismatic motion is a negative translation along the z-axis</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.friction">
+<code class="sig-name descname">friction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.friction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute joint friction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qd</strong> (<em>float</em>) – The joint velocity</p></li>
+<li><p><strong>coulomb</strong> – include Coulomb friction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return tau</dt>
+<dd class="field-even"><p>the friction force/torque</p>
+</dd>
+<dt class="field-odd">Rtype tau</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">friction(qd)</span></code> is the joint friction force/torque
+for joint velocity <code class="docutils literal notranslate"><span class="pre">qd</span></code>. The friction model includes:</p>
+<ul class="simple">
+<li><p>Viscous friction which is a linear function of velocity.</p></li>
+<li><p>Coulomb friction which is proportional to sign(qd).</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau = G^2 B \dot{q} + |G| \left\{ \begin{array}{ll}
+    \tau_C^+ &amp; \mbox{if $\dot{q} &gt; 0$} \\
+    \tau_C^- &amp; \mbox{if $\dot{q} &lt; 0$} \end{array} \right.\end{split}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The friction value should be added to the motor output torque to 
+determine the nett torque. It has a negative value when qd &gt; 0.</p></li>
+<li><p>The returned friction value is referred to the output of the
+gearbox.</p></li>
+<li><p>The friction parameters in the Link object are referred to the
+motor.</p></li>
+<li><p>Motor viscous friction is scaled up by <span class="math notranslate nohighlight">\(G^2\)</span>.</p></li>
+<li><p>Motor Coulomb friction is scaled up by math:<cite>G</cite>.</p></li>
+<li><p>The appropriate Coulomb friction value to use in the
+non-symmetric case depends on the sign of the joint velocity,
+not the motor velocity.</p></li>
+<li><p>Coulomb friction is zero for zero joint velocity, stiction is
+not modeled.</p></li>
+<li><p>The absolute value of the gear ratio is used.  Negative gear
+ratios are tricky: the Puma560 robot has negative gear ratio for
+joints 1 and 3.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.islimit">
+<code class="sig-name descname">islimit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.islimit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if joint exceeds limit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float</em>) – joint coordinate</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if joint is exceeded</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.islimit(q)</span></code> is True if <code class="docutils literal notranslate"><span class="pre">q</span></code> exceeds the joint limits defined
+by <code class="docutils literal notranslate"><span class="pre">link</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no limits are set always return False.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink.qlim" title="roboticstoolbox.robot.ELink.ELink.qlim"><code class="xref py py-func docutils literal notranslate"><span class="pre">qlim()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.m">
+<em class="property">property </em><code class="sig-name descname">m</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link mass</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.m</span></code> is the link mass</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link mass</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.m</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link mass</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link name</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.name</span></code> is the link name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.name</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link name</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.nofriction">
+<code class="sig-name descname">nofriction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">viscous</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.nofriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone link without friction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coulomb</strong> (<em>bool</em>) – if True, will set the Coulomb friction to 0</p></li>
+<li><p><strong>viscous</strong> (<em>bool</em>) – if True, will set the viscous friction to 0</p></li>
+</ul>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.nofriction()</span></code> is a copy of the link instance with the same 
+parameters except, the Coulomb and/or viscous friction parameters are
+set to zero.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For simulation it can be useful to remove Couloumb friction
+which can cause problems for numerical integration.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.qlim">
+<em class="property">property </em><code class="sig-name descname">qlim</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.qlim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set joint limits</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.qlim</span></code> is the joint limits</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint limits</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,) or Nine</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.qlim</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint limits</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The limits are not widely enforced within the toolbox.</p></li>
+<li><p>If no joint limits are specified the value is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink.islimit" title="roboticstoolbox.robot.ELink.ELink.islimit"><code class="xref py py-func docutils literal notranslate"><span class="pre">islimit()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.r">
+<em class="property">property </em><code class="sig-name descname">r</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link centre of mass</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.r</span></code> is the link centre of mass</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link centre of mass</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.r</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link centre of mass</p></li>
+</ul>
+<p>The link centre of mass is a 3-vector defined with respect to the link
+frame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.ets">
+<code class="sig-name descname">ets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.ets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.ets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.closest_point">
+<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.closest_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
+distance between this link and shape, provided it is less than
+inf_dist. It will also return the points on self and shape in the
+world frame which connect the line of length distance between the
+shapes. If the distance is negative then the shapes are collided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>Shape</em>) – The shape to compare distance to</p></li>
+<li><p><strong>inf_dist</strong> (<em>float</em>) – The minimum distance within which to consider
+the shape</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
+p1 and p2 are the points in the world frame on the respective
+shapes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float, SE3, SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.collided">
+<code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.collided" title="Permalink to this definition">¶</a></dt>
+<dd><p>collided(shape) checks if this link and shape have collided</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>shape</strong> (<em>Shape</em>) – The shape to compare distance to</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if shapes have collided</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="e-models">
+<span id="id1"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="defined-using-ets">
+<h3>Defined using ETS<a class="headerlink" href="#defined-using-ets" title="Permalink to this headline">¶</a></h3>
+<p>A number of models are defined in terms of elementary transform sequences.
+They can be listed by:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;ETS&quot;</span><span class="p">)</span>
+<span class="go">┌────────┬─────────┬─────────────────────┬────────────┬─────┬────────┬──────────┐</span>
+<span class="go">│ class  │  model  │    manufacturer     │ model type │ DoF │ config │ keywords │</span>
+<span class="go">├────────┼─────────┼─────────────────────┼────────────┼─────┼────────┼──────────┤</span>
+<span class="go">│Panda[0m   │ Panda[0m   │ Franka Emika[0m        │ ETS[0m        │ 7[0m   │ [0m       │ [0m         │</span>
+<span class="go">│Frankie[0m │ Frankie[0m │ Franka Emika, Omron[0m │ ETS[0m        │ 9[0m   │ [0m       │ mobile[0m   │</span>
+<span class="go">└────────┴─────────┴─────────────────────┴────────────┴─────┴────────┴──────────┘</span>
+
+</pre></div>
+</div>
+<span class="target" id="module-roboticstoolbox.models.ETS"></span><dl class="py class">
+<dt id="roboticstoolbox.models.ETS.Panda">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.ETS.</code><code class="sig-name descname">Panda</code><a class="reference internal" href="_modules/roboticstoolbox/models/ETS/Panda.html#Panda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.ETS.Panda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Create model of Franka-Emika Panda manipulator</p>
+<p>panda = Panda() creates a robot object representing the Franka-Emika
+Panda robot arm. This robot is represented using the elementary
+transform sequence (ETS).</p>
+<p>ETS taken from [1] based on
+<a class="reference external" href="https://frankaemika.github.io/docs/control_parameters.html">https://frankaemika.github.io/docs/control_parameters.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.ETS.Frankie">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.ETS.</code><code class="sig-name descname">Frankie</code><a class="reference internal" href="_modules/roboticstoolbox/models/ETS/Frankie.html#Frankie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.ETS.Frankie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>A class representing the Franka Emika Panda robot arm. ETS taken from [1]
+based on <a class="reference external" href="https://frankaemika.github.io/docs/control_parameters.html">https://frankaemika.github.io/docs/control_parameters.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et_list</strong> (<em>list of etb.robot.et</em>) – List of elementary transforms which represent the robot
+kinematics</p></li>
+<li><p><strong>q_idx</strong> (<em>list of int</em>) – List of indexes within the ets_list which correspond to
+joints</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the robot</p></li>
+<li><p><strong>manufacturer</strong> (<em>str</em><em>, </em><em>optional</em>) – Manufacturer of the robot</p></li>
+<li><p><strong>base</strong> (<em>float np.ndarray</em><em>(</em><em>4</em><em>,</em><em>4</em><em>)</em><em>, </em><em>optional</em>) – Location of the base is the world frame</p></li>
+<li><p><strong>tool</strong> (<em>float np.ndarray</em><em>(</em><em>4</em><em>,</em><em>4</em><em>)</em><em>, </em><em>optional</em>) – Offset of the flange of the robot to the end-effector</p></li>
+<li><p><strong>qz</strong> (<em>float np.ndarray</em><em>(</em><em>7</em><em>,</em><em>)</em>) – The zero joint angle configuration of the robot</p></li>
+<li><p><strong>qr</strong> (<em>float np.ndarray</em><em>(</em><em>7</em><em>,</em><em>)</em>) – The ready state joint angle configuration of the robot</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>References: [1] Kinematic Derivatives using the Elementary Transform</dt><dd><p>Sequence, J. Haviland and P. Corke</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="defined-from-urdf">
+<h3>Defined from URDF<a class="headerlink" href="#defined-from-urdf" title="Permalink to this headline">¶</a></h3>
+<p>A number of models are defined in terms of Denavit-Hartenberg parameters, either
+standard or modified.  They can be listed by:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
+<span class="go">┌────────┬──────────┬────────────────────┬────────────┬─────┬────────┬──────────┐</span>
+<span class="go">│ class  │  model   │    manufacturer    │ model type │ DoF │ config │ keywords │</span>
+<span class="go">├────────┼──────────┼────────────────────┼────────────┼─────┼────────┼──────────┤</span>
+<span class="go">│Panda[0m   │ panda[0m    │ Franka Emika[0m       │ URDF[0m       │ 7[0m   │ [0m       │ [0m         │</span>
+<span class="go">│UR3[0m     │ ur3[0m      │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
+<span class="go">│UR5[0m     │ ur5[0m      │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
+<span class="go">│UR10[0m    │ ur10[0m     │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
+<span class="go">│Puma560[0m │ Puma560[0m  │ Unimation[0m          │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
+<span class="go">│px100[0m   │ px100[0m    │ Interbotix[0m         │ URDF[0m       │ 7[0m   │ [0m       │ [0m         │</span>
+<span class="go">│px150[0m   │ px150[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
+<span class="go">│rx150[0m   │ rx150[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
+<span class="go">│rx200[0m   │ rx200[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
+<span class="go">│vx300[0m   │ vx300[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
+<span class="go">│vx300s[0m  │ vx300s[0m   │ Interbotix[0m         │ URDF[0m       │ 9[0m   │ [0m       │ [0m         │</span>
+<span class="go">│wx200[0m   │ wx200[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
+<span class="go">│wx250[0m   │ wx250[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
+<span class="go">│wx250s[0m  │ wx250s[0m   │ Interbotix[0m         │ URDF[0m       │ 9[0m   │ [0m       │ [0m         │</span>
+<span class="go">│Mico[0m    │ j2n4s300[0m │ Kinova[0m             │ URDF[0m       │ 10[0m  │ [0m       │ [0m         │</span>
+<span class="go">│PR2[0m     │ pr2[0m      │ Willow Garage[0m      │ URDF[0m       │ 45[0m  │ [0m       │ [0m         │</span>
+<span class="go">└────────┴──────────┴────────────────────┴────────────┴─────┴────────┴──────────┘</span>
+
+</pre></div>
+</div>
+<span class="target" id="module-roboticstoolbox.models.URDF"></span><dl class="py class">
+<dt id="roboticstoolbox.models.URDF.Panda">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">Panda</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/Panda.html#Panda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.Panda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a Panda URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">Panda()</span></code> is a class which imports a Franka-Emika Panda robot definition
+from a URDF file.  The model describes its kinematic and graphical
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐</span>
+<span class="go">│id │     link     │   parent    │    joint     │                     ETS                     │</span>
+<span class="go">├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │  [38;5;4mpanda_link0[0m │           -[0m │             [0m │                                            [0m │</span>
+<span class="go">│ 1[0m │  panda_link1[0m │ panda_link0[0m │ panda_joint1[0m │                          tz(0.333) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │  panda_link2[0m │ panda_link1[0m │ panda_joint2[0m │                           Rx(-90°) * Rz(q1)[0m │</span>
+<span class="go">│ 3[0m │  panda_link3[0m │ panda_link2[0m │ panda_joint3[0m │               ty(-0.316) * Rx(90°) * Rz(q2)[0m │</span>
+<span class="go">│ 4[0m │  panda_link4[0m │ panda_link3[0m │ panda_joint4[0m │               tx(0.0825) * Rx(90°) * Rz(q3)[0m │</span>
+<span class="go">│ 5[0m │  panda_link5[0m │ panda_link4[0m │ panda_joint5[0m │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4)[0m │</span>
+<span class="go">│ 6[0m │  panda_link6[0m │ panda_link5[0m │ panda_joint6[0m │                            Rx(90°) * Rz(q5)[0m │</span>
+<span class="go">│ 7[0m │  panda_link7[0m │ panda_link6[0m │ panda_joint7[0m │                tx(0.088) * Rx(90°) * Rz(q6)[0m │</span>
+<span class="go">│ 8[0m │ [38;5;4m@panda_link8[0m │ panda_link7[0m │ panda_joint8[0m │                                   tz(0.107)[0m │</span>
+<span class="go">└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+<li><p>qs, arm is stretched out in the x-direction</p></li>
+<li><p>qn, arm is at a nominal non-singular configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.UR3">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">UR3</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/UR3.html#UR3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.UR3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a UR3 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR3 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR3</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬────────────────────────────────────┐</span>
+<span class="go">│id │      link      │     parent     │             joint              │                ETS                 │</span>
+<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │      [38;5;4mbase_link[0m │          world[0m │                    world_joint[0m │                                   [0m │</span>
+<span class="go">│ 1[0m │  shoulder_link[0m │      base_link[0m │             shoulder_pan_joint[0m │                tz(0.1519) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │ upper_arm_link[0m │  shoulder_link[0m │            shoulder_lift_joint[0m │      ty(0.1198) * Ry(90°) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │   forearm_link[0m │ upper_arm_link[0m │                    elbow_joint[0m │ ty(-0.0925) * tz(0.24365) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │   wrist_1_link[0m │   forearm_link[0m │                  wrist_1_joint[0m │     tz(0.21325) * Ry(90°) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │   wrist_2_link[0m │   wrist_1_link[0m │                  wrist_2_joint[0m │               ty(0.08505) * Rz(q4)[0m │</span>
+<span class="go">│ 6[0m │   wrist_3_link[0m │   wrist_2_link[0m │                  wrist_3_joint[0m │               tz(0.08535) * Ry(q5)[0m │</span>
+<span class="go">│ 7[0m │       [38;5;4m@ee_link[0m │   wrist_3_link[0m │                 ee_fixed_joint[0m │               ty(0.0819) * Rz(90°)[0m │</span>
+<span class="go">│ 8[0m │          [38;5;4m@base[0m │      base_link[0m │     base_link-base_fixed_joint[0m │                          Rz(-180°)[0m │</span>
+<span class="go">│ 9[0m │         [38;5;4m@tool0[0m │   wrist_3_link[0m │ wrist_3_link-tool0_fixed_joint[0m │              ty(0.0819) * Rx(-90°)[0m │</span>
+<span class="go">│10[0m │          [38;5;4mworld[0m │              -[0m │                               [0m │                                   [0m │</span>
+<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.UR5">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">UR5</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/UR5.html#UR5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.UR5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a UR5 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR5 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR5</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
+<span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
+<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼──────────────────────────────────┤</span>
+<span class="go">│ 0[0m │      [38;5;4mbase_link[0m │          world[0m │                    world_joint[0m │                                 [0m │</span>
+<span class="go">│ 1[0m │  shoulder_link[0m │      base_link[0m │             shoulder_pan_joint[0m │            tz(0.089159) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │ upper_arm_link[0m │  shoulder_link[0m │            shoulder_lift_joint[0m │   ty(0.13585) * Ry(90°) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │   forearm_link[0m │ upper_arm_link[0m │                    elbow_joint[0m │ ty(-0.1197) * tz(0.425) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │   wrist_1_link[0m │   forearm_link[0m │                  wrist_1_joint[0m │   tz(0.39225) * Ry(90°) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │   wrist_2_link[0m │   wrist_1_link[0m │                  wrist_2_joint[0m │               ty(0.093) * Rz(q4)[0m │</span>
+<span class="go">│ 6[0m │   wrist_3_link[0m │   wrist_2_link[0m │                  wrist_3_joint[0m │             tz(0.09465) * Ry(q5)[0m │</span>
+<span class="go">│ 7[0m │       [38;5;4m@ee_link[0m │   wrist_3_link[0m │                 ee_fixed_joint[0m │             ty(0.0823) * Rz(90°)[0m │</span>
+<span class="go">│ 8[0m │          [38;5;4m@base[0m │      base_link[0m │     base_link-base_fixed_joint[0m │                        Rz(-180°)[0m │</span>
+<span class="go">│ 9[0m │         [38;5;4m@tool0[0m │   wrist_3_link[0m │ wrist_3_link-tool0_fixed_joint[0m │            ty(0.0823) * Rx(-90°)[0m │</span>
+<span class="go">│10[0m │          [38;5;4mworld[0m │              -[0m │                               [0m │                                 [0m │</span>
+<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.UR10">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">UR10</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/UR10.html#UR10"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.UR10" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a UR10 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR310 robot
+definition from a URDF file.  The model describes its kinematic and
+graphical characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR10</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
+<span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
+<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼──────────────────────────────────┤</span>
+<span class="go">│ 0[0m │      [38;5;4mbase_link[0m │          world[0m │                    world_joint[0m │                                 [0m │</span>
+<span class="go">│ 1[0m │  shoulder_link[0m │      base_link[0m │             shoulder_pan_joint[0m │              tz(0.1273) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │ upper_arm_link[0m │  shoulder_link[0m │            shoulder_lift_joint[0m │  ty(0.220941) * Ry(90°) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │   forearm_link[0m │ upper_arm_link[0m │                    elbow_joint[0m │ ty(-0.1719) * tz(0.612) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │   wrist_1_link[0m │   forearm_link[0m │                  wrist_1_joint[0m │    tz(0.5723) * Ry(90°) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │   wrist_2_link[0m │   wrist_1_link[0m │                  wrist_2_joint[0m │              ty(0.1149) * Rz(q4)[0m │</span>
+<span class="go">│ 6[0m │   wrist_3_link[0m │   wrist_2_link[0m │                  wrist_3_joint[0m │              tz(0.1157) * Ry(q5)[0m │</span>
+<span class="go">│ 7[0m │       [38;5;4m@ee_link[0m │   wrist_3_link[0m │                 ee_fixed_joint[0m │             ty(0.0922) * Rz(90°)[0m │</span>
+<span class="go">│ 8[0m │          [38;5;4m@base[0m │      base_link[0m │     base_link-base_fixed_joint[0m │                        Rz(-180°)[0m │</span>
+<span class="go">│ 9[0m │         [38;5;4m@tool0[0m │   wrist_3_link[0m │ wrist_3_link-tool0_fixed_joint[0m │            ty(0.0922) * Rx(-90°)[0m │</span>
+<span class="go">│10[0m │          [38;5;4mworld[0m │              -[0m │                               [0m │                                 [0m │</span>
+<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.Puma560">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">Puma560</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/Puma560.html#Puma560"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.Puma560" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a Puma 560 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">Puma560()</span></code> is a class which imports a Unimation Puma560 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬────────┬────────┬───────┬───────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │  link  │ parent │ joint │                            ETS                            │</span>
+<span class="go">├───┼────────┼────────┼───────┼───────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │  [38;5;4mlink1[0m │      -[0m │      [0m │                                                          [0m │</span>
+<span class="go">│ 1[0m │  link2[0m │  link1[0m │    j1[0m │                             tz(0.6718) * Rx(90°) * Ry(q0)[0m │</span>
+<span class="go">│ 2[0m │  link3[0m │  link2[0m │    j2[0m │                                                    Rz(q1)[0m │</span>
+<span class="go">│ 3[0m │  link4[0m │  link3[0m │    j3[0m │ tx(0.4318) * ty(-0.0203) * tz(0.1501) * Rz(-90°) * Rz(q2)[0m │</span>
+<span class="go">│ 4[0m │  link5[0m │  link4[0m │    j4[0m │                                Rz(90°) * Rx(90°) * Rz(q3)[0m │</span>
+<span class="go">│ 5[0m │  link6[0m │  link5[0m │    j5[0m │                             tz(0.4331) * Rx(90°) * Rz(q4)[0m │</span>
+<span class="go">│ 6[0m │ @link7[0m │  link6[0m │    j6[0m │                            ty(0.0558) * Rx(-90°) * Rz(q5)[0m │</span>
+<span class="go">└───┴────────┴────────┴───────┴───────────────────────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+<li><p>qs, arm is stretched out in the x-direction</p></li>
+<li><p>qn, arm is at a nominal non-singular configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.px100">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">px100</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/px100.html#px100"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.px100" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a PX100 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">px100()</span></code> is a class which imports an Interbotix px100 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px100</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼─────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                        [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                     tz(0.0508) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                    tz(0.04225) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.035) * tz(0.1) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │       /gripper_link[0m │     /forearm_link[0m │  wrist_angle[0m │                        tx(0.1) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                   tx(0.063) * Rx(-180°)[0m │</span>
+<span class="go">│ 6[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                     tx(0.0055) * Rx(q4)[0m │</span>
+<span class="go">│ 7[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                        [0m │</span>
+<span class="go">│ 8[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                               tx(0.023)[0m │</span>
+<span class="go">│ 9[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                  ty(q5)[0m │</span>
+<span class="go">│10[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                  ty(q6)[0m │</span>
+<span class="go">│11[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                            tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/px100.html">http://www.support.interbotix.com/html/specifications/px100.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.px150">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">px150</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/px150.html#px150"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.px150" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a PX150 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">px150()</span></code> is a class which imports an Interbotix px150 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px150</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼─────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                        [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                      tz(0.065) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                    tz(0.03891) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.05) * tz(0.15) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │         /wrist_link[0m │     /forearm_link[0m │  wrist_angle[0m │                       tx(0.15) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │       /gripper_link[0m │       /wrist_link[0m │ wrist_rotate[0m │          tx(0.065) * Rx(-180°) * Rx(q4)[0m │</span>
+<span class="go">│ 6[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                               tx(0.043)[0m │</span>
+<span class="go">│ 7[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                     tx(0.0055) * Rx(q5)[0m │</span>
+<span class="go">│ 8[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                        [0m │</span>
+<span class="go">│ 9[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                               tx(0.023)[0m │</span>
+<span class="go">│10[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                  ty(q6)[0m │</span>
+<span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                  ty(q7)[0m │</span>
+<span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                            tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/px150.html">http://www.support.interbotix.com/html/specifications/px150.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.rx150">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">rx150</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/rx150.html#rx150"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.rx150" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a RX150 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">rx150()</span></code> is a class which imports an Interbotix rx150 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx150</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼─────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                        [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                      tz(0.065) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                    tz(0.03891) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.05) * tz(0.15) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │         /wrist_link[0m │     /forearm_link[0m │  wrist_angle[0m │                       tx(0.15) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │       /gripper_link[0m │       /wrist_link[0m │ wrist_rotate[0m │          tx(0.065) * Rx(-180°) * Rx(q4)[0m │</span>
+<span class="go">│ 6[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                               tx(0.043)[0m │</span>
+<span class="go">│ 7[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                     tx(0.0055) * Rx(q5)[0m │</span>
+<span class="go">│ 8[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                        [0m │</span>
+<span class="go">│ 9[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                               tx(0.023)[0m │</span>
+<span class="go">│10[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                  ty(q6)[0m │</span>
+<span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                  ty(q7)[0m │</span>
+<span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                            tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/rx150.html">http://www.support.interbotix.com/html/specifications/rx150.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.rx200">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">rx200</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/rx200.html#rx200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.rx200" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a RX200 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">rx200()</span></code> is a class which imports an Interbotix rx200 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx200</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                       [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                     tz(0.065) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                   tz(0.03891) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.05) * tz(0.2) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │         /wrist_link[0m │     /forearm_link[0m │  wrist_angle[0m │                       tx(0.2) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │       /gripper_link[0m │       /wrist_link[0m │ wrist_rotate[0m │         tx(0.065) * Rx(-180°) * Rx(q4)[0m │</span>
+<span class="go">│ 6[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                              tx(0.043)[0m │</span>
+<span class="go">│ 7[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                    tx(0.0055) * Rx(q5)[0m │</span>
+<span class="go">│ 8[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                       [0m │</span>
+<span class="go">│ 9[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                              tx(0.023)[0m │</span>
+<span class="go">│10[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                 ty(q6)[0m │</span>
+<span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                 ty(q7)[0m │</span>
+<span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                           tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/rx200">http://www.support.interbotix.com/html/specifications/rx200</a>.html#</p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.vx300">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">vx300</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/vx300.html#vx300"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.vx300" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a VX300 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">vx300()</span></code> is a class which imports an Interbotix vx300 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                    ETS                    │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼───────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                          [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                       tz(0.0787) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                      tz(0.04805) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.05955) * tz(0.3) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │         /wrist_link[0m │     /forearm_link[0m │  wrist_angle[0m │                          tx(0.3) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │       /gripper_link[0m │       /wrist_link[0m │ wrist_rotate[0m │         tx(0.069744) * Rx(-180°) * Rx(q4)[0m │</span>
+<span class="go">│ 6[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                              tx(0.042825)[0m │</span>
+<span class="go">│ 7[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                     tx(0.005675) * Rx(q5)[0m │</span>
+<span class="go">│ 8[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                          [0m │</span>
+<span class="go">│ 9[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                              tx(0.025875)[0m │</span>
+<span class="go">│10[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                    ty(q6)[0m │</span>
+<span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                    ty(q7)[0m │</span>
+<span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                                tx(0.0385)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴───────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/vx300.html">http://www.support.interbotix.com/html/specifications/vx300.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.vx300s">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">vx300s</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/vx300s.html#vx300s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.vx300s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a VX300s URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">vx300s()</span></code> is a class which imports an Interbotix vx300s robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300s</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬───────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │       parent        │    joint     │                    ETS                    │</span>
+<span class="go">├───┼─────────────────────┼─────────────────────┼──────────────┼───────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                   -[0m │             [0m │                                          [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │          /base_link[0m │        waist[0m │                       tz(0.0787) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │      /shoulder_link[0m │     shoulder[0m │                      tz(0.04805) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │ /upper_forearm_link[0m │     /upper_arm_link[0m │        elbow[0m │ tx(0.05955) * tz(0.3) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │ /lower_forearm_link[0m │ /upper_forearm_link[0m │ forearm_roll[0m │                          tx(0.2) * Rx(q3)[0m │</span>
+<span class="go">│ 5[0m │         /wrist_link[0m │ /lower_forearm_link[0m │  wrist_angle[0m │                          tx(0.1) * Ry(q4)[0m │</span>
+<span class="go">│ 6[0m │       /gripper_link[0m │         /wrist_link[0m │ wrist_rotate[0m │         tx(0.069744) * Rx(-180°) * Rx(q5)[0m │</span>
+<span class="go">│ 7[0m │        [38;5;4m/ee_arm_link[0m │       /gripper_link[0m │       ee_arm[0m │                              tx(0.042825)[0m │</span>
+<span class="go">│ 8[0m │ @/gripper_prop_link[0m │        /ee_arm_link[0m │      gripper[0m │                     tx(0.005675) * Rx(q6)[0m │</span>
+<span class="go">│ 9[0m │   [38;5;4m/gripper_bar_link[0m │        /ee_arm_link[0m │  gripper_bar[0m │                                          [0m │</span>
+<span class="go">│10[0m │       [38;5;4m/fingers_link[0m │   /gripper_bar_link[0m │       ee_bar[0m │                              tx(0.025875)[0m │</span>
+<span class="go">│11[0m │  @/left_finger_link[0m │       /fingers_link[0m │  left_finger[0m │                                    ty(q7)[0m │</span>
+<span class="go">│12[0m │ @/right_finger_link[0m │       /fingers_link[0m │ right_finger[0m │                                    ty(q8)[0m │</span>
+<span class="go">│13[0m │   [38;5;4m@/ee_gripper_link[0m │       /fingers_link[0m │   ee_gripper[0m │                                tx(0.0385)[0m │</span>
+<span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴───────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/vx3006dof.html">http://www.support.interbotix.com/html/specifications/vx3006dof.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.wx200">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">wx200</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/wx200.html#wx200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.wx200" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a WX200 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">wx200()</span></code> is a class which imports an Interbotix wx200 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx200</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                       [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                    tz(0.0716) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                   tz(0.03865) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.05) * tz(0.2) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │         /wrist_link[0m │     /forearm_link[0m │  wrist_angle[0m │                       tx(0.2) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │       /gripper_link[0m │       /wrist_link[0m │ wrist_rotate[0m │         tx(0.065) * Rx(-180°) * Rx(q4)[0m │</span>
+<span class="go">│ 6[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                              tx(0.043)[0m │</span>
+<span class="go">│ 7[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                    tx(0.0055) * Rx(q5)[0m │</span>
+<span class="go">│ 8[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                       [0m │</span>
+<span class="go">│ 9[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                              tx(0.023)[0m │</span>
+<span class="go">│10[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                 ty(q6)[0m │</span>
+<span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                 ty(q7)[0m │</span>
+<span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                           tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/wx200.html">http://www.support.interbotix.com/html/specifications/wx200.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.wx250">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">wx250</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/wx250.html#wx250"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.wx250" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a WX250 URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">wx250()</span></code> is a class which imports an Interbotix wx250 robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                    ETS                     │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                 -[0m │             [0m │                                           [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │        /base_link[0m │        waist[0m │                        tz(0.0716) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │    /shoulder_link[0m │     shoulder[0m │                       tz(0.03865) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │       /forearm_link[0m │   /upper_arm_link[0m │        elbow[0m │ tx(0.04975) * tz(0.25) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │         /wrist_link[0m │     /forearm_link[0m │  wrist_angle[0m │                          tx(0.25) * Ry(q3)[0m │</span>
+<span class="go">│ 5[0m │       /gripper_link[0m │       /wrist_link[0m │ wrist_rotate[0m │             tx(0.065) * Rx(-180°) * Rx(q4)[0m │</span>
+<span class="go">│ 6[0m │        [38;5;4m/ee_arm_link[0m │     /gripper_link[0m │       ee_arm[0m │                                  tx(0.043)[0m │</span>
+<span class="go">│ 7[0m │ @/gripper_prop_link[0m │      /ee_arm_link[0m │      gripper[0m │                        tx(0.0055) * Rx(q5)[0m │</span>
+<span class="go">│ 8[0m │   [38;5;4m/gripper_bar_link[0m │      /ee_arm_link[0m │  gripper_bar[0m │                                           [0m │</span>
+<span class="go">│ 9[0m │       [38;5;4m/fingers_link[0m │ /gripper_bar_link[0m │       ee_bar[0m │                                  tx(0.023)[0m │</span>
+<span class="go">│10[0m │  @/left_finger_link[0m │     /fingers_link[0m │  left_finger[0m │                                     ty(q6)[0m │</span>
+<span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                     ty(q7)[0m │</span>
+<span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                               tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/wx250.html">http://www.support.interbotix.com/html/specifications/wx250.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.wx250s">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">wx250s</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/wx250s.html#wx250s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.wx250s" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a wx250s URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">wx250s()</span></code> is a class which imports an Interbotix wx250s robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250s</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │       parent        │    joint     │                    ETS                     │</span>
+<span class="go">├───┼─────────────────────┼─────────────────────┼──────────────┼────────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │          [38;5;4m/base_link[0m │                   -[0m │             [0m │                                           [0m │</span>
+<span class="go">│ 1[0m │      /shoulder_link[0m │          /base_link[0m │        waist[0m │                        tz(0.0716) * Rz(q0)[0m │</span>
+<span class="go">│ 2[0m │     /upper_arm_link[0m │      /shoulder_link[0m │     shoulder[0m │                       tz(0.03865) * Ry(q1)[0m │</span>
+<span class="go">│ 3[0m │ /upper_forearm_link[0m │     /upper_arm_link[0m │        elbow[0m │ tx(0.04975) * tz(0.25) * Rx(180°) * Ry(q2)[0m │</span>
+<span class="go">│ 4[0m │ /lower_forearm_link[0m │ /upper_forearm_link[0m │ forearm_roll[0m │                         tx(0.175) * Rx(q3)[0m │</span>
+<span class="go">│ 5[0m │         /wrist_link[0m │ /lower_forearm_link[0m │  wrist_angle[0m │                         tx(0.075) * Ry(q4)[0m │</span>
+<span class="go">│ 6[0m │       /gripper_link[0m │         /wrist_link[0m │ wrist_rotate[0m │             tx(0.065) * Rx(-180°) * Rx(q5)[0m │</span>
+<span class="go">│ 7[0m │        [38;5;4m/ee_arm_link[0m │       /gripper_link[0m │       ee_arm[0m │                                  tx(0.043)[0m │</span>
+<span class="go">│ 8[0m │ @/gripper_prop_link[0m │        /ee_arm_link[0m │      gripper[0m │                        tx(0.0055) * Rx(q6)[0m │</span>
+<span class="go">│ 9[0m │   [38;5;4m/gripper_bar_link[0m │        /ee_arm_link[0m │  gripper_bar[0m │                                           [0m │</span>
+<span class="go">│10[0m │       [38;5;4m/fingers_link[0m │   /gripper_bar_link[0m │       ee_bar[0m │                                  tx(0.023)[0m │</span>
+<span class="go">│11[0m │  @/left_finger_link[0m │       /fingers_link[0m │  left_finger[0m │                                     ty(q7)[0m │</span>
+<span class="go">│12[0m │ @/right_finger_link[0m │       /fingers_link[0m │ right_finger[0m │                                     ty(q8)[0m │</span>
+<span class="go">│13[0m │   [38;5;4m@/ee_gripper_link[0m │       /fingers_link[0m │   ee_gripper[0m │                               tx(0.027575)[0m │</span>
+<span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴────────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="http://www.support.interbotix.com/html/specifications/wx2506dof.html">http://www.support.interbotix.com/html/specifications/wx2506dof.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.Mico">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">Mico</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/Mico.html#Mico"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.Mico" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a Mico URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">Panda()</span></code> is a class which imports a Kinova Mico robot definition
+from a URDF file.  The model describes its kinematic and graphical 
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Mico</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬─────────────────────────────┬────────────────────────┬─────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │            link             │         parent         │            joint            │                                           ETS                                            │</span>
+<span class="go">├───┼─────────────────────────────┼────────────────────────┼─────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0[0m │                        [38;5;4mroot[0m │                  world[0m │      connect_root_and_world[0m │                                                                                         [0m │</span>
+<span class="go">│ 1[0m │                       [38;5;4mworld[0m │                      -[0m │                            [0m │                                                                                         [0m │</span>
+<span class="go">│ 2[0m │          [38;5;4mj2n4s300_link_base[0m │                   root[0m │         j2n4s300_joint_base[0m │                                                                                         [0m │</span>
+<span class="go">│ 3[0m │             j2n4s300_link_1[0m │     j2n4s300_link_base[0m │            j2n4s300_joint_1[0m │                                                          tz(0.15675) * Ry(180°) * Rz(q0)[0m │</span>
+<span class="go">│ 4[0m │             j2n4s300_link_2[0m │        j2n4s300_link_1[0m │            j2n4s300_joint_2[0m │                                 ty(0.0016) * tz(-0.11875) * Rz(180°) * Rx(-90°) * Rz(q1)[0m │</span>
+<span class="go">│ 5[0m │             j2n4s300_link_3[0m │        j2n4s300_link_2[0m │            j2n4s300_joint_3[0m │                                                            ty(-0.41) * Ry(180°) * Rz(q2)[0m │</span>
+<span class="go">│ 6[0m │             j2n4s300_link_4[0m │        j2n4s300_link_3[0m │            j2n4s300_joint_4[0m │                                  ty(0.2073) * tz(-0.0114) * Rz(180°) * Rx(-90°) * Rz(q3)[0m │</span>
+<span class="go">│ 7[0m │      [38;5;4m@j2n4s300_end_effector[0m │        j2n4s300_link_4[0m │ j2n4s300_joint_end_effector[0m │                                                           tz(-0.16) * Rz(90°) * Rx(180°)[0m │</span>
+<span class="go">│ 8[0m │      j2n4s300_link_finger_1[0m │        j2n4s300_link_4[0m │     j2n4s300_joint_finger_1[0m │     tx(0.00279) * ty(0.03126) * tz(-0.11467) * Rz(77.9°) * Ry(37.2°) * Rx(-90°) * Rz(q4)[0m │</span>
+<span class="go">│ 9[0m │ @j2n4s300_link_finger_tip_1[0m │ j2n4s300_link_finger_1[0m │ j2n4s300_joint_finger_tip_1[0m │                                                          tx(0.044) * ty(-0.003) * Rz(q5)[0m │</span>
+<span class="go">│10[0m │      j2n4s300_link_finger_2[0m │        j2n4s300_link_4[0m │     j2n4s300_joint_finger_2[0m │  tx(0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-79.42°) * Ry(37.2°) * Rx(-90°) * Rz(q6)[0m │</span>
+<span class="go">│11[0m │ @j2n4s300_link_finger_tip_2[0m │ j2n4s300_link_finger_2[0m │ j2n4s300_joint_finger_tip_2[0m │                                                          tx(0.044) * ty(-0.003) * Rz(q7)[0m │</span>
+<span class="go">│12[0m │      j2n4s300_link_finger_3[0m │        j2n4s300_link_4[0m │     j2n4s300_joint_finger_3[0m │ tx(-0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-100.6°) * Ry(37.2°) * Rx(-90°) * Rz(q8)[0m │</span>
+<span class="go">│13[0m │ @j2n4s300_link_finger_tip_3[0m │ j2n4s300_link_finger_3[0m │ j2n4s300_joint_finger_tip_3[0m │                                                          tx(0.044) * ty(-0.003) * Rz(q9)[0m │</span>
+<span class="go">└───┴─────────────────────────────┴────────────────────────┴─────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.URDF.PR2">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">PR2</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/PR2.html#PR2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.PR2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="arm_superclass.html" class="btn btn-neutral float-right" title="Superclasses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="arm_ets.html" class="btn btn-neutral float-left" title="Elementary transform sequence (ETS) models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

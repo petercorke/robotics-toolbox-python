@@ -1,0 +1,985 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>roboticstoolbox.robot.DHLink &mdash; Robotics Toolbox for Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.robot.DHLink</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.robot.DHLink</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: Jesse Haviland</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link</span><span class="p">,</span> <span class="n">_listen_dyn</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
+
+<span class="n">_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+
+<span class="c1"># --------------------------------------------------------------#</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="c1"># print(&#39;Using SymPy&#39;)</span>
+    <span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sym</span>
+
+    <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sym</span><span class="o">.</span><span class="n">Expr</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">_cos</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">_issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_sin</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">_issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------#</span>
+
+
+<div class="viewcode-block" id="DHLink"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink">[docs]</a><span class="k">class</span> <span class="nc">DHLink</span><span class="p">(</span><span class="n">Link</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A link superclass for all robots defined using Denavit-Hartenberg notation.</span>
+<span class="sd">    A Link object holds all information related to a robot joint and link such</span>
+<span class="sd">    as kinematics parameters, rigid-body inertial parameters, motor and</span>
+<span class="sd">    transmission parameters.</span>
+
+<span class="sd">    :param theta: kinematic: joint angle</span>
+<span class="sd">    :type theta: float</span>
+<span class="sd">    :param d: kinematic - link offset</span>
+<span class="sd">    :type d: float</span>
+<span class="sd">    :param alpha: kinematic - link twist</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param a: kinematic - link length</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param sigma: kinematic - 0 if revolute, 1 if prismatic</span>
+<span class="sd">    :type sigma: int</span>
+<span class="sd">    :param mdh: kinematic - 0 if standard D&amp;H, else 1</span>
+<span class="sd">    :type mdh: int</span>
+<span class="sd">    :param offset: kinematic - joint variable offset</span>
+<span class="sd">    :type offset: float</span>
+
+<span class="sd">    :param qlim: joint variable limits [min, max]</span>
+<span class="sd">    :type qlim: ndarray(2,)</span>
+<span class="sd">    :param flip: joint moves in opposite direction</span>
+<span class="sd">    :type flip: bool</span>
+
+<span class="sd">    :param m: dynamic - link mass</span>
+<span class="sd">    :type m: float</span>
+<span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
+<span class="sd">    :type r:  ndarray(3,)</span>
+<span class="sd">    :param I: dynamic - inertia of link with respect to COM</span>
+<span class="sd">    :type I: ndarray</span>
+<span class="sd">    :param Jm: dynamic - motor inertia</span>
+<span class="sd">    :type Jm: float</span>
+<span class="sd">    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]</span>
+<span class="sd">    :type B: float, or ndarray(2,)</span>
+<span class="sd">    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</span>
+<span class="sd">    :type Tc: ndarray(2,)</span>
+<span class="sd">    :param G: dynamic - gear ratio</span>
+<span class="sd">    :type G: float</span>
+
+<span class="sd">    :references:</span>
+<span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">mdh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># TODO</span>
+        <span class="c1">#  probably should make DHLink(link) return a copy</span>
+        <span class="c1">#  probably should enforce keyword arguments, easy to make an</span>
+        <span class="c1">#    error with positional args</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Kinematic parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">=</span> <span class="n">mdh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">DHLink</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">rp</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">([</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
+            <span class="n">nlinks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+            <span class="c1"># TODO - Should I do a deep copy here a physically copy the Links</span>
+            <span class="c1"># and not just the references?</span>
+            <span class="c1"># Copy Link references to new list</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">nlinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="n">rp</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">(</span>
+                <span class="n">nlinks</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">manufacturer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">manufacturer</span><span class="p">,</span>
+                <span class="n">base</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
+                <span class="n">tool</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">tool</span><span class="p">,</span>
+                <span class="n">gravity</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot add a Link with a non Link object&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; + </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">qvar</span> <span class="o">=</span> <span class="s2">&quot;q&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">qvar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:   theta=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="si">}</span><span class="s2">, &quot;</span> \
+                <span class="sa">f</span><span class="s2">&quot;a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">, alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:  theta=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  &quot;</span> \
+                <span class="sa">f</span><span class="s2">&quot;alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">)</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint angle</span>
+
+<span class="sd">        - ``link.theta`` is the joint angle</span>
+<span class="sd">            :return: joint angle</span>
+<span class="sd">            :rtype: float</span>
+<span class="sd">        - ``link.theta = ...`` checks and sets the joint angle</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta</span>
+
+    <span class="nd">@theta</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
+    <span class="k">def</span> <span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="n">theta_new</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta is not valid for revolute joints&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta</span> <span class="o">=</span> <span class="n">theta_new</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link offset</span>
+
+<span class="sd">        - ``link.d`` is the link offset</span>
+<span class="sd">            :return: link offset</span>
+<span class="sd">            :rtype: float</span>
+<span class="sd">        - ``link.d = ...`` checks and sets the link offset</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span>
+
+    <span class="nd">@d</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
+    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="n">d_new</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;f is not valid for prismatic joints&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">d_new</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link length</span>
+
+<span class="sd">        - ``link.a`` is the link length</span>
+<span class="sd">            :return: link length</span>
+<span class="sd">            :rtype: float</span>
+<span class="sd">        - ``link.a = ...`` checks and sets the link length</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
+
+    <span class="nd">@a</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a_new</span>
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link twist</span>
+
+<span class="sd">        - ``link.d`` is the link twist</span>
+<span class="sd">            :return: link twist</span>
+<span class="sd">            :rtype: float</span>
+<span class="sd">        - ``link.d = ...`` checks and sets the link twist</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span>
+
+    <span class="nd">@alpha</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
+    <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha_new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span> <span class="o">=</span> <span class="n">alpha_new</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint type</span>
+
+<span class="sd">        - ``link.sigma`` is the joint type</span>
+<span class="sd">            :return: joint type</span>
+<span class="sd">            :rtype: int</span>
+<span class="sd">        - ``link.sigma = ...`` checks and sets the joint type</span>
+
+<span class="sd">        The joint type is 0 for a revolute joint, and 1 for a prismatic joint.</span>
+
+<span class="sd">        :seealso: :func:`isrevolute`, :func:`isprismatic`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span>
+
+    <span class="nd">@sigma</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
+    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma_new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span> <span class="o">=</span> <span class="n">sigma_new</span>
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set kinematic convention</span>
+
+<span class="sd">        - ``link.mdh`` is the kinematic convention</span>
+<span class="sd">            :return: kinematic convention</span>
+<span class="sd">            :rtype: bool</span>
+<span class="sd">        - ``link.mdh = ...`` checks and sets the kinematic convention</span>
+
+<span class="sd">        The kinematic convention is True for modified Denavit-Hartenberg</span>
+<span class="sd">        notation (eg. Craig&#39;s textbook) and False for Denavit-Hartenberg</span>
+<span class="sd">        notation (eg. Siciliano, Spong, Paul textbooks).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span>
+
+    <span class="nd">@mdh</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
+    <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mdh_new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mdh_new</span><span class="p">)</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint variable offset</span>
+
+<span class="sd">        - ``link.offset`` is the joint variable offset</span>
+
+<span class="sd">        :return: joint variable offset</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        - ``link.offset = ...`` checks and sets the joint variable offset</span>
+
+<span class="sd">        The offset is added to the joint angle before forward kinematics, and</span>
+<span class="sd">        subtracted after inverse kinematics.  It is used to define the joint</span>
+<span class="sd">        configuration for zero joint coordinates.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span>
+
+    <span class="nd">@offset</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset_new</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset_new</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="DHLink.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Link transform matrix</span>
+
+<span class="sd">        :param q: Joint coordinate</span>
+<span class="sd">        :type q: float</span>
+<span class="sd">        :return T: SE(3) link homogeneous transformation</span>
+<span class="sd">        :rtype T: SE3 instance</span>
+
+<span class="sd">        ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous</span>
+<span class="sd">        transformation matrix corresponding to the link&#39;s joint variable ``q``</span>
+<span class="sd">        which is either the Denavit-Hartenberg parameter :math:`\theta_j`</span>
+<span class="sd">        (revolute) or :math:`d_j` (prismatic). </span>
+<span class="sd">        </span>
+<span class="sd">        This is the relative pose of the current link frame with respect to the</span>
+<span class="sd">        previous link frame.</span>
+
+
+
+<span class="sd">        For details of the computation see the documentation for the subclasses,</span>
+<span class="sd">        click on the right side of the class boxes below. </span>
+
+<span class="sd">        .. inheritance-diagram:: roboticstoolbox.RevoluteDH roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH roboticstoolbox.PrismaticMDH</span>
+<span class="sd">            :top-classes: roboticstoolbox.robot.DHLink.DHLink</span>
+<span class="sd">            :parts: 2</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - For a revolute joint the ``theta`` parameter of the link is </span>
+<span class="sd">              ignored, and ``q`` used instead.</span>
+<span class="sd">            - For a prismatic joint the ``d`` parameter of the link is ignored,</span>
+<span class="sd">              and ``q`` used instead.</span>
+<span class="sd">            - The joint ``offset`` parameter is added to ``q`` before </span>
+<span class="sd">              computation of the transformation matrix.</span>
+<span class="sd">            - The computation is different for standard and modified </span>
+<span class="sd">              Denavit-Hartenberg parameters.</span>
+
+<span class="sd">        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`, :class:`RevoluteMDH`, :class:`PrismaticMDH`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">sa</span> <span class="o">=</span> <span class="n">_sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">ca</span> <span class="o">=</span> <span class="n">_cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="n">q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># revolute</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">_sin</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="n">_cos</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># prismatic</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">_sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+            <span class="n">ct</span> <span class="o">=</span> <span class="n">_cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># standard DH</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">ct</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">st</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># modified DH</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ca</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DHLink.isrevolute"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of revolute type</span>
+
+<span class="sd">        :return: Ture if is revolute</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        :seealso: :func:`sigma`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DHLink.isprismatic"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.isprismatic">[docs]</a>    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of prismatic type</span>
+
+<span class="sd">        :return: Ture if is prismatic</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        :seealso: :func:`sigma`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DHLink.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ets</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">:</span>
+            <span class="c1"># MDH format: a alpha theta d</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># DH format: theta d a alpha</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+                    
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ets</span></div></div>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+<div class="viewcode-block" id="RevoluteDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.RevoluteDH">[docs]</a><span class="k">class</span> <span class="nc">RevoluteDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for revolute links using standard DH convention</span>
+
+<span class="sd">    :param d: kinematic - link offset</span>
+<span class="sd">    :type d: float</span>
+<span class="sd">    :param alpha: kinematic - link twist</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param a: kinematic - link length</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param offset: kinematic - joint variable offset</span>
+<span class="sd">    :type offset: float</span>
+
+<span class="sd">    :param qlim: joint variable limits [min, max]</span>
+<span class="sd">    :type qlim: float ndarray(1,2)</span>
+<span class="sd">    :param flip: joint moves in opposite direction</span>
+<span class="sd">    :type flip: bool</span>
+
+<span class="sd">    :param m: dynamic - link mass</span>
+<span class="sd">    :type m: float</span>
+<span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
+<span class="sd">    :type r:  float ndarray(3)</span>
+<span class="sd">    :param I: dynamic - inertia of link with respect to COM</span>
+<span class="sd">    :type I: ndarray</span>
+<span class="sd">    :param Jm: dynamic - motor inertia</span>
+<span class="sd">    :type Jm: float</span>
+<span class="sd">    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]</span>
+<span class="sd">    :type B: float, or ndarray(2,)</span>
+<span class="sd">    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</span>
+<span class="sd">    :type Tc: ndarray(2,)</span>
+<span class="sd">    :param G: dynamic - gear ratio</span>
+<span class="sd">    :type G: float</span>
+
+<span class="sd">    A subclass of the :class:`DHLink` class for a revolute joint that holds all</span>
+<span class="sd">    information related to a robot link such as kinematics parameters,</span>
+<span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
+
+<span class="sd">    The link transform is</span>
+
+<span class="sd">    :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`</span>
+
+<span class="sd">    where :math:`q_i` is the joint variable.</span>
+
+<span class="sd">    :references:</span>
+<span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
+
+<span class="sd">    :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mdh</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PrismaticDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.PrismaticDH">[docs]</a><span class="k">class</span> <span class="nc">PrismaticDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for prismatic link using standard DH convention</span>
+
+<span class="sd">    :param theta: kinematic: joint angle</span>
+<span class="sd">    :type theta: float</span>
+<span class="sd">    :param d: kinematic - link offset</span>
+<span class="sd">    :type d: float</span>
+<span class="sd">    :param alpha: kinematic - link twist</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param a: kinematic - link length</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param offset: kinematic - joint variable offset</span>
+<span class="sd">    :type offset: float</span>
+
+<span class="sd">    :param qlim: joint variable limits [min, max]</span>
+<span class="sd">    :type qlim: float ndarray(1,2)</span>
+<span class="sd">    :param flip: joint moves in opposite direction</span>
+<span class="sd">    :type flip: bool</span>
+
+<span class="sd">    :param m: dynamic - link mass</span>
+<span class="sd">    :type m: float</span>
+<span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
+<span class="sd">    :type r:  float ndarray(3)</span>
+<span class="sd">    :param I: dynamic - inertia of link with respect to COM</span>
+<span class="sd">    :type I: ndarray</span>
+<span class="sd">    :param Jm: dynamic - motor inertia</span>
+<span class="sd">    :type Jm: float</span>
+<span class="sd">    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]</span>
+<span class="sd">    :type B: float, or ndarray(2,)</span>
+<span class="sd">    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</span>
+<span class="sd">    :type Tc: ndarray(2,)</span>
+<span class="sd">    :param G: dynamic - gear ratio</span>
+<span class="sd">    :type G: float</span>
+
+<span class="sd">    A subclass of the DHLink class for a prismatic joint that holds all</span>
+<span class="sd">    information related to a robot link such as kinematics parameters,</span>
+<span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
+
+<span class="sd">    The link transform is</span>
+
+<span class="sd">    :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`</span>
+
+<span class="sd">    where :math:`q_i` is the joint variable.</span>
+
+<span class="sd">    :references:</span>
+<span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
+
+<span class="sd">    :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mdh</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RevoluteMDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.RevoluteMDH">[docs]</a><span class="k">class</span> <span class="nc">RevoluteMDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for revolute links using modified DH convention</span>
+
+<span class="sd">    :param d: kinematic - link offset</span>
+<span class="sd">    :type d: float</span>
+<span class="sd">    :param alpha: kinematic - link twist</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param a: kinematic - link length</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param offset: kinematic - joint variable offset</span>
+<span class="sd">    :type offset: float</span>
+
+<span class="sd">    :param qlim: joint variable limits [min, max]</span>
+<span class="sd">    :type qlim: float ndarray(1,2)</span>
+<span class="sd">    :param flip: joint moves in opposite direction</span>
+<span class="sd">    :type flip: bool</span>
+
+<span class="sd">    :param m: dynamic - link mass</span>
+<span class="sd">    :type m: float</span>
+<span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
+<span class="sd">    :type r:  float ndarray(3)</span>
+<span class="sd">    :param I: dynamic - inertia of link with respect to COM</span>
+<span class="sd">    :type I: ndarray</span>
+<span class="sd">    :param Jm: dynamic - motor inertia</span>
+<span class="sd">    :type Jm: float</span>
+<span class="sd">    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]</span>
+<span class="sd">    :type B: float, or ndarray(2,)</span>
+<span class="sd">    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</span>
+<span class="sd">    :type Tc: ndarray(2,)</span>
+<span class="sd">    :param G: dynamic - gear ratio</span>
+<span class="sd">    :type G: float</span>
+
+<span class="sd">    A subclass of the DHLink class for a revolute joint that holds all</span>
+<span class="sd">    information related to a robot link such as kinematics parameters,</span>
+<span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
+
+<span class="sd">    The link transform is</span>
+
+<span class="sd">    :math:`\mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i)`</span>
+
+<span class="sd">    where :math:`q_i` is the joint variable.</span>
+
+<span class="sd">    :references:</span>
+<span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
+
+<span class="sd">    :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mdh</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PrismaticMDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.PrismaticMDH">[docs]</a><span class="k">class</span> <span class="nc">PrismaticMDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for prismatic link using modified DH convention</span>
+
+<span class="sd">    :param theta: kinematic: joint angle</span>
+<span class="sd">    :type theta: float</span>
+<span class="sd">    :param d: kinematic - link offset</span>
+<span class="sd">    :type d: float</span>
+<span class="sd">    :param alpha: kinematic - link twist</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param a: kinematic - link length</span>
+<span class="sd">    :type a: float</span>
+<span class="sd">    :param offset: kinematic - joint variable offset</span>
+<span class="sd">    :type offset: float</span>
+
+<span class="sd">    :param qlim: joint variable limits [min, max]</span>
+<span class="sd">    :type qlim: float ndarray(1,2)</span>
+<span class="sd">    :param flip: joint moves in opposite direction</span>
+<span class="sd">    :type flip: bool</span>
+
+<span class="sd">    :param m: dynamic - link mass</span>
+<span class="sd">    :type m: float</span>
+<span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
+<span class="sd">    :type r:  float ndarray(3)</span>
+<span class="sd">    :param I: dynamic - inertia of link with respect to COM</span>
+<span class="sd">    :type I: ndarray</span>
+<span class="sd">    :param Jm: dynamic - motor inertia</span>
+<span class="sd">    :type Jm: float</span>
+<span class="sd">    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]</span>
+<span class="sd">    :type B: float, or ndarray(2,)</span>
+<span class="sd">    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</span>
+<span class="sd">    :type Tc: ndarray(2,)</span>
+<span class="sd">    :param G: dynamic - gear ratio</span>
+<span class="sd">    :type G: float</span>
+
+<span class="sd">    A subclass of the DHLink class for a prismatic joint that holds all</span>
+<span class="sd">    information related to a robot link such as kinematics parameters,</span>
+<span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
+
+<span class="sd">    The link transform is</span>
+
+<span class="sd">    :math:`\mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}}`</span>
+
+<span class="sd">    where :math:`q_i` is the joint variable.</span>
+
+<span class="sd">    :references:</span>
+<span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
+
+<span class="sd">    :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mdh</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

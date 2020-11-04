@@ -7,13 +7,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; Robotics Toolbox Python 0.3.7
+  <title>Introduction &mdash; Robotics Toolbox for Python 0.3.7
  documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
 
   
   
@@ -37,7 +38,9 @@
 
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Manipulator arms" href="arm.html" />
+    <link rel="prev" title="Robotics Toolbox for Python" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,9 +54,12 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
           
 
+          
+            
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -82,9 +88,28 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Arm Type Robots - DH</a></li>
-<li class="toctree-l1"><a class="reference internal" href="arm_ets.html">Arm Type Robots - ETS</a></li>
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#high-level-classes">High-level classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#operators-for-pose-objects">Operators for pose objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#so-n-and-se-n">SO(n) and SE(n)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unit-quaternions-and-quaternions">Unit quaternions and quaternions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#list-capability">List capability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vectorization">Vectorization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#low-level-spatial-math">Low-level spatial math</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#graphics">Graphics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#symbolic-support">Symbolic support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#matlab-compatability">MATLAB compatability</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
 </ul>
 
             
@@ -100,14 +125,14 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Robotics Toolbox Python</a>
+          <a href="index.html">Robotics Toolbox for Python</a>
         
       </nav>
 
 
       <div class="wy-nav-content">
         
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
         
           
 
@@ -144,6 +169,15 @@
     
   </ul>
 
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="arm.html" class="btn btn-neutral float-right" title="Manipulator arms" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Robotics Toolbox for Python" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
   
   <hr/>
 </div>
@@ -1071,13 +1105,25 @@ In line 12 when we multiply the matrices we need to use the <cite>&#64;</cite> o
           </div>
           <footer>
   
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="arm.html" class="btn btn-neutral float-right" title="Manipulator arms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Robotics Toolbox for Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2020, Jesse Haviland
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
 
     </p>
   </div>
@@ -1116,7 +1162,7 @@ In line 12 when we multiply the matrices we need to use the <cite>&#64;</cite> o
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-102222819-4', 'auto');
+    ga('create', 'G-11Q6WJM565', 'auto');
     ga('send', 'pageview');
     </script>
 

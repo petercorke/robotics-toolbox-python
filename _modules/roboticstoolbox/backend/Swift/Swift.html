@@ -1,0 +1,525 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>roboticstoolbox.backend.Swift.Swift &mdash; Robotics Toolbox for Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="../../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.backend.Swift.Swift</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.backend.Swift.Swift</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author Jesse Haviland</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">roboticstoolbox.backend.Connector</span> <span class="kn">import</span> <span class="n">Connector</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">spatialmath</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+<span class="n">_sw</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">sw</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">_import_swift</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">importlib</span>
+    <span class="k">global</span> <span class="n">sw</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sw</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;swift&#39;</span><span class="p">)</span>
+        <span class="c1"># from swift import start_servers</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">You must install the python package swift, see &#39;</span>
+            <span class="s1">&#39;https://github.com/jhavl/swift</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+
+<div class="viewcode-block" id="Swift"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift">[docs]</a><span class="k">class</span> <span class="nc">Swift</span><span class="p">(</span><span class="n">Connector</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Graphical backend using Swift</span>
+
+<span class="sd">    Swift is a web app built on three.js. It supports many 3D graphical</span>
+<span class="sd">    primitives including meshes, boxes, ellipsoids and lines. It can render</span>
+<span class="sd">    Collada objects in full color.</span>
+
+<span class="sd">    :param realtime: Force the simulator to display no faster than real time,</span>
+<span class="sd">        note that it may still run slower due to complexity</span>
+<span class="sd">    :type realtime: bool</span>
+<span class="sd">    :param display: Do not launch the graphical front-end of the simulator.</span>
+<span class="sd">        Will still simulate the robot. Runs faster due to not needing to</span>
+<span class="sd">        display anything.</span>
+<span class="sd">    :type display: bool</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">        :linenos:</span>
+
+<span class="sd">        import roboticstoolbox as rtb</span>
+
+<span class="sd">        robot = rtb.models.DH.Panda()  # create a robot</span>
+
+<span class="sd">        pyplot = rtb.backend.Swift()   # create a Swift backend</span>
+<span class="sd">        pyplot.add(robot)              # add the robot to the backend</span>
+<span class="sd">        robot.q = robot.qz             # set the robot configuration</span>
+<span class="sd">        pyplot.step()                  # update the backend and graphical view</span>
+
+<span class="sd">    :references:</span>
+
+<span class="sd">        - https://github.com/jhavl/swift</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">realtime</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Swift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outq</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inq</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span> <span class="o">=</span> <span class="n">realtime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="n">display</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="ow">and</span> <span class="n">sw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_import_swift</span><span class="p">()</span>
+
+    <span class="c1">#</span>
+    <span class="c1">#  Basic methods to do with the state of the external program</span>
+    <span class="c1">#</span>
+
+<div class="viewcode-block" id="Swift.launch"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Launch a graphical backend in Swift</span>
+
+<span class="sd">        ``env = launch(args)`` create a 3D scene in a running Swift instance as</span>
+<span class="sd">        defined by args, and returns a reference to the backend.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
+            <span class="n">sw</span><span class="o">.</span><span class="n">start_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Swift.step"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the graphical scene</span>
+
+<span class="sd">        :param dt: time step in milliseconds, defaults to 50</span>
+<span class="sd">        :type dt: int, optional</span>
+
+<span class="sd">        ``env.step(args)`` triggers an update of the 3D scene in the Swift</span>
+<span class="sd">        window referenced by ``env``.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Each robot in the scene is updated based on</span>
+<span class="sd">              their control type (position, velocity, acceleration, or torque).</span>
+<span class="sd">            - Upon acting, the other three of the four control types will be</span>
+<span class="sd">              updated in the internal state of the robot object.</span>
+<span class="sd">            - The control type is defined by the robot object, and not all</span>
+<span class="sd">              robot objects support all control types.</span>
+<span class="sd">            - Execution is blocked for the specified interval</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO how is the pose of shapes updated prior to step?</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">step</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_robots</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_shapes</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="c1"># Adjust sim time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim_time</span> <span class="o">+=</span> <span class="n">dt</span>
+
+        <span class="c1"># Send updated sim time to Swift</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
+
+            <span class="c1"># If realtime is set, delay progress if we are running too quickly</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
+                <span class="n">time_taken</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="n">time_taken</span>
+
+                <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">diff</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_draw_all</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;sim_time&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Swift.reset"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the graphical scene</span>
+
+<span class="sd">        ``env.reset()`` triggers a reset of the 3D scene in the Swift window</span>
+<span class="sd">        referenced by ``env``. It is restored to the original state defined by</span>
+<span class="sd">        ``launch()``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span></div>
+
+<div class="viewcode-block" id="Swift.restart"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restart the graphics display</span>
+
+<span class="sd">        ``env.restart()`` triggers a restart of the Swift view referenced by</span>
+<span class="sd">        ``env``. It is closed and relaunched to the original state defined by</span>
+<span class="sd">        ``launch()``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restart</span></div>
+
+<div class="viewcode-block" id="Swift.close"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close the graphics display</span>
+
+<span class="sd">        ``env.close()`` gracefully disconnectes from the Swift visualizer</span>
+<span class="sd">        referenced by ``env``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+    <span class="c1">#</span>
+    <span class="c1">#  Methods to interface with the robots created in other environemnts</span>
+    <span class="c1">#</span>
+
+<div class="viewcode-block" id="Swift.add"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ob</span><span class="p">,</span> <span class="n">show_robot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_collision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a robot to the graphical scene</span>
+
+<span class="sd">        :param ob: the object to add</span>
+<span class="sd">        :type ob: ???</span>
+<span class="sd">        :param show_robot: ????, defaults to True</span>
+<span class="sd">        :type show_robot: bool, optional</span>
+<span class="sd">        :param show_collision: ???, defaults to False</span>
+<span class="sd">        :type show_collision: bool, optional</span>
+<span class="sd">        :return: object id within visualizer</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        ``id = env.add(robot)`` adds the ``robot`` to the graphical</span>
+<span class="sd">            environment.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Adds the robot object to a list of robots which will be updated</span>
+<span class="sd">              when the ``step()`` method is called.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># id = add(robot) adds the robot to the external environment. robot</span>
+        <span class="c1"># must be of an appropriate class. This adds a robot object to a</span>
+        <span class="c1"># list of robots which will act upon the step() method being called.</span>
+
+        <span class="c1"># TODO can add more than a robot right?</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="n">robot</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">robot</span><span class="p">[</span><span class="s1">&#39;show_robot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">show_robot</span>
+            <span class="n">robot</span><span class="p">[</span><span class="s1">&#39;show_collision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">show_collision</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;robot&#39;</span><span class="p">,</span> <span class="n">robot</span><span class="p">)</span>
+
+                <span class="n">loaded</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">loaded</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">loaded</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;is_loaded&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">))</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">id</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;shape&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="Swift.remove"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a robot to the graphical scene</span>
+
+<span class="sd">        ``env.remove(robot)`` removes the ``robot`` from the graphical</span>
+<span class="sd">            environment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO - shouldn&#39;t this have an id argument? which robot does it remove</span>
+        <span class="c1"># TODO - it can remove any entity?</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_step_robots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">robot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">:</span>
+
+            <span class="c1"># if rpl.readonly or robot.control_type == &#39;p&#39;:</span>
+            <span class="c1">#     pass            # pragma: no cover</span>
+
+            <span class="k">if</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> \
+                            <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])):</span>
+                        <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]])</span>
+                        <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]])</span>
+
+            <span class="k">elif</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">else</span><span class="p">:</span>            <span class="c1"># pragma: no cover</span>
+                <span class="c1"># Should be impossible to reach</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Invalid robot.control_type. &#39;</span>
+                    <span class="s1">&#39;Must be one of </span><span class="se">\&#39;</span><span class="s1">p</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="s1">v</span><span class="se">\&#39;</span><span class="s1">, or </span><span class="se">\&#39;</span><span class="s1">a</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_step_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">:</span>
+
+            <span class="n">T</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">base</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
+
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+            <span class="n">shape</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_draw_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;robot_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;shape_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
+
+    <span class="k">def</span> <span class="nf">_send_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

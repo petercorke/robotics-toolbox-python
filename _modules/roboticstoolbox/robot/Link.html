@@ -7,13 +7,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>roboticstoolbox.robot.Link &mdash; Robotics Toolbox Python 0.3.7
+  <title>roboticstoolbox.robot.Link &mdash; Robotics Toolbox for Python 0.3.7
  documentation</title>
   
 
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
 
   
   
@@ -51,9 +52,12 @@
           
 
           
-            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
           
 
+          
+            
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -83,8 +87,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm_dh.html">Arm Type Robots - DH</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm_ets.html">Arm Type Robots - ETS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 </ul>
 
             
@@ -100,14 +105,14 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Robotics Toolbox Python</a>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
         
       </nav>
 
 
       <div class="wy-nav-content">
         
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
         
           
 
@@ -149,299 +154,670 @@
            <div itemprop="articleBody">
             
   <h1>Source code for roboticstoolbox.robot.Link</h1><div class="highlight"><pre>
-<span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">@author: Jesse Haviland</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
-
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
-<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">isscalar</span>
-<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> \
+    <span class="n">isscalar</span><span class="p">,</span> <span class="n">isvector</span><span class="p">,</span> <span class="n">ismatrix</span>
+<span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 
 
-<div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_listen_dyn</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A link superclass for all link types. A Link object holds all information</span>
-<span class="sd">    related to a robot joint and link such as kinematics parameters,</span>
-<span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
+<span class="sd">    Decorator for property setters</span>
 
-<span class="sd">    :param theta: kinematic: joint angle</span>
-<span class="sd">    :type theta: float</span>
-<span class="sd">    :param d: kinematic - link offset</span>
-<span class="sd">    :type d: float</span>
-<span class="sd">    :param alpha: kinematic - link twist</span>
-<span class="sd">    :type alpha: float</span>
-<span class="sd">    :param a: kinematic - link length</span>
-<span class="sd">    :type a: float</span>
-<span class="sd">    :param sigma: kinematic - 0 if revolute, 1 if prismatic</span>
-<span class="sd">    :type sigma: int</span>
-<span class="sd">    :param mdh: kinematic - 0 if standard D&amp;H, else 1</span>
-<span class="sd">    :type mdh: int</span>
-<span class="sd">    :param offset: kinematic - joint variable offset</span>
-<span class="sd">    :type offset: float</span>
+<span class="sd">    Use this decorator for any property setter that updates a parameter that</span>
+<span class="sd">    affects the result of inverse dynamics.  This allows the C version of the</span>
+<span class="sd">    parameters only having to be updated when they change, rather than on </span>
+<span class="sd">    every call.  This decorator signals the change by invoking the </span>
+<span class="sd">    ``dynchanged()`` method of the robot that owns the link.</span>
 
-<span class="sd">    :param qlim: joint variable limits [min max]</span>
-<span class="sd">    :type qlim: float ndarray(2)</span>
+<span class="sd">    Example::</span>
+
+<span class="sd">        @m.setter</span>
+<span class="sd">        @_listen_dyn</span>
+<span class="sd">        def m(self, m_new):</span>
+<span class="sd">            self._m = m_new</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper_listen_dyn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_robot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">dynchanged</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper_listen_dyn</span>
+
+
+<div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Link superclass</span>
+
+<span class="sd">    :param name: name of the link</span>
+<span class="sd">    :type name: str</span>
+
+<span class="sd">    :param qlim: joint variable limits [min, max]</span>
+<span class="sd">    :type qlim: float ndarray(1,2)</span>
 <span class="sd">    :param flip: joint moves in opposite direction</span>
 <span class="sd">    :type flip: bool</span>
 
 <span class="sd">    :param m: dynamic - link mass</span>
 <span class="sd">    :type m: float</span>
 <span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
-<span class="sd">    :type r:  float ndarray(3,1)</span>
+<span class="sd">    :type r:  float ndarray(3)</span>
 <span class="sd">    :param I: dynamic - inertia of link with respect to COM</span>
-<span class="sd">    :type I: float ndarray(3,3)</span>
+<span class="sd">    :type I: ndarray</span>
+
 <span class="sd">    :param Jm: dynamic - motor inertia</span>
 <span class="sd">    :type Jm: float</span>
 <span class="sd">    :param B: dynamic - motor viscous friction</span>
-<span class="sd">    :type B: float</span>
-<span class="sd">    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)</span>
-<span class="sd">    :type Tc: float ndarray(2)</span>
+<span class="sd">    :type B: float, or ndarray(2,)</span>
+<span class="sd">    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</span>
+<span class="sd">    :type Tc: ndarray(2,)</span>
 <span class="sd">    :param G: dynamic - gear ratio</span>
 <span class="sd">    :type G: float</span>
 
-<span class="sd">    :references:</span>
-<span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
+<span class="sd">    An abstract link superclass for all link types. </span>
+
+<span class="sd">    .. inheritance-diagram:: roboticstoolbox.RevoluteDH</span>
+<span class="sd">        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH </span>
+<span class="sd">        roboticstoolbox.PrismaticMDH roboticstoolbox.ELink</span>
+<span class="sd">        :top-classes: roboticstoolbox.robot.Link</span>
+<span class="sd">        :parts: 2</span>
+<span class="sd">    </span>
+<span class="sd">    It holds metadata related to:</span>
+<span class="sd">    </span>
+<span class="sd">    - a robot link, such as rigid-body inertial parameters defined in the link</span>
+<span class="sd">      frame, and link name</span>
+<span class="sd">    - a robot joint, that connects this link to its parent, such as joint</span>
+<span class="sd">      limits, direction of motion, motor and transmission parameters.</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        - For a more sophisticated actuator model use the ``actuator``</span>
+<span class="sd">          attribute which is not initialized or used by this Toolbox.</span>
+<span class="sd">        - There is no ability to name a joint as supported by URDF</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">sigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">mdh</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">m</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">r</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
-            <span class="n">I</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>       <span class="c1"># noqa</span>
+            <span class="n">r</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,)),</span>
+            <span class="n">I</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>  <span class="c1"># noqa</span>
             <span class="n">Jm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">B</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">Tc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-            <span class="n">G</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+            <span class="n">Tc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,)),</span>
+            <span class="n">G</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">collision</span><span class="o">=</span><span class="p">[],</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-        <span class="c1"># Kinematic parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">=</span> <span class="n">mdh</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reference to owning robot</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="c1"># Joint angle parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="n">flip</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span> <span class="o">=</span> <span class="n">qlim</span>
 
-        <span class="c1"># Dynamic Parameters</span>
+        <span class="c1"># Link geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collision</span> <span class="o">=</span> <span class="n">collision</span>
+
+        <span class="c1"># TODO this is a leftover from VPython development, should be</span>
+        <span class="c1"># using geometry instead</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
+
+        <span class="c1"># Link dynamic Parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">m</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">r</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">I</span>    <span class="c1"># noqa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">I</span>  <span class="c1"># noqa</span>
+
+        <span class="c1"># Motor dynamic parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Jm</span> <span class="o">=</span> <span class="n">Jm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">=</span> <span class="n">Tc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actuator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reference to more advanced actuator model</span>
 
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">Link</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">rp</span><span class="o">.</span><span class="n">SerialLink</span><span class="p">([</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">])</span>
+<div class="viewcode-block" id="Link.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Copy of link object</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">SerialLink</span><span class="p">):</span>
-            <span class="n">nlinks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+<span class="sd">        :return: Shallow copy of link object</span>
+<span class="sd">        :rtype: Link</span>
 
-            <span class="c1"># TODO - Should I do a deep copy here a physically copy the Links</span>
-            <span class="c1"># and not just the references?</span>
-            <span class="c1"># Copy Link references to new list</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-                <span class="n">nlinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="sd">        ``link.copy()`` is a new Link subclass instance with a copy of all</span>
+<span class="sd">        the parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">new</span></div>
 
-            <span class="k">return</span> <span class="n">rp</span><span class="o">.</span><span class="n">SerialLink</span><span class="p">(</span>
-                <span class="n">nlinks</span><span class="p">,</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="n">manufacturer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">manuf</span><span class="p">,</span>
-                <span class="n">base</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
-                <span class="n">tool</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">tool</span><span class="p">,</span>
-                <span class="n">gravity</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;Use copy method of Link class&#39;</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Link.dyn"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.dyn">[docs]</a>    <span class="k">def</span> <span class="nf">dyn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inertial properties of link as a string</span>
+
+<span class="sd">        :param indent: indent each line by this many spaces</span>
+<span class="sd">        :type indent: int</span>
+<span class="sd">        :return: The string representation of the link dynamics</span>
+<span class="sd">        :rtype: string</span>
+
+<span class="sd">        ``link.dyn()`` is a string representation the inertial properties of</span>
+<span class="sd">        the link object in a multi-line format. The properties shown are mass,</span>
+<span class="sd">        centre of mass, inertia, friction, gear ratio and motor properties.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; print(robot.links[2])        # kinematic parameters</span>
+<span class="sd">            &gt;&gt;&gt; print(robot.links[2].dyn())  # dynamic parameters</span>
+
+<span class="sd">        :seealso: :func:`~dyntable`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;m     =  </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;r     =  </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;        | </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> | </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;I     = | </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> | </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;        | </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="si">{:8.2g}</span><span class="s2"> | </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;Jm    =  </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;B     =  </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;Tc    =  </span><span class="si">{:8.2g}</span><span class="s2">(+) </span><span class="si">{:8.2g}</span><span class="s2">(-) </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;G     =  </span><span class="si">{:8.2g}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
+            <span class="s2">&quot;qlim  =  </span><span class="si">{:8.2g}</span><span class="s2"> to </span><span class="si">{:8.2g}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Jm</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">indent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># insert indentations into the string</span>
+            <span class="c1"># TODO there is probably a tidier way to integrate this step with</span>
+            <span class="c1"># above</span>
+            <span class="n">sp</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">indent</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">sp</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">sp</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">s</span></div>
+
+    <span class="k">def</span> <span class="nf">_dyn2list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{: .3g}</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inertial properties of link as a string</span>
+
+<span class="sd">        :param fmt: conversion format for each number</span>
+<span class="sd">        :type fmt: str</span>
+<span class="sd">        :return: The string representation of the link dynamics</span>
+<span class="sd">        :rtype: string</span>
+
+<span class="sd">        ``link.)_dyn2list()`` returns a list of pretty-printed inertial</span>
+<span class="sd">        properties of the link The properties included are mass, centre of mass,</span>
+<span class="sd">        inertia, friction, gear ratio and motor properties.</span>
+
+<span class="sd">        :seealso: :func:`~dyn`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
+            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Parameter&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
+            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span>
+        <span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="n">dyn</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[[</span><span class="n">I</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]])</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Jm</span><span class="p">)</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">)</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">dyn</span>
+        
+
+    <span class="k">def</span> <span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ignorevalue</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">isscalar</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">ignorevalue</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">flat</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[[</span><span class="n">flat</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]]</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span> <span class="o">+</span><span class="s2">&quot;]&quot;</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;flip&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;qlim&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;Jm&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;Tc&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">l</span>
+
+<div class="viewcode-block" id="Link.islimit"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.islimit">[docs]</a>    <span class="k">def</span> <span class="nf">islimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if joint exceeds limit</span>
+
+<span class="sd">        :param q: joint coordinate</span>
+<span class="sd">        :type q: float</span>
+<span class="sd">        :return: True if joint is exceeded</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        ``link.islimit(q)`` is True if ``q`` exceeds the joint limits defined</span>
+<span class="sd">        by ``link``.</span>
+
+<span class="sd">        .. note:: If no limits are set always return False.</span>
+
+<span class="sd">        :seealso: :func:`qlim`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot add a Link with a non Link object&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.nofriction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.nofriction">[docs]</a>    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clone link without friction</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Revolute   theta=q</span><span class="si">{}</span><span class="s2"> +</span><span class="si">{: .2f}</span><span class="s2">,  d=</span><span class="si">{: .2f}</span><span class="s2">,  a=</span><span class="si">{: .2f}</span><span class="s2">,  &quot;</span> \
-                <span class="s2">&quot;alpha=</span><span class="si">{: .2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Prismatic  theta=</span><span class="si">{: .2f}</span><span class="s2">,  d=q</span><span class="si">{}</span><span class="s2"> +</span><span class="si">{: .2f}</span><span class="s2">,  a=</span><span class="si">{: .2f}</span><span class="s2">,  &quot;</span> \
-                <span class="s2">&quot;alpha=</span><span class="si">{: .2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="p">)</span>
+<span class="sd">        :param coulomb: if True, will set the Coulomb friction to 0</span>
+<span class="sd">        :type coulomb: bool</span>
+<span class="sd">        :param viscous: if True, will set the viscous friction to 0</span>
+<span class="sd">        :type viscous: bool</span>
 
-        <span class="k">return</span> <span class="n">s</span>
+<span class="sd">        ``link.nofriction()`` is a copy of the link instance with the same </span>
+<span class="sd">        parameters except, the Coulomb and/or viscous friction parameters are</span>
+<span class="sd">        set to zero.</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="sd">        .. note:: For simulation it can be useful to remove Couloumb friction</span>
+<span class="sd">            which can cause problems for numerical integration.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Copy the Link</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">viscous</span><span class="p">:</span>
+            <span class="n">link</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">coulomb</span><span class="p">:</span>
+            <span class="n">link</span><span class="o">.</span><span class="n">Tc</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">link</span></div>
+
+<div class="viewcode-block" id="Link.friction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.friction">[docs]</a>    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute joint friction</span>
+
+<span class="sd">        :param qd: The joint velocity</span>
+<span class="sd">        :type qd: float</span>
+<span class="sd">        :param coulomb: include Coulomb friction</span>
+<span class="sd">        :type coloumb: bool, default True</span>
+<span class="sd">        :return tau: the friction force/torque</span>
+<span class="sd">        :rtype tau: float</span>
+
+<span class="sd">        ``friction(qd)`` is the joint friction force/torque</span>
+<span class="sd">        for joint velocity ``qd``. The friction model includes:</span>
+
+<span class="sd">        - Viscous friction which is a linear function of velocity.</span>
+<span class="sd">        - Coulomb friction which is proportional to sign(qd).</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \tau = G^2 B \dot{q} + |G| \left\{ \begin{array}{ll}</span>
+<span class="sd">                \tau_C^+ &amp; \mbox{if $\dot{q} &gt; 0$} \\</span>
+<span class="sd">                \tau_C^- &amp; \mbox{if $\dot{q} &lt; 0$} \end{array} \right.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - The friction value should be added to the motor output torque to </span>
+<span class="sd">              determine the nett torque. It has a negative value when qd &gt; 0.</span>
+<span class="sd">            - The returned friction value is referred to the output of the</span>
+<span class="sd">              gearbox.</span>
+<span class="sd">            - The friction parameters in the Link object are referred to the</span>
+<span class="sd">              motor.</span>
+<span class="sd">            - Motor viscous friction is scaled up by :math:`G^2`.</span>
+<span class="sd">            - Motor Coulomb friction is scaled up by math:`G`.</span>
+<span class="sd">            - The appropriate Coulomb friction value to use in the</span>
+<span class="sd">              non-symmetric case depends on the sign of the joint velocity,</span>
+<span class="sd">              not the motor velocity.</span>
+<span class="sd">            - Coulomb friction is zero for zero joint velocity, stiction is</span>
+<span class="sd">              not modeled.</span>
+<span class="sd">            - The absolute value of the gear ratio is used.  Negative gear</span>
+<span class="sd">              ratios are tricky: the Puma560 robot has negative gear ratio for</span>
+<span class="sd">              joints 1 and 3.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> <span class="o">*</span> <span class="n">qd</span>
+
+        <span class="k">if</span> <span class="n">coulomb</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">qd</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tau</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">qd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tau</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Scale up by gear ratio</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span>
+
+        <span class="k">return</span> <span class="n">tau</span></div>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link name</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span>
+<span class="sd">        - ``link.name`` is the link name</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta</span>
+<span class="sd">        :return: link name</span>
+<span class="sd">        :rtype: str</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
+<span class="sd">        - ``link.name = ...`` checks and sets the link name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span>
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span>
+<span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint limits</span>
+
+<span class="sd">        - ``link.qlim`` is the joint limits</span>
+
+<span class="sd">        :return: joint limits</span>
+<span class="sd">        :rtype: ndarray(2,) or Nine</span>
+
+<span class="sd">        - ``link.qlim = ...`` checks and sets the joint limits</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - The limits are not widely enforced within the toolbox.</span>
+<span class="sd">            - If no joint limits are specified the value is ``None``</span>
+
+<span class="sd">        :seealso: :func:`~islimit`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">flip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flip</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">I</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># noqa</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_I</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Jm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Jm</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">B</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_B</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Tc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Tc</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_G</span>
-
-    <span class="nd">@d</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_new</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="n">d_new</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;f is not valid for prismatic joints&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">d_new</span>
-
-    <span class="nd">@alpha</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span> <span class="o">=</span> <span class="n">alpha_new</span>
-
-    <span class="nd">@theta</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_new</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="n">theta_new</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;theta is not valid for revolute joints&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_theta</span> <span class="o">=</span> <span class="n">theta_new</span>
-
-    <span class="nd">@a</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a_new</span>
-
-    <span class="nd">@sigma</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span> <span class="o">=</span> <span class="n">sigma_new</span>
-
-    <span class="nd">@mdh</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mdh_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mdh_new</span><span class="p">)</span>
-
-    <span class="nd">@offset</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset_new</span>
 
     <span class="nd">@qlim</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qlim_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qlim_new</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qlim_new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qlim_new</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint flip</span>
+
+<span class="sd">        - ``link.flip`` is the joint flip status</span>
+
+<span class="sd">        :return: joint flip</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        - ``link.flip = ...`` checks and sets the joint flip status</span>
+
+<span class="sd">        Joint flip defines the direction of motion of the joint.</span>
+
+<span class="sd">        ``flip = False`` is conventional motion direction:</span>
+
+<span class="sd">            - revolute motion is a positive rotation about the z-axis</span>
+<span class="sd">            - prismatic motion is a positive translation along the z-axis</span>
+
+<span class="sd">        ``flip = True`` is the opposite motion direction:</span>
+
+<span class="sd">            - revolute motion is a negative rotation about the z-axis</span>
+<span class="sd">            - prismatic motion is a negative translation along the z-axis</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flip</span>
 
     <span class="nd">@flip</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">flip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flip_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flip</span> <span class="o">=</span> <span class="n">flip_new</span>
 
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link mass</span>
+
+<span class="sd">        - ``link.m`` is the link mass</span>
+
+<span class="sd">        :return: link mass</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        - ``link.m = ...`` checks and sets the link mass</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m</span>
+
     <span class="nd">@m</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_m</span> <span class="o">=</span> <span class="n">m_new</span>
 
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link centre of mass</span>
+
+<span class="sd">        - ``link.r`` is the link centre of mass</span>
+
+<span class="sd">        :return: link centre of mass</span>
+<span class="sd">        :rtype: ndarray(3,)</span>
+
+<span class="sd">        - ``link.r = ...`` checks and sets the link centre of mass</span>
+
+<span class="sd">        The link centre of mass is a 3-vector defined with respect to the link</span>
+<span class="sd">        frame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r</span>
+
     <span class="nd">@r</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_r</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">r_new</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;col&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_r</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">r_new</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">I</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># noqa</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set link inertia</span>
+
+<span class="sd">        - ``link.I`` is the link inertia</span>
+
+<span class="sd">        :return: link inertia</span>
+<span class="sd">        :rtype: ndarray(3,3)</span>
+
+<span class="sd">        - ``link.I = ...`` checks and sets the link inertia</span>
+
+<span class="sd">        Link inertia is a symmetric 3x3 matrix describing the inertia with</span>
+<span class="sd">        respect to a frame with its origin at the centre of mass, and with</span>
+<span class="sd">        axes parallel to those of the link frame.</span>
+
+<span class="sd">        The inertia matrix is</span>
+<span class="sd">        </span>
+<span class="sd">        :math:`\begin{bmatrix} I_{xx} &amp; I_{xy} &amp; I_{xz} \\ I_{xy} &amp; I_{yy} &amp; I_{yz} \\I_{xz} &amp; I_{yz} &amp; I_{zz} \end{bmatrix}`</span>
+
+
+<span class="sd">        and can be specified as either:</span>
+
+<span class="sd">        - a 3 ⨉ 3 symmetric matrix</span>
+<span class="sd">        - a 3-vector :math:`(I_{xx}, I_{yy}, I_{zz})`</span>
+<span class="sd">        - a 6-vector :math:`(I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{yz}, I_{xz})`</span>
+
+<span class="sd">        .. note:: Referred to the link side of the gearbox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_I</span>
 
     <span class="nd">@I</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">I</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">I_new</span><span class="p">):</span>  <span class="c1"># noqa</span>
-        <span class="c1"># Try for Inertia Matrix</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
 
-            <span class="c1"># Try for the moments and products of inertia</span>
+        <span class="k">if</span> <span class="n">ismatrix</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span>
+            <span class="c1"># 3x3 matrix passed</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">I_new</span> <span class="o">-</span> <span class="n">I_new</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-8</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;3x3 matrix is not symmetric&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
+            <span class="c1"># 3x3 matrix passed as a 1d vector</span>
+            <span class="n">I_new</span> <span class="o">=</span> <span class="n">I_new</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">I_new</span> <span class="o">-</span> <span class="n">I_new</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-8</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;3x3 matrix is not symmetric&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+            <span class="c1"># 6-vector passed, moments and products of inertia,</span>
             <span class="c1"># [Ixx Iyy Izz Ixy Iyz Ixz]</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">Ia</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-                <span class="n">I_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                    <span class="p">[</span><span class="n">Ia</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Ia</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">Ia</span><span class="p">[</span><span class="mi">5</span><span class="p">]],</span>
-                    <span class="p">[</span><span class="n">Ia</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">Ia</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">Ia</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
-                    <span class="p">[</span><span class="n">Ia</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">Ia</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">Ia</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
-                <span class="p">])</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">I_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="p">[</span><span class="n">I_new</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">I_new</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">I_new</span><span class="p">[</span><span class="mi">5</span><span class="p">]],</span>
+                <span class="p">[</span><span class="n">I_new</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">I_new</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">I_new</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
+                <span class="p">[</span><span class="n">I_new</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">I_new</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">I_new</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="p">])</span>
 
-                <span class="c1"># Try for the moments of inertia</span>
-                <span class="c1"># [Ixx Iyy Izz]</span>
-                <span class="n">Ia</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-                <span class="n">I_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Ia</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">I_new</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="c1"># 3-vector passed, moments of inertia [Ixx Iyy Izz]</span>
+            <span class="n">I_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">I_new</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid shape passed: must be (3,3), (6,), (3,)&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_I</span> <span class="o">=</span> <span class="n">I_new</span>
 
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Jm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set motor inertia</span>
+
+<span class="sd">        - ``link.Jm`` is the motor inertia</span>
+
+<span class="sd">        :return: motor inertia</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        - ``link.Jm = ...`` checks and sets the motor inertia</span>
+
+<span class="sd">        .. note:: Referred to the motor side of the gearbox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Jm</span>
+
     <span class="nd">@Jm</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">Jm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Jm_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Jm</span> <span class="o">=</span> <span class="n">Jm_new</span>
 
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">B</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set motor viscous friction</span>
+
+<span class="sd">        - ``link.B`` is the motor viscous friction</span>
+
+<span class="sd">        :return: motor viscous friction</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        - ``link.B = ...`` checks and sets the motor viscous friction</span>
+
+<span class="sd">        .. note:: </span>
+<span class="sd">            - Referred to the motor side of the gearbox.</span>
+<span class="sd">            - Viscous friction is the same for positive and negative motion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_B</span>
+
     <span class="nd">@B</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">B</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">B_new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">isscalar</span><span class="p">(</span><span class="n">B_new</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_B</span> <span class="o">=</span> <span class="n">B_new</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;B must be a scalar&quot;</span><span class="p">)</span>
 
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Tc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set motor Coulomb friction</span>
+
+<span class="sd">        - ``link.Tc`` is the motor Coulomb friction</span>
+
+<span class="sd">        :return: motor Coulomb friction </span>
+<span class="sd">        :rtype: ndarray(2)</span>
+
+<span class="sd">        - ``link.Tc = ...`` checks and sets the motor Coulomb friction. If a</span>
+<span class="sd">          scalar is given the value is set to [T, -T], if a 2-vector it is</span>
+<span class="sd">          assumed to be in the order [Tc⁺, Tc⁻]</span>
+
+<span class="sd">        Coulomb friction is a non-linear friction effect defined by two</span>
+<span class="sd">        parameters such that</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \tau = \left\{ \begin{array}{ll}</span>
+<span class="sd">                \tau_C^+ &amp; \mbox{if $\dot{q} &gt; 0$} \\</span>
+<span class="sd">                \tau_C^- &amp; \mbox{if $\dot{q} &lt; 0$} \end{array} \right.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            -  Referred to the motor side of the gearbox.</span>
+<span class="sd">            - :math:`\tau_C^+` must be :math:`&gt; 0`, and :math:`\tau_C^-` must </span>
+<span class="sd">              be :math:`&lt; 0`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Tc</span>
+
     <span class="nd">@Tc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">Tc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tc_new</span><span class="p">):</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -458,240 +834,48 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_Tc</span> <span class="o">=</span> <span class="n">Tc_new</span>
 
+<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set gear ratio</span>
+
+<span class="sd">        - ``link.G`` is the transmission gear ratio</span>
+
+<span class="sd">        :return: gear ratio</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        - ``link.G = ...`` checks and sets the gear ratio</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - The ratio of motor motion : link motion</span>
+<span class="sd">            - The gear ratio can be negative, see also the ``flip`` attribute.</span>
+
+<span class="sd">        :seealso: :func:`flip`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_G</span>
+
     <span class="nd">@G</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">G_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_G</span> <span class="o">=</span> <span class="n">G_new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_G</span> <span class="o">=</span> <span class="n">G_new</span></div>
 
-    <span class="k">def</span> <span class="nf">_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Copy the Link</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span>
-            <span class="n">d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span>
-            <span class="n">theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>
-            <span class="n">sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span>
-            <span class="n">mdh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
-            <span class="n">qlim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">,</span>
-            <span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">,</span>
-            <span class="n">m</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
-            <span class="n">r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">,</span>
-            <span class="n">I</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">,</span>
-            <span class="n">Jm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Jm</span><span class="p">,</span>
-            <span class="n">B</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span>
-            <span class="n">Tc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">,</span>
-            <span class="n">G</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-        <span class="k">return</span> <span class="n">link</span>
+    <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+    <span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">sym</span>
+    
+    <span class="n">ET</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ETS</span>
 
-<div class="viewcode-block" id="Link.dyn"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.dyn">[docs]</a>    <span class="k">def</span> <span class="nf">dyn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Show inertial properties of link</span>
 
-<span class="sd">        s = dyn() returns a string representation the inertial properties of</span>
-<span class="sd">        the link object in a multi-line format. The properties shown are mass,</span>
-<span class="sd">        centre of mass, inertia, friction, gear ratio and motor properties.</span>
 
-<span class="sd">        :return s: The string representation of the link dynamics</span>
-<span class="sd">        :rtype s: string</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;m     =  </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;r     =  </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;        | </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> | </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;I     = | </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> | </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;        | </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="si">{:.2f}</span><span class="s2"> | </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;Jm    =  </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;B     =  </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;Tc    =  </span><span class="si">{:.2f}</span><span class="s2">(+) </span><span class="si">{:.2f}</span><span class="s2">(-) </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;G     =  </span><span class="si">{:.2f}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> \
-            <span class="s2">&quot;qlim  =  </span><span class="si">{:.2f}</span><span class="s2"> to </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Jm</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="p">)</span>
+    <span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;d, a, theta&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">s</span></div>
-
-<div class="viewcode-block" id="Link.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Link transform matrix</span>
-
-<span class="sd">        T = A(q) is the link homogeneous transformation matrix (4x4)</span>
-<span class="sd">        corresponding to the link variable q which is either the</span>
-<span class="sd">        Denavit-Hartenberg parameter theta (revolute) or d (prismatic)</span>
-
-<span class="sd">        :param q: Joint angle (radians)</span>
-<span class="sd">        :type q: float</span>
-<span class="sd">        :return T: link homogeneous transformation matrix</span>
-<span class="sd">        :rtype T: float numpy.ndarray((4, 4))</span>
-
-<span class="sd">        :notes:</span>
-<span class="sd">            - For a revolute joint the THETA parameter of the link is ignored,</span>
-<span class="sd">              and q used instead.</span>
-<span class="sd">            - For a prismatic joint the D parameter of the link is ignored,</span>
-<span class="sd">              and q used instead.</span>
-<span class="sd">            - The link offset parameter is added to Q before computation of</span>
-<span class="sd">              the transformation matrix.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">sa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
-        <span class="n">ca</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">:</span>
-            <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="n">q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># revolute</span>
-            <span class="n">st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-            <span class="n">ct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># prismatic</span>
-            <span class="n">st</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
-            <span class="n">ct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">q</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># standard DH</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">ct</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">st</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># modified DH</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ca</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Link.islimit"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.islimit">[docs]</a>    <span class="k">def</span> <span class="nf">islimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks if the joint is exceeding a joint limit</span>
-
-<span class="sd">        :return: True if joint is exceeded</span>
-<span class="sd">        :rtype: bool</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Link.isrevolute"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks if the joint is of revolute type</span>
-
-<span class="sd">        :return: Ture if is revolute</span>
-<span class="sd">        :rtype: bool</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Link.isprismatic"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.isprismatic">[docs]</a>    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks if the joint is of prismatic type</span>
-
-<span class="sd">        :return: Ture if is prismatic</span>
-<span class="sd">        :rtype: bool</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Link.nofriction"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.nofriction">[docs]</a>    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        l2 = nofriction(coulomb, viscous) copies the link and returns a link</span>
-<span class="sd">        with the same parameters except, the Coulomb and/or viscous friction</span>
-<span class="sd">        parameter to zero.</span>
-
-<span class="sd">        l2 = nofriction() as above except the the Coulomb parameter is set to</span>
-<span class="sd">        zero.</span>
-
-<span class="sd">        :param coulomb: if True, will set the coulomb friction to 0</span>
-<span class="sd">        :type coulomb: bool</span>
-<span class="sd">        :param viscous: if True, will set the viscous friction to 0</span>
-<span class="sd">        :type viscous: bool</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Copy the Link</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_copy</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">viscous</span><span class="p">:</span>
-            <span class="n">link</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-        <span class="k">if</span> <span class="n">coulomb</span><span class="p">:</span>
-            <span class="n">link</span><span class="o">.</span><span class="n">Tc</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">link</span></div>
-
-<div class="viewcode-block" id="Link.friction"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.Revolute.Link.friction">[docs]</a>    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        tau = friction(qd) Calculates the joint friction force/torque (n)</span>
-<span class="sd">        for joint velocity qd (n). The friction model includes:</span>
-
-<span class="sd">        - Viscous friction which is a linear function of velocity.</span>
-<span class="sd">        - Coulomb friction which is proportional to sign(qd).</span>
-
-<span class="sd">        :param qd: The joint velocity</span>
-<span class="sd">        :type qd: float</span>
-
-<span class="sd">        :return tau: the friction force/torque</span>
-<span class="sd">        :rtype tau: float</span>
-
-<span class="sd">        :notes:</span>
-<span class="sd">            - The friction value should be added to the motor output torque,</span>
-<span class="sd">              it has a negative value when qd &gt; 0.</span>
-<span class="sd">            - The returned friction value is referred to the output of the</span>
-<span class="sd">              gearbox.</span>
-<span class="sd">            - The friction parameters in the Link object are referred to the</span>
-<span class="sd">              motor.</span>
-<span class="sd">            - Motor viscous friction is scaled up by G^2.</span>
-<span class="sd">            - Motor Coulomb friction is scaled up by G.</span>
-<span class="sd">            - The appropriate Coulomb friction value to use in the</span>
-<span class="sd">              non-symmetric case depends on the sign of the joint velocity,</span>
-<span class="sd">              not the motor velocity.</span>
-<span class="sd">            - The absolute value of the gear ratio is used.  Negative gear</span>
-<span class="sd">              ratios are tricky: the Puma560 has negative gear ratio for</span>
-<span class="sd">              joints 1 and 3.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> <span class="o">*</span> <span class="n">qd</span>
-
-        <span class="k">if</span> <span class="n">qd</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">tau</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">qd</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">tau</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="c1"># Scale up by gear ratio</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span>
-
-        <span class="k">return</span> <span class="n">tau</span></div></div>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ELink</span><span class="p">()</span>
 </pre></div>
 
            </div>
@@ -705,7 +889,10 @@
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2020, Jesse Haviland
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
 
     </p>
   </div>
@@ -744,7 +931,7 @@
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-102222819-4', 'auto');
+    ga('create', 'G-11Q6WJM565', 'auto');
     ga('send', 'pageview');
     </script>
 

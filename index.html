@@ -7,13 +7,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Robotics Toolbox for Python &mdash; Robotics Toolbox Python 0.3.7
+  <title>Robotics Toolbox for Python &mdash; Robotics Toolbox for Python 0.3.7
  documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
 
   
   
@@ -38,7 +39,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Arm Type Robots - DH" href="arm_dh.html" /> 
+    <link rel="next" title="Introduction" href="intro.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -52,9 +53,12 @@
           
 
           
-            <a href="#" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox Python
+            <a href="#" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
           
 
+          
+            
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -84,8 +88,9 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Arm Type Robots - DH</a></li>
-<li class="toctree-l1"><a class="reference internal" href="arm_ets.html">Arm Type Robots - ETS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
 </ul>
 
             
@@ -101,14 +106,14 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">Robotics Toolbox Python</a>
+          <a href="#">Robotics Toolbox for Python</a>
         
       </nav>
 
 
       <div class="wy-nav-content">
         
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
         
           
 
@@ -146,6 +151,13 @@
   </ul>
 
   
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="intro.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+  </div>
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -155,17 +167,24 @@
 <h1>Robotics Toolbox for Python<a class="headerlink" href="#robotics-toolbox-for-python" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Arm Type Robots - DH</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#module-roboticstoolbox.robot.SerialLink">SerialLink</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#module-roboticstoolbox.robot.RevoluteDH">Revolute - standard DH</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#module-roboticstoolbox.robot.PrismaticDH">Prismatic - standard DH</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#module-roboticstoolbox.robot.RevoluteMDH">Revolute - modified DH</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#module-roboticstoolbox.robot.PrismaticMDH">Prismatic - modified DH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#high-level-classes">High-level classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#low-level-spatial-math">Low-level spatial math</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arm_ets.html">Arm Type Robots - ETS</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_ets.html#module-roboticstoolbox.robot.ETS">ETS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_ets.html#et">ET</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile.html#module-roboticstoolbox.robot.ETS">Vehicle models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile.html#path-planning">Path planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile.html#ekf">EKF</a></li>
 </ul>
 </li>
 </ul>
@@ -180,7 +199,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="arm_dh.html" class="btn btn-neutral float-right" title="Arm Type Robots - DH" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="intro.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -191,7 +210,10 @@
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2020, Jesse Haviland
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
 
     </p>
   </div>
@@ -230,7 +252,7 @@
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-102222819-4', 'auto');
+    ga('create', 'G-11Q6WJM565', 'auto');
     ga('send', 'pageview');
     </script>
 

@@ -1,0 +1,1483 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Superclasses &mdash; Robotics Toolbox for Python 0.3.7
+ documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Backends" href="arm_backend.html" />
+    <link rel="prev" title="ERobot models" href="arm_erobot.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Superclasses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#robot">Robot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#link">Link</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="arm.html">Manipulator arms</a> &raquo;</li>
+        
+      <li>Superclasses</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/arm_superclass.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="arm_backend.html" class="btn btn-neutral float-right" title="Backends" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="arm_erobot.html" class="btn btn-neutral float-left" title="ERobot models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="superclasses">
+<h1>Superclasses<a class="headerlink" href="#superclasses" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="robot">
+<h2>Robot<a class="headerlink" href="#robot" title="Permalink to this headline">¶</a></h2>
+<div class="graphviz"><img src="_images/inheritance-f1278b439ff1868cceda340fe0675a5870666cc7.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
+<map id="inheritanced41b53372b" name="inheritanced41b53372b">
+<area shape="rect" id="node1" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="153,5,269,31"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="5,5,105,31"/>
+</map><p>The various models <a class="reference internal" href="arm_erobot.html#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
+<span class="target" id="module-roboticstoolbox.robot.Robot"></span><dl class="py class">
+<dt id="roboticstoolbox.robot.Robot.Robot">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Robot.</code><code class="sig-name descname">Robot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">links</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'noname'</span></em>, <em class="sig-param"><span class="n">manufacturer</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">base</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tool</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">meshdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">keywords</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">symbolic</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.__getitem__">
+<code class="sig-name descname">__getitem__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get link (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> (<em>int</em>) – link number</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>i’th link of robot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Link subclass</p>
+</dd>
+</dl>
+<p>This also supports iterating over each link in the robot object,
+from the base to the tool.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># print the 2nd link</span>
+<span class="go">RevoluteDH:   theta=q2,  d=0, a=0.4318, alpha=0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">a</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">robot</span><span class="p">])</span>  <span class="c1"># print all the a_j values</span>
+<span class="go">[0, 0.4318, 0.0203, 0, 0, 0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.dynchanged">
+<code class="sig-name descname">dynchanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.dynchanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.dynchanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dynamic parameters have changed (Robot superclass)</p>
+<p>Called from a property setter to inform the robot that the cache of
+dynamic parameters is invalid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">roboticstoolbox.Link._listen_dyn()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.n">
+<em class="property">property </em><code class="sig-name descname">n</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of joints (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of joints</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">n</span>
+<span class="go">6</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.addconfiguration">
+<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.addconfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.addconfiguration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a named joint configuration (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the joint configuration</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>)</em>) – Joint configuration</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">qz</span>
+<span class="go">array([0., 0., 0., 0., 0., 0.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;mypos&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">mypos</span>
+<span class="go">array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.dyntable">
+<code class="sig-name descname">dyntable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.dyntable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.dyntable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty print the dynamic parameters (Robot superclass)</p>
+<p>The dynamic parameters are printed in a table, with one row per link.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot name (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the robot name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets therobot name</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.manufacturer">
+<em class="property">property </em><code class="sig-name descname">manufacturer</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.manufacturer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot manufacturer’s name (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.manufacturer</span></code> is the robot manufacturer’s name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot manufacturer’s name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.manufacturer</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the manufacturer’s name</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.links">
+<em class="property">property </em><code class="sig-name descname">links</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Robot links (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of link objects</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of Link subclass instances</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is probably more concise to index the robot object rather
+than the list of links, ie. the following are equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">robot</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.base">
+<em class="property">property </em><code class="sig-name descname">base</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot base transform (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.base</span></code> is the robot base transform</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot tool transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>SE3 instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.base</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot base transform</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The private attribute <code class="docutils literal notranslate"><span class="pre">_base</span></code> will be None in the case of
+no base transform, but this property will return <code class="docutils literal notranslate"><span class="pre">SE3()</span></code> which
+is an identity matrix.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.tool">
+<em class="property">property </em><code class="sig-name descname">tool</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.tool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot tool transform (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.tool</span></code> is the robot name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot tool transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>SE3 instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.tool</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot tool transform</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The private attribute <code class="docutils literal notranslate"><span class="pre">_tool</span></code> will be None in the case of
+no tool transform, but this property will return <code class="docutils literal notranslate"><span class="pre">SE3()</span></code> which
+is an identity matrix.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.gravity">
+<em class="property">property </em><code class="sig-name descname">gravity</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.gravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set default gravitational acceleration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the default gravitational acceleration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets default gravitational
+acceleration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the z-axis is upward, out of the Earth, this should be
+a positive number.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.qlim">
+<em class="property">property </em><code class="sig-name descname">qlim</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qlim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joint limits (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of joint limit values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,n)</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span>
+<span class="go">array([[-2.7925, -1.9199, -2.3562, -4.6426, -1.7453, -4.6426],</span>
+<span class="go">       [ 2.7925,  1.9199,  2.3562,  4.6426,  1.7453,  4.6426]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.q">
+<em class="property">property </em><code class="sig-name descname">q</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint configuration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span></code> is the robot joint configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint configuration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint configuration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.qd">
+<em class="property">property </em><code class="sig-name descname">qd</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint velocity (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qd</span></code> is the robot joint velocity</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint velocity</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qd</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint velocity</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.qdd">
+<em class="property">property </em><code class="sig-name descname">qdd</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qdd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint acceleration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span></code> is the robot joint acceleration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint acceleration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot joint acceleration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.control_type">
+<em class="property">property </em><code class="sig-name descname">control_type</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.control_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot control mode (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.control_type</span></code> is the robot control mode</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot control mode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.control_type</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot control mode</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikine">
+<code class="sig-name descname">ikine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">500</span></em>, <em class="sig-param"><span class="n">rlimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-10</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">Ymin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">search</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">slimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">transpose</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.ikine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical inverse kinematics by optimization (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (SE3 with 1 or <code class="docutils literal notranslate"><span class="pre">m</span></code> values) – The desired end-effector pose</p></li>
+<li><p><strong>ilimit</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – maximum number of iterations</p></li>
+<li><p><strong>rlimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of consecutive step rejections</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em> (</em><em>default 1e-10</em><em>)</em>) – final error tolerance</p></li>
+<li><p><strong>Y</strong> (<em>float</em><em> (</em><em>default 0.1</em><em>)</em>) – initial value of lambda</p></li>
+<li><p><strong>Ymin</strong> (<em>float</em><em> (</em><em>default 0</em><em>)</em>) – minimum allowable value of lambda</p></li>
+<li><p><strong>mask</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>)</em>) – mask vector that correspond to translation in X, Y and Z
+and rotation about X, Y and Z respectively.</p></li>
+<li><p><strong>q0</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>) </em><em>(</em><em>default all zeros</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+<li><p><strong>search</strong> (<em>bool</em>) – search over all configurations</p></li>
+<li><p><strong>slimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of search attempts</p></li>
+<li><p><strong>transpose</strong> (<em>float</em>) – use Jacobian transpose with step size A, rather
+than Levenberg-Marquadt</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>IK solver failed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool or list of bool</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If failed, what went wrong</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of str</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">q,</span> <span class="pre">failure,</span> <span class="pre">reason</span> <span class="pre">=</span> <span class="pre">ikine(T)</span></code> are the joint coordinates (n)
+corresponding to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code>
+instance. <code class="docutils literal notranslate"><span class="pre">failure</span></code> is True if the solver failed, and <code class="docutils literal notranslate"><span class="pre">reason</span></code>
+contains details of the failure.</p>
+<p>This method can be used for robots with any number of degrees of
+freedom.</p>
+<p><strong>Trajectory operation:</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">T</span></code> contains <code class="docutils literal notranslate"><span class="pre">m</span></code> &gt; 1 values, ie. a trajectory, then returns the
+joint coordinates corresponding to each of the pose values in <code class="docutils literal notranslate"><span class="pre">T</span></code>.
+<code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n) where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints. The initial
+estimate of <code class="docutils literal notranslate"><span class="pre">q</span></code> for each time step is taken as the solution from the
+previous time step. Returns trajectory of joints <code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n), list of
+failure (m) and list of error reasons (m).</p>
+<p><strong>Underactuated robots:</strong></p>
+<p>For the case where the manipulator has fewer than 6 DOF the
+solution space has more dimensions than can be spanned by the
+manipulator joint coordinates.</p>
+<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector (6)
+specifies the Cartesian DOF (in the wrist coordinate frame) that will
+be ignored in reaching a solution.  The mask vector has six elements
+that correspond to translation in X, Y and Z, and rotation about X, Y
+and Z respectively. The value should be 0 (for ignore) or 1. The
+number of non-zero elements should equal the number of manipulator
+DOF.</p>
+<p>For example when using a 3 DOF manipulator rotation orientation might
+be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
+<p>For robots with 4 or 5 DOF this method is very difficult to use since
+orientation is specified by T in world coordinates and the achievable
+orientations are a function of the tool position.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Solution is computed iteratively.</p></li>
+<li><p>Implements a Levenberg-Marquadt variable step size solver.</p></li>
+<li><p>The tolerance is computed on the norm of the error between
+current and desired tool pose.  This norm is computed from
+distances and angles without any kind of weighting.</p></li>
+<li><p>The inverse kinematic solution is generally not unique, and
+depends on the initial guess q0 (defaults to 0).</p></li>
+<li><p>The default value of q0 is zero which is a poor choice for most
+manipulators (eg. puma560, twolink) since it corresponds to a
+kinematic singularity.</p></li>
+<li><p>Such a solution is completely general, though much less
+efficient than specific inverse kinematic solutions derived
+symbolically, like ikine6s or ikine3.</p></li>
+<li><p>This approach allows a solution to be obtained at a singularity,
+but the joint angles within the null space are arbitrarily
+assigned.</p></li>
+<li><p>Joint offsets, if defined, are added to the inverse kinematics
+to generate q.</p></li>
+<li><p>Joint limits are not considered in this solution.</p></li>
+<li><p>The ‘search’ option peforms a brute-force search with initial
+conditions chosen from the entire configuration space.</p></li>
+<li><p>If the search option is used any prismatic joint must have
+joint limits defined.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control, P. Corke, Springer 2011,
+Section 8.4.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikunc">
+<code class="sig-name descname">ikunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.ikunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse manipulator by optimization without joint limits (Robot
+superclass)</p>
+<p>q, success, err = ikunc(T) are the joint coordinates (n) corresponding
+to the robot end-effector pose T which is an SE3 object or
+homogenenous transform matrix (4x4), and n is the number of robot
+joints. Also returns success and err which is the scalar final value
+of the objective function.</p>
+<p>q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the
+initial joint coordinates q0 used for the minimisation.</p>
+<p>Trajectory operation:
+In all cases if T is a vector of SE3 objects (m) or a homogeneous
+transform sequence (4x4xm) then returns the joint coordinates
+corresponding to each of the transforms in the sequence. q is mxn
+where n is the number of robot joints. The initial estimate of q
+for each time step is taken as the solution from the previous time
+step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em><em> or </em><em>SE3 trajectory</em>) – The desired end-effector pose</p></li>
+<li><p><strong>ilimit</strong> (<em>bool</em>) – Iteration limit (default 1000)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retrun q</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Rtype q</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Retrun success</dt>
+<dd class="field-even"><p>IK solved (True) or failed (False)</p>
+</dd>
+<dt class="field-odd">Rtype success</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Retrun error</dt>
+<dd class="field-even"><p>Final pose error</p>
+</dd>
+<dt class="field-odd">Rtype error</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Joint limits are not considered in this solution.</p></li>
+<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
+<li><p>In the case of multiple feasible solutions, the solution
+returned depends on the initial choice of q0</p></li>
+<li><p>Works by minimizing the error between the forward kinematics of
+the joint angle solution and the end-effector frame as an
+optimisation.</p></li>
+<li><p>The objective function (error) is described as:
+sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+Where omega is some gain matrix, currently not modifiable.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikcon">
+<code class="sig-name descname">ikcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.ikcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikcon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
+<p>q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
+corresponding to the robot end-effector pose T which is an SE3 object
+or homogenenous transform matrix (4x4), and N is the number of robot
+joints. Initial joint coordinates Q0 used for the minimisation.</p>
+<p>q, success, err = ikcon(T) as above but q0 is set to 0.</p>
+<p>Trajectory operation:
+In all cases if T is a vector of SE3 objects or a homogeneous
+transform sequence (4x4xm) then returns the joint coordinates
+corresponding to each of the transforms in the sequence. q is mxn
+where n is the number of robot joints. The initial estimate of q
+for each time step is taken as the solution from the previous time
+step. Retruns trajectory of joints q (mxn), list of success (m) and
+list of errors (m)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em><em> or </em><em>SE3 trajectory</em>) – The desired end-effector pose</p></li>
+<li><p><strong>q0</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>) </em><em>(</em><em>default all zeros</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Retrun q</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Rtype q</dt>
+<dd class="field-odd"><p>float ndarray(n)</p>
+</dd>
+<dt class="field-even">Retrun success</dt>
+<dd class="field-even"><p>IK solved (True) or failed (False)</p>
+</dd>
+<dt class="field-odd">Rtype success</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Retrun error</dt>
+<dd class="field-even"><p>Final pose error</p>
+</dd>
+<dt class="field-odd">Rtype error</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Joint limits are considered in this solution.</p></li>
+<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
+<li><p>In the case of multiple feasible solutions, the solution
+returned depends on the initial choice of q0.</p></li>
+<li><p>Works by minimizing the error between the forward kinematics
+of the joint angle solution and the end-effector frame as an
+optimisation.</p></li>
+<li><p>The objective function (error) is described as:
+sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
+Where omega is some gain matrix, currently not modifiable.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.qmincon">
+<code class="sig-name descname">qmincon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.qmincon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qmincon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move away from joint limits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p>
+</dd>
+<dt class="field-even">Retrun qs</dt>
+<dd class="field-even"><p>The calculated joint values</p>
+</dd>
+<dt class="field-odd">Rtype qs</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Optimisation solved (True) or failed (False)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Final value of the objective function</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and returns
+a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same end-effector
+pose but are away from the joint coordinate limits. <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number
+of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for successful optimisation.
+<code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of the objective function.</p>
+<p><strong>Trajectory operation</strong></p>
+<p>In all cases if <code class="docutils literal notranslate"><span class="pre">q</span></code> is (m,n) it is taken as a pose sequence and
+<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n) corresponding
+to each of the configurations in the sequence.</p>
+<p><code class="docutils literal notranslate"><span class="pre">err</span></code> and <code class="docutils literal notranslate"><span class="pre">success</span></code> are also (m) and indicate the results of
+optimisation for the corresponding trajectory step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Robot must be redundant.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.friction">
+<code class="sig-name descname">friction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.friction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.friction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manipulator joint friction (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint velocities of the robot</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The joint friction forces/torques for the robot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.friction(qd)</span></code> is a vector of joint friction
+forces/torques for the robot moving with joint velocities <code class="docutils literal notranslate"><span class="pre">qd</span></code>.</p>
+<p>The friction model includes:</p>
+<ul class="simple">
+<li><p>Viscous friction which is a linear function of velocity.</p></li>
+<li><p>Coulomb friction which is proportional to sign(qd).</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau_j = G^2 B \dot{q}_j + |G_j| \left\{ \begin{array}{ll}
+    \tau_{C,j}^+ &amp; \mbox{if $\dot{q}_j &gt; 0$} \\
+    \tau_{C,j}^- &amp; \mbox{if $\dot{q}_j &lt; 0$} \end{array} \right.\end{split}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The friction value should be added to the motor output torque to
+determine the nett torque. It has a negative value when qd &gt; 0.</p></li>
+<li><p>The returned friction value is referred to the output of the
+gearbox.</p></li>
+<li><p>The friction parameters in the Link object are referred to the
+motor.</p></li>
+<li><p>Motor viscous friction is scaled up by <span class="math notranslate nohighlight">\(G^2\)</span>.</p></li>
+<li><p>Motor Coulomb friction is scaled up by math:<cite>G</cite>.</p></li>
+<li><p>The appropriate Coulomb friction value to use in the
+non-symmetric case depends on the sign of the joint velocity,
+not the motor velocity.</p></li>
+<li><p>Coulomb friction is zero for zero joint velocity, stiction is
+not modeled.</p></li>
+<li><p>The absolute value of the gear ratio is used.  Negative gear
+ratios are tricky: the Puma560 robot has negative gear ratio for
+joints 1 and 3.</p></li>
+<li><p>The absolute value of the gear ratio is used. Negative gear
+ratios are tricky: the Puma560 has negative gear ratio for
+joints 1 and 3.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.nofriction" title="roboticstoolbox.robot.Robot.Robot.nofriction"><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.nofriction()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.friction()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.nofriction">
+<code class="sig-name descname">nofriction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">viscous</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.nofriction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.nofriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove manipulator joint friction (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coulomb</strong> (<em>bool</em>) – set the Coulomb friction to 0</p></li>
+<li><p><strong>viscous</strong> (<em>bool</em>) – set the viscous friction to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Robot subclass</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">nofriction()</span></code> copies the robot and returns
+a robot with the same link parameters except the Coulomb and/or viscous
+friction parameter are set to zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.friction" title="roboticstoolbox.robot.Robot.Robot.friction"><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.friction()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.nofriction()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="link">
+<h2>Link<a class="headerlink" href="#link" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ERobot</span></code> is defined by a tree of <code class="docutils literal notranslate"><span class="pre">ELink</span></code> subclass objects.</p>
+<div class="graphviz"><img src="_images/inheritance-756f015610b88f6ae58bbf065bfdc29efa9e9e8f.png" alt="Inheritance diagram of roboticstoolbox.Link" usemap="#inheritance1209b9c66c" class="inheritance graphviz" /></div>
+<map id="inheritance1209b9c66c" name="inheritance1209b9c66c">
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,5,209,31"/>
+</map><span class="target" id="module-roboticstoolbox.robot.Link"></span><dl class="py class">
+<dt id="roboticstoolbox.robot.Link.Link">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Link.</code><code class="sig-name descname">Link</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">m</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">r</span><span class="o">=</span><span class="default_value">array([0.0, 0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">I</span><span class="o">=</span><span class="default_value">array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])</span></em>, <em class="sig-param"><span class="n">Jm</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">B</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">Tc</span><span class="o">=</span><span class="default_value">array([0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">mesh</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">geometry</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">collision</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Link superclass</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – name of the link</p></li>
+<li><p><strong>qlim</strong> (<em>float ndarray</em><em>(</em><em>1</em><em>,</em><em>2</em><em>)</em>) – joint variable limits [min, max]</p></li>
+<li><p><strong>flip</strong> (<em>bool</em>) – joint moves in opposite direction</p></li>
+<li><p><strong>m</strong> (<em>float</em>) – dynamic - link mass</p></li>
+<li><p><strong>r</strong> (<em>float ndarray</em><em>(</em><em>3</em><em>)</em>) – dynamic - position of COM with respect to link frame</p></li>
+<li><p><strong>I</strong> (<em>ndarray</em>) – dynamic - inertia of link with respect to COM</p></li>
+<li><p><strong>Jm</strong> (<em>float</em>) – dynamic - motor inertia</p></li>
+<li><p><strong>B</strong> (<em>float</em><em>, or </em><em>ndarray</em><em>(</em><em>2</em><em>,</em><em>)</em>) – dynamic - motor viscous friction</p></li>
+<li><p><strong>Tc</strong> (<em>ndarray</em><em>(</em><em>2</em><em>,</em><em>)</em>) – dynamic - motor Coulomb friction [Tc⁺, Tc⁻]</p></li>
+<li><p><strong>G</strong> (<em>float</em>) – dynamic - gear ratio</p></li>
+</ul>
+</dd>
+</dl>
+<p>An abstract link superclass for all link types.</p>
+<div class="graphviz"><img src="_images/inheritance-75d2baa5e2445eeb0fc0d6f79fbe3fb44e18bc75.png" alt="Inheritance diagram of roboticstoolbox.RevoluteDH, roboticstoolbox.PrismaticDH, roboticstoolbox.RevoluteMDH, roboticstoolbox.PrismaticMDH, roboticstoolbox.ELink" usemap="#inheritance04c26cb51d" class="inheritance graphviz" /></div>
+<map id="inheritance04c26cb51d" name="inheritance04c26cb51d">
+<area shape="rect" id="node3" href="arm_dh.html#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="431,5,585,31"/>
+<area shape="rect" id="node4" href="arm_dh.html#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="425,55,591,80"/>
+<area shape="rect" id="node5" href="arm_dh.html#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="433,104,583,129"/>
+<area shape="rect" id="node6" href="arm_dh.html#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="427,153,589,179"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,105,209,131"/>
+<area shape="rect" id="node7" href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink" target="_top" title="ETS link class" alt="" coords="269,129,365,155"/>
+</map><p>It holds metadata related to:</p>
+<ul class="simple">
+<li><p>a robot link, such as rigid-body inertial parameters defined in the link
+frame, and link name</p></li>
+<li><p>a robot joint, that connects this link to its parent, such as joint
+limits, direction of motion, motor and transmission parameters.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>For a more sophisticated actuator model use the <code class="docutils literal notranslate"><span class="pre">actuator</span></code>
+attribute which is not initialized or used by this Toolbox.</p></li>
+<li><p>There is no ability to name a joint as supported by URDF</p></li>
+</ul>
+</div>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy of link object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Shallow copy of link object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.copy()</span></code> is a new Link subclass instance with a copy of all
+the parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.dyn">
+<code class="sig-name descname">dyn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.dyn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.dyn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inertial properties of link as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indent</strong> (<em>int</em>) – indent each line by this many spaces</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The string representation of the link dynamics</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.dyn()</span></code> is a string representation the inertial properties of
+the link object in a multi-line format. The properties shown are mass,
+centre of mass, inertia, friction, gear ratio and motor properties.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
+<span class="go">RevoluteDH:   theta=q3,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
+<span class="go">m     =       4.8 </span>
+<span class="go">r     =     -0.02   -0.014     0.07 </span>
+<span class="go">        |    0.066        0        0 | </span>
+<span class="go">I     = |        0    0.086        0 | </span>
+<span class="go">        |        0        0    0.013 | </span>
+<span class="go">Jm    =    0.0002 </span>
+<span class="go">B     =    0.0014 </span>
+<span class="go">Tc    =      0.13(+)     -0.1(-) </span>
+<span class="go">G     =       -54 </span>
+<span class="go">qlim  =      -2.4 to      2.4</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">dyntable()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.islimit">
+<code class="sig-name descname">islimit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.islimit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.islimit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if joint exceeds limit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>float</em>) – joint coordinate</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if joint is exceeded</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.islimit(q)</span></code> is True if <code class="docutils literal notranslate"><span class="pre">q</span></code> exceeds the joint limits defined
+by <code class="docutils literal notranslate"><span class="pre">link</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no limits are set always return False.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Link.Link.qlim" title="roboticstoolbox.robot.Link.Link.qlim"><code class="xref py py-func docutils literal notranslate"><span class="pre">qlim()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.nofriction">
+<code class="sig-name descname">nofriction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">viscous</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.nofriction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.nofriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone link without friction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coulomb</strong> (<em>bool</em>) – if True, will set the Coulomb friction to 0</p></li>
+<li><p><strong>viscous</strong> (<em>bool</em>) – if True, will set the viscous friction to 0</p></li>
+</ul>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.nofriction()</span></code> is a copy of the link instance with the same 
+parameters except, the Coulomb and/or viscous friction parameters are
+set to zero.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For simulation it can be useful to remove Couloumb friction
+which can cause problems for numerical integration.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.friction">
+<code class="sig-name descname">friction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">coulomb</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.friction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.friction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute joint friction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qd</strong> (<em>float</em>) – The joint velocity</p></li>
+<li><p><strong>coulomb</strong> – include Coulomb friction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return tau</dt>
+<dd class="field-even"><p>the friction force/torque</p>
+</dd>
+<dt class="field-odd">Rtype tau</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">friction(qd)</span></code> is the joint friction force/torque
+for joint velocity <code class="docutils literal notranslate"><span class="pre">qd</span></code>. The friction model includes:</p>
+<ul class="simple">
+<li><p>Viscous friction which is a linear function of velocity.</p></li>
+<li><p>Coulomb friction which is proportional to sign(qd).</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau = G^2 B \dot{q} + |G| \left\{ \begin{array}{ll}
+    \tau_C^+ &amp; \mbox{if $\dot{q} &gt; 0$} \\
+    \tau_C^- &amp; \mbox{if $\dot{q} &lt; 0$} \end{array} \right.\end{split}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The friction value should be added to the motor output torque to 
+determine the nett torque. It has a negative value when qd &gt; 0.</p></li>
+<li><p>The returned friction value is referred to the output of the
+gearbox.</p></li>
+<li><p>The friction parameters in the Link object are referred to the
+motor.</p></li>
+<li><p>Motor viscous friction is scaled up by <span class="math notranslate nohighlight">\(G^2\)</span>.</p></li>
+<li><p>Motor Coulomb friction is scaled up by math:<cite>G</cite>.</p></li>
+<li><p>The appropriate Coulomb friction value to use in the
+non-symmetric case depends on the sign of the joint velocity,
+not the motor velocity.</p></li>
+<li><p>Coulomb friction is zero for zero joint velocity, stiction is
+not modeled.</p></li>
+<li><p>The absolute value of the gear ratio is used.  Negative gear
+ratios are tricky: the Puma560 robot has negative gear ratio for
+joints 1 and 3.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link name</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.name</span></code> is the link name</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.name</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link name</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.qlim">
+<em class="property">property </em><code class="sig-name descname">qlim</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.qlim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set joint limits</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.qlim</span></code> is the joint limits</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint limits</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,) or Nine</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.qlim</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint limits</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The limits are not widely enforced within the toolbox.</p></li>
+<li><p>If no joint limits are specified the value is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Link.Link.islimit" title="roboticstoolbox.robot.Link.Link.islimit"><code class="xref py py-func docutils literal notranslate"><span class="pre">islimit()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.flip">
+<em class="property">property </em><code class="sig-name descname">flip</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.flip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set joint flip</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.flip</span></code> is the joint flip status</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint flip</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.flip</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint flip status</p></li>
+</ul>
+<p>Joint flip defines the direction of motion of the joint.</p>
+<p><code class="docutils literal notranslate"><span class="pre">flip</span> <span class="pre">=</span> <span class="pre">False</span></code> is conventional motion direction:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>revolute motion is a positive rotation about the z-axis</p></li>
+<li><p>prismatic motion is a positive translation along the z-axis</p></li>
+</ul>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">flip</span> <span class="pre">=</span> <span class="pre">True</span></code> is the opposite motion direction:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>revolute motion is a negative rotation about the z-axis</p></li>
+<li><p>prismatic motion is a negative translation along the z-axis</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.m">
+<em class="property">property </em><code class="sig-name descname">m</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link mass</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.m</span></code> is the link mass</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link mass</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.m</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link mass</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.r">
+<em class="property">property </em><code class="sig-name descname">r</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link centre of mass</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.r</span></code> is the link centre of mass</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link centre of mass</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.r</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link centre of mass</p></li>
+</ul>
+<p>The link centre of mass is a 3-vector defined with respect to the link
+frame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.I">
+<em class="property">property </em><code class="sig-name descname">I</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.I" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set link inertia</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.I</span></code> is the link inertia</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>link inertia</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3,3)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.I</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the link inertia</p></li>
+</ul>
+<p>Link inertia is a symmetric 3x3 matrix describing the inertia with
+respect to a frame with its origin at the centre of mass, and with
+axes parallel to those of the link frame.</p>
+<p>The inertia matrix is</p>
+<p><span class="math notranslate nohighlight">\(\begin{bmatrix} I_{xx} &amp; I_{xy} &amp; I_{xz} \\ I_{xy} &amp; I_{yy} &amp; I_{yz} \\I_{xz} &amp; I_{yz} &amp; I_{zz} \end{bmatrix}\)</span></p>
+<p>and can be specified as either:</p>
+<ul class="simple">
+<li><p>a 3 ⨉ 3 symmetric matrix</p></li>
+<li><p>a 3-vector <span class="math notranslate nohighlight">\((I_{xx}, I_{yy}, I_{zz})\)</span></p></li>
+<li><p>a 6-vector <span class="math notranslate nohighlight">\((I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{yz}, I_{xz})\)</span></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Referred to the link side of the gearbox.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.Jm">
+<em class="property">property </em><code class="sig-name descname">Jm</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.Jm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set motor inertia</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Jm</span></code> is the motor inertia</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>motor inertia</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Jm</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the motor inertia</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Referred to the motor side of the gearbox.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.B">
+<em class="property">property </em><code class="sig-name descname">B</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.B" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set motor viscous friction</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.B</span></code> is the motor viscous friction</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>motor viscous friction</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.B</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the motor viscous friction</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Referred to the motor side of the gearbox.</p></li>
+<li><p>Viscous friction is the same for positive and negative motion.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.Tc">
+<em class="property">property </em><code class="sig-name descname">Tc</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.Tc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set motor Coulomb friction</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Tc</span></code> is the motor Coulomb friction</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>motor Coulomb friction</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.Tc</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the motor Coulomb friction. If a
+scalar is given the value is set to [T, -T], if a 2-vector it is
+assumed to be in the order [Tc⁺, Tc⁻]</p></li>
+</ul>
+<p>Coulomb friction is a non-linear friction effect defined by two
+parameters such that</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau = \left\{ \begin{array}{ll}
+    \tau_C^+ &amp; \mbox{if $\dot{q} &gt; 0$} \\
+    \tau_C^- &amp; \mbox{if $\dot{q} &lt; 0$} \end{array} \right.\end{split}\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Referred to the motor side of the gearbox.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\tau_C^+\)</span> must be <span class="math notranslate nohighlight">\(&gt; 0\)</span>, and <span class="math notranslate nohighlight">\(\tau_C^-\)</span> must 
+be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.G">
+<em class="property">property </em><code class="sig-name descname">G</code><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.G" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set gear ratio</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.G</span></code> is the transmission gear ratio</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>gear ratio</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">link.G</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the gear ratio</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The ratio of motor motion : link motion</p></li>
+<li><p>The gear ratio can be negative, see also the <code class="docutils literal notranslate"><span class="pre">flip</span></code> attribute.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Link.Link.flip" title="roboticstoolbox.robot.Link.Link.flip"><code class="xref py py-func docutils literal notranslate"><span class="pre">flip()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="arm_backend.html" class="btn btn-neutral float-right" title="Backends" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="arm_erobot.html" class="btn btn-neutral float-left" title="ERobot models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 04-Nov-2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>
