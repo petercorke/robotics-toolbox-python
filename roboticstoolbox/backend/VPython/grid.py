@@ -10,7 +10,7 @@ from roboticstoolbox.backend.VPython.object2d import Marker2D
 from spatialmath import SE2
 
 
-class GraphicsGrid:
+class GraphicsGrid:   # pragma nocover
     """
     This class holds the current grid displayed in the canvas
 
@@ -45,9 +45,12 @@ class GraphicsGrid:
         self.__labels_idx = 1
 
         # Initialise a grid object
-        # grid_object[0] will always be the 3 plane graphics. [XY, XZ, YZ] (alphabetical in order and connection)
-        # grid_object[1] will always be the labels. There is always a certain number of indices.
-        # Order is [x-plane numbers, "X", y-plane numbers, "Y", z-plane numbers, "Z"]
+        # grid_object[0] will always be the 3 plane graphics.
+        # [XY, XZ, YZ] (alphabetical in order and connection)
+        # grid_object[1] will always be the labels.
+        # There is always a certain number of indices.
+        # Order is [x-plane numbers, "X", y-plane numbers,
+        # "Y", z-plane numbers, "Z"]
         self.grid_object = [[], []]
         self.__init_grid()
 
@@ -62,8 +65,9 @@ class GraphicsGrid:
         self.grid_object[self.__planes_idx] = the_grid
 
         # Update the labels instead of recreating them
-        update_grid_numbers(self.__focal_point, self.grid_object[self.__labels_idx],
-                            self.__num_squares, self.__scale, self.__is_3d, self.__scene)
+        update_grid_numbers(
+            self.__focal_point, self.grid_object[self.__labels_idx],
+            self.__num_squares, self.__scale, self.__is_3d, self.__scene)
 
     def __create_grid_objects(self):
         """
@@ -84,9 +88,12 @@ class GraphicsGrid:
                                            round(self.__scene.center.y, 2), \
                                            round(self.__scene.center.z, 2)
             self.__focal_point = [x_origin, y_origin, z_origin]
-            # Convert focal point for 2D rendering. Puts focus point in centre of the view
+            # Convert focal point for 2D rendering. Puts focus point
+            # in centre of the view
             if not self.__is_3d:
-                self.__focal_point = [val - int(self.__num_squares / 2) for val in self.__focal_point]
+                self.__focal_point = [
+                    val - int(self.__num_squares / 2)
+                    for val in self.__focal_point]
                 x_origin = self.__focal_point[0]
                 y_origin = self.__focal_point[1]
                 z_origin = 0
@@ -109,25 +116,41 @@ class GraphicsGrid:
         #      +,+,+    |      -,-,-      |   -,-    |    -,-   |    -,-
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
-        # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = round(x_origin + (-(self.__num_squares / 2) +
-                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
-        max_x_coord = round(x_origin + ((self.__num_squares / 2) +
-                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        # e.g. at the origin, for negative axes: -10 -> 0,
+        # positive axes: 0 -> 10
+        min_x_coord = round(
+            x_origin + (-(self.__num_squares / 2)
+                        + (sign(camera_axes.x) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
+        max_x_coord = round(
+            x_origin + ((self.__num_squares / 2)
+                        + (sign(camera_axes.x) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
 
-        min_y_coord = round(y_origin + (-(self.__num_squares / 2) +
-                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
-        max_y_coord = round(y_origin + ((self.__num_squares / 2) +
-                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        min_y_coord = round(
+            y_origin + (-(self.__num_squares / 2)
+                        + (sign(camera_axes.y) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
+        max_y_coord = round(
+            y_origin + ((self.__num_squares / 2)
+                        + (sign(camera_axes.y) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
 
-        min_z_coord = round(z_origin + (-(self.__num_squares / 2) +
-                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
-        max_z_coord = round(z_origin + ((self.__num_squares / 2) +
-                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        min_z_coord = round(
+            z_origin + (-(self.__num_squares / 2)
+                        + (sign(camera_axes.z) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
+        max_z_coord = round(
+            z_origin + ((self.__num_squares / 2)
+                        + (sign(camera_axes.z) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
 
-        x_coords = arange(min_x_coord, max_x_coord + self.__scale, self.__scale)
-        y_coords = arange(min_y_coord, max_y_coord + self.__scale, self.__scale)
-        z_coords = arange(min_z_coord, max_z_coord + self.__scale, self.__scale)
+        x_coords = arange(
+            min_x_coord, max_x_coord + self.__scale, self.__scale)
+        y_coords = arange(
+            min_y_coord, max_y_coord + self.__scale, self.__scale)
+        z_coords = arange(
+            min_z_coord, max_z_coord + self.__scale, self.__scale)
 
         # If the grid has given too many objects
         if len(x_coords) > self.__num_squares + 1:
@@ -137,7 +160,8 @@ class GraphicsGrid:
         if len(z_coords) > self.__num_squares + 1:
             z_coords = z_coords[0:self.__num_squares+1]
 
-        # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
+        # Compound origins are in the middle of the bounding boxes.
+        # Thus new pos will be between max and min.
         x_middle = x_coords.mean()
         y_middle = y_coords.mean()
         z_middle = z_coords.mean()
@@ -146,7 +170,8 @@ class GraphicsGrid:
 
         # XZ plane
         for x_point in x_coords:
-            # Draw a line across for each x coord, along the same y-axis, from min to max z coord
+            # Draw a line across for each x coord, along the same y-axis,
+            # from min to max z coord
             xz_lines.append(create_line(
                 vector(x_point, y_origin, min_z_coord),
                 vector(x_point, y_origin, max_z_coord),
@@ -154,7 +179,8 @@ class GraphicsGrid:
                 thickness=line_thickness
             ))
         for z_point in z_coords:
-            # Draw a line across each z coord, along the same y-axis, from min to max z coord
+            # Draw a line across each z coord, along the same y-axis,
+            # from min to max z coord
             xz_lines.append(create_line(
                 vector(min_x_coord, y_origin, z_point),
                 vector(max_x_coord, y_origin, z_point),
@@ -164,7 +190,8 @@ class GraphicsGrid:
 
         # XY plane
         for x_point in x_coords:
-            # Draw a line across each x coord, along the same z-axis, from min to max y coord
+            # Draw a line across each x coord, along the same z-axis,
+            # from min to max y coord
             xy_lines.append(create_line(
                 vector(x_point, min_y_coord, z_origin),
                 vector(x_point, max_y_coord, z_origin),
@@ -172,7 +199,8 @@ class GraphicsGrid:
                 thickness=line_thickness
             ))
         for y_point in y_coords:
-            # Draw a line across each y coord, along the same z-axis, from min to max x coord
+            # Draw a line across each y coord, along the same z-axis,
+            # from min to max x coord
             xy_lines.append(create_line(
                 vector(min_x_coord, y_point, z_origin),
                 vector(max_x_coord, y_point, z_origin),
@@ -182,7 +210,8 @@ class GraphicsGrid:
 
         # YZ plane
         for y_point in y_coords:
-            # Draw a line across each y coord, along the same x-axis, from min to max z coord
+            # Draw a line across each y coord, along the same x-axis,
+            # from min to max z coord
             yz_lines.append(create_line(
                 vector(x_origin, y_point, min_z_coord),
                 vector(x_origin, y_point, max_z_coord),
@@ -190,7 +219,8 @@ class GraphicsGrid:
                 thickness=line_thickness
             ))
         for z_point in z_coords:
-            # Draw a line across each z coord, along the same x-axis, from min to max y coord
+            # Draw a line across each z coord, along the same x-axis,
+            # from min to max y coord
             yz_lines.append(create_line(
                 vector(x_origin, min_y_coord, z_point),
                 vector(x_origin, max_y_coord, z_point),
@@ -201,21 +231,27 @@ class GraphicsGrid:
         # Compound the lines together into respective objects
         # XY Plane
         if camera_axes.z < 0:
-            xy_plane = compound(xy_lines, origin=vector(x_middle, y_middle, min_z_coord))
+            xy_plane = compound(
+                xy_lines, origin=vector(x_middle, y_middle, min_z_coord))
         else:
-            xy_plane = compound(xy_lines, origin=vector(x_middle, y_middle, max_z_coord))
+            xy_plane = compound(
+                xy_lines, origin=vector(x_middle, y_middle, max_z_coord))
 
         # XZ Plane
         if camera_axes.y < 0:
-            xz_plane = compound(xz_lines, origin=vector(x_middle, min_y_coord, z_middle))
+            xz_plane = compound(
+                xz_lines, origin=vector(x_middle, min_y_coord, z_middle))
         else:
-            xz_plane = compound(xz_lines, origin=vector(x_middle, max_y_coord, z_middle))
+            xz_plane = compound(
+                xz_lines, origin=vector(x_middle, max_y_coord, z_middle))
 
         # YZ Plane
         if camera_axes.x < 0:
-            yz_plane = compound(yz_lines, origin=vector(min_x_coord, y_middle, z_middle))
+            yz_plane = compound(
+                yz_lines, origin=vector(min_x_coord, y_middle, z_middle))
         else:
-            yz_plane = compound(yz_lines, origin=vector(max_x_coord, y_middle, z_middle))
+            yz_plane = compound(
+                yz_lines, origin=vector(max_x_coord, y_middle, z_middle))
 
         # Combine all into one list
         grid = [None, None, None]
@@ -236,9 +272,12 @@ class GraphicsGrid:
                                            round(self.__scene.center.y, 2), \
                                            round(self.__scene.center.z, 2)
             self.__focal_point = [x_origin, y_origin, z_origin]
-            # Convert focal point for 2D rendering. Puts focus point in centre of the view
+            # Convert focal point for 2D rendering.
+            # Puts focus point in centre of the view
             if not self.__is_3d:
-                self.__focal_point = [val - int(self.__num_squares / 2) for val in self.__focal_point]
+                self.__focal_point = [
+                    val - int(self.__num_squares / 2)
+                    for val in self.__focal_point]
                 x_origin = self.__focal_point[0]
                 y_origin = self.__focal_point[1]
                 z_origin = 0
@@ -261,25 +300,41 @@ class GraphicsGrid:
         #      +,+,+    |      -,-,-      |   -,-    |    -,-   |    -,-
         # min = -num_squares or 0, around the default position
         # max = +num_squares or 0, around the default position
-        # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
-        min_x_coord = round(x_origin + (-(self.__num_squares / 2) +
-                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
-        max_x_coord = round(x_origin + ((self.__num_squares / 2) +
-                                        (sign(camera_axes.x) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        # e.g. at the origin, for negative axes: -10 -> 0,
+        # positive axes: 0 -> 10
+        min_x_coord = round(
+            x_origin + (-(self.__num_squares / 2)
+                        + (sign(camera_axes.x) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
+        max_x_coord = round(
+            x_origin + ((self.__num_squares / 2)
+                        + (sign(camera_axes.x) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
 
-        min_y_coord = round(y_origin + (-(self.__num_squares / 2) +
-                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
-        max_y_coord = round(y_origin + ((self.__num_squares / 2) +
-                                        (sign(camera_axes.y) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        min_y_coord = round(
+            y_origin + (-(self.__num_squares / 2)
+                        + (sign(camera_axes.y) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
+        max_y_coord = round(
+            y_origin + ((self.__num_squares / 2)
+                        + (sign(camera_axes.y) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
 
-        min_z_coord = round(z_origin + (-(self.__num_squares / 2) +
-                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
-        max_z_coord = round(z_origin + ((self.__num_squares / 2) +
-                                        (sign(camera_axes.z) * -1) * (self.__num_squares / 2)) * self.__scale, 2)
+        min_z_coord = round(
+            z_origin + (-(self.__num_squares / 2)
+                        + (sign(camera_axes.z) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
+        max_z_coord = round(
+            z_origin + ((self.__num_squares / 2)
+                        + (sign(camera_axes.z) * -1) * (
+                            self.__num_squares / 2)) * self.__scale, 2)
 
-        x_coords = arange(min_x_coord, max_x_coord + self.__scale, self.__scale)
-        y_coords = arange(min_y_coord, max_y_coord + self.__scale, self.__scale)
-        z_coords = arange(min_z_coord, max_z_coord + self.__scale, self.__scale)
+        x_coords = arange(
+            min_x_coord, max_x_coord + self.__scale, self.__scale)
+        y_coords = arange(
+            min_y_coord, max_y_coord + self.__scale, self.__scale)
+        z_coords = arange(
+            min_z_coord, max_z_coord + self.__scale, self.__scale)
 
         # If the grid has given too many objects
         if len(x_coords) > self.__num_squares + 1:
@@ -289,35 +344,44 @@ class GraphicsGrid:
         if len(z_coords) > self.__num_squares + 1:
             z_coords = z_coords[0:self.__num_squares + 1]
 
-        # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
+        # Compound origins are in the middle of the bounding boxes.
+        # Thus new pos will be between max and min.
         x_middle = x_coords.mean()
         y_middle = y_coords.mean()
         z_middle = z_coords.mean()
 
         # XY Plane
         if camera_axes.z < 0:
-            self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, min_z_coord)
+            self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = \
+                vector(x_middle, y_middle, min_z_coord)
         else:
-            self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = vector(x_middle, y_middle, max_z_coord)
+            self.grid_object[self.__planes_idx][self.__xy_plane_idx].pos = \
+                vector(x_middle, y_middle, max_z_coord)
 
         # XZ Plane
         if camera_axes.y < 0:
-            self.grid_object[self.__planes_idx][self.__xz_plane_idx].pos = vector(x_middle, min_y_coord, z_middle)
+            self.grid_object[self.__planes_idx][self.__xz_plane_idx].pos = \
+                vector(x_middle, min_y_coord, z_middle)
         else:
-            self.grid_object[self.__planes_idx][self.__xz_plane_idx].pos = vector(x_middle, max_y_coord, z_middle)
+            self.grid_object[self.__planes_idx][self.__xz_plane_idx].pos = \
+                vector(x_middle, max_y_coord, z_middle)
 
         # YZ Plane
         if camera_axes.x < 0:
-            self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = vector(min_x_coord, y_middle, z_middle)
+            self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = \
+                vector(min_x_coord, y_middle, z_middle)
         else:
-            self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = vector(max_x_coord, y_middle, z_middle)
+            self.grid_object[self.__planes_idx][self.__yz_plane_idx].pos = \
+                vector(max_x_coord, y_middle, z_middle)
 
     def update_grid(self):
         """
-        Update the grid axes and numbers if the camera position/rotation has changed.
+        Update the grid axes and numbers if the camera position/rotation
+        has changed.
         """
         # If invisible, skip the updating (Unnecessary)
-        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible:
+        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+                visible:
             return
 
         # Obtain the new camera settings
@@ -331,7 +395,8 @@ class GraphicsGrid:
         self.camera_pos = new_camera_pos
         self.camera_axes = new_camera_axes
 
-        distance_from_center = mag(self.__scene.center - self.__scene.camera.pos)
+        distance_from_center = mag(
+            self.__scene.center - self.__scene.camera.pos)
         if self.__is_3d:
             new_scale = round(distance_from_center / 30.0, 1)
         else:
@@ -343,7 +408,8 @@ class GraphicsGrid:
                 self.toggle_2d_3d()
 
         # If camera is different to previous: update
-        if (not new_camera_axes.equals(old_camera_axes)) or (not new_camera_pos.equals(old_camera_pos)):
+        if (not new_camera_axes.equals(old_camera_axes)) or (
+                not new_camera_pos.equals(old_camera_pos)):
             # Update grid
             self.__move_grid_objects()
             update_grid_numbers(self.__focal_point,
@@ -363,11 +429,14 @@ class GraphicsGrid:
         self.__is_3d = not self.__is_3d
 
         # Toggle it for XZ, YZ planes
-        self.grid_object[self.__planes_idx][self.__xz_plane_idx].visible = self.__is_3d
-        self.grid_object[self.__planes_idx][self.__yz_plane_idx].visible = self.__is_3d
+        self.grid_object[self.__planes_idx][self.__xz_plane_idx].visible = \
+            self.__is_3d
+        self.grid_object[self.__planes_idx][self.__yz_plane_idx].visible = \
+            self.__is_3d
 
         # Toggle it for Z plane numbers
-        # Index start = (num_squares + 1) (11 numbers shown for 10 squares) * 2 axes + 2 letters for axes
+        # Index start = (num_squares + 1) (11 numbers shown for 10 squares) *
+        # 2 axes + 2 letters for axes
         z_label_start = (self.__num_squares + 1) * 2 + 2
         # Index end = end of labels array
         z_label_end = len(self.grid_object[self.__labels_idx])
@@ -398,9 +467,11 @@ class GraphicsGrid:
 
     def set_relative(self, is_relative):
         """
-        Set whether the grid should be locked to (0, 0, 0) or relative to camera focus point
+        Set whether the grid should be locked to (0, 0, 0) or relative to
+        camera focus point
 
-        :param is_relative: Whether the camera is dynamic (True) or static (False)
+        :param is_relative: Whether the camera is dynamic (True) or
+            static (False)
         :type is_relative: `bool`
         """
         self.__relative_cam = is_relative
@@ -414,7 +485,8 @@ class GraphicsGrid:
         :type value: `float`
         """
         # If invisible, skip the updating (Unnecessary)
-        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].visible:
+        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+                visible:
             return
 
         value = max(min(value, 100), 0.1)  # Between 0.1 and 100
@@ -429,7 +501,9 @@ class GraphicsGrid:
         self.__init_grid()
 
 
-def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
+def create_line(
+        pos1, pos2, scene,
+        colour=None, thickness=0.01):   # pragma nocover
     """
     Create a line from position 1 to position 2.
 
@@ -466,7 +540,8 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
     # Position of the line is the midpoint (centre) between the ends
     position = (pos1 + pos2) / 2
 
-    # Axis direction of the line (to align the box (line) to intersect the two points)
+    # Axis direction of the line (to align the box (line) to intersect the
+    # two points)
     axis_dir = pos2 - pos1
 
     # Return a box of thin width and height to resemble a line
@@ -480,7 +555,9 @@ def create_line(pos1, pos2, scene, colour=None, thickness=0.01):
                color=vector(colour[0], colour[1], colour[2]))
 
 
-def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness=0.01):
+def create_segmented_line(
+        pos1, pos2, scene, segment_len,
+        colour=None, thickness=0.01):   # pragma nocover
     """
     Create a dashed line from position 1 to position 2.
 
@@ -516,14 +593,17 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
     # Length of the line using the magnitude
     line_len = mag(pos2 - pos1)
 
-    # Axis direction of the line (to align the box (line) to intersect the two points)
+    # Axis direction of the line
+    # (to align the box (line) to intersect the two points)
     axis_dir = pos2 - pos1
     axis_dir.mag = 1.0
 
-    # Return a compound of boxes of thin width and height to resemble a dashed line
+    # Return a compound of boxes of thin width and height to
+    # resemble a dashed line
     dash_positions = []
     boxes = []
-    pos1 = pos1 + (axis_dir * segment_len / 2)  # Translate centre pos to centre of where dashes will originate from
+    # Translate centre pos to centre of where dashes will originate from
+    pos1 = pos1 + (axis_dir * segment_len / 2)
 
     # Range = number of dashes (vis and invis)
     for idx in range(0, int(ceil(line_len / (segment_len / axis_dir.mag)))):
@@ -531,7 +611,8 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
         if idx % 2 == 0:
             dash_positions.append(pos1)
         pos1 = (pos1 + axis_dir * segment_len)
-        # If the axis between points changes, then the line has surpassed the end point. The line is done
+        # If the axis between points changes, then the line has surpassed
+        # the end point. The line is done
         check_dir = pos2 - pos1
         check_dir.mag = 1.0
         if not vectors_approx_equal(axis_dir, check_dir):
@@ -560,7 +641,7 @@ def create_segmented_line(pos1, pos2, scene, segment_len, colour=None, thickness
     return compound(boxes)
 
 
-def create_marker(scene, x, y, shape, colour=None):
+def create_marker(scene, x, y, shape, colour=None):  # pragma nocover
     """
     Draw the shape at the given position
 
@@ -589,10 +670,11 @@ def create_marker(scene, x, y, shape, colour=None):
     return Marker2D(obj_se2, scene, shape, colour)
 
 
-def vectors_approx_equal(v1, v2):
+def vectors_approx_equal(v1, v2):  # pragma nocover
     """
     Check whether the vectors are approximately equal.
-    This is used where there is VERY minor floating point differences that can occur in VPython.
+    This is used where there is VERY minor floating point differences
+    that can occur in VPython.
 
     :param v1: Vector 1
     :type v1: class:`vpython.vector`
@@ -601,4 +683,5 @@ def vectors_approx_equal(v1, v2):
     :returns: True if vectors are within tolerance
     :rtype: `bool`
     """
-    return abs(v1.x - v2.x < 0.001) and abs(v1.y - v2.y < 0.001) and abs(v1.z - v2.z < 0.001)
+    return abs(v1.x - v2.x < 0.001) and abs(v1.y - v2.y < 0.001) and \
+        abs(v1.z - v2.z < 0.001)

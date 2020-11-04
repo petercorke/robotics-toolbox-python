@@ -17,7 +17,7 @@ y_axis_vector = vector(0, 1, 0)
 z_axis_vector = vector(0, 0, 1)
 
 
-def get_pose_x_vec(se3_obj):
+def get_pose_x_vec(se3_obj):  # pragma nocover
     """
     Convert SE3 details to VPython vector format
 
@@ -30,7 +30,7 @@ def get_pose_x_vec(se3_obj):
     return vector(data[0], data[1], data[2])
 
 
-def get_pose_y_vec(se3_obj):
+def get_pose_y_vec(se3_obj):  # pragma nocover
     """
     Convert SE3 details to VPython vector format
 
@@ -43,7 +43,7 @@ def get_pose_y_vec(se3_obj):
     return vector(data[0], data[1], data[2])
 
 
-def get_pose_z_vec(se3_obj):
+def get_pose_z_vec(se3_obj):  # pragma nocover
     """
     Convert SE3 details to VPython vector format
 
@@ -56,7 +56,7 @@ def get_pose_z_vec(se3_obj):
     return vector(data[0], data[1], data[2])
 
 
-def get_pose_pos(se3_obj):
+def get_pose_pos(se3_obj):  # pragma nocover
     """
     Convert SE3 details to VPython vector format
 
@@ -69,7 +69,7 @@ def get_pose_pos(se3_obj):
     return vector(data[0], data[1], data[2])
 
 
-def vpython_to_se3(graphic_object):
+def vpython_to_se3(graphic_object):  # pragma nocover
     """
     This function will take in a graphics object and output it's pose as an
     SE3 object
@@ -96,7 +96,7 @@ def vpython_to_se3(graphic_object):
     return SE3(T)
 
 
-def wrap_to_pi(angle_type, angle):
+def wrap_to_pi(angle_type, angle):  # pragma nocover
     """
     Wrap the given angle (deg or rad) to [-pi pi]
 
@@ -125,7 +125,7 @@ def wrap_to_pi(angle_type, angle):
     return angle
 
 
-def close_localhost_session(canvas):
+def close_localhost_session(canvas):  # pragma nocover
     """
     Terminate the local host session through JavaScript
 
@@ -140,4 +140,3 @@ def close_localhost_session(canvas):
             close();
         </script>
         ''')
-
