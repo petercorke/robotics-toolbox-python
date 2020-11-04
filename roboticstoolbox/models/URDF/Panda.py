@@ -38,7 +38,6 @@ class Panda(ERobot):
             elinks,
             name=name,
             manufacturer='Franka Emika',
-            ee_links=elinks[7],
             gripper_links=elinks[9]
         )
 
@@ -46,10 +45,10 @@ class Panda(ERobot):
             2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
         self.addconfiguration("qz", np.array(
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]))
+            [0, 0, 0, 0, 0, 0, 0]))
 
         self.addconfiguration("qr", np.array(
-            [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4, 0, 0]))
+            [0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
 
 
 if __name__ == '__main__':   # pragma nocover

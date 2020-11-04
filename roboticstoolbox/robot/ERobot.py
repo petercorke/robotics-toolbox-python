@@ -125,6 +125,12 @@ class ERobot(Robot):
         # Make a gripper object for each gripper
         for link in gripper_links:
             g_links = self.dfs_links(link)
+
+            # Remove gripper links from the robot
+            for g_link in g_links:
+                elinks.remove(g_link)
+
+            # Save the gripper object
             self.grippers.append(Gripper(g_links))
 
         # Subtract the n of the grippers from the n of the robot
@@ -139,24 +145,19 @@ class ERobot(Robot):
                 if len(link.child) == 0:
                     # no children, must be an end-effector
                     self.ee_links.append(link)
-        # else:
-        #     for link = self.gripper_links:
-        #         # use the passed in value
-        #         self.ee_links.append(link.)
-
+        else:
+            for link in gripper_links:
+                # use the passed in value
+                self.ee_links.append(link.parent)
 
         # assign the joint indices
         if all([link.jindex is None for link in elinks]):
-            # no jindex set, assign them
-            # if len(self.ee_links) > 1:
-            #     raise ValueError('for a robot with multiple end-effectors must assign joint indices')
-            # maybe do the DFS in where somewhere
 
             jindex = [0]  # "mutable integer" hack
 
             def visit_link(link, jindex):
                 # if it's a joint, assign it a jindex and increment it
-                if link.isjoint:
+                if link.isjoint and link in elinks:
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
@@ -166,7 +167,7 @@ class ERobot(Robot):
 
         elif all([link.jindex is not None for link in elinks]):
             # jindex set on all, check they are unique and sequential
-            jset = set(range(n))
+            jset = set(range(self._n))
             for link in elinks:
                 if link.jindex not in jset:
                     raise ValueError(
@@ -267,6 +268,32 @@ class ERobot(Robot):
 
             ob['links'].append(li)
 
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                li = {
+                    'axis': [],
+                    'eta': [],
+                    'geometry': [],
+                    'collision': []
+                }
+
+                for et in link.ets():
+                    li['axis'].append(et.axis)
+                    li['eta'].append(et.eta)
+
+                if link.v is not None:
+                    li['axis'].append(link.v.axis)
+                    li['eta'].append(link.v.eta)
+
+                for gi in link.geometry:
+                    li['geometry'].append(gi.to_dict())
+
+                for gi in link.collision:
+                    li['collision'].append(gi.to_dict())
+
+                ob['links'].append(li)
+
         return ob
 
     def fk_dict(self):
@@ -276,6 +303,7 @@ class ERobot(Robot):
 
         self.fkine_all()
 
+        # Do the robot
         for link in self.links:
 
             li = {
@@ -290,6 +318,22 @@ class ERobot(Robot):
                 li['collision'].append(gi.fk_dict())
 
             ob['links'].append(li)
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                li = {
+                    'geometry': [],
+                    'collision': []
+                }
+
+                for gi in link.geometry:
+                    li['geometry'].append(gi.fk_dict())
+
+                for gi in link.collision:
+                    li['collision'].append(gi.fk_dict())
+
+                ob['links'].append(li)
 
         return ob
 
@@ -628,37 +672,41 @@ class ERobot(Robot):
         else:
             q = getvector(q, self.n)
 
-        # t = self.base
-        # Tall = SE3()
-        j = 0
-
-        if self.links[0].isjoint:
-            self.links[0]._fk = self.base * self.links[0].A(q[j])
-            j += 1
-        else:
-            self.links[0]._fk = self.base * self.links[0].A()
-
-        for col in self.links[0].collision:
-            col.wT = self.links[0]._fk
-
-        for gi in self.links[0].geometry:
-            gi.wT = self.links[0]._fk
-
-        for i in range(1, len(self.links)):
-            if self.links[i].isjoint:
-                t = self.links[i].A(q[j])
-                j += 1
+        for link in self.links:
+            if link.isjoint:
+                t = link.A(q[link.jindex])
             else:
-                t = self.links[i].A()
+                t = link.A()
 
-            self.links[i]._fk = self.links[i].parent._fk * t
+            if link.parent is None:
+                link._fk = self.base * t
+            else:
+                link._fk = link.parent._fk * t
 
             # Update the collision objects transform as well
-            for col in self.links[i].collision:
-                col.wT = self.links[i]._fk
+            for col in link.collision:
+                col.wT = link._fk
 
-            for gi in self.links[i].geometry:
-                gi.wT = self.links[i]._fk
+            for gi in link.geometry:
+                gi.wT = link._fk
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                # print(link.jindex)
+                if link.isjoint:
+                    t = link.A(gripper.q[link.jindex])
+                else:
+                    t = link.A()
+
+                link._fk = link.parent._fk * t
+
+                # Update the collision objects transform as well
+                for col in link.collision:
+                    col.wT = link._fk
+
+                for gi in link.geometry:
+                    gi.wT = link._fk
 
     # def jacob0(self, q=None):
     #     """
