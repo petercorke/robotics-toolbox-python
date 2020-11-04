@@ -9,7 +9,22 @@ import numpy as np
 import spatialmath as sm
 import time
 from queue import Queue
-from swift import start_servers
+
+_sw = None
+sw = None
+
+
+def _import_swift():
+    import importlib
+    global sw
+    try:
+        sw = importlib.import_module('swift')
+        # from swift import start_servers
+    except ImportError:
+        print(
+            '\nYou must install the python package swift, see '
+            'https://github.com/jhavl/swift\n')
+        raise
 
 
 class Swift(Connector):  # pragma nocover
@@ -59,6 +74,9 @@ class Swift(Connector):  # pragma nocover
         self.realtime = realtime
         self.display = display
 
+        if self.display and sw is None:
+            _import_swift()
+
     #
     #  Basic methods to do with the state of the external program
     #
@@ -75,7 +93,7 @@ class Swift(Connector):  # pragma nocover
         super().launch()
 
         if self.display:
-            start_servers(self.outq, self.inq)
+            sw.start_servers(self.outq, self.inq)
             self.last_time = time.time()
 
     def step(self, dt=50):
