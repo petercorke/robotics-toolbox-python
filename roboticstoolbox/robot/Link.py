@@ -95,7 +95,7 @@ class Link(ABC):
             Jm=0.0,
             B=0.0,
             Tc=np.zeros((2,)),
-            G=1.0,
+            G=0.0,
             mesh=None,
             geometry=[],
             collision=[],
