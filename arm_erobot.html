@@ -1551,7 +1551,7 @@ parameters such that</p>
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>Referred to the motor side of the gearbox.</p></li>
-<li><p><span class="math notranslate nohighlight">\(\tau_C^+\)</span> must be <span class="math notranslate nohighlight">\(&gt; 0\)</span>, and <span class="math notranslate nohighlight">\(\tau_C^-\)</span> must 
+<li><p><span class="math notranslate nohighlight">\(\tau_C^+\)</span> must be <span class="math notranslate nohighlight">\(&gt; 0\)</span>, and <span class="math notranslate nohighlight">\(\tau_C^-\)</span> must
 be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
 </ul>
 </div>
@@ -1682,7 +1682,7 @@ for joint velocity <code class="docutils literal notranslate"><span class="pre">
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>The friction value should be added to the motor output torque to 
+<li><p>The friction value should be added to the motor output torque to
 determine the nett torque. It has a negative value when qd &gt; 0.</p></li>
 <li><p>The returned friction value is referred to the output of the
 gearbox.</p></li>
@@ -1782,7 +1782,7 @@ by <code class="docutils literal notranslate"><span class="pre">link</span></cod
 </ul>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">link.nofriction()</span></code> is a copy of the link instance with the same 
+<p><code class="docutils literal notranslate"><span class="pre">link.nofriction()</span></code> is a copy of the link instance with the same
 parameters except, the Coulomb and/or viscous friction parameters are
 set to zero.</p>
 <div class="admonition note">
@@ -2036,9 +2036,9 @@ characteristics.</p>
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">UR3</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/UR3.html#UR3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.UR3" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a UR3 URDF model</p>
-<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR3 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
-characteristics.</p>
+<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR3 robot
+definition from a URDF file.  The model describes its kinematic and
+graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR3</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
@@ -2074,9 +2074,9 @@ characteristics.</p>
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">UR5</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/UR5.html#UR5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.UR5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a UR5 URDF model</p>
-<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR5 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
-characteristics.</p>
+<p><code class="docutils literal notranslate"><span class="pre">UR3()</span></code> is a class which imports a Universal Robotics UR5 robot
+definition from a URDF file.  The model describes its kinematic and
+graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
@@ -2151,7 +2151,7 @@ graphical characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a Puma 560 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">Puma560()</span></code> is a class which imports a Unimation Puma560 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -2187,7 +2187,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a PX100 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">px100()</span></code> is a class which imports an Interbotix px100 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px100</span><span class="p">()</span>
@@ -2233,7 +2233,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a PX150 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">px150()</span></code> is a class which imports an Interbotix px150 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px150</span><span class="p">()</span>
@@ -2280,7 +2280,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a RX150 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">rx150()</span></code> is a class which imports an Interbotix rx150 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx150</span><span class="p">()</span>
@@ -2327,7 +2327,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a RX200 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">rx200()</span></code> is a class which imports an Interbotix rx200 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx200</span><span class="p">()</span>
@@ -2374,7 +2374,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a VX300 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">vx300()</span></code> is a class which imports an Interbotix vx300 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300</span><span class="p">()</span>
@@ -2421,7 +2421,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a VX300s URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">vx300s()</span></code> is a class which imports an Interbotix vx300s robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300s</span><span class="p">()</span>
@@ -2469,7 +2469,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a WX200 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">wx200()</span></code> is a class which imports an Interbotix wx200 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx200</span><span class="p">()</span>
@@ -2516,7 +2516,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a WX250 URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">wx250()</span></code> is a class which imports an Interbotix wx250 robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250</span><span class="p">()</span>
@@ -2563,7 +2563,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a wx250s URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">wx250s()</span></code> is a class which imports an Interbotix wx250s robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250s</span><span class="p">()</span>
@@ -2611,7 +2611,7 @@ characteristics.</p>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
 <p>Class that imports a Mico URDF model</p>
 <p><code class="docutils literal notranslate"><span class="pre">Panda()</span></code> is a class which imports a Kinova Mico robot definition
-from a URDF file.  The model describes its kinematic and graphical 
+from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Mico</span><span class="p">()</span>
@@ -2679,7 +2679,7 @@ characteristics.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 04-Nov-2020.
+        Last updated on 05-Nov-2020.
       </span>
 
     </p>

@@ -189,7 +189,7 @@
             <span class="n">e</span> <span class="o">=</span> <span class="n">axis_func</span>
             <span class="n">axis_func</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">axis_func</span>
             <span class="n">axis</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">axis</span>
-            <span class="n">et</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">eta</span>
+            <span class="c1"># et = e.eta</span>
             <span class="n">j</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">jindex</span>
             <span class="n">flip</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">isflip</span>
             <span class="n">joint</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">isjoint</span>
@@ -1305,7 +1305,6 @@
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
-        <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tr2jac</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ETS.hessian0"><a class="viewcode-back" href="../../../mobile.html#roboticstoolbox.robot.ETS.ETS.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1596,7 +1595,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 04-Nov-2020.
+        Last updated on 05-Nov-2020.
       </span>
 
     </p>

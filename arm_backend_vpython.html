@@ -183,8 +183,183 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="vpython">
-<h1>VPython<a class="headerlink" href="#vpython" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-roboticstoolbox.backend.VPython">
+<span id="vpython"></span><h1>VPython<a class="headerlink" href="#module-roboticstoolbox.backend.VPython" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="roboticstoolbox.backend.VPython.VPython">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.backend.VPython.</code><code class="sig-name descname">VPython</code><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backend.Connector.Connector</span></code></p>
+<p>Graphical backend using VPython</p>
+<p>VPython is a Python API that connects to a JavaScript/WebGL 3D graphics
+engine in a browser tab.  It supports many 3D graphical primitives
+including meshes, boxes, ellipsoids and lines. It can not render in
+full color.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+
+<span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>  <span class="c1"># create a robot</span>
+
+<span class="n">pyplot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">VPython</span><span class="p">()</span> <span class="c1"># create a VPython backend</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>              <span class="c1"># add the robot to the backend</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qz</span>             <span class="c1"># set the robot configuration</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>                  <span class="c1"># update the backend and graphical view</span>
+</pre></div>
+</td></tr></table></div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://vpython.org">https://vpython.org</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.launch">
+<code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">is_3d</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">height</span><span class="o">=</span><span class="default_value">500</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">888</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">caption</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launch a graphical backend in a browser tab</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>env = launch(args)` create a 3D scene in a new browser tab as
+defined by args, and returns a reference to the backend.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fig_num</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the graphical scene</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">DHRobot</span></code></a>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot</span></code>) – The Identification of the robot to remove. Can be either the
+DHRobot or GraphicalRobot</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint angles/configuration of the robot (Optional, if not
+supplied will use the stored q values).</p></li>
+<li><p><strong>fig_num</strong> (<em>int</em><em>, </em><em>optional</em>) – The canvas index to delete the robot from, defaults to
+the initial one</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – Figure number must be between 0 and total number of
+canvases</p></li>
+<li><p><strong>TypeError</strong> – Input must be a DHLink or GraphicalRobot</p></li>
+</ul>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">env.step(args)</span></code> triggers an update of the 3D scene in the browser
+window referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Each robot in the scene is updated based on
+their control type (position, velocity, acceleration, or torque).</p></li>
+<li><p>Upon acting, the other three of the four control types will be
+updated in the internal state of the robot object.</p></li>
+<li><p>The control type is defined by the robot object, and not all
+robot objects support all control types.</p></li>
+<li><p>Execution is blocked for the specified interval</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the graphical scene</p>
+<p><code class="docutils literal notranslate"><span class="pre">env.reset()</span></code> triggers a reset of the 3D scene in the browser window
+referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is restored to the original state defined by
+<code class="docutils literal notranslate"><span class="pre">launch()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.restart">
+<code class="sig-name descname">restart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.restart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restart the graphics display</p>
+<p><code class="docutils literal notranslate"><span class="pre">env.restart()</span></code> triggers a restart of the browser view referenced by
+<code class="docutils literal notranslate"><span class="pre">env</span></code>. It is closed and relaunched to the original state defined by
+<code class="docutils literal notranslate"><span class="pre">launch()</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the graphics display</p>
+<p><code class="docutils literal notranslate"><span class="pre">env.close()</span></code> gracefully closes the browser tab browser view
+referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fig_num</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">dhrobot</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a robot to the graphical scene</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig_num</strong> (<em>int</em>) – The canvas number to place the robot in</p></li>
+<li><p><strong>name</strong> (<cite>str</cite>) – The name of the robot</p></li>
+<li><p><strong>dhrobot</strong> (class:<cite>~roboticstoolbox.robot.DHRobot.DHRobot</cite>, None) – The <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code> object (if applicable)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Figure number must be between 0 and number of
+figures created</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>object id within visualizer</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">=</span> <span class="pre">env.add(robot)</span></code> adds the <code class="docutils literal notranslate"><span class="pre">robot</span></code> to the graphical</dt><dd><p>environment.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot</span></code> must be of an appropriate class.</p></li>
+<li><p>Adds the robot object to a list of robots which will be updated
+when the <code class="docutils literal notranslate"><span class="pre">step()</span></code> method is called.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.VPython.VPython.remove">
+<code class="sig-name descname">remove</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em>, <em class="sig-param"><span class="n">fig_num</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/VPython/VPython.html#VPython.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.VPython.VPython.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a robot to the graphical scene</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (class:<cite>~roboticstoolbox.robot.DHRobot.DHRobot</cite>,
+class:<cite>roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot</cite>) – The id of the robot to remove. Can be either the DHLink or
+GraphicalRobot</p></li>
+<li><p><strong>fig_num</strong> (<em>int</em><em>, </em><em>optional</em>) – The canvas index to delete the robot from, defaults to
+the initial one</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – Figure number must be between 0 and total number
+of canvases</p></li>
+<li><p><strong>TypeError</strong> – Input must be a DHLink or GraphicalRobot</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">env.remove(robot)</span></code> removes the <code class="docutils literal notranslate"><span class="pre">robot</span></code> from the graphical</dt><dd><p>environment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -210,7 +385,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 04-Nov-2020.
+        Last updated on 05-Nov-2020.
       </span>
 
     </p>

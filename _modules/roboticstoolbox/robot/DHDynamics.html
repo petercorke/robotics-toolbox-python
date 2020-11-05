@@ -175,6 +175,7 @@
 <span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">symbolic</span> <span class="k">as</span> <span class="n">sym</span>
 <span class="kn">from</span> <span class="nn">frne</span> <span class="kn">import</span> <span class="n">init</span><span class="p">,</span> <span class="n">frne</span><span class="p">,</span> <span class="n">delete</span>
 
+
 <span class="k">def</span> <span class="nf">_check_rne</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper_check_rne</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -184,7 +185,6 @@
         <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_rne_changed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wrapper_check_rne</span>
-
 
 
 <span class="k">class</span> <span class="nc">DHDynamics</span><span class="p">:</span>
@@ -231,7 +231,6 @@
             <span class="n">L</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">22</span><span class="p">:</span><span class="n">j</span> <span class="o">+</span> <span class="mi">24</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Tc</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
-
 
     <span class="nd">@_check_rne</span>
     <span class="k">def</span> <span class="nf">rne</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qdd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grav</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fext</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -392,9 +391,9 @@
 
 <span class="sd">        .. note::</span>
 
-<span class="sd">            - This function performs poorly with non-linear joint friction, such as</span>
-<span class="sd">            Coulomb friction.  The R.nofriction() method can be used to set this</span>
-<span class="sd">            friction to zero.</span>
+<span class="sd">            - This function performs poorly with non-linear joint friction,</span>
+<span class="sd">            such as Coulomb friction.  The R.nofriction() method can be used</span>
+<span class="sd">            to set this friction to zero.</span>
 <span class="sd">            - If the function is not specified then zero force/torque is</span>
 <span class="sd">            applied to the manipulator joints.</span>
 <span class="sd">            - Interpolation is performed using `ScipY integrate.ode</span>
@@ -531,9 +530,9 @@
 <span class="sd">        :rtype: ndarray(n)</span>
 
 <span class="sd">        ``qdd = accel(q, qd, torque)`` calculates a vector (n) of joint</span>
-<span class="sd">        accelerations that result from applying the actuator force/torque (n) to</span>
-<span class="sd">        the manipulator in state `q` (n) and `qd` (n), and ``n`` is the number</span>
-<span class="sd">        of robot joints.</span>
+<span class="sd">        accelerations that result from applying the actuator force/torque (n)</span>
+<span class="sd">        to the manipulator in state `q` (n) and `qd` (n), and ``n`` is</span>
+<span class="sd">        the number of robot joints.</span>
 
 <span class="sd">        :math:`\ddot{q} = \mathbf{I}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)`</span>
 
@@ -605,8 +604,6 @@
             <span class="k">return</span> <span class="n">qdd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">qdd</span>
-
-
 
     <span class="k">def</span> <span class="nf">pay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -794,7 +791,8 @@
 
 <span class="sd">        If ``q`` is a matrix (m,n), each row is interpretted as a joint state</span>
 <span class="sd">        vector, and the result is a 3d-matrix (n,n,m) where each plane</span>
-<span class="sd">        corresponds to the Cartesian inertia for the corresponding row of ``q``.</span>
+<span class="sd">        corresponds to the Cartesian inertia for the corresponding</span>
+<span class="sd">        row of ``q``.</span>
 
 <span class="sd">        .. warning:: Assumes that the operational space has 6 DOF.</span>
 
@@ -847,7 +845,8 @@
 <span class="sd">            - The diagonal elements ``I[j,j]`` are the inertia seen by joint</span>
 <span class="sd">              actuator ``j``.</span>
 <span class="sd">            - The off-diagonal elements ``I[j,k]`` are coupling inertias that</span>
-<span class="sd">              relate acceleration on joint ``j`` to force/torque on joint ``k``.</span>
+<span class="sd">              relate acceleration on joint ``j`` to force/torque on</span>
+<span class="sd">              joint ``k``.</span>
 <span class="sd">            - The diagonal terms include the motor inertia reflected through</span>
 <span class="sd">              the gear ratio.</span>
 
@@ -880,11 +879,10 @@
 <span class="sd">        :return: Velocity matrix</span>
 <span class="sd">        :rtype: ndarray(n,n)</span>
 
-<span class="sd">    </span>
 <span class="sd">        ``coriolis(q, qd)`` calculates the Coriolis/centripetal matrix (n,n)</span>
-<span class="sd">        for the robot in configuration ``q`` and velocity ``qd``, where ``n`` is</span>
-<span class="sd">        the number of joints. </span>
-<span class="sd">        </span>
+<span class="sd">        for the robot in configuration ``q`` and velocity ``qd``, where ``n``</span>
+<span class="sd">        is the number of joints.</span>
+
 <span class="sd">        The product :math:`\mathbf{C} \dot{q}` is the vector of joint</span>
 <span class="sd">        force/torque due to velocity coupling. The diagonal elements are due to</span>
 <span class="sd">        centripetal effects and the off-diagonal elements are due to Coriolis</span>
@@ -975,7 +973,7 @@
 
 <span class="sd">        ``itorque(q, qdd)`` is the inertia force/torque vector (n) at</span>
 <span class="sd">        the specified joint configuration q (n) and acceleration qdd (n), and</span>
-<span class="sd">        ``n`` is the number of robot joints. </span>
+<span class="sd">        ``n`` is the number of robot joints.</span>
 <span class="sd">        It is :math:`\mathbf{I}(q) \ddot{q}`.</span>
 
 <span class="sd">        Example:</span>
@@ -1242,7 +1240,7 @@
 <span class="sd">            which is written in C.</span>
 <span class="sd">            - This version supports symbolic model parameters</span>
 <span class="sd">            - Verified against MATLAB code</span>
-<span class="sd">        </span>
+
 <span class="sd">        :seealso: :func:`rne`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1494,7 +1492,8 @@
                     <span class="o">+</span> <span class="n">link</span><span class="o">.</span><span class="n">G</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">link</span><span class="o">.</span><span class="n">Jm</span> <span class="o">*</span> <span class="n">qdd_k</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> \
                     <span class="o">-</span> <span class="n">link</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd_k</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">coulomb</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;j=</span><span class="si">{</span><span class="n">j</span><span class="si">:}</span><span class="s1">, G=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">G</span><span class="si">:}</span><span class="s1">, Jm=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">Jm</span><span class="si">:}</span><span class="s1">, friction=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd_k</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">:}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># noqa</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;j=</span><span class="si">{</span><span class="n">j</span><span class="si">:}</span><span class="s1">, G=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">G</span><span class="si">:}</span><span class="s1">, Jm=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">Jm</span><span class="si">:}</span><span class="s1">, friction=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd_k</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">:}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># noqa</span>
                     <span class="nb">print</span><span class="p">()</span>
 
             <span class="c1"># compute the base wrench and save it</span>
@@ -1506,12 +1505,13 @@
 
         <span class="c1"># if self.symbolic:</span>
         <span class="c1">#     # simplify symbolic expressions</span>
-        <span class="c1">#     print(&#39;start symbolic simplification, this might take a while...&#39;)</span>
+        <span class="c1">#     print(</span>
+        <span class="c1">#       &#39;start symbolic simplification, this might take a while...&#39;)</span>
         <span class="c1">#     # from sympy import trigsimp</span>
 
         <span class="c1">#     # tau = trigsimp(tau)</span>
         <span class="c1">#     # consider using multiprocessing to spread over cores</span>
-        <span class="c1">#     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy</span>
+        <span class="c1">#     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy  # noqa</span>
         <span class="c1">#     print(&#39;done&#39;)</span>
         <span class="c1">#     if tau.shape[0] == 1:</span>
         <span class="c1">#         return tau.reshape(self.n)</span>
@@ -1576,8 +1576,8 @@
     <span class="c1"># print(tau[0].expand().coeff(qdd[0]))</span>
 
     <span class="n">q</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">qz</span>
-    <span class="n">qd</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">qz</span>
-    <span class="n">qdd</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">qz</span>
+    <span class="c1"># qd = puma.qz</span>
+    <span class="c1"># qdd = puma.qz</span>
     <span class="n">ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">6</span><span class="p">,))</span>
     <span class="n">qd</span> <span class="o">=</span> <span class="n">ones</span>
     <span class="n">qdd</span> <span class="o">=</span> <span class="n">ones</span>
@@ -1739,7 +1739,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 04-Nov-2020.
+        Last updated on 05-Nov-2020.
       </span>
 
     </p>

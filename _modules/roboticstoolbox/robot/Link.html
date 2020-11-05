@@ -169,8 +169,8 @@
 
 <span class="sd">    Use this decorator for any property setter that updates a parameter that</span>
 <span class="sd">    affects the result of inverse dynamics.  This allows the C version of the</span>
-<span class="sd">    parameters only having to be updated when they change, rather than on </span>
-<span class="sd">    every call.  This decorator signals the change by invoking the </span>
+<span class="sd">    parameters only having to be updated when they change, rather than on</span>
+<span class="sd">    every call.  This decorator signals the change by invoking the</span>
 <span class="sd">    ``dynchanged()`` method of the robot that owns the link.</span>
 
 <span class="sd">    Example::</span>
@@ -217,28 +217,27 @@
 <span class="sd">    :param G: dynamic - gear ratio</span>
 <span class="sd">    :type G: float</span>
 
-<span class="sd">    An abstract link superclass for all link types. </span>
+<span class="sd">    An abstract link superclass for all link types.</span>
 
 <span class="sd">    .. inheritance-diagram:: roboticstoolbox.RevoluteDH</span>
-<span class="sd">        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH </span>
+<span class="sd">        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH</span>
 <span class="sd">        roboticstoolbox.PrismaticMDH roboticstoolbox.ELink</span>
 <span class="sd">        :top-classes: roboticstoolbox.robot.Link</span>
 <span class="sd">        :parts: 2</span>
-<span class="sd">    </span>
+
 <span class="sd">    It holds metadata related to:</span>
-<span class="sd">    </span>
+
 <span class="sd">    - a robot link, such as rigid-body inertial parameters defined in the link</span>
 <span class="sd">      frame, and link name</span>
 <span class="sd">    - a robot joint, that connects this link to its parent, such as joint</span>
 <span class="sd">      limits, direction of motion, motor and transmission parameters.</span>
 
-<span class="sd">    .. note:: </span>
+<span class="sd">    .. note::</span>
 <span class="sd">        - For a more sophisticated actuator model use the ``actuator``</span>
 <span class="sd">          attribute which is not initialized or used by this Toolbox.</span>
 <span class="sd">        - There is no ability to name a joint as supported by URDF</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -370,15 +369,15 @@
 <span class="sd">        :rtype: string</span>
 
 <span class="sd">        ``link.)_dyn2list()`` returns a list of pretty-printed inertial</span>
-<span class="sd">        properties of the link The properties included are mass, centre of mass,</span>
-<span class="sd">        inertia, friction, gear ratio and motor properties.</span>
+<span class="sd">        properties of the link The properties included are mass, centre of</span>
+<span class="sd">        mass, inertia, friction, gear ratio and motor properties.</span>
 
 <span class="sd">        :seealso: :func:`~dyn`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
             <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Parameter&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span>
-        <span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
+            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">),</span>
+            <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
@@ -396,9 +395,8 @@
         <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span>
         <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">)</span>
         <span class="nb">format</span><span class="p">(</span><span class="n">dyn</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="n">dyn</span>
-        
 
     <span class="k">def</span> <span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ignorevalue</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -461,7 +459,7 @@
 <span class="sd">        :param viscous: if True, will set the viscous friction to 0</span>
 <span class="sd">        :type viscous: bool</span>
 
-<span class="sd">        ``link.nofriction()`` is a copy of the link instance with the same </span>
+<span class="sd">        ``link.nofriction()`` is a copy of the link instance with the same</span>
 <span class="sd">        parameters except, the Coulomb and/or viscous friction parameters are</span>
 <span class="sd">        set to zero.</span>
 
@@ -506,7 +504,7 @@
 
 <span class="sd">        .. note::</span>
 
-<span class="sd">            - The friction value should be added to the motor output torque to </span>
+<span class="sd">            - The friction value should be added to the motor output torque to</span>
 <span class="sd">              determine the nett torque. It has a negative value when qd &gt; 0.</span>
 <span class="sd">            - The returned friction value is referred to the output of the</span>
 <span class="sd">              gearbox.</span>
@@ -557,7 +555,6 @@
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
-
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
@@ -686,7 +683,7 @@
 <span class="sd">        axes parallel to those of the link frame.</span>
 
 <span class="sd">        The inertia matrix is</span>
-<span class="sd">        </span>
+
 <span class="sd">        :math:`\begin{bmatrix} I_{xx} &amp; I_{xy} &amp; I_{xz} \\ I_{xy} &amp; I_{yy} &amp; I_{yz} \\I_{xz} &amp; I_{yz} &amp; I_{zz} \end{bmatrix}`</span>
 
 
@@ -770,7 +767,7 @@
 
 <span class="sd">        - ``link.B = ...`` checks and sets the motor viscous friction</span>
 
-<span class="sd">        .. note:: </span>
+<span class="sd">        .. note::</span>
 <span class="sd">            - Referred to the motor side of the gearbox.</span>
 <span class="sd">            - Viscous friction is the same for positive and negative motion.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -793,7 +790,7 @@
 
 <span class="sd">        - ``link.Tc`` is the motor Coulomb friction</span>
 
-<span class="sd">        :return: motor Coulomb friction </span>
+<span class="sd">        :return: motor Coulomb friction</span>
 <span class="sd">        :rtype: ndarray(2)</span>
 
 <span class="sd">        - ``link.Tc = ...`` checks and sets the motor Coulomb friction. If a</span>
@@ -811,7 +808,7 @@
 
 <span class="sd">        .. note::</span>
 <span class="sd">            -  Referred to the motor side of the gearbox.</span>
-<span class="sd">            - :math:`\tau_C^+` must be :math:`&gt; 0`, and :math:`\tau_C^-` must </span>
+<span class="sd">            - :math:`\tau_C^+` must be :math:`&gt; 0`, and :math:`\tau_C^-` must</span>
 <span class="sd">              be :math:`&lt; 0`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Tc</span>
@@ -861,15 +858,13 @@
     <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">G_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_G</span> <span class="o">=</span> <span class="n">G_new</span></div>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
     <span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">sym</span>
-    
+
     <span class="n">ET</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ETS</span>
-
-
-
 
     <span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;d, a, theta&#39;</span><span class="p">)</span>
 
@@ -891,7 +886,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 04-Nov-2020.
+        Last updated on 05-Nov-2020.
       </span>
 
     </p>

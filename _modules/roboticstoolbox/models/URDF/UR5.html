@@ -158,17 +158,15 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
 
 
 <div class="viewcode-block" id="UR5"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.URDF.UR5">[docs]</a><span class="k">class</span> <span class="nc">UR5</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that imports a UR5 URDF model</span>
 
-<span class="sd">    ``UR3()`` is a class which imports a Universal Robotics UR5 robot definition</span>
-<span class="sd">    from a URDF file.  The model describes its kinematic and graphical </span>
-<span class="sd">    characteristics.</span>
+<span class="sd">    ``UR3()`` is a class which imports a Universal Robotics UR5 robot</span>
+<span class="sd">    definition from a URDF file.  The model describes its kinematic and</span>
+<span class="sd">    graphical characteristics.</span>
 
 <span class="sd">    .. runblock:: pycon</span>
 
@@ -186,10 +184,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="n">mpath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">rp</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
-        <span class="n">fpath</span> <span class="o">=</span> <span class="n">mpath</span> <span class="o">/</span> <span class="s1">&#39;models&#39;</span> <span class="o">/</span> <span class="s1">&#39;xacro&#39;</span> <span class="o">/</span> <span class="s1">&#39;ur_description&#39;</span> <span class="o">/</span> <span class="s1">&#39;urdf&#39;</span>
-        <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;ur5_joint_limited_robot.urdf.xacro&#39;</span>
 
         <span class="n">args</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">urdf_to_ets_args</span><span class="p">(</span>
             <span class="s2">&quot;ur_description/urdf/ur5_joint_limited_robot.urdf.xacro&quot;</span><span class="p">)</span>
@@ -223,7 +217,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 04-Nov-2020.
+        Last updated on 05-Nov-2020.
       </span>
 
     </p>
