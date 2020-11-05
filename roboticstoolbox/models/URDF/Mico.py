@@ -2,8 +2,6 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
-import roboticstoolbox as rp
 
 
 class Mico(ERobot):
@@ -11,7 +9,7 @@ class Mico(ERobot):
     Class that imports a Mico URDF model
 
     ``Panda()`` is a class which imports a Kinova Mico robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon
@@ -47,5 +45,5 @@ class Mico(ERobot):
 
 if __name__ == '__main__':   # pragma nocover
 
-    robot = j2n4s300()
+    robot = Mico()
     print(robot)

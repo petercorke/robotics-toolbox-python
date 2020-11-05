@@ -118,7 +118,7 @@ class TestVPython(unittest.TestCase):
     #     try:
     #         # Put a box in the created scene
     #         box(canvas=scene.scene)
-    #     except BaseException:
+    #     except Exception:
     #         # Something went wrong
     #         self.assertEqual(False, True)
 

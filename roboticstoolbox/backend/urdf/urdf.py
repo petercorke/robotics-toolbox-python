@@ -5,7 +5,6 @@
 """
 
 import numpy as np
-from spatialmath import base
 import roboticstoolbox as rtb
 import copy
 import os
@@ -1612,7 +1611,7 @@ class URDF(URDFType):
         # why arent the other things validated
         try:
             self._validate_transmissions()
-        except BaseException:
+        except Exception:
             pass
 
         self.name = name
@@ -1711,10 +1710,10 @@ class URDF(URDFType):
 
             # joint limit
             try:
-                qlim = [joint.limit.lower, joint.limit.upper]
+                joint.qlim = [joint.limit.lower, joint.limit.upper]
             except AttributeError:
                 # no joint limits provided
-                qlim = None
+                pass
 
             # joint friction
             try:
@@ -1722,7 +1721,7 @@ class URDF(URDFType):
                     childlink.B = joint.dynamics.friction
 
                 # TODO Add damping
-                joint.dynamics.damping
+                # joint.dynamics.damping
             except AttributeError:
                 pass
 
@@ -1736,136 +1735,6 @@ class URDF(URDFType):
 
             # TODO, why did you put the base_link on the end?
             # easy to do it here
-
-        # for i in range(len(elinks)):
-        #     found = False
-        #     for joint in range(len(elinks)):
-        #         if i != joint:
-        #             if self.joints[i].parent == self.joints[joint].child:
-        #                 elinks[i]._parent = elinks[joint]
-        #                 found = True
-
-        #     if not found:
-        #         link = self._link_map[self.joints[i].parent]
-        #         base_link = rtb.ELink(
-        #                 rtb.ETS(),
-        #                 name=link.name)
-        #         elinks[i]._parent = base_link
-        #         try:
-        #             for visual in link.visuals:
-        #                 base_link.geometry.append(visual.geometry.ob)
-        #         except AttributeError:   # pragma nocover
-        #             pass
-
-        # for joint in self.joints:
-        #     # each joint has a reference to a parent and child link
-
-        #     ets = rtb.ETS()
-        #     T = sm.SE3(joint.origin)
-        #     trans = T.t
-        #     rot = joint.rpy
-        #     var = None
-
-        #     ets = ETS.SE3(trans, rot)
-        #     # if trans[0] != 0:
-        #     #     ets = ets * rtb.ETS.tx(trans[0])
-
-        #     # if trans[1] != 0:
-        #     #     ets = ets * rtb.ETS.ty(trans[1])
-
-        #     # if trans[2] != 0:
-        #     #     ets = ets * rtb.ETS.tz(trans[2])
-
-        #     # if rot[0] != 0:
-        #     #     ets = ets * rtb.ETS.rx(rot[0])
-
-        #     # if rot[1] != 0:
-        #     #     ets = ets * rtb.ETS.ry(rot[1])
-
-        #     # if rot[2] != 0:
-        #     #     ets = ets * rtb.ETS.rz(rot[2])
-
-        #     if joint.joint_type == 'revolute' or \
-        #        joint.joint_type == 'continuous':   # pragma nocover
-        #         if joint.axis[0] == 1:
-        #             var = rtb.ETS.rx()
-        #         elif joint.axis[0] == -1:
-        #             var = rtb.ETS.rx(flip=True)
-        #         elif joint.axis[1] == 1:
-        #             var = rtb.ETS.ry()
-        #         elif joint.axis[1] == -1:
-        #             var = rtb.ETS.ry(flip=True)
-        #         elif joint.axis[2] == 1:
-        #             var = rtb.ETS.rz()
-        #         elif joint.axis[2] == -1:
-        #             var = rtb.ETS.rz(flip=True)
-        #     elif joint.joint_type == 'prismatic':   # pragma nocover
-        #         if joint.axis[0] == 1:
-        #             var = rtb.ETS.tx()
-        #         elif joint.axis[0] == -1:
-        #             var = rtb.ETS.tx(flip=True)
-        #         elif joint.axis[1] == 1:
-        #             var = rtb.ETS.ty()
-        #         elif joint.axis[1] == -1:
-        #             var = rtb.ETS.ty(flip=True)
-        #         elif joint.axis[2] == 1:
-        #             var = rtb.ETS.tz()
-        #         elif joint.axis[2] == -1:
-        #             var = rtb.ETS.tz(flip=True)
-
-        #     try:
-        #         qlim = [joint.limit.lower, joint.limit.upper]
-        #     except AttributeError:
-        #         qlim = [0, 0]
-
-        #     elinks.append(
-        #         rtb.ELink(
-        #             ets,
-        #             var,
-        #             name=joint.name,
-        #             qlim=qlim
-        #         )
-        #     )
-        #     elinks_dict[elinks[-1].name] = elinks[-1]
-
-        # elinks.append(base_link)
-        # self.elinks = elinks
-
-        # Store the visuals, collisions, and inertials
-        # for i in range(len(joints)):
-        #     link = self._link_map[joints[i].child]
-        #     elinks[i].r = link.inertial.origin[:3, 3]
-        #     elinks[i].m = link.inertial.mass
-        #     elinks[i].inertia = link.inertial.inertia
-
-        #     try:
-        #         if self.joints[i].dynamics.friction is not None:
-        #             elinks[i].B = self.joints[i].dynamics.friction
-
-        #         # TODO Add damping
-        #         self.joints[i].dynamics.damping
-        #     except AttributeError:
-        #         pass
-
-        #     try:
-        #         for visual in link.visuals:
-        #             elinks[i].geometry.append(visual.geometry.ob)
-        #     except AttributeError:   # pragma nocover
-        #         pass
-
-        #     try:
-        #         colls = []
-        #         for col in link.collisions:
-        #             colls.append(col.geometry.ob)
-        #         elinks[i].collision = colls
-        #     except AttributeError:   # pragma nocover
-        #         pass
-
-        # # Apply gear ratio
-        # self._validate_transmissions()
-        # for t in self.transmissions:
-        #     elinks_dict[self.joint_map[t.joints[0].name].name].G = \
-        #         t.actuators[0].mechanicalReduction
 
     @property
     def name(self):
@@ -2003,7 +1872,7 @@ class URDF(URDFType):
                 path, _ = os.path.split(file_obj)
 
         else:   # pragma nocover
-            parser = ET.XMLParser(remove_comments=True, remove_blank_text=True)
+            parser = ET.XMLParser()
             tree = ET.parse(file_obj, parser=parser)
             path, _ = os.path.split(file_obj.name)
 

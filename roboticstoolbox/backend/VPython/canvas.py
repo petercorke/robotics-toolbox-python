@@ -4,7 +4,8 @@
 """
 
 from vpython import canvas, color, arrow, compound, keysdown, rate, norm, \
-    sqrt, cos, button, menu, checkbox, slider, wtext, degrees, vector
+    sqrt, cos, button, menu, checkbox, slider, wtext, degrees, vector, \
+    radians
 from roboticstoolbox.backend.VPython.common_functions import \
     get_pose_x_vec, get_pose_y_vec, get_pose_pos, \
     x_axis_vector, y_axis_vector, z_axis_vector
@@ -13,12 +14,12 @@ from roboticstoolbox.backend.VPython.grid import GraphicsGrid, create_line, \
 from enum import Enum
 
 
-class UImode(Enum):
+class UImode(Enum):  # pragma nocover
     CANVASCONTROL = 1
     TEACHPANEL = 2
 
 
-class GraphicsCanvas3D:
+class GraphicsCanvas3D:  # pragma nocover
     """
     Set up the scene with initial conditions.
         - White background
@@ -69,7 +70,7 @@ class GraphicsCanvas3D:
         self.scene.append_to_title(
             '<style>#glowscript h3{margin-bottom: -10px;border-bottom: 2px solid #15578a;padding-bottom: 5px;}#glowscript button{background: #8db9db !important;color: #fff !important;border: 2px solid #5F9ED0;border-radius: 8px;}#glowscript > div:nth-of-type(4n){display:inline-block;margin:20px;vertical-align:top;}#glowscript > div:nth-of-type(4n-3){background:#d9d9d9;padding:20px;border-radius:10px;margin-bottom:10px;}</style>' \
             '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>' \
-            '<script type="text/javascript">$(document).keyup(function(event){if (event.which === 32){event.preventDefault();}});</script>'
+            '<script type="text/javascript">$(document).keyup(function(event){if (event.which === 32){event.preventDefault();}});</script>'  # noqa
         )
         # Disable the arrow keys from scrolling in the browser
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
@@ -88,7 +89,8 @@ class GraphicsCanvas3D:
         # List of joint sliders per robot
         self.__teachpanel = []  # 3D, robot -> joint -> options
         self.__teachpanel_sliders = []
-        self.__idx_qlim_min, self.__idx_qlim_max, self.__idx_theta, self.__idx_text = 0, 1, 2, 3
+        self.__idx_qlim_min, self.__idx_qlim_max, self.__idx_theta, \
+            self.__idx_text = 0, 1, 2, 3
         # Checkbox states
         self.__grid_visibility = grid
         self.__camera_lock = False
@@ -159,7 +161,8 @@ class GraphicsCanvas3D:
 
     def add_robot(self, robot):
         """
-        This function is called when a new robot is created. It adds it to the drop down menu.
+        This function is called when a new robot is created. It adds it to
+        the drop down menu.
 
         :param robot: A graphical robot to add to the scene
         :type robot: class:`graphics.graphics_robot.GraphicalRobot`
@@ -180,29 +183,35 @@ class GraphicsCanvas3D:
         self.__selected_robot = len(self.__robots) - 1
 
         num_options = 4
-        self.__teachpanel.append([[0] * num_options] * robot.num_joints)  # Add spot for current robot settings
+        #  Add spot for current robot settings
+        self.__teachpanel.append([[0] * num_options] * robot.num_joints)
 
         # Add robot joint sliders
         i = 0
         for joint in robot.joints:
             if joint.qlim[0] == joint.qlim[1]:
-                self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1],
-                                                               joint.theta, None]
+                self.__teachpanel[self.__selected_robot][i] = [
+                    joint.qlim[0], joint.qlim[1],
+                    joint.theta, None]
             else:
-                string = "{:.2f} rad ({:.2f} deg)".format(joint.theta, degrees(joint.theta))
-                self.__teachpanel[self.__selected_robot][i] = [joint.qlim[0], joint.qlim[1],
-                                                               joint.theta, wtext(text=string)]
+                string = "{:.2f} rad ({:.2f} deg)".format(
+                    joint.theta, degrees(joint.theta))
+                self.__teachpanel[self.__selected_robot][i] = [
+                    joint.qlim[0], joint.qlim[1],
+                    joint.theta, wtext(text=string)]
             i += 1
 
         # Refresh the caption
         self.__reload_caption(new_list)
 
         # Set it as selected
-        self.__ui_controls[self.__idx_menu_robots].index = len(self.__robots) - 1
+        self.__ui_controls[self.__idx_menu_robots].index = \
+            len(self.__robots) - 1
 
     def delete_robot(self, robot):
         """
-        This function is called when a new robot is to be deleted from the scene.
+        This function is called when a new robot is to be deleted
+        from the scene.
 
         :param robot: A graphical robot to add to the scene
         :type robot: class:`graphics.graphics_robot.GraphicalRobot`
@@ -251,7 +260,8 @@ class GraphicsCanvas3D:
         :returns: A button
         :rtype: class:`vpython.button`
         """
-        btn_text = self.__toggle_button_text_dict.get(self.__ui_mode, "Unknown Mode Set")
+        btn_text = self.__toggle_button_text_dict.get(
+            self.__ui_mode, "Unknown Mode Set")
         btn_text = "<span style='font-size:20px;'>" + btn_text + "</span>"
 
         btn_toggle = button(bind=self.__toggle_mode, text=btn_text)
@@ -265,7 +275,9 @@ class GraphicsCanvas3D:
         """
         if len(self.__robots) == 0:
             # Alert the user and return
-            self.scene.append_to_caption('<script type="text/javascript">alert("No robot to delete");</script>')
+            self.scene.append_to_caption(
+                '<script type="text/javascript">alert'
+                '("No robot to delete");</script>')
             return
 
         # Clear the robot visuals
@@ -324,7 +336,8 @@ class GraphicsCanvas3D:
         cam_pos = vector(self.scene.camera.pos)
         cam_focus = vector(self.scene.center)
 
-        # Weird manipulation to get correct vector directions. (scene.camera.up always defaults to world up)
+        # Weird manipulation to get correct vector directions.
+        # (scene.camera.up always defaults to world up)
         cam_axis = (vector(self.scene.camera.axis))  # X
         cam_side_axis = self.scene.camera.up.cross(cam_axis)  # Y
         cam_up = cam_axis.cross(cam_side_axis)  # Z
@@ -334,14 +347,16 @@ class GraphicsCanvas3D:
         # Get a list of keys
         keys = keysdown()
 
-        # Userspin uses ctrl, so skip this check to avoid changing camera pose while ctrl is held
+        # Userspin uses ctrl, so skip this check to avoid changing camera pose
+        # while ctrl is held
         if 'ctrl' in keys:
             return
 
-        ################################################################################################################
+        ######################################################################
         # PANNING
         # Check if the keys are pressed, update vectors as required
-        # Changing camera position updates the scene center to follow same changes
+        # Changing camera position updates the scene center to
+        # follow same changes
         if 'w' in keys:
             cam_pos = cam_pos + cam_axis * pan_amount
         if 's' in keys:
@@ -355,10 +370,11 @@ class GraphicsCanvas3D:
         if 'shift' in keys:
             cam_pos = cam_pos - cam_up * pan_amount
 
-        # Update camera position before rotation (to keep pan and rotate separate)
+        # Update camera position before rotation
+        # (to keep pan and rotate separate)
         self.scene.camera.pos = cam_pos
 
-        ################################################################################################################
+        ######################################################################
         # Camera Roll
         # If only one rotation key is pressed
         if 'q' in keys and 'e' not in keys:
@@ -378,10 +394,11 @@ class GraphicsCanvas3D:
             # Set
             self.scene.up = cam_up
 
-        ################################################################################################################
+        ######################################################################
         # CAMERA ROTATION
         d = cam_distance
-        move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))  # SAS Cosine
+        move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(
+            radians(rot_amount)))  # SAS Cosine
 
         # If only left not right key
         if 'left' in keys and 'right' not in keys:
@@ -447,18 +464,24 @@ class GraphicsCanvas3D:
         ##################################################
         self.scene.append_to_caption('<h3>Scene Settings</h3>\n')
         # Button to reset camera
-        btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
+        btn_reset = button(
+            bind=self.__reset_camera, text="Reset Camera")
         self.scene.append_to_caption('\t')
 
-        chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
+        chkbox_cam = checkbox(
+            bind=self.__camera_lock_checkbox,
+            text="Camera Lock", checked=self.__camera_lock)
         self.scene.append_to_caption('\t')
 
-        chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
+        chkbox_rel = checkbox(
+            bind=self.__grid_relative_checkbox,
+            text="Grid Relative", checked=self.__grid_relative)
 
         self.scene.append_to_caption('\t')
         # Checkbox for grid visibility
-        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
-                               checked=self.__grid_visibility)
+        chkbox_grid = checkbox(
+            bind=self.__grid_visibility_checkbox, text="Grid Visibility",
+            checked=self.__grid_visibility)
         self.scene.append_to_caption('\n')
 
         ##################################################
@@ -481,18 +504,26 @@ class GraphicsCanvas3D:
         self.scene.append_to_caption('<h3>Characteristics</h3>\n')
         # Checkbox for reference frame visibilities
         if len(self.__robots) == 0:
-            chkbox_ref = checkbox(bind=self.__reference_frame_checkbox, text="Show Reference Frames", checked=True)
+            chkbox_ref = checkbox(
+                bind=self.__reference_frame_checkbox,
+                text="Show Reference Frames", checked=True)
         else:
             chk = self.__robots[self.__selected_robot].ref_shown
-            chkbox_ref = checkbox(bind=self.__reference_frame_checkbox, text="Show Reference Frames", checked=chk)
+            chkbox_ref = checkbox(
+                bind=self.__reference_frame_checkbox,
+                text="Show Reference Frames", checked=chk)
         self.scene.append_to_caption('\t')
 
         # Checkbox for robot visibility
         if len(self.__robots) == 0:
-            chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=True)
+            chkbox_rob = checkbox(
+                bind=self.__robot_visibility_checkbox,
+                text="Show Robot", checked=True)
         else:
             chk = self.__robots[self.__selected_robot].rob_shown
-            chkbox_rob = checkbox(bind=self.__robot_visibility_checkbox, text="Show Robot", checked=chk)
+            chkbox_rob = checkbox(
+                bind=self.__robot_visibility_checkbox,
+                text="Show Robot", checked=chk)
         self.scene.append_to_caption('\n')
 
         # Slider for robot opacity
@@ -521,8 +552,9 @@ class GraphicsCanvas3D:
 
         self.scene.append_to_caption(controls_str)
 
-        return [btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid, chkbox_cam, chkbox_rel, sld_opc, btn_del,
-                btn_clr]
+        return [
+            btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid,
+            chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
 
     def __setup_joint_sliders(self):
         """
@@ -549,7 +581,8 @@ class GraphicsCanvas3D:
                 id=i
             )
             self.__teachpanel_sliders.append(s)
-            string = "{:.2f} rad ({:.2f} deg)".format(joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
+            string = "{:.2f} rad ({:.2f} deg)".format(
+                joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
             joint[self.__idx_text] = wtext(text=string)
             self.scene.append_to_caption('\n\n')
             i += 1
@@ -562,10 +595,11 @@ class GraphicsCanvas3D:
         Callback for when the toggle mode button is pressed
         """
         # Update mode
+        # Update mode, default canvas controls
         self.__ui_mode = {
             UImode.CANVASCONTROL: UImode.TEACHPANEL,
             UImode.TEACHPANEL: UImode.CANVASCONTROL
-        }.get(self.__ui_mode, UImode.CANVASCONTROL)  # Update mode, default canvas controls
+        }.get(self.__ui_mode, UImode.CANVASCONTROL)
 
         # Update UI
         # get list of robots
@@ -609,23 +643,27 @@ class GraphicsCanvas3D:
 
     def __reference_frame_checkbox(self, c):
         """
-        When a checkbox is changed for the reference frame option, update the graphics
+        When a checkbox is changed for the reference frame option, update the
+        graphics
 
         :param c: The checkbox that has been toggled
         :type c: class:`checkbox`
         """
         if len(self.__robots) > 0:
-            self.__robots[self.__selected_robot].set_reference_visibility(c.checked)
+            self.__robots[self.__selected_robot].set_reference_visibility(
+                c.checked)
 
     def __robot_visibility_checkbox(self, c):
         """
-        When a checkbox is changed for the robot visibility, update the graphics
+        When a checkbox is changed for the robot visibility, update the
+        graphics
 
         :param c: The checkbox that has been toggled
         :type c: class:`checkbox`
         """
         if len(self.__robots) > 0:
-            self.__robots[self.__selected_robot].set_robot_visibility(c.checked)
+            self.__robots[self.__selected_robot].set_robot_visibility(
+                c.checked)
 
     def __grid_visibility_checkbox(self, c):
         """
@@ -679,7 +717,8 @@ class GraphicsCanvas3D:
         :type s: class:`slider`
         """
         # Save the value
-        self.__teachpanel[self.__selected_robot][s.id][self.__idx_theta] = s.value
+        self.__teachpanel[self.__selected_robot][s.id][self.__idx_theta] = \
+            s.value
 
         # Get all angles for the robot
         angles = []
@@ -695,11 +734,12 @@ class GraphicsCanvas3D:
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_text] is None:
                 continue
-            string = "{:.2f} rad ({:.2f} deg)".format(joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
+            string = "{:.2f} rad ({:.2f} deg)".format(
+                joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
             joint[self.__idx_text].text = string
 
 
-class GraphicsCanvas2D:
+class GraphicsCanvas2D:  # pragma nocover
     """
         Set up the scene with initial conditions.
             - White background
@@ -707,15 +747,19 @@ class GraphicsCanvas2D:
             - Title, caption
             - Axes drawn (if applicable)
 
-        :param height: Height of the canvas on screen (Pixels), defaults to 360.
+        :param height: Height of the canvas on screen (Pixels),
+            defaults to 360.
         :type height: `int`, optional
         :param width: Width of the canvas on screen (Pixels), defaults to 640.
         :type width: `int`, optional
-        :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
+        :param title: Title of the plot. Gets displayed above canvas, defaults
+            to ''.
         :type title: `str`, optional
-        :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
+        :param caption: Caption (subtitle) of the plot. Gets displayed below
+            the canvas, defaults to ''.
         :type caption: `str`, optional
-        :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
+        :param grid: Whether a grid should be displayed in the plot, defaults
+            to `True`.
         :type grid: `bool`, optional
         """
 
@@ -886,7 +930,8 @@ class GraphicsCanvas2D:
         cam_pos = vector(self.scene.camera.pos)
         cam_focus = vector(self.scene.center)
 
-        # Weird manipulation to get correct vector directions. (scene.camera.up always defaults to world up)
+        # Weird manipulation to get correct vector directions.
+        # (scene.camera.up always defaults to world up)
         cam_axis = (vector(self.scene.camera.axis))  # X
         cam_side_axis = self.scene.camera.up.cross(cam_axis)  # Y
         cam_up = cam_axis.cross(cam_side_axis)  # Z
@@ -896,14 +941,16 @@ class GraphicsCanvas2D:
         # Get a list of keys
         keys = keysdown()
 
-        # Userpan uses ctrl, so skip this check to avoid changing camera pose while shift is held
+        # Userpan uses ctrl, so skip this check to avoid changing camera pose
+        # while shift is held
         if 'shift' in keys:
             return
 
-        ################################################################################################################
+        #####################################################################
         # PANNING
         # Check if the keys are pressed, update vectors as required
-        # Changing camera position updates the scene center to follow same changes
+        # Changing camera position updates the scene center to follow
+        # same changes
         if 'w' in keys:
             cam_pos = cam_pos + cam_up * pan_amount
         if 's' in keys:
@@ -913,10 +960,11 @@ class GraphicsCanvas2D:
         if 'd' in keys:
             cam_pos = cam_pos - cam_side_axis * pan_amount
 
-        # Update camera position before rotation (to keep pan and rotate separate)
+        # Update camera position before rotation
+        # (to keep pan and rotate separate)
         self.scene.camera.pos = cam_pos
 
-        ################################################################################################################
+        #####################################################################
         # Camera Roll
         # If only one rotation key is pressed
         if 'q' in keys and 'e' not in keys:
@@ -936,10 +984,11 @@ class GraphicsCanvas2D:
             # Set
             self.scene.up = cam_up
 
-        ################################################################################################################
+        ######################################################################
         # CAMERA ROTATION
         d = cam_distance
-        move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(radians(rot_amount)))  # SAS Cosine
+        move_dist = sqrt(d ** 2 + d ** 2 - 2 * d * d * cos(
+            radians(rot_amount)))  # SAS Cosine
 
         # If only left not right key
         if 'left' in keys and 'right' not in keys:
@@ -967,9 +1016,11 @@ class GraphicsCanvas2D:
         """
         # Reset Camera
         self.scene.camera.pos = vector(5, 5, 12)  # Hover above (5, 5, 0)
-        # Ever so slightly off focus, to ensure grid is rendered in the right region
+        # Ever so slightly off focus, to ensure grid is rendered in the right
+        # region
         # (if directly at, draws numbers wrong spots)
-        self.scene.camera.axis = vector(-0.001, -0.001, -12)  # Focus on (5, 5, 0)
+        # Focus on (5, 5, 0)
+        self.scene.camera.axis = vector(-0.001, -0.001, -12)
         self.scene.up = y_axis_vector
 
     def __reload_caption(self):
@@ -991,13 +1042,18 @@ class GraphicsCanvas2D:
         self.scene.append_to_caption('\n')
 
         # Button to reset camera
-        btn_reset = button(bind=self.__reset_camera, text="Reset Camera")
+        btn_reset = button(
+            bind=self.__reset_camera, text="Reset Camera")
         self.scene.append_to_caption('\t')
 
-        chkbox_cam = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock", checked=self.__camera_lock)
+        chkbox_cam = checkbox(
+            bind=self.__camera_lock_checkbox,
+            text="Camera Lock", checked=self.__camera_lock)
         self.scene.append_to_caption('\t')
 
-        chkbox_rel = checkbox(bind=self.__grid_relative_checkbox, text="Grid Relative", checked=self.__grid_relative)
+        chkbox_rel = checkbox(
+            bind=self.__grid_relative_checkbox,
+            text="Grid Relative", checked=self.__grid_relative)
         self.scene.append_to_caption('\n\n')
 
         # Button to clear the screen
@@ -1005,11 +1061,13 @@ class GraphicsCanvas2D:
         self.scene.append_to_caption('\n\n')
 
         # Checkbox for grid visibility
-        chkbox_grid = checkbox(bind=self.__grid_visibility_checkbox, text="Grid Visibility",
-                               checked=self.__grid_visibility)
+        chkbox_grid = checkbox(
+            bind=self.__grid_visibility_checkbox, text="Grid Visibility",
+            checked=self.__grid_visibility)
         self.scene.append_to_caption('\t')
 
-        # Prevent the space bar from toggling the active checkbox/button/etc (default browser behaviour)
+        # Prevent the space bar from toggling the active checkbox/button/etc
+        # (default browser behaviour)
         self.scene.append_to_caption('''
                        <script type="text/javascript">
                            $(document).keyup(function(event) {
@@ -1031,7 +1089,7 @@ class GraphicsCanvas2D:
                        'Q , E | <i>roll left / right</i><br>' \
                        '<b>ZOOM</b></br>' \
                        'MOUSEWHEEL | <i>zoom in / out</i><br>' \
-                       '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>'
+                       '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>'  # noqa
         # Disable the arrow keys from scrolling in the browser
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
@@ -1078,7 +1136,9 @@ class GraphicsCanvas2D:
     #######################################
     #  Drawing Functions
     #######################################
-    def __draw_path(self, x_path, y_path, opt_line, opt_marker, opt_colour, thickness=0.05):
+    def __draw_path(
+            self, x_path, y_path, opt_line, opt_marker,
+            opt_colour, thickness=0.05):
         """
         Draw a line from point to point in the 2D path
 
@@ -1099,7 +1159,8 @@ class GraphicsCanvas2D:
         # Get colour
         colour = self.__get_colour_from_string(opt_colour)
 
-        # For every point in the list, draw a line to the next one (excluding last point)
+        # For every point in the list, draw a line to the next one
+        # (excluding last point)
         for point in range(0, len(x_path)):
             # Get point 1
             x1 = x_path[point]
@@ -1120,15 +1181,20 @@ class GraphicsCanvas2D:
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == '-':
-                create_line(p1, p2, self.scene, colour=colour, thickness=thickness)
+                create_line(
+                    p1, p2, self.scene, colour=colour, thickness=thickness)
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == '--':
-                create_segmented_line(p1, p2, self.scene, 0.3, colour=colour, thickness=thickness)
+                create_segmented_line(
+                    p1, p2, self.scene, 0.3, colour=colour,
+                    thickness=thickness)
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == ':':
-                create_segmented_line(p1, p2, self.scene, 0.05, colour=colour, thickness=thickness)
+                create_segmented_line(
+                    p1, p2, self.scene, 0.05, colour=colour,
+                    thickness=thickness)
                 # Only one marker to avoid double-ups
                 create_marker(self.scene, x1, y1, opt_marker, colour)
             elif opt_line == '-.':
@@ -1185,7 +1251,9 @@ class GraphicsCanvas2D:
 
         # Verify x, y coords have same length
         if len(x_coords) != len(y_coords):
-            raise ValueError("Number of X coordinates does not equal number of Y coordinates.")
+            raise ValueError(
+                "Number of X coordinates does not equal "
+                "number of Y coordinates.")
 
         # Verify options given (and save settings to be applied)
         verified_options = self.__verify_plot_options(options)
@@ -1213,7 +1281,9 @@ class GraphicsCanvas2D:
         """
         Verify that the given options are usable.
 
-        :param options_str: The given options from the plot command to verify user input
+        :param options_str: The given options from the plot command to verify
+        user input
+
         :type options_str: `str`
         :raises ValueError: Unknown character entered
         :raises ValueError: Too many line segments used
@@ -1233,14 +1303,17 @@ class GraphicsCanvas2D:
         if len(options_split) == 0:
             return [default_line, default_marker, default_colour]
 
-        # If line_style given, join the first two options if applicable (some types have 2 characters)
+        # If line_style given, join the first two options if applicable
+        # (some types have 2 characters)
         for char in range(0, len(options_split) - 1):
             # If char is '-' (only leading character in double length option)
             if options_split[char] == '-' and len(options_split) > 1:
                 # If one of the leading characters is valid
-                if options_split[char + 1] == '-' or options_split[char + 1] == '.':
+                if options_split[char + 1] == '-' or \
+                        options_split[char + 1] == '.':
                     # Join the two into the first
-                    options_split[char] = options_split[char] + options_split[char + 1]
+                    options_split[char] = options_split[char] \
+                        + options_split[char + 1]
                     # Shuffle down the rest
                     for idx in range(char + 2, len(options_split)):
                         options_split[idx - 1] = options_split[idx]
@@ -1259,7 +1332,8 @@ class GraphicsCanvas2D:
         # Verify Line Style
         ##############################
         line_style_count = 0  # Count of options used
-        line_style_index = 0  # Index position of index used (only used when count == 1)
+        # Index position of index used (only used when count == 1)
+        line_style_index = 0
         for option in options_split:
             if option in self.__line_styles:
                 line_style_count = line_style_count + 1
@@ -1267,9 +1341,11 @@ class GraphicsCanvas2D:
 
         # If more than one, throw error
         if line_style_count > 1:
-            raise ValueError("Too many line style arguments given. Only one allowed")
+            raise ValueError(
+                "Too many line style arguments given. Only one allowed")
         # If none, set as solid
-        elif line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
+        elif line_style_count == 0 or not any(
+                item in options_split for item in self.__line_styles):
             output_line = default_line
         # If one, set as given
         else:
@@ -1280,7 +1356,8 @@ class GraphicsCanvas2D:
         # Verify Marker Style
         ##############################
         marker_style_count = 0  # Count of options used
-        marker_style_index = 0  # Index position of index used (only used when count == 1)
+        # Index position of index used (only used when count == 1)
+        marker_style_index = 0
         for option in options_split:
             if option in self.__marker_styles:
                 marker_style_count = marker_style_count + 1
@@ -1288,15 +1365,18 @@ class GraphicsCanvas2D:
 
         # If more than one, throw error
         if marker_style_count > 1:
-            raise ValueError("Too many marker style arguments given. Only one allowed")
+            raise ValueError(
+                "Too many marker style arguments given. Only one allowed")
         # If none, set as no-marker
-        elif marker_style_count == 0 or not any(item in options_split for item in self.__marker_styles):
+        elif marker_style_count == 0 or not any(
+                item in options_split for item in self.__marker_styles):
             output_marker = default_marker
         # If one, set as given
         else:
             output_marker = self.__marker_styles[marker_style_index]
             # If marker set and no line given, turn line to no-line
-            if line_style_count == 0 or not any(item in options_split for item in self.__line_styles):
+            if line_style_count == 0 or not any(
+                    item in options_split for item in self.__line_styles):
                 output_line = ''
         ##############################
 
@@ -1304,7 +1384,8 @@ class GraphicsCanvas2D:
         # Verify Colour Style
         ##############################
         colour_style_count = 0  # Count of options used
-        colour_style_index = 0  # Index position of index used (only used when count == 1)
+        # Index position of index used (only used when count == 1)
+        colour_style_index = 0
         for option in options_split:
             if option in self.__colour_styles:
                 colour_style_count = colour_style_count + 1
@@ -1312,9 +1393,11 @@ class GraphicsCanvas2D:
 
         # If more than one, throw error
         if colour_style_count > 1:
-            raise ValueError("Too many colour style arguments given. Only one allowed")
+            raise ValueError(
+                "Too many colour style arguments given. Only one allowed")
         # If none, set as black
-        elif colour_style_count == 0 or not any(item in options_split for item in self.__colour_styles):
+        elif colour_style_count == 0 or not any(
+                item in options_split for item in self.__colour_styles):
             output_colour = default_colour
         # If one, set as given
         else:
@@ -1325,7 +1408,9 @@ class GraphicsCanvas2D:
 
     def __get_colour_from_string(self, colour_string):
         """
-        Using the colour plot string input, return an rgb array of the colour selected
+        Using the colour plot string input, return an rgb array of the colour
+        selected
+
         :param colour_string: The colour string option
         :type colour_string: `str`
         :returns: List of RGB values for the representative colour
@@ -1335,18 +1420,21 @@ class GraphicsCanvas2D:
         return self.__colour_dictionary.get(colour_string, color.black.value)
 
 
-def convert_grid_to_z_up(scene):
+def convert_grid_to_z_up(scene):  # pragma nocover
     """
     Rotate the camera so that +z is up
     (Default vpython scene is +y up)
     """
 
     '''
-    There is an interaction between up and forward, the direction that the camera is pointing. By default, the camera
-    points in the -z direction vector(0,0,-1). In this case, you can make the x or y axes (or anything between) be the
-    up vector, but you cannot make the z axis be the up vector, because this is the axis about which the camera rotates
-    when you set the up attribute. If you want the z axis to point up, first set forward to something other than the -z
-    axis, for example vector(1,0,0). https://www.glowscript.org/docs/VPythonDocs/canvas.html
+    There is an interaction between up and forward, the direction that the
+    camera is pointing. By default, the camera points in the -z direction
+    vector(0,0,-1). In this case, you can make the x or y axes (or anything
+    between) be the up vector, but you cannot make the z axis be the up
+    vector, because this is the axis about which the camera rotates when
+    you set the up attribute. If you want the z axis to point up, first set
+    forward to something other than the -z axis, for example vector(1,0,0).
+    https://www.glowscript.org/docs/VPythonDocs/canvas.html
     '''
     # First set the x-axis forward
     scene.forward = x_axis_vector
@@ -1358,7 +1446,7 @@ def convert_grid_to_z_up(scene):
     return
 
 
-def draw_reference_frame_axes(se3_pose, scene):
+def draw_reference_frame_axes(se3_pose, scene):  # pragma nocover
     """
     Draw x, y, z axes from the given point.
     Each axis is represented in the objects reference frame.
@@ -1378,17 +1466,25 @@ def draw_reference_frame_axes(se3_pose, scene):
 
     # Create Basic Frame
     # Draw X Axis
-    x_arrow = arrow(canvas=scene, pos=origin, axis=x_axis_vector, length=0.25, color=color.red)
+    x_arrow = arrow(
+        canvas=scene, pos=origin, axis=x_axis_vector,
+        length=0.25, color=color.red)
 
     # Draw Y Axis
-    y_arrow = arrow(canvas=scene, pos=origin, axis=y_axis_vector, length=0.25, color=color.green)
+    y_arrow = arrow(
+        canvas=scene, pos=origin, axis=y_axis_vector,
+        length=0.25, color=color.green)
 
     # Draw Z Axis
-    z_arrow = arrow(canvas=scene, pos=origin, axis=z_axis_vector, length=0.25, color=color.blue)
+    z_arrow = arrow(
+        canvas=scene, pos=origin, axis=z_axis_vector,
+        length=0.25, color=color.blue)
 
     # Combine all to manipulate together
-    # Set origin to where axis converge (instead of the middle of the resulting object bounding box)
-    frame_ref = compound([x_arrow, y_arrow, z_arrow], origin=origin, canvas=scene)
+    # Set origin to where axis converge (instead of the middle of
+    # the resulting object bounding box)
+    frame_ref = compound(
+        [x_arrow, y_arrow, z_arrow], origin=origin, canvas=scene)
 
     # Set frame axes
     frame_ref.axis = x_axis

@@ -57,7 +57,7 @@ def list(keywords=None, dof=None, mtype=None):
                 robot = cls()
                 try:
                     config = robot.config()
-                except BaseException:
+                except Exception:
                     config = ""
 
                 # apply filters

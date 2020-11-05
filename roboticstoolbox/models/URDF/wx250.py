@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
 
 
 class wx250(ERobot):
@@ -11,7 +9,7 @@ class wx250(ERobot):
     Class that imports a WX250 URDF model
 
     ``wx250()`` is a class which imports an Interbotix wx250 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon

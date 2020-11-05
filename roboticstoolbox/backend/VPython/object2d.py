@@ -7,10 +7,11 @@ from vpython import shapes, radians, extrusion, vector
 from roboticstoolbox.backend.VPython.stl import import_object_from_numpy_stl
 
 
-class Object2D:
+class Object2D:   # pragma nocover
     """
     This object will allow the ability to update it's pose in the scene.
-    For example, it could resemble a car or drone that moves around in 2D space.
+    For example, it could resemble a car or drone that moves around in
+    2D space.
 
     :param se2: The SE2 object representing position and orientation
     :type se2: class:`spatialmath.se2`
@@ -86,7 +87,7 @@ class Object2D:
         self.graphic.size = self.size * multiply
 
 
-class STL2D(Object2D):
+class STL2D(Object2D):   # pragma nocover
     """
     This object is for 2D objects that contain an STL.
 
@@ -115,9 +116,10 @@ class STL2D(Object2D):
         return import_object_from_numpy_stl(self.shape, self.scene)
 
 
-class Marker2D(Object2D):
+class Marker2D(Object2D):   # pragma nocover
     """
-    This class will place a marker in the given location based on the given marker inputs
+    This class will place a marker in the given location based on the given
+    marker inputs
 
     :param se2: The SE2 object representing position and orientation
     :type se2: class:`spatialmath.se2`
@@ -152,7 +154,8 @@ class Marker2D(Object2D):
         ]
 
         if shape not in marker_styles:
-            raise ValueError("The shape must be in the list of possible shapes")
+            raise ValueError(
+                "The shape must be in the list of possible shapes")
 
         # Create the object
         self.graphic = self.__create_object()
@@ -169,7 +172,8 @@ class Marker2D(Object2D):
             shape_path = shapes.circle(radius=self.__marker_size / 2)
         elif self.shape == '+':
             # 2D coords of the cross boundary
-            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size / 5)
+            shape_path = shapes.cross(
+                width=self.__marker_size, thickness=self.__marker_size / 5)
         elif self.shape == 'o':
             # 2D coords of the circle boundary
             shape_path = shapes.circle(radius=self.__marker_size / 2)
@@ -178,36 +182,47 @@ class Marker2D(Object2D):
             shape_path = shapes.star(radius=self.__marker_size / 2, n=6)
         elif self.shape == '.':
             # 2D coords of the square boundary
-            shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size)
+            shape_path = shapes.rectangle(
+                width=self.__marker_size, height=self.__marker_size)
         elif self.shape == 'x':
             # 2D coords of the cross boundary
-            shape_path = shapes.cross(width=self.__marker_size, thickness=self.__marker_size / 5, rotate=radians(45))
+            shape_path = shapes.cross(
+                width=self.__marker_size, thickness=self.__marker_size / 5,
+                rotate=radians(45))
         elif self.shape == 's':
             # 2D coords of the square boundary
-            shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
-                                          thickness=self.__marker_size)
+            shape_path = shapes.rectangle(
+                width=self.__marker_size, height=self.__marker_size,
+                thickness=self.__marker_size)
         elif self.shape == 'd':
             # 2D coords of the diamond boundary
-            shape_path = shapes.rectangle(width=self.__marker_size, height=self.__marker_size,
-                                          thickness=self.__marker_size, rotate=radians(45))
+            shape_path = shapes.rectangle(
+                width=self.__marker_size, height=self.__marker_size,
+                thickness=self.__marker_size, rotate=radians(45))
         elif self.shape == '^':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=self.__marker_size)
+            shape_path = shapes.triangle(
+                length=self.__marker_size)
         elif self.shape == 'v':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(180))
+            shape_path = shapes.triangle(
+                length=self.__marker_size, rotate=radians(180))
         elif self.shape == '<':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(90))
+            shape_path = shapes.triangle(
+                length=self.__marker_size, rotate=radians(90))
         elif self.shape == '>':
             # 2D coords of the triangle boundary
-            shape_path = shapes.triangle(length=self.__marker_size, rotate=radians(-90))
+            shape_path = shapes.triangle(
+                length=self.__marker_size, rotate=radians(-90))
         elif self.shape == 'p':
             # 2D coords of the pentagon boundary
-            shape_path = shapes.pentagon(length=self.__marker_size)
+            shape_path = shapes.pentagon(
+                length=self.__marker_size)
         elif self.shape == 'h':
             # 2D coords of the hexagon boundary
-            shape_path = shapes.hexagon(length=self.__marker_size)
+            shape_path = shapes.hexagon(
+                length=self.__marker_size)
         # CURRENTLY UNUSED
         # elif self.__shape == 'o':
         #     # 2D coords of the octagon boundary

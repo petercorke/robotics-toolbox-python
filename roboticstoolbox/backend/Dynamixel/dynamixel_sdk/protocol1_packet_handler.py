@@ -130,7 +130,7 @@ class Protocol1PacketHandler(object):
     def rxPacket(self, port):
         rxpacket = []
 
-        result = COMM_TX_FAIL
+        result = COMM_TX_FAIL    # lgtm [py/multiple-definition]
         checksum = 0
         rx_length = 0
         wait_length = 6  # minimum length (HEADER0 HEADER1 ID LENGTH ERROR CHKSUM)
@@ -310,7 +310,7 @@ class Protocol1PacketHandler(object):
         return result
 
     def readRx(self, port, dxl_id, length):
-        result = COMM_TX_FAIL
+        result = COMM_TX_FAIL       # lgtm [py/multiple-definition]
         error = 0
 
         rxpacket = None

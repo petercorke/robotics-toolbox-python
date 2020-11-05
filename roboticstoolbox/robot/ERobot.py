@@ -85,7 +85,7 @@ class ERobot(Robot):
             tool = ets[start:]
             if len(tool) > 0:
                 elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
-        else:
+        elif isinstance(elinks, list):
             # were passed a list of ELinks
 
             # check all the incoming ELink objects
@@ -97,6 +97,8 @@ class ERobot(Robot):
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
+        else:
+            raise TypeError('elinks must be a list of ELinks or an ETS')
 
         self._n = n
 
@@ -178,7 +180,8 @@ class ERobot(Robot):
                 raise ValueError('joints {jset} were not assigned')
         else:
             # must be a mixture of ELinks with/without jindex
-            raise ValueError('all links must have a jindex, or none have a jindex')
+            raise ValueError(
+                'all links must have a jindex, or none have a jindex')
 
         # Current joint angles of the robot
         # TODO should go to Robot class?
@@ -537,8 +540,8 @@ class ERobot(Robot):
             else:
                 raise ValueError(
                     'robot has multiple end-effectors, specify one')
-        elif isinstance(ee, str) and ee in self._linkdict:
-            ee = self._linkdict[ee]
+        # elif isinstance(ee, str) and ee in self._linkdict:
+        #     ee = self._linkdict[ee]
         elif isinstance(ee, ELink) and ee in self._links:
             link = ee
         else:
@@ -1139,7 +1142,7 @@ class ERobot(Robot):
 
         """
 
-        link = self.base_link
+        # link = self.base_link
 
         def recurse(link, indent=0):
             print(' ' * indent * 2, link.name)

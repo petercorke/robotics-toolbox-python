@@ -249,7 +249,7 @@ class Protocol2PacketHandler(object):
     def rxPacket(self, port):
         rxpacket = []
 
-        result = COMM_TX_FAIL
+        result = COMM_TX_FAIL  # lgtm [py/multiple-definition]
         rx_length = 0
         wait_length = 11  # minimum length (HEADER0 HEADER1 HEADER2 RESERVED ID LENGTH_L LENGTH_H INST ERROR CRC16_L CRC16_H)
 
@@ -438,7 +438,7 @@ class Protocol2PacketHandler(object):
                         return data_list, result
 
                 else:
-                    result = COMM_RX_CORRUPT
+                    result = COMM_RX_CORRUPT   # lgtm [py/multiple-definition]
 
                     # remove header (0xFF 0xFF 0xFD)
                     del rxpacket[0: 3]
@@ -450,7 +450,7 @@ class Protocol2PacketHandler(object):
                 rx_length = rx_length - idx
 
         # FIXME: unreachable code
-        return data_list, result
+        return data_list, result     # lgtm [py/unreachable-statement]
 
     def action(self, port, dxl_id):
         txpacket = [0] * 10
@@ -526,7 +526,7 @@ class Protocol2PacketHandler(object):
         return result
 
     def readRx(self, port, dxl_id, length):
-        result = COMM_TX_FAIL
+        result = COMM_TX_FAIL   # lgtm [py/multiple-definition]
         error = 0
 
         rxpacket = None

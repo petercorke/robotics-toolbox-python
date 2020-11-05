@@ -2,8 +2,6 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-import roboticstoolbox as rp
-from pathlib import Path
 from math import pi
 
 
@@ -12,7 +10,7 @@ class Puma560(ERobot):
     Class that imports a Puma 560 URDF model
 
     ``Puma560()`` is a class which imports a Unimation Puma560 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon

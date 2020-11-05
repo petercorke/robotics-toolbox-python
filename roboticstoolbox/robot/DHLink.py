@@ -3,7 +3,6 @@
 @author: Jesse Haviland
 """
 
-import copy
 import numpy as np
 from spatialmath import SE3
 import roboticstoolbox as rp

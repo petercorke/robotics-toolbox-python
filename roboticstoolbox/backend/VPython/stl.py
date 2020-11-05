@@ -4,12 +4,13 @@
 """
 
 from vpython import vec, vertex, color, triangle, compound
-from roboticstoolbox.backend.VPython.common_functions import *
+from roboticstoolbox.backend.VPython.common_functions import \
+    vector, x_axis_vector
 from io import StringIO
 
 try:
     from roboticstoolbox.tools.stdout_supress import pipes
-except BaseException:  # pragma nocover
+except Exception:  # pragma nocover
     from contextlib import contextmanager
 
     @contextmanager
@@ -21,11 +22,11 @@ _err = StringIO()
 try:
     with pipes(stdout=_out, stderr=_err):
         from stl import mesh
-except BaseException:  # pragma nocover
+except Exception:  # pragma nocover
     from stl import mesh
 
 
-def import_object_from_numpy_stl(filename, scene):
+def import_object_from_numpy_stl(filename, scene):  # pragma nocover
     """
     Import either an ASCII or BINARY file format of an STL file.
     The triangles will be combined into a single compound entity.
@@ -34,7 +35,8 @@ def import_object_from_numpy_stl(filename, scene):
     :type filename: `str`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
-    :return: Compound object of a collection of triangles formed from an stl file.
+    :return: Compound object of a collection of triangles formed from an
+        stl file.
     :rtype: class:`vpython.compound`
     """
     # filename = meshdata[0]
@@ -96,16 +98,20 @@ def import_object_from_numpy_stl(filename, scene):
     return visual_mesh
 
 
-def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin, scene):
+def set_stl_origin(
+        stl_obj, current_obj_origin,
+        required_obj_origin, scene):  # pragma nocover
     """
-    Move the object so the required origin is at (0, 0, 0). Then set the origin for the generated stl object.
-    Origin can't be changed, so creating a compound of itself allows setting an origin location
+    Move the object so the required origin is at (0, 0, 0). Then set the
+    origin for the generated stl object. Origin can't be changed, so creating
+    a compound of itself allows setting an origin location
 
     :param stl_obj: The generated stl object.
     :type stl_obj: class:`vpython.compound`
     :param current_obj_origin: Current coordinates of the origin of the model
     :type current_obj_origin: class:`vpython.vector`
-    :param required_obj_origin: Required coordinates to place the origin at (0, 0, 0)
+    :param required_obj_origin: Required coordinates to place the origin
+        at (0, 0, 0)
     :type required_obj_origin: class:`vpython.vector`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
@@ -120,4 +126,5 @@ def set_stl_origin(stl_obj, current_obj_origin, required_obj_origin, scene):
     stl_obj.visible = False
 
     # Return a compound of itself with the origin at (0, 0, 0)
-    return compound([stl_obj], origin=vector(0, 0, 0), vector=x_axis_vector, canvas=scene)
+    return compound(
+        [stl_obj], origin=vector(0, 0, 0), vector=x_axis_vector, canvas=scene)

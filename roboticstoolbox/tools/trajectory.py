@@ -645,7 +645,7 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
         if qdmax is not None:
             # qdmax is specified, compute slowest axis
 
-            qb = taccx * qdmax / 2       # distance moved during blend
+            # qb = taccx * qdmax / 2       # distance moved during blend
             tb = taccx
 
             # convert to time

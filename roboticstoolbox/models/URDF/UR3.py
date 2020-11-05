@@ -2,17 +2,15 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
-import roboticstoolbox as rp
 
 
 class UR3(ERobot):
     """
     Class that imports a UR3 URDF model
 
-    ``UR3()`` is a class which imports a Universal Robotics UR3 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
-    characteristics.
+    ``UR3()`` is a class which imports a Universal Robotics UR3 robot
+    definition from a URDF file.  The model describes its kinematic and
+    graphical characteristics.
 
     .. runblock:: pycon
 

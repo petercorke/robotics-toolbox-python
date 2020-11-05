@@ -8,7 +8,7 @@ from vpython import color, label, mag, vector
 from numpy import sign, arange
 
 
-def get_text_size(scene):
+def get_text_size(scene):  # pragma nocover
     """
     Determine the text size based on zoom distance
 
@@ -26,12 +26,13 @@ def get_text_size(scene):
     #  2  |  12
     #  3  |  14
     #  5  |  15
-    val = 0.1114 * distance_from_center**3 - 1.336 * distance_from_center**2 + 5.8666 * distance_from_center + 5.1711
+    val = 0.1114 * distance_from_center**3 - 1.336 * distance_from_center**2 \
+        + 5.8666 * distance_from_center + 5.1711
 
     return min(max(val, 10), 15)  # Return val between 10 and 15
 
 
-def draw_label(label_text, label_position, scene):
+def draw_label(label_text, label_position, scene):  # pragma nocover
     """
     Display a label at a given position, with borders and lines
 
@@ -70,7 +71,7 @@ def draw_label(label_text, label_position, scene):
     return the_label
 
 
-def draw_text(label_text, label_position, scene):
+def draw_text(label_text, label_position, scene):  # pragma nocover
     """
     Display a label at a given position, without borders or lines.
 
@@ -111,7 +112,9 @@ def draw_text(label_text, label_position, scene):
     return the_label
 
 
-def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, scene):
+def update_grid_numbers(
+        focal_point, numbers_list, num_squares,
+        scale, is_3d, scene):  # pragma nocover
     """
     Draw the grid numbers along the xyz axes.
 
@@ -133,7 +136,8 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     padding = 0.25  # Padding to not draw numbers on top of lines.
     camera_axes = scene.camera.axis
     # Locate center of the axes
-    x_origin, y_origin, z_origin = focal_point[0], focal_point[1], focal_point[2]
+    x_origin, y_origin, z_origin = focal_point[0], focal_point[1], \
+        focal_point[2]
 
     #   CAMERA AXES |  DISPLAYED GRID | XZ PLANE | XY PLANE | YZ PLANE
     #      x,y,z    |      x,y,z      |   x,z    |    x,y   |    y,z
@@ -150,19 +154,25 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     # max = +num_squares or 0, around the default position
     # e.g. at the origin, for negative axes: -10 -> 0, positive axes: 0 -> 10
     min_x_coord = round(x_origin + (-(num_squares / 2) +
-                                    (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale, 2)
+                                    (sign(camera_axes.x) * -1)
+                                    * (num_squares / 2)) * scale, 2)
     max_x_coord = round(x_origin + ((num_squares / 2) +
-                                    (sign(camera_axes.x) * -1) * (num_squares / 2)) * scale, 2)
+                                    (sign(camera_axes.x) * -1)
+                                    * (num_squares / 2)) * scale, 2)
 
     min_y_coord = round(y_origin + (-(num_squares / 2) +
-                                    (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale, 2)
+                                    (sign(camera_axes.y) * -1)
+                                    * (num_squares / 2)) * scale, 2)
     max_y_coord = round(y_origin + ((num_squares / 2) +
-                                    (sign(camera_axes.y) * -1) * (num_squares / 2)) * scale, 2)
+                                    (sign(camera_axes.y) * -1)
+                                    * (num_squares / 2)) * scale, 2)
 
     min_z_coord = round(z_origin + (-(num_squares / 2) +
-                                    (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale, 2)
+                                    (sign(camera_axes.z) * -1)
+                                    * (num_squares / 2)) * scale, 2)
     max_z_coord = round(z_origin + ((num_squares / 2) +
-                                    (sign(camera_axes.z) * -1) * (num_squares / 2)) * scale, 2)
+                                    (sign(camera_axes.z) * -1)
+                                    * (num_squares / 2)) * scale, 2)
 
     x_coords = arange(min_x_coord, max_x_coord + scale, scale)
     y_coords = arange(min_y_coord, max_y_coord + scale, scale)
@@ -176,14 +186,16 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
     if len(z_coords) > num_squares + 1:
         z_coords = z_coords[0:num_squares + 1]
 
-    # Compound origins are in the middle of the bounding boxes. Thus new pos will be between max and min.
+    # Compound origins are in the middle of the bounding boxes.
+    # Thus new pos will be between max and min.
     x_middle = x_coords.mean()
     y_middle = y_coords.mean()
     z_middle = z_coords.mean()
 
     # If input is empty, append new, otherwise update current
     append = len(numbers_list) == 0
-    # Dimensions don't change between updates, so indexing shall remain the same
+    # Dimensions don't change between updates, so indexing shall
+    # remain the same
     index = 0
 
     # X plane
@@ -282,7 +294,8 @@ def update_grid_numbers(focal_point, numbers_list, num_squares, scale, is_3d, sc
             numbers_list[index].pos = pos
             numbers_list[index].height = get_text_size(scene)
             index += 1
-    # Draw the axis label at either the positive or negative side away from center
+    # Draw the axis label at either the positive or negative side away from
+    # center
     # If sign = -1, draw off max side, if sign = 0 or 1, draw off negative side
     txt = "Z"
     if (sign(camera_axes.x) * -1) > 0:

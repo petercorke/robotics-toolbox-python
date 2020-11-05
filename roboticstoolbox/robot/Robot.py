@@ -730,7 +730,7 @@ class Robot:
 
                 if transpose is not None:
                     # Do the simple Jacobian transpose with constant gain
-                    dq = transpose * J.T @ e
+                    dq = transpose * J.T @ e    # lgtm [py/multiple-definition]
                 else:
                     # Do the damped inverse Gauss-Newton with
                     # Levenberg-Marquadt
