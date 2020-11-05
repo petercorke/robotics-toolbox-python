@@ -1740,12 +1740,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -3948,17 +3948,17 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓</span>
-<span class="go">┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃          q⁻          ┃          q⁺          ┃</span>
-<span class="go">┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━┫</span>
-<span class="go">┃    0.0[0m ┃   0.0°[0m ┃  q1[0m ┃ 0.333[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┃    0.0[0m ┃ -90.0°[0m ┃  q2[0m ┃   0.0[0m ┃ -101.00100012566152°[0m ┃  101.00100012566152°[0m ┃</span>
-<span class="go">┃    0.0[0m ┃  90.0°[0m ┃  q3[0m ┃ 0.316[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┃ 0.0825[0m ┃  90.0°[0m ┃  q4[0m ┃   0.0[0m ┃ -176.00117550828628°[0m ┃ -3.9992454100131463°[0m ┃</span>
-<span class="go">┃-0.0825[0m ┃ -90.0°[0m ┃  q5[0m ┃ 0.384[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┃    0.0[0m ┃  90.0°[0m ┃  q6[0m ┃   0.0[0m ┃ -1.0026761414789407°[0m ┃   215.0024126228414°[0m ┃</span>
-<span class="go">┃  0.088[0m ┃  90.0°[0m ┃  q7[0m ┃ 0.107[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┛</span>
+<span class="go">┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃    0.0[0m ┃   0.0°[0m ┃  q1[0m ┃ 0.333[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃    0.0[0m ┃ -90.0°[0m ┃  q2[0m ┃   0.0[0m ┃ -101.0°[0m ┃ 101.0°[0m ┃</span>
+<span class="go">┃    0.0[0m ┃  90.0°[0m ┃  q3[0m ┃ 0.316[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃ 0.0825[0m ┃  90.0°[0m ┃  q4[0m ┃   0.0[0m ┃ -176.0°[0m ┃  -4.0°[0m ┃</span>
+<span class="go">┃-0.0825[0m ┃ -90.0°[0m ┃  q5[0m ┃ 0.384[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃    0.0[0m ┃  90.0°[0m ┃  q6[0m ┃   0.0[0m ┃   -1.0°[0m ┃ 215.0°[0m ┃</span>
+<span class="go">┃  0.088[0m ┃  90.0°[0m ┃  q7[0m ┃ 0.107[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬───────────────────────────────────────┐</span>
 <span class="go">│tool[0m │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0°[0m │</span>
@@ -4253,16 +4253,16 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">IRB140</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┏━━━━┳━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┓</span>
-<span class="go">┃θⱼ  ┃  dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃          q⁻          ┃         q⁺          ┃</span>
-<span class="go">┣━━━━╋━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃ 0.352[0m ┃ 0.07[0m ┃ -90.0°[0m ┃              -180.0°[0m ┃              180.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃     0[0m ┃ 0.36[0m ┃   0.0°[0m ┃              -100.0°[0m ┃              100.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃     0[0m ┃    0[0m ┃ -90.0°[0m ┃              -220.0°[0m ┃  59.99999999999999°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  0.38[0m ┃    0[0m ┃  90.0°[0m ┃              -200.0°[0m ┃              200.0°[0m ┃</span>
-<span class="go">┃ q5[0m ┃     0[0m ┃    0[0m ┃ -90.0°[0m ┃ -119.99999999999999°[0m ┃ 119.99999999999999°[0m ┃</span>
-<span class="go">┃ q6[0m ┃ 0.065[0m ┃    0[0m ┃   0.0°[0m ┃              -400.0°[0m ┃              400.0°[0m ┃</span>
-<span class="go">┗━━━━┻━━━━━━━┻━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━┛</span>
+<span class="go">┏━━━━┳━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃  dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━╋━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1[0m ┃ 0.352[0m ┃ 0.07[0m ┃ -90.0°[0m ┃ -180.0°[0m ┃ 180.0°[0m ┃</span>
+<span class="go">┃ q2[0m ┃     0[0m ┃ 0.36[0m ┃   0.0°[0m ┃ -100.0°[0m ┃ 100.0°[0m ┃</span>
+<span class="go">┃ q3[0m ┃     0[0m ┃    0[0m ┃ -90.0°[0m ┃ -220.0°[0m ┃  60.0°[0m ┃</span>
+<span class="go">┃ q4[0m ┃  0.38[0m ┃    0[0m ┃  90.0°[0m ┃ -200.0°[0m ┃ 200.0°[0m ┃</span>
+<span class="go">┃ q5[0m ┃     0[0m ┃    0[0m ┃ -90.0°[0m ┃ -120.0°[0m ┃ 120.0°[0m ┃</span>
+<span class="go">┃ q6[0m ┃ 0.065[0m ┃    0[0m ┃   0.0°[0m ┃ -400.0°[0m ┃ 400.0°[0m ┃</span>
+<span class="go">┗━━━━┻━━━━━━━┻━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬──────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5   │</span>
@@ -4311,16 +4311,16 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">KR5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┏━━━━┳━━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓</span>
-<span class="go">┃θⱼ  ┃   dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃          q⁻          ┃   q⁺   ┃</span>
-<span class="go">┣━━━━╋━━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃    0.4[0m ┃ 0.18[0m ┃ -90.0°[0m ┃              -155.0°[0m ┃ 155.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃      0[0m ┃  0.6[0m ┃   0.0°[0m ┃              -180.0°[0m ┃  65.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃      0[0m ┃ 0.12[0m ┃  90.0°[0m ┃ -14.999999999999998°[0m ┃ 158.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  -0.62[0m ┃  0.0[0m ┃ -90.0°[0m ┃              -350.0°[0m ┃ 350.0°[0m ┃</span>
-<span class="go">┃ q5[0m ┃    0.0[0m ┃  0.0[0m ┃  90.0°[0m ┃              -130.0°[0m ┃ 130.0°[0m ┃</span>
-<span class="go">┃ q6[0m ┃ -0.115[0m ┃    0[0m ┃ 180.0°[0m ┃              -350.0°[0m ┃ 350.0°[0m ┃</span>
-<span class="go">┗━━━━┻━━━━━━━━┻━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┛</span>
+<span class="go">┏━━━━┳━━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃   dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━╋━━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1[0m ┃    0.4[0m ┃ 0.18[0m ┃ -90.0°[0m ┃ -155.0°[0m ┃ 155.0°[0m ┃</span>
+<span class="go">┃ q2[0m ┃      0[0m ┃  0.6[0m ┃   0.0°[0m ┃ -180.0°[0m ┃  65.0°[0m ┃</span>
+<span class="go">┃ q3[0m ┃      0[0m ┃ 0.12[0m ┃  90.0°[0m ┃  -15.0°[0m ┃ 158.0°[0m ┃</span>
+<span class="go">┃ q4[0m ┃  -0.62[0m ┃  0.0[0m ┃ -90.0°[0m ┃ -350.0°[0m ┃ 350.0°[0m ┃</span>
+<span class="go">┃ q5[0m ┃    0.0[0m ┃  0.0[0m ┃  90.0°[0m ┃ -130.0°[0m ┃ 130.0°[0m ┃</span>
+<span class="go">┃ q6[0m ┃ -0.115[0m ┃    0[0m ┃ 180.0°[0m ┃ -350.0°[0m ┃ 350.0°[0m ┃</span>
+<span class="go">┗━━━━┻━━━━━━━━┻━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬──────┬──────┬──────┬──────┬──────┬──────┐</span>
 <span class="go">│name │ q0   │ q1   │ q2   │ q3   │ q4   │ q5   │</span>
@@ -4371,14 +4371,14 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Orion5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┏━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┓</span>
-<span class="go">┃θⱼ  ┃  dⱼ   ┃          aⱼ          ┃  ⍺ⱼ   ┃   q⁻    ┃         q⁺          ┃</span>
-<span class="go">┣━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃ 0.053[0m ┃                    0[0m ┃ 90.0°[0m ┃ -180.0°[0m ┃              180.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃     0[0m ┃  0.17038399999999998[0m ┃  0.0°[0m ┃   10.0°[0m ┃ 122.50000000000001°[0m ┃</span>
-<span class="go">┃ q3[0m ┃     0[0m ┃ -0.13630699999999998[0m ┃  0.0°[0m ┃   20.0°[0m ┃              340.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃     0[0m ┃                0.126[0m ┃  0.0°[0m ┃   45.0°[0m ┃              315.0°[0m ┃</span>
-<span class="go">┗━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━┛</span>
+<span class="go">┏━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃  dⱼ   ┃          aⱼ          ┃  ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1[0m ┃ 0.053[0m ┃                    0[0m ┃ 90.0°[0m ┃ -180.0°[0m ┃ 180.0°[0m ┃</span>
+<span class="go">┃ q2[0m ┃     0[0m ┃  0.17038399999999998[0m ┃  0.0°[0m ┃   10.0°[0m ┃ 122.5°[0m ┃</span>
+<span class="go">┃ q3[0m ┃     0[0m ┃ -0.13630699999999998[0m ┃  0.0°[0m ┃   20.0°[0m ┃ 340.0°[0m ┃</span>
+<span class="go">┃ q4[0m ┃     0[0m ┃                0.126[0m ┃  0.0°[0m ┃   45.0°[0m ┃ 315.0°[0m ┃</span>
+<span class="go">┗━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬──────────────────────────────────────┐</span>
 <span class="go">│base[0m │ t = 0.03, 0, 0; rpy/xyz = 0°, 0°, 0°[0m │</span>
@@ -4520,17 +4520,17 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">LWR4</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┏━━━━┳━━━━━━┳━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓</span>
-<span class="go">┃θⱼ  ┃  dⱼ  ┃ aⱼ  ┃   ⍺ⱼ   ┃          q⁻          ┃          q⁺          ┃</span>
-<span class="go">┣━━━━╋━━━━━━╋━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃    0[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┃ q2[0m ┃  0.0[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -101.00100012566152°[0m ┃  101.00100012566152°[0m ┃</span>
-<span class="go">┃ q3[0m ┃  0.4[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  0.0[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -176.00117550828628°[0m ┃ -3.9992454100131463°[0m ┃</span>
-<span class="go">┃ q5[0m ┃ 0.39[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┃ q6[0m ┃  0.0[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -1.0026761414789407°[0m ┃   215.0024126228414°[0m ┃</span>
-<span class="go">┃ q7[0m ┃  0.0[0m ┃ 0.0[0m ┃   0.0°[0m ┃ -166.00306198325342°[0m ┃  166.00306198325342°[0m ┃</span>
-<span class="go">┗━━━━┻━━━━━━┻━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┛</span>
+<span class="go">┏━━━━┳━━━━━━┳━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃  dⱼ  ┃ aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━╋━━━━━━╋━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1[0m ┃    0[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃ q2[0m ┃  0.0[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -101.0°[0m ┃ 101.0°[0m ┃</span>
+<span class="go">┃ q3[0m ┃  0.4[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃ q4[0m ┃  0.0[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -176.0°[0m ┃  -4.0°[0m ┃</span>
+<span class="go">┃ q5[0m ┃ 0.39[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃ q6[0m ┃  0.0[0m ┃ 0.0[0m ┃ -90.0°[0m ┃   -1.0°[0m ┃ 215.0°[0m ┃</span>
+<span class="go">┃ q7[0m ┃  0.0[0m ┃ 0.0[0m ┃   0.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┗━━━━┻━━━━━━┻━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬───────────────────────────────────────┐</span>
 <span class="go">│tool[0m │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0°[0m │</span>

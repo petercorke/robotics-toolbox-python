@@ -1126,6 +1126,86 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.compile">
+<code class="sig-name descname">compile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.compile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile an ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>optimised ETS</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS">ETS</a></p>
+</dd>
+</dl>
+<p>Perform constant folding for faster evaluation.  Consecutive constant
+ETs are compounded, leading to a constant ET which is denoted by
+<code class="docutils literal notranslate"><span class="pre">Ci</span></code> when displayed.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;ets&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;ets&#39; is not defined</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile.html#roboticstoolbox.robot.ETS.ETS.isconstant" title="roboticstoolbox.robot.ETS.ETS.isconstant"><code class="xref py py-func docutils literal notranslate"><span class="pre">isconstant()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.SE3">
+<em class="property">classmethod </em><code class="sig-name descname">SE3</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">rpy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.SE3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an SE3 to an ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>SE3 instance</em>) – Translation vector, or an SE(3) matrix</p></li>
+<li><p><strong>rpy</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – roll-pitch-yaw angles in XYZ order</p></li>
+<li><p><strong>tol</strong> (<em>int</em><em>, </em><em>optional</em>) – Elements small than this many eps are considered as
+being zero, defaults to 100</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ET sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ETS instance</p>
+</dd>
+</dl>
+<p>Create an ETS from the non-zero translational and rotational
+components.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SE3(t,</span> <span class="pre">rpy)</span></code> convert translation <code class="docutils literal notranslate"><span class="pre">t</span></code> and rotation given by XYZ
+roll-pitch-yaw angles <code class="docutils literal notranslate"><span class="pre">rpy</span></code> into an ETS.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SE3(X)</span></code> as above but convert from an SE3 instance <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="go">tx(1.0) * ty(2.0) * tz(3.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">))</span>
+<span class="go">Rx(5157°)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">SE3.rpy()</span></code> is used to determine rotation about the x-,
+y- and z-axes.  For a y-axis rotation with magnitude greater than
+180° this will result in a non-minimal representation with non-zero
+amounts of x- and z-axis rotation.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">rpy()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1773,6 +1853,37 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS2.compile">
+<code class="sig-name descname">compile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.compile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile an ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>optimised ETS</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS">ETS</a></p>
+</dd>
+</dl>
+<p>Perform constant folding for faster evaluation.  Consecutive constant
+ETs are compounded, leading to a constant ET which is denoted by
+<code class="docutils literal notranslate"><span class="pre">Ci</span></code> when displayed.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;ets&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;ets&#39; is not defined</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile.html#roboticstoolbox.robot.ETS.ETS2.isconstant" title="roboticstoolbox.robot.ETS.ETS2.isconstant"><code class="xref py py-func docutils literal notranslate"><span class="pre">isconstant()</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
