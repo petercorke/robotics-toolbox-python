@@ -22,7 +22,7 @@ def _import_pyb():
 
     try:
         from roboticstoolbox.tools.stdout_supress import pipes
-    except BaseException:  # pragma nocover
+    except Exception:  # pragma nocover
         from contextlib import contextmanager
 
         @contextmanager
@@ -34,7 +34,7 @@ def _import_pyb():
         try:
             with pipes(stdout=out, stderr=None):
                 p = importlib.import_module('pybullet')
-        except BaseException:  # pragma nocover
+        except Exception:  # pragma nocover
             p = importlib.import_module('pybullet')
 
         cid = p.connect(p.SHARED_MEMORY)

@@ -33,7 +33,7 @@ class SuperETS(UserList, ABC):
             e = axis_func
             axis_func = e.axis_func
             axis = e.axis
-            et = e.eta
+            # et = e.eta
             j = e.jindex
             flip = e.isflip
             joint = e.isjoint
@@ -1149,7 +1149,6 @@ class ETS(SuperETS):
         if T is None:
             T = self.eval(q)
 
-        J0 = self.jacob0(q, T)
         return tr2jac(T.A) @ self.jacob0(q, T)
 
     def hessian0(self, q=None, J0=None):

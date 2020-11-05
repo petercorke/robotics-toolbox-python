@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
 
 
 class rx150(ERobot):
@@ -11,7 +9,7 @@ class rx150(ERobot):
     Class that imports a RX150 URDF model
 
     ``rx150()`` is a class which imports an Interbotix rx150 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon

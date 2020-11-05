@@ -13,8 +13,8 @@ def _listen_dyn(func):
 
     Use this decorator for any property setter that updates a parameter that
     affects the result of inverse dynamics.  This allows the C version of the
-    parameters only having to be updated when they change, rather than on 
-    every call.  This decorator signals the change by invoking the 
+    parameters only having to be updated when they change, rather than on
+    every call.  This decorator signals the change by invoking the
     ``dynchanged()`` method of the robot that owns the link.
 
     Example::
@@ -61,28 +61,27 @@ class Link(ABC):
     :param G: dynamic - gear ratio
     :type G: float
 
-    An abstract link superclass for all link types. 
+    An abstract link superclass for all link types.
 
     .. inheritance-diagram:: roboticstoolbox.RevoluteDH
-        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH 
+        roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
         roboticstoolbox.PrismaticMDH roboticstoolbox.ELink
         :top-classes: roboticstoolbox.robot.Link
         :parts: 2
-    
+
     It holds metadata related to:
-    
+
     - a robot link, such as rigid-body inertial parameters defined in the link
       frame, and link name
     - a robot joint, that connects this link to its parent, such as joint
       limits, direction of motion, motor and transmission parameters.
 
-    .. note:: 
+    .. note::
         - For a more sophisticated actuator model use the ``actuator``
           attribute which is not initialized or used by this Toolbox.
         - There is no ability to name a joint as supported by URDF
 
     """
-
 
     def __init__(
             self,
@@ -214,15 +213,15 @@ class Link(ABC):
         :rtype: string
 
         ``link.)_dyn2list()`` returns a list of pretty-printed inertial
-        properties of the link The properties included are mass, centre of mass,
-        inertia, friction, gear ratio and motor properties.
+        properties of the link The properties included are mass, centre of
+        mass, inertia, friction, gear ratio and motor properties.
 
         :seealso: :func:`~dyn`
         """
         table = ANSITable(
             Column("Parameter", headalign="^"),
-            Column("Value", headalign="^", colalign="<")
-        , border="thin")
+            Column("Value", headalign="^", colalign="<"),
+            border="thin")
 
         def format(l, fmt, val):
             if isinstance(val, np.ndarray):
@@ -240,9 +239,8 @@ class Link(ABC):
         format(dyn, fmt, self.B)
         format(dyn, fmt, self.Tc)
         format(dyn, fmt, self.G)
-        
+
         return dyn
-        
 
     def _format(self, l, name, ignorevalue=0, indices=None):
         v = getattr(self, name)
@@ -305,7 +303,7 @@ class Link(ABC):
         :param viscous: if True, will set the viscous friction to 0
         :type viscous: bool
 
-        ``link.nofriction()`` is a copy of the link instance with the same 
+        ``link.nofriction()`` is a copy of the link instance with the same
         parameters except, the Coulomb and/or viscous friction parameters are
         set to zero.
 
@@ -350,7 +348,7 @@ class Link(ABC):
 
         .. note::
 
-            - The friction value should be added to the motor output torque to 
+            - The friction value should be added to the motor output torque to
               determine the nett torque. It has a negative value when qd > 0.
             - The returned friction value is referred to the output of the
               gearbox.
@@ -401,7 +399,6 @@ class Link(ABC):
     @name.setter
     def name(self, name):
         self._name = name
-
 
 # -------------------------------------------------------------------------- #
 
@@ -530,7 +527,7 @@ class Link(ABC):
         axes parallel to those of the link frame.
 
         The inertia matrix is
-        
+
         :math:`\begin{bmatrix} I_{xx} & I_{xy} & I_{xz} \\ I_{xy} & I_{yy} & I_{yz} \\I_{xz} & I_{yz} & I_{zz} \end{bmatrix}`
 
 
@@ -614,7 +611,7 @@ class Link(ABC):
 
         - ``link.B = ...`` checks and sets the motor viscous friction
 
-        .. note:: 
+        .. note::
             - Referred to the motor side of the gearbox.
             - Viscous friction is the same for positive and negative motion.
         """
@@ -637,7 +634,7 @@ class Link(ABC):
 
         - ``link.Tc`` is the motor Coulomb friction
 
-        :return: motor Coulomb friction 
+        :return: motor Coulomb friction
         :rtype: ndarray(2)
 
         - ``link.Tc = ...`` checks and sets the motor Coulomb friction. If a
@@ -655,7 +652,7 @@ class Link(ABC):
 
         .. note::
             -  Referred to the motor side of the gearbox.
-            - :math:`\tau_C^+` must be :math:`> 0`, and :math:`\tau_C^-` must 
+            - :math:`\tau_C^+` must be :math:`> 0`, and :math:`\tau_C^-` must
               be :math:`< 0`.
         """
         return self._Tc
@@ -705,15 +702,13 @@ class Link(ABC):
     def G(self, G_new):
         self._G = G_new
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
     from spatialmath.base import sym
-    
+
     ET = rtb.ETS
-
-
-
 
     d, a, theta = sym.symbol('d, a, theta')
 

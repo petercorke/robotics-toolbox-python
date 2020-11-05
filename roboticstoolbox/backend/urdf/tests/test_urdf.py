@@ -74,7 +74,7 @@ class TestURDF(unittest.TestCase):
 
         try:
             xacro.main("")
-        except BaseException:
+        except BaseException:    # lgtm [py/catch-base-exception]
             pass
 
     def test_urdf_load(self):
@@ -84,7 +84,7 @@ class TestURDF(unittest.TestCase):
 
         try:
             xacro.main("")
-        except BaseException:
+        except BaseException:    # lgtm [py/catch-base-exception]
             pass
 
     def test_urdf_collisions(self):
@@ -105,7 +105,7 @@ class TestURDF(unittest.TestCase):
 
         try:
             xacro.main("")
-        except BaseException:
+        except BaseException:    # lgtm [py/catch-base-exception]
             pass
 
     def test_urdf_dynamics(self):
@@ -121,5 +121,5 @@ class TestURDF(unittest.TestCase):
 
         try:
             xacro.main("")
-        except BaseException:
+        except BaseException:    # lgtm [py/catch-base-exception]
             pass

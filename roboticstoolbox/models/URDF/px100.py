@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
 
 
 class px100(ERobot):
@@ -11,7 +9,7 @@ class px100(ERobot):
     Class that imports a PX100 URDF model
 
     ``px100()`` is a class which imports an Interbotix px100 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon
@@ -27,7 +25,7 @@ class px100(ERobot):
 
     :reference:
         - http://www.support.interbotix.com/html/specifications/px100.html
-        
+
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
     """

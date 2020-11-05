@@ -3,17 +3,41 @@
 @author Micah Huth
 """
 
+import importlib
 from roboticstoolbox.backend.Connector import Connector
-
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.robot.Robot import Robot as r
 
-from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, \
-    GraphicsCanvas2D
-from roboticstoolbox.backend.VPython.graphicalrobot import \
-    GraphicalRobot
-from roboticstoolbox.backend.VPython.common_functions import \
-    close_localhost_session
+GraphicsCanvas3D = None
+GraphicsCanvas2D = None
+GraphicalRobot = None
+close_localhost_session = None
+
+
+def _imports():
+    global GraphicsCanvas3D
+    global GraphicsCanvas2D
+    global GraphicalRobot
+    global close_localhost_session
+
+    try:
+        canvas = importlib.import_module(
+            'roboticstoolbox.backend.VPython.canvas')
+        GraphicsCanvas3D = canvas.GraphicsCanvas3D
+        GraphicsCanvas2D = canvas.GraphicsCanvas2D
+
+        graphicalrobot = importlib.import_module(
+            'roboticstoolbox.backend.VPython.graphicalrobot')
+        GraphicalRobot = graphicalrobot.GraphicalRobot
+
+        common_functions = importlib.import_module(
+            'roboticstoolbox.backend.VPython.common_functions')
+        close_localhost_session = common_functions.close_localhost_session
+
+    except ImportError:
+        print(
+            '\nYou must install the VPython component of the toolbox, do: \n'
+            'pip install roboticstoolbox[vpython]\n\n')
 
 
 class VPython(Connector):  # pragma nocover
@@ -53,6 +77,8 @@ class VPython(Connector):  # pragma nocover
 
         """
         super(VPython, self).__init__()
+
+        _imports()
 
         # Init vars
         self.canvases = []

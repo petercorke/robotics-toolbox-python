@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import numpy as np
-import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
 
 

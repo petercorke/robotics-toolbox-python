@@ -9,10 +9,10 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
-from spatialmath.base.transforms3d import tr2delta, tr2eul, tr2jac, trinv
+from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
-from scipy.optimize import minimize, Bounds, LinearConstraint
+from scipy.optimize import minimize, Bounds
 from roboticstoolbox.backend.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2

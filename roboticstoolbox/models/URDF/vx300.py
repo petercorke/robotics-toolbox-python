@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
 
 
 class vx300(ERobot):
@@ -11,7 +9,7 @@ class vx300(ERobot):
     Class that imports a VX300 URDF model
 
     ``vx300()`` is a class which imports an Interbotix vx300 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
+    from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
     .. runblock:: pycon

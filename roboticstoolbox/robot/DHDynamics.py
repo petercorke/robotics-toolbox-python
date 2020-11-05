@@ -19,6 +19,7 @@ from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
 from frne import init, frne, delete
 
+
 def _check_rne(func):
     @wraps(func)
     def wrapper_check_rne(*args, **kwargs):
@@ -28,7 +29,6 @@ def _check_rne(func):
         args[0]._rne_changed = False
         return func(*args, **kwargs)
     return wrapper_check_rne
-
 
 
 class DHDynamics:
@@ -75,7 +75,6 @@ class DHDynamics:
             L[j + 22:j + 24] = self.links[i].Tc.flatten()
 
         self._rne_ob = init(self.n, self.mdh, L, self.gravity)
-
 
     @_check_rne
     def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
@@ -236,9 +235,9 @@ class DHDynamics:
 
         .. note::
 
-            - This function performs poorly with non-linear joint friction, such as
-            Coulomb friction.  The R.nofriction() method can be used to set this
-            friction to zero.
+            - This function performs poorly with non-linear joint friction,
+            such as Coulomb friction.  The R.nofriction() method can be used
+            to set this friction to zero.
             - If the function is not specified then zero force/torque is
             applied to the manipulator joints.
             - Interpolation is performed using `ScipY integrate.ode
@@ -375,9 +374,9 @@ class DHDynamics:
         :rtype: ndarray(n)
 
         ``qdd = accel(q, qd, torque)`` calculates a vector (n) of joint
-        accelerations that result from applying the actuator force/torque (n) to
-        the manipulator in state `q` (n) and `qd` (n), and ``n`` is the number
-        of robot joints.
+        accelerations that result from applying the actuator force/torque (n)
+        to the manipulator in state `q` (n) and `qd` (n), and ``n`` is
+        the number of robot joints.
 
         :math:`\ddot{q} = \mathbf{I}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)`
 
@@ -449,8 +448,6 @@ class DHDynamics:
             return qdd[0, :]
         else:
             return qdd
-
-
 
     def pay(self, W, q=None, J=None, frame=1):
         """
@@ -638,7 +635,8 @@ class DHDynamics:
 
         If ``q`` is a matrix (m,n), each row is interpretted as a joint state
         vector, and the result is a 3d-matrix (n,n,m) where each plane
-        corresponds to the Cartesian inertia for the corresponding row of ``q``.
+        corresponds to the Cartesian inertia for the corresponding
+        row of ``q``.
 
         .. warning:: Assumes that the operational space has 6 DOF.
 
@@ -691,7 +689,8 @@ class DHDynamics:
             - The diagonal elements ``I[j,j]`` are the inertia seen by joint
               actuator ``j``.
             - The off-diagonal elements ``I[j,k]`` are coupling inertias that
-              relate acceleration on joint ``j`` to force/torque on joint ``k``.
+              relate acceleration on joint ``j`` to force/torque on
+              joint ``k``.
             - The diagonal terms include the motor inertia reflected through
               the gear ratio.
 
@@ -724,11 +723,10 @@ class DHDynamics:
         :return: Velocity matrix
         :rtype: ndarray(n,n)
 
-    
         ``coriolis(q, qd)`` calculates the Coriolis/centripetal matrix (n,n)
-        for the robot in configuration ``q`` and velocity ``qd``, where ``n`` is
-        the number of joints. 
-        
+        for the robot in configuration ``q`` and velocity ``qd``, where ``n``
+        is the number of joints.
+
         The product :math:`\mathbf{C} \dot{q}` is the vector of joint
         force/torque due to velocity coupling. The diagonal elements are due to
         centripetal effects and the off-diagonal elements are due to Coriolis
@@ -819,7 +817,7 @@ class DHDynamics:
 
         ``itorque(q, qdd)`` is the inertia force/torque vector (n) at
         the specified joint configuration q (n) and acceleration qdd (n), and
-        ``n`` is the number of robot joints. 
+        ``n`` is the number of robot joints.
         It is :math:`\mathbf{I}(q) \ddot{q}`.
 
         Example:
@@ -1086,7 +1084,7 @@ class DHDynamics:
             which is written in C.
             - This version supports symbolic model parameters
             - Verified against MATLAB code
-        
+
         :seealso: :func:`rne`
         """
 
@@ -1338,7 +1336,8 @@ class DHDynamics:
                     + link.G ** 2 * link.Jm * qdd_k[j] \
                     - link.friction(qd_k[j], coulomb=not self.symbolic)
                 if debug:
-                    print(f'j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}')  # noqa
+                    print(
+                        f'j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}')  # noqa
                     print()
 
             # compute the base wrench and save it
@@ -1350,12 +1349,13 @@ class DHDynamics:
 
         # if self.symbolic:
         #     # simplify symbolic expressions
-        #     print('start symbolic simplification, this might take a while...')
+        #     print(
+        #       'start symbolic simplification, this might take a while...')
         #     # from sympy import trigsimp
 
         #     # tau = trigsimp(tau)
         #     # consider using multiprocessing to spread over cores
-        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy
+        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy  # noqa
         #     print('done')
         #     if tau.shape[0] == 1:
         #         return tau.reshape(self.n)
@@ -1420,8 +1420,8 @@ if __name__ == "__main__":   # pragma nocover
     # print(tau[0].expand().coeff(qdd[0]))
 
     q = puma.qz
-    qd = puma.qz
-    qdd = puma.qz
+    # qd = puma.qz
+    # qdd = puma.qz
     ones = np.ones((6,))
     qd = ones
     qdd = ones

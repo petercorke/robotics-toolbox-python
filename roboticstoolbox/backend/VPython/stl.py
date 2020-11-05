@@ -10,7 +10,7 @@ from io import StringIO
 
 try:
     from roboticstoolbox.tools.stdout_supress import pipes
-except BaseException:  # pragma nocover
+except Exception:  # pragma nocover
     from contextlib import contextmanager
 
     @contextmanager
@@ -22,7 +22,7 @@ _err = StringIO()
 try:
     with pipes(stdout=_out, stderr=_err):
         from stl import mesh
-except BaseException:  # pragma nocover
+except Exception:  # pragma nocover
     from stl import mesh
 
 

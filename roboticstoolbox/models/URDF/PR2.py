@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import roboticstoolbox as rp
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
 
 
 class PR2(ERobot):

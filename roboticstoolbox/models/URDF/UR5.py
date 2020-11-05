@@ -2,17 +2,15 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
-import roboticstoolbox as rp
 
 
 class UR5(ERobot):
     """
     Class that imports a UR5 URDF model
 
-    ``UR3()`` is a class which imports a Universal Robotics UR5 robot definition
-    from a URDF file.  The model describes its kinematic and graphical 
-    characteristics.
+    ``UR3()`` is a class which imports a Universal Robotics UR5 robot
+    definition from a URDF file.  The model describes its kinematic and
+    graphical characteristics.
 
     .. runblock:: pycon
 
@@ -30,10 +28,6 @@ class UR5(ERobot):
     """
 
     def __init__(self):
-
-        mpath = Path(rp.__file__).parent
-        fpath = mpath / 'models' / 'xacro' / 'ur_description' / 'urdf'
-        fname = 'ur5_joint_limited_robot.urdf.xacro'
 
         args = super().urdf_to_ets_args(
             "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro")

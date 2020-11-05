@@ -2,8 +2,6 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-from pathlib import Path
-import roboticstoolbox as rp
 
 
 class UR10(ERobot):

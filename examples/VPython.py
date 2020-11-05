@@ -4,7 +4,7 @@
 """
 
 import roboticstoolbox as rp
-import time
+# import time
 
 env = rp.backend.VPython()
 env.launch()
