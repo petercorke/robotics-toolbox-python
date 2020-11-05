@@ -6,7 +6,7 @@
 import time
 import roboticstoolbox as rp
 import numpy as np
-from spatialmath.base.argcheck import getvector, verifymatrix
+from spatialmath.base.argcheck import getvector, getmatrix
 from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
 from matplotlib.widgets import Slider
 try:
@@ -24,20 +24,11 @@ def _plot(
     # Make an empty 3D figure
     env = rp.backend.PyPlot()
 
-    trajn = 1
+    q = getmatrix(q, (None, robot.n))
 
-    if q is None:
-        q = robot.q
-
-    try:
-        q = getvector(q, robot.n, 'col')
-        robot.q = q
-    except ValueError:
-        trajn = q.shape[1]
-        verifymatrix(q, (robot.n, trajn))
 
     # Add the robot to the figure in readonly mode
-    if trajn == 1:
+    if q.shape[0] == 1:
         env.launch(robot.name + ' Plot', limits)
     else:
         env.launch(robot.name + ' Trajectory Plot', limits)
@@ -63,9 +54,8 @@ def _plot(
         env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
         env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 
-    if trajn != 1:
-        for i in range(trajn):
-            robot.q = q[:, i]
+    for qk in q:
+            robot.q = qk
             env.step()
             #time.sleep(dt/1000)
             
@@ -97,20 +87,10 @@ def _plot2(
     # Make an empty 2D figure
     env = rp.backend.PyPlot2()
 
-    trajn = 1
-
-    if q is None:
-        q = robot.q
-
-    try:
-        q = getvector(q, robot.n, 'col')
-        robot.q = q
-    except ValueError:
-        trajn = q.shape[1]
-        verifymatrix(q, (robot.n, trajn))
+    q = getmatrix(q, (None, robot.n))
 
     # Add the robot to the figure in readonly mode
-    if trajn == 1:
+    if q.shape[0] == 1:
         env.launch(robot.name + ' Plot', limits)
     else:
         env.launch(robot.name + ' Trajectory Plot', limits)
@@ -127,11 +107,10 @@ def _plot2(
         fell = robot.fellipse(centre='ee')
         env.add(fell)
 
-    if trajn != 1:
-        for i in range(trajn):
-            robot.q = q[:, i]
-            env.step()
-            time.sleep(dt/1000)
+    for qk in q:
+        robot.q = qk
+        env.step()
+        time.sleep(dt/1000)
 
     # Keep the plot open
     if block:           # pragma: no cover

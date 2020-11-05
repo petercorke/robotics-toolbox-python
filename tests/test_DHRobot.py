@@ -1263,8 +1263,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False)
+        e = panda.plot(panda.qr, block=False)
         e.close()
 
     def test_teach_basic(self):
@@ -1276,7 +1275,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_traj(self):
         panda = rp.models.DH.Panda()
-        q = np.random.rand(7, 3)
+        q = np.random.rand(3, 7)
         e = panda.plot(block=False, q=q, dt=0)
         e.close()
 
@@ -1326,25 +1325,22 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_with_vellipse(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False, vellipse=True)
+        e = panda.plot(panda.qr, block=False, vellipse=True)
         e.close()
 
     def test_plot_with_fellipse(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False, fellipse=True)
+        e = panda.plot(panda.qr, block=False, fellipse=True)
         e.close()
 
     def test_plot2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, name=True)
+        e = panda.plot2(panda.qr, block=False, name=True)
         e.close()
 
     def test_plot2_traj(self):
         panda = rp.models.DH.Panda()
-        q = np.random.rand(7, 3)
+        q = np.random.rand(3, 7)
         e = panda.plot2(block=False, q=q, dt=0)
         e.close()
 
@@ -1357,8 +1353,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_teach2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.teach(block=False)
+        e = panda.teach(panda.qr, block=False)
         e.close()
 
         e2 = panda.teach2(block=False, q=panda.qr)
@@ -1366,15 +1361,13 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_with_vellipse2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, vellipse=True, limits=[1, 2, 1, 2])
+        e = panda.plot2(panda.qr, block=False, vellipse=True, limits=[1, 2, 1, 2])
         e.step()
         e.close()
 
     def test_plot_with_fellipse2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, fellipse=True)
+        e = panda.plot2(panda.qr, block=False, fellipse=True)
         e.close()
 
     def test_plot_with_vellipse2_fail(self):
