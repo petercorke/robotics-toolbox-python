@@ -70,7 +70,7 @@ ETS - 3D
 --------
 
 .. autoclass:: roboticstoolbox.robot.ETS.ETS
-   :members: rx, ry, rz, tx, ty, tz, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval, jacob0, hessian0
+   :members: rx, ry, rz, tx, ty, tz, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval, compile, SE3, jacob0, hessian0
    :undoc-members:
    :show-inheritance:
 
@@ -78,7 +78,7 @@ ETS - 2D
 --------
 
 .. autoclass:: roboticstoolbox.robot.ETS.ETS2
-   :members: r, tx, ty, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval
+   :members: r, tx, ty, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval, compile
    :undoc-members:
    :show-inheritance:
 
