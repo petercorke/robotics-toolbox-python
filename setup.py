@@ -43,7 +43,6 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
     release = f.read()
 
-
 def package_files(directory):
     paths = []
     for (pathhere, _, filenames) in os.walk(directory):
@@ -66,7 +65,7 @@ setup(
 
     version=release,
 
-    description='A Python library for robot control',
+    description='A Python library for robotic education and research',
 
     long_description=long_description,
 
@@ -74,17 +73,47 @@ setup(
 
     url='https://github.com/petercorke/robotics-toolbox-python',
 
-    author='Jesse Haviland',
+    author='Jesse Haviland and Peter Corke',
 
     license='MIT',
 
-    python_requires='>=3.5',
+    classifiers=[
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        'Development Status :: 3 - Alpha',
+
+        # Indicate who your project is intended for
+        'Intended Audience :: Developers',
+        # Pick your license as you wish (should match "license" above)
+        'License :: OSI Approved :: MIT License',
+
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate whether you support Python 2, Python 3 or both.
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        ],
+
+    python_requires='>=3.6',
+    
+    project_urls={
+        'Documentation': 'https://petercorke.github.io/roboticstoolbox-python',
+        'Source': 'https://github.com/petercorke/roboticstoolbox-python',
+        'Tracker': 'https://github.com/petercorke/roboticstoolbox-python/issues',
+        'Coverage': 'https://codecov.io/gh/petercorke/roboticstoolbox-python'
+    },
+
+    url='https://github.com/petercorke/roboticstoolbox-python',
 
     ext_modules=[frne],
 
-    keywords='robotics vision arm kinematics ros',
+    keywords='python robotics robotics-toolbox kinematics dynamics' \
+        ' motion-planning trajectory-generation jacobian hessian control' \
+        ' simulation robot-manipulator mobile-robot'
 
-    packages=find_packages(exclude=["tests", "examples"]),
+    packages=find_packages(exclude=["tests", "examples", "notebooks"]),
 
     package_data={'roboticstoolbox': extra_files},
 
