@@ -43,6 +43,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
     release = f.read()
 
+
 def package_files(directory):
     paths = []
     for (pathhere, _, filenames) in os.walk(directory):
@@ -94,10 +95,10 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        ],
+    ],
 
     python_requires='>=3.6',
-    
+
     project_urls={
         'Documentation': 'https://petercorke.github.io/roboticstoolbox-python',
         'Source': 'https://github.com/petercorke/roboticstoolbox-python',
@@ -105,13 +106,11 @@ setup(
         'Coverage': 'https://codecov.io/gh/petercorke/roboticstoolbox-python'
     },
 
-    url='https://github.com/petercorke/roboticstoolbox-python',
-
     ext_modules=[frne],
 
     keywords='python robotics robotics-toolbox kinematics dynamics' \
-        ' motion-planning trajectory-generation jacobian hessian control' \
-        ' simulation robot-manipulator mobile-robot'
+             ' motion-planning trajectory-generation jacobian hessian' \
+             ' control simulation robot-manipulator mobile-robot',
 
     packages=find_packages(exclude=["tests", "examples", "notebooks"]),
 

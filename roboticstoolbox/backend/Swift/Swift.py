@@ -74,6 +74,8 @@ class Swift(Connector):  # pragma nocover
         self.realtime = realtime
         self.display = display
 
+        self.recording = False
+
         if self.display and sw is None:
             _import_swift()
 
@@ -96,11 +98,11 @@ class Swift(Connector):  # pragma nocover
             sw.start_servers(self.outq, self.inq)
             self.last_time = time.time()
 
-    def step(self, dt=50):
+    def step(self, dt=0.05):
         """
         Update the graphical scene
 
-        :param dt: time step in milliseconds, defaults to 50
+        :param dt: time step in seconds, defaults to 0.05
         :type dt: int, optional
 
         ``env.step(args)`` triggers an update of the 3D scene in the Swift
@@ -133,11 +135,11 @@ class Swift(Connector):  # pragma nocover
 
             # If realtime is set, delay progress if we are running too quickly
             if self.realtime:
-                time_taken = (time.time() - self.last_time) * 1000
+                time_taken = (time.time() - self.last_time)
                 diff = dt - time_taken
 
                 if diff > 0:
-                    time.sleep(diff / 1000)
+                    time.sleep(diff)
 
                 self.last_time = time.time()
 
@@ -251,6 +253,46 @@ class Swift(Connector):  # pragma nocover
 
         super().remove()
 
+    def start_recording(self, file_name, framerate):
+        """
+        Start recording the canvas in the Swift simulator
+
+        :param file_name: The file name for which the video will be saved as
+        :type file_name: string
+        :param framerate: The framerate of the video - to be timed correctly,
+            this should equalt 1 / dt where dt is the time supplied to the
+            step function
+        :type framerate: float
+
+        ``env.start_recording(file_name)`` starts recording the simulation
+            scene and will save it as file_name once
+            ``env.start_recording(file_name)`` is called
+        """
+
+        if not self.recording:
+            self._send_socket('start_recording', [framerate, file_name])
+            self.recording = True
+        else:
+            raise ValueError(
+                "You are already recording, you can only record one video"
+                " at a time")
+
+    def stop_recording(self):
+        """
+        Start recording the canvas in the Swift simulator. This is optional
+        as the video will be automatically saved when the python script exits
+
+        ``env.stop_recording()`` stops the recording of the simulation, can
+            only be called after ``env.start_recording(file_name)``
+        """
+
+        if self.recording:
+            self._send_socket('stop_recording')
+        else:
+            raise ValueError(
+                "You must call swift.start_recording(file_name) before trying"
+                " to stop the recording")
+
     def _step_robots(self, dt):
 
         for robot in self.robots:
@@ -261,7 +303,7 @@ class Swift(Connector):  # pragma nocover
             if robot.control_type == 'v':
 
                 for i in range(robot.n):
-                    robot.q[i] += robot.qd[i] * (dt / 1000)
+                    robot.q[i] += robot.qd[i] * (dt)
 
                     if np.any(robot.qlim[:, i] != 0) and \
                             not np.any(np.isnan(robot.qlim[:, i])):
@@ -285,8 +327,8 @@ class Swift(Connector):  # pragma nocover
             t = T.t
             r = T.rpy('rad')
 
-            t += shape.v[:3] * (dt / 1000)
-            r += shape.v[3:] * (dt / 1000)
+            t += shape.v[:3] * (dt)
+            r += shape.v[3:] * (dt)
 
             shape.base = sm.SE3(t) * sm.SE3.RPY(r)
 
@@ -298,7 +340,7 @@ class Swift(Connector):  # pragma nocover
         for i in range(len(self.shapes)):
             self._send_socket('shape_poses', [i, self.shapes[i].fk_dict()])
 
-    def _send_socket(self, code, data):
+    def _send_socket(self, code, data=None):
         msg = [code, data]
 
         self.outq.put(msg)
