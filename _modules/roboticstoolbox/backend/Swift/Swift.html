@@ -230,6 +230,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span> <span class="o">=</span> <span class="n">realtime</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="n">display</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="ow">and</span> <span class="n">sw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_import_swift</span><span class="p">()</span>
 
@@ -252,11 +254,11 @@
             <span class="n">sw</span><span class="o">.</span><span class="n">start_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Swift.step"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<div class="viewcode-block" id="Swift.step"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the graphical scene</span>
 
-<span class="sd">        :param dt: time step in milliseconds, defaults to 50</span>
+<span class="sd">        :param dt: time step in seconds, defaults to 0.05</span>
 <span class="sd">        :type dt: int, optional</span>
 
 <span class="sd">        ``env.step(args)`` triggers an update of the 3D scene in the Swift</span>
@@ -289,11 +291,11 @@
 
             <span class="c1"># If realtime is set, delay progress if we are running too quickly</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
-                <span class="n">time_taken</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+                <span class="n">time_taken</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span>
                 <span class="n">diff</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">-</span> <span class="n">time_taken</span>
 
                 <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">diff</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
@@ -407,6 +409,46 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="Swift.start_recording"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.start_recording">[docs]</a>    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">framerate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start recording the canvas in the Swift simulator</span>
+
+<span class="sd">        :param file_name: The file name for which the video will be saved as</span>
+<span class="sd">        :type file_name: string</span>
+<span class="sd">        :param framerate: The framerate of the video - to be timed correctly,</span>
+<span class="sd">            this should equalt 1 / dt where dt is the time supplied to the</span>
+<span class="sd">            step function</span>
+<span class="sd">        :type framerate: float</span>
+
+<span class="sd">        ``env.start_recording(file_name)`` starts recording the simulation</span>
+<span class="sd">            scene and will save it as file_name once</span>
+<span class="sd">            ``env.start_recording(file_name)`` is called</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;start_recording&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">framerate</span><span class="p">,</span> <span class="n">file_name</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recording</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;You are already recording, you can only record one video&quot;</span>
+                <span class="s2">&quot; at a time&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Swift.stop_recording"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.stop_recording">[docs]</a>    <span class="k">def</span> <span class="nf">stop_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start recording the canvas in the Swift simulator. This is optional</span>
+<span class="sd">        as the video will be automatically saved when the python script exits</span>
+
+<span class="sd">        ``env.stop_recording()`` stops the recording of the simulation, can</span>
+<span class="sd">            only be called after ``env.start_recording(file_name)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;stop_recording&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;You must call swift.start_recording(file_name) before trying&quot;</span>
+                <span class="s2">&quot; to stop the recording&quot;</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_step_robots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">robot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">:</span>
@@ -417,7 +459,7 @@
             <span class="k">if</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
 
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> \
                             <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])):</span>
@@ -441,8 +483,8 @@
             <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
 
-            <span class="n">t</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
-            <span class="n">r</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 
             <span class="n">shape</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
@@ -454,7 +496,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;shape_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
 
-    <span class="k">def</span> <span class="nf">_send_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_send_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -474,7 +516,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 05-Nov-2020.
+        Last updated on 06-Nov-2020.
       </span>
 
     </p>

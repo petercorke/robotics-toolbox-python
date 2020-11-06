@@ -239,11 +239,11 @@ defined by args, and returns a reference to the backend.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backend.Swift.Swift.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">50</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/Swift/Swift.html#Swift.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.Swift.Swift.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/Swift/Swift.html#Swift.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.Swift.Swift.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in milliseconds, defaults to 50</p>
+<dd class="field-odd"><p><strong>dt</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in seconds, defaults to 0.05</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">env.step(args)</span></code> triggers an update of the 3D scene in the Swift
@@ -330,6 +330,38 @@ when the <code class="docutils literal notranslate"><span class="pre">step()</sp
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.backend.Swift.Swift.start_recording">
+<code class="sig-name descname">start_recording</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">framerate</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/Swift/Swift.html#Swift.start_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.Swift.Swift.start_recording" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start recording the canvas in the Swift simulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>string</em>) – The file name for which the video will be saved as</p></li>
+<li><p><strong>framerate</strong> (<em>float</em>) – The framerate of the video - to be timed correctly,
+this should equalt 1 / dt where dt is the time supplied to the
+step function</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">env.start_recording(file_name)</span></code> starts recording the simulation</dt><dd><p>scene and will save it as file_name once
+<code class="docutils literal notranslate"><span class="pre">env.start_recording(file_name)</span></code> is called</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backend.Swift.Swift.stop_recording">
+<code class="sig-name descname">stop_recording</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/Swift/Swift.html#Swift.stop_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.Swift.Swift.stop_recording" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start recording the canvas in the Swift simulator. This is optional
+as the video will be automatically saved when the python script exits</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">env.stop_recording()</span></code> stops the recording of the simulation, can</dt><dd><p>only be called after <code class="docutils literal notranslate"><span class="pre">env.start_recording(file_name)</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -357,7 +389,7 @@ when the <code class="docutils literal notranslate"><span class="pre">step()</sp
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 05-Nov-2020.
+        Last updated on 06-Nov-2020.
       </span>
 
     </p>
