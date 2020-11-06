@@ -69,6 +69,7 @@ modified (Craig's convention) Denavit-Hartenberg notation
 import roboticstoolbox as rtb
 robot = rtb.models.DH.Panda()
 print(robot)
+
 ┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
 ┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
 ┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
@@ -94,41 +95,51 @@ print(robot)
 
 T = robot.fkine(robot.qz)  # forward kinematics
 print(T)
+
    0.707107    0.707107    0           0.088        
    0.707107   -0.707107    0           0            
    0           0          -1           0.823        
    0           0           0           1          
 ```
+(Python prompts are not shown to make it easy to copy+paste the code)
 
-We can animate a path
+We can solve inverse kinematics very easily.  We first choose an SE(3) pose
+defined in terms of position and orientation (end-effector z-axis down (-Z) and finger
+orientation (+Y)).
 
 ```python
->>> qt = rtb.trajectory.jtraj(robot.qz, robot.qr, 50)
->>> robot.plot(qt.q, movie='panda1.gif')
+from spatialmath import SE3
+
+T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+q_pickup, *_ = robot.ikine(T) # solve IK, ignore additional outputs
+print(q_pickup)                 # display joint angles
+
+[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
+
+print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
+
+  -1          -1.31387e-11-1.57726e-09 0.0999999    
+  -1.31386e-11 1          -7.46658e-08 0.2          
+   1.57726e-09-7.46658e-08-1           0.5          
+   0           0           0           1
+```
+
+Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
+
+We can animate a path from the upright `qz` configuration to this pickup configuration
+
+```python
+qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
+robot.plot(qt.q, movie='panda1.gif')
 ```
 
 ![Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda1.gif)
 
 which uses the default matplotlib backend.  
 
-Inverse kinematics is straightforward
-
-```python
-from spatialmath import SE3
-T = SE3(0.1, 0.2, 0.5) * SE3.OA([0, 1, 0], [0, 0, -1]) # hand down, fingers || y-axis
-q, *_ = robot.ikunc(T)   # use optimization-based IK, ignore additional output
-print(q)                 # display joint angles
-[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
-print(robot.fkine(q))    # FK shows that desired pose was achieved
-  -1          -1.31387e-11-1.57726e-09 0.0999999    
-  -1.31386e-11 1          -7.46658e-08 0.2          
-   1.57726e-09-7.46658e-08-1           0.5          
-   0           0           0           1   
-```
-
 Let's now load a URDF model of the same robotWe can instantiate our robot inside
 the 3d simulation environment.  The kinematic representation is no longer 
-based in Denavit-Hartenberg parameters, it is now a rigid-body tree.
+based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
 
 ```python
 robot = rtb.models.URDF.Panda()  # load URDF version of the Panda
@@ -155,6 +166,7 @@ for qk in qt.q:             # for each joint configuration on trajectory
       env.step()            # update visualization
 ```
 
+![URDF Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif)
 
 # Getting going
 
