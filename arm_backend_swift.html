@@ -231,8 +231,17 @@ display anything.</p></li>
 </dl>
 <dl class="py method">
 <dt id="roboticstoolbox.backend.Swift.Swift.launch">
-<code class="sig-name descname">launch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/Swift/Swift.html#Swift.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.Swift.Swift.launch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Launch a graphical backend in Swift</p>
+<code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">browser</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backend/Swift/Swift.html#Swift.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backend.Swift.Swift.launch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launch a graphical backend in Swift by default in the default browser
+or in the specified browser</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>browser</strong> (<em>string</em>) – browser to open in: one of
+‘google-chrome’, ‘chrome’, ‘firefox’, ‘safari’, ‘opera’
+or see for full list
+<a class="reference external" href="https://docs.python.org/3.8/library/webbrowser.html#webbrowser.open_new">https://docs.python.org/3.8/library/webbrowser.html#webbrowser.open_new</a></p>
+</dd>
+</dl>
 <p><code class="docutils literal notranslate"><span class="pre">env</span> <span class="pre">=</span> <span class="pre">launch(args)</span></code> create a 3D scene in a running Swift instance as
 defined by args, and returns a reference to the backend.</p>
 </dd></dl>

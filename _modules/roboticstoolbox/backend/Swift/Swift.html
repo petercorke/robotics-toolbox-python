@@ -239,9 +239,16 @@
     <span class="c1">#  Basic methods to do with the state of the external program</span>
     <span class="c1">#</span>
 
-<div class="viewcode-block" id="Swift.launch"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Swift.launch"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Launch a graphical backend in Swift</span>
+<span class="sd">        Launch a graphical backend in Swift by default in the default browser</span>
+<span class="sd">        or in the specified browser</span>
+
+<span class="sd">        :param browser: browser to open in: one of</span>
+<span class="sd">            &#39;google-chrome&#39;, &#39;chrome&#39;, &#39;firefox&#39;, &#39;safari&#39;, &#39;opera&#39;</span>
+<span class="sd">            or see for full list</span>
+<span class="sd">            https://docs.python.org/3.8/library/webbrowser.html#webbrowser.open_new</span>
+<span class="sd">        :type browser: string</span>
 
 <span class="sd">        ``env = launch(args)`` create a 3D scene in a running Swift instance as</span>
 <span class="sd">        defined by args, and returns a reference to the backend.</span>
@@ -251,7 +258,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
-            <span class="n">sw</span><span class="o">.</span><span class="n">start_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="p">)</span>
+            <span class="n">sw</span><span class="o">.</span><span class="n">start_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="n">browser</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Swift.step"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backend.Swift.Swift.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
