@@ -83,9 +83,16 @@ class Swift(Connector):  # pragma nocover
     #  Basic methods to do with the state of the external program
     #
 
-    def launch(self):
+    def launch(self, browser=None):
         """
-        Launch a graphical backend in Swift
+        Launch a graphical backend in Swift by default in the default browser
+        or in the specified browser
+
+        :param browser: browser to open in: one of
+            'google-chrome', 'chrome', 'firefox', 'safari', 'opera'
+            or see for full list
+            https://docs.python.org/3.8/library/webbrowser.html#webbrowser.open_new
+        :type browser: string
 
         ``env = launch(args)`` create a 3D scene in a running Swift instance as
         defined by args, and returns a reference to the backend.
@@ -95,7 +102,7 @@ class Swift(Connector):  # pragma nocover
         super().launch()
 
         if self.display:
-            sw.start_servers(self.outq, self.inq)
+            sw.start_servers(self.outq, self.inq, browser=browser)
             self.last_time = time.time()
 
     def step(self, dt=0.05):
