@@ -304,7 +304,9 @@ class Mesh(URDFType):
         if value.startswith('package://'):
             value = value.replace('package://', '')
 
-        value = (abspath / value).as_posix()
+        value = str(abspath / value)
+
+        # print(value)
 
         self._filename = value
 
