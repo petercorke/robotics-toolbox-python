@@ -33,72 +33,140 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 
 ## Synopsis
 
-This toolbox brings robotics specific functionality to Python, and leverages the Python's advantages of portability, ubiquity and support, and the capability of the open-source ecosystem for linear algebra (numpy, scipy),  graphics (matplotlib, three.js, WebGL), interactive development (jupyter, jupyterlab, mybinder.org), and documentation (sphinx).
+This toolbox brings robotics-specific functionality to Python, and leverages
+Python's advantages of portability, ubiquity and support, and the capability of
+the open-source ecosystem for linear algebra (numpy, scipy),  graphics
+(matplotlib, three.js, WebGL), interactive development (jupyter, jupyterlab,
+mybinder.org), and documentation (sphinx).
 
-The Toolbox provides tools for representing the kinematics and dynamics of serial-link manipulators  - you can create your own in Denavit-Hartenberg form, import a URDF file, or use supplied models for well known robots from Franka-Emika, Kinova, Universal Robotics, Rethink as well as classical robots such as the Puma 560 and the Stanford arm.
+The Toolbox provides tools for representing the kinematics and dynamics of
+serial-link manipulators  - you can easily create your own in Denavit-Hartenberg
+form, import a URDF file, or use over 30 supplied models for well-known
+contemporary robots from Franka-Emika, Kinova, Universal Robotics, Rethink as
+well as classical robots such as the Puma 560 and the Stanford arm.
 
-The toolbox also supports mobile robots with functions for robot motion models (unicycle, bicycle), path planning algorithms (bug, distance transform, D*, PRM), kinodynamic planning (lattice, RRT), localization (EKF, particle filter), map building (EKF) and simultaneous localization and mapping (EKF).
+The toolbox will also support mobile robots with functions for robot motion models
+(unicycle, bicycle), path planning algorithms (bug, distance transform, D*,
+PRM), kinodynamic planning (lattice, RRT), localization (EKF, particle filter),
+map building (EKF) and simultaneous localization and mapping (EKF).
 
 The Toolbox provides:
 
-  * code that is mature and provides a point of comparison for other implementations of the same algorithms;
-  * routines which are generally written in a straightforward manner which allows for easy understanding, perhaps at the expense of computational efficiency.
-  * source code which can be read for learning and teaching.
+  * code that is mature and provides a point of comparison for other
+    implementations of the same algorithms;
+  * routines which are generally written in a straightforward manner which
+    allows for easy understanding, perhaps at the expense of computational
+    efficiency;
+  * source code which can be read for learning and teaching;
+  * backward compatability with the Robotics Toolbox for MATLAB
   
 ## Code Example
 
-```python
->>> import roboticstoolbox as rtb
->>> p560 = rtb.models.DH.Puma560()
->>> print(p560)
-
-┏━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━┓
-┃θⱼ ┃   dⱼ    ┃   aⱼ   ┃  ⍺ⱼ  ┃
-┣━━━╋━━━━━━━━━╋━━━━━━━━╋━━━━━━┫
-┃q1 ┃   0.672 ┃      0 ┃ None ┃
-┃q2 ┃       0 ┃ 0.4318 ┃ None ┃
-┃q3 ┃ 0.15005 ┃ 0.0203 ┃ None ┃
-┃q4 ┃  0.4318 ┃      0 ┃ None ┃
-┃q5 ┃       0 ┃      0 ┃ None ┃
-┃q6 ┃       0 ┃      0 ┃ None ┃
-┗━━━┻━━━━━━━━━┻━━━━━━━━┻━━━━━━┛
-
-┌───┬────────────────────────────┐
-│qz │ 0°, 0°, 0°, 0°, 0°, 0°     │
-│qr │ 0°, 90°, -90°, 0°, 0°, 0°  │
-│qs │ 0°, 0°, -90°, 0°, 0°, 0°   │
-│qn │ 0°, 45°, 180°, 0°, 45°, 0° │
-└───┴────────────────────────────┘
-
->>> p560.fkine([0, 0, 0, 0, 0, 0])  # forward kinematics
-   1           0           0           0.4521       
-   0           1           0          -0.15005      
-   0           0           1           0.4318       
-   0           0           0           1            
-```
-
-We can animate a path
+We will load a model of the Franka-Emika Panda robot defined classically using
+modified (Craig's convention) Denavit-Hartenberg notation
 
 ```python
-qt = rtb.tools.trajectory.jtraj(p560.qz, p560.qr, 50)
-p560.plot(qt.q)
+import roboticstoolbox as rtb
+robot = rtb.models.DH.Panda()
+print(robot)
+
+┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
+┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
+┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
+┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃
+┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃
+┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃
+┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃
+┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃
+┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃
+┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃
+┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛
+
+┌─────┬───────────────────────────────────────┐
+│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │
+└─────┴───────────────────────────────────────┘
+
+┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
+│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
+├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
+│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
+│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
+└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
+
+T = robot.fkine(robot.qz)  # forward kinematics
+print(T)
+
+   0.707107    0.707107    0           0.088        
+   0.707107   -0.707107    0           0            
+   0           0          -1           0.823        
+   0           0           0           1          
 ```
+(Python prompts are not shown to make it easy to copy+paste the code)
 
-![Puma robot animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/puma_sitting.gif)
-
-which uses the default matplotlib backend.  We can instantiate our robot inside
-the 3d simulation environment
+We can solve inverse kinematics very easily.  We first choose an SE(3) pose
+defined in terms of position and orientation (end-effector z-axis down (-Z) and finger
+orientation (+Y)).
 
 ```python
-env = rtb.backend.Sim()
-env.launch()
-env.add(p560)
+from spatialmath import SE3
+
+T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+q_pickup, *_ = robot.ikine(T) # solve IK, ignore additional outputs
+print(q_pickup)                 # display joint angles
+
+[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
+
+print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
+
+  -1          -1.31387e-11-1.57726e-09 0.0999999    
+  -1.31386e-11 1          -7.46658e-08 0.2          
+   1.57726e-09-7.46658e-08-1           0.5          
+   0           0           0           1
 ```
 
+Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
+
+We can animate a path from the upright `qz` configuration to this pickup configuration
+
 ```python
-# inv kienmatis example here
-# jacobian
+qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
+robot.plot(qt.q, movie='panda1.gif')
 ```
+
+![Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda1.gif)
+
+which uses the default matplotlib backend.  
+
+Let's now load a URDF model of the same robotWe can instantiate our robot inside
+the 3d simulation environment.  The kinematic representation is no longer 
+based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
+
+```python
+robot = rtb.models.URDF.Panda()  # load URDF version of the Panda
+print(robot)    # display the model
+
+┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐
+│id │     link     │   parent    │    joint     │                     ETS                     │
+├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤
+│ 0 │  panda_link0 │           - │              │                                             │
+│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │                          tz(0.333) * Rz(q0) │
+│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │                           Rx(-90°) * Rz(q1) │
+│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │               ty(-0.316) * Rx(90°) * Rz(q2) │
+│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │               tx(0.0825) * Rx(90°) * Rz(q3) │
+│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
+│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │                            Rx(90°) * Rz(q5) │
+│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │                tx(0.088) * Rx(90°) * Rz(q6) │
+│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │                                   tz(0.107) │
+└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
+env = rtb.backend.Swift()   # instantiate 3D browser-based visualizer
+env.launch()                # activate it
+env.add(robot)              # add robot to the 3D scene
+for qk in qt.q:             # for each joint configuration on trajectory
+      robot.q = qk          # update the robot state
+      env.step()            # update visualization
+```
+
+![URDF Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif)
 
 # Getting going
 

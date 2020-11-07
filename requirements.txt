@@ -1,8 +1,0 @@
-numpy
-numpy-stl
-sympy
-scipy
-matplotlib
-spatialmath-python
-ansitable
-vpython

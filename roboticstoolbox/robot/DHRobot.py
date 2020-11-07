@@ -154,7 +154,7 @@ class DHRobot(Robot, DHDynamics):
                     if L.isprismatic():
                         ql = [qlim[0, j], qlim[1, j]]
                     else:
-                        ql = [angle(qlim[k, j]) for k in [0, 1]]
+                        ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
                     ql = []
                 if L.isprismatic():
@@ -176,7 +176,7 @@ class DHRobot(Robot, DHDynamics):
                     if L.isprismatic():
                         ql = [qlim[0, j], qlim[1, j]]
                     else:
-                        ql = [angle(qlim[k, j]) for k in [0, 1]]
+                        ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
                     ql = []
                 if L.isprismatic():
