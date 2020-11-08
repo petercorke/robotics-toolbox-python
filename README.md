@@ -70,58 +70,58 @@ import roboticstoolbox as rtb
 robot = rtb.models.DH.Panda()
 print(robot)
 
-┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
-┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
-┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
-┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃
-┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃
-┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃
-┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃
-┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃
-┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃
-┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃
-┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛
-
-┌─────┬───────────────────────────────────────┐
-│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │
-└─────┴───────────────────────────────────────┘
-
-┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
-│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
-├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
-│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
-│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
-└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
+	┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
+	┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
+	┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
+	┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃
+	┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃
+	┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃
+	┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃
+	┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃
+	┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃
+	┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃
+	┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛
+	
+	┌─────┬───────────────────────────────────────┐
+	│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │
+	└─────┴───────────────────────────────────────┘
+	
+	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
+	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
+	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
+	│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
+	│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
+	└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
 
 T = robot.fkine(robot.qz)  # forward kinematics
 print(T)
 
-   0.707107    0.707107    0           0.088        
-   0.707107   -0.707107    0           0            
-   0           0          -1           0.823        
-   0           0           0           1          
+	   0.707107    0.707107    0           0.088        
+	   0.707107   -0.707107    0           0            
+	   0           0          -1           0.823        
+	   0           0           0           1          
 ```
-(Python prompts are not shown to make it easy to copy+paste the code)
+(Python prompts are not shown to make it easy to copy+paste the code, console output is indented)
 
 We can solve inverse kinematics very easily.  We first choose an SE(3) pose
-defined in terms of position and orientation (end-effector z-axis down (-Z) and finger
-orientation (+Y)).
+defined in terms of position and orientation (end-effector z-axis down (A=-Z) and finger
+orientation parallel to y-axis (O=+Y)).
 
 ```python
 from spatialmath import SE3
 
 T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-q_pickup, *_ = robot.ikine(T) # solve IK, ignore additional outputs
+q_pickup, *_ = robot.ikunc(T)   # solve IK, ignore additional outputs
 print(q_pickup)                 # display joint angles
 
-[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
+	[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
 
 print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
 
-  -1          -1.31387e-11-1.57726e-09 0.0999999    
-  -1.31386e-11 1          -7.46658e-08 0.2          
-   1.57726e-09-7.46658e-08-1           0.5          
-   0           0           0           1
+	  -1          -1.31387e-11-1.57726e-09 0.0999999    
+	  -1.31386e-11 1          -7.46658e-08 0.2          
+	   1.57726e-09-7.46658e-08-1           0.5          
+	   0           0           0           1
 ```
 
 Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
@@ -135,29 +135,33 @@ robot.plot(qt.q, movie='panda1.gif')
 
 ![Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda1.gif)
 
-which uses the default matplotlib backend.  
+which uses the default matplotlib backend.  Grey arrows show the joint axes and the colored frame shows the end-effector pose.
 
-Let's now load a URDF model of the same robotWe can instantiate our robot inside
-the 3d simulation environment.  The kinematic representation is no longer 
+Let's now load a URDF model of the same robot. The kinematic representation is no longer 
 based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
 
 ```python
 robot = rtb.models.URDF.Panda()  # load URDF version of the Panda
 print(robot)    # display the model
 
-┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐
-│id │     link     │   parent    │    joint     │                     ETS                     │
-├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤
-│ 0 │  panda_link0 │           - │              │                                             │
-│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │                          tz(0.333) * Rz(q0) │
-│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │                           Rx(-90°) * Rz(q1) │
-│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │               ty(-0.316) * Rx(90°) * Rz(q2) │
-│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │               tx(0.0825) * Rx(90°) * Rz(q3) │
-│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
-│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │                            Rx(90°) * Rz(q5) │
-│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │                tx(0.088) * Rx(90°) * Rz(q6) │
-│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │                                   tz(0.107) │
-└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
+	┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐
+	│id │     link     │   parent    │    joint     │                     ETS                     │
+	├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤
+	│ 0 │  panda_link0 │           - │              │                                             │
+	│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │                          tz(0.333) * Rz(q0) │
+	│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │                           Rx(-90°) * Rz(q1) │
+	│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │               ty(-0.316) * Rx(90°) * Rz(q2) │
+	│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │               tx(0.0825) * Rx(90°) * Rz(q3) │
+	│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
+	│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │                            Rx(90°) * Rz(q5) │
+	│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │                tx(0.088) * Rx(90°) * Rz(q6) │
+	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │                                   tz(0.107) │
+	└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
+```
+
+We can instantiate our robot inside a browser-based 3d-simulation environment.  
+
+```python
 env = rtb.backend.Swift()   # instantiate 3D browser-based visualizer
 env.launch()                # activate it
 env.add(robot)              # add robot to the 3D scene
