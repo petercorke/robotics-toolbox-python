@@ -204,25 +204,9 @@ class DHRobot(Robot, DHDynamics):
             s += "\n" + str(table)
 
         # show named configurations
-        if len(self._configdict) > 0:
-            table = ANSITable(
-                Column("name", colalign=">"),
-                *[Column(f"q{j:d}", colalign="<", headalign="<") for j in range(self.n)],
-                border="thin")
-
-            for name, q in self._configdict.items():
-                qlist = []
-                for i, L in enumerate(self):
-                    if L.isprismatic():
-                        qlist.append(f"{q[i]: .3g}")
-                    else:
-                        qlist.append(angle(q[i], "{: .3g}"))
-                table.row(name, *qlist)
-
-            s += "\n" + str(table)
+        s += self.configurations_str()
 
         return s
-
 
     def __add__(self, L):
         nlinks = []

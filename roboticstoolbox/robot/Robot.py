@@ -4,7 +4,7 @@ import numpy as np
 # import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
-    verifymatrix
+    verifymatrix, getunit
 from roboticstoolbox.robot.Link import Link
 from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.backend import URDF
@@ -179,14 +179,14 @@ class Robot:
         """
         return self._n
 
-    def addconfiguration(self, name, q):
+    def addconfiguration(self, name, q, unit='rad'):
         """
         Add a named joint configuration (Robot superclass)
 
         :param name: Name of the joint configuration
         :type name: str
         :param q: Joint configuration
-        :type q: ndarray(n,)
+        :type q: ndarray(n) or list
 
         Example:
 
@@ -199,8 +199,41 @@ class Robot:
             >>> robot.mypos
         """
         v = getvector(q, self.n)
+        v = getunit(v, unit)
         self._configdict[name] = v
         setattr(self, name, v)
+        
+    def configurations_str(self):
+        deg = 180 / np.pi
+
+        # TODO: factor this out of DHRobot
+        def angle(theta, fmt=None):
+
+            if fmt is not None:
+                return fmt.format(theta * deg) + "\u00b0"
+            else:
+                return str(theta * deg) + "\u00b0"
+
+        config = self.config()
+        # show named configurations
+        if len(self._configdict) > 0:
+            table = ANSITable(
+                Column("name", colalign=">"),
+                *[Column(f"q{j:d}", colalign="<", headalign="<") for j in range(self.n)],
+                border="thin")
+
+            for name, q in self._configdict.items():
+                qlist = []
+                for i, c in enumerate(config):
+                    if c == 'P':
+                        qlist.append(f"{q[i]: .3g}")
+                    else:
+                        qlist.append(angle(q[i], "{: .3g}"))
+                table.row(name, *qlist)
+
+            return "\n" + str(table)
+        else:
+            return ""
 
     def dyntable(self):
         """
