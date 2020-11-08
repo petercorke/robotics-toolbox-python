@@ -211,6 +211,7 @@
             <span class="n">ets</span><span class="o">=</span><span class="n">ETS</span><span class="p">(),</span>
             <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># process common options</span>
@@ -237,7 +238,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_child</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_joint_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="n">jindex</span>
 
         <span class="c1"># Initialise the static transform representing the constant</span>
         <span class="c1"># component of the ETS</span>
