@@ -55,6 +55,7 @@ class ELink(Link):
             ets=ETS(),
             v=None,
             parent=None,
+            jindex=None,
             **kwargs):
 
         # process common options
@@ -81,7 +82,7 @@ class ELink(Link):
         self._parent = parent
         self._child = []
         self._joint_name = None
-        self._jindex = None
+        self._jindex = jindex
 
         # Initialise the static transform representing the constant
         # component of the ETS

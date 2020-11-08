@@ -11,7 +11,33 @@ import unittest
 import spatialmath as sm
 
 
-class TestETS(unittest.TestCase):
+class TestERobot(unittest.TestCase):
+
+    def test_ets_init(self):
+        ets = rp.ETS.tx(-0.0825) * rp.ETS.rz() * rp.ETS.tx(-0.0825) \
+            * rp.ETS.rz() * rp.ETS.tx(0.1)
+
+        rp.ERobot(ets)
+
+    def test_init_bases(self):
+        e1 = rp.ELink()
+        e2 = rp.ELink()
+        e3 = rp.ELink(parent=e1)
+        e4 = rp.ELink(parent=e2)
+
+        with self.assertRaises(ValueError):
+            rp.ERobot([e1, e2, e3, e4])
+
+    # def test_jindex(self):
+    #     e1 = rp.ELink(rp.ETS.rz(), jindex=0)
+    #     e2 = rp.ELink(rp.ETS.rz(), jindex=1, parent=e1)
+    #     e3 = rp.ELink(rp.ETS.rz(), jindex=2, parent=e2)
+    #     e4 = rp.ELink(rp.ETS.rz(), jindex=3, parent=e3)
+
+
+
+    #     # with self.assertRaises(ValueError):
+    #     rp.ERobot([e1, e2, e3, e4])
 
     def test_panda(self):
         panda = rp.models.ETS.Panda()
