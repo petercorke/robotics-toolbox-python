@@ -333,6 +333,23 @@ class SuperETS(UserList, ABC):
         """
         return np.where([e.isjoint for e in self])[0]
 
+    def jointset(self):
+        """
+        Get set of joint indices
+
+        :return: set of unique joint indices
+        :rtype: set
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rz(j=1) * ETS.tx(j=2) * ETS.rz(j=1) * ETS.tx(1)
+            >>> e.jointset()
+        """
+        return set([self[j].jindex for j in self.joints()])
+
     def T(self, q=None):
         """
         Evaluate an elementary transformation
@@ -824,6 +841,23 @@ class ETS(SuperETS):
     :seealso: :func:`rx`, :func:`ry`, :func:`rz`, :func:`tx`,
         :func:`ty`, :func:`tz`
     """
+    @property
+    def s(self):
+        if self.axis[1] == 'x':
+            if self.axis[0] == 'R':
+                return np.r_[0, 0, 0, 1, 0, 0]
+            else:
+                return np.r_[1, 0, 0, 0, 0, 0]
+        elif self.axis[1] == 'y':
+            if self.axis[0] == 'R':
+                return np.r_[0, 0, 0, 0, 1, 0]
+            else:
+                return np.r_[0, 1, 0, 0, 0, 0]
+        else:
+            if self.axis[0] == 'R':
+                return np.r_[0, 0, 0, 0, 0, 1]
+            else:
+                return np.r_[0, 0, 1, 0, 0, 0]
 
     @classmethod
     def rx(cls, eta=None, unit='rad', **kwargs):
@@ -1036,8 +1070,8 @@ class ETS(SuperETS):
         :math:`\mathbf{E}(q)`.
 
         .. math::
-
-            {}^0 T_e &= \mathbf{E}(q) \in \mbox{SE}(3)
+        
+            {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)
 
         The temporal derivative of this is the spatial
         velocity :math:`\nu` which is a 6-vector is related to the rate of
@@ -1045,7 +1079,7 @@ class ETS(SuperETS):
 
         .. math::
 
-            {}^0 \nu & = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
+           {}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
 
         This velocity can be expressed relative to the {0} frame or the {e}
         frame.
@@ -1173,7 +1207,7 @@ class ETS(SuperETS):
 
         .. math::
 
-            {}^0 T_e &= \mathbf{E}(q) \in \mbox{SE}(3)
+            {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)
 
         The temporal derivative of this is the spatial
         velocity :math:`\nu` which is a 6-vector is related to the rate of
@@ -1181,7 +1215,7 @@ class ETS(SuperETS):
 
         .. math::
 
-            {}^0 \nu & = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
+            {}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
 
         This velocity can be expressed relative to the {0} frame or the {e}
         frame.
@@ -1191,7 +1225,7 @@ class ETS(SuperETS):
 
         .. math::
 
-            {}^0 \dot{\nu} &= \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
+            {}^0 \dot{\nu} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
                       &= \mathbf{J}(q) \ddot{q} + \dot{q}^T \mathbf{H}(q) \dot{q}
 
         The manipulator Hessian tensor :math:`H` maps joint velocity to
