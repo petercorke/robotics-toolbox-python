@@ -16,7 +16,7 @@ motion controller,” arXiv preprint arXiv:2002.11901,2020.
 
 # Launch the simulator Swift
 env = rtb.backend.Swift()
-env.launch()
+env.launch('google-chrome')
 
 # Create a Panda robot object
 panda = rtb.models.Panda()
@@ -95,4 +95,4 @@ while not arrived:
     panda.qd[:n] = qd[:n]
 
     # Step the simulator by 50 ms
-    env.step(50)
+    env.step(0.05)
