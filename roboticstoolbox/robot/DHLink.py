@@ -404,6 +404,8 @@ class DHLink(Link):
 
         return SE3(T, check=False)
 
+
+    # TODO these next 2 should be properties
     def isrevolute(self):
         """
         Checks if the joint is of revolute type
