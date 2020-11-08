@@ -177,7 +177,7 @@ class PyPlot(Connector):
 
         super().close()
 
-        signal.setitimer(signal.ITIMER_REAL, 0)
+        # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.close(self.fig)
 
     #
@@ -257,12 +257,12 @@ class PyPlot(Connector):
         super().remove()
 
     def hold(self):           # pragma: no cover
-        signal.setitimer(signal.ITIMER_REAL, 0)
+        # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
 
         try:
             plt.show()
-        except(AttributeError):
+        except AttributeError:
             pass
 
     #

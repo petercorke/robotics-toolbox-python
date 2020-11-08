@@ -7,7 +7,7 @@ import roboticstoolbox as rp
 from roboticstoolbox.backend.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
-import signal
+# import signal
 from roboticstoolbox.backend.PyPlot.RobotPlot2 import RobotPlot2
 from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
 
@@ -66,8 +66,8 @@ class PyPlot2(Connector):
         plt.show()
 
         # Set the signal handler and a 0.1 second plot updater
-        signal.signal(signal.SIGALRM, self._plot_handler)
-        signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
+        # signal.signal(signal.SIGALRM, self._plot_handler)
+        # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
 
     def step(self, dt=50):
         '''
@@ -121,7 +121,7 @@ class PyPlot2(Connector):
 
         super().close()
 
-        signal.setitimer(signal.ITIMER_REAL, 0)
+        # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.close(self.fig)
 
     #
@@ -161,7 +161,7 @@ class PyPlot2(Connector):
         super().remove()
 
     def hold(self):           # pragma: no cover
-        signal.setitimer(signal.ITIMER_REAL, 0)
+        # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
         plt.show()
 
