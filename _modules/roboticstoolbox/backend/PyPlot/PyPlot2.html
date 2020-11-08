@@ -163,7 +163,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backend.Connector</span> <span class="kn">import</span> <span class="n">Connector</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">signal</span>
+<span class="c1"># import signal</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backend.PyPlot.RobotPlot2</span> <span class="kn">import</span> <span class="n">RobotPlot2</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backend.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
 
@@ -219,11 +219,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
         <span class="c1"># Set the signal handler and a 0.1 second plot updater</span>
-        <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGALRM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_handler</span><span class="p">)</span>
-        <span class="n">signal</span><span class="o">.</span><span class="n">setitimer</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">ITIMER_REAL</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span></div>
+        <span class="c1"># signal.signal(signal.SIGALRM, self._plot_handler)</span>
+        <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)</span>
 
 <div class="viewcode-block" id="PyPlot2.step"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backend.PyPlot.PyPlot2.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -277,7 +277,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="n">signal</span><span class="o">.</span><span class="n">setitimer</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">ITIMER_REAL</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span></div>
 
     <span class="c1">#</span>
@@ -317,7 +317,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot2.hold"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backend.PyPlot.PyPlot2.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>           <span class="c1"># pragma: no cover</span>
-        <span class="n">signal</span><span class="o">.</span><span class="n">setitimer</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">ITIMER_REAL</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
@@ -377,7 +377,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 06-Nov-2020.
+        Last updated on 08-Nov-2020.
       </span>
 
     </p>

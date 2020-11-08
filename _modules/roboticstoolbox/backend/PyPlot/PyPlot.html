@@ -333,7 +333,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="n">signal</span><span class="o">.</span><span class="n">setitimer</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">ITIMER_REAL</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="p">)</span></div>
 
     <span class="c1">#</span>
@@ -413,12 +413,12 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot.hold"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backend.PyPlot.PyPlot.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>           <span class="c1"># pragma: no cover</span>
-        <span class="n">signal</span><span class="o">.</span><span class="n">setitimer</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">ITIMER_REAL</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">(</span><span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">pass</span></div>
 
     <span class="c1">#</span>
@@ -513,7 +513,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 06-Nov-2020.
+        Last updated on 08-Nov-2020.
       </span>
 
     </p>
