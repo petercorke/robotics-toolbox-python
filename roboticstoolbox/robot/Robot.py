@@ -27,6 +27,7 @@ class Robot:
             links,
             name='noname',
             manufacturer='',
+            comment='',
             base=None,
             tool=None,
             gravity=None,
@@ -36,6 +37,7 @@ class Robot:
 
         self.name = name
         self.manufacturer = manufacturer
+        self.comment = comment
         self.symbolic = symbolic
         self.base = base
         self.tool = tool
