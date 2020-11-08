@@ -491,6 +491,8 @@ class ERobot(Robot):
             raise ValueError('must be an ELink')
         # self._reset_fk_path()
 # --------------------------------------------------------------------- #
+    # TODO  get configuration string
+
 
     @property
     def ee_links(self):
@@ -555,6 +557,16 @@ class ERobot(Robot):
             link = link.parent
 
         return ets
+
+    def config(self):
+        s = ''
+        for link in self.links:
+            if link.v is not None:
+                if link.v.isprismatic:
+                    s += 'P'
+                elif link.v.isrevolute:
+                    s += 'R'
+        return s
 
 # --------------------------------------------------------------------- #
 
@@ -1123,7 +1135,11 @@ class ERobot(Robot):
                 link.parent.name if link.parent is not None else "-",
                 link._joint_name if link.parent is not None else "",
                 ets.__str__(f"q{link._jindex}"))
-        return str(table)
+
+        s = str(table)
+        s += self.configurations_str()
+
+        return s
 
     def hierarchy(self):
         """
@@ -1844,20 +1860,26 @@ if __name__ == "__main__":
     import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
-    robot = rtb.models.ETS.Panda()
-    print(robot)
-    print(robot.base, robot.tool)
-    print(robot.ee_links)
-    ets = robot.ets()
-    print(ets)
-    print('n', ets.n)
-    ets2 = ets.compile()
-    print(ets2)
+    p=rtb.models.URDF.Panda()
+    print(p[1].m)
 
-    q = np.random.rand(7)
-    # print(ets.eval(q))
-    # print(ets2.eval(q))
+    # robot = rtb.models.ETS.Panda()
+    # print(robot)
+    # print(robot.base, robot.tool)
+    # print(robot.ee_links)
+    # ets = robot.ets()
+    # print(ets)
+    # print('n', ets.n)
+    # ets2 = ets.compile()
+    # print(ets2)
 
-    J1 = robot.jacob0(q)
-    J2 = ets2.jacob0(q)
-    print(J1-J2)
+    # q = np.random.rand(7)
+    # # print(ets.eval(q))
+    # # print(ets2.eval(q))
+
+    # J1 = robot.jacob0(q)
+    # J2 = ets2.jacob0(q)
+    # print(J1-J2)
+
+    # print(robot[2].v, robot[2].v.jindex)
+    # print(robot[2].Ts)
