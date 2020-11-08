@@ -647,6 +647,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;must be an ELink&#39;</span><span class="p">)</span>
         <span class="c1"># self._reset_fk_path()</span>
 <span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># TODO  get configuration string</span>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ee_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -711,6 +713,16 @@
             <span class="n">link</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span>
 
         <span class="k">return</span> <span class="n">ets</span></div>
+
+<div class="viewcode-block" id="ERobot.config"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.config">[docs]</a>    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;P&#39;</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;R&#39;</span>
+        <span class="k">return</span> <span class="n">s</span></div>
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -1279,7 +1291,11 @@
                 <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span>
                 <span class="n">link</span><span class="o">.</span><span class="n">_joint_name</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="n">ets</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">_jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurations_str</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">s</span>
 
 <div class="viewcode-block" id="ERobot.hierarchy"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.hierarchy">[docs]</a>    <span class="k">def</span> <span class="nf">hierarchy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -2000,23 +2016,29 @@
     <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
     <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">base</span><span class="p">,</span> <span class="n">robot</span><span class="o">.</span><span class="n">tool</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">ee_links</span><span class="p">)</span>
-    <span class="n">ets</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">ets</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="n">ets</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">ets2</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">ets2</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">=</span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
-    <span class="c1"># print(ets.eval(q))</span>
-    <span class="c1"># print(ets2.eval(q))</span>
+    <span class="c1"># robot = rtb.models.ETS.Panda()</span>
+    <span class="c1"># print(robot)</span>
+    <span class="c1"># print(robot.base, robot.tool)</span>
+    <span class="c1"># print(robot.ee_links)</span>
+    <span class="c1"># ets = robot.ets()</span>
+    <span class="c1"># print(ets)</span>
+    <span class="c1"># print(&#39;n&#39;, ets.n)</span>
+    <span class="c1"># ets2 = ets.compile()</span>
+    <span class="c1"># print(ets2)</span>
 
-    <span class="n">J1</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="n">J2</span> <span class="o">=</span> <span class="n">ets2</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">J1</span><span class="o">-</span><span class="n">J2</span><span class="p">)</span>
+    <span class="c1"># q = np.random.rand(7)</span>
+    <span class="c1"># # print(ets.eval(q))</span>
+    <span class="c1"># # print(ets2.eval(q))</span>
+
+    <span class="c1"># J1 = robot.jacob0(q)</span>
+    <span class="c1"># J2 = ets2.jacob0(q)</span>
+    <span class="c1"># print(J1-J2)</span>
+
+    <span class="c1"># print(robot[2].v, robot[2].v.jindex)</span>
+    <span class="c1"># print(robot[2].Ts)</span>
 </pre></div>
 
            </div>

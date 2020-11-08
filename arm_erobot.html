@@ -443,6 +443,11 @@ func to each visited link</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.config">
+<code class="sig-name descname">config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.fkine">
 <code class="sig-name descname">fkine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.fkine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fkine" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -703,55 +708,14 @@ damper becomes active</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
-<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.closest_point">
-<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.closest_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
-distance between this robot and shape, provided it is less than
-inf_dist. It will also return the points on self and shape in the
-world frame which connect the line of length distance between the
-shapes. If the distance is negative then the shapes are collided.
-:param shape: The shape to compare distance to
-:type shape: Shape
-:param inf_dist: The minimum distance within which to consider</p>
-<blockquote>
-<div><p>the shape</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>d, p1, p2 where d is the distance between the shapes,
-p1 and p2 are the points in the world frame on the respective
-shapes</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float, SE3, SE3</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.collided">
-<code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.collided" title="Permalink to this definition">¶</a></dt>
-<dd><p>collided(shape) checks if this robot and shape have collided
-:param shape: The shape to compare distance to
-:type shape: Shape
-:returns: True if shapes have collided
-:rtype: bool</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.addconfiguration">
-<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.addconfiguration" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.addconfiguration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a named joint configuration (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the joint configuration</p></li>
-<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>)</em>) – Joint configuration</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>) or </em><em>list</em>) – Joint configuration</p></li>
 </ul>
 </dd>
 </dl>
@@ -792,6 +756,11 @@ no base transform, but this property will return <code class="docutils literal n
 is an identity matrix.</p>
 </div>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.configurations_str">
+<code class="sig-name descname">configurations_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.configurations_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.dynchanged">
@@ -1131,6 +1100,11 @@ Where omega is some gain matrix, currently not modifiable.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
+<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.links">
 <em class="property">property </em><code class="sig-name descname">links</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.links" title="Permalink to this definition">¶</a></dt>
 <dd><p>Robot links (Robot superclass)</p>
@@ -1291,6 +1265,42 @@ is an identity matrix.</p>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.closest_point">
+<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.closest_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
+distance between this robot and shape, provided it is less than
+inf_dist. It will also return the points on self and shape in the
+world frame which connect the line of length distance between the
+shapes. If the distance is negative then the shapes are collided.
+:param shape: The shape to compare distance to
+:type shape: Shape
+:param inf_dist: The minimum distance within which to consider</p>
+<blockquote>
+<div><p>the shape</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>d, p1, p2 where d is the distance between the shapes,
+p1 and p2 are the points in the world frame on the respective
+shapes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float, SE3, SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.collided">
+<code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.collided" title="Permalink to this definition">¶</a></dt>
+<dd><p>collided(shape) checks if this robot and shape have collided
+:param shape: The shape to compare distance to
+:type shape: Shape
+:returns: True if shapes have collided
+:rtype: bool</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1341,27 +1351,164 @@ J. Haviland and P. Corke</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.v">
 <em class="property">property </em><code class="sig-name descname">v</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.v" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Variable part of link ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint variable transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ETS instance</p>
+</dd>
+</dl>
+<p>The ETS for each ELink comprises a constant part (possible the identity)
+followed by an optional joint variable transform.  This property returns
+the latter.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ELink</span><span class="p">,</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">link</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.333</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="p">)</span>
+<span class="go">Rz(q)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.Ts">
 <em class="property">property </em><code class="sig-name descname">Ts</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.Ts" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Constant part of link ETS</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>constant part of link transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>SE3 instance</p>
+</dd>
+</dl>
+<p>The ETS for each ELink comprises a constant part (possible the identity)
+followed by an optional joint variable transform.  This property returns
+the constant part.  If no constant part is given, this returns an
+identity matrix.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ELink</span><span class="p">,</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">link</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.333</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">link</span><span class="o">.</span><span class="n">Ts</span>
+<span class="go">SE3(array([[ 1.   ,  0.   ,  0.   ,  0.   ],</span>
+<span class="go">           [ 0.   ,  0.   , -1.   ,  0.   ],</span>
+<span class="go">           [ 0.   ,  1.   ,  0.   ,  0.333],</span>
+<span class="go">           [ 0.   ,  0.   ,  0.   ,  1.   ]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">link</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">link</span><span class="o">.</span><span class="n">Ts</span>
+<span class="go">SE3(array([[1., 0., 0., 0.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.isjoint">
 <em class="property">property </em><code class="sig-name descname">isjoint</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.isjoint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Test if link has joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>test if link has a joint</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+<p>The ETS for each ELink comprises a constant part (possible the identity)
+followed by an optional joint variable transform.  This property returns the
+whether the</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># link with joint</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># static link</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.jindex">
 <em class="property">property </em><code class="sig-name descname">jindex</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.jindex" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get/set joint index</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">link.jindex</span></code> is the joint index</dt><dd><dl class="field-list simple">
+<dt class="field-odd">return</dt>
+<dd class="field-odd"><p>joint index</p>
+</dd>
+<dt class="field-even">rtype</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link.jindex</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint index</p></li>
+</ul>
+<p>For a serial-link manipulator the joints are numbered starting at zero
+and increasing sequentially toward the end-effector.  For branched
+mechanisms this is not so straightforward.</p>
+<p>The link’s <code class="docutils literal notranslate"><span class="pre">jindex</span></code> property specifies the index of its joint
+variable within a vector of joint coordinates.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">jindex</span></code> values must be a sequence of integers starting
+at zero.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.isrevolute">
+<code class="sig-name descname">isrevolute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.isrevolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.isrevolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the joint is of revolute type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Ture if is revolute</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.isprismatic">
+<code class="sig-name descname">isprismatic</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.isprismatic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.isprismatic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the joint is of prismatic type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Ture if is prismatic</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.parent">
 <em class="property">property </em><code class="sig-name descname">parent</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.parent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Parent link</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Link’s parent</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ELink instance</p>
+</dd>
+</dl>
+<p>This is a reference to</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># base link has no parent</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># second link&#39;s parent</span>
+<span class="go">ELink(panda_link0, ets=, m=1.0)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.child">
@@ -1371,16 +1518,6 @@ J. Haviland and P. Corke</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.M">
 <em class="property">property </em><code class="sig-name descname">M</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.M" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ELink.ELink.collision">
-<em class="property">property </em><code class="sig-name descname">collision</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.collision" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ELink.ELink.geometry">
-<em class="property">property </em><code class="sig-name descname">geometry</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.geometry" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1402,6 +1539,11 @@ with no variable</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.ets">
+<code class="sig-name descname">ets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.ets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.ets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.B">
@@ -1556,6 +1698,11 @@ be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
 </ul>
 </div>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.collision">
+<em class="property">property </em><code class="sig-name descname">collision</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.collision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.copy">
@@ -1847,8 +1994,8 @@ frame.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ELink.ELink.ets">
-<code class="sig-name descname">ets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.ets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.ets" title="Permalink to this definition">¶</a></dt>
+<dt id="roboticstoolbox.robot.ELink.ELink.geometry">
+<em class="property">property </em><code class="sig-name descname">geometry</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.geometry" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1906,12 +2053,13 @@ shapes</p>
 They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;ETS&quot;</span><span class="p">)</span>
-<span class="go">┌────────┬─────────┬─────────────────────┬────────────┬─────┬────────┬──────────┐</span>
-<span class="go">│ class  │  model  │    manufacturer     │ model type │ DoF │ config │ keywords │</span>
-<span class="go">├────────┼─────────┼─────────────────────┼────────────┼─────┼────────┼──────────┤</span>
-<span class="go">│Panda[0m   │ Panda[0m   │ Franka Emika[0m        │ ETS[0m        │ 7[0m   │ [0m       │ [0m         │</span>
-<span class="go">│Frankie[0m │ Frankie[0m │ Franka Emika, Omron[0m │ ETS[0m        │ 9[0m   │ [0m       │ mobile[0m   │</span>
-<span class="go">└────────┴─────────┴─────────────────────┴────────────┴─────┴────────┴──────────┘</span>
+<span class="go">┌────────┬─────────┬─────────────────────┬────────────┬─────┬───────────┬──────────┐</span>
+<span class="go">│ class  │  model  │    manufacturer     │ model type │ DoF │    config │ keywords │</span>
+<span class="go">├────────┼─────────┼─────────────────────┼────────────┼─────┼───────────┼──────────┤</span>
+<span class="go">│Panda[0m   │ Panda[0m   │ Franka Emika[0m        │ ETS[0m        │ 7[0m   │ RRRRRRR[0m   │ [0m         │</span>
+<span class="go">│Frankie[0m │ Frankie[0m │ Franka Emika, Omron[0m │ ETS[0m        │ 9[0m   │ RPRRRRRRR[0m │ mobile[0m   │</span>
+<span class="go">│Puma560[0m │ Puma560[0m │ Unimation[0m           │ ETS[0m        │ 6[0m   │ RRRRRR[0m    │ [0m         │</span>
+<span class="go">└────────┴─────────┴─────────────────────┴────────────┴─────┴───────────┴──────────┘</span>
 
 </pre></div>
 </div>
@@ -1963,6 +2111,42 @@ joints</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt id="roboticstoolbox.models.ETS.Puma560">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.ETS.</code><code class="sig-name descname">Puma560</code><a class="reference internal" href="_modules/roboticstoolbox/models/ETS/Puma560.html#Puma560"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.ETS.Puma560" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Create model of Franka-Emika Panda manipulator</p>
+<p><code class="docutils literal notranslate"><span class="pre">puma</span> <span class="pre">=</span> <span class="pre">Puma560()</span></code> creates a robot object representing the classic
+Unimation Puma560 robot arm. This robot is represented using the elementary
+transform sequence (ETS).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>The model has different joint offset conventions compared to 
+<code class="docutils literal notranslate"><span class="pre">DH.Puma560()</span></code>. For this robot:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Zero joint angles <code class="docutils literal notranslate"><span class="pre">qz</span></code> is the vertical configuration, corresponding to
+<code class="docutils literal notranslate"><span class="pre">qr</span></code> with <code class="docutils literal notranslate"><span class="pre">DH.Puma560()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qbent</span></code> is the bent configuration, corresponding to
+<code class="docutils literal notranslate"><span class="pre">qz</span></code> with <code class="docutils literal notranslate"><span class="pre">DH.Puma560()</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>“A Simple and Systematic Approach to Assigning Denavit–Hartenberg
+Parameters,”, P. I. Corke,  in IEEE Transactions on Robotics, vol. 23,
+no. 3, pp. 590-594, June 2007, doi: 10.1109/TRO.2007.896765.</p></li>
+<li><p><a class="reference external" href="https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters">https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters</a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="defined-from-urdf">
 <h3>Defined from URDF<a class="headerlink" href="#defined-from-urdf" title="Permalink to this headline">¶</a></h3>
@@ -1970,26 +2154,26 @@ joints</p></li>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
-<span class="go">┌────────┬──────────┬────────────────────┬────────────┬─────┬────────┬──────────┐</span>
-<span class="go">│ class  │  model   │    manufacturer    │ model type │ DoF │ config │ keywords │</span>
-<span class="go">├────────┼──────────┼────────────────────┼────────────┼─────┼────────┼──────────┤</span>
-<span class="go">│Panda[0m   │ panda[0m    │ Franka Emika[0m       │ URDF[0m       │ 7[0m   │ [0m       │ [0m         │</span>
-<span class="go">│UR3[0m     │ ur3[0m      │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
-<span class="go">│UR5[0m     │ ur5[0m      │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
-<span class="go">│UR10[0m    │ ur10[0m     │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
-<span class="go">│Puma560[0m │ Puma560[0m  │ Unimation[0m          │ URDF[0m       │ 6[0m   │ [0m       │ [0m         │</span>
-<span class="go">│px100[0m   │ px100[0m    │ Interbotix[0m         │ URDF[0m       │ 7[0m   │ [0m       │ [0m         │</span>
-<span class="go">│px150[0m   │ px150[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
-<span class="go">│rx150[0m   │ rx150[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
-<span class="go">│rx200[0m   │ rx200[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
-<span class="go">│vx300[0m   │ vx300[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
-<span class="go">│vx300s[0m  │ vx300s[0m   │ Interbotix[0m         │ URDF[0m       │ 9[0m   │ [0m       │ [0m         │</span>
-<span class="go">│wx200[0m   │ wx200[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
-<span class="go">│wx250[0m   │ wx250[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ [0m       │ [0m         │</span>
-<span class="go">│wx250s[0m  │ wx250s[0m   │ Interbotix[0m         │ URDF[0m       │ 9[0m   │ [0m       │ [0m         │</span>
-<span class="go">│Mico[0m    │ j2n4s300[0m │ Kinova[0m             │ URDF[0m       │ 10[0m  │ [0m       │ [0m         │</span>
-<span class="go">│PR2[0m     │ pr2[0m      │ Willow Garage[0m      │ URDF[0m       │ 45[0m  │ [0m       │ [0m         │</span>
-<span class="go">└────────┴──────────┴────────────────────┴────────────┴─────┴────────┴──────────┘</span>
+<span class="go">┌────────┬──────────┬────────────────────┬────────────┬─────┬───────────────────────────────────────────────┬──────────┐</span>
+<span class="go">│ class  │  model   │    manufacturer    │ model type │ DoF │                                        config │ keywords │</span>
+<span class="go">├────────┼──────────┼────────────────────┼────────────┼─────┼───────────────────────────────────────────────┼──────────┤</span>
+<span class="go">│Panda[0m   │ panda[0m    │ Franka Emika[0m       │ URDF[0m       │ 7[0m   │ RRRRRRR[0m                                       │ [0m         │</span>
+<span class="go">│UR3[0m     │ ur3[0m      │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ RRRRRR[0m                                        │ [0m         │</span>
+<span class="go">│UR5[0m     │ ur5[0m      │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ RRRRRR[0m                                        │ [0m         │</span>
+<span class="go">│UR10[0m    │ ur10[0m     │ Universal Robotics[0m │ URDF[0m       │ 6[0m   │ RRRRRR[0m                                        │ [0m         │</span>
+<span class="go">│Puma560[0m │ Puma560[0m  │ Unimation[0m          │ URDF[0m       │ 6[0m   │ RRRRRR[0m                                        │ [0m         │</span>
+<span class="go">│px100[0m   │ px100[0m    │ Interbotix[0m         │ URDF[0m       │ 7[0m   │ RRRRRPP[0m                                       │ [0m         │</span>
+<span class="go">│px150[0m   │ px150[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ RRRRRRPP[0m                                      │ [0m         │</span>
+<span class="go">│rx150[0m   │ rx150[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ RRRRRRPP[0m                                      │ [0m         │</span>
+<span class="go">│rx200[0m   │ rx200[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ RRRRRRPP[0m                                      │ [0m         │</span>
+<span class="go">│vx300[0m   │ vx300[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ RRRRRRPP[0m                                      │ [0m         │</span>
+<span class="go">│vx300s[0m  │ vx300s[0m   │ Interbotix[0m         │ URDF[0m       │ 9[0m   │ RRRRRRRPP[0m                                     │ [0m         │</span>
+<span class="go">│wx200[0m   │ wx200[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ RRRRRRPP[0m                                      │ [0m         │</span>
+<span class="go">│wx250[0m   │ wx250[0m    │ Interbotix[0m         │ URDF[0m       │ 8[0m   │ RRRRRRPP[0m                                      │ [0m         │</span>
+<span class="go">│wx250s[0m  │ wx250s[0m   │ Interbotix[0m         │ URDF[0m       │ 9[0m   │ RRRRRRRPP[0m                                     │ [0m         │</span>
+<span class="go">│Mico[0m    │ j2n4s300[0m │ Kinova[0m             │ URDF[0m       │ 10[0m  │ RRRRRRRRRR[0m                                    │ [0m         │</span>
+<span class="go">│PR2[0m     │ pr2[0m      │ Willow Garage[0m      │ URDF[0m       │ 45[0m  │ RRRRRRRRRRRRPRRRRRRRRRRRPRRRRRPRRRRRRRPRRRRRP[0m │ [0m         │</span>
+<span class="go">└────────┴──────────┴────────────────────┴────────────┴─────┴───────────────────────────────────────────────┴──────────┘</span>
 
 </pre></div>
 </div>
@@ -2017,6 +2201,13 @@ characteristics.</p>
 <span class="go">│ 7[0m │  panda_link7[0m │ panda_link6[0m │ panda_joint7[0m │                tx(0.088) * Rx(90°) * Rz(q6)[0m │</span>
 <span class="go">│ 8[0m │ [38;5;4m@panda_link8[0m │ panda_link7[0m │ panda_joint8[0m │                                   tz(0.107)[0m │</span>
 <span class="go">└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0°[0m  │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  45°[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
 
 </pre></div>
 </div>
@@ -2058,6 +2249,13 @@ graphical characteristics.</p>
 <span class="go">│10[0m │          [38;5;4mworld[0m │              -[0m │                               [0m │                                   [0m │</span>
 <span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴────────────────────────────────────┘</span>
 
+<span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
+<span class="go">│name │ q0    │ q1  │ q2  │ q3  │ q4   │ q5  │</span>
+<span class="go">├─────┼───────┼─────┼─────┼─────┼──────┼─────┤</span>
+<span class="go">│  qz[0m │  0°[0m   │  0°[0m │  0°[0m │  0°[0m │  0°[0m  │  0°[0m │</span>
+<span class="go">│  qr[0m │  180°[0m │  0°[0m │  0°[0m │  0°[0m │  90°[0m │  0°[0m │</span>
+<span class="go">└─────┴───────┴─────┴─────┴─────┴──────┴─────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2095,6 +2293,13 @@ graphical characteristics.</p>
 <span class="go">│ 9[0m │         [38;5;4m@tool0[0m │   wrist_3_link[0m │ wrist_3_link-tool0_fixed_joint[0m │            ty(0.0823) * Rx(-90°)[0m │</span>
 <span class="go">│10[0m │          [38;5;4mworld[0m │              -[0m │                               [0m │                                 [0m │</span>
 <span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
+
+<span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
+<span class="go">│name │ q0    │ q1  │ q2  │ q3  │ q4   │ q5  │</span>
+<span class="go">├─────┼───────┼─────┼─────┼─────┼──────┼─────┤</span>
+<span class="go">│  qz[0m │  0°[0m   │  0°[0m │  0°[0m │  0°[0m │  0°[0m  │  0°[0m │</span>
+<span class="go">│  qr[0m │  180°[0m │  0°[0m │  0°[0m │  0°[0m │  90°[0m │  0°[0m │</span>
+<span class="go">└─────┴───────┴─────┴─────┴─────┴──────┴─────┘</span>
 
 </pre></div>
 </div>
@@ -2134,6 +2339,13 @@ graphical characteristics.</p>
 <span class="go">│10[0m │          [38;5;4mworld[0m │              -[0m │                               [0m │                                 [0m │</span>
 <span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
 
+<span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
+<span class="go">│name │ q0    │ q1  │ q2  │ q3  │ q4   │ q5  │</span>
+<span class="go">├─────┼───────┼─────┼─────┼─────┼──────┼─────┤</span>
+<span class="go">│  qz[0m │  0°[0m   │  0°[0m │  0°[0m │  0°[0m │  0°[0m  │  0°[0m │</span>
+<span class="go">│  qr[0m │  180°[0m │  0°[0m │  0°[0m │  0°[0m │  90°[0m │  0°[0m │</span>
+<span class="go">└─────┴───────┴─────┴─────┴─────┴──────┴─────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2167,6 +2379,15 @@ characteristics.</p>
 <span class="go">│ 5[0m │  link6[0m │  link5[0m │    j5[0m │                             tz(0.4331) * Rx(90°) * Rz(q4)[0m │</span>
 <span class="go">│ 6[0m │ @link7[0m │  link6[0m │    j6[0m │                            ty(0.0558) * Rx(-90°) * Rz(q5)[0m │</span>
 <span class="go">└───┴────────┴────────┴───────┴───────────────────────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
+<span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
+<span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m  │  0°[0m   │  0°[0m │  0°[0m  │  0°[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │  90°[0m │ -90°[0m  │  0°[0m │  0°[0m  │  0°[0m │</span>
+<span class="go">│  qs[0m │  0°[0m │  0°[0m  │ -90°[0m  │  0°[0m │  0°[0m  │  0°[0m │</span>
+<span class="go">│  qn[0m │  0°[0m │  45°[0m │  180°[0m │  0°[0m │  45°[0m │  0°[0m │</span>
+<span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
 
 </pre></div>
 </div>
@@ -2208,6 +2429,13 @@ characteristics.</p>
 <span class="go">│10[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                  ty(q6)[0m │</span>
 <span class="go">│11[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                            tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬────┬────────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5 │ q6     │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼────┼────────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0[0m │  0[0m     │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  2[0m │  0.785[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴────┴────────┘</span>
 
 </pre></div>
 </div>
@@ -2256,6 +2484,13 @@ characteristics.</p>
 <span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                            tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
 
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼────────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0[0m     │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  0.785[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴────────┴────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2302,6 +2537,13 @@ characteristics.</p>
 <span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                  ty(q7)[0m │</span>
 <span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                            tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼────────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0[0m     │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  0.785[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴────────┴────┘</span>
 
 </pre></div>
 </div>
@@ -2350,6 +2592,13 @@ characteristics.</p>
 <span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                           tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────┘</span>
 
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼────────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0[0m     │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  0.785[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴────────┴────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2396,6 +2645,13 @@ characteristics.</p>
 <span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                    ty(q7)[0m │</span>
 <span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                                tx(0.0385)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴───────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼────────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0[0m     │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  0.785[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴────────┴────┘</span>
 
 </pre></div>
 </div>
@@ -2445,6 +2701,13 @@ characteristics.</p>
 <span class="go">│13[0m │   [38;5;4m@/ee_gripper_link[0m │       /fingers_link[0m │   ee_gripper[0m │                                tx(0.0385)[0m │</span>
 <span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴───────────────────────────────────────────┘</span>
 
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┬────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │ q7 │ q8 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┼────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0°[0m  │  0[0m │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  45°[0m │  0[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┴────┴────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2492,6 +2755,13 @@ characteristics.</p>
 <span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                           tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────┘</span>
 
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼────────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0[0m     │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  0.785[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴────────┴────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2538,6 +2808,13 @@ characteristics.</p>
 <span class="go">│11[0m │ @/right_finger_link[0m │     /fingers_link[0m │ right_finger[0m │                                     ty(q7)[0m │</span>
 <span class="go">│12[0m │   [38;5;4m@/ee_gripper_link[0m │     /fingers_link[0m │   ee_gripper[0m │                               tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼────────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0[0m     │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  0.785[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴────────┴────┘</span>
 
 </pre></div>
 </div>
@@ -2587,6 +2864,13 @@ characteristics.</p>
 <span class="go">│13[0m │   [38;5;4m@/ee_gripper_link[0m │       /fingers_link[0m │   ee_gripper[0m │                               tx(0.027575)[0m │</span>
 <span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴────────────────────────────────────────────┘</span>
 
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┬────┬────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │ q7 │ q8 │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┼────┼────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0°[0m  │  0[0m │  0[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  45°[0m │  0[0m │  0[0m │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┴────┴────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -2634,6 +2918,13 @@ characteristics.</p>
 <span class="go">│12[0m │      j2n4s300_link_finger_3[0m │        j2n4s300_link_4[0m │     j2n4s300_joint_finger_3[0m │ tx(-0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-100.6°) * Ry(37.2°) * Rx(-90°) * Rz(q8)[0m │</span>
 <span class="go">│13[0m │ @j2n4s300_link_finger_tip_3[0m │ j2n4s300_link_finger_3[0m │ j2n4s300_joint_finger_tip_3[0m │                                                          tx(0.044) * ty(-0.003) * Rz(q9)[0m │</span>
 <span class="go">└───┴─────────────────────────────┴────────────────────────┴─────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬──────┬──────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐</span>
+<span class="go">│name │ q0  │ q1   │ q2   │ q3  │ q4  │ q5  │ q6  │ q7  │ q8  │ q9  │</span>
+<span class="go">├─────┼─────┼──────┼──────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤</span>
+<span class="go">│  qz[0m │  0°[0m │  0°[0m  │  0°[0m  │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │</span>
+<span class="go">│  qr[0m │  0°[0m │  45°[0m │  60°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │</span>
+<span class="go">└─────┴─────┴──────┴──────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘</span>
 
 </pre></div>
 </div>

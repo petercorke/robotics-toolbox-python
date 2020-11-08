@@ -280,9 +280,9 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;ets=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">())</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;, parent=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, parent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
 
@@ -302,31 +302,112 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Variable part of link ETS</span>
+
+<span class="sd">        :return: joint variable transform</span>
+<span class="sd">        :rtype: ETS instance</span>
+
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the identity)</span>
+<span class="sd">        followed by an optional joint variable transform.  This property returns</span>
+<span class="sd">        the latter.</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ELink, ETS</span>
+<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.tz(0.333) * ETS.rx(90, &#39;deg&#39;) * ETS.rz() )</span>
+<span class="sd">            &gt;&gt;&gt; print(link.v)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constant part of link ETS</span>
+
+<span class="sd">        :return: constant part of link transform</span>
+<span class="sd">        :rtype: SE3 instance</span>
+
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the identity)</span>
+<span class="sd">        followed by an optional joint variable transform.  This property returns</span>
+<span class="sd">        the constant part.  If no constant part is given, this returns an</span>
+<span class="sd">        identity matrix.</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ELink, ETS</span>
+<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.tz(0.333) * ETS.rx(90, &#39;deg&#39;) * ETS.rz() )</span>
+<span class="sd">            &gt;&gt;&gt; link.Ts</span>
+<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.rz() )</span>
+<span class="sd">            &gt;&gt;&gt; link.Ts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if link has joint</span>
+
+<span class="sd">        :return: test if link has a joint</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the identity)</span>
+<span class="sd">        followed by an optional joint variable transform.  This property returns the</span>
+<span class="sd">        whether the</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
+<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot[1].isjoint  # link with joint</span>
+<span class="sd">            &gt;&gt;&gt; robot[8].isjoint  # static link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint index</span>
+
+<span class="sd">        - ``link.jindex`` is the joint index</span>
+<span class="sd">            :return: joint index</span>
+<span class="sd">            :rtype: int</span>
+<span class="sd">        - ``link.jindex = ...`` checks and sets the joint index</span>
+
+<span class="sd">        For a serial-link manipulator the joints are numbered starting at zero</span>
+<span class="sd">        and increasing sequentially toward the end-effector.  For branched</span>
+<span class="sd">        mechanisms this is not so straightforward.</span>
+
+<span class="sd">        The link&#39;s ``jindex`` property specifies the index of its joint</span>
+<span class="sd">        variable within a vector of joint coordinates.</span>
+
+<span class="sd">        .. note:: ``jindex`` values must be a sequence of integers starting</span>
+<span class="sd">            at zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span>
 
     <span class="nd">@jindex</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="n">j</span>
+
+<div class="viewcode-block" id="ELink.isrevolute"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of revolute type</span>
+
+<span class="sd">        :return: Ture if is revolute</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrevolute</span></div>
+
+<div class="viewcode-block" id="ELink.isprismatic"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.isprismatic">[docs]</a>    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of prismatic type</span>
+
+<span class="sd">        :return: Ture if is prismatic</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isprismatic</span></div>
 
     <span class="c1"># @property</span>
     <span class="c1"># def ets(self):</span>
@@ -342,6 +423,21 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parent link</span>
+
+<span class="sd">        :return: Link&#39;s parent</span>
+<span class="sd">        :rtype: ELink instance</span>
+
+<span class="sd">        This is a reference to </span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
+<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot[0].parent  # base link has no parent</span>
+<span class="sd">            &gt;&gt;&gt; robot[1].parent  # second link&#39;s parent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
 
     <span class="nd">@property</span>
@@ -352,39 +448,14 @@
     <span class="k">def</span> <span class="nf">M</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M</span>
 
-    <span class="nd">@collision</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
-        <span class="n">new_coll</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">coll</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-                    <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-            <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
-
-    <span class="nd">@geometry</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
-        <span class="n">new_geom</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-                    <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-            <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span>
 
     <span class="c1"># @r.setter</span>
     <span class="c1"># def r(self, T):</span>
@@ -438,6 +509,40 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span></div>
+
+    <span class="nd">@collision</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
+        <span class="n">new_coll</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">coll</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
+                    <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
+            <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
+
+    <span class="nd">@geometry</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
+        <span class="n">new_geom</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
+                    <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
+            <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span>
 
 <div class="viewcode-block" id="ELink.closest_point"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>

@@ -1669,13 +1669,13 @@ ASME Journa of Dynamic Systems, Measurement and Control, vol.
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.addconfiguration">
-<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.addconfiguration" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.addconfiguration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a named joint configuration (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the joint configuration</p></li>
-<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>)</em>) – Joint configuration</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>) or </em><em>list</em>) – Joint configuration</p></li>
 </ul>
 </dd>
 </dl>
@@ -1740,12 +1740,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1763,6 +1763,11 @@ row of <code class="docutils literal notranslate"><span class="pre">q</span></co
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.configurations_str">
+<code class="sig-name descname">configurations_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.configurations_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.control_type">

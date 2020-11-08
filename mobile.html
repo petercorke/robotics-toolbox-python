@@ -474,6 +474,27 @@ of joints in order from left to right.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.SuperETS.jointset">
+<code class="sig-name descname">jointset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#SuperETS.jointset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.SuperETS.jointset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get set of joint indices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>set of unique joint indices</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>set</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">jointset</span><span class="p">()</span>
+<span class="go">{1, 2}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.SuperETS.T">
 <code class="sig-name descname">T</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#SuperETS.T"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.SuperETS.T" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate an elementary transformation</p>
@@ -540,14 +561,14 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
 <span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
@@ -1488,14 +1509,14 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
 <span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
@@ -1723,6 +1744,27 @@ or moves in the opposite direction.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS2.jointset">
+<code class="sig-name descname">jointset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jointset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get set of joint indices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>set of unique joint indices</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>set</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">jointset</span><span class="p">()</span>
+<span class="go">{1, 2}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS2.n">
 <em class="property">property </em><code class="sig-name descname">n</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.n" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of joints</p>
@@ -1847,6 +1889,11 @@ J. Haviland and P. Corke</p></li>
 <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.ty" title="roboticstoolbox.robot.ETS.ETS.ty"><code class="xref py py-func docutils literal notranslate"><span class="pre">ty()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.tz" title="roboticstoolbox.robot.ETS.ETS.tz"><code class="xref py py-func docutils literal notranslate"><span class="pre">tz()</span></code></a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.s">
+<em class="property">property </em><code class="sig-name descname">s</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.s" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS.rx">
 <em class="property">classmethod </em><code class="sig-name descname">rx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.rx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.rx" title="Permalink to this definition">¶</a></dt>
@@ -2096,12 +2143,12 @@ reduce computation time.</p>
 some functions of the joint variables, which we can write as
 <span class="math notranslate nohighlight">\(\mathbf{E}(q)\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 T_e &amp;= \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
+\[{}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
 <p>The temporal derivative of this is the spatial
 velocity <span class="math notranslate nohighlight">\(\nu\)</span> which is a 6-vector is related to the rate of
 change of joint coordinates by the Jacobian matrix.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 \nu &amp; = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
+\[{}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
 <p>This velocity can be expressed relative to the {0} frame or the {e}
 frame.</p>
 <dl class="field-list simple">
@@ -2181,18 +2228,18 @@ coordinates <code class="docutils literal notranslate"><span class="pre">q</span
 some functions of the joint variables, which we can write as
 <span class="math notranslate nohighlight">\(\mathbf{E}(q)\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 T_e &amp;= \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
+\[{}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
 <p>The temporal derivative of this is the spatial
 velocity <span class="math notranslate nohighlight">\(\nu\)</span> which is a 6-vector is related to the rate of
 change of joint coordinates by the Jacobian matrix.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 \nu &amp; = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
+\[{}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
 <p>This velocity can be expressed relative to the {0} frame or the {e}
 frame.</p>
 <p>The temporal derivative of spatial velocity is spatial acceleration,
 which again can be expressed with respect to the {0} or {e} frames</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}{}^0 \dot{\nu} &amp;= \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
+\[\begin{split}{}^0 \dot{\nu} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
           &amp;= \mathbf{J}(q) \ddot{q} + \dot{q}^T \mathbf{H}(q) \dot{q}\end{split}\]</div>
 <p>The manipulator Hessian tensor <span class="math notranslate nohighlight">\(H\)</span> maps joint velocity to
 end-effector spatial acceleration, expressed in the {0} coordinate
@@ -2633,14 +2680,14 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
 <span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
@@ -2863,6 +2910,27 @@ or moves in the opposite direction.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">joints</span><span class="p">()</span>
 <span class="go">array([0, 2])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS.jointset">
+<code class="sig-name descname">jointset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jointset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get set of joint indices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>set of unique joint indices</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>set</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">jointset</span><span class="p">()</span>
+<span class="go">{1, 2}</span>
 </pre></div>
 </div>
 </dd></dl>

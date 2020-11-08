@@ -360,25 +360,9 @@
             <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 
         <span class="c1"># show named configurations</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
-                <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&gt;&quot;</span><span class="p">),</span>
-                <span class="o">*</span><span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)],</span>
-                <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">qlist</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">():</span>
-                        <span class="n">qlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2"> .3g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">qlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">angle</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;</span><span class="si">{: .3g}</span><span class="s2">&quot;</span><span class="p">))</span>
-                <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">qlist</span><span class="p">)</span>
-
-            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurations_str</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">s</span>
-
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
         <span class="n">nlinks</span> <span class="o">=</span> <span class="p">[]</span>

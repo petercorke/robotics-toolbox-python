@@ -233,7 +233,7 @@ as shown in this example where we define a simple two link planar manipulator.</
 8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
@@ -569,12 +569,12 @@ reduce computation time.</p>
 some functions of the joint variables, which we can write as
 <span class="math notranslate nohighlight">\(\mathbf{E}(q)\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 T_e &amp;= \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
+\[{}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
 <p>The temporal derivative of this is the spatial
 velocity <span class="math notranslate nohighlight">\(\nu\)</span> which is a 6-vector is related to the rate of
 change of joint coordinates by the Jacobian matrix.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 \nu &amp; = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
+\[{}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
 <p>This velocity can be expressed relative to the {0} frame or the {e}
 frame.</p>
 <dl class="field-list simple">
@@ -615,18 +615,18 @@ coordinates <code class="docutils literal notranslate"><span class="pre">q</span
 some functions of the joint variables, which we can write as
 <span class="math notranslate nohighlight">\(\mathbf{E}(q)\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 T_e &amp;= \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
+\[{}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)\]</div>
 <p>The temporal derivative of this is the spatial
 velocity <span class="math notranslate nohighlight">\(\nu\)</span> which is a 6-vector is related to the rate of
 change of joint coordinates by the Jacobian matrix.</p>
 <div class="math notranslate nohighlight">
-\[{}^0 \nu &amp; = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
+\[{}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6\]</div>
 <p>This velocity can be expressed relative to the {0} frame or the {e}
 frame.</p>
 <p>The temporal derivative of spatial velocity is spatial acceleration,
 which again can be expressed with respect to the {0} or {e} frames</p>
 <div class="math notranslate nohighlight">
-\[\begin{split}{}^0 \dot{\nu} &amp;= \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
+\[\begin{split}{}^0 \dot{\nu} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\
           &amp;= \mathbf{J}(q) \ddot{q} + \dot{q}^T \mathbf{H}(q) \dot{q}\end{split}\]</div>
 <p>The manipulator Hessian tensor <span class="math notranslate nohighlight">\(H\)</span> maps joint velocity to
 end-effector spatial acceleration, expressed in the {0} coordinate
@@ -1110,14 +1110,14 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
 <span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
@@ -1839,14 +1839,14 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
 <span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">396</span>, in <span class="n">eval</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>

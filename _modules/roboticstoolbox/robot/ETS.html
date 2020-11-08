@@ -489,6 +489,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">([</span><span class="n">e</span><span class="o">.</span><span class="n">isjoint</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
 
+<div class="viewcode-block" id="SuperETS.jointset"><a class="viewcode-back" href="../../../mobile.html#roboticstoolbox.robot.ETS.SuperETS.jointset">[docs]</a>    <span class="k">def</span> <span class="nf">jointset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get set of joint indices</span>
+
+<span class="sd">        :return: set of unique joint indices</span>
+<span class="sd">        :rtype: set</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ETS</span>
+<span class="sd">            &gt;&gt;&gt; e = ETS.rz(j=1) * ETS.tx(j=2) * ETS.rz(j=1) * ETS.tx(1)</span>
+<span class="sd">            &gt;&gt;&gt; e.jointset()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">jindex</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="p">()])</span></div>
+
 <div class="viewcode-block" id="SuperETS.T"><a class="viewcode-back" href="../../../mobile.html#roboticstoolbox.robot.ETS.SuperETS.T">[docs]</a>    <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate an elementary transformation</span>
@@ -980,6 +997,23 @@
 <span class="sd">    :seealso: :func:`rx`, :func:`ry`, :func:`rz`, :func:`tx`,</span>
 <span class="sd">        :func:`ty`, :func:`tz`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">s</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 
 <div class="viewcode-block" id="ETS.rx"><a class="viewcode-back" href="../../../mobile.html#roboticstoolbox.robot.ETS.ETS.rx">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">rx</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1192,8 +1226,8 @@
 <span class="sd">        :math:`\mathbf{E}(q)`.</span>
 
 <span class="sd">        .. math::</span>
-
-<span class="sd">            {}^0 T_e &amp;= \mathbf{E}(q) \in \mbox{SE}(3)</span>
+<span class="sd">        </span>
+<span class="sd">            {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)</span>
 
 <span class="sd">        The temporal derivative of this is the spatial</span>
 <span class="sd">        velocity :math:`\nu` which is a 6-vector is related to the rate of</span>
@@ -1201,7 +1235,7 @@
 
 <span class="sd">        .. math::</span>
 
-<span class="sd">            {}^0 \nu &amp; = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6</span>
+<span class="sd">           {}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6</span>
 
 <span class="sd">        This velocity can be expressed relative to the {0} frame or the {e}</span>
 <span class="sd">        frame.</span>
@@ -1329,7 +1363,7 @@
 
 <span class="sd">        .. math::</span>
 
-<span class="sd">            {}^0 T_e &amp;= \mathbf{E}(q) \in \mbox{SE}(3)</span>
+<span class="sd">            {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)</span>
 
 <span class="sd">        The temporal derivative of this is the spatial</span>
 <span class="sd">        velocity :math:`\nu` which is a 6-vector is related to the rate of</span>
@@ -1337,7 +1371,7 @@
 
 <span class="sd">        .. math::</span>
 
-<span class="sd">            {}^0 \nu &amp; = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6</span>
+<span class="sd">            {}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6</span>
 
 <span class="sd">        This velocity can be expressed relative to the {0} frame or the {e}</span>
 <span class="sd">        frame.</span>
@@ -1347,7 +1381,7 @@
 
 <span class="sd">        .. math::</span>
 
-<span class="sd">            {}^0 \dot{\nu} &amp;= \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\</span>
+<span class="sd">            {}^0 \dot{\nu} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q} \in \mathbb{R}^6 \\</span>
 <span class="sd">                      &amp;= \mathbf{J}(q) \ddot{q} + \dot{q}^T \mathbf{H}(q) \dot{q}</span>
 
 <span class="sd">        The manipulator Hessian tensor :math:`H` maps joint velocity to</span>

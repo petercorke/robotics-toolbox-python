@@ -191,7 +191,7 @@
 </map><p>The various models <a class="reference internal" href="arm_erobot.html#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
 <span class="target" id="module-roboticstoolbox.robot.Robot"></span><dl class="py class">
 <dt id="roboticstoolbox.robot.Robot.Robot">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Robot.</code><code class="sig-name descname">Robot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">links</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'noname'</span></em>, <em class="sig-param"><span class="n">manufacturer</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">base</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tool</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">meshdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">keywords</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">symbolic</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Robot.</code><code class="sig-name descname">Robot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">links</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'noname'</span></em>, <em class="sig-param"><span class="n">manufacturer</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">comment</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">base</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tool</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">meshdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">keywords</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">symbolic</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.__getitem__">
@@ -256,13 +256,13 @@ dynamic parameters is invalid.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.addconfiguration">
-<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.addconfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.addconfiguration" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.addconfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.addconfiguration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a named joint configuration (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of the joint configuration</p></li>
-<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>)</em>) – Joint configuration</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>) or </em><em>list</em>) – Joint configuration</p></li>
 </ul>
 </dd>
 </dl>
@@ -277,6 +277,11 @@ dynamic parameters is invalid.</p>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.configurations_str">
+<code class="sig-name descname">configurations_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.configurations_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.configurations_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.dyntable">
