@@ -9,10 +9,11 @@ req = [
     'spatialmath-python>=0.8.3',
     'scipy',
     'matplotlib',
-    'ansitable'
+    'ansitable',
+    'swift-sim'
 ]
 
-swift_req = [
+collision_req = [
     'pybullet'
 ]
 
@@ -58,7 +59,7 @@ frne = Extension(
             './roboticstoolbox/core/frne.c'])
 
 setup(
-    name='roboticstoolbox',
+    name='roboticstoolbox-python',
 
     version='0.6.0',
 
@@ -117,7 +118,7 @@ setup(
     install_requires=req,
 
     extras_require={
-        'swift': swift_req,
+        'collision': collision_req,
         'dev': dev_req,
         'docs': docs_req,
         'vpython': vp_req
