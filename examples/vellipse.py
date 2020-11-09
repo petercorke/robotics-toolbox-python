@@ -13,7 +13,7 @@ panda.q = panda.qr
 
 vell = panda.vellipse(centre='ee')
 
-env = rp.backend.PyPlot()
+env = rp.backends.PyPlot()
 env.launch(
     'Panda Velocity Ellipse Example',
     limits=[-0.2, 0.6, -0.4, 0.4, 0, 0.8])

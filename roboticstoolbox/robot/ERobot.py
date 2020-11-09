@@ -11,11 +11,11 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 from roboticstoolbox.robot.ELink import ELink, ETS
-# from roboticstoolbox.backend.PyPlot.functions import \
+# from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
 #     _plot2, _teach2
-from roboticstoolbox.backend import xacro
-from roboticstoolbox.backend import URDF
+from roboticstoolbox.tools import xacro
+from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath
@@ -368,7 +368,7 @@ class ERobot(Robot):
         # get the path to the class that defines the robot
         classpath = sys.modules[self.__module__].__file__
         # add on relative path to get to the URDF or xacro file
-        base_path = PurePath(classpath).parent.parent / 'xacro'
+        base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
         file_path = base_path / PurePosixPath(file_path)
         name, ext = splitext(file_path)
 

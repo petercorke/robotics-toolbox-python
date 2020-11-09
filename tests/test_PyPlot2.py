@@ -14,7 +14,7 @@ class TestPyPlot(unittest.TestCase):
 
     def test_PyPlot(self):
         panda = rp.models.DH.Panda()
-        env = rp.backend.PyPlot2()
+        env = rp.backends.PyPlot2()
         env.launch()
         env.add(panda)
         env.step()
@@ -23,7 +23,7 @@ class TestPyPlot(unittest.TestCase):
 
     def test_PyPlot_invisible(self):
         panda = rp.models.DH.Panda()
-        env = rp.backend.PyPlot2()
+        env = rp.backends.PyPlot2()
         env.launch()
         env.add(panda, display=False)
         env.step()
@@ -32,7 +32,7 @@ class TestPyPlot(unittest.TestCase):
 
     def test_unimplemented(self):
         # TODO remove these as implemented
-        env = rp.backend.PyPlot2()
+        env = rp.backends.PyPlot2()
         env.reset()
 
         env.restart()

@@ -9,16 +9,16 @@ from numpy import array
 from math import pi
 import time
 
-from roboticstoolbox.backend.VPython.common_functions import \
+from roboticstoolbox.backends.VPython.common_functions import \
     get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, get_pose_pos, \
     vpython_to_se3, wrap_to_pi, close_localhost_session, \
     x_axis_vector, y_axis_vector, z_axis_vector
-from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, \
+from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas3D, \
     draw_reference_frame_axes
-from roboticstoolbox.backend.VPython.graphicalrobot import GraphicalRobot, \
+from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot, \
     DefaultJoint, RotationalJoint, PrismaticJoint, StaticJoint, Gripper
-from roboticstoolbox.backend.VPython.stl import import_object_from_numpy_stl
-from roboticstoolbox.backend.VPython.grid import GraphicsGrid
+from roboticstoolbox.backends.VPython.stl import import_object_from_numpy_stl
+from roboticstoolbox.backends.VPython.grid import GraphicsGrid
 
 
 class TestVPython(unittest.TestCase):

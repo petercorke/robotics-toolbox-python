@@ -3,6 +3,7 @@
 from roboticstoolbox.tools.null import null
 from roboticstoolbox.tools.p_servo import p_servo
 from roboticstoolbox.tools.ticker import Ticker
+from roboticstoolbox.tools.urdf import *
 # from roboticstoolbox.tools.stdout_supress import stdout_supress
 
 __all__ = [

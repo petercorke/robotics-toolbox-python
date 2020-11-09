@@ -16,7 +16,7 @@ IEEE/ASME International Conference on Advanced Intelligent Mechatronics
 """
 
 # Launch the simulator Swift
-env = rtb.backend.Swift()
+env = rtb.backends.Swift()
 env.launch()
 
 # Create a Panda robot object

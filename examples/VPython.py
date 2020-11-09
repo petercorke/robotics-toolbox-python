@@ -6,7 +6,7 @@
 import roboticstoolbox as rp
 # import time
 
-env = rp.backend.VPython()
+env = rp.backends.VPython()
 env.launch()
 
 #  PUMA560

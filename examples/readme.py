@@ -22,7 +22,8 @@ robot.plot(qt.q, movie="panda1.gif")
 dt = 0.050  # simulation timestep in seconds
 robot = rtb.models.URDF.Panda()
 print(robot)
-env = rtb.backend.Swift()   # instantiate 3D browser-based visualizer
+
+env = rtb.backends.Swift()   # instantiate 3D browser-based visualizer
 env.launch("chrome")        # activate it
 env.add(robot)              # add robot to the 3D scene
 env.start_recording("panda2", 1 / dt)
