@@ -7,8 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Denavit-Hartenberg models &mdash; Robotics Toolbox for Python 0.3.7
- documentation</title>
+  <title>Denavit-Hartenberg models &mdash; Robotics Toolbox for Python  documentation</title>
   
 
   
@@ -33,6 +32,7 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -1740,12 +1740,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -2478,6 +2478,69 @@ joints.</p></li>
 effects of Coulomb friction when operating at joint velocity QD
 (1xN).</p></li>
 </ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.linkcolormap">
+<code class="sig-name descname">linkcolormap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">linkcolors</span><span class="o">=</span><span class="default_value">'viridis'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.linkcolormap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a colormap for robot joints</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>linkcolors</strong> (<em>list</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – list of colors or colormap, defaults to “viridis”</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>color map</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.colors.ListedColormap</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cm</span> <span class="pre">=</span> <span class="pre">robot.linkcolormap()</span></code> is an n-element colormap that gives a
+unique color for every link.  The RGBA colors for link <code class="docutils literal notranslate"><span class="pre">j</span></code> are
+<code class="docutils literal notranslate"><span class="pre">cm(j)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cm</span> <span class="pre">=</span> <span class="pre">robot.linkcolormap(cmap)</span></code> as above but <code class="docutils literal notranslate"><span class="pre">cmap</span></code> is the name
+of a valid matplotlib colormap.  The default, example above, is the
+<code class="docutils literal notranslate"><span class="pre">viridis</span></code> colormap.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cm</span> <span class="pre">=</span> <span class="pre">robot.linkcolormap(list</span> <span class="pre">of</span> <span class="pre">colors)</span></code> as above but a 
+colormap is created from a list of n color names given as strings,
+tuples or hexstrings.</p></li>
+</ul>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cm</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">linkcolormap</span><span class="p">(</span><span class="s2">&quot;inferno&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">cm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)))</span> <span class="c1"># cm(i) is 3rd color in colormap</span>
+<span class="go">[[0.0015 0.0005 0.0139 1.    ]</span>
+<span class="go"> [0.2582 0.0386 0.4065 1.    ]</span>
+<span class="go"> [0.5783 0.148  0.4044 1.    ]</span>
+<span class="go"> [0.865  0.3168 0.2261 1.    ]</span>
+<span class="go"> [0.9876 0.6453 0.0399 1.    ]</span>
+<span class="go"> [0.9884 0.9984 0.6449 1.    ]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cm</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">linkcolormap</span><span class="p">([</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;#0f8040&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;cyan&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">cm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)))</span>
+<span class="go">[[1.     0.     0.     1.    ]</span>
+<span class="go"> [0.     0.5    0.     1.    ]</span>
+<span class="go"> [0.     0.5    0.     1.    ]</span>
+<span class="go"> [0.0588 0.502  0.251  1.    ]</span>
+<span class="go"> [1.     1.     0.     1.    ]</span>
+<span class="go"> [0.     1.     1.     1.    ]]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Colormaps have 4-elements: red, green, blue, alpha (RGBA)</p></li>
+<li><p>Names of supported colors and colormaps are defined in the matplotlib
+documentation.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">Specifying colors</a></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="py method">

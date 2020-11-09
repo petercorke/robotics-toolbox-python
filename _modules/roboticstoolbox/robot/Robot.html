@@ -7,8 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>roboticstoolbox.robot.Robot &mdash; Robotics Toolbox for Python 0.3.7
- documentation</title>
+  <title>roboticstoolbox.robot.Robot &mdash; Robotics Toolbox for Python  documentation</title>
   
 
   
@@ -33,6 +32,7 @@
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -167,6 +167,8 @@
 <span class="c1"># from roboticstoolbox.tools import xacro</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span><span class="p">,</span> <span class="n">PurePosixPath</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Bounds</span><span class="p">,</span> <span class="n">LinearConstraint</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.tools.null</span> <span class="kn">import</span> <span class="n">null</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 
@@ -423,6 +425,52 @@
             <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">link</span><span class="o">.</span><span class="n">_dyn2list</span><span class="p">())</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></div>
 
+
+
+<div class="viewcode-block" id="Robot.linkcolormap"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.linkcolormap">[docs]</a>    <span class="k">def</span> <span class="nf">linkcolormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linkcolors</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a colormap for robot joints</span>
+
+<span class="sd">        :param linkcolors: list of colors or colormap, defaults to &quot;viridis&quot;</span>
+<span class="sd">        :type linkcolors: list or str, optional</span>
+<span class="sd">        :return: color map</span>
+<span class="sd">        :rtype: matplotlib.colors.ListedColormap</span>
+
+<span class="sd">        - ``cm = robot.linkcolormap()`` is an n-element colormap that gives a</span>
+<span class="sd">          unique color for every link.  The RGBA colors for link ``j`` are</span>
+<span class="sd">          ``cm(j)``.</span>
+<span class="sd">        - ``cm = robot.linkcolormap(cmap)`` as above but ``cmap`` is the name</span>
+<span class="sd">          of a valid matplotlib colormap.  The default, example above, is the</span>
+<span class="sd">          ``viridis`` colormap.</span>
+<span class="sd">        - ``cm = robot.linkcolormap(list of colors)`` as above but a </span>
+<span class="sd">          colormap is created from a list of n color names given as strings,</span>
+<span class="sd">          tuples or hexstrings.</span>
+<span class="sd">        </span>
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; cm = robot.linkcolormap(&quot;inferno&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; print(cm(range(6))) # cm(i) is 3rd color in colormap</span>
+<span class="sd">            &gt;&gt;&gt; cm = robot.linkcolormap([&#39;red&#39;, &#39;g&#39;, (0,0.5,0), &#39;#0f8040&#39;, &#39;yellow&#39;, &#39;cyan&#39;])</span>
+<span class="sd">            &gt;&gt;&gt; print(cm(range(6)))</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            </span>
+<span class="sd">            - Colormaps have 4-elements: red, green, blue, alpha (RGBA)</span>
+<span class="sd">            - Names of supported colors and colormaps are defined in the matplotlib</span>
+<span class="sd">              documentation.</span>
+
+<span class="sd">                - `Specifying colors &lt;https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py&gt;`_</span>
+<span class="sd">                - `Colormaps &lt;https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py&gt;`_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
+            <span class="c1"># provided a list of color names</span>
+            <span class="k">return</span> <span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># assume it is a colormap name</span>
+            <span class="k">return</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span></div>
 <span class="c1"># --------------------------------------------------------------------- #</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
