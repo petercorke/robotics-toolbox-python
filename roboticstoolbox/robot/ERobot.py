@@ -648,19 +648,31 @@ class ERobot(Robot):
         if q is None:
             q = self.q
 
+        path, n = self.get_path(from_link, to_link)
+
+        use_jindex = True
+
         try:
             q = getvector(q, self.n, 'col')
-        except ValueError:
-            trajn = q.shape[1]
-            verifymatrix(q, (self.n, trajn))
 
-        path, _ = self.get_path(from_link, to_link)
+        except ValueError:
+            try:
+                q = getvector(q, n, 'col')
+                use_jindex = False
+                j = 0
+            except ValueError:
+                trajn = q.shape[1]
+                verifymatrix(q, (self.n, trajn))
 
         for i in range(trajn):
             tr = self.base.A
             for link in path:
                 if link.isjoint:
-                    T = link.A(q[link.jindex, i], fast=True)
+                    if use_jindex:
+                        T = link.A(q[link.jindex, i], fast=True)
+                    else:
+                        T = link.A(q[j, i], fast=True)
+                        j += 1
                 else:
                     T = link.A(fast=True)
 
@@ -1317,7 +1329,7 @@ class ERobot(Robot):
             return l_Ain, l_bin, d, wTcp
 
         for link in links:
-            if link.jtype == link.VARIABLE:
+            if link.isjoint:
                 j += 1
 
             for link_col in link.collision:

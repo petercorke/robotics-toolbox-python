@@ -11,6 +11,8 @@ from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.tools import xacro
 from pathlib import PurePath, PurePosixPath
 from scipy.optimize import minimize, Bounds, LinearConstraint
+from matplotlib import colors
+from matplotlib import cm
 from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
 
@@ -267,6 +269,52 @@ class Robot:
             table.row(link.name, *link._dyn2list())
         return str(table)
 
+
+
+    def linkcolormap(self, linkcolors="viridis"):
+        """
+        Create a colormap for robot joints
+
+        :param linkcolors: list of colors or colormap, defaults to "viridis"
+        :type linkcolors: list or str, optional
+        :return: color map
+        :rtype: matplotlib.colors.ListedColormap
+
+        - ``cm = robot.linkcolormap()`` is an n-element colormap that gives a
+          unique color for every link.  The RGBA colors for link ``j`` are
+          ``cm(j)``.
+        - ``cm = robot.linkcolormap(cmap)`` as above but ``cmap`` is the name
+          of a valid matplotlib colormap.  The default, example above, is the
+          ``viridis`` colormap.
+        - ``cm = robot.linkcolormap(list of colors)`` as above but a 
+          colormap is created from a list of n color names given as strings,
+          tuples or hexstrings.
+        
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> cm = robot.linkcolormap("inferno")
+            >>> print(cm(range(6))) # cm(i) is 3rd color in colormap
+            >>> cm = robot.linkcolormap(['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
+            >>> print(cm(range(6)))
+
+        .. note::
+            
+            - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
+            - Names of supported colors and colormaps are defined in the matplotlib
+              documentation.
+
+                - `Specifying colors <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
+                - `Colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
+        """
+
+        if isinstance(linkcolors, list) and len(linkcolors) == self.n:
+            # provided a list of color names
+            return colors.ListedColormap(linkcolors)
+        else:
+            # assume it is a colormap name
+            return cm.get_cmap(linkcolors, 6)
 # --------------------------------------------------------------------- #
     @property
     def name(self):

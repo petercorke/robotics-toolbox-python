@@ -14,6 +14,7 @@
 import os
 import sys
 import sphinx_rtd_theme
+import re
 
 
 # -- Project information -----------------------------------------------------
@@ -22,10 +23,12 @@ project = 'Robotics Toolbox for Python'
 copyright = '2020, Jesse Haviland and Peter Corke'
 author = 'Jesse Haviland and Peter Corke'
 
-print(__file__)
-# The full version, including alpha/beta/rc tags
-with open('../../RELEASE', encoding='utf-8') as f:
-    release = f.read()
+# print(__file__)
+
+# parse version number out of setup.py
+with open('../../setup.py', encoding='utf-8') as f:
+    setup_py = f.read()
+    m = re.search("version='([0-9\.]*)',", setup_py, re.MULTILINE)
 
 # -- General configuration ---------------------------------------------------
 
@@ -75,7 +78,6 @@ html_theme_options = {
     #'github_repo': 'spatialmath-python',
     #'logo_name': False,
     'logo_only': False,
-    #'description': 'Spatial maths and geometry for Python',
     'display_version': True,
     'prev_next_buttons_location': 'both',
     'analytics_id': 'G-11Q6WJM565',
@@ -111,4 +113,41 @@ latex_elements = {
     # 'fncychap': '\\usepackage[Lenny]{fncychap}',
     'fncychap': '\\usepackage{fncychap}',
     'maketitle': "blah blah blah"
+}
+
+# see https://stackoverflow.com/questions/9728292/creating-latex-math-macros-within-sphinx
+mathjax_config = {
+    'TeX': {
+        'Macros': {
+            # RVC Math notation
+            #  - not possible to do the if/then/else approach
+            #  - subset only
+            "presup": [r"\,{}^{\scriptscriptstyle #1}\!", 1],
+            # groups
+            "SE": [r"\mathbf{SE}(#1)", 1],
+            "SO": [r"\mathbf{SO}(#1)", 1],
+            "se": [r"\mathbf{se}(#1)", 1],
+            "so": [r"\mathbf{so}(#1)", 1],
+            # vectors
+            "vec": [r"\boldsymbol{#1}", 1],
+            "dvec": [r"\dot{\boldsymbol{#1}}", 1],
+            "ddvec": [r"\ddot{\boldsymbol{#1}}", 1],
+            "fvec": [r"\presup{#1}\boldsymbol{#2}", 2],
+            "fdvec": [r"\presup{#1}\dot{\boldsymbol{#2}}", 2],
+            "fddvec": [r"\presup{#1}\ddot{\boldsymbol{#2}}", 2],
+            "norm": [r"\Vert #1 \Vert", 1],
+            # matrices
+            "mat": [r"\mathbf{#1}", 1],
+            "fmat": [r"\presup{#1}\mathbf{#2}", 2],
+            # skew matrices
+            "sk": [r"\left[#1\right]", 1],
+            "skx": [r"\left[#1\right]_{\times}", 1],
+            "vex": [r"\vee\left( #1\right)", 1],
+            "vexx": [r"\vee_{\times}\left( #1\right)", 1],
+            # quaternions
+            "q": r"\mathring{q}",
+            "fq": [r"\presup{#1}\mathring{q}", 1],
+
+        }
+   }
 }

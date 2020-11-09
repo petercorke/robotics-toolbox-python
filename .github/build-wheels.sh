@@ -13,7 +13,7 @@ function repair_wheel {
 cd ./io
 
 # Compile wheels
-for PYBIN in /opt/python/cp3[5-8]*/bin; do
+for PYBIN in /opt/python/cp3[6-8]*/bin; do
     "${PYBIN}/pip" install .
     "${PYBIN}/pip" install pytest
     "${PYBIN}/pip" wheel /io/ --no-deps -w wheelhouse/
@@ -25,7 +25,7 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install packages and test
-for PYBIN in /opt/python/cp3[5-8]*/bin/; do
+for PYBIN in /opt/python/cp3[6-8]*/bin/; do
     "${PYBIN}/pip" install roboticstoolbox --no-index -f /io/wheelhouse
     ("${PYBIN}/pytest")
 done

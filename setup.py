@@ -9,10 +9,11 @@ req = [
     'spatialmath-python>=0.8.3',
     'scipy',
     'matplotlib',
-    'ansitable'
+    'ansitable',
+    'swift-sim'
 ]
 
-swift_req = [
+collision_req = [
     'pybullet'
 ]
 
@@ -41,10 +42,6 @@ docs_req = [
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-# Get the release/version string
-with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
-    release = f.read()
-
 
 def package_files(directory):
     paths = []
@@ -64,9 +61,9 @@ frne = Extension(
             './roboticstoolbox/core/frne.c'])
 
 setup(
-    name='roboticstoolbox',
+    name='roboticstoolbox-python',
 
-    version=release,
+    version='0.6.0',
 
     description='A Python library for robotic education and research',
 
@@ -123,7 +120,7 @@ setup(
     install_requires=req,
 
     extras_require={
-        'swift': swift_req,
+        'collision': collision_req,
         'dev': dev_req,
         'docs': docs_req,
         'vpython': vp_req
