@@ -13,7 +13,7 @@ from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds
-from roboticstoolbox.backend.PyPlot.functions import \
+from roboticstoolbox.backends.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
 from roboticstoolbox.robot.DHDynamics import DHDynamics

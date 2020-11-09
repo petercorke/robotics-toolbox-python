@@ -19,7 +19,7 @@ print(robot.fkine(q))
 # URDF model
 robot = rtb.models.URDF.Panda()
 print(robot)
-env = rtb.backend.Swift()
+env = rtb.backends.Swift()
 env.launch()
 env.add(robot)
 for qk in qt.q:

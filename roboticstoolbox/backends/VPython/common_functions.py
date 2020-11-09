@@ -131,8 +131,8 @@ def close_localhost_session(canvas):  # pragma nocover
 
     :param canvas: The scene to append the JS to the caption
     :type canvas:
-        class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas3D`,
-        class:`roboticstoolbox.backend.VPython.graphics_canvas.GraphicsCanvas2D`
+        class:`roboticstoolbox.backends.VPython.graphics_canvas.GraphicsCanvas3D`,
+        class:`roboticstoolbox.backends.VPython.graphics_canvas.GraphicsCanvas2D`
     """
 
     canvas.scene.append_to_caption('''

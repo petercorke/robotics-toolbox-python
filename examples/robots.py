@@ -53,7 +53,7 @@ wx250s.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(2.4)
 # j2n4s300.q = j2n4s300.qr
 
 # Launch Sim
-env = rp.backend.Swift()
+env = rp.backends.Swift()
 env.launch()
 
 # Add robots

@@ -4,7 +4,7 @@
 """
 
 from vpython import vec, vertex, color, triangle, compound
-from roboticstoolbox.backend.VPython.common_functions import \
+from roboticstoolbox.backends.VPython.common_functions import \
     vector, x_axis_vector
 from io import StringIO
 

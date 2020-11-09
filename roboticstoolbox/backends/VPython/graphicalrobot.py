@@ -4,12 +4,12 @@
 """
 
 from vpython import box, compound, color, sqrt
-from roboticstoolbox.backend.VPython.canvas import draw_reference_frame_axes
-from roboticstoolbox.backend.VPython.common_functions import \
+from roboticstoolbox.backends.VPython.canvas import draw_reference_frame_axes
+from roboticstoolbox.backends.VPython.common_functions import \
     array, x_axis_vector, y_axis_vector, z_axis_vector, \
     get_pose_pos, get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, \
     vector
-from roboticstoolbox.backend.VPython.stl import set_stl_origin, \
+from roboticstoolbox.backends.VPython.stl import set_stl_origin, \
     import_object_from_numpy_stl
 from time import perf_counter
 from spatialmath import SE3

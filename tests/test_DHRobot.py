@@ -1373,7 +1373,7 @@ class TestDHRobot(unittest.TestCase):
     def test_plot_with_vellipse2_fail(self):
         panda = rp.models.DH.Panda()
         panda.q = panda.qr
-        e = rp.backend.PyPlot2()
+        e = rp.backends.PyPlot2()
         e.launch()
         e.add(panda.fellipse(
                 q=panda.qr, centre=[0, 1]))

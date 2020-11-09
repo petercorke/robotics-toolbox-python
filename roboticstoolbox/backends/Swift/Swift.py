@@ -3,7 +3,7 @@
 @author Jesse Haviland
 """
 
-from roboticstoolbox.backend.Connector import Connector
+from roboticstoolbox.backends.Connector import Connector
 import roboticstoolbox as rp
 import numpy as np
 import spatialmath as sm
@@ -52,7 +52,7 @@ class Swift(Connector):  # pragma nocover
 
         robot = rtb.models.DH.Panda()  # create a robot
 
-        pyplot = rtb.backend.Swift()   # create a Swift backend
+        pyplot = rtb.backends.Swift()   # create a Swift backend
         pyplot.add(robot)              # add the robot to the backend
         robot.q = robot.qz             # set the robot configuration
         pyplot.step()                  # update the backend and graphical view

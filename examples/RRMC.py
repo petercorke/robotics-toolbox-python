@@ -8,7 +8,7 @@ import spatialmath as sm
 import numpy as np
 import time
 
-env = rp.backend.PyPlot()
+env = rp.backends.PyPlot()
 env.launch('Panda Resolved-Rate Motion Control Example')
 
 panda = rp.models.DH.Panda()

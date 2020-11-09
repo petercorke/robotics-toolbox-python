@@ -6,7 +6,7 @@
 
 import unittest
 import roboticstoolbox as rp
-from roboticstoolbox.backend import URDF, Link, Joint, Transmission, xacro
+from roboticstoolbox.backends import URDF, Link, Joint, Transmission, xacro
 import numpy as np
 import numpy.testing as nt
 
@@ -16,7 +16,7 @@ class TestURDF(unittest.TestCase):
     # def test_urdfpy(self):
 
     #     # Load
-    #     # u = URDF.load('roboticstoolbox/backend/urdf/tests/data/ur5.urdf')
+    #     # u = URDF.load('roboticstoolbox/backends/urdf/tests/data/ur5.urdf')
     #     u = URDF.load('roboticstoolbox/models/xacro/ur_description/urdf/ur5_joint_limited_robot.urdf.xacro')
 
     #     self.assertIsInstance(u, URDF)
@@ -43,17 +43,17 @@ class TestURDF(unittest.TestCase):
                 urdf.links[0].visuals[0].origin,
                 np.ndarray))
 
-        urdf.links[0].visuals[0].geometry.box = rp.backend.urdf.Box([1, 2, 3])
+        urdf.links[0].visuals[0].geometry.box = rp.backends.urdf.Box([1, 2, 3])
         self.assertTrue(
             isinstance(
                 urdf.links[0].visuals[0].geometry.geometry,
-                rp.backend.urdf.Box))
+                rp.backends.urdf.Box))
 
         urdf.links[0].visuals[0].geometry.cylinder = \
-            rp.backend.urdf.Cylinder(1, 2)
+            rp.backends.urdf.Cylinder(1, 2)
 
         urdf.links[0].visuals[0].geometry.sphere = \
-            rp.backend.urdf.Sphere(2)
+            rp.backends.urdf.Sphere(2)
 
         nt.assert_array_almost_equal(
             urdf.links[0].visuals[0].geometry.box.size,
@@ -70,7 +70,7 @@ class TestURDF(unittest.TestCase):
         self.assertTrue(
             isinstance(
                 urdf.links[0].visuals[0].geometry.mesh,
-                rp.backend.urdf.Mesh))
+                rp.backends.urdf.Mesh))
 
         try:
             xacro.main("")

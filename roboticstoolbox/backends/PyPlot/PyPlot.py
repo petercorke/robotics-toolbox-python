@@ -5,12 +5,12 @@
 
 import roboticstoolbox as rp
 import numpy as np
-from roboticstoolbox.backend.Connector import Connector
+from roboticstoolbox.backends.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
 import signal
-from roboticstoolbox.backend.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath.base.argcheck import getvector
 # from roboticstoolbox.tools import Ticker
 
@@ -41,7 +41,7 @@ class PyPlot(Connector):
 
         robot = rtb.models.DH.Panda()  # create a robot
 
-        pyplot = rtb.backend.PyPlot()  # create a PyPlot backend
+        pyplot = rtb.backends.PyPlot()  # create a PyPlot backend
         pyplot.add(robot)              # add the robot to the backend
         robot.q = robot.qz             # set the robot configuration
         pyplot.step()                  # update the backend and graphical view
@@ -242,7 +242,7 @@ class PyPlot(Connector):
         :param id: The id of the robot to remove. Can be either the DHLink or 
             GraphicalRobot
         :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
-                  class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+                  class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`
         :param fig_num: The canvas index to delete the robot from, defaults to
              the initial one
         :type fig_num: int, optional

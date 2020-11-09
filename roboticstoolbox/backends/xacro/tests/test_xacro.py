@@ -42,8 +42,8 @@ import re
 import subprocess
 import sys
 import unittest
-from roboticstoolbox.backend import xacro
-from roboticstoolbox.backend.xacro.cli import process_args
+from roboticstoolbox.backends import xacro
+from roboticstoolbox.backends.xacro.cli import process_args
 import xml.dom
 from xml.dom.minidom import parseString
 
@@ -591,7 +591,7 @@ class TestXacro(TestXacroCommentsIgnored):
 
     def test_include_from_variable(self):
         doc = '''<a xmlns:xacro="http://www.ros.org/xacro">
-        <xacro:property name="file" value="roboticstoolbox/backend/xacro/tests/include1.xml"/>
+        <xacro:property name="file" value="roboticstoolbox/backends/xacro/tests/include1.xml"/>
         <xacro:include filename="${file}" /></a>'''  # noqa
         self.assert_matches(self.quick_xacro(doc), '''<a><inc1/></a>''')
 
@@ -600,8 +600,8 @@ class TestXacro(TestXacroCommentsIgnored):
         src = '''
 <a xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:property name="var" value="main"/>
-  <xacro:include filename="roboticstoolbox/backend/xacro/tests/include1.xacro" ns="A"/>
-  <xacro:include filename="roboticstoolbox/backend/xacro/tests/include2.xacro" ns="B"/>
+  <xacro:include filename="roboticstoolbox/backends/xacro/tests/include1.xacro" ns="A"/>
+  <xacro:include filename="roboticstoolbox/backends/xacro/tests/include2.xacro" ns="B"/>
   <xacro:A.foo/><xacro:B.foo/>
   <main var="${var}" A="${2*A.var}" B="${B.var+1}"/>
 </a>'''

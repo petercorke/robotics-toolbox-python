@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-from roboticstoolbox.backend.PyPlot.RobotPlot import RobotPlot
+from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 
 
 class RobotPlot2(RobotPlot):

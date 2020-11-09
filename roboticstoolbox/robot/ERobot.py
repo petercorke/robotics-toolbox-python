@@ -11,11 +11,11 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix
 from roboticstoolbox.robot.ELink import ELink, ETS
-# from roboticstoolbox.backend.PyPlot.functions import \
+# from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
 #     _plot2, _teach2
-from roboticstoolbox.backend import xacro
-from roboticstoolbox.backend import URDF
+from roboticstoolbox.backends import xacro
+from roboticstoolbox.backends import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath

@@ -1,4 +1,4 @@
-This folder contains the VPython graphics backend of the toolbox.
+This folder contains the VPython graphics backends of the toolbox.
 Instructions on how to use VPython, and the fundamentals of how it works are below.
 (Pictures to come)
 
@@ -43,11 +43,11 @@ Instructions on how to use VPython, and the fundamentals of how it works are bel
 # How To
 ## Setup
 To use VPython, simply select is as your backend.
-Note: 2D functionality is currently not implemented via the backend. It can still be used outside the backend, however.
+Note: 2D functionality is currently not implemented via the backends. It can still be used outside the backend, however.
 ```python
 import roboticstoolbox as rp
 
-env = rp.backend.VPython()
+env = rp.backends.VPython()
 ```
 
 ## Setting Up The Backend

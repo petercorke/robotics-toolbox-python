@@ -4,7 +4,7 @@
 """
 
 import importlib
-from roboticstoolbox.backend.Connector import Connector
+from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.robot.Robot import Robot as r
 
@@ -22,16 +22,16 @@ def _imports():
 
     try:
         canvas = importlib.import_module(
-            'roboticstoolbox.backend.VPython.canvas')
+            'roboticstoolbox.backends.VPython.canvas')
         GraphicsCanvas3D = canvas.GraphicsCanvas3D
         GraphicsCanvas2D = canvas.GraphicsCanvas2D
 
         graphicalrobot = importlib.import_module(
-            'roboticstoolbox.backend.VPython.graphicalrobot')
+            'roboticstoolbox.backends.VPython.graphicalrobot')
         GraphicalRobot = graphicalrobot.GraphicalRobot
 
         common_functions = importlib.import_module(
-            'roboticstoolbox.backend.VPython.common_functions')
+            'roboticstoolbox.backends.VPython.common_functions')
         close_localhost_session = common_functions.close_localhost_session
 
     except ImportError:
@@ -58,7 +58,7 @@ class VPython(Connector):  # pragma nocover
 
         robot = rtb.models.DH.Panda()  # create a robot
 
-        pyplot = rtb.backend.VPython() # create a VPython backend
+        pyplot = rtb.backends.VPython() # create a VPython backend
         pyplot.add(robot)              # add the robot to the backend
         robot.q = robot.qz             # set the robot configuration
         pyplot.step()                  # update the backend and graphical view
@@ -119,7 +119,7 @@ class VPython(Connector):  # pragma nocover
         :param id: The Identification of the robot to remove. Can be either the
             DHRobot or GraphicalRobot
         :type id: :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
-            :class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+            :class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`
         :param q: The joint angles/configuration of the robot (Optional, if not
             supplied will use the stored q values).
         :type q: float ndarray(n)
@@ -301,7 +301,7 @@ class VPython(Connector):  # pragma nocover
         :param id: The id of the robot to remove. Can be either the DHLink or
             GraphicalRobot
         :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
-                  class:`roboticstoolbox.backend.VPython.graphics_robot.GraphicalRobot`
+                  class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`
         :param fig_num: The canvas index to delete the robot from, defaults to
              the initial one
         :type fig_num: int, optional

@@ -162,7 +162,7 @@ print(robot)    # display the model
 We can instantiate our robot inside a browser-based 3d-simulation environment.  
 
 ```python
-env = rtb.backend.Swift()   # instantiate 3D browser-based visualizer
+env = rtb.backends.Swift()   # instantiate 3D browser-based visualizer
 env.launch()                # activate it
 env.add(robot)              # add robot to the 3D scene
 for qk in qt.q:             # for each joint configuration on trajectory

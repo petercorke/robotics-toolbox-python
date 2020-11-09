@@ -4,7 +4,7 @@
 """
 
 from vpython import shapes, radians, extrusion, vector
-from roboticstoolbox.backend.VPython.stl import import_object_from_numpy_stl
+from roboticstoolbox.backends.VPython.stl import import_object_from_numpy_stl
 
 
 class Object2D:   # pragma nocover

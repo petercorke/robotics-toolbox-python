@@ -7,8 +7,8 @@ from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
     verifymatrix, getunit
 from roboticstoolbox.robot.Link import Link
 from spatialmath.base.transforms3d import tr2delta
-# from roboticstoolbox.backend import URDF
-# from roboticstoolbox.backend import xacro
+# from roboticstoolbox.backends import URDF
+# from roboticstoolbox.backends import xacro
 from pathlib import PurePath, PurePosixPath
 from scipy.optimize import minimize, Bounds, LinearConstraint
 from roboticstoolbox.tools.null import null

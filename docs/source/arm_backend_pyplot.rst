@@ -1,7 +1,7 @@
 PyPlot (matplotlib)
 -------------------
 
-.. automodule:: roboticstoolbox.backend.PyPlot
+.. automodule:: roboticstoolbox.backends.PyPlot
    :members:
    :undoc-members:
    :show-inheritance:

@@ -7,7 +7,7 @@ import time
 import roboticstoolbox as rp
 import numpy as np
 from spatialmath.base.argcheck import getvector, getmatrix
-from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from matplotlib.widgets import Slider
 try:
     import PIL
@@ -22,7 +22,7 @@ def _plot(
         jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
 
     # Make an empty 3D figure
-    env = rp.backend.PyPlot()
+    env = rp.backends.PyPlot()
 
     q = getmatrix(q, (None, robot.n))
 
@@ -85,7 +85,7 @@ def _plot2(
         eeframe=True, name=True):
 
     # Make an empty 2D figure
-    env = rp.backend.PyPlot2()
+    env = rp.backends.PyPlot2()
 
     q = getmatrix(q, (None, robot.n))
 
@@ -146,7 +146,7 @@ def _teach(
         env.step(0)
 
     # Make an empty 3D figure
-    env = rp.backend.PyPlot()
+    env = rp.backends.PyPlot()
 
     # Add the robot to the figure in readonly mode
     env.launch('Teach ' + robot.name, limits=limits)
@@ -245,7 +245,7 @@ def _teach2(
         env.step(0)
 
     # Make an empty 3D figure
-    env = rp.backend.PyPlot2()
+    env = rp.backends.PyPlot2()
 
     # Add the robot to the figure in readonly mode
     env.launch('Teach ' + robot.name, limits=limits)
@@ -331,7 +331,7 @@ def _plot_ellipse(
         raise TypeError(
             'ellipse must be of type roboticstoolbox.backend.PyPlot.EllipsePlot')
 
-    env = rp.backend.PyPlot()
+    env = rp.backends.PyPlot()
 
     # Add the robot to the figure in readonly mode
     env.launch(ellipse.robot.name + ' ' + ellipse.name, limits=limits)

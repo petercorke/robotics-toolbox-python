@@ -4,12 +4,12 @@
 """
 
 import roboticstoolbox as rp
-from roboticstoolbox.backend.Connector import Connector
+from roboticstoolbox.backends.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
 # import signal
-from roboticstoolbox.backend.PyPlot.RobotPlot2 import RobotPlot2
-from roboticstoolbox.backend.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42

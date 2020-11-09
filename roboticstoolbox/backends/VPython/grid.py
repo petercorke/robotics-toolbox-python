@@ -5,8 +5,8 @@
 
 from vpython import vector, compound, mag, box
 from numpy import sign, ceil, arange
-from roboticstoolbox.backend.VPython.text import update_grid_numbers
-from roboticstoolbox.backend.VPython.object2d import Marker2D
+from roboticstoolbox.backends.VPython.text import update_grid_numbers
+from roboticstoolbox.backends.VPython.object2d import Marker2D
 from spatialmath import SE2
 
 
