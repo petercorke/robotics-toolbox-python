@@ -43,7 +43,7 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
     ev = eTep.t
 
     # Angular velocity error
-    ew = eTep.rpy() * np.pi/180
+    ew = eTep.rpy('rad')
 
     # Form error vector
     e = np.r_[ev, ew]
