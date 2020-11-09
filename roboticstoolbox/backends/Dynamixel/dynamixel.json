@@ -1,0 +1,581 @@
+{
+    "300": {
+        "model": "AX-12W",
+        "url": "https://emanual.robotis.com/docs/en/dxl/ax/ax-12w/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 300,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "12": {
+        "model": "AX-12+/12A",
+        "url": "https://emanual.robotis.com/docs/en/dxl/ax/ax-12a/",
+        "resolution": [
+            0.29,
+            "[\u00b0]"
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 12,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "18": {
+        "model": "AX-18F/18A",
+        "url": "https://emanual.robotis.com/docs/en/dxl/ax/ax-18a/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 18,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "107": {
+        "model": "EX-106+",
+        "url": "https://emanual.robotis.com/docs/en/dxl/ex/ex-106+/",
+        "resolution": [
+            0.06
+        ],
+        "angular_range": [
+            0,
+            251
+        ],
+        "modelnum": 107,
+        "encoder_range": [
+            0,
+            4095
+        ]
+    },
+    "10": {
+        "model": "RX-10",
+        "url": "https://emanual.robotis.com/docs/en/dxl/rx/rx-10/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 10,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "24": {
+        "model": "RX-24F",
+        "url": "https://emanual.robotis.com/docs/en/dxl/rx/rx-24f/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 24,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "28": {
+        "model": "RX-28",
+        "url": "https://emanual.robotis.com/docs/en/dxl/rx/rx-28/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 28,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "64": {
+        "model": "RX-64",
+        "url": "https://emanual.robotis.com/docs/en/dxl/rx/rx-64/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 64,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "360": {
+        "model": "MX-12W",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-12w/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "angular_range": [
+            0,
+            360
+        ],
+        "modelnum": 360,
+        "encoder_range": [
+            0,
+            4095
+        ]
+    },
+    "29": {
+        "model": "MX-28",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-28/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 29,
+        "encoder_range": [
+            0,
+            4095
+        ]
+    },
+    "30": {
+        "model": "MX-28(2.0)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-28-2/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 30
+    },
+    "310": {
+        "model": "MX-64",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-64/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 310,
+        "encoder_range": [
+            0,
+            4095
+        ]
+    },
+    "311": {
+        "model": "MX-64(2.0)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 311
+    },
+    "320": {
+        "model": "MX-106",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-106/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 320,
+        "encoder_range": [
+            0,
+            4095
+        ]
+    },
+    "321": {
+        "model": "MX-106(2.0)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/mx/mx-106-2/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 321
+    },
+    "350": {
+        "model": "XL320",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xl320/",
+        "resolution": [
+            0.29
+        ],
+        "angular_range": [
+            0,
+            300
+        ],
+        "modelnum": 350,
+        "encoder_range": [
+            0,
+            1023
+        ]
+    },
+    "1060": {
+        "model": "XL430-W250",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1060
+    },
+    "1090": {
+        "model": "2XL430-W250",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/2xl430-w250/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1090
+    },
+    "1070": {
+        "model": "XC430-W150",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xc430-w150/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1070
+    },
+    "1080": {
+        "model": "XC430-W240",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xc430-w240/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1080
+    },
+    "1030": {
+        "model": "XM430-W210",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w210/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1030
+    },
+    "1020": {
+        "model": "XM430-W350",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1020
+    },
+    "1130": {
+        "model": "XM540-W150",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w150/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1130
+    },
+    "1120": {
+        "model": "XM540-W270",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1120
+    },
+    "1010": {
+        "model": "XH430-W210",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh430-w210/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1010
+    },
+    "1000": {
+        "model": "XH430-W350",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh430-w350/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1000
+    },
+    "1050": {
+        "model": "XH430-V210",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh430-v210/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1050
+    },
+    "1040": {
+        "model": "XH430-V350",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh430-v350/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1040
+    },
+    "1110": {
+        "model": "XH540-W150",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh540-w150/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1110
+    },
+    "1100": {
+        "model": "XH540-W270",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh540-w270/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1100
+    },
+    "1150": {
+        "model": "XH540-V150",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh540-v150/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1150
+    },
+    "1140": {
+        "model": "XH540-V270",
+        "url": "https://emanual.robotis.com/docs/en/dxl/x/xh540-v270/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 1140
+    },
+    "35072": {
+        "model": "L42-10-S300-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/l42-10-s300-r/",
+        "resolution": [
+            4096.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 35072
+    },
+    "37896": {
+        "model": "L54-30-S500-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/l54-30-s500-r/",
+        "resolution": [
+            361384.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 37896
+    },
+    "37928": {
+        "model": "L54-30-S400-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/l54-30-s400-r/",
+        "resolution": [
+            288395.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 37928
+    },
+    "38152": {
+        "model": "L54-50-S500-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/l54-50-s500-r/",
+        "resolution": [
+            361384.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 38152
+    },
+    "38176": {
+        "model": "L54-50-S290-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/l54-50-s290-r/",
+        "resolution": [
+            207692.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 38176
+    },
+    "43288": {
+        "model": "M42-10-S260-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/m42-10-s260-r/",
+        "resolution": [
+            263187.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 43288
+    },
+    "46096": {
+        "model": "M54-40-S250-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/m54-40-s250-r/",
+        "resolution": [
+            251417.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 46096
+    },
+    "46352": {
+        "model": "M54-60-S250-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/m54-60-s250-r/",
+        "resolution": [
+            251417.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 46352
+    },
+    "51200": {
+        "model": "H42-20-S300-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/h42-20-s300-r/",
+        "resolution": [
+            303750.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 51200
+    },
+    "53768": {
+        "model": "H54-100-S500-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/h54-100-s500-r/",
+        "resolution": [
+            501923.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 53768
+    },
+    "54024": {
+        "model": "H54-200-S500-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/h54-200-s500-r/",
+        "resolution": [
+            501923.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 54024
+    },
+    "43289": {
+        "model": "M42-10-S260-R(A)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/m42-10-s260-ra/",
+        "resolution": [
+            526375.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 43289
+    },
+    "46097": {
+        "model": "M54-40-S250-R(A)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/m54-40-s250-ra/",
+        "resolution": [
+            502834.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 46097
+    },
+    "46353": {
+        "model": "M54-60-S250-R(A)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/m54-60-s250-ra/",
+        "resolution": [
+            502834.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 46353
+    },
+    "51201": {
+        "model": "H42-20-S300-R(A)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/h42-20-s300-ra/",
+        "resolution": [
+            607500.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 51201
+    },
+    "53769": {
+        "model": "H54-100-S500-R(A)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/h54-100-s500-ra/",
+        "resolution": [
+            1003846.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 53769
+    },
+    "54025": {
+        "model": "H54-200-S500-R(A)",
+        "url": "https://emanual.robotis.com/docs/en/dxl/pro/h54-200-s500-ra/",
+        "resolution": [
+            1003846.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 54025
+    },
+    "2120": {
+        "model": "PM54-060-S250-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/p/pm54-060-s250-r/",
+        "resolution": [
+            502834.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 2120
+    },
+    "2110": {
+        "model": "PM54-040-S250-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/p/pm54-040-s250-r/",
+        "resolution": [
+            502834.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 2110
+    },
+    "2100": {
+        "model": "PM42-010-S260-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/p/pm42-010-s260-r/",
+        "resolution": [
+            526374.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 2100
+    },
+    "2000": {
+        "model": "PH42-020-S300-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/p/ph42-020-s300-r/",
+        "resolution": [
+            607500.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 2000
+    },
+    "2010": {
+        "model": "PH54-100-S500-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/p/ph54-100-s500-r/",
+        "resolution": [
+            1003846.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 2010
+    },
+    "2020": {
+        "model": "PH54-200-S500-R",
+        "url": "https://emanual.robotis.com/docs/en/dxl/p/ph54-200-s500-r/",
+        "resolution": [
+            1003846.0,
+            "[pulse/rev]"
+        ],
+        "modelnum": 2020
+    }
+}

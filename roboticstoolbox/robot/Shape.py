@@ -6,40 +6,60 @@
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector
 from spatialmath.base import r2q
-# from roboticstoolbox.tools.stdout_supress import stdout_supress
 import numpy as np
+from functools import wraps
+from io import StringIO
 import os
 
-try:
-    # with stdout_supress():
-    import pybullet as p
+p = None
+_pyb = None
 
-    cid = p.connect(p.SHARED_MEMORY)
-    if (cid < 0):
-        p.connect(p.DIRECT)
-    _pyb = True
-except ImportError:
-    _pyb = False
+
+def _import_pyb():
+    import importlib
+    global _pyb
+    global p
+
+    try:
+        from roboticstoolbox.tools.stdout_supress import pipes
+    except Exception:  # pragma nocover
+        from contextlib import contextmanager
+
+        @contextmanager
+        def pipes(stdout=None, stderr=None):
+            pass
+
+    try:
+        out = StringIO()
+        try:
+            with pipes(stdout=out, stderr=None):
+                p = importlib.import_module('pybullet')
+        except Exception:  # pragma nocover
+            p = importlib.import_module('pybullet')
+
+        cid = p.connect(p.SHARED_MEMORY)
+        if (cid < 0):
+            p.connect(p.DIRECT)
+        _pyb = True
+    except ImportError:   # pragma nocover
+        _pyb = False
 
 
 class Shape(object):
 
     def __init__(
             self,
-            primitive,
             base=None,
             radius=0,
             length=0,
             scale=[1, 1, 1],
             filename=None,
-            co=None,
             stype=None):
 
         self._wT = SE3()
-        self.co = co
+        self.co = None
         self.base = base
-        self.wT = None
-        self.primitive = primitive
+        # self.wT = None
         self.scale = scale
         self.radius = radius
         self.length = length
@@ -47,7 +67,15 @@ class Shape(object):
         self.stype = stype
         self.v = np.zeros(6)
 
+        self.pinit = False
+
     def to_dict(self):
+        '''
+        to_dict() returns the shapes information in dictionary form
+
+        :returns: All information about the shape
+        :rtype: dict
+        '''
 
         if self.stype == 'cylinder':
             fk = self.wT * SE3.Rx(np.pi/2)
@@ -68,6 +96,12 @@ class Shape(object):
         return shape
 
     def fk_dict(self):
+        '''
+        fk_dict() outputs shapes pose in dictionary form
+
+        :returns: The shape pose in translation and quternion form
+        :rtype: dict
+        '''
 
         if self.stype == 'cylinder':
             fk = self.wT * SE3.Rx(np.pi/2)
@@ -81,7 +115,7 @@ class Shape(object):
 
         return shape
 
-    def __repr__(self):
+    def __repr__(self):   # pragma nocover
         return f'{self.stype},\n{self.base}'
 
     def _update_pyb(self):
@@ -89,6 +123,17 @@ class Shape(object):
             q = r2q(self.wT.R)
             rot = [q[1], q[2], q[3], q[0]]
             p.resetBasePositionAndOrientation(self.co, self.wT.t, rot)
+
+    def _init_pob(self):   # pragma nocover
+        pass
+
+    def _check_pyb(func):   # pragma nocover
+        @wraps(func)
+        def wrapper_check_pyb(*args, **kwargs):
+            if _pyb is None:
+                _import_pyb()
+            return func(*args, **kwargs)
+        return wrapper_check_pyb
 
     @property
     def v(self):
@@ -112,14 +157,6 @@ class Shape(object):
     @property
     def base(self):
         return self._base
-
-    @property
-    def primitive(self):
-        return self._primitive
-
-    @primitive.setter
-    def primitive(self, value):
-        self._primitive = value
 
     @property
     def scale(self):
@@ -164,153 +201,189 @@ class Shape(object):
         self._base = T
         self._update_pyb()
 
-    @classmethod
-    def Box(cls, scale, base=None):
+    @_check_pyb
+    def closest_point(self, shape, inf_dist=1.0):
+        '''
+        closest_point(shape, inf_dist) returns the minimum euclidean
+        distance between self and shape, provided it is less than inf_dist.
+        It will also return the points on self and shape in the world frame
+        which connect the line of length distance between the shapes. If the
+        distance is negative then the shapes are collided.
 
-        if base is None:
-            base = SE3()
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param inf_dist: The minimum distance within which to consider
+            the shape
+        :type inf_dist: float
+        :returns: d, p1, p2 where d is the distance between the shapes,
+            p1 and p2 are the points in the world frame on the respective
+            shapes
+        :rtype: float, SE3, SE3
+        '''
 
-        if _pyb:
-            col = p.createCollisionShape(
-                shapeType=p.GEOM_BOX, halfExtents=np.array(scale)/2)
+        if not self.pinit:
+            self._init_pob()
+            self._update_pyb()
 
-            co = p.createMultiBody(
-                baseMass=1,
-                baseInertialFramePosition=[0, 0, 0],
-                baseCollisionShapeIndex=col)
+        if not shape.pinit:
+            shape._init_pob()
+            shape._update_pyb()
+
+        if not _pyb:  # pragma nocover
+            raise ImportError(
+                'The package PyBullet is required for collision '
+                'functionality. Install using pip install pybullet')
+
+        ret = p.getClosestPoints(self.co, shape.co, inf_dist)
+
+        if len(ret) == 0:
+            d = None
+            p1 = None
+            p2 = None
         else:
-            co = None
+            ret = ret[0]
+            d = ret[8]
+            p1 = SE3(ret[5])
+            p2 = SE3(ret[6])
 
-        return cls(
-            True, base=base, scale=scale, co=co, stype='box')
+        return d, p1, p2
 
-    @classmethod
-    def Cylinder(cls, radius, length, base=None):
+    def collided(self, shape):
+        '''
+        collided(shape) checks if self and shape have collided
 
-        if base is None:
-            base = SE3()
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :returns: True if shapes have collided
+        :rtype: bool
+        '''
 
-        if _pyb:
-            col = p.createCollisionShape(
-                shapeType=p.GEOM_CYLINDER, radius=radius, height=length)
+        d, _, _ = self.closest_point(shape)
 
-            co = p.createMultiBody(
-                baseMass=1,
-                baseInertialFramePosition=[0, 0, 0],
-                baseCollisionShapeIndex=col)
+        if d is not None and d <= 0:
+            return True
         else:
-            co = None
+            return False
 
-        return cls(
-            True, base=base, radius=radius, length=length, co=co,
-            stype='cylinder')
 
-    @classmethod
-    def Sphere(cls, radius, base=None):
+class Mesh(Shape):
+    """
+    A mesh object described by an stl or collada file.
 
-        if base is None:
-            base = SE3()
+    :param filename: The path to the mesh that contains this object.
+        This is the absolute path.
+    :type filename: str
+    :param scale: The scaling value for the mesh along the XYZ axes. If
+        ``None``, assumes no scale is applied.
+    :type scale: list (3) float, optional
+    :param base: Local reference frame of the shape
+    :type base: SE3
 
-        if _pyb:
-            col = p.createCollisionShape(
-                shapeType=p.GEOM_SPHERE, radius=radius)
+    """
 
-            co = p.createMultiBody(
-                baseMass=1,
-                baseInertialFramePosition=[0, 0, 0],
-                baseCollisionShapeIndex=col)
-        else:
-            co = None
+    def __init__(self, filename=None, scale=[1, 1, 1], base=None):
+        super(Mesh, self).__init__(
+            filename=filename, base=base,
+            scale=scale, stype='mesh')
 
-        return cls(True, base=base, radius=radius, co=co, stype='sphere')
-
-    @classmethod
-    def Mesh(cls, filename, base=None, scale=[1, 1, 1]):
-
-        if base is None:
-            base = SE3()
-
-        name, file_extension = os.path.splitext(filename)
-
-        if _pyb and \
-                (file_extension == '.stl' or file_extension == '.STL'):
+    def _init_pob(self):
+        name, file_extension = os.path.splitext(self.filename)
+        if (file_extension == '.stl' or file_extension == '.STL'):
 
             col = p.createCollisionShape(
                 shapeType=p.GEOM_MESH,
-                fileName=filename,
-                meshScale=scale)
+                fileName=self.filename,
+                meshScale=self.scale)
 
-            co = p.createMultiBody(
+            self.co = p.createMultiBody(
                 baseMass=1,
                 baseInertialFramePosition=[0, 0, 0],
                 baseCollisionShapeIndex=col)
 
-        else:
-            co = None
-
-        return cls(
-            False, filename=filename, base=base, co=co,
-            scale=scale, stype='mesh')
+            self.pinit = True
 
 
-# class Mesh(Shape):
-#     """
-#     A mesh object.
+class Cylinder(Shape):
+    """A cylinder whose center is at the local origin.
+    Parameters
 
-#     :param filename: The path to the mesh that contains this object.
-#         This is the absolute path.
-#     :type filename: str
-#     :param scale: The scaling value for the mesh along the XYZ axes. If
-#         ``None``, assumes no scale is applied.
-#     :type scale: list (3) float, optional
+    :param radius: The radius of the cylinder in meters.
+    :type radius: float
+    :param length: The length of the cylinder in meters.
+    :type length: float
+    :param base: Local reference frame of the shape
+    :type base: SE3
 
-#     """
+    """
 
-#     def __init__(self, filename, base=None, scale=None):
-#         super(Box, self).__init__(
-#             False, filename=filename, base=base, scale=scale)
+    def __init__(self, radius, length, base=None):
+        super(Cylinder, self).__init__(
+            base=base, radius=radius, length=length,
+            stype='cylinder')
 
+    def _init_pob(self):
+        col = p.createCollisionShape(
+            shapeType=p.GEOM_CYLINDER,
+            radius=self.radius, height=self.length)
 
-# class Cylinder(Shape):
-#     """A cylinder whose center is at the local origin.
-#     Parameters
-#     ----------
-#     :param radius: The radius of the cylinder in meters.
-#     :type radius: float
-#         The radius of the cylinder in meters.
-#     :param length: The length of the cylinder in meters.
-#     :type length: float
+        self.co = p.createMultiBody(
+            baseMass=1,
+            baseInertialFramePosition=[0, 0, 0],
+            baseCollisionShapeIndex=col)
 
-#     """
-
-#     def __init__(self, radius, length, base=None):
-#         super(Box, self).__init__(
-
-#             True, base=base, radius=radius, length=length)
+        self.pinit = True
 
 
-# class Sphere(Shape):
-#     """
-#     A sphere whose center is at the local origin.
+class Sphere(Shape):
+    """
+    A sphere whose center is at the local origin.
 
-#     :param radius: The radius of the sphere in meters.
-#     :type radius: float
+    :param radius: The radius of the sphere in meters.
+    :type radius: float
+    :param base: Local reference frame of the shape
+    :type base: SE3
 
-#     """
+    """
 
-#     def __init__(self, radius, base=None):
-#         super(Box, self).__init__(True, base=base, radius=radius)
+    def __init__(self, radius, base=None):
+        super(Sphere, self).__init__(
+            base=base, radius=radius, stype='sphere')
+
+    def _init_pob(self):
+        col = p.createCollisionShape(
+            shapeType=p.GEOM_SPHERE, radius=self.radius)
+
+        self.co = p.createMultiBody(
+            baseMass=1,
+            baseInertialFramePosition=[0, 0, 0],
+            baseCollisionShapeIndex=col)
+
+        self.pinit = True
 
 
-# class Box(Shape):
-#     """
-#     A rectangular prism whose center is at the local origin.
+class Box(Shape):
+    """
+    A rectangular prism whose center is at the local origin.
 
-#     :param scale: The length, width, and height of the box in meters.
-#     :type scale: list (3) float
+    :param scale: The length, width, and height of the box in meters.
+    :type scale: list (3) float
+    :param base: Local reference frame of the shape
+    :type base: SE3
 
-#     """
+    """
 
-#     def __init__(self, scale, base=None):
+    def __init__(self, scale, base=None):
+        super(Box, self).__init__(base=base, scale=scale, stype='box')
 
-#         super(Box, self).__init__(True, base=base, scale=scale)
+    def _init_pob(self):
+
+        col = p.createCollisionShape(
+            shapeType=p.GEOM_BOX,
+            halfExtents=np.array(self.scale)/2)
+
+        self.co = p.createMultiBody(
+            baseMass=1,
+            baseInertialFramePosition=[0, 0, 0],
+            baseCollisionShapeIndex=col)
+
+        self.pinit = True

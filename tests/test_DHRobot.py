@@ -102,7 +102,7 @@ class TestDHRobot(unittest.TestCase):
         self.assertEqual(r0.theta, ans)
 
     def test_r(self):
-        r = np.array([[1], [2], [3]])
+        r = np.r_[1, 2, 3]
         l0 = rp.PrismaticDH(r=r)
         l1 = rp.RevoluteDH(r=r)
         l2 = rp.PrismaticDH(r=r)
@@ -138,7 +138,7 @@ class TestDHRobot(unittest.TestCase):
         ans = np.c_[qlim, qlim, qlim, qlim]
 
         nt.assert_array_almost_equal(r0.qlim, ans)
-        nt.assert_array_almost_equal(r1.qlim, qlim)
+        nt.assert_array_almost_equal(r1.qlim, np.c_[qlim])
 
     def test_fkine(self):
         l0 = rp.PrismaticDH()
@@ -318,7 +318,7 @@ class TestDHRobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.A(0, q).A, T1, decimal=4)
         nt.assert_array_almost_equal(panda.A([1, 4], q).A, T2, decimal=4)
-        nt.assert_array_almost_equal(panda.A([1, 4]).A, T2, decimal=4)
+        nt.assert_array_almost_equal(panda.A([1, 4], q).A, T2, decimal=4)
 
     def test_A_error(self):
         panda = rp.models.DH.Panda()
@@ -332,10 +332,10 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
-        ans = [False, True, True, True, True, True, True]
+        ans = np.r_[False, True, True, True, True, True, True]
 
-        self.assertEqual(panda.islimit(q), ans)
-        self.assertEqual(panda.islimit(), ans)
+        nt.assert_array_equal(panda.islimit(q), ans)
+        nt.assert_array_equal(panda.islimit(), ans)
 
     def test_isspherical(self):
         l0 = rp.RevoluteDH()
@@ -458,49 +458,49 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(panda.jacobe(q), Je, decimal=4)
         nt.assert_array_almost_equal(panda.jacobe(), Je, decimal=4)
 
-    def test_jacob0v(self):
-        l0 = rp.PrismaticDH(theta=4)
-        l1 = rp.RevoluteDH(a=2)
-        l2 = rp.PrismaticDH(theta=2)
-        l3 = rp.RevoluteDH()
+    # def test_jacob0v(self):
+    #     l0 = rp.PrismaticDH(theta=4)
+    #     l1 = rp.RevoluteDH(a=2)
+    #     l2 = rp.PrismaticDH(theta=2)
+    #     l3 = rp.RevoluteDH()
 
-        r0 = rp.DHRobot([l0, l1, l2, l3])
-        q = [1, 2, 3, 4]
-        r0.q = q
+    #     r0 = rp.DHRobot([l0, l1, l2, l3])
+    #     q = [1, 2, 3, 4]
+    #     r0.q = q
 
-        J = np.array([
-            [0.8439, 0.5366, 0, 0, 0, 0],
-            [-0.5366, 0.8439, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0.8439, 0.5366, 0],
-            [0, 0, 0, -0.5366, 0.8439, 0],
-            [0, 0, 0, 0, 0, 1],
-        ])
+    #     J = np.array([
+    #         [0.8439, 0.5366, 0, 0, 0, 0],
+    #         [-0.5366, 0.8439, 0, 0, 0, 0],
+    #         [0, 0, 1, 0, 0, 0],
+    #         [0, 0, 0, 0.8439, 0.5366, 0],
+    #         [0, 0, 0, -0.5366, 0.8439, 0],
+    #         [0, 0, 0, 0, 0, 1],
+    #     ])
 
-        nt.assert_array_almost_equal(r0.jacob0v(q), J, decimal=4)
-        nt.assert_array_almost_equal(r0.jacob0v(), J, decimal=4)
+    #     nt.assert_array_almost_equal(r0.jacob0v(q), J, decimal=4)
+    #     nt.assert_array_almost_equal(r0.jacob0v(), J, decimal=4)
 
-    def test_jacobev(self):
-        l0 = rp.PrismaticDH(theta=4)
-        l1 = rp.RevoluteDH(a=2)
-        l2 = rp.PrismaticDH(theta=2)
-        l3 = rp.RevoluteDH()
+    # def test_jacobev(self):
+    #     l0 = rp.PrismaticDH(theta=4)
+    #     l1 = rp.RevoluteDH(a=2)
+    #     l2 = rp.PrismaticDH(theta=2)
+    #     l3 = rp.RevoluteDH()
 
-        r0 = rp.DHRobot([l0, l1, l2, l3])
-        q = [1, 2, 3, 4]
-        r0.q = q
+    #     r0 = rp.DHRobot([l0, l1, l2, l3])
+    #     q = [1, 2, 3, 4]
+    #     r0.q = q
 
-        J = np.array([
-            [0.8439, -0.5366, 0, 0, 0, 0],
-            [0.5366, 0.8439, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0.8439, -0.5366, 0],
-            [0, 0, 0, 0.5366, 0.8439, 0],
-            [0, 0, 0, 0, 0, 1],
-        ])
+    #     J = np.array([
+    #         [0.8439, -0.5366, 0, 0, 0, 0],
+    #         [0.5366, 0.8439, 0, 0, 0, 0],
+    #         [0, 0, 1, 0, 0, 0],
+    #         [0, 0, 0, 0.8439, -0.5366, 0],
+    #         [0, 0, 0, 0.5366, 0.8439, 0],
+    #         [0, 0, 0, 0, 0, 1],
+    #     ])
 
-        nt.assert_array_almost_equal(r0.jacobev(q), J, decimal=4)
-        nt.assert_array_almost_equal(r0.jacobev(), J, decimal=4)
+    #     nt.assert_array_almost_equal(r0.jacobev(q), J, decimal=4)
+    #     nt.assert_array_almost_equal(r0.jacobev(), J, decimal=4)
 
     def test_nofriction(self):
         l0 = rp.DHLink(Tc=2, B=3)
@@ -670,71 +670,6 @@ class TestDHRobot(unittest.TestCase):
     #     nt.assert_array_almost_equal(res3, tauB, decimal=4)
     #     nt.assert_array_almost_equal(res4, tauB3, decimal=4)
 
-    def test_ikcon(self):
-        panda = rp.models.DH.Panda()
-        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        T = panda.fkine(q)
-        Tt = sm.SE3([T, T, T])
-
-        qr = [7.69161412e-04, 9.01409257e-01, -1.46372859e-02,
-              -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
-              7.84926515e-01]
-
-        qa, success, err = panda.ikcon(T.A, q0=np.zeros(7))
-        qa2, success, err = panda.ikcon(Tt)
-        qa3, _, _ = panda.ikcon(Tt, q0=np.zeros((3, 7)))
-
-        nt.assert_array_almost_equal(qa, qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[0, :], qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[1, :], qr, decimal=4)
-        nt.assert_array_almost_equal(qa3[0, :], qr, decimal=4)
-        nt.assert_array_almost_equal(qa3[1, :], qr, decimal=4)
-
-    def test_ikine(self):
-        panda = rp.models.DH.Panda()
-        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        T = panda.fkine(q)
-        Tt = sm.SE3([T, T])
-
-        l0 = rp.RevoluteDH(d=2.0)
-        l1 = rp.PrismaticDH(theta=1.0)
-        l2 = rp.PrismaticDH(theta=1, qlim=[0, 2])
-        r0 = rp.DHRobot([l0, l1])
-        r1 = rp.DHRobot([l0, l2])
-
-        qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
-
-        qa, success, err = panda.ikine(T)
-        qa2, success, err = panda.ikine(Tt)
-        qa3, success, err = panda.ikine(Tt, q0=np.zeros((2, 7)))
-        qa4, success, err = panda.ikine(T, q0=np.zeros(7))
-
-        # Untested
-        qa5, success, err = r0.ikine(
-            T.A, mask=[1, 1, 0, 0, 0, 0],
-            transpose=5, ilimit=5)
-        qa5, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0])
-        qa6, success, err = r0.ikine(T, mask=[1, 1, 0, 0, 0, 0], ilimit=1)
-        qa7, success, err = r1.ikine(
-            T, mask=[1, 1, 0, 0, 0, 0],
-            ilimit=1, search=True, slimit=1)
-
-        nt.assert_array_almost_equal(qa, qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[0, :], qr, decimal=4)
-        nt.assert_array_almost_equal(qa2[1, :], qr, decimal=4)
-        nt.assert_array_almost_equal(qa3[1, :], qr, decimal=4)
-        nt.assert_array_almost_equal(qa4, qr, decimal=4)
-
-        with self.assertRaises(ValueError):
-            panda.ikine(Tt, q0=np.zeros(7))
-
-        with self.assertRaises(ValueError):
-            r0.ikine(T)
-
-        with self.assertRaises(ValueError):
-            r0.ikine(
-                T, mask=[1, 1, 0, 0, 0, 0], ilimit=1,
-                search=True, slimit=1)
 
     def test_ikine3(self):
         l0 = rp.RevoluteDH(alpha=np.pi / 2)
@@ -795,61 +730,61 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(q0, qr0, decimal=4)
         nt.assert_array_almost_equal(q1, qr1, decimal=4)
 
-    def test_ikine6s_rrp(self):
-        l0 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l1 = rp.RevoluteDH(alpha=np.pi / 2)
-        l2 = rp.PrismaticDH()
-        l3 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l4 = rp.RevoluteDH(alpha=np.pi / 2)
-        l5 = rp.RevoluteDH()
-        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
-        r1 = rp.DHRobot([l1, l0, l2, l3, l4, l5])
-        q = [1, 1, 1, 1, 1, 1]
-        T1 = r0.fkine(q)
-        T2 = r1.fkine(q)
+    # def test_ikine6s_rrp(self):
+    #     l0 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l1 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l2 = rp.PrismaticDH()
+    #     l3 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l4 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l5 = rp.RevoluteDH()
+    #     r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+    #     r1 = rp.DHRobot([l1, l0, l2, l3, l4, l5])
+    #     q = [1, 1, 1, 1, 1, 1]
+    #     T1 = r0.fkine(q)
+    #     T2 = r1.fkine(q)
 
-        qr0 = [1.0000, -2.1416, -1.0000, -1.0000, -2.1416, 1.0000]
-        qr1 = [-2.1416, -1.0000, 1.0000, -2.1416, 1.0000, 1.0000]
-        qr2 = [1.0000, 1.0000, 1.0000, -2.1416, -1.0000, -2.1416]
-        qr3 = [-2.1416, 2.1416, -1.0000, -1.0000, 2.1416, -2.1416]
+    #     qr0 = [1.0000, -2.1416, -1.0000, -1.0000, -2.1416, 1.0000]
+    #     qr1 = [-2.1416, -1.0000, 1.0000, -2.1416, 1.0000, 1.0000]
+    #     qr2 = [1.0000, 1.0000, 1.0000, -2.1416, -1.0000, -2.1416]
+    #     qr3 = [-2.1416, 2.1416, -1.0000, -1.0000, 2.1416, -2.1416]
 
-        q0, _ = r0.ikine6s(T1)
-        q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
-        q2, _ = r1.ikine6s(T2)
-        q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
+    #     q0, _ = r0.ikine6s(T1)
+    #     q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
+    #     q2, _ = r1.ikine6s(T2)
+    #     q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
 
-        nt.assert_array_almost_equal(q0, qr0, decimal=4)
-        nt.assert_array_almost_equal(q1, qr1, decimal=4)
-        nt.assert_array_almost_equal(q2, qr2, decimal=4)
-        nt.assert_array_almost_equal(q3, qr3, decimal=4)
+    #     nt.assert_array_almost_equal(q0, qr0, decimal=4)
+    #     nt.assert_array_almost_equal(q1, qr1, decimal=4)
+    #     nt.assert_array_almost_equal(q2, qr2, decimal=4)
+    #     nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
-    def test_ikine6s_simple(self):
-        l0 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l1 = rp.RevoluteDH()
-        l2 = rp.RevoluteDH(alpha=np.pi / 2)
-        l3 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l4 = rp.RevoluteDH(alpha=np.pi / 2)
-        l5 = rp.RevoluteDH()
-        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
-        r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
-        q = [1, 1, 1, 1, 1, 1]
-        T1 = r0.fkine(q)
-        T2 = r1.fkine(q)
+    # def test_ikine6s_simple(self):
+    #     l0 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l1 = rp.RevoluteDH()
+    #     l2 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l3 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l4 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l5 = rp.RevoluteDH()
+    #     r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+    #     r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
+    #     q = [1, 1, 1, 1, 1, 1]
+    #     T1 = r0.fkine(q)
+    #     T2 = r1.fkine(q)
 
-        qr0 = [0, 0, 0, -0.9741, -2.2630, -0.4605]
-        qr1 = [0, 0, 0, 0.1947, -1.3811, 1.8933]
-        qr2 = [0, 0, 0, 2.1675, 2.2630, 2.6811]
-        qr3 = [0, 0, 0, -2.9468, 1.3811, -1.2483]
+    #     qr0 = [0, 0, 0, -0.9741, -2.2630, -0.4605]
+    #     qr1 = [0, 0, 0, 0.1947, -1.3811, 1.8933]
+    #     qr2 = [0, 0, 0, 2.1675, 2.2630, 2.6811]
+    #     qr3 = [0, 0, 0, -2.9468, 1.3811, -1.2483]
 
-        q0, _ = r0.ikine6s(T1)
-        q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
-        q2, _ = r1.ikine6s(T2)
-        q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
+    #     q0, _ = r0.ikine6s(T1)
+    #     q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
+    #     q2, _ = r1.ikine6s(T2)
+    #     q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
 
-        nt.assert_array_almost_equal(q0, qr0, decimal=4)
-        nt.assert_array_almost_equal(q1, qr2, decimal=4)
-        nt.assert_array_almost_equal(q2, qr1, decimal=4)
-        nt.assert_array_almost_equal(q3, qr3, decimal=4)
+    #     nt.assert_array_almost_equal(q0, qr0, decimal=4)
+    #     nt.assert_array_almost_equal(q1, qr2, decimal=4)
+    #     nt.assert_array_almost_equal(q2, qr1, decimal=4)
+    #     nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
     def test_ikine6s_offset(self):
         self.skipTest("error introduced with DHLink change")
@@ -895,76 +830,59 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(q0[1, :], qr0, decimal=4)
         nt.assert_array_almost_equal(q0[2, :], qr0, decimal=4)
 
-    def test_ikine6s_fail(self):
-        l0 = rp.RevoluteDH(alpha=np.pi / 2)
-        l1 = rp.RevoluteDH(d=1.0)
-        l2 = rp.RevoluteDH(alpha=np.pi / 2)
-        l3 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l4a = rp.RevoluteDH(alpha=np.pi / 2)
-        l4b = rp.RevoluteDH()
-        l5 = rp.RevoluteDH()
-        l6 = rp.RevoluteMDH()
-        r0 = rp.DHRobot([l0, l1, l2, l3, l4a, l5])
-        r1 = rp.DHRobot([l0, l1, l2, l3, l4b, l5])
-        r2 = rp.DHRobot([l1, l2, l3])
-        r3 = rp.DHRobot([l6, l6, l6, l6, l6, l6])
+    # def test_ikine6s_fail(self):
+    #     l0 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l1 = rp.RevoluteDH(d=1.0)
+    #     l2 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l3 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l4a = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l4b = rp.RevoluteDH()
+    #     l5 = rp.RevoluteDH()
+    #     l6 = rp.RevoluteMDH()
+    #     r0 = rp.DHRobot([l0, l1, l2, l3, l4a, l5])
+    #     r1 = rp.DHRobot([l0, l1, l2, l3, l4b, l5])
+    #     r2 = rp.DHRobot([l1, l2, l3])
+    #     r3 = rp.DHRobot([l6, l6, l6, l6, l6, l6])
 
-        puma = rp.models.DH.Puma560()
-        T = sm.SE3(0, 10, 10)
-        puma.ikine6s(T)
+    #     puma = rp.models.DH.Puma560()
+    #     T = sm.SE3(0, 10, 10)
+    #     puma.ikine6s(T)
 
-        q = [1, 1, 1, 1, 1, 1]
-        T = r0.fkine(q)
+    #     q = [1, 1, 1, 1, 1, 1]
+    #     T = r0.fkine(q)
 
-        with self.assertRaises(ValueError):
-            r0.ikine6s(T)
+    #     with self.assertRaises(ValueError):
+    #         r0.ikine6s(T)
 
-        with self.assertRaises(ValueError):
-            r1.ikine6s(T)
+    #     with self.assertRaises(ValueError):
+    #         r1.ikine6s(T)
 
-        with self.assertRaises(ValueError):
-            r2.ikine6s(T)
+    #     with self.assertRaises(ValueError):
+    #         r2.ikine6s(T)
 
-        with self.assertRaises(ValueError):
-            r3.ikine6s(T)
+    #     with self.assertRaises(ValueError):
+    #         r3.ikine6s(T)
 
-    def test_ikinem(self):
-        puma = rp.models.DH.Puma560()
-        q = puma.qr
-        T = puma.fkine(q)
-        Tt = sm.SE3([T, T])
+    # def test_ikinem(self):
+    #     puma = rp.models.DH.Puma560()
+    #     q = puma.qr
+    #     T = puma.fkine(q)
+    #     Tt = sm.SE3([T, T])
 
-        q0, _, _ = puma.ikinem(Tt)
-        q1, success, _ = puma.ikinem(T.A, qlimits=False)
-        q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
+    #     q0, _, _ = puma.ikinem(Tt)
+    #     q1, success, _ = puma.ikinem(T.A, qlimits=False)
+    #     q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
 
-        # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
+    #     # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
 
-        self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q0[0, :]).A)) < 0.7)
-        self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q0[1, :]).A)) < 0.7)
-        self.assertTrue(
-            np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
+    #     self.assertTrue(
+    #         np.sum(np.abs(T.A - puma.fkine(q0[0, :]).A)) < 0.7)
+    #     self.assertTrue(
+    #         np.sum(np.abs(T.A - puma.fkine(q0[1, :]).A)) < 0.7)
+    #     self.assertTrue(
+    #         np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
 
-    def test_ikunc(self):
-        puma = rp.models.DH.Puma560()
-        q = puma.qr
-        T = puma.fkine(q)
-        Tt = sm.SE3([T, T])
 
-        q0, _, _ = puma.ikunc(Tt)
-        q1, success, _ = puma.ikunc(T.A)
-        q2, success, _ = puma.ikunc(T, ilimit=1)
-
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[0, :]).A, np.zeros((4, 4)), decimal=4)
-
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(q0[1, :]).A, np.zeros((4, 4)), decimal=4)
-
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
 
     def test_rne(self):
         puma = rp.models.DH.Puma560()
@@ -1062,7 +980,6 @@ class TestDHRobot(unittest.TestCase):
 
     def test_cinertia(self):
         puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
         q = puma.qn
 
         Mr = [
@@ -1075,16 +992,13 @@ class TestDHRobot(unittest.TestCase):
 
         M0 = puma.cinertia(q)
         M1 = puma.cinertia(np.c_[q, q].T)
-        M2 = puma.cinertia()
 
         nt.assert_array_almost_equal(M0, Mr, decimal=4)
         nt.assert_array_almost_equal(M1[0, :, :], Mr, decimal=4)
         nt.assert_array_almost_equal(M1[1, :, :], Mr, decimal=4)
-        nt.assert_array_almost_equal(M2, Mr, decimal=4)
 
     def test_coriolis(self):
         puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
         q = puma.qn
 
         qd = [1, 2, 3, 1, 2, 3]
@@ -1106,7 +1020,6 @@ class TestDHRobot(unittest.TestCase):
 
     def test_gravload(self):
         puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
         q = puma.qn
 
         grav = [0, 0, 9.81]
@@ -1116,18 +1029,15 @@ class TestDHRobot(unittest.TestCase):
         tau0 = puma.gravload(q)
         tau1 = puma.gravload(np.c_[q, q].T)
         tau2 = puma.gravload(q=np.c_[q, q].T, grav=np.c_[grav, grav].T)
-        tau3 = puma.gravload(grav=grav)
 
         nt.assert_array_almost_equal(tau0, taur, decimal=4)
         nt.assert_array_almost_equal(tau1[0, :], taur, decimal=4)
         nt.assert_array_almost_equal(tau1[1, :], taur, decimal=4)
         nt.assert_array_almost_equal(tau2[0, :], taur, decimal=4)
         nt.assert_array_almost_equal(tau2[1, :], taur, decimal=4)
-        nt.assert_array_almost_equal(tau3, taur, decimal=4)
 
     def test_itorque(self):
         puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
         q = puma.qn
 
         qdd = [1, 2, 3, 1, 2, 3]
@@ -1329,18 +1239,16 @@ class TestDHRobot(unittest.TestCase):
         panda.q = panda.qr
 
         q = panda.qr
-        qt = np.c_[q, q]
+        qt = np.c_[q, q].T
 
-        q0, s0, _ = panda.qmincon()
         q1, s1, _ = panda.qmincon(q)
         q2, _, _ = panda.qmincon(qt)
 
         qres = [-0.0969, -0.3000, 0.0870, -2.2000, 0.0297, 2.0000, 0.7620]
 
-        nt.assert_array_almost_equal(q0, qres, decimal=4)
         nt.assert_array_almost_equal(q1, qres, decimal=4)
-        nt.assert_array_almost_equal(q2[:, 0], qres, decimal=4)
-        nt.assert_array_almost_equal(q2[:, 1], qres, decimal=4)
+        nt.assert_array_almost_equal(q2[0, :], qres, decimal=4)
+        nt.assert_array_almost_equal(q2[1, :], qres, decimal=4)
 
     def test_teach(self):
         panda = rp.models.DH.Panda()
@@ -1355,8 +1263,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False)
+        e = panda.plot(panda.qr, block=False)
         e.close()
 
     def test_teach_basic(self):
@@ -1368,7 +1275,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_traj(self):
         panda = rp.models.DH.Panda()
-        q = np.random.rand(7, 3)
+        q = np.random.rand(3, 7)
         e = panda.plot(block=False, q=q, dt=0)
         e.close()
 
@@ -1418,25 +1325,22 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_with_vellipse(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False, vellipse=True)
+        e = panda.plot(panda.qr, block=False, vellipse=True)
         e.close()
 
     def test_plot_with_fellipse(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot(block=False, fellipse=True)
+        e = panda.plot(panda.qr, block=False, fellipse=True)
         e.close()
 
     def test_plot2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, name=True)
+        e = panda.plot2(panda.qr, block=False, name=True)
         e.close()
 
     def test_plot2_traj(self):
         panda = rp.models.DH.Panda()
-        q = np.random.rand(7, 3)
+        q = np.random.rand(3, 7)
         e = panda.plot2(block=False, q=q, dt=0)
         e.close()
 
@@ -1449,8 +1353,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_teach2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.teach(block=False)
+        e = panda.teach(panda.qr, block=False)
         e.close()
 
         e2 = panda.teach2(block=False, q=panda.qr)
@@ -1458,21 +1361,19 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_with_vellipse2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, vellipse=True, limits=[1, 2, 1, 2])
+        e = panda.plot2(panda.qr, block=False, vellipse=True, limits=[1, 2, 1, 2])
         e.step()
         e.close()
 
     def test_plot_with_fellipse2(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
-        e = panda.plot2(block=False, fellipse=True)
+        e = panda.plot2(panda.qr, block=False, fellipse=True)
         e.close()
 
     def test_plot_with_vellipse2_fail(self):
         panda = rp.models.DH.Panda()
         panda.q = panda.qr
-        e = rp.backend.PyPlot2()
+        e = rp.backends.PyPlot2()
         e.launch()
         e.add(panda.fellipse(
                 q=panda.qr, centre=[0, 1]))

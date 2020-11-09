@@ -5,8 +5,10 @@ from roboticstoolbox.robot.DHLink import DHLink, RevoluteDH, PrismaticDH, \
     RevoluteMDH, PrismaticMDH
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.Shape import Shape
+from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.robot.Gripper import Gripper
+# from roboticstoolbox.robot.ETS2 import ETS
+from roboticstoolbox.robot.Shape import Shape, Cylinder, Sphere, Box, Mesh
 
 __all__ = [
     'Robot',
@@ -22,5 +24,11 @@ __all__ = [
     'ELink',
     'ERobot',
     'ETS',
-    'Shape'
+    'ETS2',
+    'Gripper',
+    'Shape',
+    'Cylinder',
+    'Sphere',
+    'Box',
+    'Mesh'
     ]

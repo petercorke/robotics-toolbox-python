@@ -98,8 +98,8 @@ class TestModels(unittest.TestCase):
         r.qr
         r.qz
 
-    def test_j2n4s300(self):
-        r = rp.models.j2n4s300()
+    def test_Mico(self):
+        r = rp.models.Mico()
         r.qr
         r.qz
 

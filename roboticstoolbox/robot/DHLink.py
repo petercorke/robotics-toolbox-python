@@ -3,14 +3,11 @@
 @author: Jesse Haviland
 """
 
-import copy
 import numpy as np
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, \
-    isscalar, isvector, ismatrix
 import roboticstoolbox as rp
-from roboticstoolbox.robot.Link import Link
-from functools import wraps
+from roboticstoolbox.robot.Link import Link, _listen_dyn
+from roboticstoolbox.robot.ETS import ETS
 
 _eps = np.finfo(np.float64).eps
 
@@ -25,7 +22,6 @@ try:  # pragma: no cover
 except ImportError:
     def _issymbol(x):  # pylint: disable=unused-argument
         return False
-
 
 def _cos(theta):
     if _issymbol(theta):
@@ -45,9 +41,10 @@ def _sin(theta):
 
 class DHLink(Link):
     """
-    A link superclass for all link types. A Link object holds all information
-    related to a robot joint and link such as kinematics parameters,
-    rigid-body inertial parameters, motor and transmission parameters.
+    A link superclass for all robots defined using Denavit-Hartenberg notation.
+    A Link object holds all information related to a robot joint and link such
+    as kinematics parameters, rigid-body inertial parameters, motor and
+    transmission parameters.
 
     :param theta: kinematic: joint angle
     :type theta: float
@@ -64,23 +61,23 @@ class DHLink(Link):
     :param offset: kinematic - joint variable offset
     :type offset: float
 
-    :param qlim: joint variable limits [min max]
-    :type qlim: float ndarray(2)
+    :param qlim: joint variable limits [min, max]
+    :type qlim: ndarray(2,)
     :param flip: joint moves in opposite direction
     :type flip: bool
 
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3,1)
+    :type r:  ndarray(3,)
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float ndarray(3,3)
+    :type I: ndarray
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction
-    :type B: float
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float ndarray(2)
+    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]
+    :type B: float, or ndarray(2,)
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
 
@@ -97,16 +94,7 @@ class DHLink(Link):
             a=0.0,
             sigma=0,
             mdh=False,
-            offset=0.0,
-            qlim=np.zeros(2),
-            flip=False,
-            m=0.0,
-            r=np.zeros(3),
-            I=np.zeros((3, 3)),       # noqa
-            Jm=0.0,
-            B=0.0,
-            Tc=np.zeros(2),
-            G=1.0,
+            offset=0,
             **kwargs):
 
         # TODO
@@ -114,7 +102,6 @@ class DHLink(Link):
         #  probably should enforce keyword arguments, easy to make an
         #    error with positional args
         super().__init__(**kwargs)
-        self._robot = None
 
         # Kinematic parameters
         self.sigma = sigma
@@ -123,20 +110,9 @@ class DHLink(Link):
         self.alpha = alpha
         self.a = a
         self.mdh = mdh
-        self.id = None
         self.offset = offset
+        self.id = None
 
-        self.flip = flip
-        self.qlim = qlim
-
-        # Dynamic Parameters
-        self.m = m
-        self.r = r
-        self.I = I    # noqa
-        self.Jm = Jm
-        self.B = B
-        self.Tc = Tc
-        self.G = G
 
     def __add__(self, L):
         if isinstance(L, DHLink):
@@ -164,104 +140,49 @@ class DHLink(Link):
 
     def __str__(self):
 
-        if not self.sigma:
-            s = "Revolute   theta=q{} +{: .2f},  d={: .2f},  a={: .2f},  " \
-                "alpha={: .2f}".format(
-                    self.id, self.offset, self.d, self.a, self.alpha)
+        if self.offset == 0:
+            offset = ""
         else:
-            s = "Prismatic  theta={: .2f},  d=q{} +{: .2f},  a={: .2f},  " \
-                "alpha={: .2f}".format(
-                    self.theta, self.id, self.offset, self.a, self.alpha, )
-
+            offset = f" + {self.offset}"
+        if self.id is None:
+            qvar = "q"
+        else:
+            qvar = f"q{self.id}"
+        cls = self.__class__.__name__
+        if self.isrevolute():
+            s = f"{cls}:   theta={qvar}{offset},  d={self.d}, " \
+                f"a={self.a}, alpha={self.alpha}"
+        else:
+            s = f"{cls}:  theta={self.theta},  d={qvar}{offset},  a={self.a},  " \
+                f"alpha={self.alpha}"
         return s
 
     def __repr__(self):
-        return str(self)
+        name = self.__class__.__name__
+        args = []
+        if self.isrevolute():
+            self._format(args, "d")
+        else:
+            self._format(args, "theta")
+        self._format(args, "a")
+        self._format(args, "alpha")
+        args.extend(super()._params())
+        return name + "(" + ", ".join(args) + ")"
 
-    def _listen_dyn(func):
-        @wraps(func)
-        def wrapper_listen_dyn(*args):
-            if args[0]._robot is not None:
-                args[0]._robot.dynchanged()
-            return func(*args)
-        return wrapper_listen_dyn
-
-    @property
-    def d(self):
-        return self._d
-
-    @property
-    def alpha(self):
-        return self._alpha
+# -------------------------------------------------------------------------- #
 
     @property
     def theta(self):
+        """
+        Get/set joint angle
+
+        - ``link.theta`` is the joint angle
+            :return: joint angle
+            :rtype: float
+        - ``link.theta = ...`` checks and sets the joint angle
+
+        """
         return self._theta
-
-    @property
-    def a(self):
-        return self._a
-
-    @property
-    def sigma(self):
-        return self._sigma
-
-    @property
-    def mdh(self):
-        return self._mdh
-
-    @property
-    def offset(self):
-        return self._offset
-
-    @property
-    def qlim(self):
-        return self._qlim
-
-    @property
-    def flip(self):
-        return self._flip
-
-    @property
-    def m(self):
-        return self._m
-
-    @property
-    def r(self):
-        return self._r
-
-    @property
-    def I(self):    # noqa
-        return self._I
-
-    @property
-    def Jm(self):
-        return self._Jm
-
-    @property
-    def B(self):
-        return self._B
-
-    @property
-    def Tc(self):
-        return self._Tc
-
-    @property
-    def G(self):
-        return self._G
-
-    @d.setter
-    @_listen_dyn
-    def d(self, d_new):
-        if self.sigma and d_new != 0.0:
-            raise ValueError("f is not valid for prismatic joints")
-        else:
-            self._d = d_new
-
-    @alpha.setter
-    @_listen_dyn
-    def alpha(self, alpha_new):
-        self._alpha = alpha_new
 
     @theta.setter
     @_listen_dyn
@@ -271,202 +192,178 @@ class DHLink(Link):
         else:
             self._theta = theta_new
 
+# -------------------------------------------------------------------------- #
+
+    @property
+    def d(self):
+        """
+        Get/set link offset
+
+        - ``link.d`` is the link offset
+            :return: link offset
+            :rtype: float
+        - ``link.d = ...`` checks and sets the link offset
+
+        """
+        return self._d
+
+    @d.setter
+    @_listen_dyn
+    def d(self, d_new):
+        if self.sigma and d_new != 0.0:
+            raise ValueError("f is not valid for prismatic joints")
+        else:
+            self._d = d_new
+
+# -------------------------------------------------------------------------- #
+
+    @property
+    def a(self):
+        """
+        Get/set link length
+
+        - ``link.a`` is the link length
+            :return: link length
+            :rtype: float
+        - ``link.a = ...`` checks and sets the link length
+
+        """
+        return self._a
+
     @a.setter
     @_listen_dyn
     def a(self, a_new):
         self._a = a_new
+# -------------------------------------------------------------------------- #
+
+    @property
+    def alpha(self):
+        """
+        Get/set link twist
+
+        - ``link.d`` is the link twist
+            :return: link twist
+            :rtype: float
+        - ``link.d = ...`` checks and sets the link twist
+
+        """
+        return self._alpha
+
+    @alpha.setter
+    @_listen_dyn
+    def alpha(self, alpha_new):
+        self._alpha = alpha_new
+
+# -------------------------------------------------------------------------- #
+
+    @property
+    def sigma(self):
+        """
+        Get/set joint type
+
+        - ``link.sigma`` is the joint type
+            :return: joint type
+            :rtype: int
+        - ``link.sigma = ...`` checks and sets the joint type
+
+        The joint type is 0 for a revolute joint, and 1 for a prismatic joint.
+
+        :seealso: :func:`isrevolute`, :func:`isprismatic`
+        """
+        return self._sigma
 
     @sigma.setter
     @_listen_dyn
     def sigma(self, sigma_new):
         self._sigma = sigma_new
+# -------------------------------------------------------------------------- #
+
+    @property
+    def mdh(self):
+        """
+        Get/set kinematic convention
+
+        - ``link.mdh`` is the kinematic convention
+            :return: kinematic convention
+            :rtype: bool
+        - ``link.mdh = ...`` checks and sets the kinematic convention
+
+        The kinematic convention is True for modified Denavit-Hartenberg
+        notation (eg. Craig's textbook) and False for Denavit-Hartenberg
+        notation (eg. Siciliano, Spong, Paul textbooks).
+        """
+        return self._mdh
 
     @mdh.setter
     @_listen_dyn
     def mdh(self, mdh_new):
         self._mdh = int(mdh_new)
 
+# -------------------------------------------------------------------------- #
+
+    @property
+    def offset(self):
+        """
+        Get/set joint variable offset
+
+        - ``link.offset`` is the joint variable offset
+
+        :return: joint variable offset
+        :rtype: float
+
+        - ``link.offset = ...`` checks and sets the joint variable offset
+
+        The offset is added to the joint angle before forward kinematics, and
+        subtracted after inverse kinematics.  It is used to define the joint
+        configuration for zero joint coordinates.
+
+        """
+        return self._offset
+
     @offset.setter
     def offset(self, offset_new):
         self._offset = offset_new
 
-    @qlim.setter
-    def qlim(self, qlim_new):
-        self._qlim = getvector(qlim_new, 2)
-
-    @flip.setter
-    def flip(self, flip_new):
-        self._flip = flip_new
-
-    @m.setter
-    @_listen_dyn
-    def m(self, m_new):
-        self._m = m_new
-
-    @r.setter
-    @_listen_dyn
-    def r(self, r_new):
-        self._r = getvector(r_new, 3)
-
-    @I.setter
-    @_listen_dyn
-    def I(self, I_new):  # noqa
-
-        if ismatrix(I_new, (3, 3)):
-            # 3x3 matrix passed
-            if np.any(np.abs(I_new - I_new.T) > 1e-8):
-                raise ValueError('3x3 matrix is not symmetric')
-
-        elif isvector(I_new, 9):
-            # 3x3 matrix passed as a 1d vector
-            I_new = I_new.reshape(3, 3)
-            if np.any(np.abs(I_new - I_new.T) > 1e-8):
-                raise ValueError('3x3 matrix is not symmetric')
-
-        elif isvector(I_new, 6):
-            # 6-vector passed, moments and products of inertia,
-            # [Ixx Iyy Izz Ixy Iyz Ixz]
-            I_new = np.array([
-                [I_new[0], I_new[3], I_new[5]],
-                [I_new[3], I_new[1], I_new[4]],
-                [I_new[5], I_new[4], I_new[2]]
-            ])
-
-        elif isvector(I_new, 3):
-            # 3-vector passed, moments of inertia [Ixx Iyy Izz]
-            I_new = np.diag(I_new)
-
-        else:
-            raise ValueError('invalid shape passed: must be (3,3), (6,), (3,)')
-
-        self._I = I_new
-
-    @Jm.setter
-    @_listen_dyn
-    def Jm(self, Jm_new):
-        self._Jm = Jm_new
-
-    @B.setter
-    @_listen_dyn
-    def B(self, B_new):
-        if isscalar(B_new):
-            self._B = B_new
-        else:
-            raise TypeError("B must be a scalar")
-
-    @Tc.setter
-    @_listen_dyn
-    def Tc(self, Tc_new):
-
-        try:
-            # sets Coulomb friction parameters to [F -F], for a symmetric
-            # Coulomb friction model.
-            Tc = getvector(Tc_new, 1)
-            Tc_new = np.array([Tc[0], -Tc[0]])
-        except ValueError:
-            # [FP FM] sets Coulomb friction to [FP FM], for an asymmetric
-            # Coulomb friction model. FP>0 and FM<0.  FP is applied for a
-            # positive joint velocity and FM for a negative joint
-            # velocity.
-            Tc_new = getvector(Tc_new, 2)
-
-        self._Tc = Tc_new
-
-    @G.setter
-    @_listen_dyn
-    def G(self, G_new):
-        self._G = G_new
-
-    def _copy(self):
-        # Copy the Link
-        # link = DHLink(
-        #     d=self.d,
-        #     alpha=self.alpha,
-        #     theta=self.theta,
-        #     a=self.a,
-        #     sigma=self.sigma,
-        #     mdh=self.mdh,
-        #     offset=self.offset,
-        #     qlim=self.qlim,
-        #     flip=self.flip,
-        #     m=self.m,
-        #     r=self.r,
-        #     I=self.I,
-        #     Jm=self.Jm,
-        #     B=self.B,
-        #     Tc=self.Tc,
-        #     G=self.G)
-
-        # TODO how many places is this called?
-
-        return copy.copy(self)
-
-    def dyn(self, indent=0):
-        """
-        Show inertial properties of link
-
-        s = dyn() returns a string representation the inertial properties of
-        the link object in a multi-line format. The properties shown are mass,
-        centre of mass, inertia, friction, gear ratio and motor properties.
-
-        :param indent: indent each line by this many spaces
-        :type indent: int
-        :return s: The string representation of the link dynamics
-        :rtype s: string
-        """
-
-        s = "m     =  {:8.2g} \n" \
-            "r     =  {:8.2g} {:8.2g} {:8.2g} \n" \
-            "        | {:8.2g} {:8.2g} {:8.2g} | \n" \
-            "I     = | {:8.2g} {:8.2g} {:8.2g} | \n" \
-            "        | {:8.2g} {:8.2g} {:8.2g} | \n" \
-            "Jm    =  {:8.2g} \n" \
-            "B     =  {:8.2g} \n" \
-            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n" \
-            "G     =  {:8.2g} \n" \
-            "qlim  =  {:8.2g} to {:8.2g}".format(
-                self.m,
-                self.r[0], self.r[1], self.r[2],
-                self.I[0, 0], self.I[0, 1], self.I[0, 2],
-                self.I[1, 0], self.I[1, 1], self.I[1, 2],
-                self.I[2, 0], self.I[2, 1], self.I[2, 2],
-                self.Jm,
-                self.B,
-                self.Tc[0], self.Tc[1],
-                self.G,
-                self.qlim[0], self.qlim[1]
-            )
-
-        if indent > 0:
-            # insert indentations into the string
-            # TODO there is probably a tidier way to integrate this step with
-            # above
-            sp = ' ' * indent
-            s = sp + s.replace('\n', '\n' + sp)
-
-        return s
+# -------------------------------------------------------------------------- #
 
     def A(self, q):
-        """
+        r"""
         Link transform matrix
 
-        T = A(q) is the link homogeneous transformation matrix (4x4)
-        corresponding to the link variable q which is either the
-        Denavit-Hartenberg parameter theta (revolute) or d (prismatic)
-
-        :param q: Joint angle (radians)
+        :param q: Joint coordinate
         :type q: float
-        :return T: link homogeneous transformation matrix
-        :rtype T: float numpy.ndarray((4, 4))
+        :return T: SE(3) link homogeneous transformation
+        :rtype T: SE3 instance
 
-        :notes:
-            - For a revolute joint the THETA parameter of the link is ignored,
-              and q used instead.
-            - For a prismatic joint the D parameter of the link is ignored,
-              and q used instead.
-            - The link offset parameter is added to Q before computation of
-              the transformation matrix.
+        ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous
+        transformation matrix corresponding to the link's joint variable ``q``
+        which is either the Denavit-Hartenberg parameter :math:`\theta_j`
+        (revolute) or :math:`d_j` (prismatic). 
+        
+        This is the relative pose of the current link frame with respect to the
+        previous link frame.
 
+
+
+        For details of the computation see the documentation for the subclasses,
+        click on the right side of the class boxes below. 
+
+        .. inheritance-diagram:: roboticstoolbox.RevoluteDH roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH roboticstoolbox.PrismaticMDH
+            :top-classes: roboticstoolbox.robot.DHLink.DHLink
+            :parts: 2
+
+        .. note::
+
+            - For a revolute joint the ``theta`` parameter of the link is 
+              ignored, and ``q`` used instead.
+            - For a prismatic joint the ``d`` parameter of the link is ignored,
+              and ``q`` used instead.
+            - The joint ``offset`` parameter is added to ``q`` before 
+              computation of the transformation matrix.
+            - The computation is different for standard and modified 
+              Denavit-Hartenberg parameters.
+
+        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`, :class:`RevoluteMDH`, :class:`PrismaticMDH`
         """
 
         sa = _sin(self.alpha)
@@ -507,20 +404,8 @@ class DHLink(Link):
 
         return SE3(T, check=False)
 
-    def islimit(self, q):
-        """
-        Checks if the joint is exceeding a joint limit
 
-        :return: True if joint is exceeded
-        :rtype: bool
-
-        """
-
-        if q < self.qlim[0] or q > self.qlim[1]:
-            return True
-        else:
-            return False
-
+    # TODO these next 2 should be properties
     def isrevolute(self):
         """
         Checks if the joint is of revolute type
@@ -528,6 +413,7 @@ class DHLink(Link):
         :return: Ture if is revolute
         :rtype: bool
 
+        :seealso: :func:`sigma`
         """
 
         if not self.sigma:
@@ -542,6 +428,7 @@ class DHLink(Link):
         :return: Ture if is prismatic
         :rtype: bool
 
+        :seealso: :func:`sigma`
         """
 
         if self.sigma:
@@ -549,78 +436,56 @@ class DHLink(Link):
         else:
             return False
 
-    def nofriction(self, coulomb=True, viscous=False):
-        """
-        ``l2 = nofriction(coulomb, viscous)`` copies the link and returns a
-        link with the same parameters except, the Coulomb and/or viscous
-        friction parameter to zero.
+    def ets(self):
+        ets = ETS()
 
-        ``l2 = nofriction()`` as above except the the Coulomb parameter is set
-        to zero.
+        if self.mdh:
+            # MDH format: a alpha theta d
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
 
-        :param coulomb: if True, will set the Coulomb friction to 0
-        :type coulomb: bool
-        :param viscous: if True, will set the viscous friction to 0
-        :type viscous: bool
-        """
+            if self.isrevolute():
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
+                ets *= ETS.rz(flip=self.flip)  # joint
 
-        # Copy the Link
-        link = self._copy()
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.rz(self.theta)
 
-        if viscous:
-            link.B = 0.0
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+                ets *= ETS.tz(flip=self.flip)  # joint
 
-        if coulomb:
-            link.Tc = [0.0, 0.0]
+        else:
+            # DH format: theta d a alpha
 
-        return link
+            if self.isrevolute():
+                ets *= ETS.rz(flip=self.flip)
+                if self.offset != 0:
+                    ets *= ETS.rz(self.offset)
 
-    def friction(self, qd, coulomb=True):
-        """
-        ``tau = friction(qd)`` Calculates the joint friction force/torque (n)
-        for joint velocity qd (n). The friction model includes:
+                if self.d != 0:
+                    ets *= ETS.tz(self.d)
+            else:
+                if self.theta != 0:
+                    ets *= ETS.rz(self.theta)
+                    
+                if self.offset != 0:
+                    ets *= ETS.tz(self.offset)
+                ets *= ETS.tz(flip=self.flip)
 
-        - Viscous friction which is a linear function of velocity.
-        - Coulomb friction which is proportional to sign(qd).
+            if self.a != 0:
+                ets *= ETS.tx(self.a)
+            if self.alpha != 0:
+                ets *= ETS.rx(self.alpha)
+        return ets
 
-        :param qd: The joint velocity
-        :type qd: float
-
-        :return tau: the friction force/torque
-        :rtype tau: float
-
-        :notes:
-            - The friction value should be added to the motor output torque,
-              it has a negative value when qd > 0.
-            - The returned friction value is referred to the output of the
-              gearbox.
-            - The friction parameters in the Link object are referred to the
-              motor.
-            - Motor viscous friction is scaled up by G^2.
-            - Motor Coulomb friction is scaled up by G.
-            - The appropriate Coulomb friction value to use in the
-              non-symmetric case depends on the sign of the joint velocity,
-              not the motor velocity.
-            - The absolute value of the gear ratio is used.  Negative gear
-              ratios are tricky: the Puma560 has negative gear ratio for
-              joints 1 and 3.
-
-        """
-
-        tau = self.B * np.abs(self.G) * qd
-
-        if coulomb:
-            if qd > 0:
-                tau += self.Tc[0]
-            elif qd < 0:
-                tau += self.Tc[1]
-
-        # Scale up by gear ratio
-        tau = -np.abs(self.G) * tau
-
-        return tau
-
-
+# -------------------------------------------------------------------------- #
 class RevoluteDH(DHLink):
     r"""
     Class for revolute links using standard DH convention
@@ -631,14 +496,10 @@ class RevoluteDH(DHLink):
     :type alpha: float
     :param a: kinematic - link length
     :type a: float
-    :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
     :param offset: kinematic - joint variable offset
     :type offset: float
 
-    :param qlim: joint variable limits [min max]
+    :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
@@ -648,25 +509,23 @@ class RevoluteDH(DHLink):
     :param r: dynamic - position of COM with respect to link frame
     :type r:  float ndarray(3)
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float ndarray(3,3)
+    :type I: ndarray
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float ndarray(2)
+    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]
+    :type B: float, or ndarray(2,)
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
 
-    A subclass of the DHLink class for a revolute joint: holds all information
-    related to a robot link such as kinematics parameters, rigid-body inertial
-    parameters, motor and transmission parameters.
+    A subclass of the :class:`DHLink` class for a revolute joint that holds all
+    information related to a robot link such as kinematics parameters,
+    rigid-body inertial parameters, motor and transmission parameters.
 
     The link transform is
 
-    .. math::
-
-        \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)  # noqa
+    :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
 
     where :math:`q_i` is the joint variable.
 
@@ -682,7 +541,7 @@ class RevoluteDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):
@@ -708,14 +567,10 @@ class PrismaticDH(DHLink):
     :type alpha: float
     :param a: kinematic - link length
     :type a: float
-    :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
     :param offset: kinematic - joint variable offset
     :type offset: float
 
-    :param qlim: joint variable limits [min max]
+    :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
@@ -725,25 +580,23 @@ class PrismaticDH(DHLink):
     :param r: dynamic - position of COM with respect to link frame
     :type r:  float ndarray(3)
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float ndarray(3,3)
+    :type I: ndarray
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float ndarray(2)
+    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]
+    :type B: float, or ndarray(2,)
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
 
-    A subclass of the DHLink class for a prismatic joint: holds all information
-    related to a robot link such as kinematics parameters, rigid-body inertial
-    parameters, motor and transmission parameters.
+    A subclass of the DHLink class for a prismatic joint that holds all
+    information related to a robot link such as kinematics parameters,
+    rigid-body inertial parameters, motor and transmission parameters.
 
     The link transform is
 
-    .. math::
-
-        \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)  # noqa
+    :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
 
     where :math:`q_i` is the joint variable.
 
@@ -759,7 +612,7 @@ class PrismaticDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):
@@ -783,14 +636,10 @@ class RevoluteMDH(DHLink):
     :type alpha: float
     :param a: kinematic - link length
     :type a: float
-    :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
     :param offset: kinematic - joint variable offset
     :type offset: float
 
-    :param qlim: joint variable limits [min max]
+    :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
@@ -800,25 +649,23 @@ class RevoluteMDH(DHLink):
     :param r: dynamic - position of COM with respect to link frame
     :type r:  float ndarray(3)
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float ndarray(3,3)
+    :type I: ndarray
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float ndarray(2)
+    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]
+    :type B: float, or ndarray(2,)
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
 
-    A subclass of the DHLink class for a revolute joint: holds all information
-    related to a robot link such as kinematics parameters, rigid-body inertial
-    parameters, motor and transmission parameters.
+    A subclass of the DHLink class for a revolute joint that holds all
+    information related to a robot link such as kinematics parameters,
+    rigid-body inertial parameters, motor and transmission parameters.
 
     The link transform is
 
-    .. math::
-
-        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i)  # noqa
+    :math:`\mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i)`
 
     where :math:`q_i` is the joint variable.
 
@@ -834,7 +681,7 @@ class RevoluteMDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):
@@ -860,14 +707,10 @@ class PrismaticMDH(DHLink):
     :type alpha: float
     :param a: kinematic - link length
     :type a: float
-    :param sigma: kinematic - 0 if revolute, 1 if prismatic
-    :type sigma: int
-    :param mdh: kinematic - 0 if standard D&H, else 1
-    :type mdh: int
     :param offset: kinematic - joint variable offset
     :type offset: float
 
-    :param qlim: joint variable limits [min max]
+    :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
@@ -877,25 +720,23 @@ class PrismaticMDH(DHLink):
     :param r: dynamic - position of COM with respect to link frame
     :type r:  float ndarray(3)
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float ndarray(3,3)
+    :type I: ndarray
     :param Jm: dynamic - motor inertia
     :type Jm: float
-    :param B: dynamic - motor viscous friction (1x1 or 2x1)
-    :type B: float
-    :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float ndarray(2)
+    :param B: dynamic - motor viscous friction: B=B⁺=B⁻, [B⁺, B⁻]
+    :type B: float, or ndarray(2,)
+    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
 
-    A subclass of the DHLink class for a prismatic joint: holds all information
-    related to a robot link such as kinematics parameters, rigid-body inertial
-    parameters, motor and transmission parameters.
+    A subclass of the DHLink class for a prismatic joint that holds all
+    information related to a robot link such as kinematics parameters,
+    rigid-body inertial parameters, motor and transmission parameters.
 
     The link transform is
 
-    .. math::
-
-        \mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}}  # noqa
+    :math:`\mathbf{T}_{tx}(a_{i-1}) \cdot \mathbf{T}_{rx}(\alpha_{i-1}) \cdot \mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}}`
 
     where :math:`q_i` is the joint variable.
 
@@ -911,7 +752,7 @@ class PrismaticMDH(DHLink):
             a=0.0,
             alpha=0.0,
             offset=0.0,
-            qlim=np.zeros(2),
+            qlim=None,
             flip=False,
             **kwargs
             ):

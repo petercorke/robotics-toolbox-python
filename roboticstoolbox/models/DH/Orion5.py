@@ -9,14 +9,45 @@ from spatialmath import SE3
 
 
 class Orion5(DHRobot):
+    """
+    Class that models a RAWR robotics Orion5 manipulator
+
+    ``Orion5()`` is a class which models a RAWR Robotics Orion5 robot and
+    describes its kinematic characteristics using standard DH
+    conventions.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Orion5()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+        - qz, zero angles, all folded up
+        - qv, stretched out vertically
+        - qh, arm horizontal, hand down
+
+    .. note::
+
+      - SI units of metres are used.
+      - Robot has only 4 DoF.
+
+    :references:
+        - https://rawrobotics.com.au/orion5
+        - https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view
+
+    .. codeauthor:: Aditya Dua
+    .. codeauthor:: Peter Corke
+    """
+
+
     def __init__(self, base=None):
 
         mm = 1e-3
         deg = pi / 180
 
-        # details from https://rawrobotics.com.au/orion5
-        # User Manual at
-        # https://drive.google.com/file/d/0B6_9_-ZgiRdTNkVqMEkxN2RSc2c/view
+        # details from 
 
         h = 53.0 * mm
         r = 30.309 * mm

@@ -18,23 +18,34 @@
 # from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
+from spatialmath import SE3
 
 
 class Puma560(DHRobot):
     """
-    Create model of Puma 560 manipulator
+    Class that models a Puma 560 manipulator
 
-    puma = Puma560() is a script which creates a puma SerialLink object
-    describing the kinematic and dynamic characteristics of a Unimation Puma
-    560 manipulator using standard DH conventions.
+    :param symbolic: use symbolic constants
+    :type symbolic: bool
 
-    Also define some joint configurations:
+    ``Puma560()`` is a class which models a Unimation Puma560 robot and
+    describes its kinematic and dynamic characteristics using standard DH
+    conventions.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
     - qz, zero joint angle configuration, 'L' shaped configuration
     - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the X direction
+    - qs, arm is stretched out in the x-direction
     - qn, arm is at a nominal non-singular configuration
 
-    :notes:
+    .. note::
         - SI units are used.
         - The model includes armature inertia and gear ratios.
         - The value of m1 is given as 0 here.  Armstrong found no value for it
@@ -50,10 +61,11 @@ class Puma560(DHRobot):
           Proc. IEEE Int. Conf. Robotics and Automation, (San Diego),
           pp. 1608-1613, May 1994. (for kinematic and dynamic parameters)
         - "A combined optimization method for solving the inverse kinematics
-           problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
-           (for joint angle limits)
+          problem", Wang & Chen, IEEE Trans. RA 7(4) 1991 pp 489-.
+          (for joint angle limits)
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
+    .. codeauthor:: Peter Corke
     """
 
     def __init__(self, symbolic=False):
@@ -67,6 +79,7 @@ class Puma560(DHRobot):
             zero = 0.0
 
         deg = pi / 180
+        inch = 0.0254
 
         # base = 0.672      # from mounting surface to shoulder axis
 
@@ -153,14 +166,16 @@ class Puma560(DHRobot):
                 qlim=[-266*deg, 266*deg]
             )
         ]
+        base = SE3(0, 0, 26.45*inch)  # pedestal
 
         super().__init__(
             L,
             name="Puma 560",
             manufacturer="Unimation",
-            keywords=('dynamics', 'symbolic'),
+            keywords=('dynamics', 'symbolic', 'mesh'),
             symbolic=symbolic,
-            meshdir="meshes/UNIMATE/puma560"
+            meshdir="meshes/UNIMATE/puma560",
+            base=base
         )
 
         # zero angles, L shaped pose
@@ -175,8 +190,87 @@ class Puma560(DHRobot):
         # nominal table top picking pose
         self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
+    def _ikine(self, T, config):
+        # Puma model with shoulder and elbow offsets
+        # - Inverse kinematics for a PUMA 560,
+        #   Paul and Zhang,
+        #   The International Journal of Robotics Research,
+        #   Vol. 5, No. 2, Summer 1986, p. 32-44
+
+        # based on MATLAB code by Robert Biro with Gary Von McMurray,
+        # GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95
+
+        # config is l|r  u|d  f|n
+
+        a2 = self.links[1].a
+        a3 = self.links[2].a
+        d1 = self.links[0].d
+        d3 = self.links[2].d
+        d4 = self.links[3].d
+
+        # The following parameters are extracted from the Homogeneous
+        # Transformation as defined in equation 1, p. 34
+
+        Px, Py, Pz = T.t
+
+        theta = np.zeros((3,))
+
+        # Solve for theta[0]
+        # r is defined in equation 38, p. 39.
+        # theta[0] uses equations 40 and 41, p.39,
+        # based on the configuration parameter n1
+
+        r = np.sqrt(Px**2 + Py**2)
+        if 'r' in config:
+            theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
+        else:
+            theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
+
+        # Solve for theta[1]
+        # V114 is defined in equation 43, p.39.
+        # r is defined in equation 47, p.39.
+        # Psi is defined in equation 49, p.40.
+        # theta[1] uses equations 50 and 51, p.40, based on the
+        # configuration parameter n2
+        if 'u' in config:
+            n2 = 1
+        else:
+            n2 = -1
+
+        if 'r' in config:
+            n2 = -n2
+
+        V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
+
+        r = np.sqrt(V114**2 + Pz**2)
+
+        Psi = np.arccos(
+            (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
+            / (2.0 * a2 * r))
+
+        if np.isnan(Psi):
+            theta = []
+        else:
+            theta[1] = np.arctan2(Pz, V114) + n2 * Psi
+
+            # Solve for theta[2]
+            # theta[2] uses equation 57, p. 40.
+            num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
+            den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
+            theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
+        
+        return theta
+
+    def ikine_a(self, T, config="lun"):
+        return self.ikine_6s(T, config, self._ikine)
 
 if __name__ == '__main__':    # pragma nocover
 
-    puma = Puma560(symbolic=True)
+    puma = Puma560(symbolic=False)
     print(puma)
+    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0,0,1], [1,0,0])
+    (q, failed, reason) = puma.ikine(T)
+    print(failed, q)
+    qq = puma.ikine_a(T)
+    print(qq)
+    print(puma.fkine(qq))

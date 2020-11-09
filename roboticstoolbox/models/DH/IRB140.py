@@ -10,27 +10,34 @@ import numpy as np
 
 class IRB140(DHRobot):
     """
-    IRB140 Create model of ABB IRB 140 manipulator
+    Class that models an ABB  IRB140 manipulator
 
-    IRB140 is a script that creates the workspace variable irb140 which
-    describes the kinematic characteristics of an ABB IRB 140 manipulator
-    using standard DH conventions.
-    Also define the workspace vectors:
-      qz         zero joint angle configuration
-      qr         vertical 'READY' configuration
-      qd         lower arm horizontal as per data sheet
+    ``IRB140()`` is a class which models a Unimation Puma560 robot and
+    describes its kinematic and dynamic characteristics using standard DH
+    conventions.
 
-    Reference::
-    - "IRB 140 data sheet", ABB Robotics.
-    - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
-      System Design and Reconfiguration Alternatives"
-      A. Djuric and R. J. Urbanic
-    - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
+    .. runblock:: pycon
 
-    Notes::
-    - SI units of metres are used.
-    - Unlike most other mdl_xxx scripts this one is actually a function that
-      behaves like a script and writes to the global workspace.
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.IRB140()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+        - qz, zero joint angle configuration
+        - qr, vertical 'READY' configuration
+        - qd, lower arm horizontal as per data sheet
+
+    .. note:: SI units of metres are used.
+
+    :references:
+        - "IRB 140 data sheet", ABB Robotics.
+        - "Utilizing the Functional Work Space Evaluation Tool for Assessing a
+          System Design and Reconfiguration Alternatives"
+          A. Djuric and R. J. Urbanic
+        - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
+
+    .. codeauthor:: Peter Corke
     """
     def __init__(self):
         deg = pi/180

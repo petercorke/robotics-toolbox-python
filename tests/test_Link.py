@@ -143,14 +143,14 @@ class TestDHLink(unittest.TestCase):
         l1 = rp.RevoluteDH()
 
         s0 = l0.__str__()
-        s1 = l1.__repr__()
+        s1 = l1.__str__()
 
         self.assertEqual(
-            s0, "Prismatic  theta= 0.00,  d=qNone + 0.00,  a= 0.00,  "
-                "alpha= 0.00")
+            s0, "PrismaticDH:  theta=0.0,  d=q,  a=0.0,  "
+                "alpha=0.0")
         self.assertEqual(
-            s1, "Revolute   theta=qNone + 0.00,  d= 0.00,  a= 0.00,  "
-                "alpha= 0.00")
+            s1, "RevoluteDH:   theta=q,  d=0.0, a=0.0, "
+                "alpha=0.0")
 
     def test_dyn(self):
         puma = rp.models.DH.Puma560()
@@ -189,6 +189,24 @@ qlim  =      -2.8 to      2.8""")
 
         with self.assertRaises(TypeError):
             l0.B = [1, 2]
+
+    def test_robot(self):
+        l0 = rp.RevoluteDH()
+        r = rp.DHRobot([l0])
+
+        self.assertIs(l0._robot, r)
+
+    def test_copy(self):
+
+        l0 = rp.RevoluteDH()
+        r = rp.DHRobot([l0])
+        l1 = l0.copy()
+        l0.m = 4
+        l0.r[1] = 5
+        self.assertEqual(l1.m, 0)
+        self.assertEqual(l1.r[1], 0)
+        self.assertIs(l0._robot, r)
+        self.assertIs(l1._robot, r)
 
 if __name__ == '__main__':
 

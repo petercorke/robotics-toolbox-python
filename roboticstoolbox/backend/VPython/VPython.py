@@ -10,16 +10,16 @@ import os
 import platform
 import glob
 
-from roboticstoolbox.backend.Connector import Connector
+from roboticstoolbox.backends.Connector import Connector
 
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.robot.Robot import Robot as r
 
-from roboticstoolbox.backend.VPython.canvas import GraphicsCanvas3D, \
+from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas3D, \
     GraphicsCanvas2D
-from roboticstoolbox.backend.VPython.graphicalrobot import \
+from roboticstoolbox.backends.VPython.graphicalrobot import \
     GraphicalRobot
-from roboticstoolbox.backend.VPython.common_functions import \
+from roboticstoolbox.backends.VPython.common_functions import \
     close_localhost_session
 
 

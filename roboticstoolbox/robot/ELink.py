@@ -3,9 +3,9 @@
 @author: Jesse Haviland
 """
 
-import numpy as np
+# import numpy as np
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
+# from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
@@ -13,9 +13,7 @@ from roboticstoolbox.robot.Link import Link
 
 class ELink(Link):
     """
-    A link superclass for all link types. A Link object holds all information
-    related to a robot joint and link such as kinematics parameters,
-    rigid-body inertial parameters, motor and transmission parameters.
+    ETS link class
 
     :param ets: kinematic - The elementary transforms which make up the link
     :type ets: ETS
@@ -38,42 +36,42 @@ class ELink(Link):
     :param G: dynamic - gear ratio
     :type G: float
 
+    The ELink object holds all information related to a robot link and can form
+    a serial-connected chain or a rigid-body tree.
+
+    It inherits from the Link class which provides common functionality such
+    as joint and link such as kinematics parameters,
+    .
+
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
 
+    :seealso: :class:`Link`, :class:`DHLink`
     """
 
     def __init__(
             self,
             ets=ETS(),
             v=None,
-            name='',
             parent=None,
-            qlim=np.zeros(2),
-            m=0.0,
-            r=None,
-            I=np.zeros((3, 3)),  # noqa
-            Jm=0.0,
-            B=0.0,
-            Tc=np.zeros(2),
-            G=1.0,
-            geometry=[],
-            collision=[]):
+            jindex=None,
+            **kwargs):
 
-        super(ELink, self).__init__()
+        # process common options
+        super(ELink, self).__init__(**kwargs)
 
-        self.STATIC = 0
-        self.VARIABLE = 1
-
+        # check we have an ETS
         if isinstance(ets, ETS):
             self._ets = ets
         else:
             raise TypeError(
                 'The ets argument must be of type ETS')
 
-        self._name = name
+        if v is None and len(ets) > 0 and ets[-1].isjoint:
+            v = ets.pop()
 
+        # TODO simplify this logic, can be ELink class or None
         if isinstance(parent, list):
             raise TypeError(
                 'Only one parent link can be present')
@@ -83,82 +81,181 @@ class ELink(Link):
 
         self._parent = parent
         self._child = []
+        self._joint_name = None
+        self._jindex = jindex
 
-        # Number of transforms in the ETS
-        self._M = len(self._ets)
-
-        # Initialise joints
-        if isinstance(ets, ETS):
-            self._Ts = SE3()
-            for i in range(self.M):
-                if ets[i].jtype is not ets[i].STATIC:
-                    raise ValueError('The transforms in ets must be constant')
-
-                if not isinstance(ets[i].T(), SE3):
-                    self._Ts *= SE3(ets[i].T())
-                else:
-                    self._Ts *= ets[i].T()
-
-        elif isinstance(ets, SE3):
-            self._Ts = ets
+        # Initialise the static transform representing the constant
+        # component of the ETS
+        self._init_Ts()
 
         # Check the variable joint
         if v is None:
-            self._jtype = self.STATIC
+            self._joint = False
         elif not isinstance(v, ETS):
             raise TypeError('v must be of type ETS')
-        elif v[0].jtype is v[0].STATIC:
+        elif not v[0].isjoint:
             raise ValueError('v must be a variable ETS')
         elif len(v) > 1:
             raise ValueError(
                 "An elementary link can only have one joint variable")
         else:
-            self._jtype = self.VARIABLE
+            self._joint = True
 
         self._v = v
-        self.qlim = qlim
-        self.geometry = geometry
-        self.collision = collision
 
-        # Dynamic Parameters
-        self.m = m
-        self.r = r
-        self.I = I  # noqa
-        self.Jm = Jm
-        self.B = B
-        self.Tc = Tc
-        self.G = G
+    def _init_Ts(self):
+        # Number of transforms in the ETS excluding the joint variable
+        self._M = len(self._ets)
+
+        # Initialise joints
+        if isinstance(self._ets, ETS):
+            self._Ts = SE3()
+            for i in range(self.M):
+                if self._ets[i].isjoint:
+                    raise ValueError('The transforms in ets must be constant')
+
+                if not isinstance(self._ets[i].T(), SE3):
+                    self._Ts *= SE3(self._ets[i].T())
+                else:
+                    self._Ts *= self._ets[i].T()
+
+        elif isinstance(self._ets, SE3):
+            self._Ts = self._ets
 
     def __repr__(self):
-        return self.name
+        name = self.__class__.__name__
+        s = f"{self.name}, ets={self.ets()}"
+        if self.parent is not None:
+            s += f", parent={self.parent.name}"
+        args = [s] + super()._params()
+        return name + "(" + ", ".join(args) + ")"
+
+    def __str__(self):
+        """
+        Pretty prints the ETS Model of the link. Will output angles in degrees
+
+        :return: Pretty print of the robot link
+        :rtype: str
+        """
+        # name = self.__class__.__name__
+        if self.parent is None:
+            parent = ""
+        else:
+            parent = f" [{self.parent.name}]"
+        return f"name[{self.name}({parent}): {self.ets()}] "
 
     @property
     def v(self):
+        """
+        Variable part of link ETS
+
+        :return: joint variable transform
+        :rtype: ETS instance
+
+        The ETS for each ELink comprises a constant part (possible the identity)
+        followed by an optional joint variable transform.  This property returns
+        the latter.
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ELink, ETS
+            >>> link = ELink( ETS.tz(0.333) * ETS.rx(90, 'deg') * ETS.rz() )
+            >>> print(link.v)
+        """
         return self._v
 
     @property
     def Ts(self):
+        """
+        Constant part of link ETS
+
+        :return: constant part of link transform
+        :rtype: SE3 instance
+
+        The ETS for each ELink comprises a constant part (possible the identity)
+        followed by an optional joint variable transform.  This property returns
+        the constant part.  If no constant part is given, this returns an
+        identity matrix.
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ELink, ETS
+            >>> link = ELink( ETS.tz(0.333) * ETS.rx(90, 'deg') * ETS.rz() )
+            >>> link.Ts
+            >>> link = ELink( ETS.rz() )
+            >>> link.Ts
+        """
         return self._Ts
 
-    @property
-    def collision(self):
-        return self._collision
 
     @property
-    def geometry(self):
-        return self._geometry
+    def isjoint(self):
+        """
+        Test if link has joint
+
+        :return: test if link has a joint
+        :rtype: bool
+
+        The ETS for each ELink comprises a constant part (possible the identity)
+        followed by an optional joint variable transform.  This property returns the
+        whether the
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[1].isjoint  # link with joint
+            >>> robot[8].isjoint  # static link
+        """
+        return self._v is not None
 
     @property
-    def jtype(self):
-        return self._jtype
+    def jindex(self):
+        """
+        Get/set joint index
 
-    @property
-    def ets(self):
-        return self._ets
+        - ``link.jindex`` is the joint index
+            :return: joint index
+            :rtype: int
+        - ``link.jindex = ...`` checks and sets the joint index
 
-    @property
-    def name(self):
-        return self._name
+        For a serial-link manipulator the joints are numbered starting at zero
+        and increasing sequentially toward the end-effector.  For branched
+        mechanisms this is not so straightforward.
+
+        The link's ``jindex`` property specifies the index of its joint
+        variable within a vector of joint coordinates.
+
+        .. note:: ``jindex`` values must be a sequence of integers starting
+            at zero.
+        """
+        return self._jindex
+
+    @jindex.setter
+    def jindex(self, j):
+        self._jindex = j
+
+    def isrevolute(self):
+        """
+        Checks if the joint is of revolute type
+
+        :return: Ture if is revolute
+        :rtype: bool
+        """
+        return self.v.isrevolute
+
+    def isprismatic(self):
+        """
+        Checks if the joint is of prismatic type
+
+        :return: Ture if is prismatic
+        :rtype: bool
+        """
+        return self.v.isprismatic
+
+    # @property
+    # def ets(self):
+    #     return self._ets
 
     # @property
     # def parent_name(self):
@@ -170,6 +267,21 @@ class ELink(Link):
 
     @property
     def parent(self):
+        """
+        Parent link
+
+        :return: Link's parent
+        :rtype: ELink instance
+
+        This is a reference to 
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[0].parent  # base link has no parent
+            >>> robot[1].parent  # second link's parent
+        """
         return self._parent
 
     @property
@@ -181,36 +293,66 @@ class ELink(Link):
         return self._M
 
     @property
-    def qlim(self):
-        return self._qlim
+    def collision(self):
+        return self._collision
 
     @property
-    def m(self):
-        return self._m
+    def geometry(self):
+        return self._geometry
 
-    @property
-    def r(self):
-        return self._r
 
-    @property
-    def I(self):  # noqa
-        return self._I
+    # @r.setter
+    # def r(self, T):
+    #     if not isinstance(T, SE3):
+    #         T = SE3(T)
+    #     self._r = T
 
-    @property
-    def Jm(self):
-        return self._Jm
+    def A(self, q=None, fast=False):
+        """
+        Link transform matrix
 
-    @property
-    def B(self):
-        return self._B
+        T = A(q) is the link homogeneous transformation matrix (4x4)
+        corresponding to the link variable q
 
-    @property
-    def Tc(self):
-        return self._Tc
+        :param q: Joint coordinate (radians or metres). Not required for links
+            with no variable
+        :type q: float
+        :return T: link homogeneous transformation matrix
+        :rtype T: SE3
 
-    @property
-    def G(self):
-        return self._G
+        """
+
+        # j = 0
+        # tr = SE3()
+
+        if self.isjoint and q is None:
+            raise ValueError("q is required for variable joints")
+
+        # for k in range(self.M):
+        #     if self.ets[k].jtype == self.ets[k].VARIABLE:
+        #         T = self.ets[k].T(q)
+        #         j += 1
+        #     else:
+        #         T = self.ets[k].T()
+
+        #     tr = tr * T
+
+        if self.v is not None:
+            if fast:
+                return self.Ts.A @ self.v.T(q)
+            else:
+                return SE3(self.Ts.A @ self.v.T(q), check=False)
+        else:
+            if fast:
+                return self.Ts.A
+            else:
+                return self.Ts
+
+    def ets(self):
+        if self.v is None:
+            return self._ets
+        else:
+            return self._ets * self.v
 
     @collision.setter
     def collision(self, coll):
@@ -246,258 +388,54 @@ class ELink(Link):
 
         self._geometry = new_geom
 
-    @qlim.setter
-    def qlim(self, qlim_new):
-        self._qlim = getvector(qlim_new, 2)
+    def closest_point(self, shape, inf_dist=1.0):
+        '''
+        closest_point(shape, inf_dist) returns the minimum euclidean
+        distance between this link and shape, provided it is less than
+        inf_dist. It will also return the points on self and shape in the
+        world frame which connect the line of length distance between the
+        shapes. If the distance is negative then the shapes are collided.
 
-    @m.setter
-    def m(self, m_new):
-        self._m = m_new
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param inf_dist: The minimum distance within which to consider
+            the shape
+        :type inf_dist: float
+        :returns: d, p1, p2 where d is the distance between the shapes,
+            p1 and p2 are the points in the world frame on the respective
+            shapes
+        :rtype: float, SE3, SE3
+        '''
 
-    @r.setter
-    def r(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
-        self._r = T
+        d = 10000
+        p1 = None,
+        p2 = None
 
-    @I.setter
-    def I(self, I_new):  # noqa
-        # Try for Inertia Matrix
-        try:
-            verifymatrix(I_new, (3, 3))
-        except (ValueError, TypeError):
+        for col in self.collision:
+            td, tp1, tp2 = col.closest_point(shape, inf_dist)
 
-            # Try for the moments and products of inertia
-            # [Ixx Iyy Izz Ixy Iyz Ixz]
-            try:
-                Ia = getvector(I_new, 6)
-                I_new = np.array([
-                    [Ia[0], Ia[3], Ia[5]],
-                    [Ia[3], Ia[1], Ia[4]],
-                    [Ia[5], Ia[4], Ia[2]]
-                ])
-            except ValueError:
+            if td is not None and td < d:
+                d = td
+                p1 = tp1
+                p2 = tp2
 
-                # Try for the moments of inertia
-                # [Ixx Iyy Izz]
-                Ia = getvector(I_new, 3)
-                I_new = np.diag(Ia)
+        if d == 10000:
+            d = None
 
-        self._I = I_new
+        return d, p1, p2
 
-    @Jm.setter
-    def Jm(self, Jm_new):
-        self._Jm = Jm_new
+    def collided(self, shape):
+        '''
+        collided(shape) checks if this link and shape have collided
 
-    @B.setter
-    def B(self, B_new):
-        if isscalar(B_new):
-            self._B = B_new
-        else:
-            raise TypeError("B must be a scalar")
-
-    @Tc.setter
-    def Tc(self, Tc_new):
-
-        try:
-            # sets Coulomb friction parameters to [F -F], for a symmetric
-            # Coulomb friction model.
-            Tc = getvector(Tc_new, 1)
-            Tc_new = np.array([Tc[0], -Tc[0]])
-        except ValueError:
-            # [FP FM] sets Coulomb friction to [FP FM], for an asymmetric
-            # Coulomb friction model. FP>0 and FM<0.  FP is applied for a
-            # positive joint velocity and FM for a negative joint
-            # velocity.
-            Tc_new = getvector(Tc_new, 2)
-
-        self._Tc = Tc_new
-
-    @G.setter
-    def G(self, G_new):
-        self._G = G_new
-
-    def __str__(self):
-        """
-        Pretty prints the ETS Model of the link. Will output angles in degrees
-
-        :return: Pretty print of the robot link
-        :rtype: str
-        """
-        return str(self._ets)
-
-    def _copy(self):
-        # Copy the Link
-        link = ELink(  # noqa
-            ets=self.ets,
-            qlim=self.qlim,
-            m=self.m,
-            r=self.r,
-            I=self.I,
-            Jm=self.Jm,
-            B=self.B,
-            Tc=self.Tc,
-            G=self.G)
-
-        return link
-
-    def dyn(self):
-        """
-        Show inertial properties of link
-
-        s = dyn() returns a string representation the inertial properties of
-        the link object in a multi-line format. The properties shown are mass,
-        centre of mass, inertia, friction, gear ratio and motor properties.
-
-        :return s: The string representation of the link dynamics
-        :rtype s: string
-        """
-
-        s = "m     =  {:.2f} \n" \
-            "r     =  {:.2f} {:.2f} {:.2f} \n" \
-            "        | {:.2f} {:.2f} {:.2f} | \n" \
-            "I     = | {:.2f} {:.2f} {:.2f} | \n" \
-            "        | {:.2f} {:.2f} {:.2f} | \n" \
-            "Jm    =  {:.2f} \n" \
-            "B     =  {:.2f} \n" \
-            "Tc    =  {:.2f}(+) {:.2f}(-) \n" \
-            "G     =  {:.2f} \n" \
-            "qlim  =  {:.2f} to {:.2f}".format(
-                self.m,
-                self.r.t[0], self.r.t[1], self.r.t[2],
-                self.I[0, 0], self.I[0, 1], self.I[0, 2],
-                self.I[1, 0], self.I[1, 1], self.I[1, 2],
-                self.I[2, 0], self.I[2, 1], self.I[2, 2],
-                self.Jm,
-                self.B,
-                self.Tc[0], self.Tc[1],
-                self.G,
-                self.qlim[0], self.qlim[1]
-            )
-
-        return s
-
-    def A(self, q=None, fast=False):
-        """
-        Link transform matrix
-
-        T = A(q) is the link homogeneous transformation matrix (4x4)
-        corresponding to the link variable q
-
-        :param q: Joint coordinate (radians or metres). Not required for links
-            with no variable
-        :type q: float
-        :return T: link homogeneous transformation matrix
-        :rtype T: SE3
-
-        """
-
-        # j = 0
-        # tr = SE3()
-
-        if self.jtype == self.VARIABLE and q is None:
-            raise ValueError("q is required for variable joints")
-
-        # for k in range(self.M):
-        #     if self.ets[k].jtype == self.ets[k].VARIABLE:
-        #         T = self.ets[k].T(q)
-        #         j += 1
-        #     else:
-        #         T = self.ets[k].T()
-
-        #     tr = tr * T
-
-        if self.v is not None:
-            if fast:
-                return self.Ts.A @ self.v.T(q)
-            else:
-                return SE3(self.Ts.A @ self.v.T(q), check=False)
-        else:
-            if fast:
-                return self.Ts.A
-            else:
-                return self.Ts
-
-    def islimit(self, q):
-        """
-        Checks if the joint is exceeding a joint limit
-
-        :return: True if joint is exceeded
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :returns: True if shapes have collided
         :rtype: bool
+        '''
 
-        """
+        for col in self.collision:
+            if col.collided(shape):
+                return True
 
-        if q < self.qlim[0] or q > self.qlim[1]:
-            return True
-        else:
-            return False
-
-    def nofriction(self, coulomb=True, viscous=False):
-        """
-        l2 = nofriction(coulomb, viscous) copies the link and returns a link
-        with the same parameters except, the Coulomb and/or viscous friction
-        parameter to zero.
-
-        l2 = nofriction() as above except the the Coulomb parameter is set to
-        zero.
-
-        :param coulomb: if True, will set the coulomb friction to 0
-        :type coulomb: bool
-        :param viscous: if True, will set the viscous friction to 0
-        :type viscous: bool
-        """
-
-        # Copy the Link
-        link = self._copy()
-
-        if viscous:
-            link.B = 0.0
-
-        if coulomb:
-            link.Tc = [0.0, 0.0]
-
-        return link
-
-    def friction(self, qd):
-        """
-        tau = friction(qd) Calculates the joint friction force/torque (n)
-        for joint velocity qd (n). The friction model includes:
-
-        - Viscous friction which is a linear function of velocity.
-        - Coulomb friction which is proportional to sign(qd).
-
-        :param qd: The joint velocity
-        :type qd: float
-
-        :return tau: the friction force/torque
-        :rtype tau: float
-
-        :notes:
-            - The friction value should be added to the motor output torque,
-              it has a negative value when qd > 0.
-            - The returned friction value is referred to the output of the
-              gearbox.
-            - The friction parameters in the Link object are referred to the
-              motor.
-            - Motor viscous friction is scaled up by G^2.
-            - Motor Coulomb friction is scaled up by G.
-            - The appropriate Coulomb friction value to use in the
-              non-symmetric case depends on the sign of the joint velocity,
-              not the motor velocity.
-            - The absolute value of the gear ratio is used.  Negative gear
-              ratios are tricky: the Puma560 has negative gear ratio for
-              joints 1 and 3.
-
-        """
-
-        tau = self.B * np.abs(self.G) * qd
-
-        if qd > 0:
-            tau += self.Tc[0]
-        elif qd < 0:
-            tau += self.Tc[1]
-
-        # Scale up by gear ratio
-        tau = -np.abs(self.G) * tau
-
-        return tau
+        return False

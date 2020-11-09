@@ -11,7 +11,33 @@ import unittest
 import spatialmath as sm
 
 
-class TestETS(unittest.TestCase):
+class TestERobot(unittest.TestCase):
+
+    def test_ets_init(self):
+        ets = rp.ETS.tx(-0.0825) * rp.ETS.rz() * rp.ETS.tx(-0.0825) \
+            * rp.ETS.rz() * rp.ETS.tx(0.1)
+
+        rp.ERobot(ets)
+
+    def test_init_bases(self):
+        e1 = rp.ELink()
+        e2 = rp.ELink()
+        e3 = rp.ELink(parent=e1)
+        e4 = rp.ELink(parent=e2)
+
+        with self.assertRaises(ValueError):
+            rp.ERobot([e1, e2, e3, e4])
+
+    # def test_jindex(self):
+    #     e1 = rp.ELink(rp.ETS.rz(), jindex=0)
+    #     e2 = rp.ELink(rp.ETS.rz(), jindex=1, parent=e1)
+    #     e3 = rp.ELink(rp.ETS.rz(), jindex=2, parent=e2)
+    #     e4 = rp.ELink(rp.ETS.rz(), jindex=3, parent=e3)
+
+
+
+    #     # with self.assertRaises(ValueError):
+    #     rp.ERobot([e1, e2, e3, e4])
 
     def test_panda(self):
         panda = rp.models.ETS.Panda()
@@ -21,7 +47,7 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(panda.qr, qr)
         nt.assert_array_almost_equal(panda.qz, qz)
         nt.assert_array_almost_equal(
-            panda.gravity, np.array([[0], [0], [9.81]]))
+            panda.gravity, np.r_[0, 0, 9.81])
 
     def test_q(self):
         panda = rp.models.ETS.Panda()
@@ -133,11 +159,11 @@ class TestETS(unittest.TestCase):
         r2 = pm.fkine_all()
 
         for i in range(7):
-            nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
 
         p.fkine_all(q)
         for i in range(7):
-            nt.assert_array_almost_equal(p.ets[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
 
     def test_jacob0(self):
         panda = rp.models.ETS.Panda()
@@ -390,21 +416,21 @@ class TestETS(unittest.TestCase):
             ValueError, panda.jacobm, [1, 3], panda.jacob0(q1),
             np.array([1, 2, 3]))
 
-    def test_jacobev(self):
-        pdh = rp.models.DH.Panda()
-        panda = rp.models.ETS.Panda()
-        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        panda.q = q1
+    # def test_jacobev(self):
+    #     pdh = rp.models.DH.Panda()
+    #     panda = rp.models.ETS.Panda()
+    #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+    #     panda.q = q1
 
-        nt.assert_array_almost_equal(panda.jacobev(), pdh.jacobev(q1))
+    #     nt.assert_array_almost_equal(panda.jacobev(), pdh.jacobev(q1))
 
-    def test_jacob0v(self):
-        pdh = rp.models.DH.Panda()
-        panda = rp.models.ETS.Panda()
-        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        panda.q = q1
+    # def test_jacob0v(self):
+    #     pdh = rp.models.DH.Panda()
+    #     panda = rp.models.ETS.Panda()
+    #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+    #     panda.q = q1
 
-        nt.assert_array_almost_equal(panda.jacob0v(), pdh.jacob0v(q1))
+    #     nt.assert_array_almost_equal(panda.jacob0v(), pdh.jacob0v(q1))
 
     def test_jacobe(self):
         pdh = rp.models.DH.Panda()
@@ -418,10 +444,8 @@ class TestETS(unittest.TestCase):
     def test_init(self):
         l0 = rp.ELink()
         l1 = rp.ELink(parent=l0)
-        r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1, ee_link=l0)
+        r = rp.ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1)
         r.base_link = l1
-        r.base_link = 0
-        r.ee_link = 1
 
         with self.assertRaises(TypeError):
             rp.ERobot(l0, base=sm.SE3.Rx(1.3))
@@ -591,6 +615,30 @@ class TestETS(unittest.TestCase):
 
     #     e2 = panda.teach2(block=False, q=panda.qr)
     #     e2.close()
+
+    def test_dist(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        p = rp.models.Panda()
+
+        d0, _, _ = p.closest_point(s0)
+        d1, _, _ = p.closest_point(s1, 5)
+        d2, _, _ = p.closest_point(s1)
+
+        self.assertAlmostEqual(d0, -0.5599999999995913)
+        self.assertAlmostEqual(d1, 2.4275999999999995)
+        self.assertAlmostEqual(d2, None)
+
+    def test_collided(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        p = rp.models.Panda()
+
+        c0 = p.collided(s0)
+        c1 = p.collided(s1)
+
+        self.assertTrue(c0)
+        self.assertFalse(c1)
 
 
 if __name__ == '__main__':

@@ -49,9 +49,9 @@ class Testtools(unittest.TestCase):
         r1 = rp.null(a1)
         r2 = rp.null(a2)
 
-        nt.assert_array_almost_equal(r0, ans0, decimal=4)
-        nt.assert_array_almost_equal(r1, ans1, decimal=4)
-        nt.assert_array_almost_equal(r2, ans2, decimal=4)
+        nt.assert_array_almost_equal(np.abs(r0), np.abs(ans0), decimal=4)
+        nt.assert_array_almost_equal(np.abs(r1), np.abs(ans1), decimal=4)
+        nt.assert_array_almost_equal(np.abs(r2), np.abs(ans2), decimal=4)
 
     def test_p_servo(self):
         a = sm.SE3()

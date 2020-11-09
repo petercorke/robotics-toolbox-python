@@ -10,20 +10,30 @@ import numpy as np
 
 
 class Cobra600(DHRobot):
+    """
+    Class that models a Adept Cobra 600 SCARA manipulator
 
-    # %MDL_COBRA600 Create model of Adept Cobra 600 manipulator
-    # %
-    # % MDL_COBRA600 is a script that creates the workspace variable c600 which
-    # % describes the kinematic characteristics of the 4-axis Adept Cobra 600
-    # % SCARA manipulator using standard DH conventions.
-    # %
-    # % Also define the workspace vectors:
-    # %   qz         zero joint angle configuration
-    # %
-    # % Notes::
-    # % - SI units are used.
-    # %
-    # % See also SerialRevolute, mdl_puma560akb, mdl_stanford.
+    ``Cobra600()`` is a class which models an Adept Cobra 600 SCARA robot and
+    describes its kinematic characteristics using standard DH
+    conventions.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Cobra600()
+        >>> print(robot)
+
+    Defined joint configurations are:
+
+    - qz, zero joint angle configuration, 'L' shaped configuration
+
+    .. note::
+        - SI units are used.
+        - Robot has only 4 DoF.
+
+    .. codeauthor:: Peter Corke
+    """
+
     def __init__(self):
         deg = pi/180
 

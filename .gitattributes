@@ -1,2 +1,5 @@
 # reclassify Python notebooks as documentation
 *.ipynb linguist-documentation
+notebooks/* linguist-documentation
+docs/* linguist-documentation
+examples/* linguist-documentation

@@ -4,7 +4,7 @@
 """
 
 import roboticstoolbox as rp
-import time
+# import time
 
 env = rp.backend.VPython()
 env.launch(g_col=[0.2, 0.2, 0.2], g_opc=0.3)

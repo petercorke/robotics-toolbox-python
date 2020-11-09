@@ -20,7 +20,7 @@ class TestELink(unittest.TestCase):
 
         l0 = rp.ELink(rx * ry * tz)
 
-        ans = 'Rx(88.4074) * Ry(88.4074) * tz(1)'
+        ans = 'name[(): Rx(88.41°) * Ry(88.41°) * tz(1)] '
 
         self.assertEqual(str(l0), ans)
 
@@ -145,22 +145,22 @@ class TestELink(unittest.TestCase):
 
         self.assertEqual(
             s0,
-            "m     =  0.00 \n"
-            "r     =  0.00 0.00 0.00 \n"
-            "        | 0.00 0.00 0.00 | \n"
-            "I     = | 0.00 0.35 0.00 | \n"
-            "        | 0.00 0.00 0.00 | \n"
-            "Jm    =  0.00 \n"
-            "B     =  0.00 \n"
-            "Tc    =  0.40(+) -0.43(-) \n"
-            "G     =  -62.61 \n"
-            "qlim  =  -2.79 to 2.79")
+"""m     =         0 
+r     =         0        0        0 
+        |        0        0        0 | 
+I     = |        0     0.35        0 | 
+        |        0        0        0 | 
+Jm    =         0 
+B     =         0 
+Tc    =       0.4(+)    -0.43(-) 
+G     =       -63 
+qlim  =      -2.8 to      2.8""")
 
     def test_properties(self):
         l0 = rp.ELink()
 
         self.assertEqual(l0.m, 0.0)
-        nt.assert_array_almost_equal(l0.r.A, np.eye(4))
+        nt.assert_array_almost_equal(l0.r, np.zeros(3))
         self.assertEqual(l0.Jm, 0.0)
 
     def test_fail_parent(self):
@@ -176,13 +176,12 @@ class TestELink(unittest.TestCase):
 
     def test_collision(self):
         p = rp.models.Panda()
-        link = p.ets[1]
+        link = p.links[1]
         col = link.collision[0]
 
         self.assertIsInstance(col, rp.Shape)
 
         self.assertIsInstance(col.base, sm.SE3)
-        self.assertTrue(col.primitive)
         self.assertIsInstance(col.scale, np.ndarray)
 
         col.radius = 2
@@ -193,7 +192,7 @@ class TestELink(unittest.TestCase):
 
     def test_collision_fail(self):
         l0 = rp.ELink()
-        col = rp.Shape.Box([1, 1, 1])
+        col = rp.Box([1, 1, 1])
         l0.collision = col
 
         with self.assertRaises(TypeError):
@@ -204,7 +203,7 @@ class TestELink(unittest.TestCase):
 
     def test_geometry_fail(self):
         l0 = rp.ELink()
-        col = rp.Shape.Box([1, 1, 1])
+        col = rp.Box([1, 1, 1])
         l0.geometry = col
         l0.geometry = [col, col]
 
@@ -213,6 +212,31 @@ class TestELink(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             l0.geometry = 1
+
+    def test_dist(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        p = rp.models.Panda()
+        link = p.links[3]
+
+        d0, _, _ = link.closest_point(s0)
+        d1, _, _ = link.closest_point(s1, 5)
+        d2, _, _ = link.closest_point(s1)
+
+        self.assertAlmostEqual(d0, -0.49)
+        self.assertAlmostEqual(d1, 2.44)
+        self.assertAlmostEqual(d2, None)
+
+    def test_collided(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        p = rp.models.Panda()
+        link = p.links[3]
+        c0 = link.collided(s0)
+        c1 = link.collided(s1)
+
+        self.assertTrue(c0)
+        self.assertFalse(c1)
 
 
 if __name__ == '__main__':

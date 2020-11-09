@@ -1,4 +1,5 @@
 """
+@author: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
 @author: Peter Corke
 @author: Samuel Drew
 """
@@ -8,33 +9,36 @@ from math import pi
 
 
 class KR5(DHRobot):
-    '''
-    KR5 Create model of Kuka KR5 manipulator
+    """
+    Class that models a Kuka KR5 manipulator
 
-    MDL_KR5 is a script that creates the workspace variable KR5 which
-    describes the kinematic characteristics of a Kuka KR5 manipulator using
-    standard DH conventions.
+    ``KR5()`` is a class which models a Kuka KR5 robot and
+    describes its kinematic characteristics using standard DH
+    conventions.
 
-    Also define the workspace vectors:
-      qk1        nominal working position 1
-      qk2        nominal working position 2
-      qk3        nominal working position 3
+    .. runblock:: pycon
 
-    Notes::
-    - SI units of metres are used.
-    - Includes an 11.5cm tool in the z-direction
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.KR5()
+        >>> print(robot)
 
-    Reference::
-    - https://github.com/4rtur1t0/ARTE/blob/master/robots/KUKA/KR5_arc/parameters.m
+    Defined joint configurations are:
 
-    Author::
-    - Gautam Sinha,
-      Indian Institute of Technology, Kanpur.
+      - qk1, nominal working position 1
+      - qk2, nominal working position 2
+      - qk3, nominal working position 3
 
-    Define simplest line model for KUKA KR5 robot
-    Contain DH parameters for KUKA KR5 robot
-    All link lenghts and offsets are measured in cm
-    '''
+    .. note::
+      - SI units of metres are used.
+      - Includes an 11.5cm tool in the z-direction
+
+    :references:
+      - https://github.com/4rtur1t0/ARTE/blob/master/robots/KUKA/KR5_arc/parameters.m
+
+    .. codeauthor:: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
+    .. codeauthor:: Samuel Drew
+    .. codeauthor:: Peter Corke
+    """
 
     def __init__(self):
         deg = pi / 180
