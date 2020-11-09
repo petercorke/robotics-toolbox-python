@@ -27,7 +27,7 @@ jobs:
         python -m pip install --upgrade pip
     - name: Test with pytest
       run: |
-        pip install .[dev,swift,vpython]
+        pip install .[dev,collision,vpython]
         pip install pytest-timeout
         pytest --timeout=20 --timeout_method thread
   codecov:
@@ -46,7 +46,7 @@ jobs:
         python -m pip install --upgrade pip
     - name: Run coverage
       run: |
-        pip install -e .[dev,swift,vpython]
+        pip install -e .[dev,collision,vpython]
         pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
         coverage report
     - name: upload coverage to Codecov
