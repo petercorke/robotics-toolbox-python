@@ -14,8 +14,8 @@ from roboticstoolbox.robot.ELink import ELink, ETS
 # from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
 #     _plot2, _teach2
-from roboticstoolbox.backends import xacro
-from roboticstoolbox.backends import URDF
+from roboticstoolbox.tools import xacro
+from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath

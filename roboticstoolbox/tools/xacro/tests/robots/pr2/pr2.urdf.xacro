@@ -7,32 +7,32 @@
   
   <!-- The following included files set up definitions of parts of the robot body -->
   <!-- misc common stuff? -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/common.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/common.xacro" />
   <!-- PR2 Arm -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/shoulder_v0/shoulder.urdf.xacro" />
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/upper_arm_v0/upper_arm.urdf.xacro" />
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/forearm_v0/forearm.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/shoulder_v0/shoulder.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/upper_arm_v0/upper_arm.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/forearm_v0/forearm.urdf.xacro" />
   <!-- PR2 gripper -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/gripper_v0/gripper.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/gripper_v0/gripper.urdf.xacro" />
   <!-- PR2 head -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/head_v0/head.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/head_v0/head.urdf.xacro" />
   <!-- PR2 tilting laser mount -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/tilting_laser_v0/tilting_laser.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/tilting_laser_v0/tilting_laser.urdf.xacro" />
   <!-- PR2 torso -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/torso_v0/torso.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/torso_v0/torso.urdf.xacro" />
   <!-- PR2 base -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/base_v0/base.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/base_v0/base.urdf.xacro" />
   <!-- Head sensors -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/sensors/head_sensor_package.urdf.xacro" />
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/sensors/kinect_prosilica_camera.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/sensors/head_sensor_package.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/sensors/kinect_prosilica_camera.urdf.xacro" />
   <!-- Camera sensors -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/sensors/wge100_camera.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/sensors/wge100_camera.urdf.xacro" />
   <!-- Texture projector -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/sensors/projector_wg6802418.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/sensors/projector_wg6802418.urdf.xacro" />
   <!-- generic simulator_gazebo plugins for starting mechanism control, ros time, ros battery -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/gazebo/gazebo.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/gazebo/gazebo.urdf.xacro" />
   <!-- materials for visualization -->
-  <xacro:include filename="roboticstoolbox/backends/xacro/tests/robots/pr2/materials.urdf.xacro" />
+  <xacro:include filename="roboticstoolbox/tools/xacro/tests/robots/pr2/materials.urdf.xacro" />
 
   <!-- Now we can start using the macros included above to define the actual PR2 -->
 

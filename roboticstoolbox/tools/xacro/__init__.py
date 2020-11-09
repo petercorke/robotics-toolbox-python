@@ -61,6 +61,7 @@ filestack = []
 # The top level directory
 tld = ''
 
+
 def push_file(filename):
     """
     Push a new filename to the filestack.

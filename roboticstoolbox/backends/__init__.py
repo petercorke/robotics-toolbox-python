@@ -1,5 +1,4 @@
 from roboticstoolbox.backends.PyPlot import *
-from roboticstoolbox.backends.urdf import *
 from roboticstoolbox.backends.Swift import *
 
 try:

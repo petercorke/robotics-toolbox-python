@@ -1,4 +1,4 @@
-from roboticstoolbox.backends.urdf.urdf import (
+from roboticstoolbox.tools.urdf.urdf import (
     URDFType,
     Box, Cylinder, Sphere, Mesh, Geometry,
     Collision, Visual, Inertial,
