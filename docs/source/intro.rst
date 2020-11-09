@@ -1,75 +1,74 @@
-
 ************
 Introduction
 ************
-
 
 
 Introduction
 ============
 
-The Robotics Toolbox for MATLAB\textsuperscript{\textregistered} (RTB-M) was created around 1991 to support the first author’s PhD research and was first published in 1995-6~\cite{Corke95d}\cite{Corke96j}. It has evolved over 25 years to track changes and improvements to the MATLAB language and ecosystem, such as the addition of structures, objects, lists (cell arrays) and strings, myriad of other improvements to the language, new graphics and new tools such as IDE, debugger, notebooks (LiveScripts), apps and continuous integration.  An adverse consequence is that many poor %(in retrospect)
-early design decisions hinder development. 
+The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support the
+first author’s PhD research and was first published in 1995-6 [Corke95d]_
+[Corke96j]_. It has evolved over 25 years to track changes and improvements to
+the MATLAB language and ecosystem, such as the addition of structures, objects,
+lists (cell arrays) and strings, myriad of other improvements to the language,
+new graphics and new tools such as IDE, debugger, notebooks (LiveScripts), apps
+and continuous integration.  An adverse consequence is that many poor (in
+retrospect) early design decisions hinder development. 
 
-Over time additional functionality was added, in particular for vision, and two major refactorings led to the current state of three toolboxes: Robotics Toolbox for MATLAB and Machine Vision Toolbox for MATLAB (1999) both
-of which are built on the Spatial Math Toolbox for MATLAB (SMTB-M) in 2019~\cite{Corke17a}.
-The code was formally open sourced to support its use for the third edition of John Craig’s book~\cite{craig2005introduction}.
+Over time additional functionality was added, in particular for vision, and two
+major refactorings led to the current state of three toolboxes: Robotics Toolbox
+for MATLAB and Machine Vision Toolbox for MATLAB (1999) both of which are built
+on the Spatial Math Toolbox for MATLAB (SMTB-M) in 2019.
+
+The code was formally open sourced to support its use for the third edition of John Craig’s book [Craig2005]_.
 It was hosted on ftp sites, personal web servers, Google code and currently GitHub and maintained under a succession of version control tools including rcs, cvs, svn and git.  A support forum on Google Groups was established in 2008 and currently has over 1400 members.
-
-
-
-This paper describes the motivation and design of the Robotics Toolbox for Python, and illustrates key features in a tutorial fashion.
 
 
 A Python version
 ================
-The imperative for a Python version has long existed and the first port was started in 2008 but ultimately failed for lack of ongoing resources to complete a sufficient subset of functionality.
-Subsequent attempts have all met the same fate.
 
-The design goals of this version can be summarised as new functionality
-\begin{itemize}
-\item A superset of the MATLAB Toolbox functionality
-\item Build on the Spatial Math Toolbox for Python which provides objects to represent rotations as matrices \SO{2} and \SO{3} as well as unit-quaternions, rigid-body motions as matrices \SE{2} and \SE{3} matrices as well as twists in \SE{2} and \SE{3}, and Featherstone’s spatial vectors~\cite{Featherstone87}.
-\item Support models expressed using Denavit-Hartenberg notation (standard and modified), elementary transform sequences~\cite{ets1, ets2}, and URDF-style rigid-body trees.  Support branched, but not closed-loop or parallel, robots
-\item Collision checking
-\end{itemize}
-and improved software engineering
-\begin{itemize}
-\item Use Python 3 (3.6 and greater)
-\item Utilize WebGL and Javascript graphics technologies
-\item Documentation in ReStructured Text using Sphinx and delivered via GitHub pages.
-\item Hosted on GitHub with continuous integration using GitHub actions
-\item High code-quality metrics for test coverage and automated code review and security analysis
-\item As few dependencies as possible, in particular being able to work with ROS but not be dependent on ROS. This sidesteps ROS constraints on operating system and Python versions.
-\item Modular approach to interfacing to different graphics libraries, simulators and physical robots.
-\item Support Python notebooks which allows publication of static notebooks (for example via GitHub) and interactive online notebooks (MyBinder.org).
-\item Use of UniCode characters to make console output easier to read
-\end{itemize}
+The imperative for a Python version has long existed and the first port was
+started in 2008 but ultimately failed for lack of ongoing resources to complete
+a sufficient subset of functionality. Subsequent attempts have all met the same
+fate.
 
-\subsection{Related work}
-There are a number of Python-based packages for robotics, each reflecting different design approaches or requirements and with 
-various levels of finish in terms of documentation, examples, and continuous integration.
+The design goals of this version can be summarised as new functionality:
 
-PythonRobotics~\cite{py1} and Klampt~\cite{py2}  offer a focus on autonomous navigation and planning. While differing in scope to this work, PythonRobotics features excellent documentation and code quality, making it an exemplar.
+* A superset of the MATLAB Toolbox functionality
+* Build on the Spatial Math Toolbox for Python which provides objects to
+  represent rotations as matrices SO(2) and SE(3) as well as unit-quaternions,
+  rigid-body motions as SE(2) and SE(3) matrices as well as twists in
+  se(2) and se(3), and Featherstone’s spatial vectors [Featherstone87]_.
+* Support models expressed using Denavit-Hartenberg notation (standard and
+  modified), elementary transform sequences [ets1]_ [ets2]_, and URDF-style
+  rigid-body trees.  Support branched, but not closed-loop or parallel, robots
+* Collision checking
 
-Numerous packages have a focus on dynamics including iDynTree~\cite{py4}, Siconos~\cite{py5}, PyDy~\cite{py6}, DART~\cite{py7}, and PyBullet~\cite{py3}. PyBullet and DART both feature graphical simulations, physics simulation, dynamical modelling, and collision detection making them useful robotics toolkits. These two packages are written in C++ with Python bindings making them fast and efficient, while still being usable in a Python environment. However, although both packages are feature-rich, they lack the ease of use and intuitive interfaces provided by  \emph{pythonic} development-driven applications. Siconos, iDynTree, and PyDy focus on multibody dynamics for model specification, simulation and benchmarking.
+and improved software engineering:
 
-The pybotics~\cite{py8} robotics toolkit focusses on robot kinematics but is limited to Modified Denavit–Hartenberg notation. A similar work, python-robotics~\cite{py0}, was created due to the author's inspiration by RTB-M and dissatisfaction with Python-based alternatives~\cite{edu}. The package, while far from a RTB-M clone or conversion, contains useful functionality for robotics education.
-
-Our reinvented toolbox: The Robotics Toolbox for Python, promises to encapsulate an extensive scope of robotics, from low-level spatial-mathematics to robot arm kinematics and dynamics (regardless of model notation), and mobile robots, provide interfaces to graphical simulators and real robots,
-while being a pythonic, well documented, and well maintained with applications in research, education, and industry.
+* Use Python 3 (3.6 and greater)
+* Utilize WebGL and Javascript graphics technologies
+* Documentation in ReStructured Text using Sphinx and delivered via GitHub pages.
+* Hosted on GitHub with continuous integration using GitHub actions
+* High code-quality metrics for test coverage and automated code review and security analysis
+* As few dependencies as possible, in particular being able to work with ROS but not be dependent on ROS. This sidesteps ROS constraints on operating system and Python versions.
+* Modular approach to interfacing to different graphics libraries, simulators and physical robots.
+* Support Python notebooks which allows publication of static notebooks (for example via GitHub) and interactive online notebooks (`MyBinder.org <MyBinder.org>`_).
+* Use of UniCode characters to make console output easier to read
 
 
 Spatial math layer
 ==================
 
-Robotics and computer vision require us to describe position, orientation and pose in 3D space. 
-Mobile robotics has the same requirement, but generally for 2D space.
-We therefore need tools to represent quantities such as rigid-body transformations (matrices $\in \mbox{SE(n)}$
-or twists $\in \mbox{se}(n)$), rotations (matrices $\in \mbox{SO(n)}$ or \mbox{so(n)}, Euler or roll-pitch-yaw angles,
-or unit quaternions $\in S^3$).
-Such capability is amongst the oldest in RTB-M and the equivalent functionality exists in RTB-P which makes use of the Spatial Maths Toolbox for Python (SMTB-P)\footnote{\url{https://github.com/petercorke/spatialmath-python}}.
-For example
+Robotics and computer vision require us to describe position, orientation and
+pose in 3D space. Mobile robotics has the same requirement, but generally for 2D
+space. We therefore need tools to represent quantities such as rigid-body
+transformations (matrices :math:`\in \SE{n}` or twists :math:`\in \SE{n}`),
+rotations (matrices :math:`\in \SO{n}` or :math:`\so{n}`, Euler or roll-pitch-yaw
+angles, or unit quaternions :math:`\in \mathrm{S}^3`). Such capability is amongst the oldest in
+RTB-M and the equivalent functionality exists in RTB-P which makes use of the
+`Spatial Maths Toolbox for Python (SMTB-P)
+<https://github.com/petercorke/spatialmath-python>`_. For example:
 
 .. runblock:: pycon
 
@@ -77,31 +76,39 @@ For example
     >>> T = transl(0.5, 0.0, 0.0) @ rpy2tr(0.1, 0.2, 0.3, order='xyz') @ trotx(-90, 'deg')
     >>> print(T)
 
-There is strong similarity to the equivalent MATLAB case apart from the use of the \code{@} operator, the use of keyword arguments instead
-of keyword-value pairs, and the format of the printed array.
-All the ``classic'' RTB-M functions are provided in the \code{spatialmath.base} package as well as additional 
-functions for quaternions, vectors, twists and argument handling.  There are also functions to perform interpolation,
-plot and animate
-coordinate frames, and create movies, using matplotlib. 
-The underlying datatypes in all cases are 1D and 2D NumPy arrays.
-For a user transitioning from MATLAB the most significant difference is the use of 1D arrays -- all
-MATLAB arrays have two dimensions, even if one of them is equal to one.
+There is strong similarity to the equivalent MATLAB case apart from the use of
+the ``@`` operator, the use of keyword arguments instead of keyword-value pairs,
+and the format of the printed array. All the *classic* RTB-M functions are
+provided in the ``spatialmath.base`` package as well as additional functions for
+quaternions, vectors, twists and argument handling.  There are also functions to
+perform interpolation, plot and animate coordinate frames, and create movies,
+using matplotlib. The underlying datatypes in all cases are 1D and 2D NumPy
+arrays. 
 
-However some challenges arise when using arrays, whether native MATLAB matrices or NumPy arrays as in this case.
-Firstly, arrays are not typed and for
-example a $3 \times 3$ array could be an element of $\mbox{\SE{2}}$ or $\mbox{\SO{3}}$ or an arbitrary matrix.
+.. warning:: For a user transitioning from MATLAB the most significant difference is
+    the use of 1D arrays -- all MATLAB arrays have two dimensions, even if one of
+    them is equal to one.
 
-Secondly, the operators we need for poses are a subset of those available for matrices, and some operators may need to be redefined
-in a specific way.
-For example, $\SE{3} * \SE{3} \rightarrow \SE{3}$ but $\SE{3} + \SE{3} \rightarrow \mathbb{R}^{4 \times 4}$, and equality testing for a unit-quaternion has to respect the double mapping.
+However some challenges arise when using arrays, whether native MATLAB matrices
+or NumPy arrays as in this case. Firstly, arrays are not typed and for example a
+:math:`3 \times 3` array could be an element of :math:`\SE{2}` or
+:math:`\SO{3}` or an arbitrary matrix.
 
-Thirdly, in robotics we often need to represent time sequences of poses.  We could add an extra dimension to 
-the matrices representing rigid-body transformations or unit-quaternions, or place them in a list.  The first approach
-is cumbersome and reduces code clarity, while the second cannot ensure that all elements of the list have the
-same type.
+Secondly, the operators we need for poses are a subset of those available for
+matrices, and some operators may need to be redefined in a specific way. For
+example, :math:`\SE{3} * \SE{3} \rightarrow \SE{3}` but :math:`\SE{3} + \SE{3} \rightarrow \mathbb{R}^{4 \times 4}`, and equality testing for a
+unit-quaternion has to respect the double mapping.
 
-We  use classes and data encapsulation to address all these issues.
-SMTB-P provides abstraction classes \code{SE3}, \code{Twist3}, \code{SO3}, \code{UnitQuaternion}, \code{SE2}, \code{Twist2} and \code{SO2}. For example, the previous example could be written as
+Thirdly, in robotics we often need to represent time sequences of poses.  We
+could add an extra dimension to the matrices representing rigid-body
+transformations or unit-quaternions, or place them in a list.  The first
+approach is cumbersome and reduces code clarity, while the second cannot ensure
+that all elements of the list have the same type.
+
+We  use classes and data encapsulation to address all these issues. SMTB-P
+provides abstraction classes ``SE3``, ``Twist3``, ``SO3``, ``UnitQuaternion``,
+``SE2``, ``Twist2`` and ``SO2``. For example, the previous example could be written
+as
 
 .. runblock:: pycon
 
@@ -111,70 +118,73 @@ SMTB-P provides abstraction classes \code{SE3}, \code{Twist3}, \code{SO3}, \code
 
 where composition is denoted by the * operator and the matrix is printed more elegantly (and elements are color
 coded at the console or in ipython).
-\code{SE3.RPY()} is a class method that acts like a constructor, creating an \code{SE3} instance from a set of roll-pitch-yaw angles,
-and \code{SE3.Rx()} creates an \code{SE3} instance from a pure rotation about the x-axis.
-Attempts to compose with a non \code{SE3} instance would result in a \code{TypeError}.
+``SE3.RPY()`` is a class method that acts like a constructor, creating an ``SE3`` instance from a set of roll-pitch-yaw angles,
+and ``SE3.Rx()`` creates an ``SE3`` instance from a pure rotation about the x-axis.
+Attempts to compose with a non ``SE3`` instance would result in a ``TypeError``.
 
 The orientation of the new coordinate frame may be expressed in terms of Euler angles
+the rotation matrix can be easily extractedand 
 
 .. runblock:: pycon
+
+    >>> from spatialmath import *
+    >>> T = SE3(0.5, 0.0, 0.0) * SE3.RPY([0.1, 0.2, 0.3], order='xyz') * SE3.Rx(-90, unit='deg')
     >>> T.eul()
-
-the rotation matrix can be easily extracted
-
-.. runblock:: pycon
     >>> T.R
 
-and we can plot the coordinate frame
-\begin{Code}
->>> T.plot(color='red', label='2')
-\end{Code}
+and we can plot the coordinate frame::
+
+    >>> T.plot(color='red', label='2')
+
 Similar constructors allow object construction with orientation expressed in terms of an angle-vector pair or orientation
 and approach vectors.
 
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\columnwidth]{figs/pose-values.pdf}
-    \caption{Any of the SMTB-P pose classes can contain a list of values}
-    \label{fig:values}
-\end{figure}
-\begin{figure}
-    \centering
-    \includegraphics[width=\columnwidth]{figs/broadcasting.pdf}
-    \caption{Overloaded operators support broadcasting.}
-    \label{fig:broadcasting}
-\end{figure}
-
 Rotation can also be represented by a unit quaternion
 
 .. runblock:: pycon
-    >>> UnitQuaternion.Rx(0.3)
-    >>> UnitQuaternion.AngVec(0.3, [1, 0, 0])
+
+    >>> from spatialmath import UnitQuaternion
+    >>> print(UnitQuaternion.Rx(0.3))
+    >>> print(UnitQuaternion.AngVec(0.3, [1, 0, 0]))
 
 which again demonstrates several alternative constructors. 
 The classes are somewhat polymorphic and have the same constructors for canonic rotations, Euler and roll-pitch-yaw angles, angle-vector,
-as well as a random value.  \SE{n} and \SO{n} also support a matrix exponential constructor where the argument is the
+as well as a random value.  :math:`\SE{n}` and :math:`\SO{n}` also support a matrix exponential constructor where the argument is the
 corresponding Lie algebra element.
 
-To support trajectories each of these types inherits list properties from \code{collections.UserList}
-as shown in Figure \ref{fig:values}.
+To support trajectories each of these types inherits list properties from ``collections.UserList``
+
+.. figure:: ../figs/pose-values.png
+      :width: 600
+      :alt: Any of the SMTB-P pose classes can contain a list of values
+
+      Any of the SMTB-P pose classes can contain a list of values
+
 We can index the values, iterate over the values, assign to values.
 Some constructors take an array-like argument allowing creation of multi-valued pose objects,
 for example
 
 .. runblock:: pycon
+
+    >>> from spatialmath import SE3
+    >>> import numpy as np
     >>> R = SE3.Rx(np.linspace(0, pi/2, num=100))
     >>> len(R)
 
-where the instance \code{R} contains a sequence of 100 rotation matrices.  
+where the instance ``R`` contains a sequence of 100 rotation matrices.  
 Composition with a single-valued (scalar) pose instance  broadcasts the scalar
-across the sequence as shown in Figure \ref{fig:broadcasting}.
+across the sequence
 
-The types all have an inverse method \code{.inv()} and support composition with the inverse using the \code{/} operator
-and integer exponentiation (repeated composition) using the \code{**} operator.
+.. figure:: ../figs/broadcasting.png
+   :alt: Overloaded operators support broadcasting
+
+   Overloaded operators support broadcasting
+
+The types all have an inverse method ``.inv()`` and support composition with the inverse using the ``/`` operator
+and integer exponentiation (repeated composition) using the ``**`` operator.
 Other overloaded operators include *, *=, **, **=, /, /=, ==, !=, +, -.
-Supporting classes include \code{Quaternion} and \code{Plucker}
+Supporting classes include ``Quaternion`` and ``Plucker``.
 
 All of this allows for concise and readable code.
 The use of classes ensures type safety and that the matrices abstracted by the class are always valid members of
@@ -183,8 +193,23 @@ Operations such as addition which are not group operations yield a NumPy array r
 
 These benefits come at a price in terms of execution time due to the overhead of constructors and methods which wrap base functions, and type checking.
 The Toolbox supports SymPy which provides powerful symbolic support for Python and it works well in conjunction with NumPy, ie. a NumPy array can contain symbolic elements.  Many the Toolbox methods and functions contain extra logic to ensure that symbolic operations work as expected. While this adds to the overhead it means that for the user, working with symbols is as easy as working with numbers.  
-%To put this in perspective, performance 
-Performance on a 3.6\unit{GHz} Intel Core i9 is shown in Table \ref{tab:timing}.
+
+
+.. table::  Performance on a 3.6GHz Intel Core i9
+
+    ===================  ==============
+    Function/method      Execution time
+    ===================  ==============
+    ``base.rotx()``      4.07 μs
+    ``base.trotx()``     5.79 μs
+    ``SE3.Rx()``         12.3 μs
+    ``SE3 * SE3``        4.69 μs
+    ``4x4 @``            0.986 μs
+    ``SE3.inv()``        7.62 μs
+    ``base.trinv()``     4.19 μs
+    ``np.linalg.inv()``  4.49 μs
+    ===================  ==============
+
 
 Robotics Toolbox
 ================
@@ -193,123 +218,120 @@ Robot models
 ------------
 
 The Toolbox ships with over 30 robot models, most are purely kinematic but some have inertial and frictional parameters.
-Kinematic models can be specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH, MDH) notation, as an ETS string~\cite{ets1},
+Kinematic models can be specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH, MDH) notation, as an ETS string [ets1]_,
 as a rigid-body tree, or from a URDF file.
 
-\begin{table}
-\centering
-\begin{tabular}{|l|l|}\hline
-Function/method & Execution time \\ \hline
-\code{base.rotx()} &     4.07 \unit{\mu s} \\
-\code{base.trotx()} &    5.79 \unit{\mu s} \\
-\code{SE3.Rx()} &             12.3 \unit{\mu s} \\
-\code{SE3 * SE3} &              4.69 \unit{\mu s} \\
-\code{4x4 @} &              0.986 \unit{\mu s} \\
-\code{SE3.inv()} &             7.62 \unit{\mu s} \\
-\code{base.trinv()} &          4.19 \unit{\mu s} \\
-\code{np.linalg.inv()} &       4.49 \unit{\mu s} \\ \hline
-\end{tabular}
-\caption{Spatial math execution performance}
-\label{tab:timing}
-\end{table}
 
-\subsubsection{Denavit-Hartenberg parameters}
-To specify a kinematic model using DH notation, we create a new subclass of \code{DHRobot} and pass the superclass constructor
-a list of link objects.  For example, an IRB140 is simply
-\begin{Code}
->>> robot = DHRobot(
-       [
-          RevoluteDH(d=d1, a=a1, alpha=-pi/2), 
-          RevoluteDH(a=a2), 
-          RevoluteDH(alpha=pi/2),
-          ...
+
+
+Denavit-Hartenberg parameters
+-----------------------------
+
+To specify a kinematic model using DH notation, we create a new subclass of ``DHRobot`` and pass the superclass constructor
+a list of link objects.  For example, an IRB140 is simply::
+
+    >>> robot = DHRobot(
+        [
+            RevoluteDH(d=d1, a=a1, alpha=-pi/2), 
+            RevoluteDH(a=a2), 
+            RevoluteDH(alpha=pi/2),
+            ...
         ], name="my IRB140")
-\end{Code}
+
+
 where only the non-zero parameters need to be specified. 
-In this case we used \code{RevoluteDH} objects for a revolute joint described using standard DH conventions.  Other classes available
-are \code{PrismaticDH}, \code{RevoluteMDH} and \code{PrismaticMDH}.
+In this case we used ``RevoluteDH`` objects for a revolute joint described using standard DH conventions.  Other classes available
+are ``PrismaticDH``, ``RevoluteMDH`` and ``PrismaticMDH``.
 Other parameters such as mass,  CoG, link inertia, motor inertia, viscous friction, Coulomb friction, and joint limits can also be specified using additional keyword arguments.
 
 We can now easily perform standard kinematic operations
-\begin{Code}
->>> puma = rtb.models.DH.Puma560()
->>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
->>> q, *_ = puma.ikine(T)
->>> puma.plot(q)
-\end{Code}
-\code{ikine} is a generalised iterative numerical solution\cite{chiaverini-control} based on Levenberg-Marquadt minimization, and additional status results are also returned.
-The default plot interface, using matplotlib, produces a ``noodle robot'' plot like that shown in Fig \ref{fig:noodle}.
+
+.. runblock:: pycon
+
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
+    >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+    >>> q, *_ = puma.ikine(T)
+
+``ikine`` is a generalised iterative numerical solution based on Levenberg-Marquadt minimization, and additional status results are also returned.
+The default plot interface::
+
+    >>> puma.plot(q)
+
+using matplotlib, produces a ``noodle robot'' plot like
+
+NOODLE PLOT HERE
 
 The starting point for the solution may be specified, but
 defaults to zero, and affects both the search time and the solution found, since in general
 a manipulator may have several poses which result in the same end-effector pose.
 For a redundant manipulator a solution will be found but there is no
-explicit control over the null-space.  For a manipulator with $n < 6$ DOF 
+explicit control over the null-space.  For a manipulator with :math:`n < 6` DOF 
 an additional argument is required to indicate which of the
-$6-n$ Cartesian DOF are to be unconstrained in the solution.
-%Note that a solution is not possible if the specified transform describes
-%a point out of reach of the manipulator --- in such a case the function will
-%return with an error.
+:math:`6-n` Cartesian DOF are to be unconstrained in the solution.
+
+.. note:: A solution is not possible if the specified transform describes
+    a point out of reach of the manipulator -- in such a case the function will
+    return with an error.
 
 The inverse kinematic procedure for any specific robot can 
-be derived symbolically~\cite{Paul81a}
+be derived symbolically
 and commonly an efficient closed-form solution can be obtained.
 Some robot classes have an analytical solution coded, for example
-\begin{Code}
->>> puma.ikine_a(T, config="lun")
-\end{Code}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\columnwidth]{figs/noodle+ellipsoid.png}
-%     \caption{A robot rendered using the default matplotlib visualizer.}
-%     \label{fig:noodle}
-% \end{figure}
+.. runblock:: pycon
 
-\subsubsection{ETS notation}
-A Puma robot can also be specified in ETS format~\cite{} as a sequence of simple rigid-body transformations, pure translation
+    >>> puma.ikine_a(T, config="lun")
+
+
+ETS notation
+------------
+
+A Puma robot can also be specified in ETS format [ets1]_ as a sequence of simple rigid-body transformations, pure translation
 or pure rotation, with a constant parameter or a free parameter which is a joint variable
-\begin{Code}
->>> e = ET.tz(l1) * ET.rz() * ET.ty(l2) * ET.ry() 
-        * ET.tz(l3) * ET.tx(l6) * ET.ty(l4) * ET.ry()
-        * ET.tz(l5) * ET.rz() * ET.ry() * ET.rz()
-\end{Code}
-\begin{Code}
->>> robot = SerialLink(ETS String)
-\end{Code}
+
+.. runblock:: pycon
+
+    >>> from roboticstoolbox import ETS as E
+    >>> import roboticstoolbox as rtb
+    >>> l1 = 0.672; l2 = 0.2337; l3 = 0.4318; l4 = -0.0837; l5 = 0.4318; l6 = 0.0203
+    >>> e = E.tz(l1) * E.rz() * E.ty(l2) * E.ry() * E.tz(l3) * E.tx(l6) * E.ty(l4) * E.ry() * E.tz(l5) * E.rz() * ETry() * E.rz()
+    >>> print(e)
+    >>> robot = rtb.ERobot(e)
+    >>> print(robot)
+
 and can represent single-branched robots with any combination of revolute and prismatic joints.
 
 
-\subsubsection{ERobot: rigid-body tree and URDF import}
+ERobot: rigid-body tree and URDF import
+---------------------------------------
+
 The final approach is to an import a URDF file.  The Toolbox includes a parser with built-in xacro processor
 which makes many models from the ROS universe available.
 
 More complex models such as for Panda or Puma are defined by classes but built this way
 
-\begin{Code}
->>> panda = Panda()
-\end{Code}
+.. runblock:: pycon
 
-Forward kinematics is simply
-\begin{Code}
->>> T = robot.fkine(panda.qz)
-\end{Code}
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.URDF.Panda()
+    >>> T = panda.fkine(panda.qz)
 
-where known poses are defined by properties such panda.qz.
+and forward kinematics is simply...
+
+where known poses are defined by properties such ``panda.qz``.
 For branched robots, with multipe end-effectors,  the name of the frame of interest must be provided.
 
 
-This pose can be visualized by
-\begin{Code}
->>> panda.plot(qz)
-\end{Code}
+This pose can be visualized by::
+
+    >>> panda.plot(qz)
+
 which produces the 3-D plot shown in Figure \ref{fig:noodle}.
 
-and inverse kinematic is 
+and inverse kinematic is::
 
-\begin{Code}
->>> q = panda.ikine(T)
-\end{Code}
+    >>> q = panda.ikine(T)
 
 
 Trajectories
@@ -320,39 +342,41 @@ pose to the upright (or READY) pose in 100 steps is
 
 .. runblock:: pycon
 
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
     >>> traj = rtb.jtraj(puma.qz, puma.qr, 100)
     >>> rtb.qplot(traj.j)
 
-where \code{puma.qr} is an example of a named joint configuration.
-\code{traj} is named tuple with elements \code{q}$=\vec{q}_k$, \code{qd}$=\dvec{q}_k$ and \code{qdd}$=\ddvec{q}_k$.
+where ``puma.qr`` is an example of a named joint configuration.
+``traj`` is named tuple with elements ``q`` = :math:`\vec{q}_k`, ``qd`` = :math:`\dvec{q}_k` and ``qdd`` = :math:`\ddvec{q}_k`.
 Each element is an array with one row per time step, and each row a joint angle vector.
 The trajectory is a fifth order polynomial which has continuous jerk.
 By default, the initial and final velocities are zero, but these may be specified by additional
 arguments.
 
 Straight line (Cartesian) paths can be generated in a similar way between
-two points specified by a pair of poses in \SE{3}
+two points specified by a pair of poses in :math:`\SE{3}`
 
 .. runblock:: pycon
+
+    >>> import numpy as np
+    >>> from spatialmath import SE3
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
     >>> t = np.arange(0, 2, 0.010)
     >>> T0 = SE3(0.6, -0.5, 0.0)
     >>> T1 = SE3(0.4, 0.5, 0.2)
-    >>> Ts = ctraj(T0, T1, t)
+    >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, t)
     >>> len(Ts)
+    >>> qs, *_ = puma.ikine(Ts)
+    >>> qs.shape
 
-The resulting trajectory, \code{Ts}, is an \code{SE3} instance with 200 values.
+The resulting trajectory, ``Ts``, is an ``SE3`` instance with 200 values.
 For both trajectory types the number of steps is given by an integer argument or the length of a
 passed time vector.
 
 Inverse kinematics can then be applied to determine the corresponding 
-joint angle motion using
-
-.. runblock:: pycon
-
-    >>> qs, *_ = puma.ikine(Ts)
-    >>> qs.shape
-
-where \code{qs} is is an array of joint coordinates, one row per timestep.
+joint angle motion using the ``ikine`` method and ``qs``is is an array of joint coordinates, one row per timestep.
 In this case the starting 
 joint coordinates for each inverse kinematic solution
 is taken as the result of the previous solution.
@@ -366,6 +390,7 @@ As mentioned earlier, the Toolbox supports SymPy. For example:
 .. runblock:: pycon
 
     >>> import roboticstoolbox.base.symbolics as sym
+    >>> from spatialmath.base import *
     >>> phi, theta, psi = sym.symbol('phi, theta, psi')
     >>> rpy2r(phi, theta, psi)
 
@@ -373,20 +398,22 @@ The capability extends to forward kinematics
 
 .. runblock:: pycon
 
+    >>> import roboticstoolbox as rtb
+    >>> import roboticstoolbox.base.symbolics as sym
+    >>> puma = rtb.models.DH.Puma560()
     >>> q = sym.symbol("q_:6") # q = (q_1, q_2, ... q_5)
     >>> T = puma.fkine(q)
 
-
 .. runblock:: pycon
+   :linenos:
 
     >>> puma = rtb.models.DH.Puma560(symbolic=True)
     >>> T = puma.fkine(q)
-
-If we display the value of \var{puma} we see that the $\alpha_j$ values are now displayed in red to indicate that they are symbolic constants.  The x-coordinate of the end-effector is
-
-.. runblock:: pycon
-
     >>> T.t[0]
+
+If we display the value of ``puma`` we see that the :math:`\alpha_j` values are now displayed in red to indicate that they are symbolic constants.  The x-coordinate of the end-effector is
+given by line 3.
+
 
 SymPy allows any expression to be converted to runnable code in a variety of languages including C, Python and Octave/MATLAB.
 
@@ -404,18 +431,20 @@ At a singular configuration
 
 .. runblock:: pycon
 
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
     >>> J = puma.jacob0(puma.qr)
     >>> np.linalg.matrix_rank(J)
     >>> jsingu(J)
 
 Jacobians can also be computed for symbolic joint variables as for forward kinematics above.
 
-For \var{ERobot} instances we can also compute the Hessians::
+For \var{ERobot``instances we can also compute the Hessians::
 
->>> H = puma.hessian0(q)
->>> H = puma.hessiane(q)
+    >>> H = puma.hessian0(q)
+    >>> H = puma.hessiane(q)
 
-in the base or end-effector frames respectively, as 3D NumPy arrays in $\mathbb{R}^{6 \times n \times n}$.
+in the base or end-effector frames respectively, as 3D NumPy arrays in :math:`\mathbb{R}^{6 \times n \times n}`.
 
 For all robot classes we can compute manipulability
 
@@ -424,9 +453,7 @@ For all robot classes we can compute manipulability
     >>> m = puma.manipulability(q)
     >>> m = puma.manipulability(q, "asada")
 
-for the Yoshikawa\cite{yoshikawa1984analysis} and Asada\cite{asada1983geometrical} 
-% measures respectively, and
-measures, and
+for the Yoshikawa and Asada measures respectively, and
 
 .. runblock:: pycon
 
@@ -434,161 +461,178 @@ measures, and
 
 is the Yoshikawa measure computed for just the task space translational degrees
 of freedom.
-For \var{ERobot} instances we can also compute the manipulability
-Jacobian 
-\begin{Code}
->>> Jm = puma.manipm(q, J, H)
-\end{Code}
-such that $\dot{m} = \mat{J}_m(\vec{q}) \dvec{q}$.
+For ``ERobot`` instances we can also compute the manipulability
+Jacobian::
 
-%%%%%%%%%%%%%% DYNAMICS
+    >>> Jm = puma.manipm(q, J, H)
+
+such that :math:`\dot{m} = \mat{J}_m(\vec{q}) \dvec{q}`.
+
 Dynamics
 --------
 
 The new Toolbox supports several approaches to computing dynamics.  
-For models defined using standard or modified DH notation we use a classical version of the recursive Newton-Euler~\cite{Armstrong79}
-algorithm implemented in Python or C\footnote{The same code as used by RTB-M is called directly from Python, and does not use NumPy.}.
-For example, the inverse dynamics 
-\begin{Code}
->>> tau = puma.rne(puma.qn, np.zeros((6,)), np.zeros((6,)))
-\end{Code}
-is the gravity torque for the robot in the configuration \var{qn}.
+For models defined using standard or modified DH notation we use a classical version of the recursive Newton-Euler
+algorithm implemented in Python or C.
+
+.. note:: The same code as used by RTB-M is called directly from Python, and does not use NumPy.
+
+For example, the inverse dynamics
+
+.. runblock:: pycon
+
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
+    >>> tau = puma.rne(puma.qn, np.zeros((6,)), np.zeros((6,)))
+    >>> print(tau)
+
+is the gravity torque for the robot in the configuration ``qn``.
 
 Inertia, Coriolis/centripetal and gravity terms are computed by
 
 .. runblock:: pycon
 
->>> Jpuma.inertia(q)
->>> puma.coriolis(q, qd)
->>> puma.gravload(q)
+    >>> import roboticstoolbox as rtb
+    >>> puma = rtb.models.DH.Puma560()
+    >>> puma.inertia(q)
+    >>> puma.coriolis(q, qd)
+    >>> puma.gravload(q)
 
-respectively, using the method of
-\cite{Walker82} from the inverse dynamics.  These values include the effect of motor inertia and friction.
+respectively, using the method of Orin and Walker from the inverse dynamics.  These values include the effect of motor inertia and friction.
 
-Forward dynamics are given by
-\begin{Code}
->>> qdd = puma.accel(q, tau, qd)
-\end{Code}
-which we can integrate over time
-\begin{Code}
->>> q = puma.fdyn(5, q0, mycontrol, ...)
-\end{Code}
-uses an RK45 numerical integration from the SciPy package to solve for the joint trajectory \code{q} given the
-control function called as
-\begin{Code}
+Forward dynamics are given by::
+
+    >>> qdd = puma.accel(q, tau, qd)
+
+which we can integrate over time::
+
+    >>> q = puma.fdyn(5, q0, mycontrol, ...)
+
+uses an RK45 numerical integration from the SciPy package to solve for the joint trajectory ``q`` given the
+control function called as::
+
       tau = mycontrol(robot, t, q, qd, **args)
-\end{Code}
-
-The fast C implementation is not capable of symbolic operation so a Python version of RNE \code{rne\_python} has been
+ 
+The fast C implementation is not capable of symbolic operation so a Python version of RNE ``rne\_python`` has been
 implemented as well.  For a 6- or 7-DoF manipulator the torque expressions have thousands of terms yet are computed in less than a second. However, subsequent expression manipulation is slow, and the best strategy is to eliminate the least significant terms and this typically gets the expression for the first joint to a hundred or so terms which is quite manageable.
 This is an area of active work, as is the automatic generation of efficient run-time
 code for manipulator dynamics.
 
-For the Puma560 robot the C version of inverse dynamics takes 23\unit{\mu s} while the 
-Python version takes 1.5\unit{ms} ($65\times$ slower).  With symbolic operands it takes 170\unit{ms} ($113\times$ slower) to produce the unsimplified torque expressions.
+For the Puma560 robot the C version of inverse dynamics takes 23μs while the 
+Python version takes 1.5ms (:math:`65\times` slower).  With symbolic operands it takes 170ms``(:math:`113\times` slower) to produce the unsimplified torque expressions.
 
-For all robots there is also an implementation of Featherstone's spatial vector method, \code{rne\_spatial}, and SMTB-P provides a set of classes for
+For all robots there is also an implementation of Featherstone's spatial vector method, ``rne_spatial()``, and SMTB-P provides a set of classes for
 spatial velocity, acceleration, momentum, force and inertia.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+New capability
+==============
 
-\section{New capability}
 There are several areas of innovation compared to the MATLAB version of the Toolbox.
 
-\subsection{Branched mechanisms}
-The RTB-M \code{SerialLink} class had no option to express branching.
-In RTB-P the equivalent class is \code{DHRobot} is similarly limited, but a new class \code{ERobot} is more general and allows for branching (but not closed
+Branched mechanisms
+-------------------
+
+The RTB-M ``SerialLink`` class had no option to express branching.
+In RTB-P the equivalent class is ``DHRobot``is similarly limited, but a new class ``ERobot`` is more general and allows for branching (but not closed
 kinematic loops).
-The robot is described by a set of \code{ELink} objects, each of which points to its parent link.
-The \code{ERobot} has references to the root and leaf \code{ELink}s.
+The robot is described by a set of ``ELink`` objects, each of which points to its parent link.
+The ``ERobot`` has references to the root and leaf ``ELink``s.
 This structure closely mirrors the URDF representation, allowing for easy import of URDF models.
 
-\subsection{Collision checking}
+Collision checking
+------------------
+
 RTB-M had a simple, contributed but unsupported, collision checking capability.
-This is dramatically improved in the Python version using using PyBullet~\cite{py3} which supports primitive shapes such as Cylinders, Spheres and Boxes as well as mesh objects. 
+This is dramatically improved in the Python version using using `PyBullet <https://pybullet.org/wordpress/>`_ which supports primitive shapes such as Cylinders, Spheres and Boxes as well as mesh objects. 
 Every robot link has a collision shape in addition to the shape used for rendering.  
-We can conveniently perform collision checks between links as well as between whole robots, discrete links, and objects in the world. For example a $1 \times 1 \times 1$ box 
-centered at $(1,0,0)$ can be tested against all, or just one link, of the robot by
-%
-\begin{Code}
->>> panda = rtb.models.Panda()
->>> obstacle = rtb.Box([1, 1, 1], SE3(1, 0, 0)) 
->>> iscollision = panda.collided(obstacle) # boolean
->>> iscollision = panda.links[0].collided(obstacle)
-\end{Code}
-%
+We can conveniently perform collision checks between links as well as between whole robots, discrete links, and objects in the world. For example a :math:`1 \times 1 \times 1` box 
+centered at :math:`(1,0,0)` can be tested against all, or just one link, of the robot by::
+
+    >>> panda = rtb.models.Panda()
+    >>> obstacle = rtb.Box([1, 1, 1], SE3(1, 0, 0)) 
+    >>> iscollision = panda.collided(obstacle) # boolean
+    >>> iscollision = panda.links[0].collided(obstacle)
+
+
 Additionally, we can compute the minimum Euclidean distance between whole robots, discrete links, or objects and get the points in the world frame which construct this line.
-%
-\begin{Code}
+
+
 >>> d, p1, p2 = panda.closest_point(obstacle)
 >>> d, p1, p2 = panda.links[0].closest_point(obstacle)
-\end{Code}
+
 which returns the distance and the coordinates of the closest points on the two bodies.
 
 % Bullet is a fast and mature package which we found gave better results than FCL\cite{}
 % but found that closest points between polyhedra snapped to vertices rather than the actual closest points on
 % faces.
 
-\subsection{Interfaces}
+Interfaces
+----------
+
 RTB-M could only animate a robot in a figure, and there was limited but not-well-supported ability to interface to V-REP
 and a physical robot.
 The Python version supports a simple, but universal API to a robot
-inspired by the simplicity and expressiveness of the OpenAI Gym API \cite{gym} which was designed as a toolkit for developing and comparing reinforcement learning algorithms.
-Whether simulating a robot or controlling a real physical robot, the API operates in the same manner.
-% providing users with a common interface which is not found amoung other robotics packages.
+inspired by the simplicity and expressiveness of the OpenAI Gym API which was designed as a toolkit for developing and comparing reinforcement learning algorithms.
+Whether simulating a robot or controlling a real physical robot, the API operates in the same manner, providing users with a common interface which is not found amoung other robotics packages.
 
-By default the Toolbox behaves like the MATLAB version with a plot method
-\begin{Code}
+By default the Toolbox behaves like the MATLAB version with a plot method::
+
 >>> puma.plot(q)
-\end{Code}
-which will plot the robot at the specified joint configurmation, or animate it if \code{q} is an $m \times 6$ matrix, using
-the default \code{PyPlot} backend which draws a ``noodle robot'' using matplotlib similar to that
+
+which will plot the robot at the specified joint configurmation, or animate it if ``q``is an :math:`m \times 6` matrix, using
+the default ``PyPlot``backend which draws a ``noodle robot'' using matplotlib similar to that
 shown in Figure \ref{fig:noodle}.
 
-The more general solution, and what is implemented inside \code{plot} in the example above, is
-\begin{Code}
->>> pyplot = roboticstoolbox.backends.PyPlot()
->>> pyplot.launch()
->>> pyplot.add(puma)
->>> puma.q = q
->>> puma.step()
-\end{Code}
+The more general solution, and what is implemented inside ``plot`` in the example above, is::
+
+    >>> pyplot = roboticstoolbox.backends.PyPlot()
+    >>> pyplot.launch()
+    >>> pyplot.add(puma)
+    >>> puma.q = q
+    >>> puma.step()
 
 This makes it possible to animate multiple robots in the one graphical window, or the one robot in various environments either graphical
 or real.
 
 The VPython backend, see Fig. \ref{fig:vpython}, provides browser-based 3D graphics based on WebGL.  This is advantageous for displaying on mobile
-devices.  Swift, see Fig. \ref{fig:ur-lineup}, is an Electron app that uses three.js to provide high-quality 3D animations.
-It can produce vivid 3D effects using anaglyphs viewed with colored glasses, and
-we also adapted it to work with a Looking Glass light-field (holographic) display\footnote{\url{https://lookingglassfactory.com}} for
-glasses-free 3D viewing.
+devices.  Swift, see Fig. \ref{fig:ur-lineup}, is a web-based visualizer using three.js to provide high-quality 3D animations.
+It can produce vivid 3D effects using anaglyphs viewed with colored glasses.
 Animations can be recorded as MP4 files or animated GIF files which are useful for inclusion in GitHub markdown documents.
 
 
-\section{Code engineering}
-The code is implemented in Python $\ge 3.6$ and all code is hosted on GitHub and unit-testing is performed using GitHub-actions.
-Test coverage is uploaded to \code{codecov.io} for visualization and trending, and we use \code{lgtm.com} to perform
-automated code review.
-The code is documented with ReStructured Text format docstrings which provides powerful markup including cross-referencing, equations, class inheritance diagrams and figures -- all of which is converted to HTML documentation whenever a change is pushed, and this is accessible via GitHub pages.
-Issues can be reported via GitHub issues or patches submitted as pull requests.
+Code engineering
+----------------
 
-RTB-P, and its dependencies, can be installed simply by 
-\begin{Code}
-$ pip install roboticstoolbox-python
-\end{Code}
+The code is implemented in Python :math:`\ge 3.6` and all code is hosted on GitHub and
+unit-testing is performed using GitHub-actions. Test coverage is uploaded to
+``codecov.io`` for visualization and trending, and we use ``lgtm.com`` to perform
+automated code review. The code is documented with ReStructured Text format
+docstrings which provides powerful markup including cross-referencing,
+equations, class inheritance diagrams and figures -- all of which is converted
+to HTML documentation whenever a change is pushed, and this is accessible via
+GitHub pages. Issues can be reported via GitHub issues or patches submitted as
+pull requests.
+
+RTB-P, and its dependencies, can be installed simply by::
+
+    $ pip install roboticstoolbox-python
+
 which includes basic visualization using matplotlib.
-Options such as \code{vpython} can be used to specify additional dependencies to be installed.
-The Toolbox adopts a ``when needed'' approach to many dependencies and will only attempt
-to import them if the user attempts to exploit a particular functionality.  If the dependency is not installed a warning provides instructions on how to install them using pip and/or npm.
-More details are given on the project home page.\footnote{\url{https://github.com/petercorke/robotics-toolbox-python}}
+Options such as ``vpython`` can be used to specify additional dependencies to be installed.
+The Toolbox adopts a "when needed" approach to many dependencies and will only attempt
+to import them if the user attempts to exploit a particular functionality.  If the dependency is not installed a warning provides instructions on how to install them using pip.
+More details are given on the project home page.
 This applies to the visualizers Vpython and Swift, as well as pybullet and ROS.
 The Toolbox provides capability to import URDF-xacro files without ROS.
 The backend architecture allows a user to connect to a ROS environment if required, and only then does ROS have to be
 installed.
 
-\section{Conclusion}
-This paper has introduced and demonstrated in tutorial form the principle features of the Robotics
+
+Conclusion
+==========
+
+This article has introduced and demonstrated in tutorial form the principle features of the Robotics
 Toolbox for Python which runs on Mac, Windows and Linux.% using Python 3.6 or better.
 The code is free and open, and released under the MIT licence.
 It provides many of the essential tools necessary for 
@@ -598,11 +642,9 @@ It is familiar yet new, and we hope it will serve the community well for the nex
 Currently under development are backend interfaces for CoppeliaSim, Dynamixel servo chains, and ROS;
 symbolic dynamics, simplification and code generation; mobile robotics motion models, planners, EKF localization, map making and SLAM; and a minimalist block-diagram simulation tool\footnote{\url{https://github.com/petercorke/bdsim}}.
 
-\clearpage
-
-\bibliographystyle{IEEEtran} 
-
-% \bibliography{IEEEabrv, ref} % For normal
-\bibliography{publist,book,refs} % For overleaf
-
-\end{document}
+.. [Corke95d] P. Corke. A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.
+.. [Corke96j] P. Corke. A robotics toolbox for MATLAB. IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996.
+.. [Craig2005] Introduction to Robotics, John Craig, Wiley, 2005.
+.. [Featherstone87] R. Featherstone, Robot Dynamics Algorithms. Kluwer Academic, 1987.
+.. [ets1] P. Corke, “A simple and systematic approach to assigning Denavit- Hartenberg parameters,” IEEE transactions on robotics, vol. 23, no. 3, pp. 590–594, 2007.
+.. [ets2] J. Haviland and P. Corke, “A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence,” arXiv preprint, 2020.
