@@ -8,8 +8,8 @@ import threading
 import glob
 import os
 import platform
-from time import perf_counter
-from PIL import Image
+from time import perf_counter, sleep
+import imageio
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.robot.Robot import Robot as r
@@ -91,6 +91,10 @@ class VPython(Connector):  # pragma nocover
         # 2D array of [is_3d, height, width, title, caption, grid] per canvas
         self.canvas_settings = []
         self.robots = []
+        self._recording = False
+        self._recording_thread = None
+        self._recording_fps = None
+        self._thread_lock = threading.Lock()
 
         self._create_empty_session()
 
@@ -161,7 +165,7 @@ class VPython(Connector):  # pragma nocover
                 "Figure number must be between 0 and total number of canvases")
 
         # If DHRobot given
-        if isinstance(id, r.Robot):
+        if isinstance(id, r):
             robot = None
             # Find first occurrence of it that is in the correct canvas
             for i in range(len(self.robots)):
@@ -387,6 +391,8 @@ class VPython(Connector):  # pragma nocover
         # Wait for thread to finish
         self._recording_thread.join()
 
+        sleep(2)  # Quick sleep to ensure all downloads are done
+
         # Get downloads directory
         opsys = platform.system()
         if opsys == 'Windows':  # Windows
@@ -402,12 +408,15 @@ class VPython(Connector):  # pragma nocover
         fp_out = filename
         fp_in = path_in + "/vpython_*.png"
 
-        file_format = filename[-4:]
-        if file_format[0] == '.':
-            file_format = file_format[-3:]
+        files = [file for file in glob.glob(fp_in)]
 
-        img, *imgs = [Image.open(f) for f in sorted(glob.glob(fp_in))]
-        img.save(fp=fp_out, format=file_format, append_images=imgs, save_all=True)
+        writer = imageio.get_writer(fp_out, fps=self._recording_fps)
+
+        for f in files:
+            writer.append_data(imageio.imread(f))  # Add it to the video
+            os.remove(f)  # Clean up file
+
+        writer.close()
 
         print("VPython Recording Saved... It is safe to exit")
 
