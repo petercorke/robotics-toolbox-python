@@ -5,7 +5,7 @@
 
 import threading
 from time import perf_counter, sleep
-import cv2
+from PIL import Image
 import os
 import platform
 import glob
@@ -299,23 +299,15 @@ class VPython(Connector):
             # lets assume 'HOME' for now
             path_in = os.path.join(os.getenv('HOME'), 'downloads')
 
-        path_out = filename
-        fps = self._recording_fps
-        size = None
+        fp_out = filename
+        fp_in = path_in + "/vpython_*.png"
 
-        frames = []
+        file_format = filename[-4:]
+        if file_format[0] == '.':
+            file_format=file_format[-3:]
 
-        for file in glob.glob(path_in + "/vpython_*.png"):
-            frame = cv2.imread(file)
-            height, width, layers = frame.shape
-            size = (width, height)
-            frames.append(frame)
-            os.remove(file)
-
-        out = cv2.VideoWriter(path_out, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
-        for f in frames:
-            out.write(f)
-        out.release()
+        img, *imgs = [Image.open(f) for f in sorted(glob.glob(fp_in))]
+        img.save(fp=fp_out, format=file_format, append_images=imgs, save_all=True)
 
         print("VPython Recording Saved... It is safe to exit")
 
