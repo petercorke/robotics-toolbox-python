@@ -4,6 +4,12 @@
 """
 
 import importlib
+import threading
+import glob
+import os
+import platform
+from time import perf_counter
+from PIL import Image
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox.robot.Robot import Robot as r
@@ -90,7 +96,8 @@ class VPython(Connector):  # pragma nocover
 
     def launch(
             self, is_3d=True, height=500, width=888,
-            title='', caption='', grid=True):
+            title='', caption='', grid=True,
+            g_col=None, g_opc=1):
         """
         Launch a graphical backend in a browser tab
 
@@ -102,15 +109,17 @@ class VPython(Connector):  # pragma nocover
         super().launch()
 
         self.canvas_settings.append(
-            [is_3d, height, width, title, caption, grid])
+            [is_3d, height, width, title, caption, grid, g_col, g_opc])
 
         # Create the canvas with the given information
         if is_3d:
             self.canvases.append(
-                GraphicsCanvas3D(height, width, title, caption, grid))
+                GraphicsCanvas3D(height, width, title, caption,
+                                 grid, g_col, g_opc))
         else:
             self.canvases.append(
-                GraphicsCanvas2D(height, width, title, caption, grid))
+                GraphicsCanvas2D(height, width, title, caption,
+                                 grid, g_col, g_opc))
 
     def step(self, id, q=None, fig_num=0):
         """
@@ -342,6 +351,67 @@ class VPython(Connector):  # pragma nocover
             raise TypeError("Input must be a DHLink or GraphicalRobot")
 
     #
+    # Public non-standard methods
+    #
+    def record_start(self, fps, scene_num=0):
+        """
+        Start recording screencaps of a scene
+        """
+        self._thread_lock.acquire()
+
+        if not self._recording:
+            print("VPython Recording...")
+            self._recording = True
+            self._recording_fps = fps
+            # Spawn a thread
+            self._recording_thread = threading.Thread(target=self._record_scene, args=(scene_num, fps,))
+            self._recording_thread.start()
+
+        self._thread_lock.release()
+
+    def record_stop(self, filename):
+        """
+        Stop recording screencaps of a scene and combine them into a movie
+        """
+        #
+        self._thread_lock.acquire()
+        if self._recording:
+            self._recording = False
+            print("VPython Recording Stopped...")
+            print("VPython Recording Saving... DO NOT EXIT")
+        else:
+            self._thread_lock.release()
+            return
+        self._thread_lock.release()
+
+        # Wait for thread to finish
+        self._recording_thread.join()
+
+        # Get downloads directory
+        opsys = platform.system()
+        if opsys == 'Windows':  # Windows
+            path_in = os.path.join(os.getenv('USERPROFILE'), 'downloads')
+
+        elif opsys == 'Linux' or opsys == 'Darwin':  # Linux / Mac
+            path_in = os.path.join(os.getenv('HOME'), 'downloads')
+
+        else:  # Undefined OS
+            # lets assume 'HOME' for now
+            path_in = os.path.join(os.getenv('HOME'), 'downloads')
+
+        fp_out = filename
+        fp_in = path_in + "/vpython_*.png"
+
+        file_format = filename[-4:]
+        if file_format[0] == '.':
+            file_format = file_format[-3:]
+
+        img, *imgs = [Image.open(f) for f in sorted(glob.glob(fp_in))]
+        img.save(fp=fp_out, format=file_format, append_images=imgs, save_all=True)
+
+        print("VPython Recording Saved... It is safe to exit")
+
+    #
     #  Private Methods
     #
 
@@ -361,3 +431,37 @@ class VPython(Connector):  # pragma nocover
                 gs.innerHTML = '';
             </script>
         ''')
+
+    def _record_scene(self, scene_num, fps):
+        """
+        Thread-called function to continuously record screenshots
+        """
+        frame_num = 0
+        if fps <= 0:
+            raise ValueError("fps must be greater than 0.")
+        f = 1 / fps
+
+        self._thread_lock.acquire()
+        recording = self._recording
+        self._thread_lock.release()
+
+        while recording:
+            # Get current time
+            t_start = perf_counter()
+
+            # Take screenshot
+            filename = "vpython_{:04d}.png".format(frame_num)
+            self.canvases[scene_num].take_screenshot(filename)
+            frame_num += 1
+
+            # Get current time
+            t_stop = perf_counter()
+
+            # Wait for time of frame to finish
+            # If saving takes longer than frame frequency, this while is skipped
+            while t_stop - t_start < f:
+                t_stop = perf_counter()
+
+            self._thread_lock.acquire()
+            recording = self._recording
+            self._thread_lock.release()
