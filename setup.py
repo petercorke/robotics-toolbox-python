@@ -39,10 +39,6 @@ docs_req = [
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-# Get the release/version string
-with open(path.join(here, 'RELEASE'), encoding='utf-8') as f:
-    release = f.read()
-
 
 def package_files(directory):
     paths = []
@@ -64,7 +60,7 @@ frne = Extension(
 setup(
     name='roboticstoolbox',
 
-    version=release,
+    version='0.6.0',
 
     description='A Python library for robotic education and research',
 
