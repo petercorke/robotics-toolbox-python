@@ -144,7 +144,7 @@ env.step(puma, puma.qr, 0)
 In order to record the canvas, there are unique backend functions to call: `record_start` and `record_stop`. Currently,
 only one scene in the backend can be recorded at a time. The start function requires inputs of FPS, and a scene number
 (defaults to 0). The stop function requires a filename with extension. Files are saved relative to the roboticstoolbox
-home directory.
+home directory. Imageio is used to convert all image files into a movie file.
 
 **NOTE**: The scene is still interactive during recording. E.g. The teachpanel can be used to manipulate the robot while
 being recorded for later viewing.
