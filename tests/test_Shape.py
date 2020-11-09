@@ -66,6 +66,7 @@ class TestShape(unittest.TestCase):
 
     def test_mesh(self):
         ur = rp.models.UR5()
+        print(ur.links[1].collision[0].filename)
         ur.links[1].collision[0].closest_point(ur.links[2].collision[0])
 
     def test_collision(self):

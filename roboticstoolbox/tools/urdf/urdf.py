@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .utils import (parse_origin, configure_origin)
 
-abspath = Path(rtb.__file__).parent / 'models' / 'xacro'
+abspath = Path(rtb.__file__).parent / 'models' / 'URDF' / 'xacro'
 
 
 class URDFType(object):

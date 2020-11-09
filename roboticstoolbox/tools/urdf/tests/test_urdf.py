@@ -17,7 +17,7 @@ class TestURDF(unittest.TestCase):
 
     #     # Load
     #     # u = URDF.load('roboticstoolbox/backends/urdf/tests/data/ur5.urdf')
-    #     u = URDF.load('roboticstoolbox/models/xacro/ur_description/urdf/ur5_joint_limited_robot.urdf.xacro')
+    #     u = URDF.load('roboticstoolbox/models/URDF/xacro/ur_description/urdf/ur5_joint_limited_robot.urdf.xacro')
 
     #     self.assertIsInstance(u, URDF)
     #     for j in u.joints:
@@ -30,10 +30,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_visuals(self):
 
         urdf_string = xacro.main(
-            "roboticstoolbox/models/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
+            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
         urdf = URDF.loadstr(
             urdf_string,
-            "roboticstoolbox/models/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
+            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
 
         urdf.links[0].visuals[0].name = "Lonk"
         self.assertTrue(urdf.links[0].visuals[0].name == "Lonk")
@@ -90,10 +90,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_collisions(self):
 
         urdf_string = xacro.main(
-            "roboticstoolbox/models/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
+            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
         urdf = URDF.loadstr(
             urdf_string,
-            "roboticstoolbox/models/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
+            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
 
         urdf.links[0].collisions[0].name = "Lonk"
         self.assertTrue(urdf.links[0].collisions[0].name == "Lonk")
@@ -111,10 +111,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_dynamics(self):
 
         urdf_string = xacro.main(
-            "roboticstoolbox/models/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
+            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
         urdf = URDF.loadstr(
             urdf_string,
-            "roboticstoolbox/models/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
+            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")
 
         self.assertEqual(urdf.joints[0].limit.effort, 87.0)
         self.assertEqual(urdf.joints[0].limit.velocity, 2.175)
