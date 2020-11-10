@@ -215,6 +215,12 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__ui_controls[self.__idx_menu_robots].index = \
             len(self.__robots) - 1
 
+        # Place camera based on robots effective radius * 1.25
+        if robot.robot is not None:
+            radius = sum([abs(link.a) + abs(link.d) for link in robot.robot.links]) * 1.25
+            self.scene.camera.pos = vector(radius, radius, radius) + get_pose_pos(robot.joints[1].get_pose())
+            self.scene.camera.axis = vector(-radius, -radius, -radius)
+
     def delete_robot(self, robot):
         """
         This function is called when a new robot is to be deleted
