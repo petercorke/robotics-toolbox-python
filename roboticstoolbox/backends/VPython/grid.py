@@ -88,6 +88,7 @@ class GraphicsGrid:   # pragma nocover
         min_z_coord = 0
         max_z_coord = min_z_coord + round(self.__num_squares * self.__scale, 2)
 
+        # Get all coords
         x_coords = arange(
             min_x_coord, max_x_coord + self.__scale, self.__scale)
         y_coords = arange(
@@ -103,11 +104,11 @@ class GraphicsGrid:   # pragma nocover
         if len(z_coords) > self.__num_squares + 1:
             z_coords = z_coords[0:self.__num_squares+1]
 
-        # THIS PROCESS ASSUMES EVEN NUMBER OF SQUARES.
         # As curve objects cannot be compounded, so must be a single entity
 
         line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
 
+        # Create the inital curve objects
         xy_grid = curve(vector(0, 0, 0),
                         color=vector(self._colour[0], self._colour[1], self._colour[2]),
                         radius=line_thickness,
@@ -123,6 +124,7 @@ class GraphicsGrid:   # pragma nocover
                         radius=line_thickness,
                         origin=vector(0, 0, 0))
 
+        # Zig-Zag through all of the points
         # XY plane
         for idx, x_point in enumerate(x_coords):
             if idx % 2 == 0:
