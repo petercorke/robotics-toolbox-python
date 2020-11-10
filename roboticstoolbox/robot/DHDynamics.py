@@ -31,7 +31,7 @@ def _check_rne(func):
     return wrapper_check_rne
 
 
-class DHDynamics:
+class DHDynamicsMixin:
 
     def printdyn(self):
         """

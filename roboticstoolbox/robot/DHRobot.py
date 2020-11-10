@@ -16,11 +16,11 @@ from scipy.optimize import minimize, Bounds
 from roboticstoolbox.backends.PyPlot.functions import \
     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
-from roboticstoolbox.robot.DHDynamics import DHDynamics
+from roboticstoolbox.robot.DHDynamics import DHDynamicsMixin
 from ansitable import ANSITable, Column
 
 
-class DHRobot(Robot, DHDynamics):
+class DHRobot(Robot, DHDynamicsMixin):
     """
     Class for robots defined using Denavit-Hartenberg notation
 
