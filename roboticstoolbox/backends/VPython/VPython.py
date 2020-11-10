@@ -290,8 +290,16 @@ class VPython(Connector):  # pragma nocover
         """
 
         # TODO - name can come from the robot object, maybe an override name?
+        #  Micah: "Name is used from robot class, unless robot is not given"
+
         # TODO - why dhrobot "if applicable"?
+        #  Micah: "It's possible to create a graphical robot
+        #  in VPython not using a robot class."
+
         # TODO - what about other classes of robot?
+        #  Micah: "I use specific parameters in dhrobots.
+        #  If they exist in other robot classes, it should work."
+
         # TODO - what about adding ellipsoids?
 
         super().add()
