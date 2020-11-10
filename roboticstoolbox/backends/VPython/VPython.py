@@ -101,7 +101,7 @@ class VPython(Connector):  # pragma nocover
     def launch(
             self, is_3d=True, height=500, width=888,
             title='', caption='', grid=True,
-            g_col=None, g_opc=1):
+            g_col=None):
         """
         Launch a graphical backend in a browser tab
 
@@ -113,17 +113,17 @@ class VPython(Connector):  # pragma nocover
         super().launch()
 
         self.canvas_settings.append(
-            [is_3d, height, width, title, caption, grid, g_col, g_opc])
+            [is_3d, height, width, title, caption, grid, g_col])
 
         # Create the canvas with the given information
         if is_3d:
             self.canvases.append(
                 GraphicsCanvas3D(height, width, title, caption,
-                                 grid, g_col, g_opc))
+                                 grid, g_col))
         else:
             self.canvases.append(
                 GraphicsCanvas2D(height, width, title, caption,
-                                 grid, g_col, g_opc))
+                                 grid, g_col))
 
     def step(self, id, q=None, fig_num=0):
         """
@@ -439,7 +439,7 @@ class VPython(Connector):  # pragma nocover
         Then clear the browser tab
         """
         # Create a canvas to initiate the connection
-        temp = GraphicsCanvas2D()
+        temp = GraphicsCanvas3D()
 
         # Delete the canvas to leave a blank screen
         temp.scene.append_to_caption('''

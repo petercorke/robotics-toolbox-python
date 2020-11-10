@@ -7,12 +7,12 @@ import roboticstoolbox as rp
 # import time
 
 env = rp.backends.VPython()
-env.launch(g_col=[0.2, 0.2, 0.2], g_opc=0.3)
-# env.launch()
+# env.launch(g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+env.launch()
 
 #  PUMA560
-puma = rp.models.DH.Puma560()
-env.add(0, 'Puma', puma)
+# puma = rp.models.DH.Puma560()
+# env.add(0, 'Puma', puma)
 
 # env.record_start(10)
 #

@@ -57,8 +57,8 @@ To create a scene to draw objects to, a canvas must be created. Upon creation, a
 If launched through Jupyter Notebooks, it will be displayed where executed.
 
 Different attributes can be supplied to the environment for some customisation. The display width, height, title, and
-caption can be manually input. Booleans representing the number of dimensions, and grid visibility can be set. Finally,
-grid colour and opacity options can be set.
+caption can be manually input. Booleans representing the number of dimensions, and grid visibility and colour can be
+set.
 
 Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
 capabilities)
@@ -68,10 +68,10 @@ env.launch()
 
 # Alternatively create a grid with specified parameters
 env.launch(is_3d=True, height=768, width=1024, title="Scene 1", caption="This scene shows...",
-    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+    grid=False, g_col=[0.2, 0.2, 0.2])
 
 env.launch(is_3d=False, height=768, width=1024, title="Scene 2", caption="This scene shows...",
-    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+    grid=False, g_col=[0.2, 0.2, 0.2])
 ``` 
 Multiple scenes can be created, simply execute `launch` for every scene required. Keeping note of the order for future
 reference.

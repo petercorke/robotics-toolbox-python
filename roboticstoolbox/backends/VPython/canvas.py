@@ -46,7 +46,7 @@ class GraphicsCanvas3D:  # pragma nocover
     :type g_opc: `float`, optional
     """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None, g_opc=1):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None):
         # def __init__(self, height=360, width=640, title='', caption='',
         #   grid=True):
 
@@ -126,13 +126,14 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
+        self.scene.waitfor("draw_complete")  # Ensure camera updates before grid is created
 
         # Any time a key or mouse is held down, run the callback function
         rate(30)  # 30Hz
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col, opacity=g_opc)
+        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col)
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
@@ -790,7 +791,7 @@ class GraphicsCanvas2D:  # pragma nocover
     :type g_opc: `float`, optional
     """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None, g_opc=1):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None):
 
         # Private lists
         self.__line_styles = [
@@ -876,7 +877,7 @@ class GraphicsCanvas2D:  # pragma nocover
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col, opacity=g_opc)
+        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col)
         # Toggle grid to 2D
         # self.__graphics_grid.toggle_2d_3d()
         # Lock the grid
