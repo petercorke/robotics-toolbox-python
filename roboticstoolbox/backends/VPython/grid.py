@@ -80,75 +80,7 @@ class GraphicsGrid:   # pragma nocover
         :return: List of the three drawn axes.
         :rtype: `list`
         """
-
-        # Initial conditions
-        # xz_lines = []
-        # xy_lines = []
-        # yz_lines = []
-        camera_axes = self.camera_axes
-        # Locate centre of axes
-        # if self.__relative_cam:
-        #     x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
-        #                                    round(self.__scene.center.y, 2), \
-        #                                    round(self.__scene.center.z, 2)
-        #     self.__focal_point = [x_origin, y_origin, z_origin]
-        #     # Convert focal point for 2D rendering. Puts focus point
-        #     # in centre of the view
-        #     if not self.__is_3d:
-        #         self.__focal_point = [
-        #             val - int(self.__num_squares / 2)
-        #             for val in self.__focal_point]
-        #         x_origin = self.__focal_point[0]
-        #         y_origin = self.__focal_point[1]
-        #         z_origin = 0
-        #         self.__focal_point[2] = z_origin
-        # else:
-        #     x_origin, y_origin, z_origin = self.__focal_point[0], \
-        #                                    self.__focal_point[1], \
-        #                                    self.__focal_point[2]
-
-        #   CAMERA AXES |  DISPLAYED GRID | XZ PLANE | XY PLANE | YZ PLANE
-        #      x,y,z    |      x,y,z      |   x,z    |    x,y   |    y,z
-        #  -------------+-----------------+----------+----------+----------
-        #      -,-,-    |      +,+,+      |   +,+    |    +,+   |    +,+
-        #      -,-,+    |      +,+,-      |   +,-    |    +,+   |    +,-
-        #      -,+,-    |      +,-,+      |   +,+    |    +,-   |    -,+
-        #      -,+,+    |      +,-,-      |   +,-    |    +,-   |    -,-
-        #      +,-,-    |      -,+,+      |   -,+    |    -,+   |    +,+
-        #      +,-,+    |      -,+,-      |   -,-    |    -,+   |    +,-
-        #      +,+,-    |      -,-,+      |   -,+    |    -,-   |    -,+
-        #      +,+,+    |      -,-,-      |   -,-    |    -,-   |    -,-
-        # min = -num_squares or 0, around the default position
-        # max = +num_squares or 0, around the default position
-        # e.g. at the origin, for negative axes: -10 -> 0,
-        # positive axes: 0 -> 10
-        # min_x_coord = round(
-        #     x_origin + (-(self.__num_squares / 2)
-        #                 + (sign(camera_axes.x) * -1) * (
-        #                     self.__num_squares / 2)) * self.__scale, 2)
-        # max_x_coord = round(
-        #     x_origin + ((self.__num_squares / 2)
-        #                 + (sign(camera_axes.x) * -1) * (
-        #                     self.__num_squares / 2)) * self.__scale, 2)
-        #
-        # min_y_coord = round(
-        #     y_origin + (-(self.__num_squares / 2)
-        #                 + (sign(camera_axes.y) * -1) * (
-        #                     self.__num_squares / 2)) * self.__scale, 2)
-        # max_y_coord = round(
-        #     y_origin + ((self.__num_squares / 2)
-        #                 + (sign(camera_axes.y) * -1) * (
-        #                     self.__num_squares / 2)) * self.__scale, 2)
-        #
-        # min_z_coord = round(
-        #     z_origin + (-(self.__num_squares / 2)
-        #                 + (sign(camera_axes.z) * -1) * (
-        #                     self.__num_squares / 2)) * self.__scale, 2)
-        # max_z_coord = round(
-        #     z_origin + ((self.__num_squares / 2)
-        #                 + (sign(camera_axes.z) * -1) * (
-        #                     self.__num_squares / 2)) * self.__scale, 2)
-
+        # Create grid from 0,0,0 to positive directions with step sizes of the scale
         min_x_coord = 0
         max_x_coord = min_x_coord + round(self.__num_squares * self.__scale, 2)
         min_y_coord = 0
@@ -249,119 +181,6 @@ class GraphicsGrid:   # pragma nocover
 
         return grid
 
-        # Compound origins are in the middle of the bounding boxes.
-        # Thus new pos will be between max and min.
-        # x_middle = x_coords.mean()
-        # y_middle = y_coords.mean()
-        # z_middle = z_coords.mean()
-        #
-        # line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
-        #
-        # # XZ plane
-        # for x_point in x_coords:
-        #     # Draw a line across for each x coord, along the same y-axis,
-        #     # from min to max z coord
-        #     xz_lines.append(create_line(
-        #         vector(x_point, y_origin, min_z_coord),
-        #         vector(x_point, y_origin, max_z_coord),
-        #         self.__scene,
-        #         thickness=line_thickness,
-        #         colour=self._colour,
-        #         opacity=self._opacity
-        #     ))
-        # for z_point in z_coords:
-        #     # Draw a line across each z coord, along the same y-axis,
-        #     # from min to max z coord
-        #     xz_lines.append(create_line(
-        #         vector(min_x_coord, y_origin, z_point),
-        #         vector(max_x_coord, y_origin, z_point),
-        #         self.__scene,
-        #         thickness=line_thickness,
-        #         colour=self._colour,
-        #         opacity=self._opacity
-        #     ))
-        #
-        # # XY plane
-        # for x_point in x_coords:
-        #     # Draw a line across each x coord, along the same z-axis,
-        #     # from min to max y coord
-        #     xy_lines.append(create_line(
-        #         vector(x_point, min_y_coord, z_origin),
-        #         vector(x_point, max_y_coord, z_origin),
-        #         self.__scene,
-        #         thickness=line_thickness,
-        #         colour=self._colour,
-        #         opacity=self._opacity
-        #     ))
-        # for y_point in y_coords:
-        #     # Draw a line across each y coord, along the same z-axis,
-        #     # from min to max x coord
-        #     xy_lines.append(create_line(
-        #         vector(min_x_coord, y_point, z_origin),
-        #         vector(max_x_coord, y_point, z_origin),
-        #         self.__scene,
-        #         thickness=line_thickness,
-        #         colour=self._colour,
-        #         opacity=self._opacity
-        #     ))
-        #
-        # # YZ plane
-        # for y_point in y_coords:
-        #     # Draw a line across each y coord, along the same x-axis,
-        #     # from min to max z coord
-        #     yz_lines.append(create_line(
-        #         vector(x_origin, y_point, min_z_coord),
-        #         vector(x_origin, y_point, max_z_coord),
-        #         self.__scene,
-        #         thickness=line_thickness,
-        #         colour=self._colour,
-        #         opacity=self._opacity
-        #     ))
-        # for z_point in z_coords:
-        #     # Draw a line across each z coord, along the same x-axis,
-        #     # from min to max y coord
-        #     yz_lines.append(create_line(
-        #         vector(x_origin, min_y_coord, z_point),
-        #         vector(x_origin, max_y_coord, z_point),
-        #         self.__scene,
-        #         thickness=line_thickness,
-        #         colour=self._colour,
-        #         opacity=self._opacity
-        #     ))
-        #
-        # # Compound the lines together into respective objects
-        # # XY Plane
-        # if camera_axes.z < 0:
-        #     xy_plane = compound(
-        #         xy_lines, origin=vector(x_middle, y_middle, min_z_coord))
-        # else:
-        #     xy_plane = compound(
-        #         xy_lines, origin=vector(x_middle, y_middle, max_z_coord))
-        #
-        # # XZ Plane
-        # if camera_axes.y < 0:
-        #     xz_plane = compound(
-        #         xz_lines, origin=vector(x_middle, min_y_coord, z_middle))
-        # else:
-        #     xz_plane = compound(
-        #         xz_lines, origin=vector(x_middle, max_y_coord, z_middle))
-        #
-        # # YZ Plane
-        # if camera_axes.x < 0:
-        #     yz_plane = compound(
-        #         yz_lines, origin=vector(min_x_coord, y_middle, z_middle))
-        # else:
-        #     yz_plane = compound(
-        #         yz_lines, origin=vector(max_x_coord, y_middle, z_middle))
-        #
-        # # Combine all into one list
-        # grid = [None, None, None]
-        # grid[self.__xy_plane_idx] = xy_plane
-        # grid[self.__xz_plane_idx] = xz_plane
-        # grid[self.__yz_plane_idx] = yz_plane
-        #
-        # return grid
-
     def __move_grid_objects(self):
         """
         Reusing the current assets, move the planes to the new origins.
@@ -407,26 +226,14 @@ class GraphicsGrid:   # pragma nocover
             x_origin + (-(self.__num_squares / 2)
                         + (sign(camera_axes.x) * -1) * (
                             self.__num_squares / 2)) * self.__scale, 2)
-        max_x_coord = round(
-            x_origin + ((self.__num_squares / 2)
-                        + (sign(camera_axes.x) * -1) * (
-                            self.__num_squares / 2)) * self.__scale, 2)
 
         min_y_coord = round(
             y_origin + (-(self.__num_squares / 2)
                         + (sign(camera_axes.y) * -1) * (
                             self.__num_squares / 2)) * self.__scale, 2)
-        max_y_coord = round(
-            y_origin + ((self.__num_squares / 2)
-                        + (sign(camera_axes.y) * -1) * (
-                            self.__num_squares / 2)) * self.__scale, 2)
 
         min_z_coord = round(
             z_origin + (-(self.__num_squares / 2)
-                        + (sign(camera_axes.z) * -1) * (
-                            self.__num_squares / 2)) * self.__scale, 2)
-        max_z_coord = round(
-            z_origin + ((self.__num_squares / 2)
                         + (sign(camera_axes.z) * -1) * (
                             self.__num_squares / 2)) * self.__scale, 2)
 
@@ -449,49 +256,6 @@ class GraphicsGrid:   # pragma nocover
             vector(x_pos, y_origin, z_pos)
         self.grid_object[self.__planes_idx][self.__yz_plane_idx].origin = \
             vector(x_origin, y_pos, z_pos)
-
-        box(pos=vector(x_pos, y_pos, z_origin), size=vector(5, 5, 5), color=color.red)
-        box(pos=vector(x_pos, y_origin, z_pos), size=vector(5, 5, 5), color=color.green)
-        box(pos=vector(x_origin, y_pos, z_pos), size=vector(5, 5, 5), color=color.blue)
-
-        # x_coords = arange(
-        #     min_x_coord, max_x_coord + self.__scale, self.__scale)
-        # y_coords = arange(
-        #     min_y_coord, max_y_coord + self.__scale, self.__scale)
-        # z_coords = arange(
-        #     min_z_coord, max_z_coord + self.__scale, self.__scale)
-        #
-        # # If the grid has given too many objects
-        # if len(x_coords) > self.__num_squares + 1:
-        #     x_coords = x_coords[0:self.__num_squares + 1]
-        # if len(y_coords) > self.__num_squares + 1:
-        #     y_coords = y_coords[0:self.__num_squares + 1]
-        # if len(z_coords) > self.__num_squares + 1:
-        #     z_coords = z_coords[0:self.__num_squares + 1]
-
-        # # XY Plane
-        # if camera_axes.z < 0:
-        #     self.grid_object[self.__planes_idx][self.__xy_plane_idx].origin = \
-        #         vector(x_origin, y_origin, min_z_coord)
-        # else:
-        #     self.grid_object[self.__planes_idx][self.__xy_plane_idx].origin = \
-        #         vector(x_origin, y_origin, max_z_coord)
-        #
-        # # XZ Plane
-        # if camera_axes.y < 0:
-        #     self.grid_object[self.__planes_idx][self.__xz_plane_idx].origin = \
-        #         vector(x_origin, min_y_coord, z_origin)
-        # else:
-        #     self.grid_object[self.__planes_idx][self.__xz_plane_idx].origin = \
-        #         vector(x_origin, max_y_coord, z_origin)
-        #
-        # # YZ Plane
-        # if camera_axes.x < 0:
-        #     self.grid_object[self.__planes_idx][self.__yz_plane_idx].origin = \
-        #         vector(min_x_coord, y_origin, z_origin)
-        # else:
-        #     self.grid_object[self.__planes_idx][self.__yz_plane_idx].origin = \
-        #         vector(max_x_coord, y_origin, z_origin)
 
     def update_grid(self):
         """
