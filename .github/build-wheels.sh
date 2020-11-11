@@ -25,9 +25,9 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install packages and test
-for PYBIN in /opt/python/cp3[6-8]*/bin/; do
-    "${PYBIN}/pip" install roboticstoolbox-python[dev,collision,vpython] --no-index -f /io/wheelhouse
-    ("${PYBIN}/pytest")
-done
+#for PYBIN in /opt/python/cp3[6-8]*/bin/; do
+#    "${PYBIN}/pip" install roboticstoolbox-python[dev,collision,vpython] --no-index -f /io/wheelhouse
+#    ("${PYBIN}/pytest")
+#done
 
 ls ./wheelhouse
