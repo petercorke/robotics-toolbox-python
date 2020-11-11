@@ -1,48 +1,48 @@
 #!/usr/bin/env python3
 
-import unittest
-import warnings
+# import unittest
+# import warnings
 
-from spatialmath import SE3
-from vpython import vector, box
-from numpy import array
-from math import pi
-import time
+# from spatialmath import SE3
+# from vpython import vector, box
+# from numpy import array
+# from math import pi
+# import time
 
-from roboticstoolbox.backends.VPython.common_functions import \
-    get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, get_pose_pos, \
-    vpython_to_se3, wrap_to_pi, close_localhost_session, \
-    x_axis_vector, y_axis_vector, z_axis_vector
-from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas3D, \
-    draw_reference_frame_axes
-from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot, \
-    DefaultJoint, RotationalJoint, PrismaticJoint, StaticJoint, Gripper
-from roboticstoolbox.backends.VPython.stl import import_object_from_numpy_stl
-from roboticstoolbox.backends.VPython.grid import GraphicsGrid
+# from roboticstoolbox.backends.VPython.common_functions import \
+#     get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, get_pose_pos, \
+#     vpython_to_se3, wrap_to_pi, close_localhost_session, \
+#     x_axis_vector, y_axis_vector, z_axis_vector
+# from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas3D, \
+#     draw_reference_frame_axes
+# from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot, \
+#     DefaultJoint, RotationalJoint, PrismaticJoint, StaticJoint, Gripper
+# from roboticstoolbox.backends.VPython.stl import import_object_from_numpy_stl
+# from roboticstoolbox.backends.VPython.grid import GraphicsGrid
 
 
-class TestVPython(unittest.TestCase):
+# class TestVPython(unittest.TestCase):
 
-    def setUp(self):
-        self.robot_scene = GraphicsCanvas3D()
+#     def setUp(self):
+#         self.robot_scene = GraphicsCanvas3D()
 
-        #    0.707107 -0.707107  0         0
-        #    0.707107  0.707107  0         1
-        #    0         0         1         0.4
-        #    0         0         0         1
-        self.robot_se3 = SE3().Ty(1) * SE3().Tz(0.4) * SE3().Rz(45, 'deg')
-        self.robot_structure = 1.0
-        self.se3 = SE3().Tx(3)
-        warnings.simplefilter('ignore', category=ResourceWarning)
+#         #    0.707107 -0.707107  0         0
+#         #    0.707107  0.707107  0         1
+#         #    0         0         1         0.4
+#         #    0         0         0         1
+#         self.robot_se3 = SE3().Ty(1) * SE3().Tz(0.4) * SE3().Rz(45, 'deg')
+#         self.robot_structure = 1.0
+#         self.se3 = SE3().Tx(3)
+#         warnings.simplefilter('ignore', category=ResourceWarning)
 
-    @classmethod
-    def tearDownClass(cls):
-        with cls.assertRaises(cls, SystemExit):
-            temp = GraphicsCanvas3D()
-            close_localhost_session(temp)
-            del temp
-            # Give time for VPython to exit
-            time.sleep(1)
+#     @classmethod
+#     def tearDownClass(cls):
+#         with cls.assertRaises(cls, SystemExit):
+#             temp = GraphicsCanvas3D()
+#             close_localhost_session(temp)
+#             del temp
+#             # Give time for VPython to exit
+#             time.sleep(1)
 
     #####################################################################
     # def test_get_pose_x_vector(self):
