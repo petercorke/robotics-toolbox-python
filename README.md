@@ -1,6 +1,6 @@
 # Robotics Toolbox for Python
 
-![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)
+[![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python.svg)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
 [![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
