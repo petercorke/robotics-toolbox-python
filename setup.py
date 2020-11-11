@@ -61,7 +61,7 @@ frne = Extension(
 setup(
     name='roboticstoolbox-python',
 
-    version='0.6.0',
+    version='0.6.1',
 
     description='A Python library for robotic education and research',
 
