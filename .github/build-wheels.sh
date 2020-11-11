@@ -26,7 +26,7 @@ done
 
 # Install packages and test
 for PYBIN in /opt/python/cp3[6-8]*/bin/; do
-    "${PYBIN}/pip" install roboticstoolbox --no-index -f /io/wheelhouse
+    "${PYBIN}/pip" install roboticstoolbox-python --no-index -f /io/wheelhouse
     ("${PYBIN}/pytest")
 done
 
