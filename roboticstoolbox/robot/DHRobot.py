@@ -1594,72 +1594,72 @@ class DHRobot(Robot, DHDynamicsMixin):
             fellipse, block, limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-    def plot2(
-            self, q=None, block=True, dt=50, limits=None,
-            vellipse=False, fellipse=False,
-            eeframe=True, name=False):
-        """
-        2D Graphical display and animation
+    # def plot2(
+    #         self, q=None, block=True, dt=50, limits=None,
+    #         vellipse=False, fellipse=False,
+    #         eeframe=True, name=False):
+    #     """
+    #     2D Graphical display and animation
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
+    #     :param block: Block operation of the code and keep the figure open
+    #     :type block: bool
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param dt: if q is a trajectory, this describes the delay in
+    #         milliseconds between frames
+    #     :type dt: int
+    #     :param limits: Custom view limits for the plot. If not supplied will
+    #         autoscale, [x1, x2, y1, y2, z1, z2]
+    #     :type limits: ndarray(6)
+    #     :param vellipse: (Plot Option) Plot the velocity ellipse at the
+    #         end-effector
+    #     :type vellipse: bool
+    #     :param vellipse: (Plot Option) Plot the force ellipse at the
+    #         end-effector
+    #     :type vellipse: bool
+    #     :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+    #         at the location of the end-effector. Uses three arrows, red,
+    #         green and blue to indicate the x, y, and z-axes.
+    #     :type eeframe: bool
+    #     :param name: (Plot Option) Plot the name of the robot near its base
+    #     :type name: bool
 
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
+    #     :return: A reference to the PyPlot object which controls the
+    #         matplotlib figure
+    #     :rtype: PyPlot
 
-        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on the
-          kinematic model and the joint configuration ``q``. This is a stick
-          figure polyline which joins the origins of the link coordinate frames. 
-          The plot will autoscale with an aspect ratio of 1.
+    #     - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on the
+    #       kinematic model and the joint configuration ``q``. This is a stick
+    #       figure polyline which joins the origins of the link coordinate frames. 
+    #       The plot will autoscale with an aspect ratio of 1.
 
-        - ``robot.plot2()`` as above but use the stored ``q`` value.
+    #     - ``robot.plot2()`` as above but use the stored ``q`` value.
 
-        If ``q`` (m,n) representing a joint-space trajectory it will create an
-        animation with a pause of ``dt`` seconds between each frame.
+    #     If ``q`` (m,n) representing a joint-space trajectory it will create an
+    #     animation with a pause of ``dt`` seconds between each frame.
 
-        .. note::
-            - By default this method will block until the figure is dismissed.
-              To avoid this set ``block=False``.
-            - The polyline joins the origins of the link frames, but for
-              some Denavit-Hartenberg models those frames may not actually
-              be on the robot, ie. the lines to not neccessarily represent
-              the links of the robot.
+    #     .. note::
+    #         - By default this method will block until the figure is dismissed.
+    #           To avoid this set ``block=False``.
+    #         - The polyline joins the origins of the link frames, but for
+    #           some Denavit-Hartenberg models those frames may not actually
+    #           be on the robot, ie. the lines to not neccessarily represent
+    #           the links of the robot.
 
-        :seealso: :func:`teach2`
+    #     :seealso: :func:`teach2`
 
-        """
+    #     """
 
-        # try:
-        return _plot2(
-            self, block, q, dt, limits,
-            vellipse=vellipse, fellipse=fellipse,
-            eeframe=eeframe, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
+    #     # try:
+    #     return _plot2(
+    #         self, block, q, dt, limits,
+    #         vellipse=vellipse, fellipse=fellipse,
+    #         eeframe=eeframe, name=name)
+    #     # except ModuleNotFoundError:
+    #     #     print(
+    #     #         'Could not find matplotlib.'
+    #     #         ' Matplotlib required for this function')
 
     def teach2(
             self, q=None, block=True, limits=None,

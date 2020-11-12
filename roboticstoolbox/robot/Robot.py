@@ -16,7 +16,7 @@ from matplotlib import cm
 from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
 
-from roboticstoolbox.backends.PyPlot import PyPlot
+from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.Swift import Swift
 
 try:
@@ -1227,14 +1227,79 @@ class Robot:
 # --------------------------------------------------------------------- #
 
     def plot(
-            self, backend='Swift', q=None, block=True, dt=0.050,
+            self, q, backend='Swift', block=True, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
             jointaxes=True, eeframe=True, shadow=True, name=True, movie=None
             ):
+        """
+        Graphical display and animation
+
+        :param q: The joint configuration of the robot.
+        :type q: float ndarray(n)
+        :param backend: The graphical backend to use, currently 'swift'
+            and 'pyplot' are implemented. Defaults to 'swift'
+        :type backend: string
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param dt: if q is a trajectory, this describes the delay in
+            seconds between frames
+        :type dt: float
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+            (this option is for 'pyplot' only)
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector (this option is for 'pyplot' only)
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector (this option is for 'pyplot' only)
+        :type vellipse: bool
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint) (this option is for 'pyplot' only)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+            (this option is for 'pyplot' only)
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane. (this option is for 'pyplot' only)
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+            (this option is for 'pyplot' only)
+        :type name: bool
+        :param movie: name of file in which to save an animated GIF
+            (this option is for 'pyplot' only)
+        :type movie: str
+
+        :return: A reference to the environment object which controls the
+            figure
+        :rtype: Swift or PyPlot
+
+        - ``robot.plot(q, 'pyplot')`` displays a graphical view of a robot
+          based on the kinematic model and the joint configuration ``q``.
+          This is a stick figure polyline which joins the origins of the
+          link coordinate frames. The plot will autoscale with an aspect
+          ratio of 1.
+
+        If ``q`` (m,n) representing a joint-space trajectory it will create an
+        animation with a pause of ``dt`` seconds between each frame.
+
+        .. note::
+            - By default this method will block until the figure is dismissed.
+              To avoid this set ``block=False``.
+            - For PyPlot, the polyline joins the origins of the link frames,
+              but for some Denavit-Hartenberg models those frames may not
+              actually be on the robot, ie. the lines to not neccessarily
+              represent the links of the robot.
+
+        :seealso: :func:`teach`
+        """
 
         if backend.lower() == 'swift':
             if isinstance(self, rtb.ERobot):
-                self._plot_swift(q, block)
+                env = self._plot_swift(q=q, block=block)
             elif isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(
                     'Plotting in Swift is not implemented for DHRobots yet')
@@ -1244,14 +1309,17 @@ class Robot:
                 raise NotImplementedError(
                     'Plotting in PyPlot is not implemented for ERobots yet')
             elif isinstance(self, rtb.DHRobot):
-                self._plot_pyplot(
-                    q, block, dt, limits, vellipse, fellipse,
-                    jointaxes, eeframe, shadow, name, movie)
+                env = self._plot_pyplot(
+                    q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
+                    fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
+                    shadow=shadow, name=name, movie=movie)
+
+        return env
 
     def _plot_pyplot(
-            self, q, block, dt, limits=None,
-            vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
+            self, q, block, dt, limits,
+            vellipse, fellipse,
+            jointaxes, eeframe, shadow, name, movie):
 
         # Make an empty 3D figure
         env = PyPlot()
@@ -1276,11 +1344,13 @@ class Robot:
             fell = self.fellipse(centre='ee')
             env.add(fell)
 
+        # Stop lint error
+        images = []  # list of images saved from each plot
+
         if movie is not None:
             if not _pil_exists:
                 raise RuntimeError(
                     'to save movies PIL must be installed:\npip3 install PIL')
-            images = []  # list of images saved from each plot
             # make the background white, looks better than grey stipple
             env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
@@ -1335,44 +1405,99 @@ class Robot:
 
         return env
 
-    # def _plot2(
-    #         robot, block, q, dt, limits=None,
-    #         vellipse=False, fellipse=False,
-    #         eeframe=True, name=True):
+# --------------------------------------------------------------------- #
 
-    #     # Make an empty 2D figure
-    #     env = rp.backends.PyPlot2()
+    def plot2(
+            self, q, block=True, dt=0.05, limits=None,
+            vellipse=False, fellipse=False,
+            eeframe=True, name=False):
+        """
+        2D Graphical display and animation
 
-    #     q = getmatrix(q, (None, robot.n))
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            milliseconds between frames
+        :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
-    #     # Add the robot to the figure in readonly mode
-    #     if q.shape[0] == 1:
-    #         env.launch(robot.name + ' Plot', limits)
-    #     else:
-    #         env.launch(robot.name + ' Trajectory Plot', limits)
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
 
-    #     env.add(
-    #         robot, readonly=True,
-    #         eeframe=eeframe, name=name)
+        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on
+          the kinematic model and the joint configuration ``q``. This is a
+          stick figure polyline which joins the origins of the link coordinate
+          frames. The plot will autoscale with an aspect ratio of 1.
 
-    #     if vellipse:
-    #         vell = robot.vellipse(centre='ee')
-    #         env.add(vell)
+        If ``q`` (m,n) representing a joint-space trajectory it will create an
+        animation with a pause of ``dt`` seconds between each frame.
 
-    #     if fellipse:
-    #         fell = robot.fellipse(centre='ee')
-    #         env.add(fell)
+        .. note::
+            - By default this method will block until the figure is dismissed.
+              To avoid this set ``block=False``.
+            - The polyline joins the origins of the link frames, but for
+              some Denavit-Hartenberg models those frames may not actually
+              be on the robot, ie. the lines to not neccessarily represent
+              the links of the robot.
 
-    #     for qk in q:
-    #         robot.q = qk
-    #         env.step()
-    #         time.sleep(dt/1000)
+        :seealso: :func:`teach2`
 
-    #     # Keep the plot open
-    #     if block:           # pragma: no cover
-    #         env.hold()
+        """
 
-    #     return env
+        if isinstance(self, rtb.ERobot):
+            raise NotImplementedError(
+                "2D Plotting of ERobot's not implementedyet")
+
+        # Make an empty 2D figure
+        env = PyPlot2()
+
+        q = getmatrix(q, (None, self.n))
+
+        # Add the self to the figure in readonly mode
+        if q.shape[0] == 1:
+            env.launch(self.name + ' Plot', limits)
+        else:
+            env.launch(self.name + ' Trajectory Plot', limits)
+
+        env.add(
+            self, readonly=True,
+            eeframe=eeframe, name=name)
+
+        if vellipse:
+            vell = self.vellipse(centre='ee')
+            env.add(vell)
+
+        if fellipse:
+            fell = self.fellipse(centre='ee')
+            env.add(fell)
+
+        for qk in q:
+            self.q = qk
+            env.step()
+
+        # Keep the plot open
+        if block:           # pragma: no cover
+            env.hold()
+
+        return env
 
 
     # def _teach(

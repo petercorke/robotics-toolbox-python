@@ -1263,7 +1263,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot(panda.qr, block=False)
+        e = panda.plot(panda.qr, block=False, backend='pyplot')
         e.close()
 
     def test_teach_basic(self):
@@ -1276,7 +1276,7 @@ class TestDHRobot(unittest.TestCase):
     def test_plot_traj(self):
         panda = rp.models.DH.Panda()
         q = np.random.rand(3, 7)
-        e = panda.plot(block=False, q=q, dt=0)
+        e = panda.plot(q=q, block=False, dt=0.05, backend='pyplot')
         e.close()
 
     def test_control_type(self):
@@ -1325,12 +1325,14 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_with_vellipse(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot(panda.qr, block=False, vellipse=True)
+        e = panda.plot(
+            panda.qr, block=False, vellipse=True, backend='pyplot')
         e.close()
 
     def test_plot_with_fellipse(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot(panda.qr, block=False, fellipse=True)
+        e = panda.plot(
+            panda.qr, block=False, fellipse=True, backend='pyplot')
         e.close()
 
     def test_plot2(self):
