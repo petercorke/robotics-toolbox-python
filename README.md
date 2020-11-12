@@ -166,7 +166,9 @@ for qk in qt.q:             # for each joint configuration on trajectory
       env.step()            # update visualization
 ```
 
-![URDF Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif)
+<p align="center">
+ <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif">
+</p>
 
 # Getting going
 
