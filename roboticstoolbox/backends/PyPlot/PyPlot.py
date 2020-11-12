@@ -8,7 +8,6 @@ import numpy as np
 from roboticstoolbox.backends.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
-import signal
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath.base.argcheck import getvector
@@ -30,7 +29,7 @@ class PyPlot(Connector):
     Graphical backend using matplotlib
 
     matplotlib is a common and highly portable graphics library for Python,
-    but has relatively limited 3D capability.  
+    but has relatively limited 3D capability.
 
     Example:
 
@@ -48,7 +47,7 @@ class PyPlot(Connector):
 
     .. note::  PyPlot is the default backend, and ``robot.plot(q)`` effectively
         performs lines 7-8 above.
-        
+
     """
 
     def __init__(self):
@@ -75,9 +74,9 @@ class PyPlot(Connector):
         labels = ['X', 'Y', 'Z']
 
         if name is not None:
-            self.fig = plt.figure()
+            self.fig = plt.figure(name)
         else:
-            self.fig = plt.figure()
+            self.fig = plt.figure('Robotics Toolbox for Python')
 
         self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
@@ -113,18 +112,18 @@ class PyPlot(Connector):
 
         :param dt: time step in milliseconds, defaults to 50
         :type dt: int, optional
- 
+
         ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
         window referenced by ``env``.
 
-        .. note:: 
+        .. note::
 
             - Each robot in the scene is updated based on
               their control type (position, velocity, acceleration, or torque).
             - Upon acting, the other three of the four control types will be
-              updated in the internal state of the robot object. 
-            - The control type is defined by the robot object, and not all robot
-              objects support all control types.
+              updated in the internal state of the robot object.
+            - The control type is defined by the robot object, and not all
+              robot objects support all control types.
             - Execution is blocked for the specified interval
 
         """
@@ -160,8 +159,8 @@ class PyPlot(Connector):
         Restart the graphics display
 
         ``env.restart()`` triggers a restart of the matplotlib view referenced
-        by ``env``. It is closed and relaunched to the original state defined by
-        ``launch()``.
+        by ``env``. It is closed and relaunched to the original state defined
+        by ``launch()``.
 
         """
         # TODO what does this actually do for matplotlib??
@@ -205,11 +204,12 @@ class PyPlot(Connector):
         :param name: [description], defaults to True
         :type name: bool, optional
 
-        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.
+        ``id = env.add(robot)`` adds the ``robot`` to the graphical
+            environment.
 
         .. note::
 
-            - ``robot`` must be of an appropriate class. 
+            - ``robot`` must be of an appropriate class.
             - Adds the robot object to a list of robots which will be updated
               when the ``step()`` method is called.
 
@@ -239,18 +239,19 @@ class PyPlot(Connector):
         """
         Remove a robot to the graphical scene
 
-        :param id: The id of the robot to remove. Can be either the DHLink or 
+        :param id: The id of the robot to remove. Can be either the DHLink or
             GraphicalRobot
         :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
                   class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`
         :param fig_num: The canvas index to delete the robot from, defaults to
              the initial one
         :type fig_num: int, optional
-        :raises ValueError: Figure number must be between 0 and total number 
+        :raises ValueError: Figure number must be between 0 and total number
             of canvases
         :raises TypeError: Input must be a DHLink or GraphicalRobot
 
-        ``env.remove(robot)`` removes the ``robot`` from the graphical environment.
+        ``env.remove(robot)`` removes the ``robot`` from the graphical
+            environment.
         """
         # TODO should be an id to remove?
 
