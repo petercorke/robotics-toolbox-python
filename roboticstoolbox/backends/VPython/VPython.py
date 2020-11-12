@@ -341,6 +341,16 @@ class VPython(Connector):  # pragma nocover
         else:
             raise TypeError("Input must be a DHLink or GraphicalRobot")
 
+    def hold(self):           # pragma: no cover
+        '''
+        hold() keeps the tab open i.e. stops the tab from closing once
+        the main script has finished.
+
+        '''
+
+        while True:
+            pass
+
     #
     #  Private Methods
     #

@@ -260,6 +260,16 @@ class Swift(Connector):  # pragma nocover
 
         super().remove()
 
+    def hold(self):           # pragma: no cover
+        '''
+        hold() keeps the browser tab open i.e. stops the browser tab from
+        closing once the main script has finished.
+
+        '''
+
+        while True:
+            time.sleep(1)
+
     def start_recording(self, file_name, framerate):
         """
         Start recording the canvas in the Swift simulator

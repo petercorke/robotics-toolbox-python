@@ -258,6 +258,12 @@ class PyPlot(Connector):
         super().remove()
 
     def hold(self):           # pragma: no cover
+        '''
+        hold() keeps the plot open i.e. stops the plot from closing once
+        the main script has finished.
+
+        '''
+
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
 

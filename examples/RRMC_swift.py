@@ -25,3 +25,6 @@ while not arrived:
     v, arrived = rp.p_servo(panda.fkine(), Tep, 1)
     panda.qd = np.linalg.pinv(panda.jacobe()) @ v
     env.step(dt)
+
+# Uncomment to stop the browser tab from closing
+# env.hold()
