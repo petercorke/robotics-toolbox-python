@@ -1831,12 +1831,12 @@ class ERobot(Robot):
     #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
-    p=rtb.models.URDF.Panda()
+    p = rtb.models.URDF.Panda()
     print(p[1].m)
 
     # robot = rtb.models.ETS.Panda()

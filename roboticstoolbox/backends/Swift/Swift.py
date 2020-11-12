@@ -191,18 +191,26 @@ class Swift(Connector):  # pragma nocover
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(self, ob, show_robot=True, show_collision=False):
+    def add(
+            self, ob, show_robot=True, show_collision=False,
+            readonly=False):
         """
         Add a robot to the graphical scene
 
         :param ob: the object to add
-        :type ob: ???
-        :param show_robot: ????, defaults to True
+        :type ob: Robot or Shape
+        :param show_robot: Show the robot visual geometry,
+            defaults to True
         :type show_robot: bool, optional
-        :param show_collision: ???, defaults to False
+        :param show_collision: Show the collision geometry,
+            defaults to False
         :type show_collision: bool, optional
         :return: object id within visualizer
         :rtype: int
+        :param readonly: If true, swif twill not modify any robot attributes,
+            the robot is only nbeing displayed, not simulated,
+            defaults to False
+        :type readonly: bool, optional
 
         ``id = env.add(robot)`` adds the ``robot`` to the graphical
             environment.
@@ -226,6 +234,11 @@ class Swift(Connector):  # pragma nocover
             robot['show_robot'] = show_robot
             robot['show_collision'] = show_collision
 
+            robot_object = {
+                'ob': ob,
+                'readonly': readonly
+            }
+
             if self.display:
                 id = self._send_socket('robot', robot)
 
@@ -236,7 +249,7 @@ class Swift(Connector):  # pragma nocover
             else:
                 id = len(self.robots)
 
-            self.robots.append(ob)
+            self.robots.append(robot_object)
             return id
         elif isinstance(ob, rp.Shape):
             shape = ob.to_dict()
@@ -312,12 +325,13 @@ class Swift(Connector):  # pragma nocover
 
     def _step_robots(self, dt):
 
-        for robot in self.robots:
+        for robot_object in self.robots:
+            robot = robot_object['ob']
 
-            # if rpl.readonly or robot.control_type == 'p':
-            #     pass            # pragma: no cover
+            if robot_object['readonly'] or robot.control_type == 'p':
+                pass            # pragma: no cover
 
-            if robot.control_type == 'v':
+            elif robot.control_type == 'v':
 
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt)
@@ -352,10 +366,12 @@ class Swift(Connector):  # pragma nocover
     def _draw_all(self):
 
         for i in range(len(self.robots)):
-            self._send_socket('robot_poses', [i, self.robots[i].fk_dict()])
+            self._send_socket(
+                'robot_poses', [i, self.robots[i]['ob'].fk_dict()])
 
         for i in range(len(self.shapes)):
-            self._send_socket('shape_poses', [i, self.shapes[i].fk_dict()])
+            self._send_socket(
+                'shape_poses', [i, self.shapes[i].fk_dict()])
 
     def _send_socket(self, code, data=None):
         msg = [code, data]
