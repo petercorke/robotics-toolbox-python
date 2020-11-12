@@ -13,7 +13,7 @@ env.launch()
 panda = rp.models.Panda()
 panda.q = panda.qr
 
-Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
+Tep = panda.fkine() * sm.SE3.Tx(0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.45)
 
 arrived = False
 env.add(panda)
