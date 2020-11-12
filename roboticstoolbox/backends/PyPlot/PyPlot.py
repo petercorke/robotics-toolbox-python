@@ -106,11 +106,11 @@ class PyPlot(Connector):
         # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
         # TODO still need to finish this, and get Jupyter animation working
 
-    def step(self, dt=50):
+    def step(self, dt=0.05):
         """
         Update the graphical scene
 
-        :param dt: time step in milliseconds, defaults to 50
+        :param dt: time step in seconds, defaults to 50 (0.05 s)
         :type dt: int, optional
 
         ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
@@ -138,7 +138,7 @@ class PyPlot(Connector):
         self._set_axes_equal()
         # plt.ion()
         plt.draw()
-        plt.pause(dt / 1000)
+        plt.pause(dt)
 
         self._update_robots()
 
@@ -281,7 +281,7 @@ class PyPlot(Connector):
             elif robot.control_type == 'v':
 
                 for i in range(robot.n):
-                    robot.q[i] += robot.qd[i] * (dt / 1000)
+                    robot.q[i] += robot.qd[i] * (dt)
 
             elif robot.control_type == 'a':
                 pass
