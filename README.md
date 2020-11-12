@@ -196,7 +196,7 @@ Put the options in a comma separated list like
 pip3 install roboticstoolbox-python[optionlist]
 ```
 
-[Swift-sim](https://github.com/jhavl/swift), a web-based visualizer, is
+[Swift](https://github.com/jhavl/swift), a web-based visualizer, is
 installed as part of Robotics Toolbox.
 
 ### From GitHub
