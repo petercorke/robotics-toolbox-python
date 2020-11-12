@@ -14,7 +14,7 @@ from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds
 from roboticstoolbox.backends.PyPlot.functions import \
-    _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
+    _teach, _fellipse, _vellipse, _plot_ellipse, \
     _plot2, _teach2
 from roboticstoolbox.robot.DHDynamics import DHDynamicsMixin
 from ansitable import ANSITable, Column

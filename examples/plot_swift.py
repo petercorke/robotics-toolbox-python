@@ -9,4 +9,4 @@ import numpy as np
 
 panda = rp.models.DH.Panda()
 
-panda.plot()
+panda.plot(backend='pyplot', q=panda.qr, vellipse=True)
