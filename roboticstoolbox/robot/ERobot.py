@@ -493,7 +493,6 @@ class ERobot(Robot):
 # --------------------------------------------------------------------- #
     # TODO  get configuration string
 
-
     @property
     def ee_links(self):
         return self._ee_links
@@ -570,72 +569,37 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    # def fkine(self, q=None):
-    #     '''
-    #     Evaluates the forward kinematics of a robot based on its ETS and
-    #     joint angles q.
-
-    #     T = fkine(q) evaluates forward kinematics for the robot at joint
-    #     configuration q.
-
-    #     T = fkine() as above except uses the stored q value of the
-    #     robot object.
-
-    #     Trajectory operation:
-    #     Calculates fkine for each point on a trajectory of joints q where
-    #     q is (nxm) and the returning SE3 in (m)
-
-    #     :param q: The joint angles/configuration of the robot (Optional,
-    #         if not supplied will use the stored q values).
-    #     :type q: float ndarray(n)
-    #     :return: The transformation matrix representing the pose of the
-    #         end-effector
-    #     :rtype: SE3
-
-    #     :notes:
-    #         - The robot's base or tool transform, if present, are incorporated
-    #           into the result.
-
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
-
-    #     '''
-
-    #     trajn = 1
-
-    #     if q is None:
-    #         q = self.q
-
-    #     try:
-    #         q = getvector(q, self.n, 'col')
-    #     except ValueError:
-    #         trajn = q.shape[1]
-    #         verifymatrix(q, (self.n, trajn))
-
-    #     for i in range(trajn):
-    #         j = 0
-    #         tr = self.base
-
-    #         for link in self._fkpath:
-    #             if link.isjoint:
-    #                 T = link.A(q[j, i])
-    #                 j += 1
-    #             else:
-    #                 T = link.A()
-
-    #             tr = tr * T
-
-    #         tr = tr * self.tool
-
-    #         if i == 0:
-    #             t = SE3(tr)
-    #         else:
-    #             t.append(tr)
-
-    #     return t
-
     def fkine(self, q=None, from_link=None, to_link=None):
+        '''
+        Evaluates the forward kinematics of a robot based on its ETS and
+        joint angles q.
+
+        T = fkine(q) evaluates forward kinematics for the robot at joint
+        configuration q.
+
+        T = fkine() as above except uses the stored q value of the
+        robot object.
+
+        Trajectory operation:
+        Calculates fkine for each point on a trajectory of joints q where
+        q is (nxm) and the returning SE3 in (m)
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :return: The transformation matrix representing the pose of the
+            end-effector
+        :rtype: SE3
+
+        :notes:
+            - The robot's base or tool transform, if present, are incorporated
+              into the result.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        '''
 
         if from_link is None:
             from_link = self.base_link
