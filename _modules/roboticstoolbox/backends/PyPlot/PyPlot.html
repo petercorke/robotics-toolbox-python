@@ -164,7 +164,6 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.Connector</span> <span class="kn">import</span> <span class="n">Connector</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">signal</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.RobotPlot</span> <span class="kn">import</span> <span class="n">RobotPlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">getvector</span>
@@ -186,7 +185,7 @@
 <span class="sd">    Graphical backend using matplotlib</span>
 
 <span class="sd">    matplotlib is a common and highly portable graphics library for Python,</span>
-<span class="sd">    but has relatively limited 3D capability.  </span>
+<span class="sd">    but has relatively limited 3D capability.</span>
 
 <span class="sd">    Example:</span>
 
@@ -204,7 +203,7 @@
 
 <span class="sd">    .. note::  PyPlot is the default backend, and ``robot.plot(q)`` effectively</span>
 <span class="sd">        performs lines 7-8 above.</span>
-<span class="sd">        </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -231,9 +230,9 @@
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="s1">&#39;Robotics Toolbox for Python&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=-</span><span class="mf">0.09</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.99</span><span class="p">)</span>
 
@@ -263,24 +262,24 @@
         <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)</span>
         <span class="c1"># TODO still need to finish this, and get Jupyter animation working</span>
 
-<div class="viewcode-block" id="PyPlot.step"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<div class="viewcode-block" id="PyPlot.step"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the graphical scene</span>
 
-<span class="sd">        :param dt: time step in milliseconds, defaults to 50</span>
+<span class="sd">        :param dt: time step in seconds, defaults to 50 (0.05 s)</span>
 <span class="sd">        :type dt: int, optional</span>
-<span class="sd"> </span>
+
 <span class="sd">        ``env.step(args)`` triggers an update of the 3D scene in the matplotlib</span>
 <span class="sd">        window referenced by ``env``.</span>
 
-<span class="sd">        .. note:: </span>
+<span class="sd">        .. note::</span>
 
 <span class="sd">            - Each robot in the scene is updated based on</span>
 <span class="sd">              their control type (position, velocity, acceleration, or torque).</span>
 <span class="sd">            - Upon acting, the other three of the four control types will be</span>
-<span class="sd">              updated in the internal state of the robot object. </span>
-<span class="sd">            - The control type is defined by the robot object, and not all robot</span>
-<span class="sd">              objects support all control types.</span>
+<span class="sd">              updated in the internal state of the robot object.</span>
+<span class="sd">            - The control type is defined by the robot object, and not all</span>
+<span class="sd">              robot objects support all control types.</span>
 <span class="sd">            - Execution is blocked for the specified interval</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -295,7 +294,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_axes_equal</span><span class="p">()</span>
         <span class="c1"># plt.ion()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_robots</span><span class="p">()</span></div>
 
@@ -316,8 +315,8 @@
 <span class="sd">        Restart the graphics display</span>
 
 <span class="sd">        ``env.restart()`` triggers a restart of the matplotlib view referenced</span>
-<span class="sd">        by ``env``. It is closed and relaunched to the original state defined by</span>
-<span class="sd">        ``launch()``.</span>
+<span class="sd">        by ``env``. It is closed and relaunched to the original state defined</span>
+<span class="sd">        by ``launch()``.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO what does this actually do for matplotlib??</span>
@@ -361,11 +360,12 @@
 <span class="sd">        :param name: [description], defaults to True</span>
 <span class="sd">        :type name: bool, optional</span>
 
-<span class="sd">        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.</span>
+<span class="sd">        ``id = env.add(robot)`` adds the ``robot`` to the graphical</span>
+<span class="sd">            environment.</span>
 
 <span class="sd">        .. note::</span>
 
-<span class="sd">            - ``robot`` must be of an appropriate class. </span>
+<span class="sd">            - ``robot`` must be of an appropriate class.</span>
 <span class="sd">            - Adds the robot object to a list of robots which will be updated</span>
 <span class="sd">              when the ``step()`` method is called.</span>
 
@@ -395,24 +395,31 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove a robot to the graphical scene</span>
 
-<span class="sd">        :param id: The id of the robot to remove. Can be either the DHLink or </span>
+<span class="sd">        :param id: The id of the robot to remove. Can be either the DHLink or</span>
 <span class="sd">            GraphicalRobot</span>
 <span class="sd">        :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,</span>
 <span class="sd">                  class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`</span>
 <span class="sd">        :param fig_num: The canvas index to delete the robot from, defaults to</span>
 <span class="sd">             the initial one</span>
 <span class="sd">        :type fig_num: int, optional</span>
-<span class="sd">        :raises ValueError: Figure number must be between 0 and total number </span>
+<span class="sd">        :raises ValueError: Figure number must be between 0 and total number</span>
 <span class="sd">            of canvases</span>
 <span class="sd">        :raises TypeError: Input must be a DHLink or GraphicalRobot</span>
 
-<span class="sd">        ``env.remove(robot)`` removes the ``robot`` from the graphical environment.</span>
+<span class="sd">        ``env.remove(robot)`` removes the ``robot`` from the graphical</span>
+<span class="sd">            environment.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO should be an id to remove?</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot.hold"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>           <span class="c1"># pragma: no cover</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        hold() keeps the plot open i.e. stops the plot from closing once</span>
+<span class="sd">        the main script has finished.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
         <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
 
@@ -436,7 +443,7 @@
             <span class="k">elif</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
 
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
                 <span class="k">pass</span>

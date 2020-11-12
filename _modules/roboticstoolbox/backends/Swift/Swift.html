@@ -416,6 +416,16 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="Swift.hold"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>           <span class="c1"># pragma: no cover</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        hold() keeps the browser tab open i.e. stops the browser tab from</span>
+<span class="sd">        closing once the main script has finished.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Swift.start_recording"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.start_recording">[docs]</a>    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">framerate</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start recording the canvas in the Swift simulator</span>

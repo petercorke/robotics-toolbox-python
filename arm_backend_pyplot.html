@@ -225,11 +225,11 @@ a reference to the backend.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">50</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in milliseconds, defaults to 50</p>
+<dd class="field-odd"><p><strong>dt</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in seconds, defaults to 50 (0.05 s)</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">env.step(args)</span></code> triggers an update of the 3D scene in the matplotlib
@@ -241,8 +241,8 @@ window referenced by <code class="docutils literal notranslate"><span class="pre
 their control type (position, velocity, acceleration, or torque).</p></li>
 <li><p>Upon acting, the other three of the four control types will be
 updated in the internal state of the robot object.</p></li>
-<li><p>The control type is defined by the robot object, and not all robot
-objects support all control types.</p></li>
+<li><p>The control type is defined by the robot object, and not all
+robot objects support all control types.</p></li>
 <li><p>Execution is blocked for the specified interval</p></li>
 </ul>
 </div>
@@ -262,8 +262,8 @@ defined by <code class="docutils literal notranslate"><span class="pre">launch()
 <code class="sig-name descname">restart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restart the graphics display</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.restart()</span></code> triggers a restart of the matplotlib view referenced
-by <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is closed and relaunched to the original state defined by
-<code class="docutils literal notranslate"><span class="pre">launch()</span></code>.</p>
+by <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is closed and relaunched to the original state defined
+by <code class="docutils literal notranslate"><span class="pre">launch()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -290,7 +290,10 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 </ul>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">=</span> <span class="pre">env.add(robot)</span></code> adds the <code class="docutils literal notranslate"><span class="pre">robot</span></code> to the graphical environment.</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">=</span> <span class="pre">env.add(robot)</span></code> adds the <code class="docutils literal notranslate"><span class="pre">robot</span></code> to the graphical</dt><dd><p>environment.</p>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
@@ -309,7 +312,7 @@ when the <code class="docutils literal notranslate"><span class="pre">step()</sp
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (class:<cite>~roboticstoolbox.robot.DHRobot.DHRobot</cite>,
-class:<cite>roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot</cite>) – The id of the robot to remove. Can be either the DHLink or 
+class:<cite>roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot</cite>) – The id of the robot to remove. Can be either the DHLink or
 GraphicalRobot</p></li>
 <li><p><strong>fig_num</strong> (<em>int</em><em>, </em><em>optional</em>) – The canvas index to delete the robot from, defaults to
 the initial one</p></li>
@@ -317,19 +320,24 @@ the initial one</p></li>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – Figure number must be between 0 and total number 
+<li><p><strong>ValueError</strong> – Figure number must be between 0 and total number
 of canvases</p></li>
 <li><p><strong>TypeError</strong> – Input must be a DHLink or GraphicalRobot</p></li>
 </ul>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">env.remove(robot)</span></code> removes the <code class="docutils literal notranslate"><span class="pre">robot</span></code> from the graphical environment.</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">env.remove(robot)</span></code> removes the <code class="docutils literal notranslate"><span class="pre">robot</span></code> from the graphical</dt><dd><p>environment.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.hold">
 <code class="sig-name descname">hold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.hold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.hold" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>hold() keeps the plot open i.e. stops the plot from closing once
+the main script has finished.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -394,7 +402,10 @@ robots which will act upon the step() method being called.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.hold">
 <code class="sig-name descname">hold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.hold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.hold" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>hold() keeps the backend open i.e. stops the program from closing once
+the main script has finished. This method may need keep an even loop
+running for the backend to keep it responsive.</p>
+</dd></dl>
 
 </dd></dl>
 
