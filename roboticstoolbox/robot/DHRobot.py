@@ -1247,81 +1247,81 @@ class DHRobot(Robot, DHDynamicsMixin):
 
         return Jdot
 
-    def plot(
-            self, q=None, block=True, dt=0.050, limits=None,
-            vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
-        """
-        Graphical display and animation
+    # def plot(
+    #         self, q=None, block=True, dt=0.050, limits=None,
+    #         vellipse=False, fellipse=False,
+    #         jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
+    #     """
+    #     Graphical display and animation
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            seconds between frames
-        :type dt: float
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-        :param movie: name of file in which to save an animated GIF
-        :type movie: str
+    #     :param block: Block operation of the code and keep the figure open
+    #     :type block: bool
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param dt: if q is a trajectory, this describes the delay in
+    #         seconds between frames
+    #     :type dt: float
+    #     :param limits: Custom view limits for the plot. If not supplied will
+    #         autoscale, [x1, x2, y1, y2, z1, z2]
+    #     :type limits: ndarray(6)
+    #     :param vellipse: (Plot Option) Plot the velocity ellipse at the
+    #         end-effector
+    #     :type vellipse: bool
+    #     :param vellipse: (Plot Option) Plot the force ellipse at the
+    #         end-effector
+    #     :type vellipse: bool
+    #     :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+    #         which the joint revolves around(revolute joint) or translates
+    #         along (prosmatic joint)
+    #     :type jointaxes: bool
+    #     :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+    #         at the location of the end-effector. Uses three arrows, red,
+    #         green and blue to indicate the x, y, and z-axes.
+    #     :type eeframe: bool
+    #     :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+    #         plane
+    #     :type shadow: bool
+    #     :param name: (Plot Option) Plot the name of the robot near its base
+    #     :type name: bool
+    #     :param movie: name of file in which to save an animated GIF
+    #     :type movie: str
 
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
+    #     :return: A reference to the PyPlot object which controls the
+    #         matplotlib figure
+    #     :rtype: PyPlot
 
-        - ``robot.plot(q)`` displays a graphical view of a robot based on the
-          kinematic model and the joint configuration ``q``. This is a stick
-          figure polyline which joins the origins of the link coordinate frames. 
-          The plot will autoscale with an aspect ratio of 1.
+    #     - ``robot.plot(q)`` displays a graphical view of a robot based on the
+    #       kinematic model and the joint configuration ``q``. This is a stick
+    #       figure polyline which joins the origins of the link coordinate
+    #       frames. The plot will autoscale with an aspect ratio of 1.
 
-        - ``robot.plot()`` as above but use the stored ``q`` value.
+    #     - ``robot.plot()`` as above but use the stored ``q`` value.
 
-        If ``q`` (m,n) representing a joint-space trajectory it will create an
-        animation with a pause of ``dt`` seconds between each frame.
+    #     If ``q`` (m,n) representing a joint-space trajectory it will create an
+    #     animation with a pause of ``dt`` seconds between each frame.
 
-        .. note::
-            - By default this method will block until the figure is dismissed.
-              To avoid this set ``block=False``.
-            - The polyline joins the origins of the link frames, but for
-              some Denavit-Hartenberg models those frames may not actually
-              be on the robot, ie. the lines to not neccessarily represent
-              the links of the robot.
+    #     .. note::
+    #         - By default this method will block until the figure is dismissed.
+    #           To avoid this set ``block=False``.
+    #         - The polyline joins the origins of the link frames, but for
+    #           some Denavit-Hartenberg models those frames may not actually
+    #           be on the robot, ie. the lines to not neccessarily represent
+    #           the links of the robot.
 
-        :seealso: :func:`teach`
-        """
+    #     :seealso: :func:`teach`
+    #     """
 
-        # try:
-        return _plot(
-            self, block, q, int(dt * 1000), limits,
-            vellipse=vellipse, fellipse=fellipse,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,
-            movie=movie)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
+    #     # try:
+    #     return _plot(
+    #         self, block, q, int(dt * 1000), limits,
+    #         vellipse=vellipse, fellipse=fellipse,
+    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,
+    #         movie=movie)
+    #     # except ModuleNotFoundError:
+    #     #     print(
+    #     #         'Could not find matplotlib.'
+    #     #         ' Matplotlib required for this function')
 
     def teach(
             self, q=None, block=True, limits=None,
@@ -1338,11 +1338,11 @@ class DHRobot(Robot, DHDynamicsMixin):
                        autoscale, [x1, x2, y1, y2, z1, z2]
         :type limits: ndarray(6)
         :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-                          which the joint revolves around(revolute joint) or 
+                          which the joint revolves around(revolute joint) or
                           translates along (prismatic joint)
         :type jointaxes: bool
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-                         at the location of the end-effector. Uses three arrows, red,
+            at the location of the end-effector. Uses three arrows, red,
             green and blue to indicate the x, y, and z-axes.
         :type eeframe: bool
         :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
@@ -1360,10 +1360,11 @@ class DHRobot(Robot, DHDynamicsMixin):
           inital joint configuration is ``q``. The plot will autoscale with an
           aspect ratio of 1.
 
-        - ``robot.teach()`` as above except the robot's stored value of ``q`` is used.
+        - ``robot.teach()`` as above except the robot's stored value of ``q``
+            is used.
 
-        .. note:: 
-            - Program execution is blocked until the teach window is 
+        .. note::
+            - Program execution is blocked until the teach window is
               dismissed.  If ``block=False`` the method is non-blocking but
               you need to poll the window manager to ensure that the window
               remains responsive.
@@ -1408,13 +1409,13 @@ class DHRobot(Robot, DHDynamicsMixin):
         - ``robot.vellipse()`` as above except the joint configuration is that
           stored in the robot object.
 
-        .. note:: 
+        .. note::
             - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+              drawn.  Use ``opt='rot'`` to draw the rotational velocity
               ellipsoid.
             - By default the ellipsoid is drawn at the origin.  The option
               ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
+              3-vector, or the string "ee" ensures it is drawn at the
               end-effector position.
         """
 
@@ -1442,13 +1443,13 @@ class DHRobot(Robot, DHDynamicsMixin):
         - ``robot.fellipse()`` as above except the joint configuration is that
           stored in the robot object.
 
-        .. note:: 
+        .. note::
             - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+              drawn.  Use ``opt='rot'`` to draw the rotational velocity
               ellipsoid.
             - By default the ellipsoid is drawn at the origin.  The option
               ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
+              3-vector, or the string "ee" ensures it is drawn at the
               end-effector position.
 
         '''
@@ -1903,12 +1904,11 @@ class DHRobot(Robot, DHDynamicsMixin):
                 theta = theta - self.offset
 
                 q[k, :] = theta
-            
+
             if q.shape[0] == 1:
                 return q[0]
             else:
                 return q
-
 
     # def ikine_6s(self, T, left=True, elbow_up=True, wrist_flip=False):
     #     """
@@ -2495,7 +2495,6 @@ class DHRobot(Robot, DHDynamicsMixin):
         else:
             return qt, success, err
 
-
     # def jacob0v(self, q=None):
     #     """
     #     Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
@@ -2558,14 +2557,14 @@ class DHRobot(Robot, DHDynamicsMixin):
 
     #     return Jv
 
+
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
 
-    
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma nocover
 
     import roboticstoolbox as rtb
     # import spatialmath.base.symbolic as sym
@@ -2575,7 +2574,7 @@ if __name__ == "__main__":
     # print(J)
     # print(puma.manipulability(puma.qn))
     # print(puma.manipulability(puma.qn, 'asada'))
-    #tw, T0 = puma.twists(puma.qz)
+    # tw, T0 = puma.twists(puma.qz)
     print(planar)
 
     puma = rtb.models.DH.Puma560()

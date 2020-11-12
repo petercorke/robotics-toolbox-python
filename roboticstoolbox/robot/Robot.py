@@ -1,7 +1,7 @@
 import sys
 import copy
 import numpy as np
-# import roboticstoolbox as rtb
+import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
     verifymatrix, getunit
@@ -204,7 +204,7 @@ class Robot:
         v = getunit(v, unit)
         self._configdict[name] = v
         setattr(self, name, v)
-        
+
     def configurations_str(self):
         deg = 180 / np.pi
 
@@ -269,8 +269,6 @@ class Robot:
             table.row(link.name, *link._dyn2list())
         return str(table)
 
-
-
     def linkcolormap(self, linkcolors="viridis"):
         """
         Create a colormap for robot joints
@@ -286,27 +284,30 @@ class Robot:
         - ``cm = robot.linkcolormap(cmap)`` as above but ``cmap`` is the name
           of a valid matplotlib colormap.  The default, example above, is the
           ``viridis`` colormap.
-        - ``cm = robot.linkcolormap(list of colors)`` as above but a 
+        - ``cm = robot.linkcolormap(list of colors)`` as above but a
           colormap is created from a list of n color names given as strings,
           tuples or hexstrings.
-        
+
         .. runblock:: pycon
 
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
             >>> cm = robot.linkcolormap("inferno")
             >>> print(cm(range(6))) # cm(i) is 3rd color in colormap
-            >>> cm = robot.linkcolormap(['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
+            >>> cm = robot.linkcolormap(
+            >>>     ['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
             >>> print(cm(range(6)))
 
         .. note::
-            
-            - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
-            - Names of supported colors and colormaps are defined in the matplotlib
-              documentation.
 
-                - `Specifying colors <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
-                - `Colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
+            - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
+            - Names of supported colors and colormaps are defined in the
+              matplotlib documentation.
+
+                - `Specifying colors
+                <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
+                - `Colormaps
+                <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
         """
 
         if isinstance(linkcolors, list) and len(linkcolors) == self.n:
@@ -316,6 +317,7 @@ class Robot:
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
 # --------------------------------------------------------------------- #
+
     @property
     def name(self):
         """
@@ -1212,3 +1214,21 @@ class Robot:
         nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
 
         return nf
+
+# --------------------------------------------------------------------- #
+
+    def plot(
+            self, backend='Swift', q=None, block=True, dt=0.050
+            # limits=None, vellipse=False, fellipse=False,
+            # jointaxes=True, eeframe=True, shadow=True, name=True, movie=None
+            ):
+
+        if backend.lower() == 'swift':
+            if isinstance(self, rtb.ERobot):
+                print('hello')
+            elif isinstance(self, rtb.DHRobot):
+                raise NotImplementedError(
+                    'Plotting in Swift is not implemented for DHRobots yet')
+
+        elif backend.lower() == 'pyplot':
+            print('pyplot')

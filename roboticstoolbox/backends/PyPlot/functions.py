@@ -6,7 +6,7 @@
 import time
 import roboticstoolbox as rp
 import numpy as np
-from spatialmath.base.argcheck import getvector, getmatrix
+from spatialmath.base.argcheck import getmatrix
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from matplotlib.widgets import Slider
 try:
@@ -25,7 +25,6 @@ def _plot(
     env = rp.backends.PyPlot()
 
     q = getmatrix(q, (None, robot.n))
-
 
     # Add the robot to the figure in readonly mode
     if q.shape[0] == 1:
@@ -47,7 +46,8 @@ def _plot(
 
     if movie is not None:
         if not _pil_exists:
-            raise RuntimeError('to save movies PIL must be installed:\npip3 install PIL')
+            raise RuntimeError(
+                'to save movies PIL must be installed:\npip3 install PIL')
         images = []  # list of images saved from each plot
         # make the background white, looks better than grey stipple
         env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
@@ -55,22 +55,23 @@ def _plot(
         env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 
     for qk in q:
-            robot.q = qk
-            env.step()
-            #time.sleep(dt/1000)
-            
-            if movie is not None:
-                # render the frame and save as a PIL image in the list
-                canvas = env.fig.canvas
-                img = PIL.Image.frombytes('RGB', canvas.get_width_height(), 
-                 canvas.tostring_rgb())
-                images.append(img)
+        robot.q = qk
+        env.step()
+
+        if movie is not None:
+            # render the frame and save as a PIL image in the list
+            canvas = env.fig.canvas
+            img = PIL.Image.frombytes(
+                'RGB', canvas.get_width_height(),
+                canvas.tostring_rgb())
+            images.append(img)
 
     if movie is not None:
         # save it as an animated GIF
-        images[0].save(movie,
-               save_all=True, append_images=images[1:], optimize=False, 
-               duration=dt, loop=0)
+        images[0].save(
+            movie,
+            save_all=True, append_images=images[1:], optimize=False,
+            duration=dt, loop=0)
 
     # Keep the plot open
     if block:           # pragma: no cover
@@ -329,7 +330,8 @@ def _plot_ellipse(
 
     if not isinstance(ellipse, EllipsePlot):
         raise TypeError(
-            'ellipse must be of type roboticstoolbox.backend.PyPlot.EllipsePlot')
+            'ellipse must be of type '
+            'roboticstoolbox.backend.PyPlot.EllipsePlot')
 
     env = rp.backends.PyPlot()
 
