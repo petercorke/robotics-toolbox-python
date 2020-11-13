@@ -14,7 +14,7 @@ GraphicalRobot = None
 close_localhost_session = None
 
 
-def _imports():
+def _imports():  # pragma nocover
     global GraphicsCanvas3D
     global GraphicsCanvas2D
     global GraphicalRobot

@@ -14,7 +14,7 @@ _sw = None
 sw = None
 
 
-def _import_swift():
+def _import_swift():     # pragma nocover
     import importlib
     global sw
     try:

@@ -258,17 +258,18 @@ class Puma560(DHRobot):
             num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
             den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
             theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
-        
+
         return theta
 
     def ikine_a(self, T, config="lun"):
         return self.ikine_6s(T, config, self._ikine)
 
+
 if __name__ == '__main__':    # pragma nocover
 
     puma = Puma560(symbolic=False)
     print(puma)
-    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0,0,1], [1,0,0])
+    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0, 0, 1], [1, 0, 0])
     (q, failed, reason) = puma.ikine(T)
     print(failed, q)
     qq = puma.ikine_a(T)

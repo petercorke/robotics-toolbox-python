@@ -142,7 +142,7 @@ class PyPlot2(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.SerialLink) or isinstance(ob, rp.ETS):
+        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
             self.robots.append(
                 RobotPlot2(
                     ob, self.ax, readonly, display,
@@ -206,8 +206,8 @@ class PyPlot2(Connector):
         for i in range(len(self.ellipses)):
             self.ellipses[i].draw2()
 
-    def _plot_handler(self, sig, frame):
-        plt.pause(0.001)
+    # def _plot_handler(self, sig, frame):
+    #     plt.pause(0.001)
 
     def _add_teach_panel(self, robot):
         fig = self.fig
@@ -244,7 +244,7 @@ class PyPlot2(Connector):
 
         qlim = np.copy(robot.qlim) * 180/np.pi
 
-        if np.all(qlim == 0):
+        if np.all(qlim == 0):    # pragma nocover
             qlim[0, :] = -180
             qlim[1, :] = 180
 

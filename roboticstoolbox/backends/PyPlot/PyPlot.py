@@ -290,7 +290,7 @@ class PyPlot(Connector):
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt)
 
-            elif robot.control_type == 'a':
+            elif robot.control_type == 'a':     # pragma: no cover
                 pass
 
             else:            # pragma: no cover
@@ -312,11 +312,11 @@ class PyPlot(Connector):
         for i in range(len(self.ellipses)):
             self.ellipses[i].draw()
 
-    def _plot_handler(self, sig, frame):
-        try:
-            plt.pause(0.001)
-        except(AttributeError):
-            pass
+    # def _plot_handler(self, sig, frame):
+    #     try:
+    #         plt.pause(0.001)
+    #     except(AttributeError):
+    #         pass
 
     def _set_axes_equal(self):
         """
@@ -389,7 +389,7 @@ class PyPlot(Connector):
 
         qlim = np.copy(robot.qlim) * 180/np.pi
 
-        if np.all(qlim == 0):
+        if np.all(qlim == 0):     # pragma: no cover
             qlim[0, :] = -180
             qlim[1, :] = 180
 

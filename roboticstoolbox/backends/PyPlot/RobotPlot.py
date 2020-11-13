@@ -83,13 +83,13 @@ class RobotPlot(object):
                     or self.robot.ets[self.robot.q_idx[i]].axis == 'tz':
                 Tji = T[i] * Tjz
 
-            elif self.robot.ets[self.robot.q_idx[i]].axis == 'Ry' \
-                    or self.robot.ets[self.robot.q_idx[i]].axis == 'ty':
-                Tji = T[i] * Tjy
+            # elif self.robot.ets[self.robot.q_idx[i]].axis == 'Ry' \
+            #         or self.robot.ets[self.robot.q_idx[i]].axis == 'ty':
+            #     Tji = T[i] * Tjy
 
-            elif self.robot.ets[self.robot.q_idx[i]].axis == 'Rx' \
-                    or self.robot.ets[self.robot.q_idx[i]].axis == 'tx':
-                Tji = T[i] * Tjx
+            # elif self.robot.ets[self.robot.q_idx[i]].axis == 'Rx' \
+            #         or self.robot.ets[self.robot.q_idx[i]].axis == 'tx':
+            #     Tji = T[i] * Tjx
 
             joints[:, i] = Tji.t
 

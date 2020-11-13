@@ -97,7 +97,7 @@ class Connector(ABC):
         pass
 
     @abstractmethod
-    def hold(self):
+    def hold(self):    # pragma nocover
         '''
         hold() keeps the backend open i.e. stops the program from closing once
         the main script has finished. This method may need keep an even loop
