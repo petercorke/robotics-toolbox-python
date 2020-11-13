@@ -347,18 +347,26 @@
     <span class="c1">#  Methods to interface with the robots created in other environemnts</span>
     <span class="c1">#</span>
 
-<div class="viewcode-block" id="Swift.add"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ob</span><span class="p">,</span> <span class="n">show_robot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_collision</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Swift.add"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ob</span><span class="p">,</span> <span class="n">show_robot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_collision</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">readonly</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a robot to the graphical scene</span>
 
 <span class="sd">        :param ob: the object to add</span>
-<span class="sd">        :type ob: ???</span>
-<span class="sd">        :param show_robot: ????, defaults to True</span>
+<span class="sd">        :type ob: Robot or Shape</span>
+<span class="sd">        :param show_robot: Show the robot visual geometry,</span>
+<span class="sd">            defaults to True</span>
 <span class="sd">        :type show_robot: bool, optional</span>
-<span class="sd">        :param show_collision: ???, defaults to False</span>
+<span class="sd">        :param show_collision: Show the collision geometry,</span>
+<span class="sd">            defaults to False</span>
 <span class="sd">        :type show_collision: bool, optional</span>
 <span class="sd">        :return: object id within visualizer</span>
 <span class="sd">        :rtype: int</span>
+<span class="sd">        :param readonly: If true, swif twill not modify any robot attributes,</span>
+<span class="sd">            the robot is only nbeing displayed, not simulated,</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type readonly: bool, optional</span>
 
 <span class="sd">        ``id = env.add(robot)`` adds the ``robot`` to the graphical</span>
 <span class="sd">            environment.</span>
@@ -382,6 +390,11 @@
             <span class="n">robot</span><span class="p">[</span><span class="s1">&#39;show_robot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">show_robot</span>
             <span class="n">robot</span><span class="p">[</span><span class="s1">&#39;show_collision&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">show_collision</span>
 
+            <span class="n">robot_object</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;ob&#39;</span><span class="p">:</span> <span class="n">ob</span><span class="p">,</span>
+                <span class="s1">&#39;readonly&#39;</span><span class="p">:</span> <span class="n">readonly</span>
+            <span class="p">}</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;robot&#39;</span><span class="p">,</span> <span class="n">robot</span><span class="p">)</span>
 
@@ -392,7 +405,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">robot_object</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">id</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
             <span class="n">shape</span> <span class="o">=</span> <span class="n">ob</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
@@ -468,12 +481,13 @@
 
     <span class="k">def</span> <span class="nf">_step_robots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 
-        <span class="k">for</span> <span class="n">robot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">robot_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">:</span>
+            <span class="n">robot</span> <span class="o">=</span> <span class="n">robot_object</span><span class="p">[</span><span class="s1">&#39;ob&#39;</span><span class="p">]</span>
 
-            <span class="c1"># if rpl.readonly or robot.control_type == &#39;p&#39;:</span>
-            <span class="c1">#     pass            # pragma: no cover</span>
+            <span class="k">if</span> <span class="n">robot_object</span><span class="p">[</span><span class="s1">&#39;readonly&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>            <span class="c1"># pragma: no cover</span>
 
-            <span class="k">if</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">robot</span><span class="o">.</span><span class="n">control_type</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
 
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
                     <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
@@ -508,10 +522,12 @@
     <span class="k">def</span> <span class="nf">_draw_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;robot_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span>
+                <span class="s1">&#39;robot_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ob&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;shape_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span>
+                <span class="s1">&#39;shape_poses&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fk_dict</span><span class="p">()])</span>
 
     <span class="k">def</span> <span class="nf">_send_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
@@ -533,7 +549,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 12-Nov-2020.
+        Last updated on 13-Nov-2020.
       </span>
 
     </p>

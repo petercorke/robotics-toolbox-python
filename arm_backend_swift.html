@@ -299,14 +299,19 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ob</span></em>, <em class="sig-param"><span class="n">show_robot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_collision</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ob</span></em>, <em class="sig-param"><span class="n">show_robot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_collision</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">readonly</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a robot to the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ob</strong> – the object to add</p></li>
-<li><p><strong>show_robot</strong> (<em>bool</em><em>, </em><em>optional</em>) – ????, defaults to True</p></li>
-<li><p><strong>show_collision</strong> (<em>bool</em><em>, </em><em>optional</em>) – ???, defaults to False</p></li>
+<li><p><strong>ob</strong> (<a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><em>Robot</em></a><em> or </em><em>Shape</em>) – the object to add</p></li>
+<li><p><strong>show_robot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the robot visual geometry,
+defaults to True</p></li>
+<li><p><strong>show_collision</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the collision geometry,
+defaults to False</p></li>
+<li><p><strong>readonly</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, swif twill not modify any robot attributes,
+the robot is only nbeing displayed, not simulated,
+defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -405,7 +410,7 @@ as the video will be automatically saved when the python script exits</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 12-Nov-2020.
+        Last updated on 13-Nov-2020.
       </span>
 
     </p>

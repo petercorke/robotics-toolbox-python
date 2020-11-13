@@ -1160,7 +1160,7 @@ unique color for every link.  The RGBA colors for link <code class="docutils lit
 <li><p><code class="docutils literal notranslate"><span class="pre">cm</span> <span class="pre">=</span> <span class="pre">robot.linkcolormap(cmap)</span></code> as above but <code class="docutils literal notranslate"><span class="pre">cmap</span></code> is the name
 of a valid matplotlib colormap.  The default, example above, is the
 <code class="docutils literal notranslate"><span class="pre">viridis</span></code> colormap.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cm</span> <span class="pre">=</span> <span class="pre">robot.linkcolormap(list</span> <span class="pre">of</span> <span class="pre">colors)</span></code> as above but a 
+<li><p><code class="docutils literal notranslate"><span class="pre">cm</span> <span class="pre">=</span> <span class="pre">robot.linkcolormap(list</span> <span class="pre">of</span> <span class="pre">colors)</span></code> as above but a
 colormap is created from a list of n color names given as strings,
 tuples or hexstrings.</p></li>
 </ul>
@@ -1174,7 +1174,8 @@ tuples or hexstrings.</p></li>
 <span class="go"> [0.865  0.3168 0.2261 1.    ]</span>
 <span class="go"> [0.9876 0.6453 0.0399 1.    ]</span>
 <span class="go"> [0.9884 0.9984 0.6449 1.    ]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cm</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">linkcolormap</span><span class="p">([</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;#0f8040&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;cyan&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cm</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">linkcolormap</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;#0f8040&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;cyan&#39;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">cm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)))</span>
 <span class="go">[[1.     0.     0.     1.    ]</span>
 <span class="go"> [0.     0.5    0.     1.    ]</span>
@@ -1188,13 +1189,14 @@ tuples or hexstrings.</p></li>
 <p class="admonition-title">Note</p>
 <ul>
 <li><p>Colormaps have 4-elements: red, green, blue, alpha (RGBA)</p></li>
-<li><p>Names of supported colors and colormaps are defined in the matplotlib
-documentation.</p>
+<li><p>Names of supported colors and colormaps are defined in the
+matplotlib documentation.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">Specifying colors</a></p></li>
-<li><p><a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p></li>
+<li><p><a href="#id1"><span class="problematic" id="id2">`</span></a>Specifying colors</p></li>
 </ul>
+<p>&lt;<a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py</a>&gt;`_
+- <a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p>
 </div></blockquote>
 </li>
 </ul>
@@ -1288,6 +1290,134 @@ friction parameter are set to zero.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
 <dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.friction()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.nofriction()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">'Swift'</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">movie</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graphical display and animation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot.</p></li>
+<li><p><strong>backend</strong> (<em>string</em>) – The graphical backend to use, currently ‘swift’
+and ‘pyplot’ are implemented. Defaults to ‘swift’</p></li>
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – if q is a trajectory, this describes the delay in
+seconds between frames</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]
+(this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>vellipse</strong> (<em>bool</em>) – (Plot Option) Plot the velocity ellipse at the
+end-effector (this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>vellipse</strong> – (Plot Option) Plot the force ellipse at the
+end-effector (this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint) (this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.
+(this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane. (this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base
+(this option is for ‘pyplot’ only)</p></li>
+<li><p><strong>movie</strong> (<em>str</em>) – name of file in which to save an animated GIF
+(this option is for ‘pyplot’ only)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the environment object which controls the
+figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift" title="roboticstoolbox.backends.Swift.Swift">Swift</a> or <a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot(q,</span> <span class="pre">'pyplot')</span></code> displays a graphical view of a robot
+based on the kinematic model and the joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>.
+This is a stick figure polyline which joins the origins of the
+link coordinate frames. The plot will autoscale with an aspect
+ratio of 1.</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n) representing a joint-space trajectory it will create an
+animation with a pause of <code class="docutils literal notranslate"><span class="pre">dt</span></code> seconds between each frame.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default this method will block until the figure is dismissed.
+To avoid this set <code class="docutils literal notranslate"><span class="pre">block=False</span></code>.</p></li>
+<li><p>For PyPlot, the polyline joins the origins of the link frames,
+but for some Denavit-Hartenberg models those frames may not
+actually be on the robot, ie. the lines to not neccessarily
+represent the links of the robot.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">teach()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.plot2">
+<code class="sig-name descname">plot2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot2" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D Graphical display and animation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>dt</strong> (<em>int</em>) – if q is a trajectory, this describes the delay in
+milliseconds between frames</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>vellipse</strong> (<em>bool</em>) – (Plot Option) Plot the velocity ellipse at the
+end-effector</p></li>
+<li><p><strong>vellipse</strong> – (Plot Option) Plot the force ellipse at the
+end-effector</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot2(q)</span></code> displays a 2D graphical view of a robot based on
+the kinematic model and the joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>. This is a
+stick figure polyline which joins the origins of the link coordinate
+frames. The plot will autoscale with an aspect ratio of 1.</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n) representing a joint-space trajectory it will create an
+animation with a pause of <code class="docutils literal notranslate"><span class="pre">dt</span></code> seconds between each frame.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default this method will block until the figure is dismissed.
+To avoid this set <code class="docutils literal notranslate"><span class="pre">block=False</span></code>.</p></li>
+<li><p>The polyline joins the origins of the link frames, but for
+some Denavit-Hartenberg models those frames may not actually
+be on the robot, ie. the lines to not neccessarily represent
+the links of the robot.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">teach2()</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2143,7 +2273,7 @@ shapes</p>
 
 </div>
 <div class="section" id="e-models">
-<span id="id1"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="defined-using-ets">
 <h3>Defined using ETS<a class="headerlink" href="#defined-using-ets" title="Permalink to this headline">¶</a></h3>
 <p>A number of models are defined in terms of elementary transform sequences.
@@ -3068,7 +3198,7 @@ characteristics.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 12-Nov-2020.
+        Last updated on 13-Nov-2020.
       </span>
 
     </p>
