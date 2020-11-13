@@ -14,8 +14,7 @@ from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds
 from roboticstoolbox.backends.PyPlot.functions import \
-    _teach, _fellipse, _vellipse, _plot_ellipse, \
-    _plot2, _teach2
+    _teach, _teach2
 from roboticstoolbox.robot.DHDynamics import DHDynamicsMixin
 from ansitable import ANSITable, Column
 
@@ -38,9 +37,9 @@ class DHRobot(Robot, DHDynamicsMixin):
     :type gravity: ndarray(3)
 
     A concrete superclass for arm type robots defined using Denavit-Hartenberg
-    notation, that represents a serial-link arm-type robot.  Each link and joint
-    in the chain is described by a DHLink-class object using Denavit-Hartenberg
-    parameters (standard or modified).
+    notation, that represents a serial-link arm-type robot.  Each link and
+    joint in the chain is described by a DHLink-class object using
+    Denavit-Hartenberg parameters (standard or modified).
 
     .. note:: Link subclass elements passed in must be all standard, or all
           modified, DH parameters.
@@ -84,7 +83,7 @@ class DHRobot(Robot, DHDynamicsMixin):
                     L[i].name = f"link{self._n}"
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
-            
+
         super().__init__(links, **kwargs)
 
         # Check the DH convention
@@ -146,7 +145,7 @@ class DHRobot(Robot, DHDynamicsMixin):
                 Column("⍺ⱼ₋₁", headalign="^"),
                 Column("θⱼ", headalign="^"),
                 Column("dⱼ", headalign="^"),
-                *qlim_columns, 
+                *qlim_columns,
                 border="thick"
                 )
             for j, L in enumerate(self):
@@ -158,9 +157,11 @@ class DHRobot(Robot, DHDynamicsMixin):
                 else:
                     ql = []
                 if L.isprismatic():
-                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
+                    table.row(
+                        L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
                 else:
-                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
+                    table.row(
+                        L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
         else:
             # DH format
             table = ANSITable(
@@ -688,9 +689,10 @@ class DHRobot(Robot, DHDynamicsMixin):
         q = self._getq(q)
         revolute = self.isrevolute()
 
-        return np.array(
-            [q[k] * np.pi / 180.0 if revolute[k] else q[k] for k in range(len(q))]
-                    )
+        return np.array([
+            q[k] * np.pi / 180.0
+            if revolute[k] else q[k] for k in range(len(q))
+        ])
 
     def twists(self, q=None):
         """
@@ -770,18 +772,18 @@ class DHRobot(Robot, DHDynamicsMixin):
             ets *= ETS.SE3(self._tool)
 
         return ets
-            
+
     def fkine(self, q=None):
         """
         Forward kinematics
 
         :param q: The joint configuration (Optional,
-            if not supplied will use the stored q values). 
+            if not supplied will use the stored q values).
         :type q: ndarray(n) or ndarray(m,n)
-        :return: Forward kinematics as an SE(3) matrix 
+        :return: Forward kinematics as an SE(3) matrix
         :rtype: SE3 instance
 
-        - ``robot.fkine(q)`` computes the forward kinematics for the robot at 
+        - ``robot.fkine(q)`` computes the forward kinematics for the robot at
           joint configuration ``q``.
 
         - ``robot.fkine()`` as above except uses the stored ``q`` value of the
@@ -833,11 +835,11 @@ class DHRobot(Robot, DHDynamicsMixin):
         Forward kinematics for all link frames
 
         :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values). 
+            if not supplied will use the stored q values).
         :type q: ndarray(n) or ndarray(m,n)
         :param old: "old" behaviour, defaults to True
         :type old: bool, optional
-        :return: Forward kinematics as an SE(3) matrix 
+        :return: Forward kinematics as an SE(3) matrix
         :rtype: SE3 instance with ``n`` values
 
         - ``fkine_all(q)`` evaluates fkine for each joint within a robot and
@@ -897,8 +899,8 @@ class DHRobot(Robot, DHDynamicsMixin):
         :return J: The manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-          velocity to end-effector spatial velocity.
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity.
 
         - ``robot.jacobe(q)` as above except uses the stored q value of the
           robot object.
@@ -963,8 +965,8 @@ class DHRobot(Robot, DHDynamicsMixin):
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-          velocity to end-effector spatial velocity.
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint velocity to end-effector spatial velocity.
 
         - ``robot.jacobe()`` as above except uses the stored q value of the
         robot object.
@@ -1019,8 +1021,9 @@ class DHRobot(Robot, DHDynamicsMixin):
           ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
           ratio of 1, but in practice will be less than 1.
 
-        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which of
-          the 6 degrees-of-freedom to consider in the measurement. For example
+        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which
+          of the 6 degrees-of-freedom to consider in the measurement. For
+          example
           ``axes="trans"`` to consider only translation or
           ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
           motion.
@@ -1336,16 +1339,16 @@ class DHRobot(Robot, DHDynamicsMixin):
             matplotlib figure
         :rtype: PyPlot
 
-        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the user
-          to "drive" a graphical robot using a graphical slider panel. The
-          robot's inital joint configuration is ``q``. The plot will autoscale
-          with an aspect ratio of 1.
+        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the
+          user to "drive" a graphical robot using a graphical slider panel.
+          The robot's inital joint configuration is ``q``. The plot will
+          autoscale with an aspect ratio of 1.
 
         - ``robot.teach2()`` as above except the robot's stored value of ``q``
           is used.
 
-        .. note:: 
-            - Program execution is blocked until the teach window is 
+        .. note::
+            - Program execution is blocked until the teach window is
               dismissed.  If ``block=False`` the method is non-blocking but
               you need to poll the window manager to ensure that the window
               remains responsive.
@@ -1372,7 +1375,6 @@ class DHRobot(Robot, DHDynamicsMixin):
         #     print(
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
-
 
     def ikine3(self, T, left=True, elbow_up=True):
         """

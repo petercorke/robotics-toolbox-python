@@ -3,121 +3,14 @@
 @author Jesse Haviland
 """
 
-import time
 import roboticstoolbox as rp
 import numpy as np
-from spatialmath.base.argcheck import getmatrix
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from matplotlib.widgets import Slider
 try:
     import PIL
     _pil_exists = True
 except ImportError:
     _pil_exists = False
-
-
-# def _plot(
-#         robot, block, q, dt, limits=None,
-#         vellipse=False, fellipse=False,
-#         jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
-
-#     # Make an empty 3D figure
-#     env = rp.backends.PyPlot()
-
-#     q = getmatrix(q, (None, robot.n))
-
-#     # Add the robot to the figure in readonly mode
-#     if q.shape[0] == 1:
-#         env.launch(robot.name + ' Plot', limits)
-#     else:
-#         env.launch(robot.name + ' Trajectory Plot', limits)
-
-#     env.add(
-#         robot, readonly=True,
-#         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-#     if vellipse:
-#         vell = robot.vellipse(centre='ee')
-#         env.add(vell)
-
-#     if fellipse:
-#         fell = robot.fellipse(centre='ee')
-#         env.add(fell)
-
-#     if movie is not None:
-#         if not _pil_exists:
-#             raise RuntimeError(
-#                 'to save movies PIL must be installed:\npip3 install PIL')
-#         images = []  # list of images saved from each plot
-#         # make the background white, looks better than grey stipple
-#         env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-#         env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-#         env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-
-#     for qk in q:
-#         robot.q = qk
-#         env.step()
-
-#         if movie is not None:
-#             # render the frame and save as a PIL image in the list
-#             canvas = env.fig.canvas
-#             img = PIL.Image.frombytes(
-#                 'RGB', canvas.get_width_height(),
-#                 canvas.tostring_rgb())
-#             images.append(img)
-
-#     if movie is not None:
-#         # save it as an animated GIF
-#         images[0].save(
-#             movie,
-#             save_all=True, append_images=images[1:], optimize=False,
-#             duration=dt, loop=0)
-
-#     # Keep the plot open
-#     if block:           # pragma: no cover
-#         env.hold()
-
-#     return env
-
-
-def _plot2(
-        robot, block, q, dt, limits=None,
-        vellipse=False, fellipse=False,
-        eeframe=True, name=True):
-
-    # Make an empty 2D figure
-    env = rp.backends.PyPlot2()
-
-    q = getmatrix(q, (None, robot.n))
-
-    # Add the robot to the figure in readonly mode
-    if q.shape[0] == 1:
-        env.launch(robot.name + ' Plot', limits)
-    else:
-        env.launch(robot.name + ' Trajectory Plot', limits)
-
-    env.add(
-        robot, readonly=True,
-        eeframe=eeframe, name=name)
-
-    if vellipse:
-        vell = robot.vellipse(centre='ee')
-        env.add(vell)
-
-    if fellipse:
-        fell = robot.fellipse(centre='ee')
-        env.add(fell)
-
-    for qk in q:
-        robot.q = qk
-        env.step()
-        time.sleep(dt/1000)
-
-    # Keep the plot open
-    if block:           # pragma: no cover
-        env.hold()
-
-    return env
 
 
 def _teach(
@@ -304,43 +197,6 @@ def _teach2(
                 qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
 
         sjoint[i].on_changed(lambda x: update(x, text))
-
-    # Keep the plot open
-    if block:           # pragma: no cover
-        env.hold()
-
-    return env
-
-
-def _fellipse(robot, q=None, opt='trans', centre=[0, 0, 0]):
-
-    ell = EllipsePlot(robot, 'f', opt, centre=centre)
-    return ell
-
-
-def _vellipse(robot, q=None, opt='trans', centre=[0, 0, 0]):
-
-    ell = EllipsePlot(robot, 'v', opt, centre=centre)
-    return ell
-
-
-def _plot_ellipse(
-        ellipse, block=True, limits=None,
-        jointaxes=True, eeframe=True, shadow=True, name=True):
-
-    if not isinstance(ellipse, EllipsePlot):
-        raise TypeError(
-            'ellipse must be of type '
-            'roboticstoolbox.backend.PyPlot.EllipsePlot')
-
-    env = rp.backends.PyPlot()
-
-    # Add the robot to the figure in readonly mode
-    env.launch(ellipse.robot.name + ' ' + ellipse.name, limits=limits)
-
-    env.add(
-        ellipse,
-        jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     # Keep the plot open
     if block:           # pragma: no cover

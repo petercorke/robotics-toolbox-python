@@ -1488,7 +1488,7 @@ class Robot:
         return ell
 
     def plot_ellipse(
-            ellipse, block=True, limits=None,
+            self, ellipse, block=True, limits=None,
             jointaxes=True, eeframe=True, shadow=True, name=True):
         """
         Plot the an ellipsoid
@@ -1615,7 +1615,7 @@ class Robot:
             fellipse = self.fellipse(q=q, opt=opt, centre=centre)
 
         return self.plot_ellipse(
-            fellipse, block, limits,
+            fellipse, block=block, limits=limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     def plot_vellipse(
@@ -1689,7 +1689,7 @@ class Robot:
             vellipse = self.vellipse(q=q, opt=opt, centre=centre)
 
         return self.plot_ellipse(
-            vellipse, block, limits,
+            vellipse, block=block, limits=limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
 # --------------------------------------------------------------------- #
