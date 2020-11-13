@@ -1042,9 +1042,249 @@ represent the links of the robot.</p></li>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">teach()</span></code></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.teach" title="roboticstoolbox.robot.Robot.Robot.teach"><code class="xref py py-func docutils literal notranslate"><span class="pre">teach()</span></code></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.fellipse">
+<code class="sig-name descname">fellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.fellipse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.fellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a force ellipsoid object for plotting with PyPlot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational force ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>list</em><em> or </em><em>str</em><em>(</em><em>'ee'</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An EllipsePlot object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EllipsePlot</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.fellipse(q)</span></code> creates a force ellipsoid for the robot at
+pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The ellipsoid is centered at the origin.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.fellipse()</span></code> as above except the joint configuration is that
+stored in the robot object.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.vellipse">
+<code class="sig-name descname">vellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.vellipse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.vellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a velocity ellipsoid object for plotting with PyPlot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational velocity ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>list</em><em> or </em><em>str</em><em>(</em><em>'ee'</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An EllipsePlot object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EllipsePlot</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.vellipse(q)</span></code> creates a force ellipsoid for the robot at
+pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The ellipsoid is centered at the origin.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.vellipse()</span></code> as above except the joint configuration is that
+stored in the robot object.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.plot_ellipse">
+<code class="sig-name descname">plot_ellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ellipse</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.plot_ellipse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.plot_ellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the an ellipsoid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>ellipse</strong> (<em>EllipsePlot</em>) – the ellipsoid to plot</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_ellipse(ellipsoid)</span></code> displays the ellipsoid.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.plot_fellipse">
+<code class="sig-name descname">plot_fellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fellipse</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.plot_fellipse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.plot_fellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the force ellipsoid for manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>fellipse</strong> (<em>EllipsePlot</em>) – the vellocity ellipsoid to plot</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational force ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>array_like</em><em> or </em><em>str</em>) – The coordinates to plot the fellipse [x, y, z] or “ee”
+to plot at the end-effector location</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_fellipse(q)</span></code> displays the velocity ellipsoid for the
+robot at pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will autoscale with an aspect ratio
+of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_fellipse()</span></code> as above except the robot is plotted with joint
+coordinates stored in the robot object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_fellipse(vellipse)</span></code> specifies a custon ellipse to plot.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.plot_vellipse">
+<code class="sig-name descname">plot_vellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">vellipse</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.plot_vellipse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.plot_vellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the velocity ellipsoid for manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>vellipse</strong> (<em>EllipsePlot</em>) – the vellocity ellipsoid to plot</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational velocity ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>array_like</em><em> or </em><em>str</em>) – The coordinates to plot the vellipse [x, y, z] or “ee”
+to plot at the end-effector location</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_vellipse(q)</span></code> displays the velocity ellipsoid for the
+robot at pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will autoscale with an aspect ratio
+of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_vellipse()</span></code> as above except the robot is plotted with joint
+coordinates stored in the robot object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_vellipse(vellipse)</span></code> specifies a custon ellipse to plot.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1100,9 +1340,135 @@ the links of the robot.</p></li>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">teach2()</span></code></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.teach2" title="roboticstoolbox.robot.Robot.Robot.teach2"><code class="xref py py-func docutils literal notranslate"><span class="pre">teach2()</span></code></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.teach">
+<code class="sig-name descname">teach</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">'xyz'</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.teach"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.teach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graphical teach pendant</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or
+translates along (prismatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.teach(q)</span></code> creates a matplotlib plot which allows the user to
+“drive” a graphical robot using a graphical slider panel. The robot’s
+inital joint configuration is <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will autoscale with an
+aspect ratio of 1.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">robot.teach()</span></code> as above except the robot’s stored value of <code class="docutils literal notranslate"><span class="pre">q</span></code></dt><dd><p>is used.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Program execution is blocked until the teach window is
+dismissed.  If <code class="docutils literal notranslate"><span class="pre">block=False</span></code> the method is non-blocking but
+you need to poll the window manager to ensure that the window
+remains responsive.</p></li>
+<li><p>The slider limits are derived from the joint limit properties.
+If not set then:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For revolute joints they are assumed to be [-pi, +pi]</p></li>
+<li><p>For prismatic joint they are assumed unknown and an error
+occurs.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.teach2">
+<code class="sig-name descname">teach2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.teach2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.teach2" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D Graphical teach pendant</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.teach2(q)</span></code> creates a 2D matplotlib plot which allows the
+user to “drive” a graphical robot using a graphical slider panel.
+The robot’s inital joint configuration is <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will
+autoscale with an aspect ratio of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.teach2()</span></code> as above except the robot’s stored value of <code class="docutils literal notranslate"><span class="pre">q</span></code>
+is used.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Program execution is blocked until the teach window is
+dismissed.  If <code class="docutils literal notranslate"><span class="pre">block=False</span></code> the method is non-blocking but
+you need to poll the window manager to ensure that the window
+remains responsive.</p></li>
+<li><p>The slider limits are derived from the joint limit properties.
+If not set then:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For revolute joints they are assumed to be [-pi, +pi]</p></li>
+<li><p>For prismatic joint they are assumed unknown and an error
+occurs.</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>If not set then</dt><dd><ul class="simple">
+<li><p>For revolute joints they are assumed to be [-pi, +pi]</p></li>
+<li><p>For prismatic joint they are assumed unknown and an error
+occurs.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
 </dd></dl>
 
 </dd></dl>

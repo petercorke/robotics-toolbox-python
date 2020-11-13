@@ -169,9 +169,6 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">Twist3</span>
 <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Bounds</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.functions</span> <span class="kn">import</span> \
-    <span class="n">_teach</span><span class="p">,</span> <span class="n">_fellipse</span><span class="p">,</span> <span class="n">_vellipse</span><span class="p">,</span> <span class="n">_plot_ellipse</span><span class="p">,</span> \
-    <span class="n">_plot2</span><span class="p">,</span> <span class="n">_teach2</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.DHDynamics</span> <span class="kn">import</span> <span class="n">DHDynamicsMixin</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 
@@ -194,9 +191,9 @@
 <span class="sd">    :type gravity: ndarray(3)</span>
 
 <span class="sd">    A concrete superclass for arm type robots defined using Denavit-Hartenberg</span>
-<span class="sd">    notation, that represents a serial-link arm-type robot.  Each link and joint</span>
-<span class="sd">    in the chain is described by a DHLink-class object using Denavit-Hartenberg</span>
-<span class="sd">    parameters (standard or modified).</span>
+<span class="sd">    notation, that represents a serial-link arm-type robot.  Each link and</span>
+<span class="sd">    joint in the chain is described by a DHLink-class object using</span>
+<span class="sd">    Denavit-Hartenberg parameters (standard or modified).</span>
 
 <span class="sd">    .. note:: Link subclass elements passed in must be all standard, or all</span>
 <span class="sd">          modified, DH parameters.</span>
@@ -240,7 +237,7 @@
                     <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input can be only DHLink or DHRobot&quot;</span><span class="p">)</span>
-            
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Check the DH convention</span>
@@ -302,7 +299,7 @@
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;⍺ⱼ₋₁&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;θⱼ&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;dⱼ&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-                <span class="o">*</span><span class="n">qlim_columns</span><span class="p">,</span> 
+                <span class="o">*</span><span class="n">qlim_columns</span><span class="p">,</span>
                 <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thick&quot;</span>
                 <span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -314,9 +311,11 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ql</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">():</span>
-                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
+                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
+                        <span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
+                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
+                        <span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># DH format</span>
             <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
@@ -844,9 +843,10 @@
         <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">revolute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span> <span class="k">if</span> <span class="n">revolute</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">else</span> <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">))]</span>
-                    <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
+            <span class="k">if</span> <span class="n">revolute</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">else</span> <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+        <span class="p">])</span></div>
 
 <div class="viewcode-block" id="DHRobot.twists"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.twists">[docs]</a>    <span class="k">def</span> <span class="nf">twists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -926,18 +926,18 @@
             <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ets</span></div>
-            
+
 <div class="viewcode-block" id="DHRobot.fkine"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
 <span class="sd">        :param q: The joint configuration (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values). </span>
+<span class="sd">            if not supplied will use the stored q values).</span>
 <span class="sd">        :type q: ndarray(n) or ndarray(m,n)</span>
-<span class="sd">        :return: Forward kinematics as an SE(3) matrix </span>
+<span class="sd">        :return: Forward kinematics as an SE(3) matrix</span>
 <span class="sd">        :rtype: SE3 instance</span>
 
-<span class="sd">        - ``robot.fkine(q)`` computes the forward kinematics for the robot at </span>
+<span class="sd">        - ``robot.fkine(q)`` computes the forward kinematics for the robot at</span>
 <span class="sd">          joint configuration ``q``.</span>
 
 <span class="sd">        - ``robot.fkine()`` as above except uses the stored ``q`` value of the</span>
@@ -989,11 +989,11 @@
 <span class="sd">        Forward kinematics for all link frames</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values). </span>
+<span class="sd">            if not supplied will use the stored q values).</span>
 <span class="sd">        :type q: ndarray(n) or ndarray(m,n)</span>
 <span class="sd">        :param old: &quot;old&quot; behaviour, defaults to True</span>
 <span class="sd">        :type old: bool, optional</span>
-<span class="sd">        :return: Forward kinematics as an SE(3) matrix </span>
+<span class="sd">        :return: Forward kinematics as an SE(3) matrix</span>
 <span class="sd">        :rtype: SE3 instance with ``n`` values</span>
 
 <span class="sd">        - ``fkine_all(q)`` evaluates fkine for each joint within a robot and</span>
@@ -1053,8 +1053,8 @@
 <span class="sd">        :return J: The manipulator Jacobian in the end-effector frame</span>
 <span class="sd">        :rtype: ndarray(6,n)</span>
 
-<span class="sd">        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint</span>
-<span class="sd">          velocity to end-effector spatial velocity.</span>
+<span class="sd">        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps</span>
+<span class="sd">          joint  velocity to end-effector spatial velocity.</span>
 
 <span class="sd">        - ``robot.jacobe(q)` as above except uses the stored q value of the</span>
 <span class="sd">          robot object.</span>
@@ -1119,8 +1119,8 @@
 <span class="sd">        :return J: The manipulator Jacobian in the world frame</span>
 <span class="sd">        :rtype: ndarray(6,n)</span>
 
-<span class="sd">        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint</span>
-<span class="sd">          velocity to end-effector spatial velocity.</span>
+<span class="sd">        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps</span>
+<span class="sd">          joint velocity to end-effector spatial velocity.</span>
 
 <span class="sd">        - ``robot.jacobe()`` as above except uses the stored q value of the</span>
 <span class="sd">        robot object.</span>
@@ -1175,8 +1175,9 @@
 <span class="sd">          ellipsoid axis. Ideally the ellipsoid would be spherical, giving a</span>
 <span class="sd">          ratio of 1, but in practice will be less than 1.</span>
 
-<span class="sd">        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which of</span>
-<span class="sd">          the 6 degrees-of-freedom to consider in the measurement. For example</span>
+<span class="sd">        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which</span>
+<span class="sd">          of the 6 degrees-of-freedom to consider in the measurement. For</span>
+<span class="sd">          example</span>
 <span class="sd">          ``axes=&quot;trans&quot;`` to consider only translation or</span>
 <span class="sd">          ``axes=&quot;rot&quot;`` to consider only rotation. Defaults to ``&quot;all&quot;``</span>
 <span class="sd">          motion.</span>
@@ -1402,483 +1403,6 @@
         <span class="n">Jdot</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">Jdot</span></div>
-
-    <span class="c1"># def plot(</span>
-    <span class="c1">#         self, q=None, block=True, dt=0.050, limits=None,</span>
-    <span class="c1">#         vellipse=False, fellipse=False,</span>
-    <span class="c1">#         jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Graphical display and animation</span>
-
-    <span class="c1">#     :param block: Block operation of the code and keep the figure open</span>
-    <span class="c1">#     :type block: bool</span>
-    <span class="c1">#     :param q: The joint configuration of the robot (Optional,</span>
-    <span class="c1">#         if not supplied will use the stored q values).</span>
-    <span class="c1">#     :type q: float ndarray(n)</span>
-    <span class="c1">#     :param dt: if q is a trajectory, this describes the delay in</span>
-    <span class="c1">#         seconds between frames</span>
-    <span class="c1">#     :type dt: float</span>
-    <span class="c1">#     :param limits: Custom view limits for the plot. If not supplied will</span>
-    <span class="c1">#         autoscale, [x1, x2, y1, y2, z1, z2]</span>
-    <span class="c1">#     :type limits: ndarray(6)</span>
-    <span class="c1">#     :param vellipse: (Plot Option) Plot the velocity ellipse at the</span>
-    <span class="c1">#         end-effector</span>
-    <span class="c1">#     :type vellipse: bool</span>
-    <span class="c1">#     :param vellipse: (Plot Option) Plot the force ellipse at the</span>
-    <span class="c1">#         end-effector</span>
-    <span class="c1">#     :type vellipse: bool</span>
-    <span class="c1">#     :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
-    <span class="c1">#         which the joint revolves around(revolute joint) or translates</span>
-    <span class="c1">#         along (prosmatic joint)</span>
-    <span class="c1">#     :type jointaxes: bool</span>
-    <span class="c1">#     :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-    <span class="c1">#         at the location of the end-effector. Uses three arrows, red,</span>
-    <span class="c1">#         green and blue to indicate the x, y, and z-axes.</span>
-    <span class="c1">#     :type eeframe: bool</span>
-    <span class="c1">#     :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
-    <span class="c1">#         plane</span>
-    <span class="c1">#     :type shadow: bool</span>
-    <span class="c1">#     :param name: (Plot Option) Plot the name of the robot near its base</span>
-    <span class="c1">#     :type name: bool</span>
-    <span class="c1">#     :param movie: name of file in which to save an animated GIF</span>
-    <span class="c1">#     :type movie: str</span>
-
-    <span class="c1">#     :return: A reference to the PyPlot object which controls the</span>
-    <span class="c1">#         matplotlib figure</span>
-    <span class="c1">#     :rtype: PyPlot</span>
-
-    <span class="c1">#     - ``robot.plot(q)`` displays a graphical view of a robot based on the</span>
-    <span class="c1">#       kinematic model and the joint configuration ``q``. This is a stick</span>
-    <span class="c1">#       figure polyline which joins the origins of the link coordinate</span>
-    <span class="c1">#       frames. The plot will autoscale with an aspect ratio of 1.</span>
-
-    <span class="c1">#     - ``robot.plot()`` as above but use the stored ``q`` value.</span>
-
-    <span class="c1">#     If ``q`` (m,n) representing a joint-space trajectory it will create an</span>
-    <span class="c1">#     animation with a pause of ``dt`` seconds between each frame.</span>
-
-    <span class="c1">#     .. note::</span>
-    <span class="c1">#         - By default this method will block until the figure is dismissed.</span>
-    <span class="c1">#           To avoid this set ``block=False``.</span>
-    <span class="c1">#         - The polyline joins the origins of the link frames, but for</span>
-    <span class="c1">#           some Denavit-Hartenberg models those frames may not actually</span>
-    <span class="c1">#           be on the robot, ie. the lines to not neccessarily represent</span>
-    <span class="c1">#           the links of the robot.</span>
-
-    <span class="c1">#     :seealso: :func:`teach`</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-
-    <span class="c1">#     # try:</span>
-    <span class="c1">#     return _plot(</span>
-    <span class="c1">#         self, block, q, int(dt * 1000), limits,</span>
-    <span class="c1">#         vellipse=vellipse, fellipse=fellipse,</span>
-    <span class="c1">#         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,</span>
-    <span class="c1">#         movie=movie)</span>
-    <span class="c1">#     # except ModuleNotFoundError:</span>
-    <span class="c1">#     #     print(</span>
-    <span class="c1">#     #         &#39;Could not find matplotlib.&#39;</span>
-    <span class="c1">#     #         &#39; Matplotlib required for this function&#39;)</span>
-
-<div class="viewcode-block" id="DHRobot.teach"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.teach">[docs]</a>    <span class="k">def</span> <span class="nf">teach</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Graphical teach pendant</span>
-
-<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
-<span class="sd">        :type block: bool</span>
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">                  if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
-<span class="sd">                       autoscale, [x1, x2, y1, y2, z1, z2]</span>
-<span class="sd">        :type limits: ndarray(6)</span>
-<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
-<span class="sd">                          which the joint revolves around(revolute joint) or</span>
-<span class="sd">                          translates along (prismatic joint)</span>
-<span class="sd">        :type jointaxes: bool</span>
-<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
-<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
-<span class="sd">        :type eeframe: bool</span>
-<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
-<span class="sd">            plane</span>
-<span class="sd">        :type shadow: bool</span>
-<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
-<span class="sd">        :type name: bool</span>
-
-<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
-<span class="sd">            matplotlib figure</span>
-<span class="sd">        :rtype: PyPlot</span>
-
-<span class="sd">        - ``robot.teach(q)`` creates a matplotlib plot which allows the user to</span>
-<span class="sd">          &quot;drive&quot; a graphical robot using a graphical slider panel. The robot&#39;s</span>
-<span class="sd">          inital joint configuration is ``q``. The plot will autoscale with an</span>
-<span class="sd">          aspect ratio of 1.</span>
-
-<span class="sd">        - ``robot.teach()`` as above except the robot&#39;s stored value of ``q``</span>
-<span class="sd">            is used.</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            - Program execution is blocked until the teach window is</span>
-<span class="sd">              dismissed.  If ``block=False`` the method is non-blocking but</span>
-<span class="sd">              you need to poll the window manager to ensure that the window</span>
-<span class="sd">              remains responsive.</span>
-<span class="sd">            - The slider limits are derived from the joint limit properties.</span>
-<span class="sd">              If not set then:</span>
-<span class="sd">                - For revolute joints they are assumed to be [-pi, +pi]</span>
-<span class="sd">                - For prismatic joint they are assumed unknown and an error</span>
-<span class="sd">                  occurs.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
-
-        <span class="c1"># try:</span>
-        <span class="k">return</span> <span class="n">_teach</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
-        <span class="c1"># except ModuleNotFoundError:</span>
-        <span class="c1">#     print(</span>
-        <span class="c1">#         &#39;Could not find matplotlib.&#39;</span>
-        <span class="c1">#         &#39; Matplotlib required for this function&#39;)</span>
-
-<div class="viewcode-block" id="DHRobot.vellipse"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">vellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a velocity ellipsoid object for plotting</span>
-
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
-<span class="sd">            rotational velocity ellipsoid</span>
-<span class="sd">        :type opt: string</span>
-<span class="sd">        :param centre:</span>
-<span class="sd">        :type centre: list or str(&#39;ee&#39;)</span>
-
-<span class="sd">        :return: An EllipsePlot object</span>
-<span class="sd">        :rtype: EllipsePlot</span>
-
-<span class="sd">        - ``robot.vellipse(q)`` creates a force ellipsoid for the robot at</span>
-<span class="sd">          pose ``q``. The ellipsoid is centered at the origin.</span>
-
-<span class="sd">        - ``robot.vellipse()`` as above except the joint configuration is that</span>
-<span class="sd">          stored in the robot object.</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            - By default the ellipsoid related to translational motion is</span>
-<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity</span>
-<span class="sd">              ellipsoid.</span>
-<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
-<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
-<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
-<span class="sd">              end-effector position.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="n">_vellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="DHRobot.fellipse"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Create a force ellipsoid object for plotting</span>
-
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
-<span class="sd">            rotational force ellipsoid</span>
-<span class="sd">        :type opt: string</span>
-<span class="sd">        :param centre:</span>
-<span class="sd">        :type centre: list or str(&#39;ee&#39;)</span>
-
-<span class="sd">        :return: An EllipsePlot object</span>
-<span class="sd">        :rtype: EllipsePlot</span>
-
-<span class="sd">        - ``robot.fellipse(q)`` creates a force ellipsoid for the robot at</span>
-<span class="sd">          pose ``q``. The ellipsoid is centered at the origin.</span>
-
-<span class="sd">        - ``robot.fellipse()`` as above except the joint configuration is that</span>
-<span class="sd">          stored in the robot object.</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            - By default the ellipsoid related to translational motion is</span>
-<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity</span>
-<span class="sd">              ellipsoid.</span>
-<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
-<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
-<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
-<span class="sd">              end-effector position.</span>
-
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="k">return</span> <span class="n">_fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="DHRobot.plot_vellipse"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.plot_vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_vellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plot the velocity ellipsoid for manipulator</span>
-
-<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
-<span class="sd">        :type block: bool</span>
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param vellipse: the vellocity ellipsoid to plot</span>
-<span class="sd">        :type vellipse: EllipsePlot</span>
-<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
-<span class="sd">            autoscale, [x1, x2, y1, y2, z1, z2]</span>
-<span class="sd">        :type limits: ndarray(6)</span>
-<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
-<span class="sd">            rotational velocity ellipsoid</span>
-<span class="sd">        :type opt: string</span>
-<span class="sd">        :param centre: The coordinates to plot the vellipse [x, y, z] or &quot;ee&quot;</span>
-<span class="sd">            to plot at the end-effector location</span>
-<span class="sd">        :type centre: array_like or str</span>
-<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
-<span class="sd">            which the joint revolves around(revolute joint) or translates</span>
-<span class="sd">            along (prosmatic joint)</span>
-<span class="sd">        :type jointaxes: bool</span>
-<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
-<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
-<span class="sd">        :type eeframe: bool</span>
-<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
-<span class="sd">            plane</span>
-<span class="sd">        :type shadow: bool</span>
-<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
-<span class="sd">        :type name: bool</span>
-
-<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
-<span class="sd">            matplotlib figure</span>
-<span class="sd">        :rtype: PyPlot</span>
-
-<span class="sd">        - ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the</span>
-<span class="sd">          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.</span>
-
-<span class="sd">        - ``plot_vellipse()`` as above except the robot is plotted with joint</span>
-<span class="sd">          coordinates stored in the robot object.</span>
-
-<span class="sd">        - ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot. </span>
-
-<span class="sd">        .. note:: </span>
-<span class="sd">            - By default the ellipsoid related to translational motion is</span>
-<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity </span>
-<span class="sd">              ellipsoid.</span>
-<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
-<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
-<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the </span>
-<span class="sd">              end-effector position.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
-
-        <span class="k">if</span> <span class="n">vellipse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">vellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">_plot_ellipse</span><span class="p">(</span>
-            <span class="n">vellipse</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="DHRobot.plot_fellipse"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.plot_fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plot the force ellipsoid for manipulator</span>
-
-<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
-<span class="sd">        :type block: bool</span>
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param fellipse: the vellocity ellipsoid to plot</span>
-<span class="sd">        :type fellipse: EllipsePlot</span>
-<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
-<span class="sd">            autoscale, [x1, x2, y1, y2, z1, z2]</span>
-<span class="sd">        :type limits: ndarray(6)</span>
-<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
-<span class="sd">            rotational force ellipsoid</span>
-<span class="sd">        :type opt: string</span>
-<span class="sd">        :param centre: The coordinates to plot the fellipse [x, y, z] or &quot;ee&quot;</span>
-<span class="sd">            to plot at the end-effector location</span>
-<span class="sd">        :type centre: array_like or str</span>
-<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
-<span class="sd">            which the joint revolves around(revolute joint) or translates</span>
-<span class="sd">            along (prosmatic joint)</span>
-<span class="sd">        :type jointaxes: bool</span>
-<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
-<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
-<span class="sd">        :type eeframe: bool</span>
-<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
-<span class="sd">            plane</span>
-<span class="sd">        :type shadow: bool</span>
-<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
-<span class="sd">        :type name: bool</span>
-
-<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
-<span class="sd">            matplotlib figure</span>
-<span class="sd">        :rtype: PyPlot</span>
-
-<span class="sd">        - ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the</span>
-<span class="sd">          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.</span>
-
-<span class="sd">        - ``plot_fellipse()`` as above except the robot is plotted with joint</span>
-<span class="sd">          coordinates stored in the robot object.</span>
-
-<span class="sd">        - ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot. </span>
-
-<span class="sd">        .. note:: </span>
-<span class="sd">            - By default the ellipsoid related to translational motion is</span>
-<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity </span>
-<span class="sd">              ellipsoid.</span>
-<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
-<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
-<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the </span>
-<span class="sd">              end-effector position.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
-
-        <span class="k">if</span> <span class="n">fellipse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">_plot_ellipse</span><span class="p">(</span>
-            <span class="n">fellipse</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
-
-    <span class="c1"># def plot2(</span>
-    <span class="c1">#         self, q=None, block=True, dt=50, limits=None,</span>
-    <span class="c1">#         vellipse=False, fellipse=False,</span>
-    <span class="c1">#         eeframe=True, name=False):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     2D Graphical display and animation</span>
-
-    <span class="c1">#     :param block: Block operation of the code and keep the figure open</span>
-    <span class="c1">#     :type block: bool</span>
-    <span class="c1">#     :param q: The joint configuration of the robot (Optional,</span>
-    <span class="c1">#         if not supplied will use the stored q values).</span>
-    <span class="c1">#     :type q: float ndarray(n)</span>
-    <span class="c1">#     :param dt: if q is a trajectory, this describes the delay in</span>
-    <span class="c1">#         milliseconds between frames</span>
-    <span class="c1">#     :type dt: int</span>
-    <span class="c1">#     :param limits: Custom view limits for the plot. If not supplied will</span>
-    <span class="c1">#         autoscale, [x1, x2, y1, y2, z1, z2]</span>
-    <span class="c1">#     :type limits: ndarray(6)</span>
-    <span class="c1">#     :param vellipse: (Plot Option) Plot the velocity ellipse at the</span>
-    <span class="c1">#         end-effector</span>
-    <span class="c1">#     :type vellipse: bool</span>
-    <span class="c1">#     :param vellipse: (Plot Option) Plot the force ellipse at the</span>
-    <span class="c1">#         end-effector</span>
-    <span class="c1">#     :type vellipse: bool</span>
-    <span class="c1">#     :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-    <span class="c1">#         at the location of the end-effector. Uses three arrows, red,</span>
-    <span class="c1">#         green and blue to indicate the x, y, and z-axes.</span>
-    <span class="c1">#     :type eeframe: bool</span>
-    <span class="c1">#     :param name: (Plot Option) Plot the name of the robot near its base</span>
-    <span class="c1">#     :type name: bool</span>
-
-    <span class="c1">#     :return: A reference to the PyPlot object which controls the</span>
-    <span class="c1">#         matplotlib figure</span>
-    <span class="c1">#     :rtype: PyPlot</span>
-
-    <span class="c1">#     - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on the</span>
-    <span class="c1">#       kinematic model and the joint configuration ``q``. This is a stick</span>
-    <span class="c1">#       figure polyline which joins the origins of the link coordinate frames. </span>
-    <span class="c1">#       The plot will autoscale with an aspect ratio of 1.</span>
-
-    <span class="c1">#     - ``robot.plot2()`` as above but use the stored ``q`` value.</span>
-
-    <span class="c1">#     If ``q`` (m,n) representing a joint-space trajectory it will create an</span>
-    <span class="c1">#     animation with a pause of ``dt`` seconds between each frame.</span>
-
-    <span class="c1">#     .. note::</span>
-    <span class="c1">#         - By default this method will block until the figure is dismissed.</span>
-    <span class="c1">#           To avoid this set ``block=False``.</span>
-    <span class="c1">#         - The polyline joins the origins of the link frames, but for</span>
-    <span class="c1">#           some Denavit-Hartenberg models those frames may not actually</span>
-    <span class="c1">#           be on the robot, ie. the lines to not neccessarily represent</span>
-    <span class="c1">#           the links of the robot.</span>
-
-    <span class="c1">#     :seealso: :func:`teach2`</span>
-
-    <span class="c1">#     &quot;&quot;&quot;</span>
-
-    <span class="c1">#     # try:</span>
-    <span class="c1">#     return _plot2(</span>
-    <span class="c1">#         self, block, q, dt, limits,</span>
-    <span class="c1">#         vellipse=vellipse, fellipse=fellipse,</span>
-    <span class="c1">#         eeframe=eeframe, name=name)</span>
-    <span class="c1">#     # except ModuleNotFoundError:</span>
-    <span class="c1">#     #     print(</span>
-    <span class="c1">#     #         &#39;Could not find matplotlib.&#39;</span>
-    <span class="c1">#     #         &#39; Matplotlib required for this function&#39;)</span>
-
-<div class="viewcode-block" id="DHRobot.teach2"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.teach2">[docs]</a>    <span class="k">def</span> <span class="nf">teach2</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        2D Graphical teach pendant</span>
-
-<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
-<span class="sd">        :type block: bool</span>
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
-<span class="sd">            autoscale, [x1, x2, y1, y2, z1, z2]</span>
-<span class="sd">        :type limits: ndarray(6)</span>
-<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
-<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
-<span class="sd">        :type eeframe: bool</span>
-<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
-<span class="sd">        :type name: bool</span>
-
-<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
-<span class="sd">            matplotlib figure</span>
-<span class="sd">        :rtype: PyPlot</span>
-
-<span class="sd">        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the user</span>
-<span class="sd">          to &quot;drive&quot; a graphical robot using a graphical slider panel. The</span>
-<span class="sd">          robot&#39;s inital joint configuration is ``q``. The plot will autoscale</span>
-<span class="sd">          with an aspect ratio of 1.</span>
-
-<span class="sd">        - ``robot.teach2()`` as above except the robot&#39;s stored value of ``q``</span>
-<span class="sd">          is used.</span>
-
-<span class="sd">        .. note:: </span>
-<span class="sd">            - Program execution is blocked until the teach window is </span>
-<span class="sd">              dismissed.  If ``block=False`` the method is non-blocking but</span>
-<span class="sd">              you need to poll the window manager to ensure that the window</span>
-<span class="sd">              remains responsive.</span>
-<span class="sd">            - The slider limits are derived from the joint limit properties.</span>
-<span class="sd">              If not set then:</span>
-<span class="sd">                - For revolute joints they are assumed to be [-pi, +pi]</span>
-<span class="sd">                - For prismatic joint they are assumed unknown and an error</span>
-<span class="sd">                  occurs.</span>
-<span class="sd">              If not set then</span>
-<span class="sd">                - For revolute joints they are assumed to be [-pi, +pi]</span>
-<span class="sd">                - For prismatic joint they are assumed unknown and an error</span>
-<span class="sd">                  occurs.</span>
-
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
-
-        <span class="c1"># try:</span>
-        <span class="k">return</span> <span class="n">_teach2</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
-            <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
-        <span class="c1"># except ModuleNotFoundError:</span>
-        <span class="c1">#     print(</span>
-        <span class="c1">#         &#39;Could not find matplotlib.&#39;</span>
-        <span class="c1">#         &#39; Matplotlib required for this function&#39;)</span>
-
 
 <div class="viewcode-block" id="DHRobot.ikine3"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikine3">[docs]</a>    <span class="k">def</span> <span class="nf">ikine3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elbow_up</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

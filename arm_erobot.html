@@ -718,14 +718,12 @@ if not supplied will use the stored q values).</p>
 <dd><p>Formulates an inequality contraint which, when optimised for will
 make it impossible for the robot to run into joint limits. Requires
 the joint limits of the robot to be specified. See examples/mmc.py
-for use case
-:param ps: The minimum angle (in radians) in which the joint is</p>
-<blockquote>
-<div><p>allowed to approach to its limit</p>
-</div></blockquote>
+for use case</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>ps</strong> (<em>float</em>) – The minimum angle (in radians) in which the joint is
+allowed to approach to its limit</p></li>
 <li><p><strong>pi</strong> (<em>float</em>) – The influence angle (in radians) in which the velocity
 damper becomes active</p></li>
 <li><p><strong>n</strong> (<em>int</em>) – The number of joints to consider. Defaults to all joints</p></li>
@@ -817,6 +815,47 @@ dynamic parameters is invalid.</p>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.fellipse">
+<code class="sig-name descname">fellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a force ellipsoid object for plotting with PyPlot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational force ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>list</em><em> or </em><em>str</em><em>(</em><em>'ee'</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An EllipsePlot object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EllipsePlot</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.fellipse(q)</span></code> creates a force ellipsoid for the robot at
+pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The ellipsoid is centered at the origin.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.fellipse()</span></code> as above except the joint configuration is that
+stored in the robot object.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
 </div>
 </dd></dl>
 
@@ -1136,7 +1175,32 @@ Where omega is some gain matrix, currently not modifiable.</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
 <code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Formulates an inequality contraint which, when optimised for will
+make it impossible for the robot to run into a collision. Requires
+See examples/neo.py for use case</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<em>float</em>) – The minimum distance in which a joint is allowed to
+approach the collision object shape</p></li>
+<li><p><strong>di</strong> (<em>float</em>) – The influence distance in which the velocity
+damper becomes active</p></li>
+<li><p><strong>xi</strong> (<em>float</em>) – The gain for the velocity damper</p></li>
+<li><p><strong>from_link</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – The first link to consider, defaults to the base
+link</p></li>
+<li><p><strong>to_link</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – The last link to consider, will consider all links
+between from_link and to_link in the robot, defaults to the
+end-effector link</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Ain, Bin as the inequality contraints for an omptimisor</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6), ndarray(6)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.linkcolormap">
@@ -1359,7 +1423,7 @@ represent the links of the robot.</p></li>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">teach()</span></code></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.teach" title="roboticstoolbox.robot.ERobot.ERobot.teach"><code class="xref py py-func docutils literal notranslate"><span class="pre">teach()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1417,9 +1481,167 @@ the links of the robot.</p></li>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">teach2()</span></code></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.teach2" title="roboticstoolbox.robot.ERobot.ERobot.teach2"><code class="xref py py-func docutils literal notranslate"><span class="pre">teach2()</span></code></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.plot_ellipse">
+<code class="sig-name descname">plot_ellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ellipse</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot_ellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the an ellipsoid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>ellipse</strong> (<em>EllipsePlot</em>) – the ellipsoid to plot</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_ellipse(ellipsoid)</span></code> displays the ellipsoid.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.plot_fellipse">
+<code class="sig-name descname">plot_fellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fellipse</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot_fellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the force ellipsoid for manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>fellipse</strong> (<em>EllipsePlot</em>) – the vellocity ellipsoid to plot</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational force ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>array_like</em><em> or </em><em>str</em>) – The coordinates to plot the fellipse [x, y, z] or “ee”
+to plot at the end-effector location</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_fellipse(q)</span></code> displays the velocity ellipsoid for the
+robot at pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will autoscale with an aspect ratio
+of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_fellipse()</span></code> as above except the robot is plotted with joint
+coordinates stored in the robot object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_fellipse(vellipse)</span></code> specifies a custon ellipse to plot.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.plot_vellipse">
+<code class="sig-name descname">plot_vellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">vellipse</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot_vellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the velocity ellipsoid for manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>vellipse</strong> (<em>EllipsePlot</em>) – the vellocity ellipsoid to plot</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational velocity ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>array_like</em><em> or </em><em>str</em>) – The coordinates to plot the vellipse [x, y, z] or “ee”
+to plot at the end-effector location</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or translates
+along (prosmatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_vellipse(q)</span></code> displays the velocity ellipsoid for the
+robot at pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will autoscale with an aspect ratio
+of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_vellipse()</span></code> as above except the robot is plotted with joint
+coordinates stored in the robot object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.plot_vellipse(vellipse)</span></code> specifies a custon ellipse to plot.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1467,6 +1689,132 @@ optimisation for the corresponding trajectory step.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.teach">
+<code class="sig-name descname">teach</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">'xyz'</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.teach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Graphical teach pendant</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em>) – (Plot Option) Plot an arrow indicating the axes in
+which the joint revolves around(revolute joint) or
+translates along (prismatic joint)</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em>) – (Plot Option) Plot a shadow of the robot in the x-y
+plane</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.teach(q)</span></code> creates a matplotlib plot which allows the user to
+“drive” a graphical robot using a graphical slider panel. The robot’s
+inital joint configuration is <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will autoscale with an
+aspect ratio of 1.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">robot.teach()</span></code> as above except the robot’s stored value of <code class="docutils literal notranslate"><span class="pre">q</span></code></dt><dd><p>is used.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Program execution is blocked until the teach window is
+dismissed.  If <code class="docutils literal notranslate"><span class="pre">block=False</span></code> the method is non-blocking but
+you need to poll the window manager to ensure that the window
+remains responsive.</p></li>
+<li><p>The slider limits are derived from the joint limit properties.
+If not set then:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For revolute joints they are assumed to be [-pi, +pi]</p></li>
+<li><p>For prismatic joint they are assumed unknown and an error
+occurs.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.teach2">
+<code class="sig-name descname">teach2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.teach2" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D Graphical teach pendant</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
+at the location of the end-effector. Uses three arrows, red,
+green and blue to indicate the x, y, and z-axes.</p></li>
+<li><p><strong>name</strong> (<em>bool</em>) – (Plot Option) Plot the name of the robot near its base</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A reference to the PyPlot object which controls the
+matplotlib figure</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot" title="roboticstoolbox.backends.PyPlot.PyPlot">PyPlot</a></p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.teach2(q)</span></code> creates a 2D matplotlib plot which allows the
+user to “drive” a graphical robot using a graphical slider panel.
+The robot’s inital joint configuration is <code class="docutils literal notranslate"><span class="pre">q</span></code>. The plot will
+autoscale with an aspect ratio of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.teach2()</span></code> as above except the robot’s stored value of <code class="docutils literal notranslate"><span class="pre">q</span></code>
+is used.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Program execution is blocked until the teach window is
+dismissed.  If <code class="docutils literal notranslate"><span class="pre">block=False</span></code> the method is non-blocking but
+you need to poll the window manager to ensure that the window
+remains responsive.</p></li>
+<li><p>The slider limits are derived from the joint limit properties.
+If not set then:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>For revolute joints they are assumed to be [-pi, +pi]</p></li>
+<li><p>For prismatic joint they are assumed unknown and an error
+occurs.</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>If not set then</dt><dd><ul class="simple">
+<li><p>For revolute joints they are assumed to be [-pi, +pi]</p></li>
+<li><p>For prismatic joint they are assumed unknown and an error
+occurs.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.tool">
 <em class="property">property </em><code class="sig-name descname">tool</code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.tool" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get/set robot tool transform (Robot superclass)</p>
@@ -1489,6 +1837,47 @@ optimisation for the corresponding trajectory step.</p>
 <p>The private attribute <code class="docutils literal notranslate"><span class="pre">_tool</span></code> will be None in the case of
 no tool transform, but this property will return <code class="docutils literal notranslate"><span class="pre">SE3()</span></code> which
 is an identity matrix.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.vellipse">
+<code class="sig-name descname">vellipse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">opt</span><span class="o">=</span><span class="default_value">'trans'</span></em>, <em class="sig-param"><span class="n">centre</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.vellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a velocity ellipsoid object for plotting with PyPlot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>opt</strong> (<em>string</em>) – ‘trans’ or ‘rot’ will plot either the translational or
+rotational velocity ellipsoid</p></li>
+<li><p><strong>centre</strong> (<em>list</em><em> or </em><em>str</em><em>(</em><em>'ee'</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An EllipsePlot object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>EllipsePlot</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.vellipse(q)</span></code> creates a force ellipsoid for the robot at
+pose <code class="docutils literal notranslate"><span class="pre">q</span></code>. The ellipsoid is centered at the origin.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.vellipse()</span></code> as above except the joint configuration is that
+stored in the robot object.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>By default the ellipsoid related to translational motion is
+drawn.  Use <code class="docutils literal notranslate"><span class="pre">opt='rot'</span></code> to draw the rotational velocity
+ellipsoid.</p></li>
+<li><p>By default the ellipsoid is drawn at the origin.  The option
+<code class="docutils literal notranslate"><span class="pre">centre</span></code> allows its origin to set to set to the specified
+3-vector, or the string “ee” ensures it is drawn at the
+end-effector position.</p></li>
+</ul>
 </div>
 </dd></dl>
 
@@ -1587,9 +1976,9 @@ J. Haviland and P. Corke</p></li>
 <dd class="field-even"><p>ETS instance</p>
 </dd>
 </dl>
-<p>The ETS for each ELink comprises a constant part (possible the identity)
-followed by an optional joint variable transform.  This property returns
-the latter.</p>
+<p>The ETS for each ELink comprises a constant part (possible the
+identity) followed by an optional joint variable transform.
+This property returns the latter.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ELink</span><span class="p">,</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">link</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.333</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="p">)</span>
@@ -1610,10 +1999,10 @@ the latter.</p>
 <dd class="field-even"><p>SE3 instance</p>
 </dd>
 </dl>
-<p>The ETS for each ELink comprises a constant part (possible the identity)
-followed by an optional joint variable transform.  This property returns
-the constant part.  If no constant part is given, this returns an
-identity matrix.</p>
+<p>The ETS for each ELink comprises a constant part (possible the
+identity) followed by an optional joint variable transform.
+This property returns the constant part.  If no constant part
+is given, this returns an identity matrix.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ELink</span><span class="p">,</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">link</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.333</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">link</span><span class="o">.</span><span class="n">Ts</span>
@@ -1643,9 +2032,9 @@ identity matrix.</p>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
-<p>The ETS for each ELink comprises a constant part (possible the identity)
-followed by an optional joint variable transform.  This property returns the
-whether the</p>
+<p>The ETS for each ELink comprises a constant part (possible the
+identity) followed by an optional joint variable transform.
+This property returns the whether the</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># link with joint</span>
@@ -1929,7 +2318,20 @@ be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.collision">
 <em class="property">property </em><code class="sig-name descname">collision</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.collision" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get/set joint collision geometry</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">link.collision</span></code> is the list of the collision geometries which</dt><dd><p>represent the collidable shape of the link.
+:return: the collision geometries
+:rtype: list of Shape</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link.collision</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the collision geometry</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link.collision.append(...)</span></code> add collision geometry</p></li>
+</ul>
+<p>The collision geometries are what is used to check for collisions.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.copy">
@@ -2223,7 +2625,19 @@ frame.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.geometry">
 <em class="property">property </em><code class="sig-name descname">geometry</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.geometry" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get/set joint visual geometry</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">link.geometry</span></code> is the list of the visual geometries which</dt><dd><p>represent the shape of the link
+:return: the visual geometries
+:rtype: list of Shape</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link.geometry</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the geometry</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">link.geometry.append(...)</span></code> add geometry</p></li>
+</ul>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.closest_point">

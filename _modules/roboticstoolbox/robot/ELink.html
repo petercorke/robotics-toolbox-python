@@ -308,9 +308,9 @@
 <span class="sd">        :return: joint variable transform</span>
 <span class="sd">        :rtype: ETS instance</span>
 
-<span class="sd">        The ETS for each ELink comprises a constant part (possible the identity)</span>
-<span class="sd">        followed by an optional joint variable transform.  This property returns</span>
-<span class="sd">        the latter.</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the latter.</span>
 
 <span class="sd">        .. runblock:: pycon</span>
 
@@ -328,10 +328,10 @@
 <span class="sd">        :return: constant part of link transform</span>
 <span class="sd">        :rtype: SE3 instance</span>
 
-<span class="sd">        The ETS for each ELink comprises a constant part (possible the identity)</span>
-<span class="sd">        followed by an optional joint variable transform.  This property returns</span>
-<span class="sd">        the constant part.  If no constant part is given, this returns an</span>
-<span class="sd">        identity matrix.</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the constant part.  If no constant part</span>
+<span class="sd">        is given, this returns an identity matrix.</span>
 
 <span class="sd">        .. runblock:: pycon</span>
 
@@ -343,7 +343,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -352,9 +351,9 @@
 <span class="sd">        :return: test if link has a joint</span>
 <span class="sd">        :rtype: bool</span>
 
-<span class="sd">        The ETS for each ELink comprises a constant part (possible the identity)</span>
-<span class="sd">        followed by an optional joint variable transform.  This property returns the</span>
-<span class="sd">        whether the</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the whether the</span>
 
 <span class="sd">        .. runblock:: pycon</span>
 
@@ -429,7 +428,7 @@
 <span class="sd">        :return: Link&#39;s parent</span>
 <span class="sd">        :rtype: ELink instance</span>
 
-<span class="sd">        This is a reference to </span>
+<span class="sd">        This is a reference to</span>
 
 <span class="sd">        .. runblock:: pycon</span>
 
@@ -449,13 +448,34 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint visual geometry</span>
+
+<span class="sd">        - ``link.geometry`` is the list of the visual geometries which</span>
+<span class="sd">            represent the shape of the link</span>
+<span class="sd">            :return: the visual geometries</span>
+<span class="sd">            :rtype: list of Shape</span>
+<span class="sd">        - ``link.geometry = ...`` checks and sets the geometry</span>
+<span class="sd">        - ``link.geometry.append(...)`` add geometry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint collision geometry</span>
+
+<span class="sd">        - ``link.collision`` is the list of the collision geometries which</span>
+<span class="sd">            represent the collidable shape of the link.</span>
+<span class="sd">            :return: the collision geometries</span>
+<span class="sd">            :rtype: list of Shape</span>
+<span class="sd">        - ``link.collision = ...`` checks and sets the collision geometry</span>
+<span class="sd">        - ``link.collision.append(...)`` add collision geometry</span>
+
+<span class="sd">        The collision geometries are what is used to check for collisions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span>
 
     <span class="c1"># @r.setter</span>
     <span class="c1"># def r(self, T):</span>
@@ -557,6 +577,7 @@
 <span class="sd">        :param inf_dist: The minimum distance within which to consider</span>
 <span class="sd">            the shape</span>
 <span class="sd">        :type inf_dist: float</span>
+
 <span class="sd">        :returns: d, p1, p2 where d is the distance between the shapes,</span>
 <span class="sd">            p1 and p2 are the points in the world frame on the respective</span>
 <span class="sd">            shapes</span>
@@ -586,6 +607,7 @@
 
 <span class="sd">        :param shape: The shape to compare distance to</span>
 <span class="sd">        :type shape: Shape</span>
+
 <span class="sd">        :returns: True if shapes have collided</span>
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        &#39;&#39;&#39;</span>

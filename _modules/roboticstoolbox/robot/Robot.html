@@ -173,6 +173,7 @@
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot</span> <span class="kn">import</span> <span class="n">PyPlot</span><span class="p">,</span> <span class="n">PyPlot2</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.Swift</span> <span class="kn">import</span> <span class="n">Swift</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -1453,6 +1454,8 @@
 <span class="sd">        :seealso: :func:`teach`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">env</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
                 <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_swift</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
@@ -1563,6 +1566,290 @@
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
+<div class="viewcode-block" id="Robot.fellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a force ellipsoid object for plotting with PyPlot</span>
+
+<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
+<span class="sd">            rotational force ellipsoid</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :param centre:</span>
+<span class="sd">        :type centre: list or str(&#39;ee&#39;)</span>
+
+<span class="sd">        :return: An EllipsePlot object</span>
+<span class="sd">        :rtype: EllipsePlot</span>
+
+<span class="sd">        - ``robot.fellipse(q)`` creates a force ellipsoid for the robot at</span>
+<span class="sd">          pose ``q``. The ellipsoid is centered at the origin.</span>
+
+<span class="sd">        - ``robot.fellipse()`` as above except the joint configuration is that</span>
+<span class="sd">          stored in the robot object.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - By default the ellipsoid related to translational motion is</span>
+<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity</span>
+<span class="sd">              ellipsoid.</span>
+<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
+<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
+<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
+<span class="sd">              end-effector position.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;ERobot fellipse not implemented yet&quot;</span><span class="p">)</span>
+
+        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ell</span></div>
+
+<div class="viewcode-block" id="Robot.vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">vellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a velocity ellipsoid object for plotting with PyPlot</span>
+
+<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
+<span class="sd">            rotational velocity ellipsoid</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :param centre:</span>
+<span class="sd">        :type centre: list or str(&#39;ee&#39;)</span>
+
+<span class="sd">        :return: An EllipsePlot object</span>
+<span class="sd">        :rtype: EllipsePlot</span>
+
+<span class="sd">        - ``robot.vellipse(q)`` creates a force ellipsoid for the robot at</span>
+<span class="sd">          pose ``q``. The ellipsoid is centered at the origin.</span>
+
+<span class="sd">        - ``robot.vellipse()`` as above except the joint configuration is that</span>
+<span class="sd">          stored in the robot object.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - By default the ellipsoid related to translational motion is</span>
+<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity</span>
+<span class="sd">              ellipsoid.</span>
+<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
+<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
+<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
+<span class="sd">              end-effector position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;ERobot vellipse not implemented yet&quot;</span><span class="p">)</span>
+
+        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ell</span></div>
+
+<div class="viewcode-block" id="Robot.plot_ellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.plot_ellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ellipse</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ellipse</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the an ellipsoid</span>
+
+<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
+<span class="sd">        :type block: bool</span>
+<span class="sd">        :param ellipse: the ellipsoid to plot</span>
+<span class="sd">        :type ellipse: EllipsePlot</span>
+<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
+<span class="sd">            which the joint revolves around(revolute joint) or translates</span>
+<span class="sd">            along (prosmatic joint)</span>
+<span class="sd">        :type jointaxes: bool</span>
+<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
+<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
+<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
+<span class="sd">        :type eeframe: bool</span>
+<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
+<span class="sd">            plane</span>
+<span class="sd">        :type shadow: bool</span>
+<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
+<span class="sd">        :type name: bool</span>
+
+<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
+<span class="sd">            matplotlib figure</span>
+<span class="sd">        :rtype: PyPlot</span>
+
+<span class="sd">        - ``robot.plot_ellipse(ellipsoid)`` displays the ellipsoid.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
+<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
+<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
+<span class="sd">              end-effector position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ellipse</span><span class="p">,</span> <span class="n">EllipsePlot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;ellipse must be of type &#39;</span>
+                <span class="s1">&#39;roboticstoolbox.backend.PyPlot.EllipsePlot&#39;</span><span class="p">)</span>
+
+        <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot</span><span class="p">()</span>
+
+        <span class="c1"># Add the robot to the figure in readonly mode</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">ellipse</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">ellipse</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
+
+        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="n">ellipse</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Keep the plot open</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">env</span></div>
+
+<div class="viewcode-block" id="Robot.plot_fellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.plot_fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fellipse</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the force ellipsoid for manipulator</span>
+
+<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
+<span class="sd">        :type block: bool</span>
+<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param fellipse: the vellocity ellipsoid to plot</span>
+<span class="sd">        :type fellipse: EllipsePlot</span>
+<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
+<span class="sd">            autoscale, [x1, x2, y1, y2, z1, z2]</span>
+<span class="sd">        :type limits: ndarray(6)</span>
+<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
+<span class="sd">            rotational force ellipsoid</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :param centre: The coordinates to plot the fellipse [x, y, z] or &quot;ee&quot;</span>
+<span class="sd">            to plot at the end-effector location</span>
+<span class="sd">        :type centre: array_like or str</span>
+<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
+<span class="sd">            which the joint revolves around(revolute joint) or translates</span>
+<span class="sd">            along (prosmatic joint)</span>
+<span class="sd">        :type jointaxes: bool</span>
+<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
+<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
+<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
+<span class="sd">        :type eeframe: bool</span>
+<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
+<span class="sd">            plane</span>
+<span class="sd">        :type shadow: bool</span>
+<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
+<span class="sd">        :type name: bool</span>
+
+<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
+<span class="sd">            matplotlib figure</span>
+<span class="sd">        :rtype: PyPlot</span>
+
+<span class="sd">        - ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the</span>
+<span class="sd">          robot at pose ``q``. The plot will autoscale with an aspect ratio</span>
+<span class="sd">          of 1.</span>
+
+<span class="sd">        - ``plot_fellipse()`` as above except the robot is plotted with joint</span>
+<span class="sd">          coordinates stored in the robot object.</span>
+
+<span class="sd">        - ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - By default the ellipsoid related to translational motion is</span>
+<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity</span>
+<span class="sd">              ellipsoid.</span>
+<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
+<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
+<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
+<span class="sd">              end-effector position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="k">if</span> <span class="n">fellipse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+            <span class="n">fellipse</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Robot.plot_vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.plot_vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_vellipse</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the velocity ellipsoid for manipulator</span>
+
+<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
+<span class="sd">        :type block: bool</span>
+<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param vellipse: the vellocity ellipsoid to plot</span>
+<span class="sd">        :type vellipse: EllipsePlot</span>
+<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
+<span class="sd">            autoscale, [x1, x2, y1, y2, z1, z2]</span>
+<span class="sd">        :type limits: ndarray(6)</span>
+<span class="sd">        :param opt: &#39;trans&#39; or &#39;rot&#39; will plot either the translational or</span>
+<span class="sd">            rotational velocity ellipsoid</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :param centre: The coordinates to plot the vellipse [x, y, z] or &quot;ee&quot;</span>
+<span class="sd">            to plot at the end-effector location</span>
+<span class="sd">        :type centre: array_like or str</span>
+<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
+<span class="sd">            which the joint revolves around(revolute joint) or translates</span>
+<span class="sd">            along (prosmatic joint)</span>
+<span class="sd">        :type jointaxes: bool</span>
+<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
+<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
+<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
+<span class="sd">        :type eeframe: bool</span>
+<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
+<span class="sd">            plane</span>
+<span class="sd">        :type shadow: bool</span>
+<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
+<span class="sd">        :type name: bool</span>
+
+<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
+<span class="sd">            matplotlib figure</span>
+<span class="sd">        :rtype: PyPlot</span>
+
+<span class="sd">        - ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the</span>
+<span class="sd">          robot at pose ``q``. The plot will autoscale with an aspect ratio</span>
+<span class="sd">          of 1.</span>
+
+<span class="sd">        - ``plot_vellipse()`` as above except the robot is plotted with joint</span>
+<span class="sd">          coordinates stored in the robot object.</span>
+
+<span class="sd">        - ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - By default the ellipsoid related to translational motion is</span>
+<span class="sd">              drawn.  Use ``opt=&#39;rot&#39;`` to draw the rotational velocity</span>
+<span class="sd">              ellipsoid.</span>
+<span class="sd">            - By default the ellipsoid is drawn at the origin.  The option</span>
+<span class="sd">              ``centre`` allows its origin to set to set to the specified</span>
+<span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
+<span class="sd">              end-effector position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="k">if</span> <span class="n">vellipse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+            <span class="n">vellipse</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
 <div class="viewcode-block" id="Robot.plot2"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.plot2">[docs]</a>    <span class="k">def</span> <span class="nf">plot2</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1620,7 +1907,7 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;2D Plotting of ERobot&#39;s not implementedyet&quot;</span><span class="p">)</span>
+                <span class="s2">&quot;2D Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
 
         <span class="c1"># Make an empty 2D figure</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot2</span><span class="p">()</span>
@@ -1653,237 +1940,159 @@
         <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
             <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
 
+        <span class="k">return</span> <span class="n">env</span></div>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="Robot.teach"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.teach">[docs]</a>    <span class="k">def</span> <span class="nf">teach</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Graphical teach pendant</span>
+
+<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
+<span class="sd">        :type block: bool</span>
+<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
+<span class="sd">                  if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
+<span class="sd">                       autoscale, [x1, x2, y1, y2, z1, z2]</span>
+<span class="sd">        :type limits: ndarray(6)</span>
+<span class="sd">        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in</span>
+<span class="sd">                          which the joint revolves around(revolute joint) or</span>
+<span class="sd">                          translates along (prismatic joint)</span>
+<span class="sd">        :type jointaxes: bool</span>
+<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
+<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
+<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
+<span class="sd">        :type eeframe: bool</span>
+<span class="sd">        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y</span>
+<span class="sd">            plane</span>
+<span class="sd">        :type shadow: bool</span>
+<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
+<span class="sd">        :type name: bool</span>
+
+<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
+<span class="sd">            matplotlib figure</span>
+<span class="sd">        :rtype: PyPlot</span>
+
+<span class="sd">        - ``robot.teach(q)`` creates a matplotlib plot which allows the user to</span>
+<span class="sd">          &quot;drive&quot; a graphical robot using a graphical slider panel. The robot&#39;s</span>
+<span class="sd">          inital joint configuration is ``q``. The plot will autoscale with an</span>
+<span class="sd">          aspect ratio of 1.</span>
+
+<span class="sd">        - ``robot.teach()`` as above except the robot&#39;s stored value of ``q``</span>
+<span class="sd">            is used.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - Program execution is blocked until the teach window is</span>
+<span class="sd">              dismissed.  If ``block=False`` the method is non-blocking but</span>
+<span class="sd">              you need to poll the window manager to ensure that the window</span>
+<span class="sd">              remains responsive.</span>
+<span class="sd">            - The slider limits are derived from the joint limit properties.</span>
+<span class="sd">              If not set then:</span>
+<span class="sd">                - For revolute joints they are assumed to be [-pi, +pi]</span>
+<span class="sd">                - For prismatic joint they are assumed unknown and an error</span>
+<span class="sd">                  occurs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;2D Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="c1"># Make an empty 3D figure</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot</span><span class="p">()</span>
+
+        <span class="c1"># Add the self to the figure in readonly mode</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="s1">&#39;Teach &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">env</span><span class="o">.</span><span class="n">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Keep the plot open</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">env</span></div>
+
+<div class="viewcode-block" id="Robot.teach2"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.teach2">[docs]</a>    <span class="k">def</span> <span class="nf">teach2</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        2D Graphical teach pendant</span>
+
+<span class="sd">        :param block: Block operation of the code and keep the figure open</span>
+<span class="sd">        :type block: bool</span>
+<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
+<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+<span class="sd">        :param limits: Custom view limits for the plot. If not supplied will</span>
+<span class="sd">            autoscale, [x1, x2, y1, y2, z1, z2]</span>
+<span class="sd">        :type limits: ndarray(6)</span>
+<span class="sd">        :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
+<span class="sd">            at the location of the end-effector. Uses three arrows, red,</span>
+<span class="sd">            green and blue to indicate the x, y, and z-axes.</span>
+<span class="sd">        :type eeframe: bool</span>
+<span class="sd">        :param name: (Plot Option) Plot the name of the robot near its base</span>
+<span class="sd">        :type name: bool</span>
+
+<span class="sd">        :return: A reference to the PyPlot object which controls the</span>
+<span class="sd">            matplotlib figure</span>
+<span class="sd">        :rtype: PyPlot</span>
+
+<span class="sd">        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the</span>
+<span class="sd">          user to &quot;drive&quot; a graphical robot using a graphical slider panel.</span>
+<span class="sd">          The robot&#39;s inital joint configuration is ``q``. The plot will</span>
+<span class="sd">          autoscale with an aspect ratio of 1.</span>
+
+<span class="sd">        - ``robot.teach2()`` as above except the robot&#39;s stored value of ``q``</span>
+<span class="sd">          is used.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - Program execution is blocked until the teach window is</span>
+<span class="sd">              dismissed.  If ``block=False`` the method is non-blocking but</span>
+<span class="sd">              you need to poll the window manager to ensure that the window</span>
+<span class="sd">              remains responsive.</span>
+<span class="sd">            - The slider limits are derived from the joint limit properties.</span>
+<span class="sd">              If not set then:</span>
+<span class="sd">                - For revolute joints they are assumed to be [-pi, +pi]</span>
+<span class="sd">                - For prismatic joint they are assumed unknown and an error</span>
+<span class="sd">                  occurs.</span>
+<span class="sd">              If not set then</span>
+<span class="sd">                - For revolute joints they are assumed to be [-pi, +pi]</span>
+<span class="sd">                - For prismatic joint they are assumed unknown and an error</span>
+<span class="sd">                  occurs.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;2D Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+
+        <span class="c1"># Make an empty 3D figure</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot2</span><span class="p">()</span>
+
+        <span class="c1"># Add the robot to the figure in readonly mode</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="s1">&#39;Teach &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">env</span><span class="o">.</span><span class="n">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Keep the plot open</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="n">env</span></div></div>
-
-
-    <span class="c1"># def _teach(</span>
-    <span class="c1">#         robot, block, order=&#39;xyz&#39;, limits=None,</span>
-    <span class="c1">#         jointaxes=True, eeframe=True, shadow=True, name=True):</span>
-
-    <span class="c1">#     # Add text to the plots</span>
-    <span class="c1">#     def text_trans(text):  # pragma: no cover</span>
-    <span class="c1">#         T = robot.fkine()</span>
-    <span class="c1">#         t = np.round(T.t, 3)</span>
-    <span class="c1">#         r = np.round(T.rpy(), 3)</span>
-    <span class="c1">#         text[0].set_text(&quot;x: {0}&quot;.format(t[0]))</span>
-    <span class="c1">#         text[1].set_text(&quot;y: {0}&quot;.format(t[1]))</span>
-    <span class="c1">#         text[2].set_text(&quot;z: {0}&quot;.format(t[2]))</span>
-    <span class="c1">#         text[3].set_text(&quot;r: {0}&quot;.format(r[0]))</span>
-    <span class="c1">#         text[4].set_text(&quot;p: {0}&quot;.format(r[1]))</span>
-    <span class="c1">#         text[5].set_text(&quot;y: {0}&quot;.format(r[2]))</span>
-
-    <span class="c1">#     # Update the robot state in mpl and the text</span>
-    <span class="c1">#     def update(val, text):  # pragma: no cover</span>
-    <span class="c1">#         for i in range(robot.n):</span>
-    <span class="c1">#             robot.q[i] = sjoint[i].val * np.pi/180</span>
-
-    <span class="c1">#         text_trans(text)</span>
-
-    <span class="c1">#         # Step the environment</span>
-    <span class="c1">#         env.step(0)</span>
-
-    <span class="c1">#     # Make an empty 3D figure</span>
-    <span class="c1">#     env = rp.backends.PyPlot()</span>
-
-    <span class="c1">#     # Add the robot to the figure in readonly mode</span>
-    <span class="c1">#     env.launch(&#39;Teach &#39; + robot.name, limits=limits)</span>
-    <span class="c1">#     env.add(</span>
-    <span class="c1">#         robot, readonly=True,</span>
-    <span class="c1">#         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)</span>
-
-    <span class="c1">#     fig = env.fig</span>
-
-    <span class="c1">#     fig.subplots_adjust(left=0.25)</span>
-    <span class="c1">#     text = []</span>
-
-    <span class="c1">#     x1 = 0.04</span>
-    <span class="c1">#     x2 = 0.22</span>
-    <span class="c1">#     yh = 0.04</span>
-    <span class="c1">#     ym = 0.5 - (robot.n * yh) / 2 + 0.17/2</span>
-
-    <span class="c1">#     axjoint = []</span>
-    <span class="c1">#     sjoint = []</span>
-
-    <span class="c1">#     qlim = np.copy(robot.qlim) * 180/np.pi</span>
-
-    <span class="c1">#     if np.all(qlim == 0):</span>
-    <span class="c1">#         qlim[0, :] = -180</span>
-    <span class="c1">#         qlim[1, :] = 180</span>
-
-    <span class="c1">#     # Set the pose text</span>
-    <span class="c1">#     T = robot.fkine()</span>
-    <span class="c1">#     t = np.round(T.t, 3)</span>
-    <span class="c1">#     r = np.round(T.rpy(), 3)</span>
-
-    <span class="c1">#     fig.text(</span>
-    <span class="c1">#         0.02,  1 - ym + 0.25, &quot;End-effector Pose&quot;,</span>
-    <span class="c1">#         fontsize=9, weight=&quot;bold&quot;, color=&quot;#4f4f4f&quot;)</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.03, 1 - ym + 0.20, &quot;x: {0}&quot;.format(t[0]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.03, 1 - ym + 0.16, &quot;y: {0}&quot;.format(t[1]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.03, 1 - ym + 0.12, &quot;z: {0}&quot;.format(t[2]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.15, 1 - ym + 0.20, &quot;r: {0}&quot;.format(r[0]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.15, 1 - ym + 0.16, &quot;p: {0}&quot;.format(r[1]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.15, 1 - ym + 0.12, &quot;y: {0}&quot;.format(r[2]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     fig.text(</span>
-    <span class="c1">#         0.02,  1 - ym + 0.06, &quot;Joint angles&quot;,</span>
-    <span class="c1">#         fontsize=9, weight=&quot;bold&quot;, color=&quot;#4f4f4f&quot;)</span>
-
-    <span class="c1">#     for i in range(robot.n):</span>
-    <span class="c1">#         ymin = (1 - ym) - i * yh</span>
-    <span class="c1">#         axjoint.append(fig.add_axes([x1, ymin, x2, 0.03], facecolor=&#39;#dbdbdb&#39;))</span>
-
-    <span class="c1">#         sjoint.append(</span>
-    <span class="c1">#             Slider(</span>
-    <span class="c1">#                 axjoint[i], &#39;q&#39; + str(i),</span>
-    <span class="c1">#                 qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))</span>
-
-    <span class="c1">#         sjoint[i].on_changed(lambda x: update(x, text))</span>
-
-    <span class="c1">#     # Keep the plot open</span>
-    <span class="c1">#     if block:           # pragma: no cover</span>
-    <span class="c1">#         env.hold()</span>
-
-    <span class="c1">#     return env</span>
-
-
-    <span class="c1"># def _teach2(</span>
-    <span class="c1">#         robot, block, order=&#39;xyz&#39;, limits=None,</span>
-    <span class="c1">#         eeframe=True, name=True):</span>
-
-    <span class="c1">#     # Add text to the plots</span>
-    <span class="c1">#     def text_trans(text):  # pragma: no cover</span>
-    <span class="c1">#         T = robot.fkine()</span>
-    <span class="c1">#         t = np.round(T.t, 3)</span>
-    <span class="c1">#         r = np.round(T.rpy(), 3)</span>
-    <span class="c1">#         text[0].set_text(&quot;x: {0}&quot;.format(t[0]))</span>
-    <span class="c1">#         text[1].set_text(&quot;y: {0}&quot;.format(t[1]))</span>
-    <span class="c1">#         text[2].set_text(&quot;yaw: {0}&quot;.format(r[2]))</span>
-
-    <span class="c1">#     # Update the robot state in mpl and the text</span>
-    <span class="c1">#     def update(val, text):  # pragma: no cover</span>
-    <span class="c1">#         for i in range(robot.n):</span>
-    <span class="c1">#             robot.q[i] = sjoint[i].val * np.pi/180</span>
-
-    <span class="c1">#         text_trans(text)</span>
-
-    <span class="c1">#         # Step the environment</span>
-    <span class="c1">#         env.step(0)</span>
-
-    <span class="c1">#     # Make an empty 3D figure</span>
-    <span class="c1">#     env = rp.backends.PyPlot2()</span>
-
-    <span class="c1">#     # Add the robot to the figure in readonly mode</span>
-    <span class="c1">#     env.launch(&#39;Teach &#39; + robot.name, limits=limits)</span>
-    <span class="c1">#     env.add(</span>
-    <span class="c1">#         robot, readonly=True,</span>
-    <span class="c1">#         eeframe=eeframe, name=name)</span>
-
-    <span class="c1">#     fig = env.fig</span>
-
-    <span class="c1">#     fig.subplots_adjust(left=0.38)</span>
-    <span class="c1">#     text = []</span>
-
-    <span class="c1">#     x1 = 0.04</span>
-    <span class="c1">#     x2 = 0.22</span>
-    <span class="c1">#     yh = 0.04</span>
-    <span class="c1">#     ym = 0.5 - (robot.n * yh) / 2 + 0.17/2</span>
-
-    <span class="c1">#     axjoint = []</span>
-    <span class="c1">#     sjoint = []</span>
-
-    <span class="c1">#     qlim = np.copy(robot.qlim) * 180/np.pi</span>
-
-    <span class="c1">#     if np.all(qlim == 0):</span>
-    <span class="c1">#         qlim[0, :] = -180</span>
-    <span class="c1">#         qlim[1, :] = 180</span>
-
-    <span class="c1">#     # Set the pose text</span>
-    <span class="c1">#     T = robot.fkine()</span>
-    <span class="c1">#     t = np.round(T.t, 3)</span>
-    <span class="c1">#     r = np.round(T.rpy(), 3)</span>
-
-    <span class="c1">#     fig.text(</span>
-    <span class="c1">#         0.02,  1 - ym + 0.25, &quot;End-effector Pose&quot;,</span>
-    <span class="c1">#         fontsize=9, weight=&quot;bold&quot;, color=&quot;#4f4f4f&quot;)</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.03, 1 - ym + 0.20, &quot;x: {0}&quot;.format(t[0]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.03, 1 - ym + 0.16, &quot;y: {0}&quot;.format(t[1]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     text.append(fig.text(</span>
-    <span class="c1">#         0.15, 1 - ym + 0.20, &quot;yaw: {0}&quot;.format(r[0]),</span>
-    <span class="c1">#         fontsize=9, color=&quot;#2b2b2b&quot;))</span>
-    <span class="c1">#     fig.text(</span>
-    <span class="c1">#         0.02,  1 - ym + 0.06, &quot;Joint angles&quot;,</span>
-    <span class="c1">#         fontsize=9, weight=&quot;bold&quot;, color=&quot;#4f4f4f&quot;)</span>
-
-    <span class="c1">#     for i in range(robot.n):</span>
-    <span class="c1">#         ymin = (1 - ym) - i * yh</span>
-    <span class="c1">#         axjoint.append(fig.add_axes([x1, ymin, x2, 0.03], facecolor=&#39;#dbdbdb&#39;))</span>
-
-    <span class="c1">#         sjoint.append(</span>
-    <span class="c1">#             Slider(</span>
-    <span class="c1">#                 axjoint[i], &#39;q&#39; + str(i),</span>
-    <span class="c1">#                 qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))</span>
-
-    <span class="c1">#         sjoint[i].on_changed(lambda x: update(x, text))</span>
-
-    <span class="c1">#     # Keep the plot open</span>
-    <span class="c1">#     if block:           # pragma: no cover</span>
-    <span class="c1">#         env.hold()</span>
-
-    <span class="c1">#     return env</span>
-
-
-    <span class="c1"># def _fellipse(robot, q=None, opt=&#39;trans&#39;, centre=[0, 0, 0]):</span>
-
-    <span class="c1">#     ell = EllipsePlot(robot, &#39;f&#39;, opt, centre=centre)</span>
-    <span class="c1">#     return ell</span>
-
-
-    <span class="c1"># def _vellipse(robot, q=None, opt=&#39;trans&#39;, centre=[0, 0, 0]):</span>
-
-    <span class="c1">#     ell = EllipsePlot(robot, &#39;v&#39;, opt, centre=centre)</span>
-    <span class="c1">#     return ell</span>
-
-
-    <span class="c1"># def _plot_pyplot_ellipse(</span>
-    <span class="c1">#         ellipse, block=True, limits=None,</span>
-    <span class="c1">#         jointaxes=True, eeframe=True, shadow=True, name=True):</span>
-
-    <span class="c1">#     if not isinstance(ellipse, EllipsePlot):</span>
-    <span class="c1">#         raise TypeError(</span>
-    <span class="c1">#             &#39;ellipse must be of type &#39;</span>
-    <span class="c1">#             &#39;roboticstoolbox.backend.PyPlot.EllipsePlot&#39;)</span>
-
-    <span class="c1">#     env = rp.backends.PyPlot()</span>
-
-    <span class="c1">#     # Add the robot to the figure in readonly mode</span>
-    <span class="c1">#     env.launch(ellipse.robot.name + &#39; &#39; + ellipse.name, limits=limits)</span>
-
-    <span class="c1">#     env.add(</span>
-    <span class="c1">#         ellipse,</span>
-    <span class="c1">#         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)</span>
-
-    <span class="c1">#     # Keep the plot open</span>
-    <span class="c1">#     if block:           # pragma: no cover</span>
-    <span class="c1">#         env.hold()</span>
-
-    <span class="c1">#     return env</span>
-
 </pre></div>
 
            </div>

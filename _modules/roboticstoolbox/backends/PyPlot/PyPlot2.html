@@ -160,8 +160,10 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.Connector</span> <span class="kn">import</span> <span class="n">Connector</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.widgets</span> <span class="kn">import</span> <span class="n">Slider</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="c1"># import signal</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.RobotPlot2</span> <span class="kn">import</span> <span class="n">RobotPlot2</span>
@@ -296,7 +298,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">SerialLink</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">ETS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">RobotPlot2</span><span class="p">(</span>
                     <span class="n">ob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span>
@@ -360,8 +362,80 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ellipses</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ellipses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">draw2</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_plot_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span></div>
+    <span class="c1"># def _plot_handler(self, sig, frame):</span>
+    <span class="c1">#     plt.pause(0.001)</span>
+
+    <span class="k">def</span> <span class="nf">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">):</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
+
+        <span class="c1"># Add text to the plots</span>
+        <span class="k">def</span> <span class="nf">text_trans</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">()</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="s2">&quot;x: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="s2">&quot;y: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">text</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="s2">&quot;yaw: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+        <span class="c1"># Update the self state in mpl and the text</span>
+        <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">robot</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">val</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+
+            <span class="n">text_trans</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+            <span class="c1"># Step the environment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.38</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">x1</span> <span class="o">=</span> <span class="mf">0.04</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="mf">0.22</span>
+        <span class="n">yh</span> <span class="o">=</span> <span class="mf">0.04</span>
+        <span class="n">ym</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">-</span> <span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span> <span class="o">*</span> <span class="n">yh</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.17</span><span class="o">/</span><span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">qlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">qlim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>    <span class="c1"># pragma nocover</span>
+            <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span>
+            <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">180</span>
+
+        <span class="c1"># Set the pose text</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">()</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="mf">0.02</span><span class="p">,</span>  <span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span> <span class="o">+</span> <span class="mf">0.25</span><span class="p">,</span> <span class="s2">&quot;End-effector Pose&quot;</span><span class="p">,</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#4f4f4f&quot;</span><span class="p">)</span>
+        <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="mf">0.03</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span> <span class="o">+</span> <span class="mf">0.20</span><span class="p">,</span> <span class="s2">&quot;x: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#2b2b2b&quot;</span><span class="p">))</span>
+        <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="mf">0.03</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span> <span class="o">+</span> <span class="mf">0.16</span><span class="p">,</span> <span class="s2">&quot;y: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#2b2b2b&quot;</span><span class="p">))</span>
+        <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="mf">0.15</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span> <span class="o">+</span> <span class="mf">0.20</span><span class="p">,</span> <span class="s2">&quot;yaw: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#2b2b2b&quot;</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="mf">0.02</span><span class="p">,</span>  <span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span> <span class="o">+</span> <span class="mf">0.06</span><span class="p">,</span> <span class="s2">&quot;Joint angles&quot;</span><span class="p">,</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#4f4f4f&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">yh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">],</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;#dbdbdb&#39;</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Slider</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                    <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">on_changed</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">robot</span><span class="p">))</span></div>
 </pre></div>
 
            </div>
