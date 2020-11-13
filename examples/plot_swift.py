@@ -4,9 +4,9 @@
 """
 
 import roboticstoolbox as rp
-import spatialmath as sm
-import numpy as np
 
-panda = rp.models.DH.Panda()
+panda = rp.models.Panda()
+panda.plot(q=panda.qr)
 
-panda.plot(backend='pyplot', q=panda.qr, vellipse=True)
+# panda = rp.models.DH.Panda()
+# panda.teach(q=panda.qr)

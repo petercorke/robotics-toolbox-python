@@ -1786,108 +1786,79 @@ class Robot:
 
         return env
 
+# --------------------------------------------------------------------- #
 
-    # def _teach(
-    #         robot, block, order='xyz', limits=None,
-    #         jointaxes=True, eeframe=True, shadow=True, name=True):
+    def teach(
+            self, q=None, block=True, order='xyz', limits=None,
+            jointaxes=True, eeframe=True, shadow=True, name=True):
+        """
+        Graphical teach pendant
 
-    #     # Add text to the plots
-    #     def text_trans(text):  # pragma: no cover
-    #         T = robot.fkine()
-    #         t = np.round(T.t, 3)
-    #         r = np.round(T.rpy(), 3)
-    #         text[0].set_text("x: {0}".format(t[0]))
-    #         text[1].set_text("y: {0}".format(t[1]))
-    #         text[2].set_text("z: {0}".format(t[2]))
-    #         text[3].set_text("r: {0}".format(r[0]))
-    #         text[4].set_text("p: {0}".format(r[1]))
-    #         text[5].set_text("y: {0}".format(r[2]))
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+                  if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param limits: Custom view limits for the plot. If not supplied will
+                       autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+                          which the joint revolves around(revolute joint) or
+                          translates along (prismatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
 
-    #     # Update the robot state in mpl and the text
-    #     def update(val, text):  # pragma: no cover
-    #         for i in range(robot.n):
-    #             robot.q[i] = sjoint[i].val * np.pi/180
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
 
-    #         text_trans(text)
+        - ``robot.teach(q)`` creates a matplotlib plot which allows the user to
+          "drive" a graphical robot using a graphical slider panel. The robot's
+          inital joint configuration is ``q``. The plot will autoscale with an
+          aspect ratio of 1.
 
-    #         # Step the environment
-    #         env.step(0)
+        - ``robot.teach()`` as above except the robot's stored value of ``q``
+            is used.
 
-    #     # Make an empty 3D figure
-    #     env = rp.backends.PyPlot()
+        .. note::
+            - Program execution is blocked until the teach window is
+              dismissed.  If ``block=False`` the method is non-blocking but
+              you need to poll the window manager to ensure that the window
+              remains responsive.
+            - The slider limits are derived from the joint limit properties.
+              If not set then:
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+        """
 
-    #     # Add the robot to the figure in readonly mode
-    #     env.launch('Teach ' + robot.name, limits=limits)
-    #     env.add(
-    #         robot, readonly=True,
-    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+        if q is not None:
+            self.q = q
 
-    #     fig = env.fig
+        # Make an empty 3D figure
+        env = PyPlot()
 
-    #     fig.subplots_adjust(left=0.25)
-    #     text = []
+        # Add the self to the figure in readonly mode
+        env.launch('Teach ' + self.name, limits=limits)
+        env.add(
+            self, readonly=True,
+            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-    #     x1 = 0.04
-    #     x2 = 0.22
-    #     yh = 0.04
-    #     ym = 0.5 - (robot.n * yh) / 2 + 0.17/2
+        env._add_teach_panel(self)
 
-    #     axjoint = []
-    #     sjoint = []
+        # Keep the plot open
+        if block:           # pragma: no cover
+            env.hold()
 
-    #     qlim = np.copy(robot.qlim) * 180/np.pi
-
-    #     if np.all(qlim == 0):
-    #         qlim[0, :] = -180
-    #         qlim[1, :] = 180
-
-    #     # Set the pose text
-    #     T = robot.fkine()
-    #     t = np.round(T.t, 3)
-    #     r = np.round(T.rpy(), 3)
-
-    #     fig.text(
-    #         0.02,  1 - ym + 0.25, "End-effector Pose",
-    #         fontsize=9, weight="bold", color="#4f4f4f")
-    #     text.append(fig.text(
-    #         0.03, 1 - ym + 0.20, "x: {0}".format(t[0]),
-    #         fontsize=9, color="#2b2b2b"))
-    #     text.append(fig.text(
-    #         0.03, 1 - ym + 0.16, "y: {0}".format(t[1]),
-    #         fontsize=9, color="#2b2b2b"))
-    #     text.append(fig.text(
-    #         0.03, 1 - ym + 0.12, "z: {0}".format(t[2]),
-    #         fontsize=9, color="#2b2b2b"))
-    #     text.append(fig.text(
-    #         0.15, 1 - ym + 0.20, "r: {0}".format(r[0]),
-    #         fontsize=9, color="#2b2b2b"))
-    #     text.append(fig.text(
-    #         0.15, 1 - ym + 0.16, "p: {0}".format(r[1]),
-    #         fontsize=9, color="#2b2b2b"))
-    #     text.append(fig.text(
-    #         0.15, 1 - ym + 0.12, "y: {0}".format(r[2]),
-    #         fontsize=9, color="#2b2b2b"))
-    #     fig.text(
-    #         0.02,  1 - ym + 0.06, "Joint angles",
-    #         fontsize=9, weight="bold", color="#4f4f4f")
-
-    #     for i in range(robot.n):
-    #         ymin = (1 - ym) - i * yh
-    #         axjoint.append(fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb'))
-
-    #         sjoint.append(
-    #             Slider(
-    #                 axjoint[i], 'q' + str(i),
-    #                 qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
-
-    #         sjoint[i].on_changed(lambda x: update(x, text))
-
-    #     # Keep the plot open
-    #     if block:           # pragma: no cover
-    #         env.hold()
-
-    #     return env
-
+        return env
 
     # def _teach2(
     #         robot, block, order='xyz', limits=None,

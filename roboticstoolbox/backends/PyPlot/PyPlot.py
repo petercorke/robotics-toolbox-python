@@ -8,6 +8,7 @@ import numpy as np
 from roboticstoolbox.backends.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath.base.argcheck import getvector
@@ -138,7 +139,7 @@ class PyPlot(Connector):
         self._set_axes_equal()
         # plt.ion()
         plt.draw()
-        plt.pause(dt)
+        # plt.pause(dt)
 
         self._update_robots()
 
@@ -349,3 +350,87 @@ class PyPlot(Connector):
         self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         self.ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+    def _add_teach_panel(self, robot):
+        fig = self.fig
+
+        # Add text to the plots
+        def text_trans(text):  # pragma: no cover
+            T = robot.fkine()
+            t = np.round(T.t, 3)
+            r = np.round(T.rpy('deg'), 3)
+            text[0].set_text("x: {0}".format(t[0]))
+            text[1].set_text("y: {0}".format(t[1]))
+            text[2].set_text("z: {0}".format(t[2]))
+            text[3].set_text("r: {0}".format(r[0]))
+            text[4].set_text("p: {0}".format(r[1]))
+            text[5].set_text("y: {0}".format(r[2]))
+
+        # Update the self state in mpl and the text
+        def update(val, text, robot):  # pragma: no cover
+            for i in range(robot.n):
+                robot.q[i] = self.sjoint[i].val * np.pi/180
+
+            text_trans(text)
+
+            # Step the environment
+            self.step(0)
+
+        fig.subplots_adjust(left=0.25)
+        text = []
+
+        x1 = 0.04
+        x2 = 0.22
+        yh = 0.04
+        ym = 0.5 - (robot.n * yh) / 2 + 0.17/2
+
+        self.axjoint = []
+        self.sjoint = []
+
+        qlim = np.copy(robot.qlim) * 180/np.pi
+
+        if np.all(qlim == 0):
+            qlim[0, :] = -180
+            qlim[1, :] = 180
+
+        # Set the pose text
+        T = robot.fkine()
+        t = np.round(T.t, 3)
+        r = np.round(T.rpy(), 3)
+
+        fig.text(
+            0.02,  1 - ym + 0.25, "End-effector Pose",
+            fontsize=9, weight="bold", color="#4f4f4f")
+        text.append(fig.text(
+            0.03, 1 - ym + 0.20, "x: {0}".format(t[0]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.03, 1 - ym + 0.16, "y: {0}".format(t[1]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.03, 1 - ym + 0.12, "z: {0}".format(t[2]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.15, 1 - ym + 0.20, "r: {0}".format(r[0]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.15, 1 - ym + 0.16, "p: {0}".format(r[1]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.15, 1 - ym + 0.12, "y: {0}".format(r[2]),
+            fontsize=9, color="#2b2b2b"))
+        fig.text(
+            0.02,  1 - ym + 0.06, "Joint angles",
+            fontsize=9, weight="bold", color="#4f4f4f")
+
+        for i in range(robot.n):
+            ymin = (1 - ym) - i * yh
+            self.axjoint.append(
+                fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb'))
+
+            self.sjoint.append(
+                Slider(
+                    self.axjoint[i], 'q' + str(i),
+                    qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
+
+            self.sjoint[i].on_changed(lambda x: update(x, text, robot))

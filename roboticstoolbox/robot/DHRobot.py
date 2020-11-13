@@ -1250,69 +1250,69 @@ class DHRobot(Robot, DHDynamicsMixin):
 
         return Jdot
 
-    def teach(
-            self, q=None, block=True, limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        """
-        Graphical teach pendant
+    # def teach(
+    #         self, q=None, block=True, limits=None,
+    #         jointaxes=True, eeframe=True, shadow=True, name=True):
+    #     """
+    #     Graphical teach pendant
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-                  if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-                       autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-                          which the joint revolves around(revolute joint) or
-                          translates along (prismatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
+    #     :param block: Block operation of the code and keep the figure open
+    #     :type block: bool
+    #     :param q: The joint configuration of the robot (Optional,
+    #               if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param limits: Custom view limits for the plot. If not supplied will
+    #                    autoscale, [x1, x2, y1, y2, z1, z2]
+    #     :type limits: ndarray(6)
+    #     :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+    #                       which the joint revolves around(revolute joint) or
+    #                       translates along (prismatic joint)
+    #     :type jointaxes: bool
+    #     :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+    #         at the location of the end-effector. Uses three arrows, red,
+    #         green and blue to indicate the x, y, and z-axes.
+    #     :type eeframe: bool
+    #     :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+    #         plane
+    #     :type shadow: bool
+    #     :param name: (Plot Option) Plot the name of the robot near its base
+    #     :type name: bool
 
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
+    #     :return: A reference to the PyPlot object which controls the
+    #         matplotlib figure
+    #     :rtype: PyPlot
 
-        - ``robot.teach(q)`` creates a matplotlib plot which allows the user to
-          "drive" a graphical robot using a graphical slider panel. The robot's
-          inital joint configuration is ``q``. The plot will autoscale with an
-          aspect ratio of 1.
+    #     - ``robot.teach(q)`` creates a matplotlib plot which allows the user to
+    #       "drive" a graphical robot using a graphical slider panel. The robot's
+    #       inital joint configuration is ``q``. The plot will autoscale with an
+    #       aspect ratio of 1.
 
-        - ``robot.teach()`` as above except the robot's stored value of ``q``
-            is used.
+    #     - ``robot.teach()`` as above except the robot's stored value of ``q``
+    #         is used.
 
-        .. note::
-            - Program execution is blocked until the teach window is
-              dismissed.  If ``block=False`` the method is non-blocking but
-              you need to poll the window manager to ensure that the window
-              remains responsive.
-            - The slider limits are derived from the joint limit properties.
-              If not set then:
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-        """
+    #     .. note::
+    #         - Program execution is blocked until the teach window is
+    #           dismissed.  If ``block=False`` the method is non-blocking but
+    #           you need to poll the window manager to ensure that the window
+    #           remains responsive.
+    #         - The slider limits are derived from the joint limit properties.
+    #           If not set then:
+    #             - For revolute joints they are assumed to be [-pi, +pi]
+    #             - For prismatic joint they are assumed unknown and an error
+    #               occurs.
+    #     """
 
-        if q is not None:
-            self.q = q
+    #     if q is not None:
+    #         self.q = q
 
-        # try:
-        return _teach(
-            self, block, limits=limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
+    #     # try:
+    #     return _teach(
+    #         self, block, limits=limits,
+    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+    #     # except ModuleNotFoundError:
+    #     #     print(
+    #     #         'Could not find matplotlib.'
+    #     #         ' Matplotlib required for this function')
 
     def teach2(
             self, q=None, block=True, limits=None,
