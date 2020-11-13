@@ -1387,212 +1387,213 @@ class DHRobot(Robot, DHDynamicsMixin):
         #         'Could not find matplotlib.'
         #         ' Matplotlib required for this function')
 
-    def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
-        """
-        Create a velocity ellipsoid object for plotting
+    # def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+    #     """
+    #     Create a velocity ellipsoid object for plotting
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        :type opt: string
-        :param centre:
-        :type centre: list or str('ee')
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param opt: 'trans' or 'rot' will plot either the translational or
+    #         rotational velocity ellipsoid
+    #     :type opt: string
+    #     :param centre:
+    #     :type centre: list or str('ee')
 
-        :return: An EllipsePlot object
-        :rtype: EllipsePlot
+    #     :return: An EllipsePlot object
+    #     :rtype: EllipsePlot
 
-        - ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
-          pose ``q``. The ellipsoid is centered at the origin.
+    #     - ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
+    #       pose ``q``. The ellipsoid is centered at the origin.
 
-        - ``robot.vellipse()`` as above except the joint configuration is that
-          stored in the robot object.
+    #     - ``robot.vellipse()`` as above except the joint configuration is that
+    #       stored in the robot object.
 
-        .. note::
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the
-              end-effector position.
-        """
+    #     .. note::
+    #         - By default the ellipsoid related to translational motion is
+    #           drawn.  Use ``opt='rot'`` to draw the rotational velocity
+    #           ellipsoid.
+    #         - By default the ellipsoid is drawn at the origin.  The option
+    #           ``centre`` allows its origin to set to set to the specified
+    #           3-vector, or the string "ee" ensures it is drawn at the
+    #           end-effector position.
+    #     """
 
-        return _vellipse(self, q=q, opt=opt, centre=centre)
+    #     return _vellipse(self, q=q, opt=opt, centre=centre)
 
-    def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
-        '''
-        Create a force ellipsoid object for plotting
+    # def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+    #     '''
+    #     Create a force ellipsoid object for plotting
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        :type opt: string
-        :param centre:
-        :type centre: list or str('ee')
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param opt: 'trans' or 'rot' will plot either the translational or
+    #         rotational force ellipsoid
+    #     :type opt: string
+    #     :param centre:
+    #     :type centre: list or str('ee')
 
-        :return: An EllipsePlot object
-        :rtype: EllipsePlot
+    #     :return: An EllipsePlot object
+    #     :rtype: EllipsePlot
 
-        - ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
-          pose ``q``. The ellipsoid is centered at the origin.
+    #     - ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
+    #       pose ``q``. The ellipsoid is centered at the origin.
 
-        - ``robot.fellipse()`` as above except the joint configuration is that
-          stored in the robot object.
+    #     - ``robot.fellipse()`` as above except the joint configuration is that
+    #       stored in the robot object.
 
-        .. note::
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the
-              end-effector position.
+    #     .. note::
+    #         - By default the ellipsoid related to translational motion is
+    #           drawn.  Use ``opt='rot'`` to draw the rotational velocity
+    #           ellipsoid.
+    #         - By default the ellipsoid is drawn at the origin.  The option
+    #           ``centre`` allows its origin to set to set to the specified
+    #           3-vector, or the string "ee" ensures it is drawn at the
+    #           end-effector position.
 
-        '''
+    #     '''
 
-        return _fellipse(self, q=q, opt=opt, centre=centre)
+    #     return _fellipse(self, q=q, opt=opt, centre=centre)
 
-    def plot_vellipse(
-            self, q=None, block=True, vellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        """
-        Plot the velocity ellipsoid for manipulator
+    # def plot_vellipse(
+    #         self, q=None, block=True, vellipse=None,
+    #         limits=None, opt='trans', centre=[0, 0, 0],
+    #         jointaxes=True, eeframe=True, shadow=True, name=True):
+    #     """
+    #     Plot the velocity ellipsoid for manipulator
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param vellipse: the vellocity ellipsoid to plot
-        :type vellipse: EllipsePlot
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        :type opt: string
-        :param centre: The coordinates to plot the vellipse [x, y, z] or "ee"
-            to plot at the end-effector location
-        :type centre: array_like or str
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
+    #     :param block: Block operation of the code and keep the figure open
+    #     :type block: bool
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param vellipse: the vellocity ellipsoid to plot
+    #     :type vellipse: EllipsePlot
+    #     :param limits: Custom view limits for the plot. If not supplied will
+    #         autoscale, [x1, x2, y1, y2, z1, z2]
+    #     :type limits: ndarray(6)
+    #     :param opt: 'trans' or 'rot' will plot either the translational or
+    #         rotational velocity ellipsoid
+    #     :type opt: string
+    #     :param centre: The coordinates to plot the vellipse [x, y, z] or "ee"
+    #         to plot at the end-effector location
+    #     :type centre: array_like or str
+    #     :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+    #         which the joint revolves around(revolute joint) or translates
+    #         along (prosmatic joint)
+    #     :type jointaxes: bool
+    #     :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+    #         at the location of the end-effector. Uses three arrows, red,
+    #         green and blue to indicate the x, y, and z-axes.
+    #     :type eeframe: bool
+    #     :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+    #         plane
+    #     :type shadow: bool
+    #     :param name: (Plot Option) Plot the name of the robot near its base
+    #     :type name: bool
 
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
+    #     :return: A reference to the PyPlot object which controls the
+    #         matplotlib figure
+    #     :rtype: PyPlot
 
-        - ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the
-          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
+    #     - ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the
+    #       robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
 
-        - ``plot_vellipse()`` as above except the robot is plotted with joint
-          coordinates stored in the robot object.
+    #     - ``plot_vellipse()`` as above except the robot is plotted with joint
+    #       coordinates stored in the robot object.
 
-        - ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot. 
+    #     - ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot. 
 
-        .. note:: 
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
-              end-effector position.
-        """
+    #     .. note:: 
+    #         - By default the ellipsoid related to translational motion is
+    #           drawn.  Use ``opt='rot'`` to draw the rotational velocity 
+    #           ellipsoid.
+    #         - By default the ellipsoid is drawn at the origin.  The option
+    #           ``centre`` allows its origin to set to set to the specified
+    #           3-vector, or the string "ee" ensures it is drawn at the 
+    #           end-effector position.
+    #     """
 
-        if q is not None:
-            self.q = q
+    #     if q is not None:
+    #         self.q = q
 
-        if vellipse is None:
-            vellipse = self.vellipse(q=q, opt=opt, centre=centre)
+    #     if vellipse is None:
+    #         vellipse = self.vellipse(q=q, opt=opt, centre=centre)
 
-        return _plot_ellipse(
-            vellipse, block, limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+    #     return _plot_ellipse(
+    #         vellipse, block, limits,
+    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-    def plot_fellipse(
-            self, q=None, block=True, fellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        """
-        Plot the force ellipsoid for manipulator
+    # def plot_fellipse(
+    #         self, q=None, block=True, fellipse=None,
+    #         limits=None, opt='trans', centre=[0, 0, 0],
+    #         jointaxes=True, eeframe=True, shadow=True, name=True):
+    #     """
+    #     Plot the force ellipsoid for manipulator
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param fellipse: the vellocity ellipsoid to plot
-        :type fellipse: EllipsePlot
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        :type opt: string
-        :param centre: The coordinates to plot the fellipse [x, y, z] or "ee"
-            to plot at the end-effector location
-        :type centre: array_like or str
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
+    #     :param block: Block operation of the code and keep the figure open
+    #     :type block: bool
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param fellipse: the vellocity ellipsoid to plot
+    #     :type fellipse: EllipsePlot
+    #     :param limits: Custom view limits for the plot. If not supplied will
+    #         autoscale, [x1, x2, y1, y2, z1, z2]
+    #     :type limits: ndarray(6)
+    #     :param opt: 'trans' or 'rot' will plot either the translational or
+    #         rotational force ellipsoid
+    #     :type opt: string
+    #     :param centre: The coordinates to plot the fellipse [x, y, z] or "ee"
+    #         to plot at the end-effector location
+    #     :type centre: array_like or str
+    #     :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+    #         which the joint revolves around(revolute joint) or translates
+    #         along (prosmatic joint)
+    #     :type jointaxes: bool
+    #     :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+    #         at the location of the end-effector. Uses three arrows, red,
+    #         green and blue to indicate the x, y, and z-axes.
+    #     :type eeframe: bool
+    #     :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+    #         plane
+    #     :type shadow: bool
+    #     :param name: (Plot Option) Plot the name of the robot near its base
+    #     :type name: bool
 
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
+    #     :return: A reference to the PyPlot object which controls the
+    #         matplotlib figure
+    #     :rtype: PyPlot
 
-        - ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the
-          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
+    #     - ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the
+    #       robot at pose ``q``. The plot will autoscale with an aspect ratio
+    #       of 1.
 
-        - ``plot_fellipse()`` as above except the robot is plotted with joint
-          coordinates stored in the robot object.
+    #     - ``plot_fellipse()`` as above except the robot is plotted with joint
+    #       coordinates stored in the robot object.
 
-        - ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot. 
+    #     - ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot.
 
-        .. note:: 
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
-              end-effector position.
-        """
+    #     .. note::
+    #         - By default the ellipsoid related to translational motion is
+    #           drawn.  Use ``opt='rot'`` to draw the rotational velocity
+    #           ellipsoid.
+    #         - By default the ellipsoid is drawn at the origin.  The option
+    #           ``centre`` allows its origin to set to set to the specified
+    #           3-vector, or the string "ee" ensures it is drawn at the
+    #           end-effector position.
+    #     """
 
-        if q is not None:
-            self.q = q
+    #     if q is not None:
+    #         self.q = q
 
-        if fellipse is None:
-            fellipse = self.fellipse(q=q, opt=opt, centre=centre)
+    #     if fellipse is None:
+    #         fellipse = self.fellipse(q=q, opt=opt, centre=centre)
 
-        return _plot_ellipse(
-            fellipse, block, limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+    #     return _plot_ellipse(
+    #         fellipse, block, limits,
+    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
     # def plot2(
     #         self, q=None, block=True, dt=50, limits=None,
