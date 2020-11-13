@@ -1490,6 +1490,39 @@ class Robot:
     def plot_ellipse(
             ellipse, block=True, limits=None,
             jointaxes=True, eeframe=True, shadow=True, name=True):
+        """
+        Plot the an ellipsoid
+
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param ellipse: the ellipsoid to plot
+        :type ellipse: EllipsePlot
+        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
+            which the joint revolves around(revolute joint) or translates
+            along (prosmatic joint)
+        :type jointaxes: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
+            plane
+        :type shadow: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+
+        - ``robot.plot_ellipse(ellipsoid)`` displays the ellipsoid.
+
+        .. note::
+            - By default the ellipsoid is drawn at the origin.  The option
+              ``centre`` allows its origin to set to set to the specified
+              3-vector, or the string "ee" ensures it is drawn at the
+              end-effector position.
+        """
 
         if not isinstance(ellipse, EllipsePlot):
             raise TypeError(
