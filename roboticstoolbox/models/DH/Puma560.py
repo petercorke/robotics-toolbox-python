@@ -249,7 +249,7 @@ class Puma560(DHRobot):
             / (2.0 * a2 * r))
 
         if np.isnan(Psi):
-            theta = []
+            theta = []    # pragma nocover
         else:
             theta[1] = np.arctan2(Pz, V114) + n2 * Psi
 

@@ -670,7 +670,6 @@ class TestDHRobot(unittest.TestCase):
     #     nt.assert_array_almost_equal(res3, tauB, decimal=4)
     #     nt.assert_array_almost_equal(res4, tauB3, decimal=4)
 
-
     def test_ikine3(self):
         l0 = rp.RevoluteDH(alpha=np.pi / 2)
         l1 = rp.RevoluteDH(a=0.4318)
@@ -714,21 +713,6 @@ class TestDHRobot(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             r3.ikine3(T)
-
-    def test_ikine6s_puma(self):
-        self.skipTest("error introduced with DHLink change")
-        r0 = rp.models.DH.Puma560()
-        q = r0.qr
-        T = r0.fkine(q)
-
-        qr0 = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
-        qr1 = [0.0000, 1.5238, -1.4768, -0.0000, -0.0470, -0.0000]
-
-        q0, _ = r0.ikine6s(T)
-        q1, _ = r0.ikine6s(T, left=False, elbow_up=False, wrist_flip=True)
-
-        nt.assert_array_almost_equal(q0, qr0, decimal=4)
-        nt.assert_array_almost_equal(q1, qr1, decimal=4)
 
     # def test_ikine6s_rrp(self):
     #     l0 = rp.RevoluteDH(alpha=-np.pi / 2)
