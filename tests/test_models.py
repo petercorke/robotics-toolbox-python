@@ -13,6 +13,7 @@ class TestModels(unittest.TestCase):
     def test_list(self):
         rp.models.list()
         rp.models.list('UR', 6)
+        rp.models.list(mtype='DH')
 
     def test_puma(self):
         puma = rp.models.DH.Puma560()

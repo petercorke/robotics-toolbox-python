@@ -15,8 +15,8 @@ def list(keywords=None, dof=None, mtype=None):
     - ``list()`` displays a list of all models provided by the Toolbox.  It
       lists the name, manufacturer, model type, number of DoF, and keywords.
 
-    - ``list(mtype=MT)`` as above, but only displays models of type ``MT`` where
-      ``MT`` is one of "DH", "ETS" or "URDF".
+    - ``list(mtype=MT)`` as above, but only displays models of type ``MT``
+      where ``MT`` is one of "DH", "ETS" or "URDF".
 
     - ``list(keywords=KW)`` as above, but only displays models that have a
       keyword in the tuple ``KW``.
@@ -57,7 +57,7 @@ def list(keywords=None, dof=None, mtype=None):
                 robot = cls()
                 try:
                     config = robot.config()
-                except Exception:
+                except Exception:   # pragma nocover
                     config = ""
 
                 # apply filters
