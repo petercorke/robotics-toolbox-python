@@ -2,7 +2,8 @@ import numpy as np
 import math
 from collections import namedtuple
 import matplotlib.pyplot as plt
-from spatialmath.base.argcheck import isvector, getvector, isscalar, assertmatrix
+from spatialmath.base.argcheck import isvector, \
+    getvector, assertmatrix
 
 
 def tpoly(q0, qf, t, qd0=0, qdf=0):
@@ -22,23 +23,24 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     :return: trajectory
     :rtype: namedtuple
 
-    - ``tg = lspb(q0, q1, t)`` is a scalar trajectory (Mx1) that varies smoothly
-      from ``q0`` to ``qf`` using a quintic polynomial.  The initial and final
-      velocity and acceleration are zero. Time ``t`` can be either:
+    - ``tg = lspb(q0, q1, t)`` is a scalar trajectory (Mx1) that varies
+      smoothly from ``q0`` to ``qf`` using a quintic polynomial.  The
+      initial and final velocity and acceleration are zero. Time
+      ``t`` can be either:
 
         * an integer scalar, indicating the total number of timesteps
 
             - Velocity is in units of distance per trajectory step, not per
               second.
             - Acceleration is in units of distance per trajectory step squared,
-              *not* per second squared. 
+              *not* per second squared.
 
-        * an array_like, containing the time steps. 
-        
+        * an array_like, containing the time steps.
+
             - Results are scaled to units of time.
 
     - ``tg = lspb(q0, q1, t, qd0, qdf)`` as above but specify the initial and
-      final velocity. The initial and final acceleration are zero. 
+      final velocity. The initial and final acceleration are zero.
 
     The return value is a namedtuple (named ``tpoly``) with elements:
 
@@ -53,7 +55,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         scaling is based on the first and last element.
 
     References:
-    
+
     - Robotics, Vision & Control, Chap 3,
       P. Corke, Springer 2011.
 
@@ -68,7 +70,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         istime = True
     else:
         raise TypeError('bad argument for time, must be int or vector')
-                
+
     tf = max(t)
     # solve for the polynomial coefficients using least squares
     X = [
@@ -79,9 +81,10 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
             [0,             0,           0,           2,       0,   0],
             [20 * tf ** 3, 12 * tf ** 2, 6 * tf,      2,       0,   0]
     ]
-    coeffs, resid, rank, s =  np.linalg.lstsq(X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None)
+    coeffs, resid, rank, s = np.linalg.lstsq(
+        X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None)
 
-    # coefficients of derivatives 
+    # coefficients of derivatives
     coeffs_d = coeffs[0:5] * np.arange(5, 0, -1)
     coeffs_dd = coeffs_d[0:4] * np.arange(4, 0, -1)
 
@@ -91,6 +94,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     pdd = np.polyval(coeffs_dd, t)
 
     return namedtuple('tpoly', 'x y yd ydd istime')(t, p, pd, pdd, istime)
+
 
 # -------------------------------------------------------------------------- #
 
@@ -108,23 +112,23 @@ def lspb(q0, qf, t, V=None):
     :type V: float
     :return: trajectory
     :rtype: namedtuple
-    
+
     Computes a trapezoidal trajectory, which has a linear motion segment with
     parabolic blends.
 
-    - ``tg = lspb(q0, qf, t)`` is a scalar trajectory (Mx1) that varies smoothly
-      from ``q0`` to ``qf`` in M steps using a constant velocity segment and
-      parabolic blends.  Time ``t`` can be either:
+    - ``tg = lspb(q0, qf, t)`` is a scalar trajectory (Mx1) that varies
+      smoothly from ``q0`` to ``qf`` in M steps using a constant velocity
+      segment and parabolic blends.  Time ``t`` can be either:
 
         * an integer scalar, indicating the total number of timesteps
 
             - Velocity is in units of distance per trajectory step, not per
               second.
             - Acceleration is in units of distance per trajectory step squared,
-              *not* per second squared. 
+              *not* per second squared.
 
-        * an array_like, containing the time steps. 
-        
+        * an array_like, containing the time steps.
+
             - Results are scaled to units of time.
 
     - ``tg = lspb(q0, q1, t, V)``  as above but specifies the velocity of the
@@ -184,7 +188,7 @@ def lspb(q0, qf, t, V=None):
     p = np.zeros((len(t),))
     pd = np.zeros((len(t),))
     pdd = np.zeros((len(t),))
-    
+
     for i, _t in enumerate(t):
 
         if _t <= tb:
@@ -203,14 +207,16 @@ def lspb(q0, qf, t, V=None):
             pd[i] = a * tf - a * _t
             pdd[i] = -a
 
-    return namedtuple('lspb', 'x y yd ydd xblend istime')(t, p, pd, pdd, tb, istime)
+    return namedtuple(
+        'lspb', 'x y yd ydd xblend istime')(t, p, pd, pdd, tb, istime)
+
 
 # -------------------------------------------------------------------------- #
 
-def  jtraj(q0, qf, tv, qd0=None, qd1=None):
+def jtraj(q0, qf, tv, qd0=None, qd1=None):
     """
     Compute a joint-space trajectory
-    
+
     :param q0: initial joint coordinate
     :type q0: N-element array_like
     :param qf: final joint coordinate
@@ -227,37 +233,37 @@ def  jtraj(q0, qf, tv, qd0=None, qd1=None):
     - ``tg = jtraj(q0, qf, M)`` is a joint space trajectory where the joint
       coordinates vary from ``q0`` (N) to ``qf`` (N).  A quintic (5th order)
       polynomial is used with default zero boundary conditions for velocity and
-      acceleration.  
-      Time is assumed to vary from 0 to 1 in ``M`` steps.  
+      acceleration.
+      Time is assumed to vary from 0 to 1 in ``M`` steps.
 
     - ``tg = jtraj(q0, qf, M, qd0, qdf)`` as above but also specifies initial
       ``qd0`` (N) and final ``qdf`` (N) joint velocity for the trajectory.
-    
-    - ``tg = jtraj(q0, qf, tv)``, as above but the number of steps in the
-      trajectory is defined by the length of the time vector ``tv`` (M).    
 
-    - ``tg = jtraj(q0, qf, tv, qd0, qdf)`` as above but specifies initial and 
+    - ``tg = jtraj(q0, qf, tv)``, as above but the number of steps in the
+      trajectory is defined by the length of the time vector ``tv`` (M).
+
+    - ``tg = jtraj(q0, qf, tv, qd0, qdf)`` as above but specifies initial and
       final joint velocity for the trajectory and a time vector.
-    
+
     The return value is a namedtuple (named ``jtraj``) with elements:
 
         - ``t``  the time coordinate as a numpy ndarray, shape=(M,)
         - ``q``  the position as a numpy ndarray, shape=(M,N)
         - ``qd``  the velocity as a numpy ndarray, shape=(M,N)
         - ``qdd``  the acceleration as a numpy ndarray, shape=(M,N)
-    
+
     Notes:
-        
+
     - When a time vector is provided the velocity and acceleration outputs
       are scaled assuming that the time vector starts at zero and increases
       linearly.
-    
+
     :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
     """
     # print(f"  --- jtraj: {q0} --> {q1} in {tv}")
     if isinstance(tv, int):
         tscal = 1.0
-        t = np.linspace(0, 1, tv) # normalized time from 0 -> 1
+        t = np.linspace(0, 1, tv)  # normalized time from 0 -> 1
     else:
         tscal = max(tv)
         t = tv.flatten() / tscal
@@ -265,7 +271,7 @@ def  jtraj(q0, qf, tv, qd0=None, qd1=None):
     q0 = getvector(q0)
     qf = getvector(qf)
     assert len(q0) == len(qf), 'q0 and q1 must be same size'
-    
+
     if qd0 is None:
         qd0 = np.zeros(q0.shape)
     else:
@@ -278,28 +284,32 @@ def  jtraj(q0, qf, tv, qd0=None, qd1=None):
         assert len(qd1) == len(q0), 'qd1 has wrong size'
 
     # compute the polynomial coefficients
-    A =   6 * (qf - q0) - 3 * (qd1 + qd0) * tscal
+    A = 6 * (qf - q0) - 3 * (qd1 + qd0) * tscal
     B = -15 * (qf - q0) + (8 * qd0 + 7 * qd1) * tscal
-    C =  10 * (qf - q0) - (6 * qd0 + 4 * qd1) * tscal
-    E =       qd0 * tscal #  as the t vector has been normalized
-    F =       q0
-    
-    n = len(q0)
-    
+    C = 10 * (qf - q0) - (6 * qd0 + 4 * qd1) * tscal
+    E = qd0 * tscal  # as the t vector has been normalized
+    F = q0
+
+    # n = len(q0)
+
     tt = np.array([t**5, t**4, t**3, t**2, t, np.ones(t.shape)]).T
     coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])
-    
+
     qt = tt @ coeffs
-    
+
     # compute  velocity
-    coeffs = np.array([np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E])
+    coeffs = np.array(
+        [np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E])
     qdt = tt @ coeffs / tscal
 
     # compute  acceleration
-    coeffs = np.array([np.zeros(A.shape), np.zeros(A.shape), 20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
+    coeffs = np.array([
+        np.zeros(A.shape), np.zeros(A.shape),
+        20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
     qddt = tt @ coeffs / tscal ** 2
 
     return namedtuple('jtraj', 't q qd qdd')(tt, qt, qdt, qddt)
+
 
 def t1plot(tg, block=True):
     """
@@ -317,32 +327,32 @@ def t1plot(tg, block=True):
     plotargs = {'markersize': 3}
     textargs = {'fontsize': 12}
 
-    fig = plt.figure()
+    plt.figure()
     ax = plt.subplot(3, 1, 1)
 
     # plot position
     if type(tg).__name__ == 'tpoly':
-        ax.plot(tg.x, tg.y, '-o', **plotargs); 
+        ax.plot(tg.x, tg.y, '-o', **plotargs)
 
     elif type(tg).__name__ == 'lspb':
-            # accel phase
-            tf = tg.x[-1]
-            k = tg.x <= tg.xblend
-            ax.plot(tg.x[k], tg.y[k], 'ro-', **plotargs)
+        # accel phase
+        tf = tg.x[-1]
+        k = tg.x <= tg.xblend
+        ax.plot(tg.x[k], tg.y[k], 'ro-', **plotargs)
 
-            # coast phase
-            k = (tg.x > tg.xblend) & (tg.x <= (tf-tg.xblend))
-            ax.plot(tg.x[k], tg.y[k], 'bo-', **plotargs)
-            k = np.where(k)[0][0]
-            ax.plot(tg.x[k-1:k+1], tg.y[k-1:k+1], 'b-', **plotargs)
+        # coast phase
+        k = (tg.x > tg.xblend) & (tg.x <= (tf-tg.xblend))
+        ax.plot(tg.x[k], tg.y[k], 'bo-', **plotargs)
+        k = np.where(k)[0][0]
+        ax.plot(tg.x[k-1:k+1], tg.y[k-1:k+1], 'b-', **plotargs)
 
-            # decel phase
-            k = tg.x > (tf - tg.xblend)
-            ax.plot(tg.x[k], tg.y[k], 'go-', **plotargs)
-            k = np.where(k)[0][0]
-            ax.plot(tg.x[k-1:k+1], tg.y[k-1:k+1], 'g-', **plotargs)
+        # decel phase
+        k = tg.x > (tf - tg.xblend)
+        ax.plot(tg.x[k], tg.y[k], 'go-', **plotargs)
+        k = np.where(k)[0][0]
+        ax.plot(tg.x[k-1:k+1], tg.y[k-1:k+1], 'g-', **plotargs)
 
-            ax.grid(True)
+        ax.grid(True)
     else:
         raise TypeError('unknown 1D trajectory tuple')
 
@@ -355,17 +365,17 @@ def t1plot(tg, block=True):
 
     # plot velocity
     ax = plt.subplot(3, 1, 2)
-    ax.plot(tg.x, tg.yd, '-o', **plotargs); 
+    ax.plot(tg.x, tg.yd, '-o', **plotargs)
     ax.grid(True)
 
     if tg.istime:
         ax.set_ylabel('$ds/dt$', **textargs)
     else:
         ax.set_ylabel('$ds/dk$', **textargs)
-    
+
     # plot acceleration
     ax = plt.subplot(3, 1, 3)
-    ax.plot(tg.x, tg.ydd, '-o', **plotargs); 
+    ax.plot(tg.x, tg.ydd, '-o', **plotargs)
     ax.grid(True)
     if tg.istime:
         ax.set_ylabel('$ds^2/dt^2$', **textargs)
@@ -386,13 +396,13 @@ def qplot(q, t=None, block=True):
     :param t: time vector, optional
     :type t: numpy ndarray, shape=(M,)
 
-    This is a convenience function to plot joint angle trajectories (MxN) for 
+    This is a convenience function to plot joint angle trajectories (MxN) for
     an N-axis robot, where each row represents one time step.
 
     - ``qplot(q)`` plots the joint angles versus row number.  If N==6 a
-      conventional 6-axis robot is assumed, and the first three joints are shown
-      as solid lines, the last three joints (wrist) are shown as dashed lines.
-      A legend is also displayed.
+      conventional 6-axis robot is assumed, and the first three joints are
+      shown as solid lines, the last three joints (wrist) are shown as dashed
+      lines. A legend is also displayed.
 
     - ``qplot(q, t)`` as above but displays the joint angle trajectory versus
       time given the time vector T (Mx1).
@@ -407,11 +417,11 @@ def qplot(q, t=None, block=True):
     n = q.shape[1]
     fig, ax = plt.subplots()
     if n == 6:
-        plt.plot(t, q[:,0:3])
-        plt.plot(t, q[:,3:6], '--')
+        plt.plot(t, q[:, 0:3])
+        plt.plot(t, q[:, 3:6], '--')
     else:
         plt.plot(t, q)
-    
+
     ax.legend([f"q{i+1}" for i in range(n)])
 
     plt.grid(True)
@@ -420,6 +430,7 @@ def qplot(q, t=None, block=True):
     ax.set_xlim(t[0], t[-1])
 
     plt.show(block=block)
+
 
 # -------------------------------------------------------------------------- #
 
@@ -434,13 +445,15 @@ def ctraj(T0, T1, s):
     :return T0: smooth path from ``T0`` to ``T1``
     :rtype: SE3
 
-    ``ctraj(T0, T1, n)`` is a Cartesian trajectory from SE3 pose ``T0`` to ``T1``
-    with ``n`` points that follow a trapezoidal velocity profile along the path.
-    The Cartesian trajectory is an SE3 instance containing ``n`` values. 
+    ``ctraj(T0, T1, n)`` is a Cartesian trajectory from SE3 pose ``T0`` to
+    ``T1`` with ``n`` points that follow a trapezoidal velocity profile along
+    the path. The Cartesian trajectory is an SE3 instance containing ``n``
+    values.
 
-    ``ctraj(T0, T1, s)`` as above but the elements of ``s`` specify the 
-    fractional distance  along the path, and these values are in the range [0 1].
-    The i'th point corresponds to a distance ``s[i]`` along the path.
+    ``ctraj(T0, T1, s)`` as above but the elements of ``s`` specify the
+    fractional distance  along the path, and these values are in the
+    range [0 1]. The i'th point corresponds to a distance ``s[i]`` along
+    the path.
 
     Examples::
 
@@ -450,9 +463,10 @@ def ctraj(T0, T1, s):
 
     Notes:
 
-    - In the second case ``s`` could be generated by a scalar trajectory generator
-      such as ``tpoly`` or ``lspb`` (default).
-    - Orientation interpolation is performed using unit-quaternion interpolation.
+    - In the second case ``s`` could be generated by a scalar trajectory
+      generator such as ``tpoly`` or ``lspb`` (default).
+    - Orientation interpolation is performed using unit-quaternion
+      interpolation.
 
     Reference:
 
@@ -461,7 +475,7 @@ def ctraj(T0, T1, s):
 
     :seealso: :func:`~roboticstoolbox.trajectory.lspb`, :func:`~spatialmath.unitquaternion.interp`
     """
-    
+
     if isinstance(s, int):
         s = lspb(0, 1, s).y
     elif isvector(s):
@@ -471,15 +485,19 @@ def ctraj(T0, T1, s):
 
     return T1.interp(s, start=T0)
 
+
 def cmstraj():
     pass
 
+
 # -------------------------------------------------------------------------- #
 
-def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qdf=None, verbose=False):
+def mstraj(
+        viapoints, dt, tacc, qdmax=None, tsegment=None,
+        q0=None, qd0=None, qdf=None, verbose=False):
     """
     Multi-segment multi-axis trajectory
-    
+
     :param viapoints: A set of viapoints, one per row
     :type viapoints: numpy.ndarray
     :param dt: time step
@@ -488,7 +506,8 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     :type tacc: float
     :param qdmax: maximum speed, defaults to None
     :type qdmax: array_like or float, optional
-    :param tsegment: maximum time of each motion segment (seconds), defaults to None
+    :param tsegment: maximum time of each motion segment (seconds), defaults
+      to None
     :type tsegment: array_like, optional
     :param q0: initial coordinates, defaults to first row of viapoints
     :type q0: array_like, optional
@@ -501,13 +520,15 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     :return: trajectory plus extra info
     :rtype: namedtuple
 
-    Computes a trajectory for N axes moving smoothly through a set of viapoints.
+    Computes a trajectory for N axes moving smoothly through a set of
+    viapoints.
     The motion comprises M segments:
 
     - The initial coordinates are the first row of ``viapoints`` or ``q0`` if
       provided.
     - The final coordinates are the last row of ``viapoints``
-    - Each segment is linear motion and polynomial blends connect the viapoints.
+    - Each segment is linear motion and polynomial blends connect the
+      viapoints.
     - All joints arrive at each via point at the same time, ie. the motion is
       coordinated across axes
 
@@ -516,8 +537,8 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     #. In terms of segment time where ``tsegment`` is an array of segment times
        which is the number of via points minus one::
 
-            ``traj = mstraj(viapoints, dt, tacc, tsegment=TS)`` 
-    
+            ``traj = mstraj(viapoints, dt, tacc, tsegment=TS)``
+
     #. Governed by the speed of the slowest axis for the segment.  The axis
        speed is a scalar (all axes have the same speed) or an N-vector of speed
        per axis::
@@ -534,7 +555,7 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
         - ``via`` the passed set of via points
 
     The  trajectory proper is (``traj.t``, ``traj.q``).  The trajectory is a
-    matrix has one row per time step, and one column per axis.  
+    matrix has one row per time step, and one column per axis.
 
      Notes:
 
@@ -555,15 +576,15 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     """
 
     if q0 is None:
-        q0 = viapoints[0,:]
-        viapoints = viapoints[1:,:]
+        q0 = viapoints[0, :]
+        viapoints = viapoints[1:, :]
     else:
         q0 = getvector(q0)
         assert viapoints.shape[1] == len(q0), 'WP and Q0 must have same number of columns'
 
     ns, nj = viapoints.shape
     Tacc = tacc
-    
+
     assert not (qdmax is not None and tsegment is not None), 'cannot specify both qdmax and tsegment'
     if qdmax is None:
         assert tsegment is not None, 'tsegment must be given if qdmax is not'
@@ -576,7 +597,7 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
         else:
             qdmax = getvector(qdmax)
             assert len(qdmax) == nj, 'Length of QDMAX does not match number of axes'
-    
+
     if isinstance(Tacc, (int, float)):
         Tacc = np.tile(Tacc, (ns,))
     else:
@@ -677,16 +698,17 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
         if verbose:
             print(f"seg {seg}, distance {dq}, slowest axis {slowest}, time required {tseg}")
 
-        ## create the trajectories for this segment
+        # create the trajectories for this segment
 
         # linear velocity from qprev to qnext
         qd = dq / tseg
 
         # add the blend polynomial
-        qb = jtraj(q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd).q
+        qb = jtraj(
+            q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd).q
         if verbose:
             print(qb)
-        tg = np.vstack([tg, qb[1:,:]])
+        tg = np.vstack([tg, qb[1:, :]])
 
         clock = clock + taccx     # update the clock
 
@@ -703,8 +725,10 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
 
     # add the final blend
     qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).q
-    tg = np.vstack([tg, qb[1:,:]])
+    tg = np.vstack([tg, qb[1:, :]])
 
     infolist.append(info(None, tseg, clock))
-    
-    return namedtuple('mstraj', 't q arrive info via')(dt * np.arange(0, tg.shape[0]), tg, arrive, infolist, viapoints)
+
+    return namedtuple(
+        'mstraj', 't q arrive info via')(
+            dt * np.arange(0, tg.shape[0]), tg, arrive, infolist, viapoints)
