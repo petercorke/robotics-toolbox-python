@@ -23,7 +23,7 @@ from roboticstoolbox.backends.Swift import Swift
 try:
     import PIL
     _pil_exists = True
-except ImportError:
+except ImportError:    # pragma nocover
     _pil_exists = False
 
 # TODO maybe this needs to be abstract
@@ -54,6 +54,7 @@ class Robot:
         self.base = base
         self.tool = tool
         self.basemesh = None
+
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
         else:
@@ -66,6 +67,7 @@ class Robot:
         # validate the links, must be a list of Link subclass objects
         if not isinstance(links, list):
             raise TypeError('The links must be stored in a list.')
+
         for link in links:
             if not isinstance(link, Link):
                 raise TypeError('links should all be Link subclass')
@@ -223,7 +225,7 @@ class Robot:
 
             if fmt is not None:
                 return fmt.format(theta * deg) + "\u00b0"
-            else:
+            else:  # pragma nocover
                 return str(theta * deg) + "\u00b0"
 
         config = self.config()
@@ -246,7 +248,7 @@ class Robot:
                 table.row(name, *qlist)
 
             return "\n" + str(table)
-        else:
+        else:  # pragma nocover
             return ""
 
     def dyntable(self):
@@ -328,6 +330,7 @@ class Robot:
         else:
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
+
 # --------------------------------------------------------------------- #
 
     @property
@@ -772,8 +775,8 @@ class Robot:
                 if not np.sum(np.abs(q)) == 0:
                     return q, True, err
 
-            q = np.array([])
-            return q, False, err
+            q = np.array([])   # pragma nocover
+            return q, False, err   # pragma nocover
 
         if not self.n >= np.sum(mask):
             raise ValueError('Number of robot DOF must be >= the same number '

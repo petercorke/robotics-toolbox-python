@@ -8,7 +8,50 @@ import roboticstoolbox as rp
 import spatialmath as sm
 import unittest
 
+
 class TestRobot(unittest.TestCase):
+
+    def test_init(self):
+        l0 = rp.PrismaticDH()
+        l1 = rp.RevoluteDH()
+
+        with self.assertRaises(TypeError):
+            rp.DHRobot([l0, l1], keywords=1)
+
+        with self.assertRaises(TypeError):
+            rp.Robot(l0)
+
+        with self.assertRaises(TypeError):
+            rp.Robot([l0, 1])
+
+    def test_configurations_str(self):
+        r = rp.models.DH.Puma560()
+        r.configurations_str()
+
+        r2 = rp.models.ETS.Frankie()
+        r2.configurations_str()
+
+    def test_dyntable(self):
+        r = rp.models.DH.Puma560()
+        r.dyntable()
+
+    def test_linkcolormap(self):
+        r = rp.models.DH.Puma560()
+        r.linkcolormap()
+
+        r.linkcolormap(['r', 'r', 'r', 'r', 'r', 'r'])
+
+    def test_base_error(self):
+        r = rp.models.DH.Puma560()
+
+        with self.assertRaises(ValueError):
+            r.base = 2
+
+    def test_tool_error(self):
+        r = rp.models.DH.Puma560()
+
+        with self.assertRaises(ValueError):
+            r.tool = 2
 
     def test_links(self):
 
@@ -23,7 +66,6 @@ class TestRobot(unittest.TestCase):
         self.assertIs(r0[1], l1)
         self.assertIs(r0[2], l2)
         self.assertIs(r0[3], l3)
-
 
     def test_ikine(self):
         panda = rp.models.DH.Panda()
@@ -110,6 +152,13 @@ class TestRobot(unittest.TestCase):
         nt.assert_array_almost_equal(
             T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
 
-if __name__ == '__main__':
+    def test_plot_swift(self):
+        r = rp.models.Panda()
+
+        env = r.plot(r.q, block=False)
+        env.close()
+
+
+if __name__ == '__main__':  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
