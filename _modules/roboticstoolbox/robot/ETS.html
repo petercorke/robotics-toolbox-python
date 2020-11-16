@@ -715,7 +715,7 @@
                         <span class="n">_j</span> <span class="o">=</span> <span class="n">j</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">_j</span> <span class="o">=</span> <span class="n">et</span><span class="o">.</span><span class="n">jindex</span>
-                    <span class="n">qvar</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_j</span><span class="p">,</span> <span class="n">_j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">qvar</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_j</span><span class="p">,</span> <span class="n">_j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># lgtm [py/str-format/surplus-argument]  # noqa</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">qvar</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
                 <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isflip</span><span class="p">:</span>
