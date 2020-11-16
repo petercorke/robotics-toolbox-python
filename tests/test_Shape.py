@@ -4,7 +4,7 @@
 """
 
 # import numpy.testing as nt
-# import numpy as np
+import numpy as np
 import roboticstoolbox as rp
 import unittest
 import spatialmath as sm
@@ -79,3 +79,7 @@ class TestShape(unittest.TestCase):
 
         self.assertTrue(c0)
         self.assertFalse(c1)
+
+    def test_wt(self):
+        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
+        s0.wT = np.eye(4)
