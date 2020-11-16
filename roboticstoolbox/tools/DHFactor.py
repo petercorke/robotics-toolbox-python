@@ -84,7 +84,7 @@ class Element:     # pragma nocover
                     constant = float(sRest)
                     if negative == "-":
                         constant = -constant
-                        negative = ""
+                        # negative = ""
                 except Exception:
                     raise ValueError("bad argument in term " + stringIn)
 
@@ -279,7 +279,7 @@ class Element:     # pragma nocover
                     s[i] = "+"
                 if s[0] == "+":
                     s.pop(0)
-        s = "".join(s)
+        s = "".join(s)    # lgtm [py/unused-local-variable]
 
     '''
     Return a string representation of the parameters (argument)

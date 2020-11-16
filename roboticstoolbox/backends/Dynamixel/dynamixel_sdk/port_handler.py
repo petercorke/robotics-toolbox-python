@@ -22,7 +22,7 @@
 import time
 import serial
 import sys
-import platform
+import platform  # lgtm [py/unused-import]
 
 LATENCY_TIMER = 16
 DEFAULT_BAUDRATE = 1000000

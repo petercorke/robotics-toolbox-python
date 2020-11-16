@@ -13,12 +13,12 @@
 # % rtb
 
 # import stuff
-from math import pi
+from math import pi              # lgtm [py/unused-import]
 import numpy as np
-import matplotlib as plt
-import roboticstoolbox as rtb
-from spatialmath import *
-from spatialmath.base import *
+import matplotlib as plt         # lgtm [py/unused-import]
+import roboticstoolbox as rtb    # lgtm [py/unused-import]
+from spatialmath import *        # lgtm [py/polluting-import]
+from spatialmath.base import *   # lgtm [py/polluting-import]
 
 # setup defaults
 np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"})

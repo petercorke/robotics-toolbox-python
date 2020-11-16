@@ -1,13 +1,9 @@
-
 #!/usr/bin/env python
 """
 @author Jesse Haviland
 """
 
 import roboticstoolbox as rp
-import spatialmath as sm
-import numpy as np
-import qpsolvers as qp
 
 # # Launch the simulator Swift
 # env = rtb.backends.Swift()
@@ -51,84 +47,3 @@ print(l0)
 
 # while 1:
 #     pass
-
-
-
-
-
-
-
-
-
-
-# import webbrowser as wb
-# import asyncio
-# import datetime
-# import random
-# import websockets
-# import threading
-# import time
-# from queue import Queue
-
-
-# class Socket:
-
-#     def __init__(self):
-#         print('Server Started')
-#         self.loop = asyncio.new_event_loop()
-#         asyncio.set_event_loop(self.loop)
-
-#         start_server = websockets.serve(self.serve, "localhost", 8997)
-
-#         self.loop.run_until_complete(start_server)
-#         self.loop.run_forever()
-
-#     async def serve(self, websocket, path):
-#         # while True:
-#             # message = await self.producer()
-#         await websocket.send('51111')
-#         self.loop.stop()
-
-#     # async def producer(self):
-#     #     data = self.q.get()
-#     #     # await asyncio.sleep(1)
-#     #     # now = datetime.datetime.utcnow().isoformat() + "Z"
-
-#     #     return data
-
-
-# # q = Queue()
-# # # x = threading.Thread(target=Socket, args=(q, ), daemon=True)
-# # # x.start()
-# Socket()
-
-
-# while 1:
-#     time.sleep(1)
-#     print('hello')
-#     # q.put('hi')
-
-
-# wb.open_new_tab('http://www.google.com')
-
-# def send(data):
-
-
-
-# panda = rp.models.Panda()
-# panda.q = panda.qr
-
-# Tep = panda.fkine() * sm.SE3.Tx(-0.2) * sm.SE3.Ty(0.2) * sm.SE3.Tz(0.2)
-
-# arrived = False
-# # env.add(panda)
-
-# dt = 0.05
-
-# while not arrived:
-
-#     v, arrived = rp.p_servo(panda.fkine(), Tep, 1)
-#     panda.qd = np.linalg.pinv(panda.jacobe()) @ v
-#     time.sleep(1)
-
-    # env.step(50)

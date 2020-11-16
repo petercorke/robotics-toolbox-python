@@ -340,10 +340,10 @@ class DynRobot:
         pass
 
     def syncread_config(self, regnames, indirectbase=1):
-        sr = SyncIO()
+        sr = SyncIO()   # lgtm [py/unused-local-variable]
 
         for id in self.idlist:
-            (a, l) = d.register_indirect_config(id, indirectbase, regnames)
+            (a, l) = d.register_indirect_config(id, indirectbase, regnames)     # lgtm [py/unused-local-variable]
 
     def setmode(self, m):
         self.dynamixels.set(self.idlist, 'drivemode', m)
@@ -356,7 +356,7 @@ class DynRobot:
     def getpos(self):
         pass
 
-    def syncwrite_config():
+    def syncwrite_config(self):
         pass
 
     def enable(self, on):

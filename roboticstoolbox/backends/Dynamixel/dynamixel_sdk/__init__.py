@@ -19,9 +19,9 @@
 
 # Author: Ryu Woon Jung (Leon)
 
-from .port_handler import *
-from .packet_handler import *
-from .group_sync_read import *
-from .group_sync_write import *
-from .group_bulk_read import *
-from .group_bulk_write import *
+from .port_handler import *   # lgtm [py/polluting-import]
+from .packet_handler import *   # lgtm [py/polluting-import]
+from .group_sync_read import *   # lgtm [py/polluting-import]
+from .group_sync_write import *   # lgtm [py/polluting-import]
+from .group_bulk_read import *   # lgtm [py/polluting-import]
+from .group_bulk_write import *   # lgtm [py/polluting-import]
