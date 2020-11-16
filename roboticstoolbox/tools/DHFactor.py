@@ -3,7 +3,7 @@
 """
 
 
-class Element:
+class Element:     # pragma nocover
 
     TX = 0
     TY = 1
