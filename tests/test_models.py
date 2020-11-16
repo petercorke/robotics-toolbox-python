@@ -5,6 +5,7 @@
 
 import roboticstoolbox as rp
 import unittest
+import numpy.testing as nt
 
 
 class TestModels(unittest.TestCase):
@@ -12,6 +13,7 @@ class TestModels(unittest.TestCase):
     def test_list(self):
         rp.models.list()
         rp.models.list('UR', 6)
+        rp.models.list(mtype='DH')
 
     def test_puma(self):
         puma = rp.models.DH.Puma560()
@@ -144,3 +146,22 @@ class TestModels(unittest.TestCase):
 
     def test_pr2(self):
         rp.models.PR2()
+
+    def test_ikine6s_puma(self):
+        self.skipTest("Need new spatialmath pypi release")
+        r0 = rp.models.DH.Puma560()
+        q = r0.qr
+        T = r0.fkine(q)
+
+        qr0 = [
+            2.68943591e-01, 1.61780018e+00, -1.57079633e+00, -1.43934287e-18,
+            -4.70038498e-02, -2.68943591e-01]
+        qr1 = [
+            1.77635684e-15,  1.57079633e+00, -1.57079633e+00,  3.14159265e+00,
+            -5.77315973e-15,  3.14159265e+00]
+
+        q0 = r0.ikine_a(T)
+        q1 = r0.ikine_a(T, 'rdf')
+
+        nt.assert_array_almost_equal(q0, qr0, decimal=4)
+        nt.assert_array_almost_equal(q1, qr1, decimal=4)

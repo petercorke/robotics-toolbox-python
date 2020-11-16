@@ -119,7 +119,7 @@ class DHRobot(Robot, DHDynamicsMixin):
             return s
 
         def angle(theta, fmt=None):
-            if sym.issymbol(theta):
+            if sym.issymbol(theta):   # pragma nocover
                 return "<<red>>" + str(theta)
             else:
                 if fmt is not None:
@@ -872,10 +872,10 @@ class DHRobot(Robot, DHDynamicsMixin):
             Tj = SE3()
         first = True
         Tall = Tj
-        # print(Tj)
+
         for q, L in zip(q, self.links):
             if first:
-                # print(q, L.A(q))
+
                 Tj *= L.A(q)
                 if old:
                     Tall = Tj
@@ -913,7 +913,7 @@ class DHRobot(Robot, DHDynamicsMixin):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
-        """
+        """  # noqa
 
         if q is None:
             q = np.copy(self.q)
@@ -979,7 +979,7 @@ class DHRobot(Robot, DHDynamicsMixin):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
-        """
+        """  # noqa
         q = self._getq(q)
 
         if T is None:
@@ -1152,7 +1152,7 @@ class DHRobot(Robot, DHDynamicsMixin):
               manipulators: The operational space formulation
               O Khatib, IEEE Journal on Robotics and Automation, 1987.
 
-        """
+        """  # noqa
 
         if q is None:
             q = self.q
@@ -1385,399 +1385,17 @@ class DHRobot(Robot, DHDynamicsMixin):
         else:
             return qt
 
-    def ikine_6s(self, T, config, _ikfunc):
-        # Undo base and tool transformations, but if they are not
-        # set, skip the operation.  Nicer for symbolics
-        if self._base is not None:
-            T = self.base.inv() * T
-        if self._tool is not None:
-            T = self.tool.inv() * T
-
-        q = np.zeros((len(T), 6))
-        for k, Tk in enumerate(T):
-            theta = _ikfunc(Tk, config)
-
-            if not np.all(np.isnan(theta)):
-                # Solve for the wrist rotation
-                # We need to account for some random translations between the
-                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
-                # final frame.
-
-                # Transform of first 3 joints
-                T13 = self.A([0, 2], theta)
-
-                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
-                Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
-
-                # Tz(d6) Tx(a5) Rx(alpha6)
-                Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
-                    SE3.Rx(self.links[5].alpha)
-
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
-
-                # The spherical wrist implements Euler angles
-                if 'f' in config:
-                    eul = R.eul(flip=True)
-                else:
-                    eul = R.eul()
-                theta = np.r_[theta, eul]
-                if self.links[3].alpha > 0:
-                    theta[4] = -theta[4]
-
-                # Remove the link offset angles
-                theta = theta - self.offset
-
-                q[k, :] = theta
-
-            if q.shape[0] == 1:
-                return q[0]
-            else:
-                return q
-
-    # def ikine_6s(self, T, left=True, elbow_up=True, wrist_flip=False):
-    #     """
-    #     Analytical inverse kinematics
-
-    #     q, err = ikine6s(T) are the joint coordinates (n) corresponding to the
-    #     robot end-effector pose T which is an SE3 object or homogenenous
-    #     transform matrix (4x4), and n is the number of robot joints. This
-    #     is an analytic solution for a 6-axis robot with a spherical wrist
-    #     (the most common form for industrial robot arms).
-
-    #     q, err = ikine6s(T, left, elbow_up, wrist_flip) as above except the
-    #     arm location, elbow position, and wrist orientation can be specified.
-
-    #     Trajectory operation:
-    #     In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
-    #     transform sequence (4x4xM) then the inverse kinematics is computed for
-    #     all m poses resulting in q (mxn) with each row representing the joint
-    #     angles at the corresponding pose.
-
-    #     :param T: The desired end-effector pose
-    #     :type T: SE3 or SE3 trajectory
-    #     :param left: True for arm to the left (default), else arm to the right
-    #     :type left: bool
-    #     :param elbow_up: True for elbow up (default), else elbow down
-    #     :type elbow_up: bool
-    #     :param wrist_flip: False for wrist not flipped (default), else wrist
-    #         flipped (rotated by 180 deg)
-    #     :type wrist_flip: bool
-
-    #     :return q: The calculated joint values
-    #     :rtype q: float ndarray(n)
-    #     :return err: Any errors encountered
-    #     :rtype err: list String
-
-    #     :notes:
-    #         - Treats a number of specific cases:
-    #             - Robot with no shoulder offset
-    #             - Robot with a shoulder offset (has lefty/righty configuration)
-    #             - Robot with a shoulder offset and a prismatic third joint
-    #               (like Stanford arm)
-    #         - The Puma 560 arms with shoulder and elbow offsets (4 lengths
-    #           parameters)
-    #         - The Kuka KR5 with many offsets (7 length parameters)
-    #         - The inverse kinematics for the various cases determined using
-    #           ikine_sym.
-    #         - The inverse kinematic solution is generally not unique, and
-    #           depends on the configuration string.
-    #         - Joint offsets, if defined, are added to the inverse kinematics
-    #           to generate q.
-    #         - Only applicable for standard Denavit-Hartenberg parameters
-
-    #     :reference:
-    #         - Inverse kinematics for a PUMA 560,
-    #           Paul and Zhang,
-    #           The International Journal of Robotics Research,
-    #           Vol. 5, No. 2, Summer 1986, p. 32-44
-
-    #     """
-
-    #     if not self.n == 6:
-    #         raise ValueError(
-    #             "Function only applicable to six degree of freedom robots")
-
-    #     if self.mdh:
-    #         raise ValueError(
-    #             "Function only applicable to robots with standard DH "
-    #             "parameters")
-
-    #     if not self.isspherical():
-    #         raise ValueError(
-    #             "Function only applicable to robots with a spherical wrist")
-
-    #     if not isinstance(T, SE3):
-    #         T = SE3(T)
-
-    #     trajn = len(T)
-
-    #     sol = [1, 1, 1]
-
-    #     if not left:
-    #         sol[0] = 2
-
-    #     if not elbow_up:
-    #         sol[1] = 2
-
-    #     if wrist_flip:
-    #         sol[2] = 2
-
-    #     if self._is_simple():
-    #         self.ikineType = 'nooffset'
-    #     elif self._is_puma():
-    #         self.ikineType = 'puma'
-    #     elif self._is_offset():
-    #         self.ikineType = 'offset'
-    #     elif self._is_rrp():
-    #         self.ikineType = 'rrp'
-    #     else:
-    #         raise ValueError('This kinematic structure not supported')
-
-    #     q = np.zeros((trajn, self.n))
-    #     err = []
-
-    #     for j in range(trajn):
-
-    #         theta = np.zeros(self.n)
-
-    #         # Undo base and tool transformations
-    #         Ti = np.linalg.inv(self.base.A) @ T[j].A @ \
-    #             np.linalg.inv(self.tool.A)
-
-    #         if self.ikineType == 'puma':
-    #             # Puma model with shoulder and elbow offsets
-    #             # - Inverse kinematics for a PUMA 560,
-    #             #   Paul and Zhang,
-    #             #   The International Journal of Robotics Research,
-    #             #   Vol. 5, No. 2, Summer 1986, p. 32-44
-
-    #             a2 = self.links[1].a
-    #             a3 = self.links[2].a
-    #             d1 = self.links[0].d
-    #             d3 = self.links[2].d
-    #             d4 = self.links[3].d
-
-    #             # The following parameters are extracted from the Homogeneous
-    #             # Transformation as defined in equation 1, p. 34
-
-    #             Px = Ti[0, 3]
-    #             Py = Ti[1, 3]
-    #             Pz = Ti[2, 3] - d1
-
-    #             # Solve for theta[0]
-    #             # r is defined in equation 38, p. 39.
-    #             # theta[0] uses equations 40 and 41, p.39,
-    #             # based on the configuration parameter n1
-
-    #             r = np.sqrt(Px**2 + Py**2)
-    #             if sol[0] == 1:
-    #                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
-    #             else:
-    #                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-
-    #             # Solve for theta[1]
-    #             # V114 is defined in equation 43, p.39.
-    #             # r is defined in equation 47, p.39.
-    #             # Psi is defined in equation 49, p.40.
-    #             # theta[1] uses equations 50 and 51, p.40, based on the
-    #             # configuration parameter n2
-    #             if sol[1] == 1:
-    #                 n2 = -1
-    #             else:
-    #                 n2 = 1
-
-    #             if sol[0] == 2:
-    #                 n2 = -n2
-
-    #             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
-
-    #             r = np.sqrt(V114**2 + Pz**2)
-
-    #             Psi = np.arccos(
-    #                 (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
-    #                 / (2.0 * a2 * r))
-
-    #             if np.isnan(Psi):
-    #                 theta = []
-    #             else:
-    #                 theta[1] = np.arctan2(Pz, V114) + n2 * Psi
-
-    #                 # Solve for theta[2]
-    #                 # theta[2] uses equation 57, p. 40.
-    #                 num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
-    #                 den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
-    #                 theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
-
-    #         elif self.ikineType == 'nooffset':
-    #             a2 = self.links[1].a
-    #             a3 = self.links[2].a
-    #             d1 = self.links[0].d
-
-    #             px = Ti[0, 3]
-    #             py = Ti[1, 3]
-    #             pz = Ti[2, 3]
-
-    #             # Autogenerated code
-    #             if self.links[0].alpha < 0:
-    #                 if sol[0] == 1:
-    #                     temp = -px - py * 1j
-    #                     if np.abs(temp) == 0:
-    #                         temp = 0
-    #                     theta[0] = np.angle(temp)
-    #                 else:
-    #                     theta[0] = np.angle(px + py * 1j)
-
-    #                 print(theta[0])
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = -np.angle(a2*d1*-2.0+a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j-np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-    #                 else:
-    #                     theta[1] = -np.angle(a2*d1*-2.0+a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j+np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = -np.angle(a2*-1j+C2*d1-C2*pz+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j-np.sqrt(0j+(-a2+S2*d1-S2*pz+C1*C2*px+C2*S1*py)**2+(-C2*d1+C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j+C2*d1-C2*pz+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+(-a2+S2*d1-S2*pz+C1*C2*px+C2*S1*py)**2+(-C2*d1+C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-
-    #             else:
-    #                 if sol[0] == 1:
-    #                     theta[0] = np.angle(px + py * 1j)
-    #                 else:
-    #                     temp = -px - py * 1j
-    #                     if np.abs(temp) == 0:
-    #                         temp = 0
-    #                     theta[0] = np.angle(temp)
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = -np.angle(a2*d1*2.0-a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j-np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-    #                 else:
-    #                     theta[1] = -np.angle(a2*d1*2.0-a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j+np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = -np.angle(a2*-1j-C2*d1+C2*pz-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j-np.sqrt(0j+(-a2-S2*d1+S2*pz+C1*C2*px+C2*S1*py)**2+(C2*d1-C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j-C2*d1+C2*pz-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+(-a2-S2*d1+S2*pz+C1*C2*px+C2*S1*py)**2+(C2*d1-C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-
-    #         elif self.ikineType == 'offset':
-    #             # General case with 6 length parameters
-    #             a1 = self.links[0].a
-    #             a2 = self.links[1].a
-    #             a3 = self.links[2].a
-    #             d1 = self.links[0].d
-    #             d2 = self.links[1].d
-    #             d3 = self.links[2].d
-
-    #             px = Ti[0, 3]
-    #             py = Ti[1, 3]
-    #             pz = Ti[2, 3]
-
-    #             # Autogenerated code
-    #             if self.links[0].alpha < 0:
-
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(-px+py*1j)+np.angle(d2*1j+d3*1j-np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = np.angle(d2*1j+d3*1j+np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))-np.angle(-px+py*1j)  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(d1*pz*2.0j-np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(d1*pz*2.0j+np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = np.angle(a3*1j-np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0-S2*a2*d1*2.0-S1*a1*py*2.0+S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0+0j))-np.angle(a2*-1j-C2*a1*1j+C2*d1-C2*pz+S2*a1+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j-C2*a1*1j+C2*d1-C2*pz+S2*a1+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0-S2*a2*d1*2.0-S1*a1*py*2.0+S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))  # noqa
-
-    #             else:
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+d3*1j-np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+d3*1j+np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(d1*pz*2.0j-np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j-d1+pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(d1*pz*2.0j+np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-    #                     print(theta[1])
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = np.angle(a3*1j-np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0+S2*a2*d1*2.0-S1*a1*py*2.0-S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))-np.angle(a2*-1j-C2*a1*1j-C2*d1+C2*pz+S2*a1-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j-C2*a1*1j-C2*d1+C2*pz+S2*a1-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0+S2*a2*d1*2.0-S1*a1*py*2.0-S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))  # noqa
-
-    #         elif self.ikineType == 'rrp':
-    #             # RRP (Stanford arm like)
-    #             px = Ti[0, 3]
-    #             py = Ti[1, 3]
-    #             pz = Ti[2, 3]
-    #             d1 = self.links[0].d
-    #             d2 = self.links[1].d
-
-    #             # Autogenerated code
-    #             if self.links[0].alpha < 0:
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(-px+py*1j)+np.angle(d2*1j-np.sqrt(0j+-d2**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = np.angle(d2*1j+np.sqrt(0j+-d2**2+px**2+py**2))-np.angle(-px+py*1j)  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(d1-pz-C1*px*1j-S1*py*1j)  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(-d1+pz+C1*px*1j+S1*py*1j)  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 theta[2] = -C2*d1+C2*pz+C1*S2*px+S1*S2*py  # noqa
-
-    #             else:
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j-np.sqrt(0j+-d2**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+np.sqrt(0j+-d2**2+px**2+py**2))  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(-d1+pz-C1*px*1j-S1*py*1j)  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(d1-pz+C1*px*1j+S1*py*1j)  # noqa
-
-    #                 print(theta[1])
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 theta[2] = -C2*d1+C2*pz-C1*S2*px-S1*S2*py  # noqa
+    # def ikine_6s(self, T, config, _ikfunc):
+    #     # Undo base and tool transformations, but if they are not
+    #     # set, skip the operation.  Nicer for symbolics
+    #     if self._base is not None:
+    #         T = self.base.inv() * T
+    #     if self._tool is not None:
+    #         T = self.tool.inv() * T
+
+    #     q = np.zeros((len(T), 6))
+    #     for k, Tk in enumerate(T):
+    #         theta = _ikfunc(Tk, config)
 
     #         if not np.all(np.isnan(theta)):
     #             # Solve for the wrist rotation
@@ -1795,92 +1413,26 @@ class DHRobot(Robot, DHDynamicsMixin):
     #             Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
     #                 SE3.Rx(self.links[5].alpha)
 
-    #             R = np.linalg.inv(Td4.A) @ np.linalg.inv(T13.A) @ Ti @ \
-    #                 np.linalg.inv(Tt.A)
+    #             R = Td4.inv() * T13.inv() * Tk * Tt.inv()
 
     #             # The spherical wrist implements Euler angles
-    #             if sol[2] == 1:
-    #                 theta[3:6] = tr2eul(R, flip=True)
+    #             if 'f' in config:
+    #                 eul = R.eul(flip=True)
     #             else:
-    #                 theta[3:6] = tr2eul(R)
-
+    #                 eul = R.eul()
+    #             theta = np.r_[theta, eul]
     #             if self.links[3].alpha > 0:
     #                 theta[4] = -theta[4]
 
     #             # Remove the link offset angles
-    #             for k in range(self.n):
-    #                 theta[k] -= self.links[k].offset
+    #             theta = theta - self.offset
 
-    #             q[j, :] = theta
+    #             q[k, :] = theta
+
+    #         if q.shape[0] == 1:
+    #             return q[0]
     #         else:
-    #             err.append('point not reachable')
-
-    #     if trajn == 1:
-    #         return q[0, :], err
-    #     else:
-    #         return q, err
-
-    def _is_simple(self):
-        L = self.links
-        alpha = [-np.pi / 2, 0, np.pi / 2]
-        s = (L[1].d == 0 and L[2].d == 0) and ((
-            L[0].alpha == alpha[0]
-            and L[1].alpha == alpha[1]
-            and L[2].alpha == alpha[2]
-        ) or (
-            L[0].alpha == -alpha[0]
-            and L[1].alpha == -alpha[1]
-            and L[2].alpha == -alpha[2]
-        )) and \
-            (not L[0].sigma and not L[1].sigma and not L[2].sigma) and \
-            L[0].a == 0
-
-        return s
-
-    def _is_offset(self):
-        L = self.links
-        alpha = [-np.pi / 2, 0, np.pi / 2]
-        s = ((
-            L[0].alpha == alpha[0]
-            and L[1].alpha == alpha[1]
-            and L[2].alpha == alpha[2]
-        ) or (
-            L[0].alpha == -alpha[0]
-            and L[1].alpha == -alpha[1]
-            and L[2].alpha == -alpha[2]
-        )) and (not L[0].sigma and not L[1].sigma and not L[2].sigma)
-
-        return s
-
-    def _is_rrp(self):
-        L = self.links
-        alpha = [-np.pi / 2, np.pi / 2, 0]
-        s = (L[1].a == 0 and L[2].a == 0) and ((
-            L[0].alpha == alpha[0]
-            and L[1].alpha == alpha[1]
-            and L[2].alpha == alpha[2]
-        ) or (
-            L[0].alpha == -alpha[0]
-            and L[1].alpha == -alpha[1]
-            and L[2].alpha == -alpha[2]
-        )) and not L[0].sigma and not L[1].sigma and L[2].sigma
-
-        return s
-
-    def _is_puma(self):
-        L = self.links
-        alpha = [np.pi / 2, 0, -np.pi / 2]
-        s = (
-            L[1].d == 0
-            and L[0].a == 0
-            and not L[2].d == 0
-            and not L[2].a == 0 and (
-                L[0].alpha == alpha[0]
-                and L[1].alpha == alpha[1]
-                and L[2].alpha == alpha[2]
-            ) and (not L[0].sigma and not L[1].sigma and not L[2].sigma))
-
-        return s
+    #             return q
 
     def ikinem(self, T, q0=None, pweight=1.0, stiffness=0.0,
                qlimits=True, ilimit=1000, nolm=False):

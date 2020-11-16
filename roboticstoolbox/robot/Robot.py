@@ -23,7 +23,7 @@ from roboticstoolbox.backends.Swift import Swift
 try:
     import PIL
     _pil_exists = True
-except ImportError:
+except ImportError:    # pragma nocover
     _pil_exists = False
 
 # TODO maybe this needs to be abstract
@@ -54,6 +54,7 @@ class Robot:
         self.base = base
         self.tool = tool
         self.basemesh = None
+
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
         else:
@@ -66,6 +67,7 @@ class Robot:
         # validate the links, must be a list of Link subclass objects
         if not isinstance(links, list):
             raise TypeError('The links must be stored in a list.')
+
         for link in links:
             if not isinstance(link, Link):
                 raise TypeError('links should all be Link subclass')
@@ -223,7 +225,7 @@ class Robot:
 
             if fmt is not None:
                 return fmt.format(theta * deg) + "\u00b0"
-            else:
+            else:  # pragma nocover
                 return str(theta * deg) + "\u00b0"
 
         config = self.config()
@@ -231,7 +233,9 @@ class Robot:
         if len(self._configdict) > 0:
             table = ANSITable(
                 Column("name", colalign=">"),
-                *[Column(f"q{j:d}", colalign="<", headalign="<") for j in range(self.n)],
+                *[
+                    Column(f"q{j:d}", colalign="<", headalign="<")
+                    for j in range(self.n)],
                 border="thin")
 
             for name, q in self._configdict.items():
@@ -244,7 +248,7 @@ class Robot:
                 table.row(name, *qlist)
 
             return "\n" + str(table)
-        else:
+        else:  # pragma nocover
             return ""
 
     def dyntable(self):
@@ -326,6 +330,7 @@ class Robot:
         else:
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
+
 # --------------------------------------------------------------------- #
 
     @property
@@ -673,13 +678,13 @@ class Robot:
         solution space has more dimensions than can be spanned by the
         manipulator joint coordinates.
 
-        In this case we specify the ``mask`` option where the ``mask`` vector (6)
-        specifies the Cartesian DOF (in the wrist coordinate frame) that will
-        be ignored in reaching a solution.  The mask vector has six elements
-        that correspond to translation in X, Y and Z, and rotation about X, Y
-        and Z respectively. The value should be 0 (for ignore) or 1. The
-        number of non-zero elements should equal the number of manipulator
-        DOF.
+        In this case we specify the ``mask`` option where the ``mask`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The mask vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value should be 0 (for ignore)
+        or 1. The number of non-zero elements should equal the number of
+        manipulator DOF.
 
         For example when using a 3 DOF manipulator rotation orientation might
         be unimportant in which case use the option: mask = [1 1 1 0 0 0].
@@ -770,8 +775,8 @@ class Robot:
                 if not np.sum(np.abs(q)) == 0:
                     return q, True, err
 
-            q = np.array([])
-            return q, False, err
+            q = np.array([])   # pragma nocover
+            return q, False, err   # pragma nocover
 
         if not self.n >= np.sum(mask):
             raise ValueError('Number of robot DOF must be >= the same number '
@@ -1064,77 +1069,78 @@ class Robot:
 # --------------------------------------------------------------------- #
 
     def qmincon(self, q=None):
-            """
-            Move away from joint limits
+        """
+        Move away from joint limits
 
-            :param q: Joint coordinates
-            :type q: ndarray(n)
-            :retrun qs: The calculated joint values
-            :rtype qs: ndarray(n)
-            :return: Optimisation solved (True) or failed (False)
-            :rtype: bool
-            :return: Final value of the objective function
-            :rtype: float
+        :param q: Joint coordinates
+        :type q: ndarray(n)
+        :retrun qs: The calculated joint values
+        :rtype qs: ndarray(n)
+        :return: Optimisation solved (True) or failed (False)
+        :rtype: bool
+        :return: Final value of the objective function
+        :rtype: float
 
-            ``qs, success, err = qmincon(q)`` exploits null space motion and returns
-            a set of joint angles ``qs`` (n) that result in the same end-effector
-            pose but are away from the joint coordinate limits. ``n`` is the number
-            of robot joints. ``success`` is True for successful optimisation.
-            ``err`` is the scalar final value of the objective function.
+        ``qs, success, err = qmincon(q)`` exploits null space motion and
+        returns a set of joint angles ``qs`` (n) that result in the same
+        end-effector pose but are away from the joint coordinate limits.
+        ``n`` is the number of robot joints. ``success`` is True for
+        successful optimisation. ``err`` is the scalar final value of
+        the objective function.
 
-            **Trajectory operation**
+        **Trajectory operation**
 
-            In all cases if ``q`` is (m,n) it is taken as a pose sequence and
-            ``qmincon()`` returns the adjusted joint coordinates (m,n) corresponding
-            to each of the configurations in the sequence.
+        In all cases if ``q`` is (m,n) it is taken as a pose sequence and
+        ``qmincon()`` returns the adjusted joint coordinates (m,n)
+        corresponding to each of the configurations in the sequence.
 
-            ``err`` and ``success`` are also (m) and indicate the results of
-            optimisation for the corresponding trajectory step.
+        ``err`` and ``success`` are also (m) and indicate the results of
+        optimisation for the corresponding trajectory step.
 
-            .. note:: Robot must be redundant.
+        .. note:: Robot must be redundant.
 
-            """
+        """
 
-            def sumsqr(A):
-                return np.sum(A**2)
+        def sumsqr(A):
+            return np.sum(A**2)
 
-            def cost(x, ub, lb, qm, N):
-                return sumsqr(
-                    (2 * (N @ x + qm) - ub - lb) / (ub - lb))
+        def cost(x, ub, lb, qm, N):
+            return sumsqr(
+                (2 * (N @ x + qm) - ub - lb) / (ub - lb))
 
-            q = getmatrix(q, (None, self.n))
+        q = getmatrix(q, (None, self.n))
 
-            qstar = np.zeros((q.shape[0], self.n))
-            error = np.zeros(q.shape[0])
-            success = np.zeros(q.shape[0])
+        qstar = np.zeros((q.shape[0], self.n))
+        error = np.zeros(q.shape[0])
+        success = np.zeros(q.shape[0])
 
-            lb = self.qlim[0, :]
-            ub = self.qlim[1, :]
+        lb = self.qlim[0, :]
+        ub = self.qlim[1, :]
 
-            for k, qk in enumerate(q):
+        for k, qk in enumerate(q):
 
-                J = self.jacobe(qk)
+            J = self.jacobe(qk)
 
-                N = null(J)
+            N = null(J)
 
-                x0 = np.zeros(N.shape[1])
-                A = np.r_[N, -N]
-                b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
+            x0 = np.zeros(N.shape[1])
+            A = np.r_[N, -N]
+            b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
 
-                con = LinearConstraint(A, -np.inf, b)
+            con = LinearConstraint(A, -np.inf, b)
 
-                res = minimize(
-                    lambda x: cost(x, ub, lb, qk, N),
-                    x0, constraints=con)
+            res = minimize(
+                lambda x: cost(x, ub, lb, qk, N),
+                x0, constraints=con)
 
-                qstar[k, :] = qk + N @ res.x
-                error[k] = res.fun
-                success[k] = res.success
+            qstar[k, :] = qk + N @ res.x
+            error[k] = res.fun
+            success[k] = res.success
 
-            if q.shape[0] == 1:
-                return qstar[0, :], success[0], error[0]
-            else:
-                return qstar, success, error
+        if q.shape[0] == 1:
+            return qstar[0, :], success[0], error[0]
+        else:
+            return qstar, success, error
 
 # --------------------------------------------------------------------- #
 
@@ -1300,7 +1306,7 @@ class Robot:
 
         env = None
 
-        if backend.lower() == 'swift':
+        if backend.lower() == 'swift':  # pragma nocover
             if isinstance(self, rtb.ERobot):
                 env = self._plot_swift(q=q, block=block)
             elif isinstance(self, rtb.DHRobot):
@@ -1308,7 +1314,7 @@ class Robot:
                     'Plotting in Swift is not implemented for DHRobots yet')
 
         elif backend.lower() == 'pyplot':
-            if isinstance(self, rtb.ERobot):
+            if isinstance(self, rtb.ERobot):  # pragma nocover
                 raise NotImplementedError(
                     'Plotting in PyPlot is not implemented for ERobots yet')
             elif isinstance(self, rtb.DHRobot):
@@ -1350,7 +1356,7 @@ class Robot:
         # Stop lint error
         images = []  # list of images saved from each plot
 
-        if movie is not None:
+        if movie is not None:   # pragma nocover
             if not _pil_exists:
                 raise RuntimeError(
                     'to save movies PIL must be installed:\npip3 install PIL')
@@ -1363,7 +1369,7 @@ class Robot:
             self.q = qk
             env.step(dt)
 
-            if movie is not None:
+            if movie is not None:  # pragma nocover
                 # render the frame and save as a PIL image in the list
                 canvas = env.fig.canvas
                 img = PIL.Image.frombytes(
@@ -1371,7 +1377,7 @@ class Robot:
                     canvas.tostring_rgb())
                 images.append(img)
 
-        if movie is not None:
+        if movie is not None:  # pragma nocover
             # save it as an animated GIF
             images[0].save(
                 movie,
@@ -1384,7 +1390,7 @@ class Robot:
 
         return env
 
-    def _plot_swift(self, q, block):
+    def _plot_swift(self, q, block):   # pragma nocover
 
         # Make an empty 3D figure
         env = Swift()
@@ -1442,7 +1448,7 @@ class Robot:
               end-effector position.
 
         '''
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "ERobot fellipse not implemented yet")
 
@@ -1480,7 +1486,7 @@ class Robot:
               3-vector, or the string "ee" ensures it is drawn at the
               end-effector position.
         """
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "ERobot vellipse not implemented yet")
 
@@ -1524,7 +1530,7 @@ class Robot:
               end-effector position.
         """
 
-        if not isinstance(ellipse, EllipsePlot):
+        if not isinstance(ellipse, EllipsePlot):  # pragma nocover
             raise TypeError(
                 'ellipse must be of type '
                 'roboticstoolbox.backend.PyPlot.EllipsePlot')
@@ -1604,7 +1610,7 @@ class Robot:
               end-effector position.
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "Ellipse Plotting of ERobot's not implemented yet")
 
@@ -1678,7 +1684,7 @@ class Robot:
               end-effector position.
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "Ellipse Plotting of ERobot's not implemented yet")
 
@@ -1749,7 +1755,7 @@ class Robot:
 
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "2D Plotting of ERobot's not implemented yet")
 
@@ -1840,7 +1846,7 @@ class Robot:
                   occurs.
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "2D Plotting of ERobot's not implemented yet")
 
@@ -1914,7 +1920,7 @@ class Robot:
 
         '''
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "2D Plotting of ERobot's not implemented yet")
 

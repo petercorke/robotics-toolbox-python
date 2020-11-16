@@ -1,5 +1,6 @@
 """
-@author: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
+@author: Gautam Sinha, Indian Institute of Technology, Kanpur
+  (original MATLAB version)
 @author: Peter Corke
 @author: Samuel Drew
 """
@@ -38,7 +39,7 @@ class KR5(DHRobot):
     .. codeauthor:: Gautam Sinha, Indian Institute of Technology, Kanpur (original MATLAB version)
     .. codeauthor:: Samuel Drew
     .. codeauthor:: Peter Corke
-    """
+    """  # noqa
 
     def __init__(self):
         deg = pi / 180

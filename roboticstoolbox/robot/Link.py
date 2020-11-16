@@ -218,12 +218,12 @@ class Link(ABC):
 
         :seealso: :func:`~dyn`
         """
-        table = ANSITable(
+        ANSITable(
             Column("Parameter", headalign="^"),
             Column("Value", headalign="^", colalign="<"),
             border="thin")
 
-        def format(l, fmt, val):
+        def format(l, fmt, val):  # noqa
             if isinstance(val, np.ndarray):
                 s = ', '.join([fmt.format(v) for v in val])
             else:
@@ -233,7 +233,7 @@ class Link(ABC):
         dyn = []
         format(dyn, fmt, self.m)
         format(dyn, fmt, self.r)
-        I = self.I.flatten()
+        I = self.I.flatten()  # noqa
         format(dyn, fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 2, 5]]])
         format(dyn, fmt, self.Jm)
         format(dyn, fmt, self.B)
@@ -242,7 +242,7 @@ class Link(ABC):
 
         return dyn
 
-    def _format(self, l, name, ignorevalue=0, indices=None):
+    def _format(self, l, name, ignorevalue=0, indices=None):  # noqa
         v = getattr(self, name)
         s = None
         if v is None:
@@ -254,12 +254,12 @@ class Link(ABC):
                 if indices is not None:
                     flat = v.flatten()
                     v = np.r_[[flat[k] for k in indices]]
-                s = f"{name}=[" + ", ".join([str(x) for x in v]) +"]"
+                s = f"{name}=[" + ", ".join([str(x) for x in v]) + "]"
         if s is not None:
             l.append(s)
 
     def _params(self):
-        l = []
+        l = []  # noqa
         self._format(l, "name")
         self._format(l, "flip", False)
         self._format(l, "qlim")
@@ -538,7 +538,7 @@ class Link(ABC):
         - a 6-vector :math:`(I_{xx}, I_{yy}, I_{zz}, I_{xy}, I_{yz}, I_{xz})`
 
         .. note:: Referred to the link side of the gearbox.
-        """
+        """  # noqa
         return self._I
 
     @I.setter

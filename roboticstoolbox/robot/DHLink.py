@@ -23,6 +23,7 @@ except ImportError:
     def _issymbol(x):  # pylint: disable=unused-argument
         return False
 
+
 def _cos(theta):
     if _issymbol(theta):
         return sym.cos(theta)
@@ -113,7 +114,6 @@ class DHLink(Link):
         self.offset = offset
         self.id = None
 
-
     def __add__(self, L):
         if isinstance(L, DHLink):
             return rp.DHRobot([self, L])
@@ -153,7 +153,8 @@ class DHLink(Link):
             s = f"{cls}:   theta={qvar}{offset},  d={self.d}, " \
                 f"a={self.a}, alpha={self.alpha}"
         else:
-            s = f"{cls}:  theta={self.theta},  d={qvar}{offset},  a={self.a},  " \
+            s = f"{cls}:  theta={self.theta},  d={qvar}{offset}, " \
+                f" a={self.a},  " \
                 f"alpha={self.alpha}"
         return s
 
@@ -338,32 +339,33 @@ class DHLink(Link):
         ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous
         transformation matrix corresponding to the link's joint variable ``q``
         which is either the Denavit-Hartenberg parameter :math:`\theta_j`
-        (revolute) or :math:`d_j` (prismatic). 
-        
+        (revolute) or :math:`d_j` (prismatic).
+
         This is the relative pose of the current link frame with respect to the
         previous link frame.
 
+        For details of the computation see the documentation for the
+        subclasses, click on the right side of the class boxes below.
 
-
-        For details of the computation see the documentation for the subclasses,
-        click on the right side of the class boxes below. 
-
-        .. inheritance-diagram:: roboticstoolbox.RevoluteDH roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH roboticstoolbox.PrismaticMDH
+        .. inheritance-diagram:: roboticstoolbox.RevoluteDH
+            roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
+            roboticstoolbox.PrismaticMDH
             :top-classes: roboticstoolbox.robot.DHLink.DHLink
             :parts: 2
 
         .. note::
 
-            - For a revolute joint the ``theta`` parameter of the link is 
+            - For a revolute joint the ``theta`` parameter of the link is
               ignored, and ``q`` used instead.
             - For a prismatic joint the ``d`` parameter of the link is ignored,
               and ``q`` used instead.
-            - The joint ``offset`` parameter is added to ``q`` before 
+            - The joint ``offset`` parameter is added to ``q`` before
               computation of the transformation matrix.
-            - The computation is different for standard and modified 
+            - The computation is different for standard and modified
               Denavit-Hartenberg parameters.
 
-        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`, :class:`RevoluteMDH`, :class:`PrismaticMDH`
+        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`,
+            :class:`RevoluteMDH`, :class:`PrismaticMDH`
         """
 
         sa = _sin(self.alpha)
@@ -403,7 +405,6 @@ class DHLink(Link):
             ])
 
         return SE3(T, check=False)
-
 
     # TODO these next 2 should be properties
     def isrevolute(self):
@@ -474,7 +475,7 @@ class DHLink(Link):
             else:
                 if self.theta != 0:
                     ets *= ETS.rz(self.theta)
-                    
+
                 if self.offset != 0:
                     ets *= ETS.tz(self.offset)
                 ets *= ETS.tz(flip=self.flip)
@@ -485,7 +486,9 @@ class DHLink(Link):
                 ets *= ETS.rx(self.alpha)
         return ets
 
+
 # -------------------------------------------------------------------------- #
+
 class RevoluteDH(DHLink):
     r"""
     Class for revolute links using standard DH convention
@@ -533,7 +536,7 @@ class RevoluteDH(DHLink):
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
 
     :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
-    """
+    """  # noqa
 
     def __init__(
             self,
@@ -604,7 +607,7 @@ class PrismaticDH(DHLink):
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
 
     :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
-    """
+    """  # noqa
 
     def __init__(
             self,
@@ -673,7 +676,7 @@ class RevoluteMDH(DHLink):
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
 
     :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
-    """
+    """  # noqa
 
     def __init__(
             self,
@@ -744,7 +747,7 @@ class PrismaticMDH(DHLink):
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
 
     :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
-    """
+    """  # noqa
 
     def __init__(
             self,

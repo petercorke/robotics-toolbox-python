@@ -69,3 +69,9 @@ class Testtools(unittest.TestCase):
 
         self.assertFalse(arrived0)
         self.assertTrue(arrived1)
+
+    def test_jsingu(self):
+        r = rp.models.Panda()
+        J = r.jacob0(r.qz)
+
+        rp.jsingu(J)

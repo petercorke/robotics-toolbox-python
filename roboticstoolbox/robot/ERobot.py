@@ -1228,7 +1228,7 @@ class ERobot(Robot):
         :type n: int
         :param gain: The gain for the velocity damper
         :type gain: float
-        
+
         :returns: Ain, Bin as the inequality contraints for an optisator
         :rtype: ndarray(6), ndarray(6)
         '''

@@ -66,7 +66,7 @@ class Puma560(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
     .. codeauthor:: Peter Corke
-    """
+    """  # noqa
 
     def __init__(self, symbolic=False):
 
@@ -204,7 +204,7 @@ class Puma560(DHRobot):
 
         a2 = self.links[1].a
         a3 = self.links[2].a
-        d1 = self.links[0].d
+        # d1 = self.links[0].d
         d3 = self.links[2].d
         d4 = self.links[3].d
 
@@ -249,7 +249,7 @@ class Puma560(DHRobot):
             / (2.0 * a2 * r))
 
         if np.isnan(Psi):
-            theta = []
+            theta = []    # pragma nocover
         else:
             theta[1] = np.arctan2(Pz, V114) + n2 * Psi
 

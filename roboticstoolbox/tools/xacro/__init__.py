@@ -39,7 +39,6 @@ import os
 import re
 import sys
 import xml.dom.minidom
-from pathlib import Path
 
 from copy import deepcopy
 from .color import error, warning
