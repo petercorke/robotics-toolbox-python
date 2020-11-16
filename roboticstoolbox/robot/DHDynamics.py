@@ -394,8 +394,6 @@ class DHDynamicsMixin:
         where each row is the acceleration corresponding to the equivalent cols
         of q, qd, torque.
 
-
-
         .. note::
             - Useful for simulation of manipulator dynamics, in
               conjunction with a numerical integration function.
@@ -411,7 +409,7 @@ class DHDynamicsMixin:
               ASME Journa of Dynamic Systems, Measurement and Control, vol.
               104, no. 3, pp. 205-211, 1982.
 
-        """
+        """  # noqa
 
         trajn = 1
 
