@@ -2,7 +2,7 @@
 
 
 import time
-
+from pathlib import Path
 import dynamixel_sdk as sdk                  # Uses Dynamixel SDK library
 
 # list of all models https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_workbench/
@@ -12,15 +12,14 @@ import dynamixel_sdk as sdk                  # Uses Dynamixel SDK library
 # XM, XH better control, XH has Maxon motor
 import json
 
-
-
-
 class DynamixelString:
 
     def __init__(self, baudrate=1000000, port=None, protocol=1, top=256, verbose=True):
 
+        jsonfile = Path(__file__).parent / "dynamixel.json"
+        print(jsonfile)
         # load the JSON file and convert keys from strings to ints
-        with open("dynamixel.json", 'r') as f:
+        with jsonfile.open() as f:
             self.modeldict = {}
             for key, value in json.load(f).items():
                 self.modeldict[int(key)] = value
@@ -30,12 +29,15 @@ class DynamixelString:
         # Set the port path
         # Get methods and members of PortHandlerLinux or PortHandlerWindows
         self.port = sdk.PortHandler(port)
+
         self.verbose = verbose
 
         # Open port
         if self.port.openPort():
             print("Succeeded to open the port")
         else:
+            print("unable to open serial port", port)
+            self.port = None
             raise RuntimeError("Failed to open the port")
 
         # Set port baudrate
@@ -103,8 +105,6 @@ class DynamixelString:
 
     def close(self):
         self.port.closePort()
-
-
 
     @property
     def n(self):
@@ -368,125 +368,43 @@ class DynRobot:
 
 if __name__ == "__main__":
 
-    dms = DynamixelString(port="/dev/tty.usbserial-FT4NQ6ZP", baudrate=1000000, protocol=2, top=20)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Dynamixel interactive console')
+    parser.add_argument('--port', '-p', default="/dev/tty.usbserial-FT4NQ6ZP",
+        help='specify name of serial port')
+    parser.add_argument('--baudrate', '-b', type=int, default=1000000,
+        help='serial baud rate')
+    parser.add_argument('--protocol', type=int, default=2,
+        help='Dynamixel protocol level')
+    parser.add_argument('--scan', type=int, default=20,
+        help='Scan for Dynamixel ids 1 to this number inclusive')
+    args = parser.parse_args()
+
+    dms = DynamixelString(port=args.port,
+         baudrate=args.baudrate, 
+         protocol=args.protocol,
+         top=args.scan)
     dms.set('all', 'return_delay', 0)
 
-    r = DynRobot(dms, [1, (2, -3), (4, -5), 6, 7, 8], 9)
-    r.setmode('position')
-    r.enable(True)
-
-    # r.moveto([0.0]*6, t=5000)
-
-    # time.sleep(5)
-
-
-    # r.syncread_config(1, ['present_position2', 'present_current'])
-
-    # print(d.get(1, 'firmware'))
-    # q0 = d.get('all', 'present_position')
-    # print(q0, type(q0))
-
-
-
-    # d.set('all', 'torque_enable', False)
-
-    # d.set('all', 'opmode', 'position')
-    # d.set(5, 'shadow_id', 4)   # 4 shadows 5
-    # d.set(3, 'shadow_id', 2)   # 3 shadows 2
-    # d.set('all', 'opmode', 'forward')
-    # d.set([3, 5], 'opmode', 'reverse')
-    #d.set('all', 'velocity_limit', 2)
-
-    # d.set('all', 'profile_velocity', 5000)
-    # d.set('all', 'profile_acceleration', 500)
-
-
-
-
-    # joint   servo
-    #  1       1
-    #  2       2 -3
-    #  3       4 -5
-    #  4       6
-    #  5       7
-    #  6       8
-    #  G       9
-
-    dms.list()
-
-    # d.set('all', 'torque_enable', True)
-
-    # d.set([1, 2, 4, 6, 7, 8, 9], 'goal_position', 2000)
-    # time.sleep(10)
-
-
-    # for i in range(0,10):
-    #     time.sleep(1)
-    #     p =d._getvalue('present_position2', 4)
-    #     print(p)
-
-
-
-
-    for id in dms.idlist:
-        (a, l) = dms.register_indirect_config(id, 1, ('present_position2', 'present_current'))
-
-    group_read = sdk.GroupSyncRead(dms.port, dms.packetHandler, a, l)
-    for id in [1, 2, 4, 6, 7, 8, 9]:
-        dxl_addparam_result = group_read.addParam(id)
-        if dxl_addparam_result != True:
-            raise RuntimeError('groupSyncRead failed to add id=%d' % id)
-
-    t0 = time.time()
-
-    for i in range(0, 1000):
-
-        dxl_comm_result = group_read.txRxPacket()
-        if dxl_comm_result != sdk.COMM_SUCCESS:
-            raise RuntimeError("%s" % dms.packetHandler.getTxRxResult(dxl_comm_result))
-
-        time.sleep(0.1)
-
-    # for id in [1, 2, 4, 6, 7, 8, 9]:
-    #     dxl_getdata_result = group_read.isAvailable(id, a, l)
-    #     if dxl_getdata_result != True:
-    #         print("[ID:%03d] groupSyncRead getdata failed" % DXL2_ID)
-
-    t1 = time.time()
-    print('reading time ', (t1-t0) / 100)
-
-    for id in [1, 2, 4, 6, 7, 8, 9]:
-        position = group_read.getData(id, a, 2)
-        current = group_read.getData(id, a+2, 2)
-        if current & 0x8000 > 0:
-            current = current - 0x10000
-        print(id, ': ', position, current)
-
-
-    # d.set([1, 2, 4, 6, 7, 8, 9], 'goal_position', [q0[i-1] for i in [1, 2, 4, 6, 7, 8, 9]])
-
-    # for i in range(0, 5):
-    #     for id in d.idlist:
-    #         d.setled(True, id)
-    #         time.sleep(0.5)
-    #         d.setled(False, id)
-
-
-    # print(d.gettemp())
-    # d.setled(True)
-    # # d.enable(True)
-    # p = d.getposition()
-    # print(p)
-    # time.sleep(5)
-    # d.setled(False)
-    # p = d.getposition()
-    # print(p)
-    # d.enable(False)
-
-    time.sleep(10)
-
-    d.set('all', 'torque_enable', False)
-    d.set('all', 'led', False)
-
-    d.close()
-
+    # simple console-based command handler
+    while True:
+        cmd = input("dynamixel>>> ")
+        cmd = cmd.strip()
+        cmd = cmd.split(",")
+        if cmd[0] == "list":
+            dms.list()
+        elif cmd[0] == "read":
+            p = d.getposition()
+            print(p)
+        elif cmd[0] == "limp":
+            dms.enable(False)
+        elif cmd[0] == "hold":
+            dms.enable(True)
+        elif cmd[0] == "led":
+            status = int(cmd[1])
+            dms.setled(status > 0)
+        elif cmd[0] == "temp":
+            print(dms.gettemp())
+        elif cmd[0] == "quit" or cmd[0] == "exit":
+            break
