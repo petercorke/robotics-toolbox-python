@@ -559,7 +559,7 @@ class SuperETS(UserList, ABC):
                         _j = j
                     else:
                         _j = et.jindex
-                    qvar = q.format(_j, _j+1)
+                    qvar = q.format(_j, _j+1) # lgtm [py/str-format/surplus-argument]  # noqa
                 else:
                     qvar = ""
                 if et.isflip:

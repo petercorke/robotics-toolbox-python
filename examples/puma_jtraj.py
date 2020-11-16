@@ -1,5 +1,5 @@
 import roboticstoolbox as rtb
-from spatialmath import *
+from spatialmath import *   # lgtm [py/polluting-import]
 
 
 #robot = rtb.models.URDF.Puma560()

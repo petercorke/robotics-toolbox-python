@@ -11,7 +11,7 @@ def table1_element(tables, name):
         value = tables[0].find(string=re.compile(name)).parent.find_next_siblings("td")[0]
         print(name, value.text)
         return value.text
-    except:
+    except Exception:
         print(name, ' not found')
         return None
 
@@ -20,7 +20,7 @@ def table2_element(tables, name, col=2):
         value = tables[1].find(string=re.compile(name)).parent.parent.find_next_siblings("td")[col]
         print(name, value.text)
         return value.text
-    except:
+    except Exception:
         print(name, ' not found')
         return None
 

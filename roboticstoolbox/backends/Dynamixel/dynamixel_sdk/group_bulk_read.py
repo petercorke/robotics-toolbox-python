@@ -19,7 +19,7 @@
 
 # Author: Ryu Woon Jung (Leon)
 
-from .robotis_def import *
+from .robotis_def import *   # lgtm [py/polluting-import]
 
 PARAM_NUM_DATA = 0
 PARAM_NUM_ADDRESS = 1

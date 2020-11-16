@@ -19,7 +19,7 @@
 
 # Author: Ryu Woon Jung (Leon)
 
-from .robotis_def import *
+from .robotis_def import *  # lgtm [py/polluting-import]
 
 TXPACKET_MAX_LEN = 1 * 1024
 RXPACKET_MAX_LEN = 1 * 1024
@@ -276,7 +276,7 @@ class Protocol2PacketHandler(object):
                         wait_length = DXL_MAKEWORD(rxpacket[PKT_LENGTH_L], rxpacket[PKT_LENGTH_H]) + PKT_LENGTH_H + 1
                         continue
 
-                    if rx_length < wait_length:
+                    if rx_length < wait_length:  # lgtm [py/redundant-comparison]
                         if port.isPacketTimeout():
                             if rx_length == 0:
                                 result = COMM_RX_TIMEOUT

@@ -23,9 +23,9 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     :return: trajectory
     :rtype: namedtuple
 
-    - ``tg = tpoly(q0, q1, t)`` is a scalar trajectory (Mx1) that varies smoothly
-      from ``q0`` to ``qf`` using a quintic polynomial.  The initial and final
-      velocity and acceleration are zero. Time ``t`` can be either:
+    - ``tg = tpoly(q0, q1, t)`` is a scalar trajectory (Mx1) that varies
+      smoothly from ``q0`` to ``qf`` using a quintic polynomial.  The initial
+      and final velocity and acceleration are zero. Time ``t`` can be either:
 
         * an integer scalar, indicating the total number of timesteps
 
@@ -39,7 +39,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
             - Results are scaled to units of time.
 
     - ``tg = tpoly(q0, q1, t, qd0, qdf)`` as above but specify the initial and
-      final velocity. The initial and final acceleration are zero. 
+      final velocity. The initial and final acceleration are zero.
 
     The return value is a namedtuple (named ``tpoly``) with elements:
 
@@ -48,8 +48,8 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         - ``yd``  the velocity as a numpy ndarray, shape=(M,)
         - ``ydd``  the acceleration as a numpy ndarray, shape=(M,)
 
-    .. note:: The time vector T is assumed to be monotonically increasing, and time
-        scaling is based on the first and last element.
+    .. note:: The time vector T is assumed to be monotonically increasing, and
+        time scaling is based on the first and last element.
 
     References:
 
@@ -141,8 +141,8 @@ def lspb(q0, qf, t, V=None):
     .. note::
 
         - For some values of V no solution is possible and an error is flagged.
-        - The time vector, if given, is assumed to be monotonically increasing, and
-          time scaling is based on the first and last element.
+        - The time vector, if given, is assumed to be monotonically increasing,
+          and time scaling is based on the first and last element.
 
     :References:
 
@@ -509,7 +509,8 @@ def mstraj(
     :type tacc: float
     :param qdmax: maximum speed, defaults to None
     :type qdmax: array_like(n) or float, optional
-    :param tsegment: maximum time of each motion segment (seconds), defaults to None
+    :param tsegment: maximum time of each motion segment (seconds), defaults
+        to None
     :type tsegment: array_like, optional
     :param q0: initial coordinates, defaults to first row of viapoints
     :type q0: array_like(n), optional
