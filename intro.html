@@ -319,13 +319,13 @@ as:</p>
 16</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;deg&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-<span class="go">  [38;5;1m 0.97517    [0m[38;5;1m-0.198669   [0m[38;5;1m-0.0978434  [0m[38;5;4m 0.5        [0m  [0m</span>
-<span class="go">  [38;5;1m 0.153792   [0m[38;5;1m 0.289629   [0m[38;5;1m 0.944702   [0m[38;5;4m 0          [0m  [0m</span>
-<span class="go">  [38;5;1m-0.159345   [0m[38;5;1m-0.936293   [0m[38;5;1m 0.312992   [0m[38;5;4m 0          [0m  [0m</span>
-<span class="go">  [38;5;244m 0          [0m[38;5;244m 0          [0m[38;5;244m 0          [0m[38;5;244m 1          [0m  [0m</span>
+<span class="go">   0.97517    -0.198669   -0.0978434   0.5          </span>
+<span class="go">   0.153792    0.289629    0.944702    0            </span>
+<span class="go">  -0.159345   -0.936293    0.312992    0            </span>
+<span class="go">   0           0           0           1            </span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">eul</span><span class="p">()</span>
-<span class="go">array([ 95.9131,  71.7604, -80.3415])</span>
+<span class="go">array([ 1.674 ,  1.2525, -1.4022])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">R</span>
 <span class="go">array([[ 0.9752, -0.1987, -0.0978],</span>
 <span class="go">       [ 0.1538,  0.2896,  0.9447],</span>
@@ -348,9 +348,9 @@ and components can be extracted such as the rotation submatrix (line 11) and tra
 <p>Rotation can also be represented by a unit quaternion</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">UnitQuaternion</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">UnitQuaternion</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">))</span>
-<span class="go">0.988771 &lt;&lt; 0.149438, 0.000000, 0.000000 &gt;&gt;</span>
+<span class="go"> 0.9888 &lt;&lt;  0.1494,  0.0000,  0.0000 &gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">UnitQuaternion</span><span class="o">.</span><span class="n">AngVec</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
-<span class="go">0.988771 &lt;&lt; 0.149438, 0.000000, 0.000000 &gt;&gt;</span>
+<span class="go"> 0.9888 &lt;&lt;  0.1494,  0.0000,  0.0000 &gt;&gt;</span>
 </pre></div>
 </div>
 <p>which again demonstrates several alternative constructors.</p>
@@ -561,10 +561,10 @@ specified using additional keyword arguments.</p>
 <span class="go">[ 0.      1.5708 -1.5708  0.      0.      0.    ]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>  <span class="c1"># forward kinematics</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-<span class="go">  [38;5;1m 0.121698   [0m[38;5;1m-0.606672   [0m[38;5;1m-0.785582   [0m[38;5;4m 0.247803   [0m  [0m</span>
-<span class="go">  [38;5;1m 0.818364   [0m[38;5;1m 0.509197   [0m[38;5;1m-0.266456   [0m[38;5;4m-0.12594    [0m  [0m</span>
-<span class="go">  [38;5;1m 0.561667   [0m[38;5;1m-0.610465   [0m[38;5;1m 0.558446   [0m[38;5;4m 1.14629    [0m  [0m</span>
-<span class="go">  [38;5;244m 0          [0m[38;5;244m 0          [0m[38;5;244m 0          [0m[38;5;244m 1          [0m  [0m</span>
+<span class="go">   0.121698   -0.606672   -0.785582    0.247803     </span>
+<span class="go">   0.818364    0.509197   -0.266456   -0.12594      </span>
+<span class="go">   0.561667   -0.610465    0.558446    1.14629      </span>
+<span class="go">   0           0           0           1            </span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                           <span class="c1"># inverse kinematics</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -692,10 +692,10 @@ which makes many models from the ROS universe available.</p>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-<span class="go">  [38;5;1m 0.707107   [0m[38;5;1m 0.707107   [0m[38;5;1m 0          [0m[38;5;4m 0.088      [0m  [0m</span>
-<span class="go">  [38;5;1m 0.707107   [0m[38;5;1m-0.707107   [0m[38;5;1m 0          [0m[38;5;4m 0          [0m  [0m</span>
-<span class="go">  [38;5;1m 0          [0m[38;5;1m 0          [0m[38;5;1m-1          [0m[38;5;4m 0.926      [0m  [0m</span>
-<span class="go">  [38;5;244m 0          [0m[38;5;244m 0          [0m[38;5;244m 0          [0m[38;5;244m 1          [0m  [0m</span>
+<span class="go">   0.707107    0.707107    0           0.088        </span>
+<span class="go">   0.707107   -0.707107    0           0            </span>
+<span class="go">   0           0          -1           0.926        </span>
+<span class="go">   0           0           0           1            </span>
 
 </pre></div>
 </div>
@@ -798,7 +798,7 @@ is taken as the result of the previous solution.</p>
 12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="go">NameError: name &#39;S&#39; is not defined</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/symbolic.py&quot;</span>, line <span class="m">19</span>, in <span class="n">symbol</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/symbolic.py&quot;</span>, line <span class="m">61</span>, in <span class="n">symbol</span>
     <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
 <span class="gr">NameError</span>: <span class="n">name &#39;sympy&#39; is not defined</span>
 <span class="gt">Traceback (most recent call last):</span>
@@ -846,7 +846,7 @@ At a singular configuration</p>
 <span class="go">Yoshikawa manipulability is 0.07861716534599998</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="s2">&quot;asada&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Asada manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-<span class="go">Asada manipulability is 0.004374613728166497</span>
+<span class="go">Asada manipulability is 0.004374613728166504</span>
 </pre></div>
 </div>
 <p>for the Yoshikawa and Asada measures respectively, and</p>

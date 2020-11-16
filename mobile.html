@@ -558,21 +558,30 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <p>do not mix ETs with and without explicit joint index.</p>
 </div>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q0) * tx(1) * Rz(q1) * tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">tx(1) * Rz(q)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="go">SE3(array([[1., 0., 0., 1.],</span>
+<span class="go">           [0., 1., 0., 1.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="go">SE3(array([[1, 0, 0, 4],</span>
+<span class="go">           [0, 1, 0, 3],</span>
+<span class="go">           [0, 0, 1, 0],</span>
+<span class="go">           [0, 0, 0, 1]]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -737,9 +746,9 @@ roll-pitch-yaw angles <code class="docutils literal notranslate"><span class="pr
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="go">tx(1.0) * ty(2.0) * tz(3.0)</span>
+<span class="go">tx(1) * ty(2) * tz(3)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">))</span>
-<span class="go">Rx(5157°)</span>
+<span class="go">Rx(90°)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -773,7 +782,19 @@ individual ETs in the reverse order.</p>
 <div class="math notranslate nohighlight">
 \[(\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )\]</div>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q2) * tx(1) * Rx(-q3) * tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
+<span class="go">tx(-1) * Rx(q3) * tx(-1) * Rz(-q2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+<span class="go">   1           0           0           0            </span>
+<span class="go">   0           1           0           0            </span>
+<span class="go">   0           0           1           0            </span>
+<span class="go">   0           0           0           1            </span>
+
 </pre></div>
 </div>
 <div class="admonition note">
@@ -1115,9 +1136,9 @@ roll-pitch-yaw angles <code class="docutils literal notranslate"><span class="pr
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="go">tx(1.0) * ty(2.0) * tz(3.0)</span>
+<span class="go">tx(1) * ty(2) * tz(3)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">))</span>
-<span class="go">Rx(5157°)</span>
+<span class="go">Rx(90°)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -1506,21 +1527,30 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <p>do not mix ETs with and without explicit joint index.</p>
 </div>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q0) * tx(1) * Rz(q1) * tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">tx(1) * Rz(q)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="go">SE3(array([[1., 0., 0., 1.],</span>
+<span class="go">           [0., 1., 0., 1.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="go">SE3(array([[1, 0, 0, 4],</span>
+<span class="go">           [0, 1, 0, 3],</span>
+<span class="go">           [0, 0, 1, 0],</span>
+<span class="go">           [0, 0, 0, 1]]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1554,7 +1584,19 @@ individual ETs in the reverse order.</p>
 <div class="math notranslate nohighlight">
 \[(\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )\]</div>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q2) * tx(1) * Rx(-q3) * tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
+<span class="go">tx(-1) * Rx(q3) * tx(-1) * Rz(-q2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+<span class="go">   1           0           0           0            </span>
+<span class="go">   0           1           0           0            </span>
+<span class="go">   0           0           1           0            </span>
+<span class="go">   0           0           0           1            </span>
+
 </pre></div>
 </div>
 <div class="admonition note">
@@ -2278,9 +2320,9 @@ roll-pitch-yaw angles <code class="docutils literal notranslate"><span class="pr
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="go">tx(1.0) * ty(2.0) * tz(3.0)</span>
+<span class="go">tx(1) * ty(2) * tz(3)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">))</span>
-<span class="go">Rx(5157°)</span>
+<span class="go">Rx(90°)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -2669,21 +2711,30 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <p>do not mix ETs with and without explicit joint index.</p>
 </div>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">413</span>, in <span class="n">eval</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;</span>, line <span class="m">234</span>, in <span class="n">getvector</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid output specifier&quot;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">invalid output specifier</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q0) * tx(1) * Rz(q1) * tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">tx(1) * Rz(q)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
+<span class="go">SE3(array([[1., 0., 0., 1.],</span>
+<span class="go">           [0., 1., 0., 1.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="go">SE3(array([[1, 0, 0, 4],</span>
+<span class="go">           [0, 1, 0, 3],</span>
+<span class="go">           [0, 0, 1, 0],</span>
+<span class="go">           [0, 0, 0, 1]]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -2717,7 +2768,19 @@ individual ETs in the reverse order.</p>
 <div class="math notranslate nohighlight">
 \[(\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )\]</div>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: invalid output specifier</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">Rz(q2) * tx(1) * Rx(-q3) * tx(1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
+<span class="go">tx(-1) * Rx(q3) * tx(-1) * Rz(-q2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+<span class="go">   1           0           0           0            </span>
+<span class="go">   0           1           0           0            </span>
+<span class="go">   0           0           1           0            </span>
+<span class="go">   0           0           0           1            </span>
+
 </pre></div>
 </div>
 <div class="admonition note">
