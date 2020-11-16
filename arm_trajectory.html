@@ -176,8 +176,418 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="trajectories">
-<h1>Trajectories<a class="headerlink" href="#trajectories" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-roboticstoolbox.tools.trajectory">
+<span id="trajectories"></span><h1>Trajectories<a class="headerlink" href="#module-roboticstoolbox.tools.trajectory" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.tpoly">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">tpoly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q0</span></em>, <em class="sig-param"><span class="n">qf</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">qd0</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">qdf</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#tpoly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.tpoly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate scalar polynomial trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> (<em>float</em>) – initial value</p></li>
+<li><p><strong>qf</strong> (<em>float</em>) – final value</p></li>
+<li><p><strong>t</strong> (<em>float</em><em> or </em><em>array_like</em>) – time</p></li>
+<li><p><strong>qd0</strong> – initial velocity, optional</p></li>
+<li><p><strong>qdf</strong> – final velocity, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>trajectory</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>namedtuple</p>
+</dd>
+</dl>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">tpoly(q0,</span> <span class="pre">q1,</span> <span class="pre">t)</span></code> is a scalar trajectory (Mx1) that varies
+smoothly from <code class="docutils literal notranslate"><span class="pre">q0</span></code> to <code class="docutils literal notranslate"><span class="pre">qf</span></code> using a quintic polynomial.  The initial
+and final velocity and acceleration are zero. Time <code class="docutils literal notranslate"><span class="pre">t</span></code> can be either:</p>
+<blockquote>
+<div><ul>
+<li><p>an integer scalar, indicating the total number of timesteps</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Velocity is in units of distance per trajectory step, not per
+second.</p></li>
+<li><p>Acceleration is in units of distance per trajectory step squared,
+<em>not</em> per second squared.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>an array_like, containing the time steps.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Results are scaled to units of time.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">tpoly(q0,</span> <span class="pre">q1,</span> <span class="pre">t,</span> <span class="pre">qd0,</span> <span class="pre">qdf)</span></code> as above but specify the initial and
+final velocity. The initial and final acceleration are zero.</p></li>
+</ul>
+<p>The return value is a namedtuple (named <code class="docutils literal notranslate"><span class="pre">tpoly</span></code>) with elements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code>  the time coordinate as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code>  the position as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">yd</span></code>  the velocity as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ydd</span></code>  the acceleration as a numpy ndarray, shape=(M,)</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The time vector T is assumed to be monotonically increasing, and
+time scaling is based on the first and last element.</p>
+</div>
+<p>References:</p>
+<ul class="simple">
+<li><p>Robotics, Vision &amp; Control, Chap 3,
+P. Corke, Springer 2011.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.lspb" title="roboticstoolbox.tools.trajectory.lspb"><code class="xref py py-func docutils literal notranslate"><span class="pre">lspb()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.t1plot" title="roboticstoolbox.tools.trajectory.t1plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">t1plot()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.jtraj" title="roboticstoolbox.tools.trajectory.jtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">jtraj()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.lspb">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">lspb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q0</span></em>, <em class="sig-param"><span class="n">qf</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">V</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#lspb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.lspb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scalar trapezoidal trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> (<em>float</em>) – initial value</p></li>
+<li><p><strong>qf</strong> (<em>float</em>) – final value</p></li>
+<li><p><strong>t</strong> (<em>float</em><em> or </em><em>array_like</em>) – time</p></li>
+<li><p><strong>V</strong> (<em>float</em>) – velocity of linear segment, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>trajectory</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>namedtuple</p>
+</dd>
+</dl>
+<p>Computes a trapezoidal trajectory, which has a linear motion segment with
+parabolic blends.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">lspb(q0,</span> <span class="pre">qf,</span> <span class="pre">t)</span></code> is a scalar trajectory (Mx1) that varies
+smoothly from <code class="docutils literal notranslate"><span class="pre">q0</span></code> to <code class="docutils literal notranslate"><span class="pre">qf</span></code> in M steps using a constant velocity
+segment and parabolic blends.  Time <code class="docutils literal notranslate"><span class="pre">t</span></code> can be either:</p>
+<blockquote>
+<div><ul>
+<li><p>an integer scalar, indicating the total number of timesteps</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Velocity is in units of distance per trajectory step, not per
+second.</p></li>
+<li><p>Acceleration is in units of distance per trajectory step squared,
+<em>not</em> per second squared.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>an array_like, containing the time steps.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Results are scaled to units of time.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">lspb(q0,</span> <span class="pre">q1,</span> <span class="pre">t,</span> <span class="pre">V)</span></code>  as above but specifies the velocity of the
+linear segment which is normally computed automatically.</p></li>
+</ul>
+<p>The return value is a namedtuple (named <code class="docutils literal notranslate"><span class="pre">lspb</span></code>) with elements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code>  the time coordinate as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code>  the position as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">yd</span></code>  the velocity as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ydd</span></code>  the acceleration as a numpy ndarray, shape=(M,)</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>For some values of V no solution is possible and an error is flagged.</p></li>
+<li><p>The time vector, if given, is assumed to be monotonically increasing,
+and time scaling is based on the first and last element.</p></li>
+</ul>
+</div>
+<dl class="field-list">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control, Chap 3,</p></li>
+</ul>
+<ol class="upperalpha simple" start="16">
+<li><p>Corke, Springer 2011.</p></li>
+</ol>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.tpoly" title="roboticstoolbox.tools.trajectory.tpoly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tpoly()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.t1plot" title="roboticstoolbox.tools.trajectory.t1plot"><code class="xref py py-func docutils literal notranslate"><span class="pre">t1plot()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.jtraj" title="roboticstoolbox.tools.trajectory.jtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">jtraj()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.jtraj">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">jtraj</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q0</span></em>, <em class="sig-param"><span class="n">qf</span></em>, <em class="sig-param"><span class="n">tv</span></em>, <em class="sig-param"><span class="n">qd0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qd1</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#jtraj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.jtraj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a joint-space trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> (<em>N-element array_like</em>) – initial joint coordinate</p></li>
+<li><p><strong>qf</strong> (<em>N-element array_like</em>) – final joint coordinate</p></li>
+<li><p><strong>tv</strong> (<em>array_like</em><em> or </em><em>int</em>) – time vector or number of steps</p></li>
+<li><p><strong>qd0</strong> (<em>N-element array_like</em><em>, </em><em>optional</em>) – initial velocity, defaults to zero</p></li>
+<li><p><strong>qd1</strong> (<em>N-element array_like</em><em>, </em><em>optional</em>) – final velocity, defaults to zero</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>trajectory of coordinates and optionally velocity and acceleration</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>namedtuple</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">jtraj(q0,</span> <span class="pre">qf,</span> <span class="pre">M)</span></code> is a joint space trajectory where the joint
+coordinates vary from <code class="docutils literal notranslate"><span class="pre">q0</span></code> (N) to <code class="docutils literal notranslate"><span class="pre">qf</span></code> (N).  A quintic (5th order)
+polynomial is used with default zero boundary conditions for velocity and
+acceleration.
+Time is assumed to vary from 0 to 1 in <code class="docutils literal notranslate"><span class="pre">M</span></code> steps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">jtraj(q0,</span> <span class="pre">qf,</span> <span class="pre">M,</span> <span class="pre">qd0,</span> <span class="pre">qdf)</span></code> as above but also specifies initial
+<code class="docutils literal notranslate"><span class="pre">qd0</span></code> (N) and final <code class="docutils literal notranslate"><span class="pre">qdf</span></code> (N) joint velocity for the trajectory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">jtraj(q0,</span> <span class="pre">qf,</span> <span class="pre">tv)</span></code>, as above but the number of steps in the
+trajectory is defined by the length of the time vector <code class="docutils literal notranslate"><span class="pre">tv</span></code> (M).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">jtraj(q0,</span> <span class="pre">qf,</span> <span class="pre">tv,</span> <span class="pre">qd0,</span> <span class="pre">qdf)</span></code> as above but specifies initial and
+final joint velocity for the trajectory and a time vector.</p></li>
+</ul>
+<p>The return value is a namedtuple (named <code class="docutils literal notranslate"><span class="pre">jtraj</span></code>) with elements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code>  the time coordinate as a numpy ndarray, shape=(M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">q</span></code>  the position as a numpy ndarray, shape=(M,N)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qd</span></code>  the velocity as a numpy ndarray, shape=(M,N)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qdd</span></code>  the acceleration as a numpy ndarray, shape=(M,N)</p></li>
+</ul>
+</div></blockquote>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>When a time vector is provided the velocity and acceleration outputs
+are scaled assuming that the time vector starts at zero and increases
+linearly.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj" title="roboticstoolbox.tools.trajectory.ctraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctraj()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.qplot" title="roboticstoolbox.tools.trajectory.qplot"><code class="xref py py-func docutils literal notranslate"><span class="pre">qplot()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">jtraj()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.t1plot">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">t1plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tg</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#t1plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.t1plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot 1D trajectories</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tg</strong> (<em>namedtuple</em>) – the trajectory to plot</p>
+</dd>
+</dl>
+<p>Plot the position, velocity and acceleration contained in the namedtuple
+<code class="docutils literal notranslate"><span class="pre">tg</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.tpoly" title="roboticstoolbox.tools.trajectory.tpoly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tpoly()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.lspb" title="roboticstoolbox.tools.trajectory.lspb"><code class="xref py py-func docutils literal notranslate"><span class="pre">lspb()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.qplot">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">qplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#qplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.qplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot robot joint angles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>numpy ndarray</em><em>, </em><em>shape=</em><em>(</em><em>M</em><em>,</em><em>N</em><em>)</em>) – joint angle trajectory</p></li>
+<li><p><strong>t</strong> (<em>numpy ndarray</em><em>, </em><em>shape=</em><em>(</em><em>M</em><em>,</em><em>)</em>) – time vector, optional</p></li>
+</ul>
+</dd>
+</dl>
+<p>This is a convenience function to plot joint angle trajectories (MxN) for
+an N-axis robot, where each row represents one time step.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qplot(q)</span></code> plots the joint angles versus row number.  If N==6 a
+conventional 6-axis robot is assumed, and the first three joints are
+shown as solid lines, the last three joints (wrist) are shown as dashed
+lines. A legend is also displayed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qplot(q,</span> <span class="pre">t)</span></code> as above but displays the joint angle trajectory versus
+time given the time vector T (Mx1).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.jtraj" title="roboticstoolbox.tools.trajectory.jtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">jtraj()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.ctraj">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">ctraj</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T0</span></em>, <em class="sig-param"><span class="n">T1</span></em>, <em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#ctraj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.ctraj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cartesian trajectory between two poses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T0</strong> (<em>SE3</em>) – initial pose</p></li>
+<li><p><strong>T1</strong> (<em>SE3</em>) – final pose</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return T0</dt>
+<dd class="field-even"><p>smooth path from <code class="docutils literal notranslate"><span class="pre">T0</span></code> to <code class="docutils literal notranslate"><span class="pre">T1</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SE3</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ctraj(T0,</span> <span class="pre">T1,</span> <span class="pre">n)</span></code> is a Cartesian trajectory from SE3 pose <code class="docutils literal notranslate"><span class="pre">T0</span></code> to
+<code class="docutils literal notranslate"><span class="pre">T1</span></code> with <code class="docutils literal notranslate"><span class="pre">n</span></code> points that follow a trapezoidal velocity profile along
+the path. The Cartesian trajectory is an SE3 instance containing <code class="docutils literal notranslate"><span class="pre">n</span></code>
+values.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ctraj(T0,</span> <span class="pre">T1,</span> <span class="pre">s)</span></code> as above but the elements of <code class="docutils literal notranslate"><span class="pre">s</span></code> specify the
+fractional distance  along the path, and these values are in the
+range [0 1]. The i’th point corresponds to a distance <code class="docutils literal notranslate"><span class="pre">s[i]</span></code> along
+the path.</p>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span> <span class="o">=</span> <span class="n">ctraj</span><span class="p">(</span><span class="n">SE3</span><span class="o">.</span><span class="n">Rand</span><span class="p">(),</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Rand</span><span class="p">(),</span> <span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">tg</span><span class="p">)</span>
+<span class="go">20</span>
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>In the second case <code class="docutils literal notranslate"><span class="pre">s</span></code> could be generated by a scalar trajectory
+generator such as <code class="docutils literal notranslate"><span class="pre">tpoly</span></code> or <code class="docutils literal notranslate"><span class="pre">lspb</span></code> (default).</p></li>
+<li><p>Orientation interpolation is performed using unit-quaternion
+interpolation.</p></li>
+</ul>
+<p>Reference:</p>
+<ul class="simple">
+<li><p>Robotics, Vision &amp; Control, Sec 3.1.5,
+Peter Corke, Springer 2011</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">lspb()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">interp()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.cmstraj">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">cmstraj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#cmstraj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.cmstraj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="roboticstoolbox.tools.trajectory.mstraj">
+<code class="sig-prename descclassname">roboticstoolbox.tools.trajectory.</code><code class="sig-name descname">mstraj</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">viapoints</span></em>, <em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">tacc</span></em>, <em class="sig-param"><span class="n">qdmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tsegment</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qd0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qdf</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mstraj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mstraj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-segment multi-axis trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>viapoints</strong> (<em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – A set of viapoints, one per row</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em> (</em><em>seconds</em><em>)</em>) – time step</p></li>
+<li><p><strong>tacc</strong> (<em>float</em>) – acceleration time (seconds)</p></li>
+<li><p><strong>qdmax</strong> (<em>array_like</em><em>(</em><em>n</em><em>) or </em><em>float</em><em>, </em><em>optional</em>) – maximum speed, defaults to None</p></li>
+<li><p><strong>tsegment</strong> (<em>array_like</em><em>, </em><em>optional</em>) – maximum time of each motion segment (seconds), defaults
+to None</p></li>
+<li><p><strong>q0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial coordinates, defaults to first row of viapoints</p></li>
+<li><p><strong>qd0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – inital  velocity, defaults to zero</p></li>
+<li><p><strong>qdf</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – final  velocity, defaults to zero</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – print debug information, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>trajectory plus extra info</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>namedtuple</p>
+</dd>
+</dl>
+<p>Computes a trajectory for N axes moving smoothly through a set of
+viapoints.
+The motion comprises M segments:</p>
+<ul class="simple">
+<li><p>The initial coordinates are the first row of <code class="docutils literal notranslate"><span class="pre">viapoints</span></code> or <code class="docutils literal notranslate"><span class="pre">q0</span></code> if
+provided.</p></li>
+<li><p>The final coordinates are the last row of <code class="docutils literal notranslate"><span class="pre">viapoints</span></code></p></li>
+<li><p>Each segment is linear motion and polynomial blends connect the
+viapoints.</p></li>
+<li><p>All joints arrive at each via point at the same time, ie. the motion is
+coordinated across axes</p></li>
+</ul>
+<p>The time of the segments can be specified in two different ways:</p>
+<ol class="arabic">
+<li><p>In terms of segment time where <code class="docutils literal notranslate"><span class="pre">tsegment</span></code> is an array of segment times
+which is the number of via points minus one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``traj = mstraj(viapoints, dt, tacc, tsegment=TS)``
+</pre></div>
+</div>
+</li>
+<li><p>Governed by the speed of the slowest axis for the segment.  The axis
+speed is a scalar (all axes have the same speed) or an N-vector of speed
+per axis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">traj</span> <span class="o">=</span> <span class="n">mstraj</span><span class="p">(</span><span class="n">viapoints</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tacc</span><span class="p">,</span> <span class="n">qdmax</span><span class="o">=</span><span class="n">SPEED</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The return value is a namedtuple (named <code class="docutils literal notranslate"><span class="pre">mstraj</span></code>) with elements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code>  the time coordinate as a numpy ndarray, shape=(K,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">q</span></code>  the axis values as a numpy ndarray, shape=(K,N)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">arrive</span></code> a list of arrival times for each segment</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">info</span></code> a list of named tuples, one per segment that describe the
+slowest axis, segment time,  and time stamp</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">via</span></code> the passed set of via points</p></li>
+</ul>
+</div></blockquote>
+<p>The  trajectory proper is (<code class="docutils literal notranslate"><span class="pre">traj.t</span></code>, <code class="docutils literal notranslate"><span class="pre">traj.q</span></code>).  The trajectory is a
+matrix has one row per time step, and one column per axis.</p>
+<blockquote>
+<div><p>Notes:</p>
+<ul class="simple">
+<li><p>Only one of <code class="docutils literal notranslate"><span class="pre">qdmag</span></code> or <code class="docutils literal notranslate"><span class="pre">tsegment</span></code> can be specified</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">tacc</span></code> is greater than zero then the path smoothly accelerates
+between segments using a polynomial blend.  This means that the the via
+point is not actually reached.</p></li>
+<li><p>The path length K is a function of the number of via
+points and the time or velocity limits that apply.</p></li>
+<li><p>Can be used to create joint space trajectories where each axis is a
+joint coordinate.</p></li>
+<li><p>Can be used to create Cartesian trajectories where the “axes”
+correspond to translation and orientation in RPY or Euler angle form.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">qdmax</span></code> is a scalar then all axes are assumed to have the same
+maximum speed.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><cite>lspb</cite>, <cite>ctraj</cite>, <cite>mtraj</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
