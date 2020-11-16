@@ -6,6 +6,7 @@
 from roboticstoolbox.tools.Ticker import Ticker
 import unittest
 
+
 class TestTicker(unittest.TestCase):
 
     def test_ticker(self):
