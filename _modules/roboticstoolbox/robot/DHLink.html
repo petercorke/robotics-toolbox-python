@@ -179,6 +179,7 @@
     <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="k">return</span> <span class="kc">False</span>
 
+
 <span class="k">def</span> <span class="nf">_cos</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">_issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
@@ -269,7 +270,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
 
-
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">DHLink</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">rp</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">([</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">])</span>
@@ -309,7 +309,8 @@
             <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:   theta=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="si">}</span><span class="s2">, &quot;</span> \
                 <span class="sa">f</span><span class="s2">&quot;a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">, alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:  theta=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  &quot;</span> \
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:  theta=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">, &quot;</span> \
+                <span class="sa">f</span><span class="s2">&quot; a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  &quot;</span> \
                 <span class="sa">f</span><span class="s2">&quot;alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">s</span>
 
@@ -494,32 +495,33 @@
 <span class="sd">        ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous</span>
 <span class="sd">        transformation matrix corresponding to the link&#39;s joint variable ``q``</span>
 <span class="sd">        which is either the Denavit-Hartenberg parameter :math:`\theta_j`</span>
-<span class="sd">        (revolute) or :math:`d_j` (prismatic). </span>
-<span class="sd">        </span>
+<span class="sd">        (revolute) or :math:`d_j` (prismatic).</span>
+
 <span class="sd">        This is the relative pose of the current link frame with respect to the</span>
 <span class="sd">        previous link frame.</span>
 
+<span class="sd">        For details of the computation see the documentation for the</span>
+<span class="sd">        subclasses, click on the right side of the class boxes below.</span>
 
-
-<span class="sd">        For details of the computation see the documentation for the subclasses,</span>
-<span class="sd">        click on the right side of the class boxes below. </span>
-
-<span class="sd">        .. inheritance-diagram:: roboticstoolbox.RevoluteDH roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH roboticstoolbox.PrismaticMDH</span>
+<span class="sd">        .. inheritance-diagram:: roboticstoolbox.RevoluteDH</span>
+<span class="sd">            roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH</span>
+<span class="sd">            roboticstoolbox.PrismaticMDH</span>
 <span class="sd">            :top-classes: roboticstoolbox.robot.DHLink.DHLink</span>
 <span class="sd">            :parts: 2</span>
 
 <span class="sd">        .. note::</span>
 
-<span class="sd">            - For a revolute joint the ``theta`` parameter of the link is </span>
+<span class="sd">            - For a revolute joint the ``theta`` parameter of the link is</span>
 <span class="sd">              ignored, and ``q`` used instead.</span>
 <span class="sd">            - For a prismatic joint the ``d`` parameter of the link is ignored,</span>
 <span class="sd">              and ``q`` used instead.</span>
-<span class="sd">            - The joint ``offset`` parameter is added to ``q`` before </span>
+<span class="sd">            - The joint ``offset`` parameter is added to ``q`` before</span>
 <span class="sd">              computation of the transformation matrix.</span>
-<span class="sd">            - The computation is different for standard and modified </span>
+<span class="sd">            - The computation is different for standard and modified</span>
 <span class="sd">              Denavit-Hartenberg parameters.</span>
 
-<span class="sd">        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`, :class:`RevoluteMDH`, :class:`PrismaticMDH`</span>
+<span class="sd">        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`,</span>
+<span class="sd">            :class:`RevoluteMDH`, :class:`PrismaticMDH`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">sa</span> <span class="o">=</span> <span class="n">_sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
@@ -559,7 +561,6 @@
             <span class="p">])</span>
 
         <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
-
 
     <span class="c1"># TODO these next 2 should be properties</span>
 <div class="viewcode-block" id="DHLink.isrevolute"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -630,7 +631,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
-                    
+
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
                 <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
@@ -641,7 +642,9 @@
                 <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ets</span></div></div>
 
+
 <span class="c1"># -------------------------------------------------------------------------- #</span>
+
 <div class="viewcode-block" id="RevoluteDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.RevoluteDH">[docs]</a><span class="k">class</span> <span class="nc">RevoluteDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for revolute links using standard DH convention</span>
@@ -689,7 +692,7 @@
 <span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
 
 <span class="sd">    :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -760,7 +763,7 @@
 <span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
 
 <span class="sd">    :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -829,7 +832,7 @@
 <span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
 
 <span class="sd">    :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -900,7 +903,7 @@
 <span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
 
 <span class="sd">    :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -935,7 +938,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

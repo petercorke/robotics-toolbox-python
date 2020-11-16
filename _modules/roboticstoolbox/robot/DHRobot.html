@@ -275,7 +275,7 @@
             <span class="k">return</span> <span class="n">s</span>
 
         <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">sym</span><span class="o">.</span><span class="n">issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">sym</span><span class="o">.</span><span class="n">issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>   <span class="c1"># pragma nocover</span>
                 <span class="k">return</span> <span class="s2">&quot;&lt;&lt;red&gt;&gt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1028,10 +1028,10 @@
             <span class="n">Tj</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">Tall</span> <span class="o">=</span> <span class="n">Tj</span>
-        <span class="c1"># print(Tj)</span>
+
         <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
-                <span class="c1"># print(q, L.A(q))</span>
+
                 <span class="n">Tj</span> <span class="o">*=</span> <span class="n">L</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">old</span><span class="p">:</span>
                     <span class="n">Tall</span> <span class="o">=</span> <span class="n">Tj</span>
@@ -1069,7 +1069,7 @@
 <span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
 <span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
 <span class="sd">            &gt;&gt;&gt; puma.jacobe([0, 0, 0, 0, 0, 0])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
@@ -1135,7 +1135,7 @@
 <span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
 <span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
 <span class="sd">            &gt;&gt;&gt; puma.jacob0([0, 0, 0, 0, 0, 0])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1308,7 +1308,7 @@
 <span class="sd">              manipulators: The operational space formulation</span>
 <span class="sd">              O Khatib, IEEE Journal on Robotics and Automation, 1987.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
@@ -1541,399 +1541,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">qt</span></div>
 
-<div class="viewcode-block" id="DHRobot.ikine_6s"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s">[docs]</a>    <span class="k">def</span> <span class="nf">ikine_6s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">_ikfunc</span><span class="p">):</span>
-        <span class="c1"># Undo base and tool transformations, but if they are not</span>
-        <span class="c1"># set, skip the operation.  Nicer for symbolics</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T</span>
-
-        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">6</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="n">_ikfunc</span><span class="p">(</span><span class="n">Tk</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">theta</span><span class="p">)):</span>
-                <span class="c1"># Solve for the wrist rotation</span>
-                <span class="c1"># We need to account for some random translations between the</span>
-                <span class="c1"># first and last 3 joints (d4) and also d6,a6,alpha6 in the</span>
-                <span class="c1"># final frame.</span>
-
-                <span class="c1"># Transform of first 3 joints</span>
-                <span class="n">T13</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">theta</span><span class="p">)</span>
-
-                <span class="c1"># T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)</span>
-                <span class="n">Td4</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>      <span class="c1"># Tz(d4)</span>
-
-                <span class="c1"># Tz(d6) Tx(a5) Rx(alpha6)</span>
-                <span class="n">Tt</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">*</span> \
-                    <span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
-
-                <span class="n">R</span> <span class="o">=</span> <span class="n">Td4</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T13</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">Tk</span> <span class="o">*</span> <span class="n">Tt</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
-
-                <span class="c1"># The spherical wrist implements Euler angles</span>
-                <span class="k">if</span> <span class="s1">&#39;f&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-                    <span class="n">eul</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">eul</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">eul</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">eul</span><span class="p">()</span>
-                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">theta</span><span class="p">,</span> <span class="n">eul</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">theta</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">theta</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
-
-                <span class="c1"># Remove the link offset angles</span>
-                <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
-
-                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">theta</span>
-
-            <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">q</span></div>
-
-    <span class="c1"># def ikine_6s(self, T, left=True, elbow_up=True, wrist_flip=False):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Analytical inverse kinematics</span>
-
-    <span class="c1">#     q, err = ikine6s(T) are the joint coordinates (n) corresponding to the</span>
-    <span class="c1">#     robot end-effector pose T which is an SE3 object or homogenenous</span>
-    <span class="c1">#     transform matrix (4x4), and n is the number of robot joints. This</span>
-    <span class="c1">#     is an analytic solution for a 6-axis robot with a spherical wrist</span>
-    <span class="c1">#     (the most common form for industrial robot arms).</span>
-
-    <span class="c1">#     q, err = ikine6s(T, left, elbow_up, wrist_flip) as above except the</span>
-    <span class="c1">#     arm location, elbow position, and wrist orientation can be specified.</span>
-
-    <span class="c1">#     Trajectory operation:</span>
-    <span class="c1">#     In all cases if T is a vector of SE3 objects (1xM) or a homogeneous</span>
-    <span class="c1">#     transform sequence (4x4xM) then the inverse kinematics is computed for</span>
-    <span class="c1">#     all m poses resulting in q (mxn) with each row representing the joint</span>
-    <span class="c1">#     angles at the corresponding pose.</span>
-
-    <span class="c1">#     :param T: The desired end-effector pose</span>
-    <span class="c1">#     :type T: SE3 or SE3 trajectory</span>
-    <span class="c1">#     :param left: True for arm to the left (default), else arm to the right</span>
-    <span class="c1">#     :type left: bool</span>
-    <span class="c1">#     :param elbow_up: True for elbow up (default), else elbow down</span>
-    <span class="c1">#     :type elbow_up: bool</span>
-    <span class="c1">#     :param wrist_flip: False for wrist not flipped (default), else wrist</span>
-    <span class="c1">#         flipped (rotated by 180 deg)</span>
-    <span class="c1">#     :type wrist_flip: bool</span>
-
-    <span class="c1">#     :return q: The calculated joint values</span>
-    <span class="c1">#     :rtype q: float ndarray(n)</span>
-    <span class="c1">#     :return err: Any errors encountered</span>
-    <span class="c1">#     :rtype err: list String</span>
-
-    <span class="c1">#     :notes:</span>
-    <span class="c1">#         - Treats a number of specific cases:</span>
-    <span class="c1">#             - Robot with no shoulder offset</span>
-    <span class="c1">#             - Robot with a shoulder offset (has lefty/righty configuration)</span>
-    <span class="c1">#             - Robot with a shoulder offset and a prismatic third joint</span>
-    <span class="c1">#               (like Stanford arm)</span>
-    <span class="c1">#         - The Puma 560 arms with shoulder and elbow offsets (4 lengths</span>
-    <span class="c1">#           parameters)</span>
-    <span class="c1">#         - The Kuka KR5 with many offsets (7 length parameters)</span>
-    <span class="c1">#         - The inverse kinematics for the various cases determined using</span>
-    <span class="c1">#           ikine_sym.</span>
-    <span class="c1">#         - The inverse kinematic solution is generally not unique, and</span>
-    <span class="c1">#           depends on the configuration string.</span>
-    <span class="c1">#         - Joint offsets, if defined, are added to the inverse kinematics</span>
-    <span class="c1">#           to generate q.</span>
-    <span class="c1">#         - Only applicable for standard Denavit-Hartenberg parameters</span>
-
-    <span class="c1">#     :reference:</span>
-    <span class="c1">#         - Inverse kinematics for a PUMA 560,</span>
-    <span class="c1">#           Paul and Zhang,</span>
-    <span class="c1">#           The International Journal of Robotics Research,</span>
-    <span class="c1">#           Vol. 5, No. 2, Summer 1986, p. 32-44</span>
-
-    <span class="c1">#     &quot;&quot;&quot;</span>
-
-    <span class="c1">#     if not self.n == 6:</span>
-    <span class="c1">#         raise ValueError(</span>
-    <span class="c1">#             &quot;Function only applicable to six degree of freedom robots&quot;)</span>
-
-    <span class="c1">#     if self.mdh:</span>
-    <span class="c1">#         raise ValueError(</span>
-    <span class="c1">#             &quot;Function only applicable to robots with standard DH &quot;</span>
-    <span class="c1">#             &quot;parameters&quot;)</span>
-
-    <span class="c1">#     if not self.isspherical():</span>
-    <span class="c1">#         raise ValueError(</span>
-    <span class="c1">#             &quot;Function only applicable to robots with a spherical wrist&quot;)</span>
-
-    <span class="c1">#     if not isinstance(T, SE3):</span>
-    <span class="c1">#         T = SE3(T)</span>
-
-    <span class="c1">#     trajn = len(T)</span>
-
-    <span class="c1">#     sol = [1, 1, 1]</span>
-
-    <span class="c1">#     if not left:</span>
-    <span class="c1">#         sol[0] = 2</span>
-
-    <span class="c1">#     if not elbow_up:</span>
-    <span class="c1">#         sol[1] = 2</span>
-
-    <span class="c1">#     if wrist_flip:</span>
-    <span class="c1">#         sol[2] = 2</span>
-
-    <span class="c1">#     if self._is_simple():</span>
-    <span class="c1">#         self.ikineType = &#39;nooffset&#39;</span>
-    <span class="c1">#     elif self._is_puma():</span>
-    <span class="c1">#         self.ikineType = &#39;puma&#39;</span>
-    <span class="c1">#     elif self._is_offset():</span>
-    <span class="c1">#         self.ikineType = &#39;offset&#39;</span>
-    <span class="c1">#     elif self._is_rrp():</span>
-    <span class="c1">#         self.ikineType = &#39;rrp&#39;</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         raise ValueError(&#39;This kinematic structure not supported&#39;)</span>
-
-    <span class="c1">#     q = np.zeros((trajn, self.n))</span>
-    <span class="c1">#     err = []</span>
-
-    <span class="c1">#     for j in range(trajn):</span>
-
-    <span class="c1">#         theta = np.zeros(self.n)</span>
-
-    <span class="c1">#         # Undo base and tool transformations</span>
-    <span class="c1">#         Ti = np.linalg.inv(self.base.A) @ T[j].A @ \</span>
-    <span class="c1">#             np.linalg.inv(self.tool.A)</span>
-
-    <span class="c1">#         if self.ikineType == &#39;puma&#39;:</span>
-    <span class="c1">#             # Puma model with shoulder and elbow offsets</span>
-    <span class="c1">#             # - Inverse kinematics for a PUMA 560,</span>
-    <span class="c1">#             #   Paul and Zhang,</span>
-    <span class="c1">#             #   The International Journal of Robotics Research,</span>
-    <span class="c1">#             #   Vol. 5, No. 2, Summer 1986, p. 32-44</span>
-
-    <span class="c1">#             a2 = self.links[1].a</span>
-    <span class="c1">#             a3 = self.links[2].a</span>
-    <span class="c1">#             d1 = self.links[0].d</span>
-    <span class="c1">#             d3 = self.links[2].d</span>
-    <span class="c1">#             d4 = self.links[3].d</span>
-
-    <span class="c1">#             # The following parameters are extracted from the Homogeneous</span>
-    <span class="c1">#             # Transformation as defined in equation 1, p. 34</span>
-
-    <span class="c1">#             Px = Ti[0, 3]</span>
-    <span class="c1">#             Py = Ti[1, 3]</span>
-    <span class="c1">#             Pz = Ti[2, 3] - d1</span>
-
-    <span class="c1">#             # Solve for theta[0]</span>
-    <span class="c1">#             # r is defined in equation 38, p. 39.</span>
-    <span class="c1">#             # theta[0] uses equations 40 and 41, p.39,</span>
-    <span class="c1">#             # based on the configuration parameter n1</span>
-
-    <span class="c1">#             r = np.sqrt(Px**2 + Py**2)</span>
-    <span class="c1">#             if sol[0] == 1:</span>
-    <span class="c1">#                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)</span>
-
-    <span class="c1">#             # Solve for theta[1]</span>
-    <span class="c1">#             # V114 is defined in equation 43, p.39.</span>
-    <span class="c1">#             # r is defined in equation 47, p.39.</span>
-    <span class="c1">#             # Psi is defined in equation 49, p.40.</span>
-    <span class="c1">#             # theta[1] uses equations 50 and 51, p.40, based on the</span>
-    <span class="c1">#             # configuration parameter n2</span>
-    <span class="c1">#             if sol[1] == 1:</span>
-    <span class="c1">#                 n2 = -1</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 n2 = 1</span>
-
-    <span class="c1">#             if sol[0] == 2:</span>
-    <span class="c1">#                 n2 = -n2</span>
-
-    <span class="c1">#             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])</span>
-
-    <span class="c1">#             r = np.sqrt(V114**2 + Pz**2)</span>
-
-    <span class="c1">#             Psi = np.arccos(</span>
-    <span class="c1">#                 (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)</span>
-    <span class="c1">#                 / (2.0 * a2 * r))</span>
-
-    <span class="c1">#             if np.isnan(Psi):</span>
-    <span class="c1">#                 theta = []</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 theta[1] = np.arctan2(Pz, V114) + n2 * Psi</span>
-
-    <span class="c1">#                 # Solve for theta[2]</span>
-    <span class="c1">#                 # theta[2] uses equation 57, p. 40.</span>
-    <span class="c1">#                 num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2</span>
-    <span class="c1">#                 den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114</span>
-    <span class="c1">#                 theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)</span>
-
-    <span class="c1">#         elif self.ikineType == &#39;nooffset&#39;:</span>
-    <span class="c1">#             a2 = self.links[1].a</span>
-    <span class="c1">#             a3 = self.links[2].a</span>
-    <span class="c1">#             d1 = self.links[0].d</span>
-
-    <span class="c1">#             px = Ti[0, 3]</span>
-    <span class="c1">#             py = Ti[1, 3]</span>
-    <span class="c1">#             pz = Ti[2, 3]</span>
-
-    <span class="c1">#             # Autogenerated code</span>
-    <span class="c1">#             if self.links[0].alpha &lt; 0:</span>
-    <span class="c1">#                 if sol[0] == 1:</span>
-    <span class="c1">#                     temp = -px - py * 1j</span>
-    <span class="c1">#                     if np.abs(temp) == 0:</span>
-    <span class="c1">#                         temp = 0</span>
-    <span class="c1">#                     theta[0] = np.angle(temp)</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[0] = np.angle(px + py * 1j)</span>
-
-    <span class="c1">#                 print(theta[0])</span>
-
-    <span class="c1">#                 S1 = np.sin(theta[0])</span>
-    <span class="c1">#                 C1 = np.cos(theta[0])</span>
-
-    <span class="c1">#                 if sol[1] == 1:</span>
-    <span class="c1">#                     theta[1] = -np.angle(a2*d1*-2.0+a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j-np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[1] = -np.angle(a2*d1*-2.0+a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j+np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa</span>
-
-    <span class="c1">#                 S2 = np.sin(theta[1])</span>
-    <span class="c1">#                 C2 = np.cos(theta[1])</span>
-
-    <span class="c1">#                 if sol[2] == 1:</span>
-    <span class="c1">#                     theta[2] = -np.angle(a2*-1j+C2*d1-C2*pz+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j-np.sqrt(0j+(-a2+S2*d1-S2*pz+C1*C2*px+C2*S1*py)**2+(-C2*d1+C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[2] = -np.angle(a2*-1j+C2*d1-C2*pz+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+(-a2+S2*d1-S2*pz+C1*C2*px+C2*S1*py)**2+(-C2*d1+C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa</span>
-
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 if sol[0] == 1:</span>
-    <span class="c1">#                     theta[0] = np.angle(px + py * 1j)</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     temp = -px - py * 1j</span>
-    <span class="c1">#                     if np.abs(temp) == 0:</span>
-    <span class="c1">#                         temp = 0</span>
-    <span class="c1">#                     theta[0] = np.angle(temp)</span>
-
-    <span class="c1">#                 S1 = np.sin(theta[0])</span>
-    <span class="c1">#                 C1 = np.cos(theta[0])</span>
-
-    <span class="c1">#                 if sol[1] == 1:</span>
-    <span class="c1">#                     theta[1] = -np.angle(a2*d1*2.0-a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j-np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[1] = -np.angle(a2*d1*2.0-a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j+np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa</span>
-
-    <span class="c1">#                 S2 = np.sin(theta[1])</span>
-    <span class="c1">#                 C2 = np.cos(theta[1])</span>
-
-    <span class="c1">#                 if sol[2] == 1:</span>
-    <span class="c1">#                     theta[2] = -np.angle(a2*-1j-C2*d1+C2*pz-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j-np.sqrt(0j+(-a2-S2*d1+S2*pz+C1*C2*px+C2*S1*py)**2+(C2*d1-C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[2] = -np.angle(a2*-1j-C2*d1+C2*pz-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+(-a2-S2*d1+S2*pz+C1*C2*px+C2*S1*py)**2+(C2*d1-C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa</span>
-
-    <span class="c1">#         elif self.ikineType == &#39;offset&#39;:</span>
-    <span class="c1">#             # General case with 6 length parameters</span>
-    <span class="c1">#             a1 = self.links[0].a</span>
-    <span class="c1">#             a2 = self.links[1].a</span>
-    <span class="c1">#             a3 = self.links[2].a</span>
-    <span class="c1">#             d1 = self.links[0].d</span>
-    <span class="c1">#             d2 = self.links[1].d</span>
-    <span class="c1">#             d3 = self.links[2].d</span>
-
-    <span class="c1">#             px = Ti[0, 3]</span>
-    <span class="c1">#             py = Ti[1, 3]</span>
-    <span class="c1">#             pz = Ti[2, 3]</span>
-
-    <span class="c1">#             # Autogenerated code</span>
-    <span class="c1">#             if self.links[0].alpha &lt; 0:</span>
-
-    <span class="c1">#                 if sol[0] == 1:</span>
-    <span class="c1">#                     theta[0] = -np.angle(-px+py*1j)+np.angle(d2*1j+d3*1j-np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[0] = np.angle(d2*1j+d3*1j+np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))-np.angle(-px+py*1j)  # noqa</span>
-
-    <span class="c1">#                 S1 = np.sin(theta[0])</span>
-    <span class="c1">#                 C1 = np.cos(theta[0])</span>
-
-    <span class="c1">#                 if sol[1] == 1:</span>
-    <span class="c1">#                     theta[1] = np.angle(d1*pz*2.0j-np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[1] = np.angle(d1*pz*2.0j+np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa</span>
-
-    <span class="c1">#                 S2 = np.sin(theta[1])</span>
-    <span class="c1">#                 C2 = np.cos(theta[1])</span>
-
-    <span class="c1">#                 if sol[2] == 1:</span>
-    <span class="c1">#                     theta[2] = np.angle(a3*1j-np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0-S2*a2*d1*2.0-S1*a1*py*2.0+S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0+0j))-np.angle(a2*-1j-C2*a1*1j+C2*d1-C2*pz+S2*a1+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[2] = -np.angle(a2*-1j-C2*a1*1j+C2*d1-C2*pz+S2*a1+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0-S2*a2*d1*2.0-S1*a1*py*2.0+S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))  # noqa</span>
-
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 if sol[0] == 1:</span>
-    <span class="c1">#                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+d3*1j-np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+d3*1j+np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa</span>
-
-    <span class="c1">#                 S1 = np.sin(theta[0])</span>
-    <span class="c1">#                 C1 = np.cos(theta[0])</span>
-
-    <span class="c1">#                 if sol[1] == 1:</span>
-    <span class="c1">#                     theta[1] = np.angle(d1*pz*2.0j-np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j-d1+pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[1] = np.angle(d1*pz*2.0j+np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa</span>
-    <span class="c1">#                     print(theta[1])</span>
-
-    <span class="c1">#                 S2 = np.sin(theta[1])</span>
-    <span class="c1">#                 C2 = np.cos(theta[1])</span>
-
-    <span class="c1">#                 if sol[2] == 1:</span>
-    <span class="c1">#                     theta[2] = np.angle(a3*1j-np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0+S2*a2*d1*2.0-S1*a1*py*2.0-S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))-np.angle(a2*-1j-C2*a1*1j-C2*d1+C2*pz+S2*a1-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[2] = -np.angle(a2*-1j-C2*a1*1j-C2*d1+C2*pz+S2*a1-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0+S2*a2*d1*2.0-S1*a1*py*2.0-S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))  # noqa</span>
-
-    <span class="c1">#         elif self.ikineType == &#39;rrp&#39;:</span>
-    <span class="c1">#             # RRP (Stanford arm like)</span>
-    <span class="c1">#             px = Ti[0, 3]</span>
-    <span class="c1">#             py = Ti[1, 3]</span>
-    <span class="c1">#             pz = Ti[2, 3]</span>
-    <span class="c1">#             d1 = self.links[0].d</span>
-    <span class="c1">#             d2 = self.links[1].d</span>
-
-    <span class="c1">#             # Autogenerated code</span>
-    <span class="c1">#             if self.links[0].alpha &lt; 0:</span>
-    <span class="c1">#                 if sol[0] == 1:</span>
-    <span class="c1">#                     theta[0] = -np.angle(-px+py*1j)+np.angle(d2*1j-np.sqrt(0j+-d2**2+px**2+py**2))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[0] = np.angle(d2*1j+np.sqrt(0j+-d2**2+px**2+py**2))-np.angle(-px+py*1j)  # noqa</span>
-
-    <span class="c1">#                 S1 = np.sin(theta[0])</span>
-    <span class="c1">#                 C1 = np.cos(theta[0])</span>
-
-    <span class="c1">#                 if sol[1] == 1:</span>
-    <span class="c1">#                     theta[1] = np.angle(d1-pz-C1*px*1j-S1*py*1j)  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[1] = np.angle(-d1+pz+C1*px*1j+S1*py*1j)  # noqa</span>
-
-    <span class="c1">#                 S2 = np.sin(theta[1])</span>
-    <span class="c1">#                 C2 = np.cos(theta[1])</span>
-
-    <span class="c1">#                 theta[2] = -C2*d1+C2*pz+C1*S2*px+S1*S2*py  # noqa</span>
-
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 if sol[0] == 1:</span>
-    <span class="c1">#                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j-np.sqrt(0j+-d2**2+px**2+py**2))  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+np.sqrt(0j+-d2**2+px**2+py**2))  # noqa</span>
-
-    <span class="c1">#                 S1 = np.sin(theta[0])</span>
-    <span class="c1">#                 C1 = np.cos(theta[0])</span>
-
-    <span class="c1">#                 if sol[1] == 1:</span>
-    <span class="c1">#                     theta[1] = np.angle(-d1+pz-C1*px*1j-S1*py*1j)  # noqa</span>
-    <span class="c1">#                 else:</span>
-    <span class="c1">#                     theta[1] = np.angle(d1-pz+C1*px*1j+S1*py*1j)  # noqa</span>
-
-    <span class="c1">#                 print(theta[1])</span>
-
-    <span class="c1">#                 S2 = np.sin(theta[1])</span>
-    <span class="c1">#                 C2 = np.cos(theta[1])</span>
-
-    <span class="c1">#                 theta[2] = -C2*d1+C2*pz-C1*S2*px-S1*S2*py  # noqa</span>
+    <span class="c1"># def ikine_6s(self, T, config, _ikfunc):</span>
+    <span class="c1">#     # Undo base and tool transformations, but if they are not</span>
+    <span class="c1">#     # set, skip the operation.  Nicer for symbolics</span>
+    <span class="c1">#     if self._base is not None:</span>
+    <span class="c1">#         T = self.base.inv() * T</span>
+    <span class="c1">#     if self._tool is not None:</span>
+    <span class="c1">#         T = self.tool.inv() * T</span>
+
+    <span class="c1">#     q = np.zeros((len(T), 6))</span>
+    <span class="c1">#     for k, Tk in enumerate(T):</span>
+    <span class="c1">#         theta = _ikfunc(Tk, config)</span>
 
     <span class="c1">#         if not np.all(np.isnan(theta)):</span>
     <span class="c1">#             # Solve for the wrist rotation</span>
@@ -1951,92 +1569,26 @@
     <span class="c1">#             Tt = SE3(self.links[5].a, 0, self.links[5].d) * \</span>
     <span class="c1">#                 SE3.Rx(self.links[5].alpha)</span>
 
-    <span class="c1">#             R = np.linalg.inv(Td4.A) @ np.linalg.inv(T13.A) @ Ti @ \</span>
-    <span class="c1">#                 np.linalg.inv(Tt.A)</span>
+    <span class="c1">#             R = Td4.inv() * T13.inv() * Tk * Tt.inv()</span>
 
     <span class="c1">#             # The spherical wrist implements Euler angles</span>
-    <span class="c1">#             if sol[2] == 1:</span>
-    <span class="c1">#                 theta[3:6] = tr2eul(R, flip=True)</span>
+    <span class="c1">#             if &#39;f&#39; in config:</span>
+    <span class="c1">#                 eul = R.eul(flip=True)</span>
     <span class="c1">#             else:</span>
-    <span class="c1">#                 theta[3:6] = tr2eul(R)</span>
-
+    <span class="c1">#                 eul = R.eul()</span>
+    <span class="c1">#             theta = np.r_[theta, eul]</span>
     <span class="c1">#             if self.links[3].alpha &gt; 0:</span>
     <span class="c1">#                 theta[4] = -theta[4]</span>
 
     <span class="c1">#             # Remove the link offset angles</span>
-    <span class="c1">#             for k in range(self.n):</span>
-    <span class="c1">#                 theta[k] -= self.links[k].offset</span>
+    <span class="c1">#             theta = theta - self.offset</span>
 
-    <span class="c1">#             q[j, :] = theta</span>
+    <span class="c1">#             q[k, :] = theta</span>
+
+    <span class="c1">#         if q.shape[0] == 1:</span>
+    <span class="c1">#             return q[0]</span>
     <span class="c1">#         else:</span>
-    <span class="c1">#             err.append(&#39;point not reachable&#39;)</span>
-
-    <span class="c1">#     if trajn == 1:</span>
-    <span class="c1">#         return q[0, :], err</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         return q, err</span>
-
-    <span class="k">def</span> <span class="nf">_is_simple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">))</span> <span class="ow">and</span> \
-            <span class="p">(</span><span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span> <span class="ow">and</span> \
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span>
-
-        <span class="k">return</span> <span class="n">s</span>
-
-    <span class="k">def</span> <span class="nf">_is_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">((</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">s</span>
-
-    <span class="k">def</span> <span class="nf">_is_rrp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="o">-</span><span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span>
-
-        <span class="k">return</span> <span class="n">s</span>
-
-    <span class="k">def</span> <span class="nf">_is_puma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">d</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">s</span>
+    <span class="c1">#             return q</span>
 
 <div class="viewcode-block" id="DHRobot.ikinem"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikinem">[docs]</a>    <span class="k">def</span> <span class="nf">ikinem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pweight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">stiffness</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                <span class="n">qlimits</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ilimit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nolm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -2288,7 +1840,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

@@ -164,7 +164,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">getunit</span><span class="p">,</span> <span class="n">trotx</span><span class="p">,</span> <span class="n">troty</span><span class="p">,</span> <span class="n">trotz</span><span class="p">,</span> \
-    <span class="n">issymbol</span><span class="p">,</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">transl2</span><span class="p">,</span> <span class="n">trot2</span><span class="p">,</span> <span class="n">removesmall</span><span class="p">,</span> <span class="n">trinv</span>
+    <span class="n">issymbol</span><span class="p">,</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">transl2</span><span class="p">,</span> <span class="n">trot2</span><span class="p">,</span> <span class="n">removesmall</span><span class="p">,</span> <span class="n">trinv</span><span class="p">,</span> <span class="n">verifymatrix</span>
 
 
 <div class="viewcode-block" id="SuperETS"><a class="viewcode-back" href="../../../mobile.html#roboticstoolbox.robot.ETS.SuperETS">[docs]</a><span class="k">class</span> <span class="nc">SuperETS</span><span class="p">(</span><span class="n">UserList</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
@@ -926,7 +926,7 @@
 
 <span class="sd">        .. note:: It is essential to use explicit joint indices to account for</span>
 <span class="sd">            the reversed order of the transforms.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="n">inv</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
@@ -1245,7 +1245,7 @@
 <span class="sd">            - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke &lt;https://arxiv.org/abs/2010.08696&gt;`_</span>
 
 <span class="sd">        :seealso: :func:`jacobe`, :func:`hessian0`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="c1"># TODO what is offset</span>
         <span class="c1"># if offset is None:</span>
@@ -1333,8 +1333,8 @@
 <span class="sd">        If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to</span>
 <span class="sd">        reduce computation time.</span>
 
-<span class="sd">       :seealso: :func:`jacob`, :func:`hessian0`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        :seealso: :func:`jacob`, :func:`hessian0`</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -1392,7 +1392,7 @@
 <span class="sd">            - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke &lt;https://arxiv.org/abs/2010.08696&gt;`_</span>
 
 <span class="sd">        :seealso: :func:`jacob0`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
 
@@ -1629,7 +1629,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

@@ -156,7 +156,7 @@
   <h1>Source code for roboticstoolbox.models.ETS.Puma560</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span> <span class="k">as</span> <span class="n">ET</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ERobot</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
 
 <div class="viewcode-block" id="Puma560"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.Puma560">[docs]</a><span class="k">class</span> <span class="nc">Puma560</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -168,10 +168,10 @@
 
 <span class="sd">    .. note::</span>
 
-<span class="sd">        - The model has different joint offset conventions compared to </span>
+<span class="sd">        - The model has different joint offset conventions compared to</span>
 <span class="sd">          ``DH.Puma560()``. For this robot:</span>
-<span class="sd">            - Zero joint angles ``qz`` is the vertical configuration, corresponding to</span>
-<span class="sd">              ``qr`` with ``DH.Puma560()``</span>
+<span class="sd">            - Zero joint angles ``qz`` is the vertical configuration,</span>
+<span class="sd">              corresponding to ``qr`` with ``DH.Puma560()``</span>
 <span class="sd">            - ``qbent`` is the bent configuration, corresponding to</span>
 <span class="sd">              ``qz`` with ``DH.Puma560()``</span>
 
@@ -181,7 +181,7 @@
 <span class="sd">          no. 3, pp. 590-594, June 2007, doi: 10.1109/TRO.2007.896765.</span>
 <span class="sd">        - https://petercorke.com/robotics/a-simple-and-systematic-approach-to-assigning-denavit-hartenberg-parameters</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Puma dimensions (m)</span>
@@ -192,8 +192,9 @@
         <span class="n">l5</span> <span class="o">=</span> <span class="mf">0.4318</span>
         <span class="n">l6</span> <span class="o">=</span> <span class="mf">0.0203</span>
 
-        <span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span> <span class="o">*</span> \
+            <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> \
+            <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">e</span><span class="p">,</span>
@@ -206,11 +207,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
             <span class="s2">&quot;qbent&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span></div>
 
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
 
     <span class="n">robot</span> <span class="o">=</span> <span class="n">Puma560</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-
 </pre></div>
 
            </div>
@@ -226,7 +227,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

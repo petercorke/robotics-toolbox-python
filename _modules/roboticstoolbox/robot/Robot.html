@@ -179,7 +179,7 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">PIL</span>
     <span class="n">_pil_exists</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
     <span class="n">_pil_exists</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="c1"># TODO maybe this needs to be abstract</span>
@@ -210,6 +210,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">base</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">tool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;keywords must be a list or tuple&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -222,6 +223,7 @@
         <span class="c1"># validate the links, must be a list of Link subclass objects</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The links must be stored in a list.&#39;</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">Link</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;links should all be Link subclass&#39;</span><span class="p">)</span>
@@ -379,7 +381,7 @@
 
             <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
 
         <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
@@ -387,7 +389,9 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&gt;&quot;</span><span class="p">),</span>
-                <span class="o">*</span><span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)],</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)],</span>
                 <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -400,7 +404,7 @@
                 <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">qlist</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Robot.dyntable"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.dyntable">[docs]</a>    <span class="k">def</span> <span class="nf">dyntable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -482,6 +486,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># assume it is a colormap name</span>
             <span class="k">return</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span></div>
+
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
@@ -829,13 +834,13 @@
 <span class="sd">        solution space has more dimensions than can be spanned by the</span>
 <span class="sd">        manipulator joint coordinates.</span>
 
-<span class="sd">        In this case we specify the ``mask`` option where the ``mask`` vector (6)</span>
-<span class="sd">        specifies the Cartesian DOF (in the wrist coordinate frame) that will</span>
-<span class="sd">        be ignored in reaching a solution.  The mask vector has six elements</span>
-<span class="sd">        that correspond to translation in X, Y and Z, and rotation about X, Y</span>
-<span class="sd">        and Z respectively. The value should be 0 (for ignore) or 1. The</span>
-<span class="sd">        number of non-zero elements should equal the number of manipulator</span>
-<span class="sd">        DOF.</span>
+<span class="sd">        In this case we specify the ``mask`` option where the ``mask`` vector</span>
+<span class="sd">        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that</span>
+<span class="sd">        will be ignored in reaching a solution.  The mask vector has six</span>
+<span class="sd">        elements that correspond to translation in X, Y and Z, and rotation</span>
+<span class="sd">        about X, Y and Z respectively. The value should be 0 (for ignore)</span>
+<span class="sd">        or 1. The number of non-zero elements should equal the number of</span>
+<span class="sd">        manipulator DOF.</span>
 
 <span class="sd">        For example when using a 3 DOF manipulator rotation orientation might</span>
 <span class="sd">        be unimportant in which case use the option: mask = [1 1 1 0 0 0].</span>
@@ -926,8 +931,8 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">err</span>
 
-            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-            <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">err</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>   <span class="c1"># pragma nocover</span>
+            <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">err</span>   <span class="c1"># pragma nocover</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of robot DOF must be &gt;= the same number &#39;</span>
@@ -1220,77 +1225,78 @@
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="Robot.qmincon"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.qmincon">[docs]</a>    <span class="k">def</span> <span class="nf">qmincon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Move away from joint limits</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move away from joint limits</span>
 
-<span class="sd">            :param q: Joint coordinates</span>
-<span class="sd">            :type q: ndarray(n)</span>
-<span class="sd">            :retrun qs: The calculated joint values</span>
-<span class="sd">            :rtype qs: ndarray(n)</span>
-<span class="sd">            :return: Optimisation solved (True) or failed (False)</span>
-<span class="sd">            :rtype: bool</span>
-<span class="sd">            :return: Final value of the objective function</span>
-<span class="sd">            :rtype: float</span>
+<span class="sd">        :param q: Joint coordinates</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :retrun qs: The calculated joint values</span>
+<span class="sd">        :rtype qs: ndarray(n)</span>
+<span class="sd">        :return: Optimisation solved (True) or failed (False)</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :return: Final value of the objective function</span>
+<span class="sd">        :rtype: float</span>
 
-<span class="sd">            ``qs, success, err = qmincon(q)`` exploits null space motion and returns</span>
-<span class="sd">            a set of joint angles ``qs`` (n) that result in the same end-effector</span>
-<span class="sd">            pose but are away from the joint coordinate limits. ``n`` is the number</span>
-<span class="sd">            of robot joints. ``success`` is True for successful optimisation.</span>
-<span class="sd">            ``err`` is the scalar final value of the objective function.</span>
+<span class="sd">        ``qs, success, err = qmincon(q)`` exploits null space motion and</span>
+<span class="sd">        returns a set of joint angles ``qs`` (n) that result in the same</span>
+<span class="sd">        end-effector pose but are away from the joint coordinate limits.</span>
+<span class="sd">        ``n`` is the number of robot joints. ``success`` is True for</span>
+<span class="sd">        successful optimisation. ``err`` is the scalar final value of</span>
+<span class="sd">        the objective function.</span>
 
-<span class="sd">            **Trajectory operation**</span>
+<span class="sd">        **Trajectory operation**</span>
 
-<span class="sd">            In all cases if ``q`` is (m,n) it is taken as a pose sequence and</span>
-<span class="sd">            ``qmincon()`` returns the adjusted joint coordinates (m,n) corresponding</span>
-<span class="sd">            to each of the configurations in the sequence.</span>
+<span class="sd">        In all cases if ``q`` is (m,n) it is taken as a pose sequence and</span>
+<span class="sd">        ``qmincon()`` returns the adjusted joint coordinates (m,n)</span>
+<span class="sd">        corresponding to each of the configurations in the sequence.</span>
 
-<span class="sd">            ``err`` and ``success`` are also (m) and indicate the results of</span>
-<span class="sd">            optimisation for the corresponding trajectory step.</span>
+<span class="sd">        ``err`` and ``success`` are also (m) and indicate the results of</span>
+<span class="sd">        optimisation for the corresponding trajectory step.</span>
 
-<span class="sd">            .. note:: Robot must be redundant.</span>
+<span class="sd">        .. note:: Robot must be redundant.</span>
 
-<span class="sd">            &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-            <span class="k">def</span> <span class="nf">sumsqr</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">sumsqr</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
-            <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">qm</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">sumsqr</span><span class="p">(</span>
-                    <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">@</span> <span class="n">x</span> <span class="o">+</span> <span class="n">qm</span><span class="p">)</span> <span class="o">-</span> <span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">))</span>
+        <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">qm</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sumsqr</span><span class="p">(</span>
+                <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">@</span> <span class="n">x</span> <span class="o">+</span> <span class="n">qm</span><span class="p">)</span> <span class="o">-</span> <span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">))</span>
 
-            <span class="n">q</span> <span class="o">=</span> <span class="n">getmatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">getmatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
 
-            <span class="n">qstar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-            <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">success</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">qstar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-            <span class="n">lb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">lb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
 
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">qk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">qk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
 
-                <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">qk</span><span class="p">)</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">qk</span><span class="p">)</span>
 
-                <span class="n">N</span> <span class="o">=</span> <span class="n">null</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">null</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
 
-                <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="n">N</span><span class="p">]</span>
-                <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ub</span> <span class="o">-</span> <span class="n">qk</span><span class="p">,</span> <span class="n">qk</span> <span class="o">-</span> <span class="n">lb</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="n">N</span><span class="p">]</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ub</span> <span class="o">-</span> <span class="n">qk</span><span class="p">,</span> <span class="n">qk</span> <span class="o">-</span> <span class="n">lb</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
 
-                <span class="n">con</span> <span class="o">=</span> <span class="n">LinearConstraint</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+            <span class="n">con</span> <span class="o">=</span> <span class="n">LinearConstraint</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 
-                <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">qk</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span>
-                    <span class="n">x0</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="n">con</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">qk</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span>
+                <span class="n">x0</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="n">con</span><span class="p">)</span>
 
-                <span class="n">qstar</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">qk</span> <span class="o">+</span> <span class="n">N</span> <span class="o">@</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
-                <span class="n">error</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span>
-                <span class="n">success</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span>
+            <span class="n">qstar</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">qk</span> <span class="o">+</span> <span class="n">N</span> <span class="o">@</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">error</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span>
+            <span class="n">success</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span>
 
-            <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">qstar</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">success</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">error</span></div>
+        <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qstar</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">success</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">error</span></div>
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -1456,7 +1462,7 @@
 
         <span class="n">env</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
                 <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_swift</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -1464,7 +1470,7 @@
                     <span class="s1">&#39;Plotting in Swift is not implemented for DHRobots yet&#39;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pyplot&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                     <span class="s1">&#39;Plotting in PyPlot is not implemented for ERobots yet&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -1506,7 +1512,7 @@
         <span class="c1"># Stop lint error</span>
         <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of images saved from each plot</span>
 
-        <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_pil_exists</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="s1">&#39;to save movies PIL must be installed:</span><span class="se">\n</span><span class="s1">pip3 install PIL&#39;</span><span class="p">)</span>
@@ -1519,7 +1525,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">qk</span>
             <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
                 <span class="c1"># render the frame and save as a PIL image in the list</span>
                 <span class="n">canvas</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span>
                 <span class="n">img</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span>
@@ -1527,7 +1533,7 @@
                     <span class="n">canvas</span><span class="o">.</span><span class="n">tostring_rgb</span><span class="p">())</span>
                 <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="c1"># save it as an animated GIF</span>
             <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
                 <span class="n">movie</span><span class="p">,</span>
@@ -1540,7 +1546,7 @@
 
         <span class="k">return</span> <span class="n">env</span>
 
-    <span class="k">def</span> <span class="nf">_plot_swift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_plot_swift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>   <span class="c1"># pragma nocover</span>
 
         <span class="c1"># Make an empty 3D figure</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">Swift</span><span class="p">()</span>
@@ -1598,7 +1604,7 @@
 <span class="sd">              end-effector position.</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;ERobot fellipse not implemented yet&quot;</span><span class="p">)</span>
 
@@ -1636,7 +1642,7 @@
 <span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
 <span class="sd">              end-effector position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;ERobot vellipse not implemented yet&quot;</span><span class="p">)</span>
 
@@ -1680,7 +1686,7 @@
 <span class="sd">              end-effector position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ellipse</span><span class="p">,</span> <span class="n">EllipsePlot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ellipse</span><span class="p">,</span> <span class="n">EllipsePlot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="s1">&#39;ellipse must be of type &#39;</span>
                 <span class="s1">&#39;roboticstoolbox.backend.PyPlot.EllipsePlot&#39;</span><span class="p">)</span>
@@ -1760,7 +1766,7 @@
 <span class="sd">              end-effector position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
 
@@ -1834,7 +1840,7 @@
 <span class="sd">              end-effector position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
 
@@ -1905,7 +1911,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;2D Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
 
@@ -1996,7 +2002,7 @@
 <span class="sd">                  occurs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;2D Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
 
@@ -2070,7 +2076,7 @@
 
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;2D Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
 
@@ -2108,7 +2114,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

@@ -1081,11 +1081,6 @@ Vol. 5, No. 2, Summer 1986, p. 32-44</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s">
-<code class="sig-name descname">ikine_6s</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">_ikfunc</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ikine_6s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikinem">
 <code class="sig-name descname">ikinem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pweight</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">qlimits</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">nolm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ikinem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikinem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics with joint limits
@@ -1296,12 +1291,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1837,13 +1832,13 @@ failure (m) and list of error reasons (m).</p>
 <p>For the case where the manipulator has fewer than 6 DOF the
 solution space has more dimensions than can be spanned by the
 manipulator joint coordinates.</p>
-<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector (6)
-specifies the Cartesian DOF (in the wrist coordinate frame) that will
-be ignored in reaching a solution.  The mask vector has six elements
-that correspond to translation in X, Y and Z, and rotation about X, Y
-and Z respectively. The value should be 0 (for ignore) or 1. The
-number of non-zero elements should equal the number of manipulator
-DOF.</p>
+<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector
+(6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+will be ignored in reaching a solution.  The mask vector has six
+elements that correspond to translation in X, Y and Z, and rotation
+about X, Y and Z respectively. The value should be 0 (for ignore)
+or 1. The number of non-zero elements should equal the number of
+manipulator DOF.</p>
 <p>For example when using a 3 DOF manipulator rotation orientation might
 be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <p>For robots with 4 or 5 DOF this method is very difficult to use since
@@ -2808,15 +2803,16 @@ reable format</p>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and returns
-a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same end-effector
-pose but are away from the joint coordinate limits. <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number
-of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for successful optimisation.
-<code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of the objective function.</p>
+<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and
+returns a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same
+end-effector pose but are away from the joint coordinate limits.
+<code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for
+successful optimisation. <code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of
+the objective function.</p>
 <p><strong>Trajectory operation</strong></p>
 <p>In all cases if <code class="docutils literal notranslate"><span class="pre">q</span></code> is (m,n) it is taken as a pose sequence and
-<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n) corresponding
-to each of the configurations in the sequence.</p>
+<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n)
+corresponding to each of the configurations in the sequence.</p>
 <p><code class="docutils literal notranslate"><span class="pre">err</span></code> and <code class="docutils literal notranslate"><span class="pre">success</span></code> are also (m) and indicate the results of
 optimisation for the corresponding trajectory step.</p>
 <div class="admonition note">
@@ -3781,8 +3777,8 @@ which is either the Denavit-Hartenberg parameter <span class="math notranslate n
 (revolute) or <span class="math notranslate nohighlight">\(d_j\)</span> (prismatic).</p>
 <p>This is the relative pose of the current link frame with respect to the
 previous link frame.</p>
-<p>For details of the computation see the documentation for the subclasses,
-click on the right side of the class boxes below.</p>
+<p>For details of the computation see the documentation for the
+subclasses, click on the right side of the class boxes below.</p>
 <div class="graphviz"><img src="_images/inheritance-5a9c5fd74f014450e2b8398e8f2c0fc31100cad7.png" alt="Inheritance diagram of roboticstoolbox.RevoluteDH, roboticstoolbox.PrismaticDH, roboticstoolbox.RevoluteMDH, roboticstoolbox.PrismaticMDH" usemap="#inheritance3a5240bd69" class="inheritance graphviz" /></div>
 <map id="inheritance3a5240bd69" name="inheritance3a5240bd69">
 <area shape="rect" id="node2" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="179,5,333,31"/>
@@ -3792,19 +3788,20 @@ click on the right side of the class boxes below.</p>
 </map><div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>For a revolute joint the <code class="docutils literal notranslate"><span class="pre">theta</span></code> parameter of the link is 
+<li><p>For a revolute joint the <code class="docutils literal notranslate"><span class="pre">theta</span></code> parameter of the link is
 ignored, and <code class="docutils literal notranslate"><span class="pre">q</span></code> used instead.</p></li>
 <li><p>For a prismatic joint the <code class="docutils literal notranslate"><span class="pre">d</span></code> parameter of the link is ignored,
 and <code class="docutils literal notranslate"><span class="pre">q</span></code> used instead.</p></li>
-<li><p>The joint <code class="docutils literal notranslate"><span class="pre">offset</span></code> parameter is added to <code class="docutils literal notranslate"><span class="pre">q</span></code> before 
+<li><p>The joint <code class="docutils literal notranslate"><span class="pre">offset</span></code> parameter is added to <code class="docutils literal notranslate"><span class="pre">q</span></code> before
 computation of the transformation matrix.</p></li>
-<li><p>The computation is different for standard and modified 
+<li><p>The computation is different for standard and modified
 Denavit-Hartenberg parameters.</p></li>
 </ul>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHLink.RevoluteDH" title="roboticstoolbox.robot.DHLink.RevoluteDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">RevoluteDH</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHLink.PrismaticDH" title="roboticstoolbox.robot.DHLink.PrismaticDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrismaticDH</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" title="roboticstoolbox.robot.DHLink.RevoluteMDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">RevoluteMDH</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" title="roboticstoolbox.robot.DHLink.PrismaticMDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrismaticMDH</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHLink.RevoluteDH" title="roboticstoolbox.robot.DHLink.RevoluteDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">RevoluteDH</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHLink.PrismaticDH" title="roboticstoolbox.robot.DHLink.PrismaticDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrismaticDH</span></code></a>,
+<a class="reference internal" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" title="roboticstoolbox.robot.DHLink.RevoluteMDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">RevoluteMDH</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" title="roboticstoolbox.robot.DHLink.PrismaticMDH"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrismaticMDH</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4238,13 +4235,13 @@ is known, so gear ratios are set to 1.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p>Kinematic data from “Modelling, Trajectory calculation and Servoing of
-a computer controlled arm”.  Stanford AIM-177.  Figure 2.3</p></li>
+<li><p>Kinematic data from “Modelling, Trajectory calculation and Servoing
+of a computer controlled arm”.  Stanford AIM-177.  Figure 2.3</p></li>
 <li><p>Dynamic data from “Robot manipulators: mathematics, programming and
 control”
 Paul 1981, Tables 6.5, 6.6</p></li>
-<li><p>Dobrotin &amp; Scheinman, “Design of a computer controlled manipulator for
-robot research”, IJCAI, 1973.</p></li>
+<li><p>Dobrotin &amp; Scheinman, “Design of a computer controlled manipulator
+for robot research”, IJCAI, 1973.</p></li>
 </ul>
 </dd>
 </dl>
@@ -4259,7 +4256,7 @@ robot research”, IJCAI, 1973.</p></li>
 <p><code class="docutils literal notranslate"><span class="pre">Ball()</span></code> is a class which models a ball robot and
 describes its kinematic characteristics using standard DH
 conventions.</p>
-<p>The ball robot is an <em>abstract</em> robot with an arbitrary number of joints 
+<p>The ball robot is an <em>abstract</em> robot with an arbitrary number of joints
 that folds into a ball shape.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Ball</span><span class="p">()</span>
@@ -4311,8 +4308,8 @@ static, and is thus -ve of the gravity caused torque.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p>“A divide and conquer articulated-body algorithm for parallel O(log(n))
-calculation of rigid body dynamics, Part 2”,
+<li><p>“A divide and conquer articulated-body algorithm for parallel
+O(log(n)) calculation of rigid body dynamics, Part 2”,
 Int. J. Robotics Research, 18(9), pp 876-892.</p></li>
 </ul>
 </dd>
@@ -4711,7 +4708,7 @@ conventions.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

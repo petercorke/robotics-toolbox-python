@@ -676,13 +676,13 @@ failure (m) and list of error reasons (m).</p>
 <p>For the case where the manipulator has fewer than 6 DOF the
 solution space has more dimensions than can be spanned by the
 manipulator joint coordinates.</p>
-<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector (6)
-specifies the Cartesian DOF (in the wrist coordinate frame) that will
-be ignored in reaching a solution.  The mask vector has six elements
-that correspond to translation in X, Y and Z, and rotation about X, Y
-and Z respectively. The value should be 0 (for ignore) or 1. The
-number of non-zero elements should equal the number of manipulator
-DOF.</p>
+<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector
+(6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+will be ignored in reaching a solution.  The mask vector has six
+elements that correspond to translation in X, Y and Z, and rotation
+about X, Y and Z respectively. The value should be 0 (for ignore)
+or 1. The number of non-zero elements should equal the number of
+manipulator DOF.</p>
 <p>For example when using a 3 DOF manipulator rotation orientation might
 be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <p>For robots with 4 or 5 DOF this method is very difficult to use since
@@ -875,15 +875,16 @@ Where omega is some gain matrix, currently not modifiable.</p></li>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and returns
-a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same end-effector
-pose but are away from the joint coordinate limits. <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number
-of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for successful optimisation.
-<code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of the objective function.</p>
+<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and
+returns a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same
+end-effector pose but are away from the joint coordinate limits.
+<code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for
+successful optimisation. <code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of
+the objective function.</p>
 <p><strong>Trajectory operation</strong></p>
 <p>In all cases if <code class="docutils literal notranslate"><span class="pre">q</span></code> is (m,n) it is taken as a pose sequence and
-<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n) corresponding
-to each of the configurations in the sequence.</p>
+<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n)
+corresponding to each of the configurations in the sequence.</p>
 <p><code class="docutils literal notranslate"><span class="pre">err</span></code> and <code class="docutils literal notranslate"><span class="pre">success</span></code> are also (m) and indicate the results of
 optimisation for the corresponding trajectory step.</p>
 <div class="admonition note">
@@ -1996,7 +1997,7 @@ be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>

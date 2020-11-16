@@ -2166,26 +2166,19 @@ frame.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS.jacobe">
 <code class="sig-name descname">jacobe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Jacobian in base frame</p>
+<dd><p>Jacobian in base frame</p>
 <dl class="field-list simple">
-<dt class="field-odd">param q</dt>
-<dd class="field-odd"><p>joint coordinates</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like</em>) – joint coordinates</p></li>
+<li><p><strong>T</strong> (<em>ndarray</em><em>(</em><em>4</em><em>,</em><em>4</em><em>)</em>) – ETS value as an SE(3) matrix if known</p></li>
+</ul>
 </dd>
-<dt class="field-even">type q</dt>
-<dd class="field-even"><p>array_like</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian matrix</p>
 </dd>
-<dt class="field-odd">param T</dt>
-<dd class="field-odd"><p>ETS value as an SE(3) matrix if known</p>
-</dd>
-<dt class="field-even">type T</dt>
-<dd class="field-even"><p>ndarray(4,4)</p>
-</dd>
-<dt class="field-odd">return</dt>
-<dd class="field-odd"><p>Jacobian matrix</p>
-</dd>
-<dt class="field-even">rtype</dt>
-<dd class="field-even"><p>ndarray(6,n)</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6,n)</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">jacobe(q)</span></code> is the manipulator Jacobian matrix which maps joint
@@ -2194,7 +2187,6 @@ velocity to end-effector spatial velocity.</p>
 is related to joint velocity by <span class="math notranslate nohighlight">\({}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}\)</span>.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">ets.eval(q)</span></code> is already computed it can be passed in as <code class="docutils literal notranslate"><span class="pre">T</span></code> to
 reduce computation time.</p>
-</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
 <dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">jacob()</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="roboticstoolbox.robot.ETS.ETS.hessian0"><code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></a></p>
@@ -3032,7 +3024,7 @@ instance is modified.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 13-Nov-2020.
+        Last updated on 16-Nov-2020.
       </span>
 
     </p>
