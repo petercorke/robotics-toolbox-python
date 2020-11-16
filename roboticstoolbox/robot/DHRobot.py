@@ -1434,68 +1434,6 @@ class DHRobot(Robot, DHDynamicsMixin):
             else:
                 return q
 
-    # def _is_simple(self):
-    #     L = self.links
-    #     alpha = [-np.pi / 2, 0, np.pi / 2]
-    #     s = (L[1].d == 0 and L[2].d == 0) and ((
-    #         L[0].alpha == alpha[0]
-    #         and L[1].alpha == alpha[1]
-    #         and L[2].alpha == alpha[2]
-    #     ) or (
-    #         L[0].alpha == -alpha[0]
-    #         and L[1].alpha == -alpha[1]
-    #         and L[2].alpha == -alpha[2]
-    #     )) and \
-    #         (not L[0].sigma and not L[1].sigma and not L[2].sigma) and \
-    #         L[0].a == 0
-
-    #     return s
-
-    # def _is_offset(self):
-    #     L = self.links
-    #     alpha = [-np.pi / 2, 0, np.pi / 2]
-    #     s = ((
-    #         L[0].alpha == alpha[0]
-    #         and L[1].alpha == alpha[1]
-    #         and L[2].alpha == alpha[2]
-    #     ) or (
-    #         L[0].alpha == -alpha[0]
-    #         and L[1].alpha == -alpha[1]
-    #         and L[2].alpha == -alpha[2]
-    #     )) and (not L[0].sigma and not L[1].sigma and not L[2].sigma)
-
-    #     return s
-
-    # def _is_rrp(self):
-    #     L = self.links
-    #     alpha = [-np.pi / 2, np.pi / 2, 0]
-    #     s = (L[1].a == 0 and L[2].a == 0) and ((
-    #         L[0].alpha == alpha[0]
-    #         and L[1].alpha == alpha[1]
-    #         and L[2].alpha == alpha[2]
-    #     ) or (
-    #         L[0].alpha == -alpha[0]
-    #         and L[1].alpha == -alpha[1]
-    #         and L[2].alpha == -alpha[2]
-    #     )) and not L[0].sigma and not L[1].sigma and L[2].sigma
-
-    #     return s
-
-    # def _is_puma(self):
-    #     L = self.links
-    #     alpha = [np.pi / 2, 0, -np.pi / 2]
-    #     s = (
-    #         L[1].d == 0
-    #         and L[0].a == 0
-    #         and not L[2].d == 0
-    #         and not L[2].a == 0 and (
-    #             L[0].alpha == alpha[0]
-    #             and L[1].alpha == alpha[1]
-    #             and L[2].alpha == alpha[2]
-    #         ) and (not L[0].sigma and not L[1].sigma and not L[2].sigma))
-
-    #     return s
-
     def ikinem(self, T, q0=None, pweight=1.0, stiffness=0.0,
                qlimits=True, ilimit=1000, nolm=False):
         """
