@@ -152,11 +152,11 @@ class TestRobot(unittest.TestCase):
         nt.assert_array_almost_equal(
             T.A - puma.fkine(q1).A, np.zeros((4, 4)), decimal=4)
 
-    def test_plot_swift(self):
-        r = rp.models.Panda()
+    # def test_plot_swift(self):
+    #     r = rp.models.Panda()
 
-        env = r.plot(r.q, block=False)
-        env.close()
+    #     env = r.plot(r.q, block=False)
+    #     env.close()
 
 
 if __name__ == '__main__':  # pragma nocover

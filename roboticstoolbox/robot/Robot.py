@@ -1306,7 +1306,7 @@ class Robot:
 
         env = None
 
-        if backend.lower() == 'swift':
+        if backend.lower() == 'swift':  # pragma nocover
             if isinstance(self, rtb.ERobot):
                 env = self._plot_swift(q=q, block=block)
             elif isinstance(self, rtb.DHRobot):
@@ -1314,7 +1314,7 @@ class Robot:
                     'Plotting in Swift is not implemented for DHRobots yet')
 
         elif backend.lower() == 'pyplot':
-            if isinstance(self, rtb.ERobot):
+            if isinstance(self, rtb.ERobot):  # pragma nocover
                 raise NotImplementedError(
                     'Plotting in PyPlot is not implemented for ERobots yet')
             elif isinstance(self, rtb.DHRobot):
@@ -1356,7 +1356,7 @@ class Robot:
         # Stop lint error
         images = []  # list of images saved from each plot
 
-        if movie is not None:
+        if movie is not None:   # pragma nocover
             if not _pil_exists:
                 raise RuntimeError(
                     'to save movies PIL must be installed:\npip3 install PIL')
@@ -1369,7 +1369,7 @@ class Robot:
             self.q = qk
             env.step(dt)
 
-            if movie is not None:
+            if movie is not None:  # pragma nocover
                 # render the frame and save as a PIL image in the list
                 canvas = env.fig.canvas
                 img = PIL.Image.frombytes(
@@ -1377,7 +1377,7 @@ class Robot:
                     canvas.tostring_rgb())
                 images.append(img)
 
-        if movie is not None:
+        if movie is not None:  # pragma nocover
             # save it as an animated GIF
             images[0].save(
                 movie,
@@ -1390,7 +1390,7 @@ class Robot:
 
         return env
 
-    def _plot_swift(self, q, block):
+    def _plot_swift(self, q, block):   # pragma nocover
 
         # Make an empty 3D figure
         env = Swift()
@@ -1448,7 +1448,7 @@ class Robot:
               end-effector position.
 
         '''
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "ERobot fellipse not implemented yet")
 
@@ -1486,7 +1486,7 @@ class Robot:
               3-vector, or the string "ee" ensures it is drawn at the
               end-effector position.
         """
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "ERobot vellipse not implemented yet")
 
@@ -1530,7 +1530,7 @@ class Robot:
               end-effector position.
         """
 
-        if not isinstance(ellipse, EllipsePlot):
+        if not isinstance(ellipse, EllipsePlot):  # pragma nocover
             raise TypeError(
                 'ellipse must be of type '
                 'roboticstoolbox.backend.PyPlot.EllipsePlot')
@@ -1610,7 +1610,7 @@ class Robot:
               end-effector position.
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "Ellipse Plotting of ERobot's not implemented yet")
 
@@ -1684,7 +1684,7 @@ class Robot:
               end-effector position.
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "Ellipse Plotting of ERobot's not implemented yet")
 
@@ -1755,7 +1755,7 @@ class Robot:
 
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "2D Plotting of ERobot's not implemented yet")
 
@@ -1846,7 +1846,7 @@ class Robot:
                   occurs.
         """
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "2D Plotting of ERobot's not implemented yet")
 
@@ -1920,7 +1920,7 @@ class Robot:
 
         '''
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
                 "2D Plotting of ERobot's not implemented yet")
 
