@@ -3,7 +3,7 @@
 @author Jesse Haviland
 """
 
-import numpy as np
+# import numpy as np
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 
 

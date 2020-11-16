@@ -1,7 +1,7 @@
-from roboticstoolbox.backends.PyPlot import *
-from roboticstoolbox.backends.Swift import *
+from roboticstoolbox.backends.PyPlot import *   # noqa
+from roboticstoolbox.backends.Swift import *   # noqa
 
 try:
-    from roboticstoolbox.backends.VPython import *
+    from roboticstoolbox.backends.VPython import *   # noqa
 except ImportError:
     pass
