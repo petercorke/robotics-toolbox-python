@@ -270,18 +270,21 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
 
     q0 = getvector(q0)
     qf = getvector(qf)
-    assert len(q0) == len(qf), 'q0 and q1 must be same size'
+    if not len(q0) == len(qf):
+        raise ValueError('q0 and q1 must be same size')
 
     if qd0 is None:
         qd0 = np.zeros(q0.shape)
     else:
         qd0 = getvector(qd0)
-        assert len(qd0) == len(q0), 'qd0 has wrong size'
+        if not len(qd0) == len(q0):
+            raise ValueError('qd0 has wrong size')
     if qd1 is None:
         qd1 = np.zeros(q0.shape)
     else:
         qd0 = getvector(qd0)
-        assert len(qd1) == len(q0), 'qd1 has wrong size'
+        if not len(qd1) == len(q0):
+            raise ValueError('qd1 has wrong size')
 
     # compute the polynomial coefficients
     A = 6 * (qf - q0) - 3 * (qd1 + qd0) * tscal
@@ -473,7 +476,8 @@ def ctraj(T0, T1, s):
     - Robotics, Vision & Control, Sec 3.1.5,
       Peter Corke, Springer 2011
 
-    :seealso: :func:`~roboticstoolbox.trajectory.lspb`, :func:`~spatialmath.unitquaternion.interp`
+    :seealso: :func:`~roboticstoolbox.trajectory.lspb`,
+        :func:`~spatialmath.unitquaternion.interp`
     """
 
     if isinstance(s, int):
@@ -565,8 +569,8 @@ def mstraj(
        point is not actually reached.
      - The path length K is a function of the number of via
        points and the time or velocity limits that apply.
-     - Can be used to create joint space trajectories where each axis is a joint
-       coordinate.
+     - Can be used to create joint space trajectories where each axis is a
+       joint coordinate.
      - Can be used to create Cartesian trajectories where the "axes"
        correspond to translation and orientation in RPY or Euler angle form.
      - If ``qdmax`` is a scalar then all axes are assumed to have the same
@@ -580,44 +584,61 @@ def mstraj(
         viapoints = viapoints[1:, :]
     else:
         q0 = getvector(q0)
-        assert viapoints.shape[1] == len(q0), 'WP and Q0 must have same number of columns'
+        if not viapoints.shape[1] == len(q0):
+            raise ValueError('WP and Q0 must have same number of columns')
 
     ns, nj = viapoints.shape
     Tacc = tacc
 
-    assert not (qdmax is not None and tsegment is not None), 'cannot specify both qdmax and tsegment'
+    if qdmax is not None and tsegment is not None:
+        raise ValueError('cannot specify both qdmax and tsegment')
+
     if qdmax is None:
-        assert tsegment is not None, 'tsegment must be given if qdmax is not'
-        assert len(tsegment) == ns, 'Length of TSEG does not match number of viapoints'
+        if tsegment is None:
+            raise ValueError('tsegment must be given if qdmax is not')
+
+        if not len(tsegment) == ns:
+            raise ValueError(
+                'Length of TSEG does not match number of viapoints')
+
     if tsegment is None:
-        assert qdmax is not None, 'qdmax must be given if tsegment is not'
+
+        if qdmax is None:
+            raise ValueError('qdmax must be given if tsegment is not')
+
         if isinstance(qdmax, (int, float)):
             # if qdmax is a scalar assume all axes have the same speed
             qdmax = np.tile(qdmax, (nj,))
         else:
             qdmax = getvector(qdmax)
-            assert len(qdmax) == nj, 'Length of QDMAX does not match number of axes'
+
+            if not len(qdmax) == nj:
+                raise ValueError(
+                    'Length of QDMAX does not match number of axes')
 
     if isinstance(Tacc, (int, float)):
         Tacc = np.tile(Tacc, (ns,))
     else:
-        assert len(Tacc) == ns, 'Tacc is wrong size'
+        if not len(Tacc) == ns:
+            raise ValueError('Tacc is wrong size')
     if qd0 is None:
         qd0 = np.zeros((nj,))
     else:
-        assert len(qd0) == len(q0), 'qd0 is wrong size'
+        if not len(qd0) == len(q0):
+            raise ValueError('qd0 is wrong size')
     if qdf is None:
         qdf = np.zeros((nj,))
     else:
-        assert len(qdf) == len(q0), 'qdf is wrong size'
+        if not len(qdf) == len(q0):
+            raise ValueError('qdf is wrong size')
 
     # set the initial conditions
-    q_prev = q0;
-    qd_prev = qd0;
+    q_prev = q0
+    qd_prev = qd0
 
     clock = 0     # keep track of time
     arrive = np.zeros((ns,))   # record planned time of arrival at via points
-    tg = np.zeros((0,nj))
+    tg = np.zeros((0, nj))
     infolist = []
     info = namedtuple('mstraj_info', 'slowest segtime clock')
 
@@ -634,7 +655,7 @@ def mstraj(
         return np.r_[ret]
 
     for seg in range(0, ns):
-        q_next = viapoints[seg,:]    # current target
+        q_next = viapoints[seg, :]    # current target
 
         if verbose:
             print(f"------- segment {seg}: {q_prev} --> {q_next}")
@@ -655,7 +676,7 @@ def mstraj(
 
         dq = q_next - q_prev    # total distance to move this segment
 
-        ## probably should iterate over the next section to get qb right...
+        # probably should iterate over the next section to get qb right...
         # while 1
         #   qd_next = (qnextnext - qnext)
         #   tb = abs(qd_next - qd) ./ qddmax;
@@ -671,7 +692,7 @@ def mstraj(
 
             # convert to time
             tl = abs(dq) / qdmax
-            #tl = abs(dq - qb) / qdmax
+            # tl = abs(dq - qb) / qdmax
             tl = np.ceil(tl / dt) * dt
 
             # find the total time and slowest axis
@@ -696,7 +717,9 @@ def mstraj(
             arrive[seg] += tacc2
 
         if verbose:
-            print(f"seg {seg}, distance {dq}, slowest axis {slowest}, time required {tseg}")
+            print(
+                f"seg {seg}, distance {dq}, "
+                "slowest axis {slowest}, time required {tseg}")
 
         # create the trajectories for this segment
 
@@ -705,7 +728,8 @@ def mstraj(
 
         # add the blend polynomial
         qb = jtraj(
-            q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd).q
+            q0, q_prev + tacc2 * qd, mrange(0, taccx, dt),
+            qd0=qd_prev, qd1=qd).q
         if verbose:
             print(qb)
         tg = np.vstack([tg, qb[1:, :]])
