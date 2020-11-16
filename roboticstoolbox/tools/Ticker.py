@@ -31,7 +31,7 @@ class Ticker(threading.Thread):
         self.join()
 
 
-if __name__ == "__main__":  # pragam nocover
+if __name__ == "__main__":  # pragma nocover
     t = Ticker(0.1)
 
     tprev = time.time()

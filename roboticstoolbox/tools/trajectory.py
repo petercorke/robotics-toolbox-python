@@ -660,7 +660,7 @@ def mstraj(
     for seg in range(0, ns):
         q_next = viapoints[seg, :]    # current target
 
-        if verbose:   # pragam nocover
+        if verbose:  # pragma nocover
             print(f"------- segment {seg}: {q_prev} --> {q_next}")
 
         # set the blend time, just half an interval for the first segment
