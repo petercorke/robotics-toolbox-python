@@ -177,9 +177,10 @@ def lspb(q0, qf, t, V=None):
             raise ValueError('V too big')
 
     if q0 == qf:
-        s = np.ones((len(t), len(t))) @ q0
-        sd = np.zeros((len(t), len(t)))
-        sdd = np.zeros((len(t), len(t)))
+        # Commented these because they arent used anywhere
+        # s = np.ones((len(t), len(t))) @ q0
+        # sd = np.zeros((len(t), len(t)))
+        # sdd = np.zeros((len(t), len(t)))
         return
 
     tb = (q0 - qf + V * tf) / V
@@ -270,6 +271,7 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
 
     q0 = getvector(q0)
     qf = getvector(qf)
+
     if not len(q0) == len(qf):
         raise ValueError('q0 and q1 must be same size')
 
@@ -603,7 +605,8 @@ def mstraj(
 
     if tsegment is None:
 
-        if qdmax is None:
+        # This is unreachable, left just in case
+        if qdmax is None:  # pragma nocover
             raise ValueError('qdmax must be given if tsegment is not')
 
         if isinstance(qdmax, (int, float)):
@@ -657,7 +660,7 @@ def mstraj(
     for seg in range(0, ns):
         q_next = viapoints[seg, :]    # current target
 
-        if verbose:
+        if verbose:   # pragam nocover
             print(f"------- segment {seg}: {q_prev} --> {q_next}")
 
         # set the blend time, just half an interval for the first segment
@@ -716,7 +719,7 @@ def mstraj(
         if seg > 0:
             arrive[seg] += tacc2
 
-        if verbose:
+        if verbose:   # pragma nocover
             print(
                 f"seg {seg}, distance {dq}, "
                 "slowest axis {slowest}, time required {tseg}")
@@ -730,7 +733,7 @@ def mstraj(
         qb = jtraj(
             q0, q_prev + tacc2 * qd, mrange(0, taccx, dt),
             qd0=qd_prev, qd1=qd).q
-        if verbose:
+        if verbose:    # pragma nocover
             print(qb)
         tg = np.vstack([tg, qb[1:, :]])
 

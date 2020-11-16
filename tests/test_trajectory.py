@@ -79,6 +79,9 @@ class TestTrajectory(unittest.TestCase):
         self.assertAlmostEqual(sdd[0], 0)
         self.assertAlmostEqual(sdd[-1], 0)
 
+        with self.assertRaises(TypeError):
+            tr.tpoly(s1, s2, 'not time')
+
     def test_lspb(self):
 
         s1 = 1
@@ -132,6 +135,17 @@ class TestTrajectory(unittest.TestCase):
 
         self.assertAlmostEqual(sd[5], 0.2)
 
+        tr.lspb(s1, s1, 1)
+
+        with self.assertRaises(TypeError):
+            tr.lspb(s1, s2, 'not time')
+
+        with self.assertRaises(ValueError):
+            tr.lspb(s1, s2, 1, V=0.000000001)
+
+        with self.assertRaises(ValueError):
+            tr.lspb(s1, s1 * 2, 0.1, V=10000000000000000000)
+
     def test_tg1plot(self):
         s1 = 1
         s2 = 2
@@ -141,6 +155,12 @@ class TestTrajectory(unittest.TestCase):
 
         tg = tr.lspb(s1, s2, 11)
         tr.t1plot(tg, block=False)
+
+        tg = tr.tpoly(s1, s2, [1, 2])
+        tr.t1plot(tg, block=False)
+
+        with self.assertRaises(TypeError):
+            tr.t1plot('abcdefg', block=False)
 
     def test_qplot(self):
 
@@ -183,6 +203,12 @@ class TestTrajectory(unittest.TestCase):
         nt.assert_array_almost_equal(T[0].A, T0.A)
         nt.assert_array_almost_equal(T[2].A, T1.A)
         nt.assert_array_almost_equal(T[1].A, SE3().A)
+
+        with self.assertRaises(TypeError):
+            tr.ctraj(T0, T1, 'hello')
+
+    def test_cmstraj(self):
+        tr.cmstraj()
 
     def test_jtraj(self):
         # unit testing jtraj with
@@ -249,6 +275,15 @@ class TestTrajectory(unittest.TestCase):
         self.assertTrue(np.allclose(qdd[0, :], np.zeros(6,)))
         self.assertTrue(np.allclose(qdd[-1, :], np.zeros(6,)))
 
+        with self.assertRaises(ValueError):
+            tr.jtraj(q1, [1, 1, 2], t)
+
+        with self.assertRaises(ValueError):
+            tr.jtraj(q1, q2, t, qd1=[1, 1])
+
+        with self.assertRaises(ValueError):
+            tr.jtraj(q1, q2, t, qd0=[1, 1])
+
     def test_mstraj(self):
 
         via = np.array([
@@ -296,6 +331,35 @@ class TestTrajectory(unittest.TestCase):
 
         self.assertIsInstance(out.info, list)
         self.assertEqual(len(out.info), via.shape[0]+1)
+
+        tr.mstraj(via, dt=1, tacc=1, qdmax=[2, 1])
+        tr.mstraj(via, dt=1, tacc=1, qdmax=2)
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(via, dt=1, tacc=1, qdmax=[2, 1], q0=[1, 2, 3])
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(via, dt=1, tacc=1, qdmax=[2, 1], tsegment=[1, 2, 3, 4])
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(via, dt=1, tacc=1)
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(via, dt=1, tacc=1, tsegment=[3, 4])
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(via, dt=1, tacc=1, qdmax=[2, 1, 3])
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(via, dt=1, tacc=[1, 2, 3, 4, 5], qdmax=[2, 1])
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(
+                via, dt=1, tacc=1, qdmax=[2, 1], qd0=[1, 2, 3], q0=[1, 2])
+
+        with self.assertRaises(ValueError):
+            tr.mstraj(
+                via, dt=1, tacc=1, qdmax=[2, 1], qdf=[1, 2, 3], q0=[1, 2])
 
 
 if __name__ == '__main__':    # pragma nocover
