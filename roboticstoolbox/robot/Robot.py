@@ -231,7 +231,9 @@ class Robot:
         if len(self._configdict) > 0:
             table = ANSITable(
                 Column("name", colalign=">"),
-                *[Column(f"q{j:d}", colalign="<", headalign="<") for j in range(self.n)],
+                *[
+                    Column(f"q{j:d}", colalign="<", headalign="<")
+                    for j in range(self.n)],
                 border="thin")
 
             for name, q in self._configdict.items():
@@ -673,13 +675,13 @@ class Robot:
         solution space has more dimensions than can be spanned by the
         manipulator joint coordinates.
 
-        In this case we specify the ``mask`` option where the ``mask`` vector (6)
-        specifies the Cartesian DOF (in the wrist coordinate frame) that will
-        be ignored in reaching a solution.  The mask vector has six elements
-        that correspond to translation in X, Y and Z, and rotation about X, Y
-        and Z respectively. The value should be 0 (for ignore) or 1. The
-        number of non-zero elements should equal the number of manipulator
-        DOF.
+        In this case we specify the ``mask`` option where the ``mask`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The mask vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value should be 0 (for ignore)
+        or 1. The number of non-zero elements should equal the number of
+        manipulator DOF.
 
         For example when using a 3 DOF manipulator rotation orientation might
         be unimportant in which case use the option: mask = [1 1 1 0 0 0].
@@ -1064,77 +1066,78 @@ class Robot:
 # --------------------------------------------------------------------- #
 
     def qmincon(self, q=None):
-            """
-            Move away from joint limits
+        """
+        Move away from joint limits
 
-            :param q: Joint coordinates
-            :type q: ndarray(n)
-            :retrun qs: The calculated joint values
-            :rtype qs: ndarray(n)
-            :return: Optimisation solved (True) or failed (False)
-            :rtype: bool
-            :return: Final value of the objective function
-            :rtype: float
+        :param q: Joint coordinates
+        :type q: ndarray(n)
+        :retrun qs: The calculated joint values
+        :rtype qs: ndarray(n)
+        :return: Optimisation solved (True) or failed (False)
+        :rtype: bool
+        :return: Final value of the objective function
+        :rtype: float
 
-            ``qs, success, err = qmincon(q)`` exploits null space motion and returns
-            a set of joint angles ``qs`` (n) that result in the same end-effector
-            pose but are away from the joint coordinate limits. ``n`` is the number
-            of robot joints. ``success`` is True for successful optimisation.
-            ``err`` is the scalar final value of the objective function.
+        ``qs, success, err = qmincon(q)`` exploits null space motion and
+        returns a set of joint angles ``qs`` (n) that result in the same
+        end-effector pose but are away from the joint coordinate limits.
+        ``n`` is the number of robot joints. ``success`` is True for
+        successful optimisation. ``err`` is the scalar final value of
+        the objective function.
 
-            **Trajectory operation**
+        **Trajectory operation**
 
-            In all cases if ``q`` is (m,n) it is taken as a pose sequence and
-            ``qmincon()`` returns the adjusted joint coordinates (m,n) corresponding
-            to each of the configurations in the sequence.
+        In all cases if ``q`` is (m,n) it is taken as a pose sequence and
+        ``qmincon()`` returns the adjusted joint coordinates (m,n)
+        corresponding to each of the configurations in the sequence.
 
-            ``err`` and ``success`` are also (m) and indicate the results of
-            optimisation for the corresponding trajectory step.
+        ``err`` and ``success`` are also (m) and indicate the results of
+        optimisation for the corresponding trajectory step.
 
-            .. note:: Robot must be redundant.
+        .. note:: Robot must be redundant.
 
-            """
+        """
 
-            def sumsqr(A):
-                return np.sum(A**2)
+        def sumsqr(A):
+            return np.sum(A**2)
 
-            def cost(x, ub, lb, qm, N):
-                return sumsqr(
-                    (2 * (N @ x + qm) - ub - lb) / (ub - lb))
+        def cost(x, ub, lb, qm, N):
+            return sumsqr(
+                (2 * (N @ x + qm) - ub - lb) / (ub - lb))
 
-            q = getmatrix(q, (None, self.n))
+        q = getmatrix(q, (None, self.n))
 
-            qstar = np.zeros((q.shape[0], self.n))
-            error = np.zeros(q.shape[0])
-            success = np.zeros(q.shape[0])
+        qstar = np.zeros((q.shape[0], self.n))
+        error = np.zeros(q.shape[0])
+        success = np.zeros(q.shape[0])
 
-            lb = self.qlim[0, :]
-            ub = self.qlim[1, :]
+        lb = self.qlim[0, :]
+        ub = self.qlim[1, :]
 
-            for k, qk in enumerate(q):
+        for k, qk in enumerate(q):
 
-                J = self.jacobe(qk)
+            J = self.jacobe(qk)
 
-                N = null(J)
+            N = null(J)
 
-                x0 = np.zeros(N.shape[1])
-                A = np.r_[N, -N]
-                b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
+            x0 = np.zeros(N.shape[1])
+            A = np.r_[N, -N]
+            b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
 
-                con = LinearConstraint(A, -np.inf, b)
+            con = LinearConstraint(A, -np.inf, b)
 
-                res = minimize(
-                    lambda x: cost(x, ub, lb, qk, N),
-                    x0, constraints=con)
+            res = minimize(
+                lambda x: cost(x, ub, lb, qk, N),
+                x0, constraints=con)
 
-                qstar[k, :] = qk + N @ res.x
-                error[k] = res.fun
-                success[k] = res.success
+            qstar[k, :] = qk + N @ res.x
+            error[k] = res.fun
+            success[k] = res.success
 
-            if q.shape[0] == 1:
-                return qstar[0, :], success[0], error[0]
-            else:
-                return qstar, success, error
+        if q.shape[0] == 1:
+            return qstar[0, :], success[0], error[0]
+        else:
+            return qstar, success, error
 
 # --------------------------------------------------------------------- #
 
