@@ -17,6 +17,12 @@ class TestDHLink(unittest.TestCase):
     def test_link(self):
         rp.DHLink()
 
+    def test_super_copy(self):
+        l0 = rp.Link()
+
+        with self.assertRaises(DeprecationWarning):
+            l0._copy()
+
     def test_qlim(self):
         l0 = rp.DHLink(qlim=[-1, 1])
 
@@ -168,7 +174,9 @@ Jm    =    0.0002
 B     =    0.0015 
 Tc    =       0.4(+)    -0.43(-) 
 G     =       -63 
-qlim  =      -2.8 to      2.8""")
+qlim  =      -2.8 to      2.8""")  # noqa
+
+        puma.links[0].dyn(indent=2)
 
     def test_revolute(self):
         l0 = rp.RevoluteDH()
@@ -207,6 +215,27 @@ qlim  =      -2.8 to      2.8""")
         self.assertEqual(l1.r[1], 0)
         self.assertIs(l0._robot, r)
         self.assertIs(l1._robot, r)
+
+    def test_I(self):  # noqa
+        r = rp.models.DH.Puma560()
+
+        with self.assertRaises(ValueError):
+            I = np.eye(3)  # noqa
+            I[1, 0] = 4
+            r.links[1].I = I  # noqa
+
+        with self.assertRaises(ValueError):
+            I = np.zeros(9)  # noqa
+            I[1] = 4
+            r.links[1].I = I  # noqa
+
+        with self.assertRaises(ValueError):
+            r.links[1].I = np.zeros(8)  # noqa
+
+    def test_qlim_none(self):
+        l0 = rp.RevoluteDH()
+        self.assertFalse(l0.islimit(0.1))
+
 
 if __name__ == '__main__':
 

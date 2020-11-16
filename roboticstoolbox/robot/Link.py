@@ -242,7 +242,7 @@ class Link(ABC):
 
         return dyn
 
-    def _format(self, l, name, ignorevalue=0, indices=None):  # noqa
+    def _format(self, l, name, ignorevalue=0, indices=None):  # noqa  # pragma nocover
         v = getattr(self, name)
         s = None
         if v is None:
@@ -258,7 +258,7 @@ class Link(ABC):
         if s is not None:
             l.append(s)
 
-    def _params(self):
+    def _params(self):  # pragma nocover
         l = []  # noqa
         self._format(l, "name")
         self._format(l, "flip", False)

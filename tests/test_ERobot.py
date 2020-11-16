@@ -34,8 +34,6 @@ class TestERobot(unittest.TestCase):
     #     e3 = rp.ELink(rp.ETS.rz(), jindex=2, parent=e2)
     #     e4 = rp.ELink(rp.ETS.rz(), jindex=3, parent=e3)
 
-
-
     #     # with self.assertRaises(ValueError):
     #     rp.ERobot([e1, e2, e3, e4])
 
@@ -639,6 +637,15 @@ class TestERobot(unittest.TestCase):
 
         self.assertTrue(c0)
         self.assertFalse(c1)
+
+    # def test_gripper(self):
+    #     e1 = rp.ELink(rp.ETS.rz(), jindex=0)
+    #     e2 = rp.ELink(rp.ETS.rz(), jindex=0, parent=e1)
+    #     e3 = rp.ELink(rp.ETS.rz(), jindex=1, parent=e2)
+    #     e4 = rp.ELink(rp.ETS.rz(), jindex=2, parent=e3)
+
+    #     # with self.assertRaises(ValueError):
+    #     rp.ERobot([e1, e2, e3, e4], gripper_links=e2)
 
 
 if __name__ == '__main__':

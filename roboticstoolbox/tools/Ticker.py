@@ -2,7 +2,7 @@ import threading
 import time
 
 
-class Ticker(threading.Thread):
+class Ticker(threading.Thread):  # pragma nocover
 
     def __init__(self, period):
         super().__init__()
