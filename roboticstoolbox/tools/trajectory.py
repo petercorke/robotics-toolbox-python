@@ -22,7 +22,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     :return: trajectory
     :rtype: namedtuple
 
-    - ``tg = lspb(q0, q1, t)`` is a scalar trajectory (Mx1) that varies smoothly
+    - ``tg = tpoly(q0, q1, t)`` is a scalar trajectory (Mx1) that varies smoothly
       from ``q0`` to ``qf`` using a quintic polynomial.  The initial and final
       velocity and acceleration are zero. Time ``t`` can be either:
 
@@ -37,7 +37,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         
             - Results are scaled to units of time.
 
-    - ``tg = lspb(q0, q1, t, qd0, qdf)`` as above but specify the initial and
+    - ``tg = tpoly(q0, q1, t, qd0, qdf)`` as above but specify the initial and
       final velocity. The initial and final acceleration are zero. 
 
     The return value is a namedtuple (named ``tpoly``) with elements:
@@ -47,15 +47,13 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         - ``yd``  the velocity as a numpy ndarray, shape=(M,)
         - ``ydd``  the acceleration as a numpy ndarray, shape=(M,)
 
-    Notes:
-
-        - The time vector T is assumed to be monotonically increasing, and time
+    .. note:: The time vector T is assumed to be monotonically increasing, and time
         scaling is based on the first and last element.
 
-    References:
+    :References:
     
-    - Robotics, Vision & Control, Chap 3,
-      P. Corke, Springer 2011.
+        - Robotics, Vision & Control, Chap 3,
+        P. Corke, Springer 2011.
 
     :seealso: :func:`lspb`, :func:`t1plot`, :func:`jtraj`.
     """
@@ -137,16 +135,16 @@ def lspb(q0, qf, t, V=None):
         - ``yd``  the velocity as a numpy ndarray, shape=(M,)
         - ``ydd``  the acceleration as a numpy ndarray, shape=(M,)
 
-    Notes:
+    .. note::
 
-    - For some values of V no solution is possible and an error is flagged.
-    - The time vector, if given, is assumed to be monotonically increasing, and
-      time scaling is based on the first and last element.
+        - For some values of V no solution is possible and an error is flagged.
+        - The time vector, if given, is assumed to be monotonically increasing, and
+          time scaling is based on the first and last element.
 
-    References:
+    :References:
 
-    - Robotics, Vision & Control, Chap 3,
-      P. Corke, Springer 2011.
+        - Robotics, Vision & Control, Chap 3,
+        P. Corke, Springer 2011.
 
     :seealso: :func:`tpoly`, :func:`t1plot`, :func:`jtraj`.
     """
@@ -481,21 +479,21 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     Multi-segment multi-axis trajectory
     
     :param viapoints: A set of viapoints, one per row
-    :type viapoints: numpy.ndarray
+    :type viapoints: ndarray(m,n)
     :param dt: time step
     :type dt: float (seconds)
     :param tacc: acceleration time (seconds)
     :type tacc: float
     :param qdmax: maximum speed, defaults to None
-    :type qdmax: array_like or float, optional
+    :type qdmax: array_like(n) or float, optional
     :param tsegment: maximum time of each motion segment (seconds), defaults to None
     :type tsegment: array_like, optional
     :param q0: initial coordinates, defaults to first row of viapoints
-    :type q0: array_like, optional
+    :type q0: array_like(n), optional
     :param qd0: inital  velocity, defaults to zero
-    :type qd0: array_like, optional
+    :type qd0: array_like(n), optional
     :param qdf: final  velocity, defaults to zero
-    :type qdf: array_like, optional
+    :type qdf: array_like(n), optional
     :param verbose: print debug information, defaults to False
     :type verbose: bool, optional
     :return: trajectory plus extra info
@@ -516,13 +514,13 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
     #. In terms of segment time where ``tsegment`` is an array of segment times
        which is the number of via points minus one::
 
-            ``traj = mstraj(viapoints, dt, tacc, tsegment=TS)`` 
+            traj = mstraj(viapoints, dt, tacc, tsegment=TS)
     
     #. Governed by the speed of the slowest axis for the segment.  The axis
        speed is a scalar (all axes have the same speed) or an N-vector of speed
        per axis::
 
-            ``traj = mstraj(viapoints, dt, tacc, qdmax=SPEED)``
+            traj = mstraj(viapoints, dt, tacc, qdmax=SPEED)
 
     The return value is a namedtuple (named ``mstraj``) with elements:
 
@@ -538,7 +536,7 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
 
      Notes:
 
-     - Only one of ``qdmag` or ``tsegment`` can be specified
+     - Only one of ``qdmag`` or ``tsegment`` can be specified
      - If ``tacc`` is greater than zero then the path smoothly accelerates
        between segments using a polynomial blend.  This means that the the via
        point is not actually reached.
@@ -551,7 +549,7 @@ def mstraj(viapoints, dt, tacc, qdmax=None, tsegment=None, q0=None, qd0=None, qd
      - If ``qdmax`` is a scalar then all axes are assumed to have the same
        maximum speed.
 
-     See also MTRAJ, LSPB, CTRAJ.
+    :seealso: `lspb`, `ctraj`, `mtraj`
     """
 
     if q0 is None:
