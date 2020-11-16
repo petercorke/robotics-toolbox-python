@@ -5,7 +5,7 @@
 """
 
 from roboticstoolbox import DHRobot, RevoluteDH
-from math import pi
+
 
 class Planar3(DHRobot):
     """

@@ -41,13 +41,12 @@ class Orion5(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-
     def __init__(self, base=None):
 
         mm = 1e-3
         deg = pi / 180
 
-        # details from 
+        # details from
 
         h = 53.0 * mm
         r = 30.309 * mm

@@ -17,7 +17,7 @@ class Ball(DHRobot):
     describes its kinematic characteristics using standard DH
     conventions.
 
-    The ball robot is an *abstract* robot with an arbitrary number of joints 
+    The ball robot is an *abstract* robot with an arbitrary number of joints
     that folds into a ball shape.
 
     .. runblock:: pycon
@@ -30,7 +30,7 @@ class Ball(DHRobot):
 
         - qz, zero joint angles
         - q1, ball shaped configuration
-        
+
     .. note::
         - SI units are used.
         - The model includes armature inertia and gear ratios.
@@ -42,9 +42,9 @@ class Ball(DHRobot):
           static, and is thus -ve of the gravity caused torque.
 
     :references:
-    
-        - "A divide and conquer articulated-body algorithm for parallel O(log(n))
-          calculation of rigid body dynamics, Part 2",
+
+        - "A divide and conquer articulated-body algorithm for parallel
+          O(log(n)) calculation of rigid body dynamics, Part 2",
           Int. J. Robotics Research, 18(9), pp 876-892.
 
     .. codeauthor:: Peter Corke
