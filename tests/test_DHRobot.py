@@ -382,7 +382,22 @@ class TestDHRobot(unittest.TestCase):
 
         panda.twists()
         panda.twists(q)
-        pass
+
+        puma = rp.models.DH.Puma560()
+        q = [1, 2, 3, 4, 5, 6]
+        puma.q = q
+
+        puma.twists()
+        puma.twists(q)
+
+        l0 = rp.PrismaticMDH()
+        r = rp.DHRobot([l0])
+        r.twists()
+
+        l0 = rp.PrismaticDH()
+        l1 = rp.PrismaticDH()
+        r = rp.DHRobot([l0, l1])
+        r.twists()
 
     def test_fkine_panda(self):
         panda = rp.models.DH.Panda()
@@ -631,6 +646,7 @@ class TestDHRobot(unittest.TestCase):
 
         Tall = panda.fkine_all(q)
         Tall2 = panda.fkine_all()
+        Tall3 = panda.fkine_all(old=False)
 
         nt.assert_array_almost_equal(Tall[0].A, t0, decimal=4)
         nt.assert_array_almost_equal(Tall[1].A, t1, decimal=4)
@@ -640,6 +656,7 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(Tall[5].A, t5, decimal=4)
         nt.assert_array_almost_equal(Tall[6].A, t6, decimal=4)
         nt.assert_array_almost_equal(Tall2[0].A, t0, decimal=4)
+        nt.assert_array_almost_equal(Tall3[0].A, panda.base.A, decimal=4)
 
     # def test_gravjac(self):
     #     l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1], alpha=0.4, a=0.2,
@@ -770,49 +787,49 @@ class TestDHRobot(unittest.TestCase):
     #     nt.assert_array_almost_equal(q2, qr1, decimal=4)
     #     nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
-    def test_ikine6s_offset(self):
-        self.skipTest("error introduced with DHLink change")
-        l0 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l1 = rp.RevoluteDH(d=1.0)
-        l2 = rp.RevoluteDH(alpha=np.pi / 2)
-        l3 = rp.RevoluteDH(alpha=-np.pi / 2)
-        l4 = rp.RevoluteDH(alpha=np.pi / 2)
-        l5 = rp.RevoluteDH()
-        r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
-        r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
-        q = [1, 1, 1, 1, 1, 1]
-        T1 = r0.fkine(q)
-        T2 = r1.fkine(q)
+    # def test_ikine6s_offset(self):
+    #     self.skipTest("error introduced with DHLink change")
+    #     l0 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l1 = rp.RevoluteDH(d=1.0)
+    #     l2 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l3 = rp.RevoluteDH(alpha=-np.pi / 2)
+    #     l4 = rp.RevoluteDH(alpha=np.pi / 2)
+    #     l5 = rp.RevoluteDH()
+    #     r0 = rp.DHRobot([l0, l1, l2, l3, l4, l5])
+    #     r1 = rp.DHRobot([l2, l1, l0, l3, l4, l5])
+    #     q = [1, 1, 1, 1, 1, 1]
+    #     T1 = r0.fkine(q)
+    #     T2 = r1.fkine(q)
 
-        qr0 = [1.0000, 3.1416, -0.0000, -1.1675, -0.8786, 2.6811]
-        qr1 = [1.0000, -1.1059, 2.6767, 0.8372, 1.2639, 1.3761]
-        qr2 = [1.0000, 3.1416, -3.1416, -0.8053, -1.3811, 1.8933]
-        qr3 = [1.0000, -1.1059, -0.4649, 1.8311, 2.3192, -2.6398]
+    #     qr0 = [1.0000, 3.1416, -0.0000, -1.1675, -0.8786, 2.6811]
+    #     qr1 = [1.0000, -1.1059, 2.6767, 0.8372, 1.2639, 1.3761]
+    #     qr2 = [1.0000, 3.1416, -3.1416, -0.8053, -1.3811, 1.8933]
+    #     qr3 = [1.0000, -1.1059, -0.4649, 1.8311, 2.3192, -2.6398]
 
-        q0, _ = r0.ikine6s(T1.A)
-        q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
-        q2, _ = r1.ikine6s(T2)
-        q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
+    #     q0, _ = r0.ikine6s(T1.A)
+    #     q1, _ = r0.ikine6s(T1, left=False, elbow_up=False, wrist_flip=True)
+    #     q2, _ = r1.ikine6s(T2)
+    #     q3, _ = r1.ikine6s(T2, left=False, elbow_up=False, wrist_flip=True)
 
-        nt.assert_array_almost_equal(q0, qr0, decimal=4)
-        nt.assert_array_almost_equal(q1, qr1, decimal=4)
-        nt.assert_array_almost_equal(q2, qr2, decimal=4)
-        nt.assert_array_almost_equal(q3, qr3, decimal=4)
+    #     nt.assert_array_almost_equal(q0, qr0, decimal=4)
+    #     nt.assert_array_almost_equal(q1, qr1, decimal=4)
+    #     nt.assert_array_almost_equal(q2, qr2, decimal=4)
+    #     nt.assert_array_almost_equal(q3, qr3, decimal=4)
 
-    def test_ikine6s_traj(self):
-        self.skipTest("error introduced with DHLink change")
-        r0 = rp.models.DH.Puma560()
-        q = r0.qr
-        T = r0.fkine(q)
-        Tt = sm.SE3([T, T, T])
+    # def test_ikine6s_traj(self):
+    #     self.skipTest("error introduced with DHLink change")
+    #     r0 = rp.models.DH.Puma560()
+    #     q = r0.qr
+    #     T = r0.fkine(q)
+    #     Tt = sm.SE3([T, T, T])
 
-        qr0 = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
+    #     qr0 = [0.2689, 1.5708, -1.4768, -3.1416, 0.0940, 2.8726]
 
-        q0, _ = r0.ikine6s(Tt)
+    #     q0, _ = r0.ikine6s(Tt)
 
-        nt.assert_array_almost_equal(q0[0, :], qr0, decimal=4)
-        nt.assert_array_almost_equal(q0[1, :], qr0, decimal=4)
-        nt.assert_array_almost_equal(q0[2, :], qr0, decimal=4)
+    #     nt.assert_array_almost_equal(q0[0, :], qr0, decimal=4)
+    #     nt.assert_array_almost_equal(q0[1, :], qr0, decimal=4)Fikin
+    #     nt.assert_array_almost_equal(q0[2, :], qr0, decimal=4)
 
     # def test_ikine6s_fail(self):
     #     l0 = rp.RevoluteDH(alpha=np.pi / 2)
@@ -847,26 +864,25 @@ class TestDHRobot(unittest.TestCase):
     #     with self.assertRaises(ValueError):
     #         r3.ikine6s(T)
 
-    # def test_ikinem(self):
-    #     puma = rp.models.DH.Puma560()
-    #     q = puma.qr
-    #     T = puma.fkine(q)
-    #     Tt = sm.SE3([T, T])
+    def test_ikinem(self):
+        puma = rp.models.DH.Puma560()
+        q = puma.qr
+        T = puma.fkine(q)
+        Tt = sm.SE3([T, T])
 
-    #     q0, _, _ = puma.ikinem(Tt)
-    #     q1, success, _ = puma.ikinem(T.A, qlimits=False)
-    #     q2, success, _ = puma.ikinem(T, qlimits=False, stiffness=0.1, ilimit=1)
+        q0, _, _ = puma.ikinem(Tt)
+        q1, success, _ = puma.ikinem(T.A, qlimits=False)
+        q2, success, _ = puma.ikinem(
+              T, qlimits=False, stiffness=0.1, ilimit=1)
 
-    #     # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
+        # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
 
-    #     self.assertTrue(
-    #         np.sum(np.abs(T.A - puma.fkine(q0[0, :]).A)) < 0.7)
-    #     self.assertTrue(
-    #         np.sum(np.abs(T.A - puma.fkine(q0[1, :]).A)) < 0.7)
-    #     self.assertTrue(
-    #         np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
-
-
+        self.assertTrue(
+            np.sum(np.abs(T.A - puma.fkine(q0[0, :]).A)) < 0.7)
+        self.assertTrue(
+            np.sum(np.abs(T.A - puma.fkine(q0[1, :]).A)) < 0.7)
+        self.assertTrue(
+            np.sum(np.abs(T.A - puma.fkine(q1).A)) < 0.7)
 
     def test_rne(self):
         puma = rp.models.DH.Puma560()
@@ -1055,29 +1071,29 @@ class TestDHRobot(unittest.TestCase):
 
 #         self.assertEqual(str(puma), res)
 
-    def test_paycap(self):
-        self.skipTest("error introduced with DHLink change")
-        puma = rp.models.DH.Puma560()
-        puma.q = puma.qn
-        q = puma.qn
+    # def test_paycap(self):
+    #     self.skipTest("error introduced with DHLink change")
+    #     puma = rp.models.DH.Puma560()
+    #     puma.q = puma.qn
+    #     q = puma.qn
 
-        w = [1, 2, 1, 2, 1, 2]
-        tauR = np.ones((6, 2))
-        tauR[:, 1] = -1
+    #     w = [1, 2, 1, 2, 1, 2]
+    #     tauR = np.ones((6, 2))
+    #     tauR[:, 1] = -1
 
-        res0 = [
-            1.15865438e+00, -3.04790052e+02, -5.00870095e+01,  6.00479950e+15,
-            3.76356072e+00, 1.93649167e+00]
+    #     res0 = [
+    #         1.15865438e+00, -3.04790052e+02, -5.00870095e+01,  6.00479950e+15,
+    #         3.76356072e+00, 1.93649167e+00]
 
-        wmax0, joint = puma.paycap(w, tauR, q=q, frame=0)
-        wmax1, _ = puma.paycap(np.c_[w, w], tauR, q=np.c_[q, q], frame=0)
-        wmax2, _ = puma.paycap(w, tauR, frame=0)
+    #     wmax0, joint = puma.paycap(w, tauR, q=q, frame=0)
+    #     wmax1, _ = puma.paycap(np.c_[w, w], tauR, q=np.c_[q, q], frame=0)
+    #     wmax2, _ = puma.paycap(w, tauR, frame=0)
 
-        nt.assert_allclose(wmax0, res0)
-        self.assertEqual(joint, 1)
-        nt.assert_allclose(wmax1[:, 0], res0)
-        nt.assert_allclose(wmax1[:, 1], res0)
-        nt.assert_allclose(wmax2, res0)
+    #     nt.assert_allclose(wmax0, res0)
+    #     self.assertEqual(joint, 1)
+    #     nt.assert_allclose(wmax1[:, 0], res0)
+    #     nt.assert_allclose(wmax1[:, 1], res0)
+    #     nt.assert_allclose(wmax2, res0)
 
     def test_jacob_dot(self):
         puma = rp.models.DH.Puma560()
@@ -1114,6 +1130,9 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_almost_equal(m2[1], a0, decimal=4)
         nt.assert_almost_equal(m3, a2, decimal=4)
         nt.assert_almost_equal(m4, a3, decimal=4)
+
+        with self.assertRaises(ValueError):
+            puma.manipulability(axes='abcdef')
 
     def test_asada(self):
         puma = rp.models.DH.Puma560()
@@ -1347,7 +1366,8 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot_with_vellipse2(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot2(panda.qr, block=False, vellipse=True, limits=[1, 2, 1, 2])
+        e = panda.plot2(
+            panda.qr, block=False, vellipse=True, limits=[1, 2, 1, 2])
         e.step()
         e.close()
 
@@ -1370,7 +1390,48 @@ class TestDHRobot(unittest.TestCase):
 
         e.close()
 
+    def test_str(self):
+        r0 = rp.models.DH.Puma560()
+        r1 = rp.models.DH.Panda()
+        str(r0)
+        str(r1)
+
+        l0 = rp.PrismaticDH(offset=1.0, qlim=[-1, 1])
+        l1 = rp.RevoluteDH(flip=True, offset=1.0, qlim=[-1, 1])
+        r2 = rp.DHRobot([l0, l1])
+        str(r2)
+
+        l0 = rp.PrismaticMDH(offset=1.0, qlim=[-1, 1])
+        l1 = rp.RevoluteMDH(flip=True, offset=1.0, qlim=[-1, 1])
+        r3 = rp.DHRobot([l0, l1])
+        str(r3)
+
+        l0 = rp.PrismaticDH(offset=1.0)
+        l1 = rp.RevoluteDH(flip=True, offset=1.0)
+        r4 = rp.DHRobot([l0, l1])
+        str(r4)
+
+        l0 = rp.PrismaticMDH(offset=1.0)
+        l1 = rp.RevoluteMDH(flip=True, offset=1.0)
+        r5 = rp.DHRobot([l0, l1], base=sm.SE3.Tx(0.1), tool=sm.SE3.Tx(0.1))
+        str(r5)
+
+    def test_alpha(self):
+        r0 = rp.models.DH.Puma560()
+
+        nt.assert_array_almost_equal(
+            r0.alpha, [0., 0., 0., 0., 0., 0.])
+
+    def test_ets(self):
+        panda = rp.models.DH.Panda()
+        panda.ets()
+
+        panda.base = sm.SE3.Tx(0.1)
+        panda.ets()
+
+    def test_SerialLink(self):
+        rp.SerialLink([rp.RevoluteDH()])
+
 
 if __name__ == '__main__':
     unittest.main()
-    # pytest.main(['tests/test_SerialLink.py'])

@@ -119,7 +119,7 @@ class DHRobot(Robot, DHDynamicsMixin):
             return s
 
         def angle(theta, fmt=None):
-            if sym.issymbol(theta):
+            if sym.issymbol(theta):   # pragma nocover
                 return "<<red>>" + str(theta)
             else:
                 if fmt is not None:
@@ -872,10 +872,10 @@ class DHRobot(Robot, DHDynamicsMixin):
             Tj = SE3()
         first = True
         Tall = Tj
-        # print(Tj)
+
         for q, L in zip(q, self.links):
             if first:
-                # print(q, L.A(q))
+
                 Tj *= L.A(q)
                 if old:
                     Tall = Tj
@@ -1385,54 +1385,54 @@ class DHRobot(Robot, DHDynamicsMixin):
         else:
             return qt
 
-    def ikine_6s(self, T, config, _ikfunc):
-        # Undo base and tool transformations, but if they are not
-        # set, skip the operation.  Nicer for symbolics
-        if self._base is not None:
-            T = self.base.inv() * T
-        if self._tool is not None:
-            T = self.tool.inv() * T
+    # def ikine_6s(self, T, config, _ikfunc):
+    #     # Undo base and tool transformations, but if they are not
+    #     # set, skip the operation.  Nicer for symbolics
+    #     if self._base is not None:
+    #         T = self.base.inv() * T
+    #     if self._tool is not None:
+    #         T = self.tool.inv() * T
 
-        q = np.zeros((len(T), 6))
-        for k, Tk in enumerate(T):
-            theta = _ikfunc(Tk, config)
+    #     q = np.zeros((len(T), 6))
+    #     for k, Tk in enumerate(T):
+    #         theta = _ikfunc(Tk, config)
 
-            if not np.all(np.isnan(theta)):
-                # Solve for the wrist rotation
-                # We need to account for some random translations between the
-                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
-                # final frame.
+    #         if not np.all(np.isnan(theta)):
+    #             # Solve for the wrist rotation
+    #             # We need to account for some random translations between the
+    #             # first and last 3 joints (d4) and also d6,a6,alpha6 in the
+    #             # final frame.
 
-                # Transform of first 3 joints
-                T13 = self.A([0, 2], theta)
+    #             # Transform of first 3 joints
+    #             T13 = self.A([0, 2], theta)
 
-                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
-                Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
+    #             # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
+    #             Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
 
-                # Tz(d6) Tx(a5) Rx(alpha6)
-                Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
-                    SE3.Rx(self.links[5].alpha)
+    #             # Tz(d6) Tx(a5) Rx(alpha6)
+    #             Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
+    #                 SE3.Rx(self.links[5].alpha)
 
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
+    #             R = Td4.inv() * T13.inv() * Tk * Tt.inv()
 
-                # The spherical wrist implements Euler angles
-                if 'f' in config:
-                    eul = R.eul(flip=True)
-                else:
-                    eul = R.eul()
-                theta = np.r_[theta, eul]
-                if self.links[3].alpha > 0:
-                    theta[4] = -theta[4]
+    #             # The spherical wrist implements Euler angles
+    #             if 'f' in config:
+    #                 eul = R.eul(flip=True)
+    #             else:
+    #                 eul = R.eul()
+    #             theta = np.r_[theta, eul]
+    #             if self.links[3].alpha > 0:
+    #                 theta[4] = -theta[4]
 
-                # Remove the link offset angles
-                theta = theta - self.offset
+    #             # Remove the link offset angles
+    #             theta = theta - self.offset
 
-                q[k, :] = theta
+    #             q[k, :] = theta
 
-            if q.shape[0] == 1:
-                return q[0]
-            else:
-                return q
+    #         if q.shape[0] == 1:
+    #             return q[0]
+    #         else:
+    #             return q
 
     def ikinem(self, T, q0=None, pweight=1.0, stiffness=0.0,
                qlimits=True, ilimit=1000, nolm=False):
