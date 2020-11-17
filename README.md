@@ -55,6 +55,9 @@ The Toolbox provides:
     efficiency;
   * source code which can be read for learning and teaching;
   * backward compatability with the Robotics Toolbox for MATLAB
+
+The Toolbox leverages the [Spatial Maths Toolbox for Python](https://github.com/petercorke/spatialmath-python) to
+provide support for data types such as SO(n) and SE(n) matrices, quaternions, twists and spatial vectors.
   
 ## Code Example
 

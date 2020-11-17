@@ -74,7 +74,7 @@ ANSITable._color = False
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-    'github_user': 'petercorke',
+    #'github_user': 'petercorke',
     #'github_repo': 'spatialmath-python',
     #'logo_name': False,
     'logo_only': False,
@@ -115,6 +115,7 @@ latex_elements = {
     'maketitle': "blah blah blah"
 }
 
+# Use RVC book notation for maths
 # see https://stackoverflow.com/questions/9728292/creating-latex-math-macros-within-sphinx
 mathjax_config = {
     'TeX': {
@@ -151,3 +152,14 @@ mathjax_config = {
         }
    }
 }
+
+# setup formatting for autorun blocks
+autorun_languages = {}
+autorun_languages['pycon_output_encoding'] = 'UTF-8'
+autorun_languages['pycon_input_encoding'] = 'UTF-8'
+autorun_languages['pycon_runfirst'] = """
+from spatialmath import SE3
+SE3._color = False
+import numpy as np
+np.set_printoptions(precision=4, suppress=True)
+"""

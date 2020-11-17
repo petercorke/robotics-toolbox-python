@@ -339,6 +339,7 @@ Some provided robot models have an analytical solution coded, for example:
 
     >>> import roboticstoolbox as rtb
     >>> puma = rtb.models.DH.Puma560()       # instantiate robot model
+    >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     >>> puma.ikine_a(T, config="lun")        # analytic inverse kinematics
 
 where we have specified a left-handed, elbow up and wrist no-flip configuration.
@@ -468,9 +469,10 @@ As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. Fo
 
 .. runblock:: pycon
 
+    >>> import roboticstoolbox as rtb
     >>> import spatialmath.base as base
     >>> phi, theta, psi = base.sym.symbol('phi, theta, psi')
-    >>> base.rpy2r(phi, theta, psi)
+    >>> rtb.rpy2r(phi, theta, psi)
 
 The capability extends to forward kinematics
 
@@ -569,8 +571,6 @@ For example, the inverse dynamics
 is the gravity torque for the robot in the configuration ``qn``.
 
 Inertia, Coriolis/centripetal and gravity terms are computed by::
-
-.. runblock:: pycon
 
     >>> puma.inertia(q)
     >>> puma.coriolis(q, qd)
