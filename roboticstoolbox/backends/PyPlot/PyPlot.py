@@ -8,7 +8,7 @@ import numpy as np
 from roboticstoolbox.backends.Connector import Connector
 import matplotlib
 import matplotlib.pyplot as plt
-import signal
+from matplotlib.widgets import Slider
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath.base.argcheck import getvector
@@ -30,7 +30,7 @@ class PyPlot(Connector):
     Graphical backend using matplotlib
 
     matplotlib is a common and highly portable graphics library for Python,
-    but has relatively limited 3D capability.  
+    but has relatively limited 3D capability.
 
     Example:
 
@@ -48,7 +48,7 @@ class PyPlot(Connector):
 
     .. note::  PyPlot is the default backend, and ``robot.plot(q)`` effectively
         performs lines 7-8 above.
-        
+
     """
 
     def __init__(self):
@@ -75,9 +75,9 @@ class PyPlot(Connector):
         labels = ['X', 'Y', 'Z']
 
         if name is not None:
-            self.fig = plt.figure()
+            self.fig = plt.figure(name)
         else:
-            self.fig = plt.figure()
+            self.fig = plt.figure('Robotics Toolbox for Python')
 
         self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
@@ -107,24 +107,24 @@ class PyPlot(Connector):
         # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
         # TODO still need to finish this, and get Jupyter animation working
 
-    def step(self, dt=50):
+    def step(self, dt=0.05):
         """
         Update the graphical scene
 
-        :param dt: time step in milliseconds, defaults to 50
+        :param dt: time step in seconds, defaults to 50 (0.05 s)
         :type dt: int, optional
- 
+
         ``env.step(args)`` triggers an update of the 3D scene in the matplotlib
         window referenced by ``env``.
 
-        .. note:: 
+        .. note::
 
             - Each robot in the scene is updated based on
               their control type (position, velocity, acceleration, or torque).
             - Upon acting, the other three of the four control types will be
-              updated in the internal state of the robot object. 
-            - The control type is defined by the robot object, and not all robot
-              objects support all control types.
+              updated in the internal state of the robot object.
+            - The control type is defined by the robot object, and not all
+              robot objects support all control types.
             - Execution is blocked for the specified interval
 
         """
@@ -139,7 +139,7 @@ class PyPlot(Connector):
         self._set_axes_equal()
         # plt.ion()
         plt.draw()
-        plt.pause(dt / 1000)
+        # plt.pause(dt)
 
         self._update_robots()
 
@@ -160,8 +160,8 @@ class PyPlot(Connector):
         Restart the graphics display
 
         ``env.restart()`` triggers a restart of the matplotlib view referenced
-        by ``env``. It is closed and relaunched to the original state defined by
-        ``launch()``.
+        by ``env``. It is closed and relaunched to the original state defined
+        by ``launch()``.
 
         """
         # TODO what does this actually do for matplotlib??
@@ -205,11 +205,12 @@ class PyPlot(Connector):
         :param name: [description], defaults to True
         :type name: bool, optional
 
-        ``id = env.add(robot)`` adds the ``robot`` to the graphical environment.
+        ``id = env.add(robot)`` adds the ``robot`` to the graphical
+            environment.
 
         .. note::
 
-            - ``robot`` must be of an appropriate class. 
+            - ``robot`` must be of an appropriate class.
             - Adds the robot object to a list of robots which will be updated
               when the ``step()`` method is called.
 
@@ -239,24 +240,31 @@ class PyPlot(Connector):
         """
         Remove a robot to the graphical scene
 
-        :param id: The id of the robot to remove. Can be either the DHLink or 
+        :param id: The id of the robot to remove. Can be either the DHLink or
             GraphicalRobot
         :type id: class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
                   class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`
         :param fig_num: The canvas index to delete the robot from, defaults to
              the initial one
         :type fig_num: int, optional
-        :raises ValueError: Figure number must be between 0 and total number 
+        :raises ValueError: Figure number must be between 0 and total number
             of canvases
         :raises TypeError: Input must be a DHLink or GraphicalRobot
 
-        ``env.remove(robot)`` removes the ``robot`` from the graphical environment.
+        ``env.remove(robot)`` removes the ``robot`` from the graphical
+            environment.
         """
         # TODO should be an id to remove?
 
         super().remove()
 
     def hold(self):           # pragma: no cover
+        '''
+        hold() keeps the plot open i.e. stops the plot from closing once
+        the main script has finished.
+
+        '''
+
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
 
@@ -280,9 +288,9 @@ class PyPlot(Connector):
             elif robot.control_type == 'v':
 
                 for i in range(robot.n):
-                    robot.q[i] += robot.qd[i] * (dt / 1000)
+                    robot.q[i] += robot.qd[i] * (dt)
 
-            elif robot.control_type == 'a':
+            elif robot.control_type == 'a':     # pragma: no cover
                 pass
 
             else:            # pragma: no cover
@@ -304,11 +312,11 @@ class PyPlot(Connector):
         for i in range(len(self.ellipses)):
             self.ellipses[i].draw()
 
-    def _plot_handler(self, sig, frame):
-        try:
-            plt.pause(0.001)
-        except(AttributeError):
-            pass
+    # def _plot_handler(self, sig, frame):
+    #     try:
+    #         plt.pause(0.001)
+    #     except(AttributeError):
+    #         pass
 
     def _set_axes_equal(self):
         """
@@ -342,3 +350,87 @@ class PyPlot(Connector):
         self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         self.ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+    def _add_teach_panel(self, robot):
+        fig = self.fig
+
+        # Add text to the plots
+        def text_trans(text):  # pragma: no cover
+            T = robot.fkine()
+            t = np.round(T.t, 3)
+            r = np.round(T.rpy('deg'), 3)
+            text[0].set_text("x: {0}".format(t[0]))
+            text[1].set_text("y: {0}".format(t[1]))
+            text[2].set_text("z: {0}".format(t[2]))
+            text[3].set_text("r: {0}".format(r[0]))
+            text[4].set_text("p: {0}".format(r[1]))
+            text[5].set_text("y: {0}".format(r[2]))
+
+        # Update the self state in mpl and the text
+        def update(val, text, robot):  # pragma: no cover
+            for i in range(robot.n):
+                robot.q[i] = self.sjoint[i].val * np.pi/180
+
+            text_trans(text)
+
+            # Step the environment
+            self.step(0)
+
+        fig.subplots_adjust(left=0.25)
+        text = []
+
+        x1 = 0.04
+        x2 = 0.22
+        yh = 0.04
+        ym = 0.5 - (robot.n * yh) / 2 + 0.17/2
+
+        self.axjoint = []
+        self.sjoint = []
+
+        qlim = np.copy(robot.qlim) * 180/np.pi
+
+        if np.all(qlim == 0):     # pragma: no cover
+            qlim[0, :] = -180
+            qlim[1, :] = 180
+
+        # Set the pose text
+        T = robot.fkine()
+        t = np.round(T.t, 3)
+        r = np.round(T.rpy(), 3)
+
+        fig.text(
+            0.02,  1 - ym + 0.25, "End-effector Pose",
+            fontsize=9, weight="bold", color="#4f4f4f")
+        text.append(fig.text(
+            0.03, 1 - ym + 0.20, "x: {0}".format(t[0]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.03, 1 - ym + 0.16, "y: {0}".format(t[1]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.03, 1 - ym + 0.12, "z: {0}".format(t[2]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.15, 1 - ym + 0.20, "r: {0}".format(r[0]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.15, 1 - ym + 0.16, "p: {0}".format(r[1]),
+            fontsize=9, color="#2b2b2b"))
+        text.append(fig.text(
+            0.15, 1 - ym + 0.12, "y: {0}".format(r[2]),
+            fontsize=9, color="#2b2b2b"))
+        fig.text(
+            0.02,  1 - ym + 0.06, "Joint angles",
+            fontsize=9, weight="bold", color="#4f4f4f")
+
+        for i in range(robot.n):
+            ymin = (1 - ym) - i * yh
+            self.axjoint.append(
+                fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb'))
+
+            self.sjoint.append(
+                Slider(
+                    self.axjoint[i], 'q' + str(i),
+                    qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
+
+            self.sjoint[i].on_changed(lambda x: update(x, text, robot))

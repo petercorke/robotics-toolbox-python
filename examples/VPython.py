@@ -6,8 +6,7 @@
 import roboticstoolbox as rp
 # import time
 
-env = rp.backends.VPython()
-# env.launch(g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+env = rp.backends.VPython()  # lgtm [py/call-to-non-callable]
 env.launch()
 
 #  PUMA560

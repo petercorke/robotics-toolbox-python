@@ -7,6 +7,7 @@ from roboticstoolbox import DHRobot, RevoluteDH, PrismaticDH
 from math import pi
 import numpy as np
 
+
 class Stanford(DHRobot):
     """
     Class that models a Stanford arm manipulator
@@ -31,13 +32,13 @@ class Stanford(DHRobot):
           is known, so gear ratios are set to 1.
 
     :references:
-        - Kinematic data from "Modelling, Trajectory calculation and Servoing of
-          a computer controlled arm".  Stanford AIM-177.  Figure 2.3
+        - Kinematic data from "Modelling, Trajectory calculation and Servoing
+          of a computer controlled arm".  Stanford AIM-177.  Figure 2.3
         - Dynamic data from "Robot manipulators: mathematics, programming and
           control"
           Paul 1981, Tables 6.5, 6.6
-        - Dobrotin & Scheinman, "Design of a computer controlled manipulator for
-          robot research", IJCAI, 1973.
+        - Dobrotin & Scheinman, "Design of a computer controlled manipulator
+          for robot research", IJCAI, 1973.
 
     .. codeauthor:: Peter Corke
 

@@ -26,7 +26,7 @@ while not arrived:
     start = time.time()
     v, arrived = rp.p_servo(panda.fkine(), Tep, 1)
     panda.qd = np.linalg.pinv(panda.jacobe()) @ v
-    env.step(50)
+    env.step(dt)
     stop = time.time()
 
     if stop - start < dt:

@@ -66,7 +66,7 @@ class Puma560(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/UNIMATE/puma560/parameters.m
 
     .. codeauthor:: Peter Corke
-    """
+    """  # noqa
 
     def __init__(self, symbolic=False):
 
@@ -204,7 +204,7 @@ class Puma560(DHRobot):
 
         a2 = self.links[1].a
         a3 = self.links[2].a
-        d1 = self.links[0].d
+        # d1 = self.links[0].d
         d3 = self.links[2].d
         d4 = self.links[3].d
 
@@ -249,7 +249,7 @@ class Puma560(DHRobot):
             / (2.0 * a2 * r))
 
         if np.isnan(Psi):
-            theta = []
+            theta = []    # pragma nocover
         else:
             theta[1] = np.arctan2(Pz, V114) + n2 * Psi
 
@@ -258,17 +258,18 @@ class Puma560(DHRobot):
             num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
             den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
             theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
-        
+
         return theta
 
     def ikine_a(self, T, config="lun"):
         return self.ikine_6s(T, config, self._ikine)
 
+
 if __name__ == '__main__':    # pragma nocover
 
     puma = Puma560(symbolic=False)
     print(puma)
-    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0,0,1], [1,0,0])
+    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0, 0, 1], [1, 0, 0])
     (q, failed, reason) = puma.ikine(T)
     print(failed, q)
     qq = puma.ikine_a(T)

@@ -152,9 +152,9 @@ class ELink(Link):
         :return: joint variable transform
         :rtype: ETS instance
 
-        The ETS for each ELink comprises a constant part (possible the identity)
-        followed by an optional joint variable transform.  This property returns
-        the latter.
+        The ETS for each ELink comprises a constant part (possible the
+        identity) followed by an optional joint variable transform.
+        This property returns the latter.
 
         .. runblock:: pycon
 
@@ -172,10 +172,10 @@ class ELink(Link):
         :return: constant part of link transform
         :rtype: SE3 instance
 
-        The ETS for each ELink comprises a constant part (possible the identity)
-        followed by an optional joint variable transform.  This property returns
-        the constant part.  If no constant part is given, this returns an
-        identity matrix.
+        The ETS for each ELink comprises a constant part (possible the
+        identity) followed by an optional joint variable transform.
+        This property returns the constant part.  If no constant part
+        is given, this returns an identity matrix.
 
         .. runblock:: pycon
 
@@ -187,7 +187,6 @@ class ELink(Link):
         """
         return self._Ts
 
-
     @property
     def isjoint(self):
         """
@@ -196,9 +195,9 @@ class ELink(Link):
         :return: test if link has a joint
         :rtype: bool
 
-        The ETS for each ELink comprises a constant part (possible the identity)
-        followed by an optional joint variable transform.  This property returns the
-        whether the
+        The ETS for each ELink comprises a constant part (possible the
+        identity) followed by an optional joint variable transform.
+        This property returns the whether the
 
         .. runblock:: pycon
 
@@ -273,7 +272,7 @@ class ELink(Link):
         :return: Link's parent
         :rtype: ELink instance
 
-        This is a reference to 
+        This is a reference to
 
         .. runblock:: pycon
 
@@ -293,13 +292,34 @@ class ELink(Link):
         return self._M
 
     @property
-    def collision(self):
-        return self._collision
-
-    @property
     def geometry(self):
+        """
+        Get/set joint visual geometry
+
+        - ``link.geometry`` is the list of the visual geometries which
+            represent the shape of the link
+            :return: the visual geometries
+            :rtype: list of Shape
+        - ``link.geometry = ...`` checks and sets the geometry
+        - ``link.geometry.append(...)`` add geometry
+        """
         return self._geometry
 
+    @property
+    def collision(self):
+        """
+        Get/set joint collision geometry
+
+        - ``link.collision`` is the list of the collision geometries which
+            represent the collidable shape of the link.
+            :return: the collision geometries
+            :rtype: list of Shape
+        - ``link.collision = ...`` checks and sets the collision geometry
+        - ``link.collision.append(...)`` add collision geometry
+
+        The collision geometries are what is used to check for collisions.
+        """
+        return self._collision
 
     # @r.setter
     # def r(self, T):
@@ -401,6 +421,7 @@ class ELink(Link):
         :param inf_dist: The minimum distance within which to consider
             the shape
         :type inf_dist: float
+
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
             shapes
@@ -430,6 +451,7 @@ class ELink(Link):
 
         :param shape: The shape to compare distance to
         :type shape: Shape
+
         :returns: True if shapes have collided
         :rtype: bool
         '''

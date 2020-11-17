@@ -19,7 +19,7 @@ class Panda(DHRobot):
         >>> robot = rtb.models.DH.Panda()
         >>> print(robot)
 
-    .. note:: 
+    .. note::
         - SI units of metres are used.
         - The model includes a tool offset.
 

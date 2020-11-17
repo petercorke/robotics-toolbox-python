@@ -18,7 +18,7 @@ class TestPyPlot(unittest.TestCase):
         env.launch()
         env.add(panda)
         env.step()
-        env._plot_handler(None, None)
+        # env._plot_handler(None, None)
         env.close()
 
     def test_PyPlot_invisible(self):
@@ -27,7 +27,7 @@ class TestPyPlot(unittest.TestCase):
         env.launch()
         env.add(panda, display=False)
         env.step()
-        env._plot_handler(None, None)
+        # env._plot_handler(None, None)
         env.close()
 
     def test_unimplemented(self):

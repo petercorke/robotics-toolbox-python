@@ -13,14 +13,11 @@ from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds
-from roboticstoolbox.backends.PyPlot.functions import \
-    _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
-    _plot2, _teach2
-from roboticstoolbox.robot.DHDynamics import DHDynamics
+from roboticstoolbox.robot.DHDynamics import DHDynamicsMixin
 from ansitable import ANSITable, Column
 
 
-class DHRobot(Robot, DHDynamics):
+class DHRobot(Robot, DHDynamicsMixin):
     """
     Class for robots defined using Denavit-Hartenberg notation
 
@@ -38,9 +35,9 @@ class DHRobot(Robot, DHDynamics):
     :type gravity: ndarray(3)
 
     A concrete superclass for arm type robots defined using Denavit-Hartenberg
-    notation, that represents a serial-link arm-type robot.  Each link and joint
-    in the chain is described by a DHLink-class object using Denavit-Hartenberg
-    parameters (standard or modified).
+    notation, that represents a serial-link arm-type robot.  Each link and
+    joint in the chain is described by a DHLink-class object using
+    Denavit-Hartenberg parameters (standard or modified).
 
     .. note:: Link subclass elements passed in must be all standard, or all
           modified, DH parameters.
@@ -84,7 +81,7 @@ class DHRobot(Robot, DHDynamics):
                     L[i].name = f"link{self._n}"
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
-            
+
         super().__init__(links, **kwargs)
 
         # Check the DH convention
@@ -122,7 +119,7 @@ class DHRobot(Robot, DHDynamics):
             return s
 
         def angle(theta, fmt=None):
-            if sym.issymbol(theta):
+            if sym.issymbol(theta):   # pragma nocover
                 return "<<red>>" + str(theta)
             else:
                 if fmt is not None:
@@ -146,7 +143,7 @@ class DHRobot(Robot, DHDynamics):
                 Column("⍺ⱼ₋₁", headalign="^"),
                 Column("θⱼ", headalign="^"),
                 Column("dⱼ", headalign="^"),
-                *qlim_columns, 
+                *qlim_columns,
                 border="thick"
                 )
             for j, L in enumerate(self):
@@ -158,9 +155,11 @@ class DHRobot(Robot, DHDynamics):
                 else:
                     ql = []
                 if L.isprismatic():
-                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
+                    table.row(
+                        L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
                 else:
-                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
+                    table.row(
+                        L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
         else:
             # DH format
             table = ANSITable(
@@ -688,9 +687,10 @@ class DHRobot(Robot, DHDynamics):
         q = self._getq(q)
         revolute = self.isrevolute()
 
-        return np.array(
-            [q[k] * np.pi / 180.0 if revolute[k] else q[k] for k in range(len(q))]
-                    )
+        return np.array([
+            q[k] * np.pi / 180.0
+            if revolute[k] else q[k] for k in range(len(q))
+        ])
 
     def twists(self, q=None):
         """
@@ -770,18 +770,18 @@ class DHRobot(Robot, DHDynamics):
             ets *= ETS.SE3(self._tool)
 
         return ets
-            
+
     def fkine(self, q=None):
         """
         Forward kinematics
 
         :param q: The joint configuration (Optional,
-            if not supplied will use the stored q values). 
+            if not supplied will use the stored q values).
         :type q: ndarray(n) or ndarray(m,n)
-        :return: Forward kinematics as an SE(3) matrix 
+        :return: Forward kinematics as an SE(3) matrix
         :rtype: SE3 instance
 
-        - ``robot.fkine(q)`` computes the forward kinematics for the robot at 
+        - ``robot.fkine(q)`` computes the forward kinematics for the robot at
           joint configuration ``q``.
 
         - ``robot.fkine()`` as above except uses the stored ``q`` value of the
@@ -833,11 +833,11 @@ class DHRobot(Robot, DHDynamics):
         Forward kinematics for all link frames
 
         :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values). 
+            if not supplied will use the stored q values).
         :type q: ndarray(n) or ndarray(m,n)
         :param old: "old" behaviour, defaults to True
         :type old: bool, optional
-        :return: Forward kinematics as an SE(3) matrix 
+        :return: Forward kinematics as an SE(3) matrix
         :rtype: SE3 instance with ``n`` values
 
         - ``fkine_all(q)`` evaluates fkine for each joint within a robot and
@@ -872,10 +872,10 @@ class DHRobot(Robot, DHDynamics):
             Tj = SE3()
         first = True
         Tall = Tj
-        # print(Tj)
+
         for q, L in zip(q, self.links):
             if first:
-                # print(q, L.A(q))
+
                 Tj *= L.A(q)
                 if old:
                     Tall = Tj
@@ -897,8 +897,8 @@ class DHRobot(Robot, DHDynamics):
         :return J: The manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-          velocity to end-effector spatial velocity.
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity.
 
         - ``robot.jacobe(q)` as above except uses the stored q value of the
           robot object.
@@ -913,7 +913,7 @@ class DHRobot(Robot, DHDynamics):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
-        """
+        """  # noqa
 
         if q is None:
             q = np.copy(self.q)
@@ -963,8 +963,8 @@ class DHRobot(Robot, DHDynamics):
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-          velocity to end-effector spatial velocity.
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint velocity to end-effector spatial velocity.
 
         - ``robot.jacobe()`` as above except uses the stored q value of the
         robot object.
@@ -979,7 +979,7 @@ class DHRobot(Robot, DHDynamics):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
-        """
+        """  # noqa
         q = self._getq(q)
 
         if T is None:
@@ -1019,8 +1019,9 @@ class DHRobot(Robot, DHDynamics):
           ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
           ratio of 1, but in practice will be less than 1.
 
-        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which of
-          the 6 degrees-of-freedom to consider in the measurement. For example
+        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which
+          of the 6 degrees-of-freedom to consider in the measurement. For
+          example
           ``axes="trans"`` to consider only translation or
           ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
           motion.
@@ -1151,7 +1152,7 @@ class DHRobot(Robot, DHDynamics):
               manipulators: The operational space formulation
               O Khatib, IEEE Journal on Robotics and Automation, 1987.
 
-        """
+        """  # noqa
 
         if q is None:
             q = self.q
@@ -1246,482 +1247,6 @@ class DHRobot(Robot, DHDynamics):
         Jdot = v[:, 0]
 
         return Jdot
-
-    def plot(
-            self, q=None, block=True, dt=0.050, limits=None,
-            vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None):
-        """
-        Graphical display and animation
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            seconds between frames
-        :type dt: float
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-        :param movie: name of file in which to save an animated GIF
-        :type movie: str
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.plot(q)`` displays a graphical view of a robot based on the
-          kinematic model and the joint configuration ``q``. This is a stick
-          figure polyline which joins the origins of the link coordinate frames. 
-          The plot will autoscale with an aspect ratio of 1.
-
-        - ``robot.plot()`` as above but use the stored ``q`` value.
-
-        If ``q`` (m,n) representing a joint-space trajectory it will create an
-        animation with a pause of ``dt`` seconds between each frame.
-
-        .. note::
-            - By default this method will block until the figure is dismissed.
-              To avoid this set ``block=False``.
-            - The polyline joins the origins of the link frames, but for
-              some Denavit-Hartenberg models those frames may not actually
-              be on the robot, ie. the lines to not neccessarily represent
-              the links of the robot.
-
-        :seealso: :func:`teach`
-        """
-
-        # try:
-        return _plot(
-            self, block, q, int(dt * 1000), limits,
-            vellipse=vellipse, fellipse=fellipse,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name,
-            movie=movie)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
-    def teach(
-            self, q=None, block=True, limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        """
-        Graphical teach pendant
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-                  if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-                       autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-                          which the joint revolves around(revolute joint) or 
-                          translates along (prismatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-                         at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.teach(q)`` creates a matplotlib plot which allows the user to
-          "drive" a graphical robot using a graphical slider panel. The robot's
-          inital joint configuration is ``q``. The plot will autoscale with an
-          aspect ratio of 1.
-
-        - ``robot.teach()`` as above except the robot's stored value of ``q`` is used.
-
-        .. note:: 
-            - Program execution is blocked until the teach window is 
-              dismissed.  If ``block=False`` the method is non-blocking but
-              you need to poll the window manager to ensure that the window
-              remains responsive.
-            - The slider limits are derived from the joint limit properties.
-              If not set then:
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-        """
-
-        if q is not None:
-            self.q = q
-
-        # try:
-        return _teach(
-            self, block, limits=limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
-    def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
-        """
-        Create a velocity ellipsoid object for plotting
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        :type opt: string
-        :param centre:
-        :type centre: list or str('ee')
-
-        :return: An EllipsePlot object
-        :rtype: EllipsePlot
-
-        - ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
-          pose ``q``. The ellipsoid is centered at the origin.
-
-        - ``robot.vellipse()`` as above except the joint configuration is that
-          stored in the robot object.
-
-        .. note:: 
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
-              end-effector position.
-        """
-
-        return _vellipse(self, q=q, opt=opt, centre=centre)
-
-    def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
-        '''
-        Create a force ellipsoid object for plotting
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        :type opt: string
-        :param centre:
-        :type centre: list or str('ee')
-
-        :return: An EllipsePlot object
-        :rtype: EllipsePlot
-
-        - ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
-          pose ``q``. The ellipsoid is centered at the origin.
-
-        - ``robot.fellipse()`` as above except the joint configuration is that
-          stored in the robot object.
-
-        .. note:: 
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
-              end-effector position.
-
-        '''
-
-        return _fellipse(self, q=q, opt=opt, centre=centre)
-
-    def plot_vellipse(
-            self, q=None, block=True, vellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        """
-        Plot the velocity ellipsoid for manipulator
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param vellipse: the vellocity ellipsoid to plot
-        :type vellipse: EllipsePlot
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational velocity ellipsoid
-        :type opt: string
-        :param centre: The coordinates to plot the vellipse [x, y, z] or "ee"
-            to plot at the end-effector location
-        :type centre: array_like or str
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.plot_vellipse(q)`` displays the velocity ellipsoid for the
-          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
-
-        - ``plot_vellipse()`` as above except the robot is plotted with joint
-          coordinates stored in the robot object.
-
-        - ``robot.plot_vellipse(vellipse)`` specifies a custon ellipse to plot. 
-
-        .. note:: 
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
-              end-effector position.
-        """
-
-        if q is not None:
-            self.q = q
-
-        if vellipse is None:
-            vellipse = self.vellipse(q=q, opt=opt, centre=centre)
-
-        return _plot_ellipse(
-            vellipse, block, limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-    def plot_fellipse(
-            self, q=None, block=True, fellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
-        """
-        Plot the force ellipsoid for manipulator
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param fellipse: the vellocity ellipsoid to plot
-        :type fellipse: EllipsePlot
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param opt: 'trans' or 'rot' will plot either the translational or
-            rotational force ellipsoid
-        :type opt: string
-        :param centre: The coordinates to plot the fellipse [x, y, z] or "ee"
-            to plot at the end-effector location
-        :type centre: array_like or str
-        :param jointaxes: (Plot Option) Plot an arrow indicating the axes in
-            which the joint revolves around(revolute joint) or translates
-            along (prosmatic joint)
-        :type jointaxes: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param shadow: (Plot Option) Plot a shadow of the robot in the x-y
-            plane
-        :type shadow: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.plot_fellipse(q)`` displays the velocity ellipsoid for the
-          robot at pose ``q``. The plot will autoscale with an aspect ratio of 1.
-
-        - ``plot_fellipse()`` as above except the robot is plotted with joint
-          coordinates stored in the robot object.
-
-        - ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot. 
-
-        .. note:: 
-            - By default the ellipsoid related to translational motion is
-              drawn.  Use ``opt='rot'`` to draw the rotational velocity 
-              ellipsoid.
-            - By default the ellipsoid is drawn at the origin.  The option
-              ``centre`` allows its origin to set to set to the specified
-              3-vector, or the string "ee" ensures it is drawn at the 
-              end-effector position.
-        """
-
-        if q is not None:
-            self.q = q
-
-        if fellipse is None:
-            fellipse = self.fellipse(q=q, opt=opt, centre=centre)
-
-        return _plot_ellipse(
-            fellipse, block, limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-    def plot2(
-            self, q=None, block=True, dt=50, limits=None,
-            vellipse=False, fellipse=False,
-            eeframe=True, name=False):
-        """
-        2D Graphical display and animation
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on the
-          kinematic model and the joint configuration ``q``. This is a stick
-          figure polyline which joins the origins of the link coordinate frames. 
-          The plot will autoscale with an aspect ratio of 1.
-
-        - ``robot.plot2()`` as above but use the stored ``q`` value.
-
-        If ``q`` (m,n) representing a joint-space trajectory it will create an
-        animation with a pause of ``dt`` seconds between each frame.
-
-        .. note::
-            - By default this method will block until the figure is dismissed.
-              To avoid this set ``block=False``.
-            - The polyline joins the origins of the link frames, but for
-              some Denavit-Hartenberg models those frames may not actually
-              be on the robot, ie. the lines to not neccessarily represent
-              the links of the robot.
-
-        :seealso: :func:`teach2`
-
-        """
-
-        # try:
-        return _plot2(
-            self, block, q, dt, limits,
-            vellipse=vellipse, fellipse=fellipse,
-            eeframe=eeframe, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
-    def teach2(
-            self, q=None, block=True, limits=None,
-            eeframe=True, name=False):
-        '''
-        2D Graphical teach pendant
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the user
-          to "drive" a graphical robot using a graphical slider panel. The
-          robot's inital joint configuration is ``q``. The plot will autoscale
-          with an aspect ratio of 1.
-
-        - ``robot.teach2()`` as above except the robot's stored value of ``q``
-          is used.
-
-        .. note:: 
-            - Program execution is blocked until the teach window is 
-              dismissed.  If ``block=False`` the method is non-blocking but
-              you need to poll the window manager to ensure that the window
-              remains responsive.
-            - The slider limits are derived from the joint limit properties.
-              If not set then:
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-              If not set then
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-
-        '''
-
-        if q is not None:
-            self.q = q
-
-        # try:
-        return _teach2(
-            self, block, limits=limits,
-            eeframe=eeframe, name=name)
-        # except ModuleNotFoundError:
-        #     print(
-        #         'Could not find matplotlib.'
-        #         ' Matplotlib required for this function')
-
 
     def ikine3(self, T, left=True, elbow_up=True):
         """
@@ -1860,400 +1385,17 @@ class DHRobot(Robot, DHDynamics):
         else:
             return qt
 
-    def ikine_6s(self, T, config, _ikfunc):
-        # Undo base and tool transformations, but if they are not
-        # set, skip the operation.  Nicer for symbolics
-        if self._base is not None:
-            T = self.base.inv() * T
-        if self._tool is not None:
-            T = self.tool.inv() * T
-
-        q = np.zeros((len(T), 6))
-        for k, Tk in enumerate(T):
-            theta = _ikfunc(Tk, config)
-
-            if not np.all(np.isnan(theta)):
-                # Solve for the wrist rotation
-                # We need to account for some random translations between the
-                # first and last 3 joints (d4) and also d6,a6,alpha6 in the
-                # final frame.
-
-                # Transform of first 3 joints
-                T13 = self.A([0, 2], theta)
-
-                # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
-                Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
-
-                # Tz(d6) Tx(a5) Rx(alpha6)
-                Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
-                    SE3.Rx(self.links[5].alpha)
-
-                R = Td4.inv() * T13.inv() * Tk * Tt.inv()
-
-                # The spherical wrist implements Euler angles
-                if 'f' in config:
-                    eul = R.eul(flip=True)
-                else:
-                    eul = R.eul()
-                theta = np.r_[theta, eul]
-                if self.links[3].alpha > 0:
-                    theta[4] = -theta[4]
-
-                # Remove the link offset angles
-                theta = theta - self.offset
-
-                q[k, :] = theta
-            
-            if q.shape[0] == 1:
-                return q[0]
-            else:
-                return q
-
-
-    # def ikine_6s(self, T, left=True, elbow_up=True, wrist_flip=False):
-    #     """
-    #     Analytical inverse kinematics
-
-    #     q, err = ikine6s(T) are the joint coordinates (n) corresponding to the
-    #     robot end-effector pose T which is an SE3 object or homogenenous
-    #     transform matrix (4x4), and n is the number of robot joints. This
-    #     is an analytic solution for a 6-axis robot with a spherical wrist
-    #     (the most common form for industrial robot arms).
-
-    #     q, err = ikine6s(T, left, elbow_up, wrist_flip) as above except the
-    #     arm location, elbow position, and wrist orientation can be specified.
-
-    #     Trajectory operation:
-    #     In all cases if T is a vector of SE3 objects (1xM) or a homogeneous
-    #     transform sequence (4x4xM) then the inverse kinematics is computed for
-    #     all m poses resulting in q (mxn) with each row representing the joint
-    #     angles at the corresponding pose.
-
-    #     :param T: The desired end-effector pose
-    #     :type T: SE3 or SE3 trajectory
-    #     :param left: True for arm to the left (default), else arm to the right
-    #     :type left: bool
-    #     :param elbow_up: True for elbow up (default), else elbow down
-    #     :type elbow_up: bool
-    #     :param wrist_flip: False for wrist not flipped (default), else wrist
-    #         flipped (rotated by 180 deg)
-    #     :type wrist_flip: bool
-
-    #     :return q: The calculated joint values
-    #     :rtype q: float ndarray(n)
-    #     :return err: Any errors encountered
-    #     :rtype err: list String
-
-    #     :notes:
-    #         - Treats a number of specific cases:
-    #             - Robot with no shoulder offset
-    #             - Robot with a shoulder offset (has lefty/righty configuration)
-    #             - Robot with a shoulder offset and a prismatic third joint
-    #               (like Stanford arm)
-    #         - The Puma 560 arms with shoulder and elbow offsets (4 lengths
-    #           parameters)
-    #         - The Kuka KR5 with many offsets (7 length parameters)
-    #         - The inverse kinematics for the various cases determined using
-    #           ikine_sym.
-    #         - The inverse kinematic solution is generally not unique, and
-    #           depends on the configuration string.
-    #         - Joint offsets, if defined, are added to the inverse kinematics
-    #           to generate q.
-    #         - Only applicable for standard Denavit-Hartenberg parameters
-
-    #     :reference:
-    #         - Inverse kinematics for a PUMA 560,
-    #           Paul and Zhang,
-    #           The International Journal of Robotics Research,
-    #           Vol. 5, No. 2, Summer 1986, p. 32-44
-
-    #     """
-
-    #     if not self.n == 6:
-    #         raise ValueError(
-    #             "Function only applicable to six degree of freedom robots")
-
-    #     if self.mdh:
-    #         raise ValueError(
-    #             "Function only applicable to robots with standard DH "
-    #             "parameters")
-
-    #     if not self.isspherical():
-    #         raise ValueError(
-    #             "Function only applicable to robots with a spherical wrist")
-
-    #     if not isinstance(T, SE3):
-    #         T = SE3(T)
-
-    #     trajn = len(T)
-
-    #     sol = [1, 1, 1]
-
-    #     if not left:
-    #         sol[0] = 2
-
-    #     if not elbow_up:
-    #         sol[1] = 2
-
-    #     if wrist_flip:
-    #         sol[2] = 2
-
-    #     if self._is_simple():
-    #         self.ikineType = 'nooffset'
-    #     elif self._is_puma():
-    #         self.ikineType = 'puma'
-    #     elif self._is_offset():
-    #         self.ikineType = 'offset'
-    #     elif self._is_rrp():
-    #         self.ikineType = 'rrp'
-    #     else:
-    #         raise ValueError('This kinematic structure not supported')
-
-    #     q = np.zeros((trajn, self.n))
-    #     err = []
-
-    #     for j in range(trajn):
-
-    #         theta = np.zeros(self.n)
-
-    #         # Undo base and tool transformations
-    #         Ti = np.linalg.inv(self.base.A) @ T[j].A @ \
-    #             np.linalg.inv(self.tool.A)
-
-    #         if self.ikineType == 'puma':
-    #             # Puma model with shoulder and elbow offsets
-    #             # - Inverse kinematics for a PUMA 560,
-    #             #   Paul and Zhang,
-    #             #   The International Journal of Robotics Research,
-    #             #   Vol. 5, No. 2, Summer 1986, p. 32-44
-
-    #             a2 = self.links[1].a
-    #             a3 = self.links[2].a
-    #             d1 = self.links[0].d
-    #             d3 = self.links[2].d
-    #             d4 = self.links[3].d
-
-    #             # The following parameters are extracted from the Homogeneous
-    #             # Transformation as defined in equation 1, p. 34
-
-    #             Px = Ti[0, 3]
-    #             Py = Ti[1, 3]
-    #             Pz = Ti[2, 3] - d1
-
-    #             # Solve for theta[0]
-    #             # r is defined in equation 38, p. 39.
-    #             # theta[0] uses equations 40 and 41, p.39,
-    #             # based on the configuration parameter n1
-
-    #             r = np.sqrt(Px**2 + Py**2)
-    #             if sol[0] == 1:
-    #                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
-    #             else:
-    #                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-
-    #             # Solve for theta[1]
-    #             # V114 is defined in equation 43, p.39.
-    #             # r is defined in equation 47, p.39.
-    #             # Psi is defined in equation 49, p.40.
-    #             # theta[1] uses equations 50 and 51, p.40, based on the
-    #             # configuration parameter n2
-    #             if sol[1] == 1:
-    #                 n2 = -1
-    #             else:
-    #                 n2 = 1
-
-    #             if sol[0] == 2:
-    #                 n2 = -n2
-
-    #             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
-
-    #             r = np.sqrt(V114**2 + Pz**2)
-
-    #             Psi = np.arccos(
-    #                 (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
-    #                 / (2.0 * a2 * r))
-
-    #             if np.isnan(Psi):
-    #                 theta = []
-    #             else:
-    #                 theta[1] = np.arctan2(Pz, V114) + n2 * Psi
-
-    #                 # Solve for theta[2]
-    #                 # theta[2] uses equation 57, p. 40.
-    #                 num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
-    #                 den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
-    #                 theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
-
-    #         elif self.ikineType == 'nooffset':
-    #             a2 = self.links[1].a
-    #             a3 = self.links[2].a
-    #             d1 = self.links[0].d
-
-    #             px = Ti[0, 3]
-    #             py = Ti[1, 3]
-    #             pz = Ti[2, 3]
-
-    #             # Autogenerated code
-    #             if self.links[0].alpha < 0:
-    #                 if sol[0] == 1:
-    #                     temp = -px - py * 1j
-    #                     if np.abs(temp) == 0:
-    #                         temp = 0
-    #                     theta[0] = np.angle(temp)
-    #                 else:
-    #                     theta[0] = np.angle(px + py * 1j)
-
-    #                 print(theta[0])
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = -np.angle(a2*d1*-2.0+a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j-np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-    #                 else:
-    #                     theta[1] = -np.angle(a2*d1*-2.0+a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j+np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = -np.angle(a2*-1j+C2*d1-C2*pz+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j-np.sqrt(0j+(-a2+S2*d1-S2*pz+C1*C2*px+C2*S1*py)**2+(-C2*d1+C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j+C2*d1-C2*pz+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+(-a2+S2*d1-S2*pz+C1*C2*px+C2*S1*py)**2+(-C2*d1+C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-
-    #             else:
-    #                 if sol[0] == 1:
-    #                     theta[0] = np.angle(px + py * 1j)
-    #                 else:
-    #                     temp = -px - py * 1j
-    #                     if np.abs(temp) == 0:
-    #                         temp = 0
-    #                     theta[0] = np.angle(temp)
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = -np.angle(a2*d1*2.0-a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j-np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-    #                 else:
-    #                     theta[1] = -np.angle(a2*d1*2.0-a2*pz*2.0-C1*a2*px*2.0j-S1*a2*py*2.0j)+np.angle(d1*pz*2.0j-a2**2*1j+a3**2*1j-d1**2*1j-pz**2*1j-C1**2*px**2*1j+np.sqrt(0j+(a2*d1*2.0-a2*pz*2.0)**2+(C1*a2*px*2.0+S1*a2*py*2.0)**2-(d1*pz*-2.0+a2**2-a3**2+d1**2+pz**2+C1**2*px**2+S1**2*py**2+C1*S1*px*py*2.0)**2)-S1**2*py**2*1j-C1*S1*px*py*2.0j)  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = -np.angle(a2*-1j-C2*d1+C2*pz-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j-np.sqrt(0j+(-a2-S2*d1+S2*pz+C1*C2*px+C2*S1*py)**2+(C2*d1-C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j-C2*d1+C2*pz-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+(-a2-S2*d1+S2*pz+C1*C2*px+C2*S1*py)**2+(C2*d1-C2*pz+C1*S2*px+S1*S2*py)**2-a3**2))  # noqa
-
-    #         elif self.ikineType == 'offset':
-    #             # General case with 6 length parameters
-    #             a1 = self.links[0].a
-    #             a2 = self.links[1].a
-    #             a3 = self.links[2].a
-    #             d1 = self.links[0].d
-    #             d2 = self.links[1].d
-    #             d3 = self.links[2].d
-
-    #             px = Ti[0, 3]
-    #             py = Ti[1, 3]
-    #             pz = Ti[2, 3]
-
-    #             # Autogenerated code
-    #             if self.links[0].alpha < 0:
-
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(-px+py*1j)+np.angle(d2*1j+d3*1j-np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = np.angle(d2*1j+d3*1j+np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))-np.angle(-px+py*1j)  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(d1*pz*2.0j-np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(d1*pz*2.0j+np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = np.angle(a3*1j-np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0-S2*a2*d1*2.0-S1*a1*py*2.0+S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0+0j))-np.angle(a2*-1j-C2*a1*1j+C2*d1-C2*pz+S2*a1+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j-C2*a1*1j+C2*d1-C2*pz+S2*a1+S2*d1*1j-S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0-S2*a2*d1*2.0-S1*a1*py*2.0+S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))  # noqa
-
-    #             else:
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+d3*1j-np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+d3*1j+np.sqrt(0j+d2*d3*-2.0-d2**2-d3**2+px**2+py**2))  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(d1*pz*2.0j-np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j-d1+pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(d1*pz*2.0j+np.sqrt(0j+d1*pz**3*4.0+d1**3*pz*4.0-a1**4-a2**4-a3**4-d1**4-py**4-pz**4-C1**4*px**4+C1**2*py**4*2.0-C1**4*py**4+a1**2*a2**2*2.0+a1**2*a3**2*2.0+a2**2*a3**2*2.0-a1**2*d1**2*2.0+a2**2*d1**2*2.0+a3**2*d1**2*2.0-a1**2*py**2*6.0-a2**2*py**2*2.0+a3**2*py**2*2.0-a1**2*pz**2*2.0+a2**2*pz**2*2.0+a3**2*pz**2*2.0-d1**2*py**2*2.0-d1**2*pz**2*6.0-py**2*pz**2*2.0+d1*py**2*pz*4.0+C1**3*a1*px**3*4.0+S1**3*a1*py**3*4.0-C1**2*a1**2*px**2*6.0+C1**2*a2**2*px**2*2.0+C1**2*a3**2*px**2*2.0+C1**2*a1**2*py**2*6.0+C1**2*a2**2*py**2*1.0e1-C1**2*a3**2*py**2*2.0-C1**4*a2**2*py**2*1.2e1+C1**6*a2**2*py**2*4.0-C1**2*d1**2*px**2*2.0+C1**2*d1**2*py**2*2.0-C1**2*px**2*py**2*6.0+C1**4*px**2*py**2*6.0-C1**2*px**2*pz**2*2.0+C1**2*py**2*pz**2*2.0+S1**6*a2**2*py**2*4.0+C1*a1**3*px*4.0+S1*a1**3*py*4.0+a1**2*d1*pz*4.0-a2**2*d1*pz*4.0-a3**2*d1*pz*4.0-C1*a1*a2**2*px*4.0-C1*a1*a3**2*px*4.0-C1*S1*px**3*py*4.0+C1*a1*d1**2*px*4.0+C1*a1*px*py**2*1.2e1+C1*a1*px*pz**2*4.0+S1*a1*a2**2*py*4.0-S1*a1*a3**2*py*4.0+S1*a1*d1**2*py*4.0+S1*a1*px**2*py*4.0+S1*a1*py*pz**2*4.0-C1*S1**3*px*py**3*4.0+C1*S1**3*px**3*py*4.0-C1**3*a1*px*py**2*1.2e1-S1**3*a1*a2**2*py*8.0+C1**2*d1*px**2*pz*4.0-C1**2*d1*py**2*pz*4.0-S1**3*a1*px**2*py*4.0-C1*a1*d1*px*pz*8.0-S1*a1*d1*py*pz*8.0-C1*S1*a1**2*px*py*1.2e1-C1*S1*a2**2*px*py*4.0+C1*S1*a3**2*px*py*4.0-C1*S1*d1**2*px*py*4.0-C1*S1*px*py*pz**2*4.0-C1**2*S1*a1*a2**2*py*8.0+C1**2*S1*a1*px**2*py*8.0+C1*S1**3*a2**2*px*py*8.0+C1**3*S1*a2**2*px*py*8.0+C1*S1*d1*px*py*pz*8.0)-a1**2*1j-a2**2*1j+a3**2*1j-d1**2*1j-py**2*1j-pz**2*1j-C1**2*px**2*1j+C1**2*py**2*1j+C1*a1*px*2.0j+S1*a1*py*2.0j-C1*S1*px*py*2.0j)-np.angle(-a2*(a1*-1j+d1-pz+C1*px*1j+S1**3*py*1j+C1**2*S1*py*1j))  # noqa
-    #                     print(theta[1])
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 if sol[2] == 1:
-    #                     theta[2] = np.angle(a3*1j-np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0+S2*a2*d1*2.0-S1*a1*py*2.0-S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))-np.angle(a2*-1j-C2*a1*1j-C2*d1+C2*pz+S2*a1-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)  # noqa
-    #                 else:
-    #                     theta[2] = -np.angle(a2*-1j-C2*a1*1j-C2*d1+C2*pz+S2*a1-S2*d1*1j+S2*pz*1j+C1*C2*px*1j-C1*S2*px+C2*S1*py*1j-S1*S2*py)+np.angle(a3*1j+np.sqrt(0j+d1*pz*-2.0+a1**2+a2**2-a3**2+d1**2+py**2+pz**2+C1**2*px**2-C1**2*py**2+C2*a1*a2*2.0-C1*a1*px*2.0+S2*a2*d1*2.0-S1*a1*py*2.0-S2*a2*pz*2.0-C1*C2*a2*px*2.0-C2*S1*a2*py*2.0+C1*S1*px*py*2.0))  # noqa
-
-    #         elif self.ikineType == 'rrp':
-    #             # RRP (Stanford arm like)
-    #             px = Ti[0, 3]
-    #             py = Ti[1, 3]
-    #             pz = Ti[2, 3]
-    #             d1 = self.links[0].d
-    #             d2 = self.links[1].d
-
-    #             # Autogenerated code
-    #             if self.links[0].alpha < 0:
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(-px+py*1j)+np.angle(d2*1j-np.sqrt(0j+-d2**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = np.angle(d2*1j+np.sqrt(0j+-d2**2+px**2+py**2))-np.angle(-px+py*1j)  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(d1-pz-C1*px*1j-S1*py*1j)  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(-d1+pz+C1*px*1j+S1*py*1j)  # noqa
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 theta[2] = -C2*d1+C2*pz+C1*S2*px+S1*S2*py  # noqa
-
-    #             else:
-    #                 if sol[0] == 1:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j-np.sqrt(0j+-d2**2+px**2+py**2))  # noqa
-    #                 else:
-    #                     theta[0] = -np.angle(px-py*1j)+np.angle(d2*1j+np.sqrt(0j+-d2**2+px**2+py**2))  # noqa
-
-    #                 S1 = np.sin(theta[0])
-    #                 C1 = np.cos(theta[0])
-
-    #                 if sol[1] == 1:
-    #                     theta[1] = np.angle(-d1+pz-C1*px*1j-S1*py*1j)  # noqa
-    #                 else:
-    #                     theta[1] = np.angle(d1-pz+C1*px*1j+S1*py*1j)  # noqa
-
-    #                 print(theta[1])
-
-    #                 S2 = np.sin(theta[1])
-    #                 C2 = np.cos(theta[1])
-
-    #                 theta[2] = -C2*d1+C2*pz-C1*S2*px-S1*S2*py  # noqa
+    # def ikine_6s(self, T, config, _ikfunc):
+    #     # Undo base and tool transformations, but if they are not
+    #     # set, skip the operation.  Nicer for symbolics
+    #     if self._base is not None:
+    #         T = self.base.inv() * T
+    #     if self._tool is not None:
+    #         T = self.tool.inv() * T
+
+    #     q = np.zeros((len(T), 6))
+    #     for k, Tk in enumerate(T):
+    #         theta = _ikfunc(Tk, config)
 
     #         if not np.all(np.isnan(theta)):
     #             # Solve for the wrist rotation
@@ -2271,92 +1413,26 @@ class DHRobot(Robot, DHDynamics):
     #             Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
     #                 SE3.Rx(self.links[5].alpha)
 
-    #             R = np.linalg.inv(Td4.A) @ np.linalg.inv(T13.A) @ Ti @ \
-    #                 np.linalg.inv(Tt.A)
+    #             R = Td4.inv() * T13.inv() * Tk * Tt.inv()
 
     #             # The spherical wrist implements Euler angles
-    #             if sol[2] == 1:
-    #                 theta[3:6] = tr2eul(R, flip=True)
+    #             if 'f' in config:
+    #                 eul = R.eul(flip=True)
     #             else:
-    #                 theta[3:6] = tr2eul(R)
-
+    #                 eul = R.eul()
+    #             theta = np.r_[theta, eul]
     #             if self.links[3].alpha > 0:
     #                 theta[4] = -theta[4]
 
     #             # Remove the link offset angles
-    #             for k in range(self.n):
-    #                 theta[k] -= self.links[k].offset
+    #             theta = theta - self.offset
 
-    #             q[j, :] = theta
+    #             q[k, :] = theta
+
+    #         if q.shape[0] == 1:
+    #             return q[0]
     #         else:
-    #             err.append('point not reachable')
-
-    #     if trajn == 1:
-    #         return q[0, :], err
-    #     else:
-    #         return q, err
-
-    def _is_simple(self):
-        L = self.links
-        alpha = [-np.pi / 2, 0, np.pi / 2]
-        s = (L[1].d == 0 and L[2].d == 0) and ((
-            L[0].alpha == alpha[0]
-            and L[1].alpha == alpha[1]
-            and L[2].alpha == alpha[2]
-        ) or (
-            L[0].alpha == -alpha[0]
-            and L[1].alpha == -alpha[1]
-            and L[2].alpha == -alpha[2]
-        )) and \
-            (not L[0].sigma and not L[1].sigma and not L[2].sigma) and \
-            L[0].a == 0
-
-        return s
-
-    def _is_offset(self):
-        L = self.links
-        alpha = [-np.pi / 2, 0, np.pi / 2]
-        s = ((
-            L[0].alpha == alpha[0]
-            and L[1].alpha == alpha[1]
-            and L[2].alpha == alpha[2]
-        ) or (
-            L[0].alpha == -alpha[0]
-            and L[1].alpha == -alpha[1]
-            and L[2].alpha == -alpha[2]
-        )) and (not L[0].sigma and not L[1].sigma and not L[2].sigma)
-
-        return s
-
-    def _is_rrp(self):
-        L = self.links
-        alpha = [-np.pi / 2, np.pi / 2, 0]
-        s = (L[1].a == 0 and L[2].a == 0) and ((
-            L[0].alpha == alpha[0]
-            and L[1].alpha == alpha[1]
-            and L[2].alpha == alpha[2]
-        ) or (
-            L[0].alpha == -alpha[0]
-            and L[1].alpha == -alpha[1]
-            and L[2].alpha == -alpha[2]
-        )) and not L[0].sigma and not L[1].sigma and L[2].sigma
-
-        return s
-
-    def _is_puma(self):
-        L = self.links
-        alpha = [np.pi / 2, 0, -np.pi / 2]
-        s = (
-            L[1].d == 0
-            and L[0].a == 0
-            and not L[2].d == 0
-            and not L[2].a == 0 and (
-                L[0].alpha == alpha[0]
-                and L[1].alpha == alpha[1]
-                and L[2].alpha == alpha[2]
-            ) and (not L[0].sigma and not L[1].sigma and not L[2].sigma))
-
-        return s
+    #             return q
 
     def ikinem(self, T, q0=None, pweight=1.0, stiffness=0.0,
                qlimits=True, ilimit=1000, nolm=False):
@@ -2495,7 +1571,6 @@ class DHRobot(Robot, DHDynamics):
         else:
             return qt, success, err
 
-
     # def jacob0v(self, q=None):
     #     """
     #     Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
@@ -2558,14 +1633,14 @@ class DHRobot(Robot, DHDynamics):
 
     #     return Jv
 
+
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
 
-    
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma nocover
 
     import roboticstoolbox as rtb
     # import spatialmath.base.symbolic as sym
@@ -2575,7 +1650,7 @@ if __name__ == "__main__":
     # print(J)
     # print(puma.manipulability(puma.qn))
     # print(puma.manipulability(puma.qn, 'asada'))
-    #tw, T0 = puma.twists(puma.qz)
+    # tw, T0 = puma.twists(puma.qz)
     print(planar)
 
     puma = rtb.models.DH.Puma560()

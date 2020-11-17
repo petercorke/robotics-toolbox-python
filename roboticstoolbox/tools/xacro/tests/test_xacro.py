@@ -595,7 +595,6 @@ class TestXacro(TestXacroCommentsIgnored):
         <xacro:include filename="${file}" /></a>'''  # noqa
         self.assert_matches(self.quick_xacro(doc), '''<a><inc1/></a>''')
 
-
     def test_include_with_namespace(self):
         src = '''
 <a xmlns:xacro="http://www.ros.org/wiki/xacro">
@@ -604,7 +603,7 @@ class TestXacro(TestXacroCommentsIgnored):
   <xacro:include filename="roboticstoolbox/tools/xacro/tests/include2.xacro" ns="B"/>
   <xacro:A.foo/><xacro:B.foo/>
   <main var="${var}" A="${2*A.var}" B="${B.var+1}"/>
-</a>'''
+</a>'''  # noqa
         res = '''
 <a>
     <inc1/><inc2/><main var="main" A="2" B="3"/>

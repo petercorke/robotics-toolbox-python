@@ -8,7 +8,7 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall, trinv
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix
 
 
 class SuperETS(UserList, ABC):
@@ -559,7 +559,7 @@ class SuperETS(UserList, ABC):
                         _j = j
                     else:
                         _j = et.jindex
-                    qvar = q.format(_j, _j+1)
+                    qvar = q.format(_j, _j+1) # lgtm [py/str-format/surplus-argument]  # noqa
                 else:
                     qvar = ""
                 if et.isflip:
@@ -770,7 +770,7 @@ class SuperETS(UserList, ABC):
 
         .. note:: It is essential to use explicit joint indices to account for
             the reversed order of the transforms.
-        """
+        """  # noqa
 
         inv = ETS()
         for e in reversed(self.data):
@@ -1089,7 +1089,7 @@ class ETS(SuperETS):
             - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke <https://arxiv.org/abs/2010.08696>`_
 
         :seealso: :func:`jacobe`, :func:`hessian0`
-        """
+        """  # noqa
 
         # TODO what is offset
         # if offset is None:
@@ -1177,8 +1177,8 @@ class ETS(SuperETS):
         If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to
         reduce computation time.
 
-       :seealso: :func:`jacob`, :func:`hessian0`
-        """
+        :seealso: :func:`jacob`, :func:`hessian0`
+        """  # noqa
 
         if T is None:
             T = self.eval(q)
@@ -1236,7 +1236,7 @@ class ETS(SuperETS):
             - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke <https://arxiv.org/abs/2010.08696>`_
 
         :seealso: :func:`jacob0`
-        """
+        """  # noqa
 
         n = self.n
 

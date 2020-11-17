@@ -31,7 +31,7 @@ def _check_rne(func):
     return wrapper_check_rne
 
 
-class DHDynamics:
+class DHDynamicsMixin:
 
     def printdyn(self):
         """
@@ -394,8 +394,6 @@ class DHDynamics:
         where each row is the acceleration corresponding to the equivalent cols
         of q, qd, torque.
 
-
-
         .. note::
             - Useful for simulation of manipulator dynamics, in
               conjunction with a numerical integration function.
@@ -411,7 +409,7 @@ class DHDynamics:
               ASME Journa of Dynamic Systems, Measurement and Control, vol.
               104, no. 3, pp. 205-211, 1982.
 
-        """
+        """  # noqa
 
         trajn = 1
 

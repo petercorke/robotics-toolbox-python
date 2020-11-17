@@ -7,6 +7,7 @@
 from roboticstoolbox import DHRobot, RevoluteDH
 from math import pi
 
+
 class Planar2(DHRobot):
     """
     Class that models a planar 2-link robot

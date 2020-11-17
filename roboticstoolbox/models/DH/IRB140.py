@@ -38,7 +38,7 @@ class IRB140(DHRobot):
         - https://github.com/4rtur1t0/ARTE/blob/master/robots/ABB/IRB140/parameters.m
 
     .. codeauthor:: Peter Corke
-    """
+    """  # noqa
     def __init__(self):
         deg = pi/180
 

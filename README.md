@@ -1,18 +1,14 @@
 # Robotics Toolbox for Python
 
-![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
-<!---
-[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
---->
-<!---
+[![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
---->
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
-[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
-[![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
 [![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
 
+[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
+[![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
 
 
 <table style="border:0px">
@@ -162,7 +158,7 @@ print(robot)    # display the model
 We can instantiate our robot inside a browser-based 3d-simulation environment.  
 
 ```python
-env = rtb.backends.Swift()   # instantiate 3D browser-based visualizer
+env = rtb.backends.Swift()  # instantiate 3D browser-based visualizer
 env.launch()                # activate it
 env.add(robot)              # add robot to the 3D scene
 for qk in qt.q:             # for each joint configuration on trajectory
@@ -170,7 +166,9 @@ for qk in qt.q:             # for each joint configuration on trajectory
       env.step()            # update visualization
 ```
 
-![URDF Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif)
+<p align="center">
+ <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif">
+</p>
 
 # Getting going
 
@@ -189,6 +187,7 @@ pip3 install roboticstoolbox-python
 Available options are:
 
 - `vpython` install [VPython](https://vpython.org) backend
+- `vpython` install [VPython](https://vpython.org) backend
 - `collision` install collision checking with [pybullet](https://pybullet.org)
 
 Put the options in a comma separated list like
@@ -196,6 +195,9 @@ Put the options in a comma separated list like
 ```shell script
 pip3 install roboticstoolbox-python[optionlist]
 ```
+
+[Swift](https://github.com/jhavl/swift), a web-based visualizer, is
+installed as part of Robotics Toolbox.
 
 ### From GitHub
 
@@ -206,8 +208,6 @@ git clone https://github.com/petercorke/robotics-toolbox-python.git
 cd robotics-toolbox-python
 pip3 install -e .
 ```
-
-### Installing Swift
 
 ## Run some examples
 

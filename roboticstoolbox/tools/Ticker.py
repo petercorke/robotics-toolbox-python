@@ -1,7 +1,8 @@
 import threading
 import time
 
-class Ticker(threading.Thread):
+
+class Ticker(threading.Thread):  # pragma nocover
 
     def __init__(self, period):
         super().__init__()
@@ -13,7 +14,7 @@ class Ticker(threading.Thread):
 
     def wait(self):
         self.sem.acquire()
-        
+
     def run(self):
         print('in run', self.period)
         start = time.time()
@@ -29,7 +30,8 @@ class Ticker(threading.Thread):
         self.done = True
         self.join()
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma nocover
     t = Ticker(0.1)
 
     tprev = time.time()
@@ -43,7 +45,7 @@ if __name__ == "__main__":
         tnow = time.time()
         dt = tnow - tprev
         tprev = tnow
-        terr = abs(dt - 0.1) * 1000 # error in ms
+        terr = abs(dt - 0.1) * 1000  # error in ms
         if i > 0:
             tsum += terr
             tmax = max(tmax, terr)
