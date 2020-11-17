@@ -735,6 +735,9 @@ servo chains, and ROS; symbolic dynamics, simplification and code generation;
 mobile robotics motion models, planners, EKF localization, map making and SLAM;
 and a minimalist block-diagram simulation tool [bdsim]_.
 
+References
+==========
+
 .. [Corke95] P. Corke. A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.
 .. [Corke96] P. Corke. A robotics toolbox for MATLAB. IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996.
 .. [Craig2005] Introduction to Robotics, John Craig, Wiley, 2005.
