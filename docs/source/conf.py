@@ -95,8 +95,10 @@ show_authors = True
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
-
+html_static_path = ['_static']
+# html_css_files = [
+#     'css/custom.css',
+# ]
 # autodoc_mock_imports = ["numpy", "scipy"] 
 
 
@@ -152,14 +154,3 @@ mathjax_config = {
         }
    }
 }
-
-# setup formatting for autorun blocks
-autorun_languages = {}
-autorun_languages['pycon_output_encoding'] = 'UTF-8'
-autorun_languages['pycon_input_encoding'] = 'UTF-8'
-autorun_languages['pycon_runfirst'] = """
-from spatialmath import SE3
-SE3._color = False
-import numpy as np
-np.set_printoptions(precision=4, suppress=True)
-"""

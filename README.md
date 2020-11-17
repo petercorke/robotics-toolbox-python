@@ -158,6 +158,9 @@ print(robot)    # display the model
 	└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
 ```
 
+The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
+tree.
+
 We can instantiate our robot inside a browser-based 3d-simulation environment.  
 
 ```python
