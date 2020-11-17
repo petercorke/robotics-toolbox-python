@@ -90,9 +90,6 @@ class GraphicsGrid:   # pragma nocover
     def __create_grid_objects(self):
         """
         Draw a grid along each 3D plane, that is closest to the camera.
-
-        :return: List of the three drawn axes.
-        :rtype: `list`
         """
         # Create grid from 0,0,0 to positive directions with step sizes of the scale
         min_x_coord = 0
@@ -122,10 +119,10 @@ class GraphicsGrid:   # pragma nocover
 
         line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
 
-        # Create the inital curve objects
+        # Update curve objects
         for plane in self.grid_object[self.__planes_idx]:
             plane.radius = line_thickness
-            plane.append(vector(0,0,0))
+            plane.append(vector(0, 0, 0))
 
         # Zig-Zag through all of the points
         # XY plane
@@ -135,7 +132,8 @@ class GraphicsGrid:   # pragma nocover
             else:
                 y_vals = y_coords[::-1]
             for y_point in y_vals:
-                self.grid_object[self.__planes_idx][self.__xy_plane_idx].append(vector(x_point, y_point, 0))
+                self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+                    append(vector(x_point, y_point, 0))
 
         for idx, y_point in enumerate(y_coords[::-1]):
             if idx % 2 == 0:
@@ -143,7 +141,8 @@ class GraphicsGrid:   # pragma nocover
             else:
                 x_vals = x_coords
             for x_point in x_vals:
-                self.grid_object[self.__planes_idx][self.__xy_plane_idx].append(vector(x_point, y_point, 0))
+                self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+                    append(vector(x_point, y_point, 0))
 
         # XZ Plane
         for idx, x_point in enumerate(x_coords):
@@ -152,7 +151,8 @@ class GraphicsGrid:   # pragma nocover
             else:
                 z_vals = z_coords[::-1]
             for z_point in z_vals:
-                self.grid_object[self.__planes_idx][self.__xz_plane_idx].append(vector(x_point, 0, z_point))
+                self.grid_object[self.__planes_idx][self.__xz_plane_idx].\
+                    append(vector(x_point, 0, z_point))
 
         for idx, z_point in enumerate(z_coords[::-1]):
             if idx % 2 == 0:
@@ -160,7 +160,8 @@ class GraphicsGrid:   # pragma nocover
             else:
                 x_vals = x_coords
             for x_point in x_vals:
-                self.grid_object[self.__planes_idx][self.__xz_plane_idx].append(vector(x_point, 0, z_point))
+                self.grid_object[self.__planes_idx][self.__xz_plane_idx].\
+                    append(vector(x_point, 0, z_point))
 
         # YZ Plane
         for idx, y_point in enumerate(y_coords):
@@ -169,7 +170,8 @@ class GraphicsGrid:   # pragma nocover
             else:
                 z_vals = z_coords[::-1]
             for z_point in z_vals:
-                self.grid_object[self.__planes_idx][self.__yz_plane_idx].append(vector(0, y_point, z_point))
+                self.grid_object[self.__planes_idx][self.__yz_plane_idx].\
+                    append(vector(0, y_point, z_point))
 
         for idx, z_point in enumerate(z_coords[::-1]):
             if idx % 2 == 0:
@@ -177,14 +179,8 @@ class GraphicsGrid:   # pragma nocover
             else:
                 y_vals = y_coords
             for y_point in y_vals:
-                self.grid_object[self.__planes_idx][self.__yz_plane_idx].append(vector(0, y_point, z_point))
-
-        # grid = [None, None, None]
-        # grid[self.__xy_plane_idx] = xy_grid
-        # grid[self.__xz_plane_idx] = xz_grid
-        # grid[self.__yz_plane_idx] = yz_grid
-
-        # return grid
+                self.grid_object[self.__planes_idx][self.__yz_plane_idx].\
+                    append(vector(0, y_point, z_point))
 
     def __move_grid_objects(self):
         """
@@ -386,6 +382,7 @@ class GraphicsGrid:   # pragma nocover
         for text in self.grid_object[self.__labels_idx]:
             text.visible = False
 
+        # Don't del the curve objects
         self.grid_object[self.__labels_idx] = []
         self.__init_grid()
 
