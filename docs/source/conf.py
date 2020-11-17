@@ -74,7 +74,7 @@ ANSITable._color = False
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-    'github_user': 'petercorke',
+    #'github_user': 'petercorke',
     #'github_repo': 'spatialmath-python',
     #'logo_name': False,
     'logo_only': False,
@@ -95,8 +95,10 @@ show_authors = True
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
-
+html_static_path = ['_static']
+# html_css_files = [
+#     'css/custom.css',
+# ]
 # autodoc_mock_imports = ["numpy", "scipy"] 
 
 
@@ -115,6 +117,7 @@ latex_elements = {
     'maketitle': "blah blah blah"
 }
 
+# Use RVC book notation for maths
 # see https://stackoverflow.com/questions/9728292/creating-latex-math-macros-within-sphinx
 mathjax_config = {
     'TeX': {

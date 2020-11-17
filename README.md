@@ -55,6 +55,9 @@ The Toolbox provides:
     efficiency;
   * source code which can be read for learning and teaching;
   * backward compatability with the Robotics Toolbox for MATLAB
+
+The Toolbox leverages the [Spatial Maths Toolbox for Python](https://github.com/petercorke/spatialmath-python) to
+provide support for data types such as SO(n) and SE(n) matrices, quaternions, twists and spatial vectors.
   
 ## Code Example
 
@@ -154,6 +157,9 @@ print(robot)    # display the model
 	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │                                   tz(0.107) │
 	└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
 ```
+
+The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
+tree.
 
 We can instantiate our robot inside a browser-based 3d-simulation environment.  
 

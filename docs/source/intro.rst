@@ -339,6 +339,7 @@ Some provided robot models have an analytical solution coded, for example:
 
     >>> import roboticstoolbox as rtb
     >>> puma = rtb.models.DH.Puma560()       # instantiate robot model
+    >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     >>> puma.ikine_a(T, config="lun")        # analytic inverse kinematics
 
 where we have specified a left-handed, elbow up and wrist no-flip configuration.
@@ -468,9 +469,10 @@ As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. Fo
 
 .. runblock:: pycon
 
+    >>> import roboticstoolbox as rtb
     >>> import spatialmath.base as base
     >>> phi, theta, psi = base.sym.symbol('phi, theta, psi')
-    >>> base.rpy2r(phi, theta, psi)
+    >>> rtb.rpy2r(phi, theta, psi)
 
 The capability extends to forward kinematics
 
@@ -569,8 +571,6 @@ For example, the inverse dynamics
 is the gravity torque for the robot in the configuration ``qn``.
 
 Inertia, Coriolis/centripetal and gravity terms are computed by::
-
-.. runblock:: pycon
 
     >>> puma.inertia(q)
     >>> puma.coriolis(q, qd)
@@ -735,12 +735,15 @@ servo chains, and ROS; symbolic dynamics, simplification and code generation;
 mobile robotics motion models, planners, EKF localization, map making and SLAM;
 and a minimalist block-diagram simulation tool [bdsim]_.
 
+References
+==========
+
 .. [Corke95] P. Corke. A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.
 .. [Corke96] P. Corke. A robotics toolbox for MATLAB. IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996.
 .. [Craig2005] Introduction to Robotics, John Craig, Wiley, 2005.
 .. [Featherstone87] R. Featherstone, Robot Dynamics Algorithms. Kluwer Academic, 1987.
-.. [Corke07] P. Corke, “A simple and systematic approach to assigning Denavit- Hartenberg parameters,” IEEE transactions on robotics, vol. 23, no. 3, pp. 590–594, 2007.
-.. [Haviland20] J. Haviland and P. Corke, “A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence,” arXiv preprint, 2020.
+.. [Corke07] P. Corke, `“A simple and systematic approach to assigning Denavit- Hartenberg parameters,” IEEE transactions on robotics, vol. 23, no. 3, pp. 590–594, 2007, DOI 10.1109/TRO.2007.896765. <https://ieeexplore.ieee.org/document/4252158>`_.
+.. [Haviland20] `J. Haviland and P. Corke, “A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence,” arXiv preprint, 2020. <https://arxiv.org/abs/2010.08696>`_
 .. [PyBullet] `PyBullet <https://pybullet.org/wordpress/>`_
 .. [SMTB-P] `Spatial Math Toolbox for Python <https://github.com/petercorke/spatialmath-python>`_
 .. [bdsim] `Block diagram simulator for Python <https://github.com/petercorke/bdsim>`_
