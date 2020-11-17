@@ -1081,6 +1081,11 @@ Vol. 5, No. 2, Summer 1986, p. 32-44</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s">
+<code class="sig-name descname">ikine_6s</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">_ikfunc</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ikine_6s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikinem">
 <code class="sig-name descname">ikinem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pweight</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">qlimits</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">nolm</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ikinem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikinem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics with joint limits
@@ -1291,12 +1296,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -4708,7 +4713,7 @@ conventions.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 16-Nov-2020.
+        Last updated on 17-Nov-2020.
       </span>
 
     </p>

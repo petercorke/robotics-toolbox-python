@@ -1541,54 +1541,54 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">qt</span></div>
 
-    <span class="c1"># def ikine_6s(self, T, config, _ikfunc):</span>
-    <span class="c1">#     # Undo base and tool transformations, but if they are not</span>
-    <span class="c1">#     # set, skip the operation.  Nicer for symbolics</span>
-    <span class="c1">#     if self._base is not None:</span>
-    <span class="c1">#         T = self.base.inv() * T</span>
-    <span class="c1">#     if self._tool is not None:</span>
-    <span class="c1">#         T = self.tool.inv() * T</span>
+<div class="viewcode-block" id="DHRobot.ikine_6s"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s">[docs]</a>    <span class="k">def</span> <span class="nf">ikine_6s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">_ikfunc</span><span class="p">):</span>
+        <span class="c1"># Undo base and tool transformations, but if they are not</span>
+        <span class="c1"># set, skip the operation.  Nicer for symbolics</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T</span>
 
-    <span class="c1">#     q = np.zeros((len(T), 6))</span>
-    <span class="c1">#     for k, Tk in enumerate(T):</span>
-    <span class="c1">#         theta = _ikfunc(Tk, config)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">_ikfunc</span><span class="p">(</span><span class="n">Tk</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
 
-    <span class="c1">#         if not np.all(np.isnan(theta)):</span>
-    <span class="c1">#             # Solve for the wrist rotation</span>
-    <span class="c1">#             # We need to account for some random translations between the</span>
-    <span class="c1">#             # first and last 3 joints (d4) and also d6,a6,alpha6 in the</span>
-    <span class="c1">#             # final frame.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">theta</span><span class="p">)):</span>
+                <span class="c1"># Solve for the wrist rotation</span>
+                <span class="c1"># We need to account for some random translations between the</span>
+                <span class="c1"># first and last 3 joints (d4) and also d6,a6,alpha6 in the</span>
+                <span class="c1"># final frame.</span>
 
-    <span class="c1">#             # Transform of first 3 joints</span>
-    <span class="c1">#             T13 = self.A([0, 2], theta)</span>
+                <span class="c1"># Transform of first 3 joints</span>
+                <span class="n">T13</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">theta</span><span class="p">)</span>
 
-    <span class="c1">#             # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)</span>
-    <span class="c1">#             Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)</span>
+                <span class="c1"># T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)</span>
+                <span class="n">Td4</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>      <span class="c1"># Tz(d4)</span>
 
-    <span class="c1">#             # Tz(d6) Tx(a5) Rx(alpha6)</span>
-    <span class="c1">#             Tt = SE3(self.links[5].a, 0, self.links[5].d) * \</span>
-    <span class="c1">#                 SE3.Rx(self.links[5].alpha)</span>
+                <span class="c1"># Tz(d6) Tx(a5) Rx(alpha6)</span>
+                <span class="n">Tt</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">*</span> \
+                    <span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
 
-    <span class="c1">#             R = Td4.inv() * T13.inv() * Tk * Tt.inv()</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">Td4</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T13</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">Tk</span> <span class="o">*</span> <span class="n">Tt</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
 
-    <span class="c1">#             # The spherical wrist implements Euler angles</span>
-    <span class="c1">#             if &#39;f&#39; in config:</span>
-    <span class="c1">#                 eul = R.eul(flip=True)</span>
-    <span class="c1">#             else:</span>
-    <span class="c1">#                 eul = R.eul()</span>
-    <span class="c1">#             theta = np.r_[theta, eul]</span>
-    <span class="c1">#             if self.links[3].alpha &gt; 0:</span>
-    <span class="c1">#                 theta[4] = -theta[4]</span>
+                <span class="c1"># The spherical wrist implements Euler angles</span>
+                <span class="k">if</span> <span class="s1">&#39;f&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                    <span class="n">eul</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">eul</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">eul</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">eul</span><span class="p">()</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">theta</span><span class="p">,</span> <span class="n">eul</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">theta</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">theta</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 
-    <span class="c1">#             # Remove the link offset angles</span>
-    <span class="c1">#             theta = theta - self.offset</span>
+                <span class="c1"># Remove the link offset angles</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
 
-    <span class="c1">#             q[k, :] = theta</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">theta</span>
 
-    <span class="c1">#         if q.shape[0] == 1:</span>
-    <span class="c1">#             return q[0]</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             return q</span>
+            <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">q</span></div>
 
 <div class="viewcode-block" id="DHRobot.ikinem"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikinem">[docs]</a>    <span class="k">def</span> <span class="nf">ikinem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pweight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">stiffness</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                <span class="n">qlimits</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ilimit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">nolm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1840,7 +1840,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 16-Nov-2020.
+        Last updated on 17-Nov-2020.
       </span>
 
     </p>

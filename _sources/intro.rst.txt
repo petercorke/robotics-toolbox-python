@@ -339,6 +339,7 @@ Some provided robot models have an analytical solution coded, for example:
 
     >>> import roboticstoolbox as rtb
     >>> puma = rtb.models.DH.Puma560()       # instantiate robot model
+    >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     >>> puma.ikine_a(T, config="lun")        # analytic inverse kinematics
 
 where we have specified a left-handed, elbow up and wrist no-flip configuration.
@@ -468,9 +469,10 @@ As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. Fo
 
 .. runblock:: pycon
 
+    >>> import roboticstoolbox as rtb
     >>> import spatialmath.base as base
     >>> phi, theta, psi = base.sym.symbol('phi, theta, psi')
-    >>> base.rpy2r(phi, theta, psi)
+    >>> rtb.rpy2r(phi, theta, psi)
 
 The capability extends to forward kinematics
 
@@ -569,8 +571,6 @@ For example, the inverse dynamics
 is the gravity torque for the robot in the configuration ``qn``.
 
 Inertia, Coriolis/centripetal and gravity terms are computed by::
-
-.. runblock:: pycon
 
     >>> puma.inertia(q)
     >>> puma.coriolis(q, qd)
@@ -734,6 +734,9 @@ Currently under development are backend interfaces for CoppeliaSim, Dynamixel
 servo chains, and ROS; symbolic dynamics, simplification and code generation;
 mobile robotics motion models, planners, EKF localization, map making and SLAM;
 and a minimalist block-diagram simulation tool [bdsim]_.
+
+References
+==========
 
 .. [Corke95] P. Corke. A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.
 .. [Corke96] P. Corke. A robotics toolbox for MATLAB. IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996.

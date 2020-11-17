@@ -120,6 +120,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
@@ -604,7 +605,11 @@ return with an error.</p>
 be derived symbolically
 and an efficient closed-form solution obtained.
 Some provided robot models have an analytical solution coded, for example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>       <span class="c1"># instantiate robot model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;lun&quot;</span><span class="p">)</span>        <span class="c1"># analytic inverse kinematics</span>
+<span class="go">array([ 2.1012,  2.9416,  2.9355,  1.6526, -0.953 , -2.809 ])</span>
 </pre></div>
 </div>
 <p>where we have specified a left-handed, elbow up and wrist no-flip configuration.</p>
@@ -779,34 +784,23 @@ is taken as the result of the previous solution.</p>
 <div class="section" id="symbolic-manipulation">
 <h2>Symbolic manipulation<a class="headerlink" href="#symbolic-manipulation" title="Permalink to this headline">¶</a></h2>
 <p>As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. For example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;&lt;input&gt;&quot;, line 1, in &lt;module&gt;</span>
-<span class="go">NameError: name &#39;phi&#39; is not defined</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 <p>The capability extends to forward kinematics</p>
-<div class="highlight-pycon notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="go">NameError: name &#39;S&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/spatialmath/base/symbolic.py&quot;</span>, line <span class="m">61</span>, in <span class="n">symbol</span>
-    <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="n">real</span><span class="p">)</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;sympy&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;puma&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;T&#39; is not defined</span>
+<div class="highlight-pycon notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spatialmath.base</span> <span class="k">as</span> <span class="nn">base</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;q_:6&quot;</span><span class="p">)</span> <span class="c1"># q = (q_1, q_2, ... q_5)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">0.15005*sin(q_0) - 0.0203*sin(q_1)*sin(q_2)*cos(q_0) - 0.4318*sin(q_1)*cos(q_0)*cos(q_2) - 0.4318*sin(q_2)*cos(q_0)*cos(q_1) + 0.0203*cos(q_0)*cos(q_1)*cos(q_2) + 0.4318*cos(q_0)*cos(q_1)</span>
 </pre></div>
 </td></tr></table></div>
 <p>If we display the value of <code class="docutils literal notranslate"><span class="pre">puma</span></code> we see that the <span class="math notranslate nohighlight">\(\alpha_j\)</span> values are now displayed in red to indicate that they are symbolic constants.  The x-coordinate of the end-effector is
@@ -846,7 +840,7 @@ At a singular configuration</p>
 <span class="go">Yoshikawa manipulability is 0.07861716534599998</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="s2">&quot;asada&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Asada manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-<span class="go">Asada manipulability is 0.004374613728166504</span>
+<span class="go">Asada manipulability is 0.004374613728166497</span>
 </pre></div>
 </div>
 <p>for the Yoshikawa and Asada measures respectively, and</p>
@@ -884,10 +878,7 @@ algorithm implemented in Python or C.</p>
 </div>
 <p>is the gravity torque for the robot in the configuration <code class="docutils literal notranslate"><span class="pre">qn</span></code>.</p>
 <p>Inertia, Coriolis/centripetal and gravity terms are computed by:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">runblock</span><span class="p">::</span> <span class="n">pycon</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">inertia</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">inertia</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">coriolis</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">gravload</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 </pre></div>
@@ -1029,6 +1020,9 @@ It is familiar yet new, and we hope it will serve the community well for the nex
 servo chains, and ROS; symbolic dynamics, simplification and code generation;
 mobile robotics motion models, planners, EKF localization, map making and SLAM;
 and a minimalist block-diagram simulation tool <a class="reference internal" href="#bdsim" id="id13"><span>[bdsim]</span></a>.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <dl class="citation">
 <dt class="label" id="corke95"><span class="brackets"><a class="fn-backref" href="#id2">Corke95</a></span></dt>
 <dd><ol class="upperalpha simple" start="16">
@@ -1094,7 +1088,7 @@ and a minimalist block-diagram simulation tool <a class="reference internal" hre
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 16-Nov-2020.
+        Last updated on 17-Nov-2020.
       </span>
 
     </p>
