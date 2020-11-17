@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Manipulator arms &mdash; Robotics Toolbox for Python  documentation</title>
+  <title>Manipulator models &mdash; Robotics Toolbox for Python  documentation</title>
   
 
   
@@ -39,8 +39,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Manipulator models" href="arm_models.html" />
-    <link rel="prev" title="Introduction" href="intro.html" /> 
+    <link rel="next" title="Denavit-Hartenberg models" href="arm_dh.html" />
+    <link rel="prev" title="Manipulator arms" href="arm.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,8 +90,14 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Manipulator arms</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_models.html">Manipulator models</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Manipulator models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
 </ul>
@@ -143,13 +149,15 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Manipulator arms</li>
+          <li><a href="arm.html">Manipulator arms</a> &raquo;</li>
+        
+      <li>Manipulator models</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/arm.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/arm_models.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,10 +167,10 @@
   
   <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
       
-        <a href="arm_models.html" class="btn btn-neutral float-right" title="Manipulator models" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="arm_dh.html" class="btn btn-neutral float-right" title="Denavit-Hartenberg models" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="arm.html" class="btn btn-neutral float-left" title="Manipulator arms" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
   </div>
   
@@ -171,24 +179,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="manipulator-arms">
-<h1>Manipulator arms<a class="headerlink" href="#manipulator-arms" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="manipulator-models">
+<h1>Manipulator models<a class="headerlink" href="#manipulator-models" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="arm_models.html">Manipulator models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#dhrobot">DHRobot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#dhlink">DHLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html#models">Models</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arm_backend.html">Backends</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend_pyplot.html">PyPlot (matplotlib)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend_vpython.html">VPython</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend_swift.html">Swift</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arm_ets.html#ets-3d">ETS - 3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_ets.html#ets-2d">ETS - 2D</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm_erobot.html">ERobot models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html#erobot">ERobot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html#elink">ELink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html#e-models">ERobot models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arm_superclass.html">Superclasses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html#robot">Robot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html#link">Link</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -201,10 +217,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="arm_models.html" class="btn btn-neutral float-right" title="Manipulator models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="arm_dh.html" class="btn btn-neutral float-right" title="Denavit-Hartenberg models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="arm.html" class="btn btn-neutral float-left" title="Manipulator arms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

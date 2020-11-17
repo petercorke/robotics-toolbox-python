@@ -40,7 +40,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Elementary transform sequence (ETS) models" href="arm_ets.html" />
-    <link rel="prev" title="Manipulator arms" href="arm.html" /> 
+    <link rel="prev" title="Manipulator models" href="arm_models.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,21 +91,18 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Denavit-Hartenberg models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dhrobot">DHRobot</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dhlink">DHLink</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#revolute-standard-dh">Revolute - standard DH</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#prismatic-standard-dh">Prismatic - standard DH</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#revolute-modified-dh">Revolute - modified DH</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#prismatic-modified-dh">Prismatic - modified DH</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="arm_models.html">Manipulator models</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Denavit-Hartenberg models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dhrobot">DHRobot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dhlink">DHLink</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#models">Models</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#models">Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
 </ul>
@@ -159,6 +156,8 @@
         
           <li><a href="arm.html">Manipulator arms</a> &raquo;</li>
         
+          <li><a href="arm_models.html">Manipulator models</a> &raquo;</li>
+        
       <li>Denavit-Hartenberg models</li>
     
     
@@ -178,7 +177,7 @@
         <a href="arm_ets.html" class="btn btn-neutral float-right" title="Elementary transform sequence (ETS) models" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="arm.html" class="btn btn-neutral float-left" title="Manipulator arms" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="arm_models.html" class="btn btn-neutral float-left" title="Manipulator models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
   </div>
   
@@ -1296,12 +1295,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -4701,7 +4700,7 @@ conventions.</p>
         <a href="arm_ets.html" class="btn btn-neutral float-right" title="Elementary transform sequence (ETS) models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="arm.html" class="btn btn-neutral float-left" title="Manipulator arms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="arm_models.html" class="btn btn-neutral float-left" title="Manipulator models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
