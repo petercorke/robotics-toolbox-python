@@ -3,7 +3,7 @@
 @author Micah Huth
 """
 
-from vpython import vector, compound, mag, box, curve, color
+from vpython import vector, compound, mag, box, curve
 from numpy import sign, ceil, arange
 from roboticstoolbox.backends.VPython.text import update_grid_numbers
 from roboticstoolbox.backends.VPython.object2d import Marker2D
@@ -11,7 +11,7 @@ from spatialmath import SE2
 from collections.abc import MutableMapping
 
 
-class GridMMap(MutableMapping):
+class GridMMap(MutableMapping):    # pragma nocover
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
 

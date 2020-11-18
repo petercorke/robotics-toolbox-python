@@ -20,7 +20,7 @@ class UImode(Enum):  # pragma nocover
     TEACHPANEL = 2
 
 
-class UIMMap(MutableMapping):
+class UIMMap(MutableMapping):    # pragma nocover
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
 

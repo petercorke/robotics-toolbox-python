@@ -3,5 +3,5 @@ from roboticstoolbox.backends.Swift import *   # noqa
 
 try:
     from roboticstoolbox.backends.VPython import *   # noqa
-except ImportError:
+except ImportError:    # pragma nocover
     pass
