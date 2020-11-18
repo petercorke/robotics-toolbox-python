@@ -180,4 +180,3 @@ CATKIN_IGNORE
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
-.idea
