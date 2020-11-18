@@ -3,22 +3,17 @@
 @author Jesse Haviland
 """
 
-import roboticstoolbox as rp
+import roboticstoolbox as rtb
 
-# # Launch the simulator Swift
-# env = rtb.backends.Swift()
-# env.launch()
+# Launch the simulator Swift
+env = rtb.backends.Swift()
+env.launch()
 
 # Create a Panda robot object
-# panda = rtb.models.ETS.Panda()
+robot = rtb.models.Puma560()
+env.add(robot)
 
-rx = rp.ETS.rx(1.543)
-ry = rp.ETS.ry(1.543)
-tz = rp.ETS.tz(1)
-
-l0 = rp.ELink(rx * ry * tz)
-
-print(l0)
+env.hold()
 
 # print(panda)
 # print(panda.base_link)

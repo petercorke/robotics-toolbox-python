@@ -172,7 +172,8 @@ class Shape(object):
                 except ValueError:
                     print('{0} was an invalid color name, using default color')
                     value = default_color
-            else:
+            else:  # pragma nocover
+                value = default_color
                 print(
                     'Color only supported when matplotlib is installed\n'
                     'Install using: pip install matplotlib')
