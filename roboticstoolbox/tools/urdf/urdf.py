@@ -328,6 +328,46 @@ class Mesh(URDFType):
         return Mesh(**kwargs)
 
 
+class Material(URDFType):
+    """A material for some geometry.
+    Parameters
+    ----------
+    name : str
+        The name of the material.
+    color : (4,) float, optional
+        The RGBA color of the material in the range [0,1].
+    texture : :class:`.Texture`, optional
+        A texture for the material.
+    """
+    _ATTRIBS = {
+        'name': (str, True)
+    }
+    _ELEMENTS = {}
+    _TAG = 'material'
+
+    def __init__(self, name, color=None, texture=None):
+
+        if color is None:
+            color = name
+
+        self.name = name
+        self.color = color
+        self.texture = texture
+
+    @classmethod
+    def _from_xml(cls, node, path):  # pragma nocover
+        kwargs = cls._parse(node, path)
+
+        # Extract the color -- it's weirdly an attribute of a subelement
+        color = node.find('color')
+        if color is not None:
+            color = np.fromstring(
+                color.attrib['rgba'], sep=' ', dtype=np.float64)
+        kwargs['color'] = color
+
+        return Material(**kwargs)
+
+
 class Geometry(URDFType):
     """A wrapper for all geometry types.
     Only one of the following values can be set, all others should be set
@@ -524,6 +564,7 @@ class Visual(URDFType):
     }
     _ELEMENTS = {
         'geometry': (Geometry, True, False),
+        'material': (Material, False, False)
     }
     _TAG = 'visual'
 
@@ -532,6 +573,10 @@ class Visual(URDFType):
         geometry.ob.base = origin
         self.name = name
         self.origin = origin
+        self.material = material
+
+        if material is not None:
+            self.geometry.ob.color = material.color
 
     @property
     def geometry(self):
@@ -1896,7 +1941,7 @@ class URDF(URDFType):
     def _from_xml(cls, node, path):
         valid_tags = set([
             'joint', 'link', 'transmission',
-            #  'material'
+            'material'
             ])
         kwargs = cls._parse(node, path)
 
