@@ -886,14 +886,8 @@ class GraphicsCanvas2D:  # pragma nocover
         if caption != '':
             self.scene.caption = caption
 
-        self.__ui_controls = []
+        self.__ui_controls = UIMMap()
         self.__reload_caption()
-        # Indices to easily identify entities
-        self.__idx_btn_reset = 0  # Camera Reset Button
-        self.__idx_chkbox_grid = 1  # Grid Visibility Checkbox
-        self.__idx_chkbox_cam = 2  # Camera Lock Checkbox
-        self.__idx_chkbox_rel = 3  # Grid Relative Checkbox
-        self.__idx_btn_clr = 4  # Clear button
 
         # Any time a key or mouse is held down, run the callback function
         rate(30)  # 30Hz
@@ -1080,7 +1074,9 @@ class GraphicsCanvas2D:  # pragma nocover
         """
         # Remove all UI elements
         for item in self.__ui_controls:
-            item.delete()
+            if self.__ui_controls.get(item) is None:
+                continue
+            self.__ui_controls.get(item).delete()
         # Restore the caption
         self.scene.caption = self.__default_caption
         # Create the updated caption.
@@ -1095,26 +1091,31 @@ class GraphicsCanvas2D:  # pragma nocover
         # Button to reset camera
         btn_reset = button(
             bind=self.__reset_camera, text="Reset Camera")
+        self.__ui_controls.btn_reset = btn_reset
         self.scene.append_to_caption('\t')
 
         chkbox_cam = checkbox(
             bind=self.__camera_lock_checkbox,
             text="Camera Lock", checked=self.__camera_lock)
+        self.__ui_controls.chkbox_cam = chkbox_cam
         self.scene.append_to_caption('\t')
 
         chkbox_rel = checkbox(
             bind=self.__grid_relative_checkbox,
             text="Grid Relative", checked=self.__grid_relative)
+        self.__ui_controls.chkbox_rel = chkbox_rel
         self.scene.append_to_caption('\n\n')
 
         # Button to clear the screen
         btn_clr = button(bind=self.clear_scene, text="Clear Scene")
+        self.__ui_controls.btn_clear = btn_clr
         self.scene.append_to_caption('\n\n')
 
         # Checkbox for grid visibility
         chkbox_grid = checkbox(
             bind=self.__grid_visibility_checkbox, text="Grid Visibility",
             checked=self.__grid_visibility)
+        self.__ui_controls.chkbox_grid = chkbox_grid
         self.scene.append_to_caption('\t')
 
         # Prevent the space bar from toggling the active checkbox/button/etc
@@ -1144,8 +1145,6 @@ class GraphicsCanvas2D:  # pragma nocover
         # Disable the arrow keys from scrolling in the browser
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
-
-        return [btn_reset, chkbox_grid, chkbox_cam, chkbox_rel, btn_clr]
 
     #######################################
     # UI CALLBACKS
