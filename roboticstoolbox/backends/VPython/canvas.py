@@ -22,19 +22,6 @@ class UImode(Enum):  # pragma nocover
 
 class UIMMap(MutableMapping):
     def __init__(self, *args, **kwargs):
-        self.btn_clear = None
-        self.btn_del = None
-        self.btn_reset = None
-        self.btn_toggle = None
-        self.btn_ss = None
-        self.chkbox_cam = None
-        self.chkbox_grid = None
-        self.chkbox_ref = None
-        self.chkbox_rel = None
-        self.chkbox_rob = None
-        self.menu_robots = None
-        self.sld_opc = None
-
         self.__dict__.update(*args, **kwargs)
 
     def __setitem__(self, key, value):
@@ -171,7 +158,7 @@ class GraphicsCanvas3D:  # pragma nocover
         self.scene.waitfor("draw_complete")
 
         new_list = []
-        for name in self.__ui_controls.menu_robots.choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         self.__selected_robot = 0
@@ -200,7 +187,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Save the list of robot names
         new_list = []
-        for name in self.__ui_controls.menu_robots.choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
         # Add the new one
         new_list.append(robot.name)
@@ -232,7 +219,7 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__reload_caption(new_list)
 
         # Set it as selected
-        self.__ui_controls.menu_robots.index = \
+        self.__ui_controls.get('menu_robots').index = \
             len(self.__robots) - 1
 
         # Place camera based on robots effective radius * 1.25
@@ -260,7 +247,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Remove from UI
         new_list = []
-        for name in self.__ui_controls.menu_robots.choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         del new_list[robot_index]
@@ -271,8 +258,8 @@ class GraphicsCanvas3D:  # pragma nocover
         # Update UI
         self.__reload_caption(new_list)
         # Select the top item
-        if len(self.__ui_controls.menu_robots.choices) > 0:
-            self.__ui_controls.menu_robots.index = 0
+        if len(self.__ui_controls.get('menu_robots').choices) > 0:
+            self.__ui_controls.get('menu_robots').index = 0
 
     def is_robot_in_canvas(self, robot):
         """
@@ -321,7 +308,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Remove from UI
         new_list = []
-        for name in self.__ui_controls.menu_robots.choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         del new_list[self.__selected_robot]
@@ -332,8 +319,8 @@ class GraphicsCanvas3D:  # pragma nocover
         # Update UI
         self.__reload_caption(new_list)
         # Select the top item
-        if len(self.__ui_controls.menu_robots.choices) > 0:
-            self.__ui_controls.menu_robots.index = 0
+        if len(self.__ui_controls.get('menu_robots').choices) > 0:
+            self.__ui_controls.get('menu_robots').index = 0
 
     def __handle_keyboard_inputs(self):
         """
@@ -649,7 +636,7 @@ class GraphicsCanvas3D:  # pragma nocover
         # Update UI
         # get list of robots
         new_list = []
-        for name in self.__ui_controls.menu_robots.choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         self.__reload_caption(new_list)
@@ -677,13 +664,13 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__selected_robot = m.index
 
         # Update the checkboxes/sliders for the selected robot
-        self.__ui_controls.chkbox_ref.checked = \
+        self.__ui_controls.get('chkbox_ref').checked = \
             self.__robots[self.__selected_robot].ref_shown
 
-        self.__ui_controls.chkbox_rob.checked = \
+        self.__ui_controls.get('chkbox_rob').checked = \
             self.__robots[self.__selected_robot].rob_shown
 
-        self.__ui_controls.sld_opc.value = \
+        self.__ui_controls.get('sld_opc').value = \
             self.__robots[self.__selected_robot].opacity
 
     def __reference_frame_checkbox(self, c):
