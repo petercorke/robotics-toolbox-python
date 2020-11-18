@@ -193,7 +193,6 @@ pip3 install roboticstoolbox-python
 Available options are:
 
 - `vpython` install [VPython](https://vpython.org) backend
-- `vpython` install [VPython](https://vpython.org) backend
 - `collision` install collision checking with [pybullet](https://pybullet.org)
 
 Put the options in a comma separated list like
