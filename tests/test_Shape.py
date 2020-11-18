@@ -34,6 +34,20 @@ class TestShape(unittest.TestCase):
         self.assertEquals(shape.color[2], 3)
         self.assertEquals(shape.color[3], 0.5)
 
+        shape.color = (1, 2, 3)
+
+        self.assertEquals(shape.color[0], 1)
+        self.assertEquals(shape.color[1], 2)
+        self.assertEquals(shape.color[2], 3)
+        self.assertEquals(shape.color[3], 1)
+
+        shape.color = (1, 2, 3, 0.5)
+
+        self.assertEquals(shape.color[0], 1)
+        self.assertEquals(shape.color[1], 2)
+        self.assertEquals(shape.color[2], 3)
+        self.assertEquals(shape.color[3], 0.5)
+
     def test_closest(self):
         s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
         s1 = rp.Cylinder(1, 1, sm.SE3(2, 0, 0))

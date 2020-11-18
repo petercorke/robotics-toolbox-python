@@ -162,9 +162,13 @@ class Shape(object):
 
         default_color = (0.95, 0.5, 0.25, 1.0)
 
-        if isinstance(value, list) or isinstance(value, tuple):
+        if isinstance(value, tuple):
+            value = list(value)
+
+        if isinstance(value, list):
             if len(value) == 3:
                 value.append(1.0)
+                value = tuple(value)
         elif isinstance(value, str):
             if _mpl:
                 try:
