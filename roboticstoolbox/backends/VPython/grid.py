@@ -8,9 +8,30 @@ from numpy import sign, ceil, arange
 from roboticstoolbox.backends.VPython.text import update_grid_numbers
 from roboticstoolbox.backends.VPython.object2d import Marker2D
 from spatialmath import SE2
+from collections.abc import MutableMapping
 
 
-class GraphicsGrid:   # pragma nocover
+class GridMMap(MutableMapping):
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(*args, **kwargs)
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
+
+
+class GraphicsGrid:  # pragma nocover
     """
     This class holds the current grid displayed in the canvas
 
@@ -38,11 +59,11 @@ class GraphicsGrid:   # pragma nocover
         ]
 
         # Private parameters for indexing in grid_object
-        self.__xy_plane_idx = 0
-        self.__xz_plane_idx = 1
-        self.__yz_plane_idx = 2
-        self.__planes_idx = 0
-        self.__labels_idx = 1
+        # self.__xy_plane_idx = 0
+        # self.__xz_plane_idx = 1
+        # self.__yz_plane_idx = 2
+        # self.__planes_idx = 0
+        # self.__labels_idx = 1
 
         if colour is None:
             colour = [0, 0, 0]
@@ -56,20 +77,35 @@ class GraphicsGrid:   # pragma nocover
         # Order is [x-plane numbers, "X", y-plane numbers,
         # "Y", z-plane numbers, "Z"]
         line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
-        self.grid_object = [[
-            curve(vector(0, 0, 0),
-                  color=vector(self._colour[0], self._colour[1], self._colour[2]),
-                  radius=line_thickness,
-                  origin=vector(0, 0, 0)),
-            curve(vector(0, 0, 0),
-                  color=vector(self._colour[0], self._colour[1], self._colour[2]),
-                  radius=line_thickness,
-                  origin=vector(0, 0, 0)),
-            curve(vector(0, 0, 0),
-                  color=vector(self._colour[0], self._colour[1], self._colour[2]),
-                  radius=line_thickness,
-                  origin=vector(0, 0, 0))
-        ], []]
+        # self.grid_object = [[
+        #     curve(vector(0, 0, 0),
+        #           color=vector(self._colour[0], self._colour[1], self._colour[2]),
+        #           radius=line_thickness,
+        #           origin=vector(0, 0, 0)),
+        #     curve(vector(0, 0, 0),
+        #           color=vector(self._colour[0], self._colour[1], self._colour[2]),
+        #           radius=line_thickness,
+        #           origin=vector(0, 0, 0)),
+        #     curve(vector(0, 0, 0),
+        #           color=vector(self._colour[0], self._colour[1], self._colour[2]),
+        #           radius=line_thickness,
+        #           origin=vector(0, 0, 0))
+        # ], []]
+        self.grid_object = GridMMap({
+            'xy_plane': curve(vector(0, 0, 0),
+                              color=vector(self._colour[0], self._colour[1], self._colour[2]),
+                              radius=line_thickness,
+                              origin=vector(0, 0, 0)),
+            'xz_plane': curve(vector(0, 0, 0),
+                              color=vector(self._colour[0], self._colour[1], self._colour[2]),
+                              radius=line_thickness,
+                              origin=vector(0, 0, 0)),
+            'yz_plane': curve(vector(0, 0, 0),
+                              color=vector(self._colour[0], self._colour[1], self._colour[2]),
+                              radius=line_thickness,
+                              origin=vector(0, 0, 0)),
+            'labels': [],
+        })
         self.__init_grid()
 
         # Bind mouse releases to the update_grid function
@@ -84,7 +120,7 @@ class GraphicsGrid:   # pragma nocover
 
         # Update the labels instead of recreating them
         update_grid_numbers(
-            self.__focal_point, self.grid_object[self.__labels_idx],
+            self.__focal_point, self.grid_object.get('labels'),
             self.__num_squares, self.__scale, self.__is_3d, self.__scene)
 
     def __create_grid_objects(self):
@@ -109,20 +145,25 @@ class GraphicsGrid:   # pragma nocover
 
         # If the grid has given too many objects
         if len(x_coords) > self.__num_squares + 1:
-            x_coords = x_coords[0:self.__num_squares+1]
+            x_coords = x_coords[0:self.__num_squares + 1]
         if len(y_coords) > self.__num_squares + 1:
-            y_coords = y_coords[0:self.__num_squares+1]
+            y_coords = y_coords[0:self.__num_squares + 1]
         if len(z_coords) > self.__num_squares + 1:
-            z_coords = z_coords[0:self.__num_squares+1]
+            z_coords = z_coords[0:self.__num_squares + 1]
 
         # As curve objects cannot be compounded, so must be a single entity
 
         line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
 
         # Update curve objects
-        for plane in self.grid_object[self.__planes_idx]:
-            plane.radius = line_thickness
-            plane.append(vector(0, 0, 0))
+        self.grid_object.get('xy_plane').radius = line_thickness
+        self.grid_object.get('xy_plane').append(vector(0, 0, 0))
+
+        self.grid_object.get('xz_plane').radius = line_thickness
+        self.grid_object.get('xz_plane').append(vector(0, 0, 0))
+
+        self.grid_object.get('yz_plane').radius = line_thickness
+        self.grid_object.get('yz_plane').append(vector(0, 0, 0))
 
         # Zig-Zag through all of the points
         # XY plane
@@ -132,7 +173,7 @@ class GraphicsGrid:   # pragma nocover
             else:
                 y_vals = y_coords[::-1]
             for y_point in y_vals:
-                self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+                self.grid_object.get('xy_plane'). \
                     append(vector(x_point, y_point, 0))
 
         for idx, y_point in enumerate(y_coords[::-1]):
@@ -141,7 +182,7 @@ class GraphicsGrid:   # pragma nocover
             else:
                 x_vals = x_coords
             for x_point in x_vals:
-                self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+                self.grid_object.get('xy_plane'). \
                     append(vector(x_point, y_point, 0))
 
         # XZ Plane
@@ -151,7 +192,7 @@ class GraphicsGrid:   # pragma nocover
             else:
                 z_vals = z_coords[::-1]
             for z_point in z_vals:
-                self.grid_object[self.__planes_idx][self.__xz_plane_idx].\
+                self.grid_object.get('xz_plane'). \
                     append(vector(x_point, 0, z_point))
 
         for idx, z_point in enumerate(z_coords[::-1]):
@@ -160,7 +201,7 @@ class GraphicsGrid:   # pragma nocover
             else:
                 x_vals = x_coords
             for x_point in x_vals:
-                self.grid_object[self.__planes_idx][self.__xz_plane_idx].\
+                self.grid_object.get('xz_plane'). \
                     append(vector(x_point, 0, z_point))
 
         # YZ Plane
@@ -170,7 +211,7 @@ class GraphicsGrid:   # pragma nocover
             else:
                 z_vals = z_coords[::-1]
             for z_point in z_vals:
-                self.grid_object[self.__planes_idx][self.__yz_plane_idx].\
+                self.grid_object.get('yz_plane'). \
                     append(vector(0, y_point, z_point))
 
         for idx, z_point in enumerate(z_coords[::-1]):
@@ -179,7 +220,7 @@ class GraphicsGrid:   # pragma nocover
             else:
                 y_vals = y_coords
             for y_point in y_vals:
-                self.grid_object[self.__planes_idx][self.__yz_plane_idx].\
+                self.grid_object.get('yz_plane'). \
                     append(vector(0, y_point, z_point))
 
     def __move_grid_objects(self):
@@ -226,17 +267,17 @@ class GraphicsGrid:   # pragma nocover
         min_x_coord = round(
             x_origin + (-(self.__num_squares / 2)
                         + (sign(camera_axes.x) * -1) * (
-                            self.__num_squares / 2)) * self.__scale, 2)
+                                self.__num_squares / 2)) * self.__scale, 2)
 
         min_y_coord = round(
             y_origin + (-(self.__num_squares / 2)
                         + (sign(camera_axes.y) * -1) * (
-                            self.__num_squares / 2)) * self.__scale, 2)
+                                self.__num_squares / 2)) * self.__scale, 2)
 
         min_z_coord = round(
             z_origin + (-(self.__num_squares / 2)
                         + (sign(camera_axes.z) * -1) * (
-                            self.__num_squares / 2)) * self.__scale, 2)
+                                self.__num_squares / 2)) * self.__scale, 2)
 
         if camera_axes.x < 0:
             x_pos = x_origin
@@ -251,11 +292,11 @@ class GraphicsGrid:   # pragma nocover
         else:
             z_pos = min_z_coord
 
-        self.grid_object[self.__planes_idx][self.__xy_plane_idx].origin = \
+        self.grid_object.get('xy_plane').origin = \
             vector(x_pos, y_pos, z_origin)
-        self.grid_object[self.__planes_idx][self.__xz_plane_idx].origin = \
+        self.grid_object.get('xz_plane').origin = \
             vector(x_pos, y_origin, z_pos)
-        self.grid_object[self.__planes_idx][self.__yz_plane_idx].origin = \
+        self.grid_object.get('yz_plane').origin = \
             vector(x_origin, y_pos, z_pos)
 
     def update_grid(self):
@@ -264,7 +305,7 @@ class GraphicsGrid:   # pragma nocover
         has changed.
         """
         # If invisible, skip the updating (Unnecessary)
-        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
+        if not self.grid_object.get('xy_plane'). \
                 visible:
             return
 
@@ -297,7 +338,7 @@ class GraphicsGrid:   # pragma nocover
             # Update grid
             self.__move_grid_objects()
             update_grid_numbers(self.__focal_point,
-                                self.grid_object[self.__labels_idx],
+                                self.grid_object.get('labels'),
                                 self.__num_squares,
                                 self.__scale,
                                 self.__is_3d,
@@ -313,9 +354,9 @@ class GraphicsGrid:   # pragma nocover
         self.__is_3d = not self.__is_3d
 
         # Toggle it for XZ, YZ planes
-        self.grid_object[self.__planes_idx][self.__xz_plane_idx].visible = \
+        self.grid_object.get('xz_plane').visible = \
             self.__is_3d
-        self.grid_object[self.__planes_idx][self.__yz_plane_idx].visible = \
+        self.grid_object.get('yz_plane').visible = \
             self.__is_3d
 
         # Toggle it for Z plane numbers
@@ -323,10 +364,10 @@ class GraphicsGrid:   # pragma nocover
         # 2 axes + 2 letters for axes
         z_label_start = (self.__num_squares + 1) * 2 + 2
         # Index end = end of labels array
-        z_label_end = len(self.grid_object[self.__labels_idx])
+        z_label_end = len(self.grid_object.get('labels'))
         # Toggle
         for idx in range(z_label_start, z_label_end):
-            self.grid_object[self.__labels_idx][idx].visible = self.__is_3d
+            self.grid_object.get('labels')[idx].visible = self.__is_3d
 
         self.update_grid()
 
@@ -338,9 +379,10 @@ class GraphicsGrid:   # pragma nocover
         :type is_visible: `bool`
         """
         # Modify all graphics
-        for plane in self.grid_object[self.__planes_idx]:
-            plane.visible = is_visible
-        for number in self.grid_object[self.__labels_idx]:
+        self.grid_object.get('xy_plane').visible = is_visible
+        self.grid_object.get('xz_plane').visible = is_visible
+        self.grid_object.get('yz_plane').visible = is_visible
+        for number in self.grid_object.get('labels'):
             number.visible = is_visible
         # If 3D, changes are made
         # If 2D and setting off, changes are made
@@ -369,26 +411,25 @@ class GraphicsGrid:   # pragma nocover
         :type value: `float`
         """
         # If invisible, skip the updating (Unnecessary)
-        if not self.grid_object[self.__planes_idx][self.__xy_plane_idx].\
-                visible:
+        if not self.grid_object.get('xy_plane').visible:
             return
 
         value = max(min(value, 100), 0.1)  # Between 0.1 and 100
         self.__scale = value
         # Turn off grid then delete
-        for plane in self.grid_object[self.__planes_idx]:
-            plane.clear()
-            # plane.visible = False
-        for text in self.grid_object[self.__labels_idx]:
+        self.grid_object.get('xy_plane').clear()
+        self.grid_object.get('xz_plane').clear()
+        self.grid_object.get('yz_plane').clear()
+        for text in self.grid_object.get('labels'):
             text.visible = False
 
         # Don't del the curve objects
-        self.grid_object[self.__labels_idx] = []
+        self.grid_object.labels = []
         self.__init_grid()
 
 
 def create_line(pos1, pos2, scene,
-                colour=None, thickness=0.01, opacity=1):   # pragma nocover
+                colour=None, thickness=0.01, opacity=1):  # pragma nocover
     """
     Create a line from position 1 to position 2.
 
@@ -445,7 +486,7 @@ def create_line(pos1, pos2, scene,
 
 def create_segmented_line(
         pos1, pos2, scene, segment_len,
-        colour=None, thickness=0.01):   # pragma nocover
+        colour=None, thickness=0.01):  # pragma nocover
     """
     Create a dashed line from position 1 to position 2.
 
@@ -572,4 +613,4 @@ def vectors_approx_equal(v1, v2):  # pragma nocover
     :rtype: `bool`
     """
     return abs(v1.x - v2.x < 0.001) and abs(v1.y - v2.y < 0.001) and \
-        abs(v1.z - v2.z < 0.001)
+           abs(v1.z - v2.z < 0.001)
