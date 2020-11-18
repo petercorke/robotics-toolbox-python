@@ -350,7 +350,7 @@ closing once the main script has finished.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.start_recording">
-<code class="sig-name descname">start_recording</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">framerate</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.start_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.start_recording" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">start_recording</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">framerate</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'webm'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.start_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.start_recording" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start recording the canvas in the Swift simulator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -359,6 +359,8 @@ closing once the main script has finished.</p>
 <li><p><strong>framerate</strong> (<em>float</em>) – The framerate of the video - to be timed correctly,
 this should equalt 1 / dt where dt is the time supplied to the
 step function</p></li>
+<li><p><strong>format</strong> (<em>string</em>) – This is the format of the video, one of ‘webm’, ‘gif’,
+‘png’, or ‘jpg’</p></li>
 </ul>
 </dd>
 </dl>
@@ -407,7 +409,7 @@ as the video will be automatically saved when the python script exits</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 17-Nov-2020.
+        Last updated on 18-Nov-2020.
       </span>
 
     </p>

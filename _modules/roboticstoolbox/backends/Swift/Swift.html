@@ -439,7 +439,7 @@
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Swift.start_recording"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.start_recording">[docs]</a>    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">framerate</span><span class="p">):</span>
+<div class="viewcode-block" id="Swift.start_recording"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.start_recording">[docs]</a>    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">framerate</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;webm&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Start recording the canvas in the Swift simulator</span>
 
@@ -449,14 +449,24 @@
 <span class="sd">            this should equalt 1 / dt where dt is the time supplied to the</span>
 <span class="sd">            step function</span>
 <span class="sd">        :type framerate: float</span>
+<span class="sd">        :param format: This is the format of the video, one of &#39;webm&#39;, &#39;gif&#39;,</span>
+<span class="sd">            &#39;png&#39;, or &#39;jpg&#39;</span>
+<span class="sd">        :type format: string</span>
 
 <span class="sd">        ``env.start_recording(file_name)`` starts recording the simulation</span>
 <span class="sd">            scene and will save it as file_name once</span>
 <span class="sd">            ``env.start_recording(file_name)`` is called</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">valid_formats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;webm&#39;</span><span class="p">,</span> <span class="s1">&#39;gif&#39;</span><span class="p">,</span> <span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;jpg&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_formats</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Format can one of &#39;webm&#39;, &#39;gif&#39;, &#39;png&#39;, or &#39;jpg&#39;&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;start_recording&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">framerate</span><span class="p">,</span> <span class="n">file_name</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span>
+                <span class="s1">&#39;start_recording&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">framerate</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="nb">format</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">recording</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -549,7 +559,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 17-Nov-2020.
+        Last updated on 18-Nov-2020.
       </span>
 
     </p>
