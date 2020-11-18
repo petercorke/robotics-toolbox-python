@@ -4043,17 +4043,17 @@ standard or modified.  They can be listed by:</p>
 <span class="go">┌─────────┬───────────────┬──────────────────┬────────────┬─────┬────────────┬──────────────────────────┐</span>
 <span class="go">│ class   │     model     │   manufacturer   │ model type │ DoF │     config │         keywords         │</span>
 <span class="go">├─────────┼───────────────┼──────────────────┼────────────┼─────┼────────────┼──────────────────────────┤</span>
-<span class="go">│Panda[0m    │ Panda[0m         │ Franka Emika[0m     │ DH[0m         │ 7[0m   │ RRRRRRR[0m    │ [0m                         │</span>
-<span class="go">│Puma560[0m  │ Puma 560[0m      │ Unimation[0m        │ DH[0m         │ 6[0m   │ RRRRRR[0m     │ dynamics, symbolic, mesh[0m │</span>
-<span class="go">│Stanford[0m │ Stanford arm[0m  │ Victor Scheinman[0m │ DH[0m         │ 6[0m   │ RRPRRR[0m     │ dynamics[0m                 │</span>
-<span class="go">│Ball[0m     │ ball[0m          │ [0m                 │ DH[0m         │ 10[0m  │ RRRRRRRRRR[0m │ [0m                         │</span>
-<span class="go">│Cobra600[0m │ Cobra600[0m      │ Adept[0m            │ DH[0m         │ 4[0m   │ RRPR[0m       │ [0m                         │</span>
-<span class="go">│IRB140[0m   │ IRB 140[0m       │ ABB[0m              │ DH[0m         │ 6[0m   │ RRRRRR[0m     │ [0m                         │</span>
-<span class="go">│KR5[0m      │ KR5[0m           │ KUKA[0m             │ DH[0m         │ 6[0m   │ RRRRRR[0m     │ [0m                         │</span>
-<span class="go">│Orion5[0m   │ Orion 5[0m       │ RAWR Robotics[0m    │ DH[0m         │ 4[0m   │ RRRR[0m       │ [0m                         │</span>
-<span class="go">│Planar3[0m  │ Planar 3 link[0m │ [0m                 │ DH[0m         │ 3[0m   │ RRR[0m        │ planar[0m                   │</span>
-<span class="go">│Planar2[0m  │ Planar 2 link[0m │ [0m                 │ DH[0m         │ 2[0m   │ RR[0m         │ planar[0m                   │</span>
-<span class="go">│LWR4[0m     │ LWR-IV[0m        │ Kuka[0m             │ DH[0m         │ 7[0m   │ RRRRRRR[0m    │ [0m                         │</span>
+<span class="go">│Panda    │ Panda         │ Franka Emika     │ DH         │ 7   │ RRRRRRR    │                          │</span>
+<span class="go">│Puma560  │ Puma 560      │ Unimation        │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic, mesh │</span>
+<span class="go">│Stanford │ Stanford arm  │ Victor Scheinman │ DH         │ 6   │ RRPRRR     │ dynamics                 │</span>
+<span class="go">│Ball     │ ball          │                  │ DH         │ 10  │ RRRRRRRRRR │                          │</span>
+<span class="go">│Cobra600 │ Cobra600      │ Adept            │ DH         │ 4   │ RRPR       │                          │</span>
+<span class="go">│IRB140   │ IRB 140       │ ABB              │ DH         │ 6   │ RRRRRR     │                          │</span>
+<span class="go">│KR5      │ KR5           │ KUKA             │ DH         │ 6   │ RRRRRR     │                          │</span>
+<span class="go">│Orion5   │ Orion 5       │ RAWR Robotics    │ DH         │ 4   │ RRRR       │                          │</span>
+<span class="go">│Planar3  │ Planar 3 link │                  │ DH         │ 3   │ RRR        │ planar                   │</span>
+<span class="go">│Planar2  │ Planar 2 link │                  │ DH         │ 2   │ RR         │ planar                   │</span>
+<span class="go">│LWR4     │ LWR-IV        │ Kuka             │ DH         │ 7   │ RRRRRRR    │                          │</span>
 <span class="go">└─────────┴───────────────┴──────────────────┴────────────┴─────┴────────────┴──────────────────────────┘</span>
 
 </pre></div>
@@ -4072,24 +4072,24 @@ conventions.</p>
 <span class="go">┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃    0.0[0m ┃   0.0°[0m ┃  q1[0m ┃ 0.333[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
-<span class="go">┃    0.0[0m ┃ -90.0°[0m ┃  q2[0m ┃   0.0[0m ┃ -101.0°[0m ┃ 101.0°[0m ┃</span>
-<span class="go">┃    0.0[0m ┃  90.0°[0m ┃  q3[0m ┃ 0.316[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
-<span class="go">┃ 0.0825[0m ┃  90.0°[0m ┃  q4[0m ┃   0.0[0m ┃ -176.0°[0m ┃  -4.0°[0m ┃</span>
-<span class="go">┃-0.0825[0m ┃ -90.0°[0m ┃  q5[0m ┃ 0.384[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
-<span class="go">┃    0.0[0m ┃  90.0°[0m ┃  q6[0m ┃   0.0[0m ┃   -1.0°[0m ┃ 215.0°[0m ┃</span>
-<span class="go">┃  0.088[0m ┃  90.0°[0m ┃  q7[0m ┃ 0.107[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃</span>
+<span class="go">┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃</span>
+<span class="go">┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃</span>
+<span class="go">┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃</span>
 <span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬───────────────────────────────────────┐</span>
-<span class="go">│tool[0m │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0°[0m │</span>
+<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
 <span class="go">└─────┴───────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
 <span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m    │  0°[0m │  0°[0m   │  0°[0m │  0°[0m   │  0°[0m  │</span>
-<span class="go">│  qr[0m │  0°[0m │ -17.2°[0m │  0°[0m │ -126°[0m │  0°[0m │  115°[0m │  45°[0m │</span>
+<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
+<span class="go">│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
 <span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
 
 </pre></div>
@@ -4131,21 +4131,21 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃   dⱼ    ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃       0[0m ┃      0[0m ┃  90.0°[0m ┃ -160.0°[0m ┃ 160.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃       0[0m ┃ 0.4318[0m ┃   0.0°[0m ┃ -110.0°[0m ┃ 110.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃ 0.15005[0m ┃ 0.0203[0m ┃ -90.0°[0m ┃ -135.0°[0m ┃ 135.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  0.4318[0m ┃      0[0m ┃  90.0°[0m ┃ -266.0°[0m ┃ 266.0°[0m ┃</span>
-<span class="go">┃ q5[0m ┃       0[0m ┃      0[0m ┃ -90.0°[0m ┃ -100.0°[0m ┃ 100.0°[0m ┃</span>
-<span class="go">┃ q6[0m ┃       0[0m ┃      0[0m ┃   0.0°[0m ┃ -266.0°[0m ┃ 266.0°[0m ┃</span>
+<span class="go">┃ q1 ┃       0 ┃      0 ┃  90.0° ┃ -160.0° ┃ 160.0° ┃</span>
+<span class="go">┃ q2 ┃       0 ┃ 0.4318 ┃   0.0° ┃ -110.0° ┃ 110.0° ┃</span>
+<span class="go">┃ q3 ┃ 0.15005 ┃ 0.0203 ┃ -90.0° ┃ -135.0° ┃ 135.0° ┃</span>
+<span class="go">┃ q4 ┃  0.4318 ┃      0 ┃  90.0° ┃ -266.0° ┃ 266.0° ┃</span>
+<span class="go">┃ q5 ┃       0 ┃      0 ┃ -90.0° ┃ -100.0° ┃ 100.0° ┃</span>
+<span class="go">┃ q6 ┃       0 ┃      0 ┃   0.0° ┃ -266.0° ┃ 266.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
 <span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m  │  0°[0m   │  0°[0m │  0°[0m  │  0°[0m │</span>
-<span class="go">│  qr[0m │  0°[0m │  90°[0m │ -90°[0m  │  0°[0m │  0°[0m  │  0°[0m │</span>
-<span class="go">│  qs[0m │  0°[0m │  0°[0m  │ -90°[0m  │  0°[0m │  0°[0m  │  0°[0m │</span>
-<span class="go">│  qn[0m │  0°[0m │  45°[0m │  180°[0m │  0°[0m │  45°[0m │  0°[0m │</span>
+<span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
+<span class="go">│  qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
+<span class="go">│  qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
+<span class="go">│  qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
 <span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
 
 </pre></div>
@@ -4206,18 +4206,18 @@ conventions.</p>
 <span class="go">┏━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃  θⱼ   ┃  dⱼ   ┃   aⱼ   ┃   ⍺ⱼ   ┃         q⁻          ┃   q⁺   ┃</span>
 <span class="go">┣━━━━━━━╋━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m    ┃ 0.412[0m ┃      0[0m ┃ -90.0°[0m ┃             -170.0°[0m ┃ 170.0°[0m ┃</span>
-<span class="go">┃ q2[0m    ┃ 0.154[0m ┃    0.0[0m ┃  90.0°[0m ┃             -170.0°[0m ┃ 170.0°[0m ┃</span>
-<span class="go">┃-90.0°[0m ┃    q3[0m ┃ 0.0203[0m ┃   0.0°[0m ┃ 0.30479999999999996[0m ┃   1.27[0m ┃</span>
-<span class="go">┃ q4[0m    ┃     0[0m ┃      0[0m ┃ -90.0°[0m ┃             -170.0°[0m ┃ 170.0°[0m ┃</span>
-<span class="go">┃ q5[0m    ┃     0[0m ┃      0[0m ┃  90.0°[0m ┃              -90.0°[0m ┃  90.0°[0m ┃</span>
-<span class="go">┃ q6[0m    ┃     0[0m ┃      0[0m ┃   0.0°[0m ┃             -170.0°[0m ┃ 170.0°[0m ┃</span>
+<span class="go">┃ q1    ┃ 0.412 ┃      0 ┃ -90.0° ┃             -170.0° ┃ 170.0° ┃</span>
+<span class="go">┃ q2    ┃ 0.154 ┃    0.0 ┃  90.0° ┃             -170.0° ┃ 170.0° ┃</span>
+<span class="go">┃-90.0° ┃    q3 ┃ 0.0203 ┃   0.0° ┃ 0.30479999999999996 ┃   1.27 ┃</span>
+<span class="go">┃ q4    ┃     0 ┃      0 ┃ -90.0° ┃             -170.0° ┃ 170.0° ┃</span>
+<span class="go">┃ q5    ┃     0 ┃      0 ┃  90.0° ┃              -90.0° ┃  90.0° ┃</span>
+<span class="go">┃ q6    ┃     0 ┃      0 ┃   0.0° ┃             -170.0° ┃ 170.0° ┃</span>
 <span class="go">┗━━━━━━━┻━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬─────┬─────┬────┬─────┬─────┬─────┐</span>
 <span class="go">│name │ q0  │ q1  │ q2 │ q3  │ q4  │ q5  │</span>
 <span class="go">├─────┼─────┼─────┼────┼─────┼─────┼─────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m │  0[0m │  0°[0m │  0°[0m │  0°[0m │</span>
+<span class="go">│  qz │  0° │  0° │  0 │  0° │  0° │  0° │</span>
 <span class="go">└─────┴─────┴─────┴────┴─────┴─────┴─────┘</span>
 
 </pre></div>
@@ -4268,23 +4268,23 @@ that folds into a ball shape.</p>
 <span class="go">┏━━━━━┳━━━━━┳━━━━━┳━━━━━━━┓</span>
 <span class="go">┃ θⱼ  ┃ dⱼ  ┃ aⱼ  ┃  ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━━╋━━━━━╋━━━━━╋━━━━━━━┫</span>
-<span class="go">┃ q1[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q2[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q3[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q4[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q5[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q6[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q7[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q8[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q9[0m  ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
-<span class="go">┃ q10[0m ┃ 0.0[0m ┃ 0.1[0m ┃ 90.0°[0m ┃</span>
+<span class="go">┃ q1  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q2  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q3  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q4  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q5  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q6  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q7  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q8  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q9  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q10 ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
 <span class="go">┗━━━━━┻━━━━━┻━━━━━┻━━━━━━━┛</span>
 
 <span class="go">┌─────┬────────┬────────┬────────┬────────┬────────┬────────┬────────┬────────┬────────┬────────┐</span>
 <span class="go">│name │ q0     │ q1     │ q2     │ q3     │ q4     │ q5     │ q6     │ q7     │ q8     │ q9     │</span>
 <span class="go">├─────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤</span>
-<span class="go">│  qz[0m │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │  0°[0m    │</span>
-<span class="go">│  q1[0m │  57.3°[0m │ -38.2°[0m │  57.3°[0m │  57.3°[0m │ -38.2°[0m │ -38.2°[0m │  57.3°[0m │ -38.2°[0m │  57.3°[0m │  57.3°[0m │</span>
+<span class="go">│  qz │  0°    │  0°    │  0°    │  0°    │  0°    │  0°    │  0°    │  0°    │  0°    │  0°    │</span>
+<span class="go">│  q1 │  57.3° │ -38.2° │  57.3° │  57.3° │ -38.2° │ -38.2° │  57.3° │ -38.2° │  57.3° │  57.3° │</span>
 <span class="go">└─────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┘</span>
 
 </pre></div>
@@ -4335,16 +4335,16 @@ conventions.</p>
 <span class="go">┏━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃ θⱼ  ┃  dⱼ   ┃  aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━━╋━━━━━━━╋━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m  ┃ 0.387[0m ┃ 0.325[0m ┃   0.0°[0m ┃  -50.0°[0m ┃  50.0°[0m ┃</span>
-<span class="go">┃ q2[0m  ┃   0.0[0m ┃ 0.275[0m ┃ 180.0°[0m ┃  -88.0°[0m ┃  88.0°[0m ┃</span>
-<span class="go">┃0.0°[0m ┃    q3[0m ┃   0.0[0m ┃   0.0°[0m ┃     0.0[0m ┃   0.21[0m ┃</span>
-<span class="go">┃ q4[0m  ┃   0.0[0m ┃   0.0[0m ┃   0.0°[0m ┃ -180.0°[0m ┃ 180.0°[0m ┃</span>
+<span class="go">┃ q1  ┃ 0.387 ┃ 0.325 ┃   0.0° ┃  -50.0° ┃  50.0° ┃</span>
+<span class="go">┃ q2  ┃   0.0 ┃ 0.275 ┃ 180.0° ┃  -88.0° ┃  88.0° ┃</span>
+<span class="go">┃0.0° ┃    q3 ┃   0.0 ┃   0.0° ┃     0.0 ┃   0.21 ┃</span>
+<span class="go">┃ q4  ┃   0.0 ┃   0.0 ┃   0.0° ┃ -180.0° ┃ 180.0° ┃</span>
 <span class="go">┗━━━━━┻━━━━━━━┻━━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬─────┬─────┬────┬─────┐</span>
 <span class="go">│name │ q0  │ q1  │ q2 │ q3  │</span>
 <span class="go">├─────┼─────┼─────┼────┼─────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m │  0[0m │  0°[0m │</span>
+<span class="go">│  qz │  0° │  0° │  0 │  0° │</span>
 <span class="go">└─────┴─────┴─────┴────┴─────┘</span>
 
 </pre></div>
@@ -4377,20 +4377,20 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃  dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃ 0.352[0m ┃ 0.07[0m ┃ -90.0°[0m ┃ -180.0°[0m ┃ 180.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃     0[0m ┃ 0.36[0m ┃   0.0°[0m ┃ -100.0°[0m ┃ 100.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃     0[0m ┃    0[0m ┃ -90.0°[0m ┃ -220.0°[0m ┃  60.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  0.38[0m ┃    0[0m ┃  90.0°[0m ┃ -200.0°[0m ┃ 200.0°[0m ┃</span>
-<span class="go">┃ q5[0m ┃     0[0m ┃    0[0m ┃ -90.0°[0m ┃ -120.0°[0m ┃ 120.0°[0m ┃</span>
-<span class="go">┃ q6[0m ┃ 0.065[0m ┃    0[0m ┃   0.0°[0m ┃ -400.0°[0m ┃ 400.0°[0m ┃</span>
+<span class="go">┃ q1 ┃ 0.352 ┃ 0.07 ┃ -90.0° ┃ -180.0° ┃ 180.0° ┃</span>
+<span class="go">┃ q2 ┃     0 ┃ 0.36 ┃   0.0° ┃ -100.0° ┃ 100.0° ┃</span>
+<span class="go">┃ q3 ┃     0 ┃    0 ┃ -90.0° ┃ -220.0° ┃  60.0° ┃</span>
+<span class="go">┃ q4 ┃  0.38 ┃    0 ┃  90.0° ┃ -200.0° ┃ 200.0° ┃</span>
+<span class="go">┃ q5 ┃     0 ┃    0 ┃ -90.0° ┃ -120.0° ┃ 120.0° ┃</span>
+<span class="go">┃ q6 ┃ 0.065 ┃    0 ┃   0.0° ┃ -400.0° ┃ 400.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━━┻━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬──────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5   │</span>
 <span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼──────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m  │  0°[0m   │  0°[0m │  0°[0m  │  0°[0m  │</span>
-<span class="go">│  qd[0m │  0°[0m │ -90°[0m │  180°[0m │  0°[0m │  0°[0m  │ -90°[0m │</span>
-<span class="go">│  qr[0m │  0°[0m │ -90°[0m │  90°[0m  │  0°[0m │  90°[0m │ -90°[0m │</span>
+<span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0°  │</span>
+<span class="go">│  qd │  0° │ -90° │  180° │  0° │  0°  │ -90° │</span>
+<span class="go">│  qr │  0° │ -90° │  90°  │  0° │  90° │ -90° │</span>
 <span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴──────┘</span>
 
 </pre></div>
@@ -4435,21 +4435,21 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃   dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃    0.4[0m ┃ 0.18[0m ┃ -90.0°[0m ┃ -155.0°[0m ┃ 155.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃      0[0m ┃  0.6[0m ┃   0.0°[0m ┃ -180.0°[0m ┃  65.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃      0[0m ┃ 0.12[0m ┃  90.0°[0m ┃  -15.0°[0m ┃ 158.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  -0.62[0m ┃  0.0[0m ┃ -90.0°[0m ┃ -350.0°[0m ┃ 350.0°[0m ┃</span>
-<span class="go">┃ q5[0m ┃    0.0[0m ┃  0.0[0m ┃  90.0°[0m ┃ -130.0°[0m ┃ 130.0°[0m ┃</span>
-<span class="go">┃ q6[0m ┃ -0.115[0m ┃    0[0m ┃ 180.0°[0m ┃ -350.0°[0m ┃ 350.0°[0m ┃</span>
+<span class="go">┃ q1 ┃    0.4 ┃ 0.18 ┃ -90.0° ┃ -155.0° ┃ 155.0° ┃</span>
+<span class="go">┃ q2 ┃      0 ┃  0.6 ┃   0.0° ┃ -180.0° ┃  65.0° ┃</span>
+<span class="go">┃ q3 ┃      0 ┃ 0.12 ┃  90.0° ┃  -15.0° ┃ 158.0° ┃</span>
+<span class="go">┃ q4 ┃  -0.62 ┃  0.0 ┃ -90.0° ┃ -350.0° ┃ 350.0° ┃</span>
+<span class="go">┃ q5 ┃    0.0 ┃  0.0 ┃  90.0° ┃ -130.0° ┃ 130.0° ┃</span>
+<span class="go">┃ q6 ┃ -0.115 ┃    0 ┃ 180.0° ┃ -350.0° ┃ 350.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━━━┻━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬──────┬──────┬──────┬──────┬──────┬──────┐</span>
 <span class="go">│name │ q0   │ q1   │ q2   │ q3   │ q4   │ q5   │</span>
 <span class="go">├─────┼──────┼──────┼──────┼──────┼──────┼──────┤</span>
-<span class="go">│  qz[0m │  0°[0m  │  0°[0m  │  0°[0m  │  0°[0m  │  0°[0m  │  0°[0m  │</span>
-<span class="go">│ qk1[0m │  45°[0m │  60°[0m │  45°[0m │  30°[0m │  45°[0m │  30°[0m │</span>
-<span class="go">│ qk2[0m │  45°[0m │  60°[0m │  30°[0m │  60°[0m │  45°[0m │  30°[0m │</span>
-<span class="go">│ qk3[0m │  30°[0m │  60°[0m │  30°[0m │  60°[0m │  30°[0m │  60°[0m │</span>
+<span class="go">│  qz │  0°  │  0°  │  0°  │  0°  │  0°  │  0°  │</span>
+<span class="go">│ qk1 │  45° │  60° │  45° │  30° │  45° │  30° │</span>
+<span class="go">│ qk2 │  45° │  60° │  30° │  60° │  45° │  30° │</span>
+<span class="go">│ qk3 │  30° │  60° │  30° │  60° │  30° │  60° │</span>
 <span class="go">└─────┴──────┴──────┴──────┴──────┴──────┴──────┘</span>
 
 </pre></div>
@@ -4495,23 +4495,23 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃  dⱼ   ┃          aⱼ          ┃  ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃ 0.053[0m ┃                    0[0m ┃ 90.0°[0m ┃ -180.0°[0m ┃ 180.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃     0[0m ┃  0.17038399999999998[0m ┃  0.0°[0m ┃   10.0°[0m ┃ 122.5°[0m ┃</span>
-<span class="go">┃ q3[0m ┃     0[0m ┃ -0.13630699999999998[0m ┃  0.0°[0m ┃   20.0°[0m ┃ 340.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃     0[0m ┃                0.126[0m ┃  0.0°[0m ┃   45.0°[0m ┃ 315.0°[0m ┃</span>
+<span class="go">┃ q1 ┃ 0.053 ┃                    0 ┃ 90.0° ┃ -180.0° ┃ 180.0° ┃</span>
+<span class="go">┃ q2 ┃     0 ┃  0.17038399999999998 ┃  0.0° ┃   10.0° ┃ 122.5° ┃</span>
+<span class="go">┃ q3 ┃     0 ┃ -0.13630699999999998 ┃  0.0° ┃   20.0° ┃ 340.0° ┃</span>
+<span class="go">┃ q4 ┃     0 ┃                0.126 ┃  0.0° ┃   45.0° ┃ 315.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬──────────────────────────────────────┐</span>
-<span class="go">│base[0m │ t = 0.03, 0, 0; rpy/xyz = 0°, 0°, 0°[0m │</span>
-<span class="go">│tool[0m │ t = 0, 0, 0; rpy/xyz = 0°, 90°, 0°[0m   │</span>
+<span class="go">│base │ t = 0.03, 0, 0; rpy/xyz = 0°, 0°, 0° │</span>
+<span class="go">│tool │ t = 0, 0, 0; rpy/xyz = 0°, 90°, 0°   │</span>
 <span class="go">└─────┴──────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬───────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3    │</span>
 <span class="go">├─────┼─────┼──────┼───────┼───────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  90°[0m │  180°[0m │  180°[0m │</span>
-<span class="go">│  qv[0m │  0°[0m │  90°[0m │  180°[0m │  180°[0m │</span>
-<span class="go">│  qh[0m │  0°[0m │  0°[0m  │  180°[0m │  90°[0m  │</span>
+<span class="go">│  qz │  0° │  90° │  180° │  180° │</span>
+<span class="go">│  qv │  0° │  90° │  180° │  180° │</span>
+<span class="go">│  qh │  0° │  0°  │  180° │  90°  │</span>
 <span class="go">└─────┴─────┴──────┴───────┴───────┘</span>
 
 </pre></div>
@@ -4557,15 +4557,15 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━┳━━━━┳━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃ dⱼ  ┃ aⱼ ┃  ⍺ⱼ  ┃</span>
 <span class="go">┣━━━━╋━━━━━╋━━━━╋━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃ 0.0[0m ┃  1[0m ┃ 0.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃ 0.0[0m ┃  1[0m ┃ 0.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃ 0.0[0m ┃  1[0m ┃ 0.0°[0m ┃</span>
+<span class="go">┃ q1 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
+<span class="go">┃ q2 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
+<span class="go">┃ q3 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━┻━━━━┻━━━━━━┛</span>
 
 <span class="go">┌─────┬─────┬─────┬─────┐</span>
 <span class="go">│name │ q0  │ q1  │ q2  │</span>
 <span class="go">├─────┼─────┼─────┼─────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m │  0°[0m │</span>
+<span class="go">│  qz │  0° │  0° │  0° │</span>
 <span class="go">└─────┴─────┴─────┴─────┘</span>
 
 </pre></div>
@@ -4599,16 +4599,16 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━┳━━━━┳━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃ dⱼ  ┃ aⱼ ┃  ⍺ⱼ  ┃</span>
 <span class="go">┣━━━━╋━━━━━╋━━━━╋━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃ 0.0[0m ┃  1[0m ┃ 0.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃ 0.0[0m ┃  1[0m ┃ 0.0°[0m ┃</span>
+<span class="go">┃ q1 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
+<span class="go">┃ q2 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━┻━━━━┻━━━━━━┛</span>
 
 <span class="go">┌─────┬──────┬──────┐</span>
 <span class="go">│name │ q0   │ q1   │</span>
 <span class="go">├─────┼──────┼──────┤</span>
-<span class="go">│  qz[0m │  0°[0m  │  0°[0m  │</span>
-<span class="go">│  q1[0m │  0°[0m  │  90°[0m │</span>
-<span class="go">│  q2[0m │  90°[0m │ -90°[0m │</span>
+<span class="go">│  qz │  0°  │  0°  │</span>
+<span class="go">│  q1 │  0°  │  90° │</span>
+<span class="go">│  q2 │  90° │ -90° │</span>
 <span class="go">└─────┴──────┴──────┘</span>
 
 </pre></div>
@@ -4644,23 +4644,23 @@ conventions.</p>
 <span class="go">┏━━━━┳━━━━━━┳━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃  dⱼ  ┃ aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━╋━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃ q1[0m ┃    0[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
-<span class="go">┃ q2[0m ┃  0.0[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -101.0°[0m ┃ 101.0°[0m ┃</span>
-<span class="go">┃ q3[0m ┃  0.4[0m ┃ 0.0[0m ┃ -90.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
-<span class="go">┃ q4[0m ┃  0.0[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -176.0°[0m ┃  -4.0°[0m ┃</span>
-<span class="go">┃ q5[0m ┃ 0.39[0m ┃ 0.0[0m ┃  90.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
-<span class="go">┃ q6[0m ┃  0.0[0m ┃ 0.0[0m ┃ -90.0°[0m ┃   -1.0°[0m ┃ 215.0°[0m ┃</span>
-<span class="go">┃ q7[0m ┃  0.0[0m ┃ 0.0[0m ┃   0.0°[0m ┃ -166.0°[0m ┃ 166.0°[0m ┃</span>
+<span class="go">┃ q1 ┃    0 ┃ 0.0 ┃  90.0° ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃ q2 ┃  0.0 ┃ 0.0 ┃ -90.0° ┃ -101.0° ┃ 101.0° ┃</span>
+<span class="go">┃ q3 ┃  0.4 ┃ 0.0 ┃ -90.0° ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃ q4 ┃  0.0 ┃ 0.0 ┃  90.0° ┃ -176.0° ┃  -4.0° ┃</span>
+<span class="go">┃ q5 ┃ 0.39 ┃ 0.0 ┃  90.0° ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃ q6 ┃  0.0 ┃ 0.0 ┃ -90.0° ┃   -1.0° ┃ 215.0° ┃</span>
+<span class="go">┃ q7 ┃  0.0 ┃ 0.0 ┃   0.0° ┃ -166.0° ┃ 166.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━┻━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
 <span class="go">┌─────┬───────────────────────────────────────┐</span>
-<span class="go">│tool[0m │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0°[0m │</span>
+<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
 <span class="go">└─────┴───────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐</span>
 <span class="go">│name │ q0  │ q1  │ q2  │ q3  │ q4  │ q5  │ q6  │</span>
 <span class="go">├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤</span>
-<span class="go">│  qz[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │  0°[0m │</span>
+<span class="go">│  qz │  0° │  0° │  0° │  0° │  0° │  0° │  0° │</span>
 <span class="go">└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘</span>
 
 </pre></div>
