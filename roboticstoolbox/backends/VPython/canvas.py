@@ -12,11 +12,32 @@ from roboticstoolbox.backends.VPython.common_functions import \
 from roboticstoolbox.backends.VPython.grid import GraphicsGrid, create_line, \
     create_segmented_line, create_marker
 from enum import Enum
+from collections.abc import MutableMapping
 
 
 class UImode(Enum):  # pragma nocover
     CANVASCONTROL = 1
     TEACHPANEL = 2
+
+
+class UIMMap(MutableMapping):
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(*args, **kwargs)
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
 
 
 class GraphicsCanvas3D:  # pragma nocover
@@ -40,11 +61,11 @@ class GraphicsCanvas3D:  # pragma nocover
     :param grid: Whether a grid should be displayed in the plot, defaults
         to `True`.
     :type grid: `bool`, optional
+    :param g_col: The RGB grid colour
+    :type g_col: `list`, optional
     """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True):
-        # def __init__(self, height=360, width=640, title='', caption='',
-        #   grid=True):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None):
 
         # Create a new independent scene
         self.scene = canvas()
@@ -70,7 +91,8 @@ class GraphicsCanvas3D:  # pragma nocover
         self.scene.append_to_title(
             '<style>#glowscript h3{margin-bottom: -10px;border-bottom: 2px solid #15578a;padding-bottom: 5px;}#glowscript button{background: #8db9db !important;color: #fff !important;border: 2px solid #5F9ED0;border-radius: 8px;}#glowscript > div:nth-of-type(4n){display:inline-block;margin:20px;vertical-align:top;}#glowscript > div:nth-of-type(4n-3){background:#d9d9d9;padding:20px;border-radius:10px;margin-bottom:10px;}</style>' \
             '<script type="text/javascript">var arrow_keys_handler = function(e) {switch(e.keyCode){ case 37: case 39: case 38:  case 40: case 32: e.preventDefault(); break; default: break;}};window.addEventListener("keydown", arrow_keys_handler, false);</script>' \
-            '<script type="text/javascript">$(document).keyup(function(event){if (event.which === 32){event.preventDefault();}});</script>'  # noqa
+            '<script type="text/javascript">$(document).keyup(function(event){if (event.which === 32){event.preventDefault();}});</script>'
+            # noqa
         )
         # Disable the arrow keys from scrolling in the browser
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
@@ -95,37 +117,29 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__grid_visibility = grid
         self.__camera_lock = False
         self.__grid_relative = True
+        # Screen Shot tally
+        self._ss_tally = 0
 
         # Create the UI
         self.__ui_mode = UImode.CANVASCONTROL
-        self.__toggle_button = None
         self.__toggle_button_text_dict = {
             UImode.CANVASCONTROL: "Canvas Controls",
             UImode.TEACHPANEL: "Robot Controls"
         }
-        self.__toggle_button = self.__add_mode_button()
-        self.__ui_controls = self.__setup_ui_controls([])
-        # Indices to easily identify entities
-        self.__idx_btn_reset = 0  # Camera Reset Button
-        self.__idx_menu_robots = 1  # Menu box
-        self.__idx_chkbox_ref = 2  # Reference Visibility Checkbox
-        self.__idx_chkbox_rob = 3  # Robot Visibility Checkbox
-        self.__idx_chkbox_grid = 4  # Grid Visibility Checkbox
-        self.__idx_chkbox_cam = 5  # Camera Lock Checkbox
-        self.__idx_chkbox_rel = 6  # Grid Relative Checkbox
-        self.__idx_sld_opc = 7  # Opacity Slider
-        self.__idx_btn_del = 8  # Delete button
-        self.__idx_btn_clr = 9  # Clear button
+        self.__ui_controls = UIMMap()
+        self.__add_mode_button()
+        self.__setup_ui_controls([])
 
         # Rotate the camera
         convert_grid_to_z_up(self.scene)
+        self.scene.waitfor("draw_complete")  # Ensure camera updates before grid is created
 
         # Any time a key or mouse is held down, run the callback function
         rate(30)  # 30Hz
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        self.__graphics_grid = GraphicsGrid(self.scene)
+        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col)
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
@@ -144,7 +158,7 @@ class GraphicsCanvas3D:  # pragma nocover
         self.scene.waitfor("draw_complete")
 
         new_list = []
-        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         self.__selected_robot = 0
@@ -173,7 +187,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Save the list of robot names
         new_list = []
-        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
         # Add the new one
         new_list.append(robot.name)
@@ -205,8 +219,14 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__reload_caption(new_list)
 
         # Set it as selected
-        self.__ui_controls[self.__idx_menu_robots].index = \
+        self.__ui_controls.get('menu_robots').index = \
             len(self.__robots) - 1
+
+        # Place camera based on robots effective radius * 1.25
+        if robot.robot is not None:
+            radius = sum([abs(link.a) + abs(link.d) for link in robot.robot.links]) * 1.25
+            self.scene.camera.pos = vector(radius, radius, radius) + get_pose_pos(robot.joints[1].get_pose())
+            self.scene.camera.axis = vector(-radius, -radius, -radius)
 
     def delete_robot(self, robot):
         """
@@ -227,7 +247,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Remove from UI
         new_list = []
-        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         del new_list[robot_index]
@@ -238,8 +258,8 @@ class GraphicsCanvas3D:  # pragma nocover
         # Update UI
         self.__reload_caption(new_list)
         # Select the top item
-        if len(self.__ui_controls[self.__idx_menu_robots].choices) > 0:
-            self.__ui_controls[self.__idx_menu_robots].index = 0
+        if len(self.__ui_controls.get('menu_robots').choices) > 0:
+            self.__ui_controls.get('menu_robots').index = 0
 
     def is_robot_in_canvas(self, robot):
         """
@@ -250,24 +270,26 @@ class GraphicsCanvas3D:  # pragma nocover
         """
         return robot in self.__robots
 
+    def take_screenshot(self, filename):
+        """
+        Take a screenshot and save it
+        """
+        self.scene.capture(filename)
+
     #######################################
     #  UI Management
     #######################################
     def __add_mode_button(self):
         """
         Adds a button to the UI that toggles the UI mode
-
-        :returns: A button
-        :rtype: class:`vpython.button`
         """
         btn_text = self.__toggle_button_text_dict.get(
             self.__ui_mode, "Unknown Mode Set")
         btn_text = "<span style='font-size:20px;'>" + btn_text + "</span>"
 
         btn_toggle = button(bind=self.__toggle_mode, text=btn_text)
+        self.__ui_controls.btn_toggle = btn_toggle
         self.scene.append_to_caption('\n')
-
-        return btn_toggle
 
     def __del_robot(self):
         """
@@ -286,7 +308,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Remove from UI
         new_list = []
-        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         del new_list[self.__selected_robot]
@@ -297,8 +319,8 @@ class GraphicsCanvas3D:  # pragma nocover
         # Update UI
         self.__reload_caption(new_list)
         # Select the top item
-        if len(self.__ui_controls[self.__idx_menu_robots].choices) > 0:
-            self.__ui_controls[self.__idx_menu_robots].index = 0
+        if len(self.__ui_controls.get('menu_robots').choices) > 0:
+            self.__ui_controls.get('menu_robots').index = 0
 
     def __handle_keyboard_inputs(self):
         """
@@ -429,7 +451,9 @@ class GraphicsCanvas3D:  # pragma nocover
         """
         # Remove all UI elements
         for item in self.__ui_controls:
-            item.delete()
+            if self.__ui_controls.get(item) is None:
+                continue
+            self.__ui_controls.get(item).delete()
         for item in self.__teachpanel_sliders:
             item.delete()
         self.__teachpanel_sliders = []
@@ -445,9 +469,9 @@ class GraphicsCanvas3D:  # pragma nocover
         :param new_list: The new list to apply to the menu
         :type new_list: `list`
         """
-        self.__toggle_button = self.__add_mode_button()
+        self.__add_mode_button()
         if self.__ui_mode == UImode.CANVASCONTROL:
-            self.__ui_controls = self.__setup_ui_controls(new_list)
+            self.__setup_ui_controls(new_list)
         elif self.__ui_mode == UImode.TEACHPANEL:
             self.__setup_joint_sliders()
         else:
@@ -464,76 +488,88 @@ class GraphicsCanvas3D:  # pragma nocover
         ##################################################
         self.scene.append_to_caption('<h3>Scene Settings</h3>\n')
         # Button to reset camera
-        btn_reset = button(
+        reset_button = button(
             bind=self.__reset_camera, text="Reset Camera")
+        self.__ui_controls.btn_reset = reset_button
         self.scene.append_to_caption('\t')
 
-        chkbox_cam = checkbox(
-            bind=self.__camera_lock_checkbox,
-            text="Camera Lock", checked=self.__camera_lock)
+        screenshot_button = button(bind=self.__screenshot, text="Take Screenshot")
+        self.__ui_controls.btn_ss = screenshot_button
+        self.scene.append_to_caption('\n')
+
+        camera_lock_checkbox = checkbox(bind=self.__camera_lock_checkbox, text="Camera Lock",
+                                        checked=self.__camera_lock)
+        self.__ui_controls.chkbox_cam = camera_lock_checkbox
         self.scene.append_to_caption('\t')
 
-        chkbox_rel = checkbox(
+        grid_relative_checkbox = checkbox(
             bind=self.__grid_relative_checkbox,
             text="Grid Relative", checked=self.__grid_relative)
+        self.__ui_controls.chkbox_rel = grid_relative_checkbox
 
         self.scene.append_to_caption('\t')
         # Checkbox for grid visibility
-        chkbox_grid = checkbox(
+        checkbox_grid_visibility = checkbox(
             bind=self.__grid_visibility_checkbox, text="Grid Visibility",
             checked=self.__grid_visibility)
+        self.__ui_controls.chkbox_grid = checkbox_grid_visibility
         self.scene.append_to_caption('\n')
 
         ##################################################
         self.scene.append_to_caption('<h3>Robot</h3>\n')
         # Drop down for robots / joints in frame
-        menu_robots = menu(bind=self.__menu_item_chosen, choices=list_of_names)
+        menu_robots_list = menu(bind=self.__menu_item_chosen, choices=list_of_names)
         if not len(list_of_names) == 0:
-            menu_robots.index = self.__selected_robot
+            menu_robots_list.index = self.__selected_robot
+        self.__ui_controls.menu_robots = menu_robots_list
         self.scene.append_to_caption('\t')
 
         # Button to delete the selected robot
-        btn_del = button(bind=self.__del_robot, text="Delete Robot")
+        delete_button = button(bind=self.__del_robot, text="Delete Robot")
+        self.__ui_controls.btn_del = delete_button
         self.scene.append_to_caption('\t')
 
         # Button to clear the robots in screen
-        btn_clr = button(bind=self.clear_scene, text="Clear Scene")
+        clear_button = button(bind=self.clear_scene, text="Clear Scene")
+        self.__ui_controls.btn_clr = clear_button
         self.scene.append_to_caption('\n')
 
         ##################################################
         self.scene.append_to_caption('<h3>Characteristics</h3>\n')
         # Checkbox for reference frame visibilities
         if len(self.__robots) == 0:
-            chkbox_ref = checkbox(
+            reference_checkbox = checkbox(
                 bind=self.__reference_frame_checkbox,
                 text="Show Reference Frames", checked=True)
         else:
             chk = self.__robots[self.__selected_robot].ref_shown
-            chkbox_ref = checkbox(
+            reference_checkbox = checkbox(
                 bind=self.__reference_frame_checkbox,
                 text="Show Reference Frames", checked=chk)
+        self.__ui_controls.chkbox_ref = reference_checkbox
         self.scene.append_to_caption('\t')
 
         # Checkbox for robot visibility
         if len(self.__robots) == 0:
-            chkbox_rob = checkbox(
+            robot_vis_checkbox = checkbox(
                 bind=self.__robot_visibility_checkbox,
                 text="Show Robot", checked=True)
         else:
             chk = self.__robots[self.__selected_robot].rob_shown
-            chkbox_rob = checkbox(
+            robot_vis_checkbox = checkbox(
                 bind=self.__robot_visibility_checkbox,
                 text="Show Robot", checked=chk)
+        self.__ui_controls.chkbox_rob = robot_vis_checkbox
         self.scene.append_to_caption('\n')
 
         # Slider for robot opacity
         self.scene.append_to_caption('Robot Opacity:')
         if len(self.__robots) == 0:
-            sld_opc = slider(bind=self.__opacity_slider, value=1)
+            opacity_slider = slider(bind=self.__opacity_slider, value=1)
         else:
             opc = self.__robots[self.__selected_robot].opacity
-            sld_opc = slider(bind=self.__opacity_slider, value=opc)
-        # self.scene.append_to_caption('\n\n')
+            opacity_slider = slider(bind=self.__opacity_slider, value=opc)
+        self.__ui_controls.sld_opc = opacity_slider
         self.scene.append_to_caption('\n')
 
         ##################################################
@@ -551,10 +587,6 @@ class GraphicsCanvas3D:  # pragma nocover
                        'MOUSEWHEEL | <i>zoom in / out</i>'
 
         self.scene.append_to_caption(controls_str)
-
-        return [
-            btn_reset, menu_robots, chkbox_ref, chkbox_rob, chkbox_grid,
-            chkbox_cam, chkbox_rel, sld_opc, btn_del, btn_clr]
 
     def __setup_joint_sliders(self):
         """
@@ -604,7 +636,7 @@ class GraphicsCanvas3D:  # pragma nocover
         # Update UI
         # get list of robots
         new_list = []
-        for name in self.__ui_controls[self.__idx_menu_robots].choices:
+        for name in self.__ui_controls.get('menu_robots').choices:
             new_list.append(name)
 
         self.__reload_caption(new_list)
@@ -632,13 +664,13 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__selected_robot = m.index
 
         # Update the checkboxes/sliders for the selected robot
-        self.__ui_controls[self.__idx_chkbox_ref].checked = \
+        self.__ui_controls.get('chkbox_ref').checked = \
             self.__robots[self.__selected_robot].ref_shown
 
-        self.__ui_controls[self.__idx_chkbox_rob].checked = \
+        self.__ui_controls.get('chkbox_rob').checked = \
             self.__robots[self.__selected_robot].rob_shown
 
-        self.__ui_controls[self.__idx_sld_opc].value = \
+        self.__ui_controls.get('sld_opc').value = \
             self.__robots[self.__selected_robot].opacity
 
     def __reference_frame_checkbox(self, c):
@@ -738,32 +770,38 @@ class GraphicsCanvas3D:  # pragma nocover
                 joint[self.__idx_theta], degrees(joint[self.__idx_theta]))
             joint[self.__idx_text].text = string
 
+    def __screenshot(self, b):
+        """
+        Take a screencap
+        """
+        filename = "vp_ss_{:04d}.png".format(self._ss_tally)
+        self.take_screenshot(filename)
+        self._ss_tally += 1
+
 
 class GraphicsCanvas2D:  # pragma nocover
     """
-        Set up the scene with initial conditions.
-            - White background
-            - Width, height
-            - Title, caption
-            - Axes drawn (if applicable)
+    Set up the scene with initial conditions.
+        - White background
+        - Width, height
+        - Title, caption
+        - Axes drawn (if applicable)
 
-        :param height: Height of the canvas on screen (Pixels),
-            defaults to 360.
-        :type height: `int`, optional
-        :param width: Width of the canvas on screen (Pixels), defaults to 640.
-        :type width: `int`, optional
-        :param title: Title of the plot. Gets displayed above canvas, defaults
-            to ''.
-        :type title: `str`, optional
-        :param caption: Caption (subtitle) of the plot. Gets displayed below
-            the canvas, defaults to ''.
-        :type caption: `str`, optional
-        :param grid: Whether a grid should be displayed in the plot, defaults
-            to `True`.
-        :type grid: `bool`, optional
-        """
+    :param height: Height of the canvas on screen (Pixels), defaults to 360.
+    :type height: `int`, optional
+    :param width: Width of the canvas on screen (Pixels), defaults to 640.
+    :type width: `int`, optional
+    :param title: Title of the plot. Gets displayed above canvas, defaults to ''.
+    :type title: `str`, optional
+    :param caption: Caption (subtitle) of the plot. Gets displayed below the canvas, defaults to ''.
+    :type caption: `str`, optional
+    :param grid: Whether a grid should be displayed in the plot, defaults to `True`.
+    :type grid: `bool`, optional
+    :param g_col: The RGB grid colour
+    :type g_col: `list`, optional
+    """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None):
 
         # Private lists
         self.__line_styles = [
@@ -835,21 +873,15 @@ class GraphicsCanvas2D:  # pragma nocover
         if caption != '':
             self.scene.caption = caption
 
-        self.__ui_controls = []
+        self.__ui_controls = UIMMap()
         self.__reload_caption()
-        # Indices to easily identify entities
-        self.__idx_btn_reset = 0  # Camera Reset Button
-        self.__idx_chkbox_grid = 1  # Grid Visibility Checkbox
-        self.__idx_chkbox_cam = 2  # Camera Lock Checkbox
-        self.__idx_chkbox_rel = 3  # Grid Relative Checkbox
-        self.__idx_btn_clr = 4  # Clear button
 
         # Any time a key or mouse is held down, run the callback function
         rate(30)  # 30Hz
         self.scene.bind('keydown', self.__handle_keyboard_inputs)
 
         # Create the grid, and display if wanted
-        self.__graphics_grid = GraphicsGrid(self.scene)
+        self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col)
         # Toggle grid to 2D
         # self.__graphics_grid.toggle_2d_3d()
         # Lock the grid
@@ -1029,7 +1061,9 @@ class GraphicsCanvas2D:  # pragma nocover
         """
         # Remove all UI elements
         for item in self.__ui_controls:
-            item.delete()
+            if self.__ui_controls.get(item) is None:
+                continue
+            self.__ui_controls.get(item).delete()
         # Restore the caption
         self.scene.caption = self.__default_caption
         # Create the updated caption.
@@ -1044,26 +1078,31 @@ class GraphicsCanvas2D:  # pragma nocover
         # Button to reset camera
         btn_reset = button(
             bind=self.__reset_camera, text="Reset Camera")
+        self.__ui_controls.btn_reset = btn_reset
         self.scene.append_to_caption('\t')
 
         chkbox_cam = checkbox(
             bind=self.__camera_lock_checkbox,
             text="Camera Lock", checked=self.__camera_lock)
+        self.__ui_controls.chkbox_cam = chkbox_cam
         self.scene.append_to_caption('\t')
 
         chkbox_rel = checkbox(
             bind=self.__grid_relative_checkbox,
             text="Grid Relative", checked=self.__grid_relative)
+        self.__ui_controls.chkbox_rel = chkbox_rel
         self.scene.append_to_caption('\n\n')
 
         # Button to clear the screen
         btn_clr = button(bind=self.clear_scene, text="Clear Scene")
+        self.__ui_controls.btn_clear = btn_clr
         self.scene.append_to_caption('\n\n')
 
         # Checkbox for grid visibility
         chkbox_grid = checkbox(
             bind=self.__grid_visibility_checkbox, text="Grid Visibility",
             checked=self.__grid_visibility)
+        self.__ui_controls.chkbox_grid = chkbox_grid
         self.scene.append_to_caption('\t')
 
         # Prevent the space bar from toggling the active checkbox/button/etc
@@ -1093,8 +1132,6 @@ class GraphicsCanvas2D:  # pragma nocover
         # Disable the arrow keys from scrolling in the browser
         # https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
         self.scene.append_to_caption(controls_str)
-
-        return [btn_reset, chkbox_grid, chkbox_cam, chkbox_rel, btn_clr]
 
     #######################################
     # UI CALLBACKS
@@ -1313,7 +1350,7 @@ class GraphicsCanvas2D:  # pragma nocover
                         options_split[char + 1] == '.':
                     # Join the two into the first
                     options_split[char] = options_split[char] \
-                        + options_split[char + 1]
+                                          + options_split[char + 1]
                     # Shuffle down the rest
                     for idx in range(char + 2, len(options_split)):
                         options_split[idx - 1] = options_split[idx]

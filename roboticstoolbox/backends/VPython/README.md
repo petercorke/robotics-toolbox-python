@@ -57,17 +57,21 @@ To create a scene to draw objects to, a canvas must be created. Upon creation, a
 If launched through Jupyter Notebooks, it will be displayed where executed.
 
 Different attributes can be supplied to the environment for some customisation. The display width, height, title, and
-caption can be manually input. Lastly, booleans representing the dimensions, and grid visibility can be set.
+caption can be manually input. Booleans representing the number of dimensions, and grid visibility and colour can be
+set.
 
 Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
 capabilities)
 ```python
-# Create a default canvas (3D, 500*888, with grid displayed, no title or caption)
+# Create a default canvas (3D, 500*888, with grid displayed, no title or caption, black opaque grid)
 env.launch()
 
 # Alternatively create a grid with specified parameters
-env.launch(is_3d=True, height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
-env.launch(is_3d=False, height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+env.launch(is_3d=True, height=768, width=1024, title="Scene 1", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2])
+
+env.launch(is_3d=False, height=768, width=1024, title="Scene 2", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2])
 ``` 
 Multiple scenes can be created, simply execute `launch` for every scene required. Keeping note of the order for future
 reference.
@@ -78,6 +82,7 @@ The same functionality can be done in code as will be mentioned.
 3D options:
  * Toggle the UI mode between Canvas Controls, and a Teachpanel
    * The Teachpanel will have a slider for each joint to rotate between all available angles for that joint
+ * Take a screenshot of the scene. Saves to user's downloads folder.
  * Choose which robot to edit
  * Toggle robot/frame visibility
  * Change robot opacity
@@ -134,6 +139,31 @@ If no joint angles given, it will default to the joint angles internally in the 
 # Set the pose of the Puma560 to the "ready" position
 env.step(puma, puma.qr, 0)
 ```
+
+## Recording VPython
+In order to record the canvas, there are unique backend functions to call: `record_start` and `record_stop`. Currently,
+only one scene in the backend can be recorded at a time. The start function requires inputs of FPS, and a scene number
+(defaults to 0). The stop function requires a filename with extension. Files are saved relative to the roboticstoolbox
+home directory. Imageio is used to convert all image files into a movie file.
+
+**NOTE**: The scene is still interactive during recording. E.g. The teachpanel can be used to manipulate the robot while
+being recorded for later viewing.
+
+**WARNING**: Before trying to record, it is suggested to try the "Screenshot" button in the UI first. VPython uses the
+browsers download functionality, so enabling auto-download of the file types may be required. Otherwise you could be
+spammed with download requests. (Files get removed when converted to a video, so your downloads folder will be
+unmodified).
+```python
+env.record_start(10)  # Record scene 0 at 10 fps
+
+# Sleep for X seconds, and/or manipulate robot here
+# e.g.
+#   env.step(puma, puma.qn, 0)
+#   time.sleep(3)
+
+env.record_stop('my_video.avi')  # Save as an avi
+```
+
 &nbsp;
 
 &nbsp;
@@ -162,18 +192,22 @@ my_link.get_axis_vector(z_axis_vector)
 ## Setting up the scene
 To create a scene to draw object to, a canvas must be created. Upon creation, a localhost http server will be opened. 
 Different attributes can be supplied to the function for some customisation. The display width, height, title, and
-caption can be manually input. Lastly, a boolean representing the grid visibility can be set.
+caption can be manually input. The grid colour and opacity can also be set. Lastly, a boolean representing the grid
+visibility can be set.
 
 Firstly, decide whether a 3D or 2D world is required (even though the 2D is represented in a 3D world, it will have 2D
 capabilities). The scene has a GUI underneath the canvas. It gives an interface to toggle graphics and visibilities.
 ```python
-# Create a default canvas (500*888, with grid displayed, no title or caption)
+# Create a default canvas (500*888, with grid displayed, no title or caption, black opaque grid)
 g_canvas = GraphicalCanvas3D()
 g_canvas = GraphicalCanvas2D()
 
 # Alternatively create a grid with specified parameters
-g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
-g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...", grid=False)
+g_canvas = gph.GraphicsCanvas3D(height=768, width=1024, title="Scene 1", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
+
+g_canvas = gph.GraphicsCanvas2D(height=768, width=1024, title="Scene 1", caption="This scene shows...",
+    grid=False, g_col=[0.2, 0.2, 0.2], g_opc=0.3)
 ```
 
 The GraphicsGrid object has functions to toggle grid visibility.

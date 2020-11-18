@@ -18,7 +18,9 @@ collision_req = [
 
 vp_req = [
     'vpython',
-    'numpy-stl'
+    'numpy-stl',
+    'imageio',
+    'imageio-ffmpeg'
 ]
 
 dev_req = [
