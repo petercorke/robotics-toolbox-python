@@ -34,7 +34,17 @@ dt = 0.025
 
 # Start recording with a framerate of 1/dt and
 # call the video panda_swift_recording
+# Export video as a webm file (this only works in Chrome)
 env.start_recording('panda_swift_recording', 1 / dt)
+
+# To export as a gif replace the above line with
+# env.start_recording('panda_swift_recording', 1 / dt, format='gif')
+
+# To export as a tar folder of jpg captures replace with
+# env.start_recording('panda_swift_recording', 1 / dt, format='jpg')
+
+# To export as a tar folder of png captures replace with
+# env.start_recording('panda_swift_recording', 1 / dt, format='png')
 
 # Number of joint in the panda which we are controlling
 n = 7

@@ -283,7 +283,7 @@ class Swift(Connector):  # pragma nocover
         while True:
             time.sleep(1)
 
-    def start_recording(self, file_name, framerate):
+    def start_recording(self, file_name, framerate, format='webm'):
         """
         Start recording the canvas in the Swift simulator
 
@@ -293,14 +293,24 @@ class Swift(Connector):  # pragma nocover
             this should equalt 1 / dt where dt is the time supplied to the
             step function
         :type framerate: float
+        :param format: This is the format of the video, one of 'webm', 'gif',
+            'png', or 'jpg'
+        :type format: string
 
         ``env.start_recording(file_name)`` starts recording the simulation
             scene and will save it as file_name once
             ``env.start_recording(file_name)`` is called
         """
 
+        valid_formats = ['webm', 'gif', 'png', 'jpg']
+
+        if format not in valid_formats:
+            raise ValueError(
+                "Format can one of 'webm', 'gif', 'png', or 'jpg'")
+
         if not self.recording:
-            self._send_socket('start_recording', [framerate, file_name])
+            self._send_socket(
+                'start_recording', [framerate, file_name, format])
             self.recording = True
         else:
             raise ValueError(
