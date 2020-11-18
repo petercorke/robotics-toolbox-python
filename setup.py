@@ -5,11 +5,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
     'numpy',
-    'spatialmath-python>=0.8.3',
+    'spatialmath-python>=0.8.4',
     'scipy',
     'matplotlib',
     'ansitable',
-    'swift-sim'
+    'swift-sim>=0.6.1'
 ]
 
 collision_req = [
