@@ -11,6 +11,14 @@ from functools import wraps
 from io import StringIO
 import os
 
+_mpl = False
+
+try:
+    from matplotlib import colors as mpc
+    _mpl = True
+except ImportError:    # pragma nocover
+    pass
+
 p = None
 _pyb = None
 
@@ -53,19 +61,20 @@ class Shape(object):
             radius=0,
             length=0,
             scale=[1, 1, 1],
+            color=None,
             filename=None,
             stype=None):
 
         self._wT = SE3()
         self.co = None
         self.base = base
-        # self.wT = None
         self.scale = scale
         self.radius = radius
         self.length = length
         self.filename = filename
         self.stype = stype
         self.v = np.zeros(6)
+        self.color = color
 
         self.pinit = False
 
@@ -90,7 +99,8 @@ class Shape(object):
             'length': self.length,
             't': fk.t.tolist(),
             'q': r2q(fk.R).tolist(),
-            'v': self.v.tolist()
+            'v': self.v.tolist(),
+            'color': self.color
         }
 
         return shape
@@ -142,6 +152,34 @@ class Shape(object):
     @v.setter
     def v(self, value):
         self._v = getvector(value, 6)
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, value):
+
+        default_color = (0.95, 0.5, 0.25, 1.0)
+
+        if isinstance(value, list) or isinstance(value, tuple):
+            if len(value) == 3:
+                value.append(1.0)
+        elif isinstance(value, str):
+            if _mpl:
+                try:
+                    value = mpc.to_rgba(value)
+                except ValueError:
+                    print('{0} was an invalid color name, using default color')
+                    value = default_color
+            else:
+                print(
+                    'Color only supported when matplotlib is installed\n'
+                    'Install using: pip install matplotlib')
+        elif value is None:
+            value = default_color
+
+        self._color = value
 
     @property
     def wT(self):

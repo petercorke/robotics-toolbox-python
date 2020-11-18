@@ -11,14 +11,19 @@ from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.tools import xacro
 from pathlib import PurePath, PurePosixPath
 from scipy.optimize import minimize, Bounds, LinearConstraint
-from matplotlib import colors
-from matplotlib import cm
 from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
 
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.backends.Swift import Swift
+
+try:
+    from matplotlib import colors
+    from matplotlib import cm
+    _mpl = True
+except ImportError:    # pragma nocover
+    pass
 
 try:
     import PIL
