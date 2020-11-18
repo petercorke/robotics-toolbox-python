@@ -148,7 +148,7 @@ class TestModels(unittest.TestCase):
         rp.models.PR2()
 
     def test_ikine6s_puma(self):
-        self.skipTest("Need new spatialmath pypi release")
+        # self.skipTest("Need new spatialmath pypi release")
         r0 = rp.models.DH.Puma560()
         q = r0.qr
         T = r0.fkine(q)
