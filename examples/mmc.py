@@ -16,7 +16,7 @@ motion controller,” arXiv preprint arXiv:2002.11901,2020.
 
 # Launch the simulator Swift
 env = rtb.backends.Swift()
-env.launch('google-chrome')
+env.launch()
 
 # Create a Panda robot object
 panda = rtb.models.Panda()

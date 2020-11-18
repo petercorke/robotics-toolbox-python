@@ -36,6 +36,9 @@ dt = 0.025
 # call the video panda_swift_recording
 env.start_recording('panda_swift_recording', 1 / dt)
 
+# To export as a gif replace the above line with
+# env.start_recording('panda_swift_recording', 1 / dt, format='gif')
+
 # Number of joint in the panda which we are controlling
 n = 7
 
@@ -108,3 +111,5 @@ while not arrived:
 
 # Stop recording and save the video (to the downloads folder)
 env.stop_recording()
+
+# env.hold()
