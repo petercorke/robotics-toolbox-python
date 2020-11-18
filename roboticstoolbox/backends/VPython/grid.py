@@ -58,39 +58,13 @@ class GraphicsGrid:  # pragma nocover
             round(self.__scene.center.z)
         ]
 
-        # Private parameters for indexing in grid_object
-        # self.__xy_plane_idx = 0
-        # self.__xz_plane_idx = 1
-        # self.__yz_plane_idx = 2
-        # self.__planes_idx = 0
-        # self.__labels_idx = 1
-
         if colour is None:
             colour = [0, 0, 0]
         self._colour = colour
 
         # Initialise a grid object
-        # grid_object[0] will always be the 3 plane graphics.
-        # [XY, XZ, YZ] (alphabetical in order and connection)
-        # grid_object[1] will always be the labels.
-        # There is always a certain number of indices.
-        # Order is [x-plane numbers, "X", y-plane numbers,
-        # "Y", z-plane numbers, "Z"]
         line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
-        # self.grid_object = [[
-        #     curve(vector(0, 0, 0),
-        #           color=vector(self._colour[0], self._colour[1], self._colour[2]),
-        #           radius=line_thickness,
-        #           origin=vector(0, 0, 0)),
-        #     curve(vector(0, 0, 0),
-        #           color=vector(self._colour[0], self._colour[1], self._colour[2]),
-        #           radius=line_thickness,
-        #           origin=vector(0, 0, 0)),
-        #     curve(vector(0, 0, 0),
-        #           color=vector(self._colour[0], self._colour[1], self._colour[2]),
-        #           radius=line_thickness,
-        #           origin=vector(0, 0, 0))
-        # ], []]
+        
         self.grid_object = GridMMap({
             'xy_plane': curve(vector(0, 0, 0),
                               color=vector(self._colour[0], self._colour[1], self._colour[2]),
