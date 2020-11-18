@@ -293,7 +293,8 @@ class Swift(Connector):  # pragma nocover
             this should equalt 1 / dt where dt is the time supplied to the
             step function
         :type framerate: float
-        :param format: This is the format of the video, either 'webm' or 'gif'
+        :param format: This is the format of the video, one of 'webm', 'gif',
+            'png', or 'jpg'
         :type format: string
 
         ``env.start_recording(file_name)`` starts recording the simulation
@@ -301,8 +302,11 @@ class Swift(Connector):  # pragma nocover
             ``env.start_recording(file_name)`` is called
         """
 
-        if not format == 'webm' and not format == 'gif':
-            raise ValueError("Format can only be 'webm' or 'gif'")
+        valid_formats = ['webm', 'gif', 'png', 'jpg']
+
+        if format not in valid_formats:
+            raise ValueError(
+                "Format can one of 'webm', 'gif', 'png', or 'jpg'")
 
         if not self.recording:
             self._send_socket(
