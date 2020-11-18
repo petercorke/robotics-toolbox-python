@@ -6,23 +6,30 @@
 import roboticstoolbox as rp
 import numpy as np
 from roboticstoolbox.backends.Connector import Connector
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
+
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath.base.argcheck import getvector
 # from roboticstoolbox.tools import Ticker
 
-matplotlib.rcParams['pdf.fonttype'] = 42
-matplotlib.rcParams['ps.fonttype'] = 42
-plt.style.use('ggplot')
-matplotlib.rcParams['font.size'] = 7
-matplotlib.rcParams['lines.linewidth'] = 0.5
-matplotlib.rcParams['xtick.major.size'] = 1.5
-matplotlib.rcParams['ytick.major.size'] = 1.5
-matplotlib.rcParams['axes.labelpad'] = 1
-plt.rc('grid', linestyle="-", color='#dbdbdb')
+_mpl = False
+
+try:
+    import matplotlib
+    import matplotlib.pyplot as plt
+    from matplotlib.widgets import Slider
+    matplotlib.rcParams['pdf.fonttype'] = 42
+    matplotlib.rcParams['ps.fonttype'] = 42
+    plt.style.use('ggplot')
+    matplotlib.rcParams['font.size'] = 7
+    matplotlib.rcParams['lines.linewidth'] = 0.5
+    matplotlib.rcParams['xtick.major.size'] = 1.5
+    matplotlib.rcParams['ytick.major.size'] = 1.5
+    matplotlib.rcParams['axes.labelpad'] = 1
+    plt.rc('grid', linestyle="-", color='#dbdbdb')
+    _mpl = True
+except ImportError:    # pragma nocover
+    pass
 
 
 class PyPlot(Connector):
@@ -56,6 +63,11 @@ class PyPlot(Connector):
         super(PyPlot, self).__init__()
         self.robots = []
         self.ellipses = []
+
+        if not _mpl:    # pragma nocover
+            raise ImportError(
+                '\n\nYou do not have matplotlib installed, do:\n'
+                'pip install matplotlib\n\n')
 
     def launch(self, name=None, limits=None):
         """
