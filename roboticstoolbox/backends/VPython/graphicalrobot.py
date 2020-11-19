@@ -540,9 +540,9 @@ class GraphicalRobot:  # pragma nocover
             if robot.basemesh is not None:
                 self.append_link("s", robot.base, robot.basemesh, [0, 0], 0)
             # else: assume no base joint
+            robot_colours = robot.linkcolormap()
             # Create the joints
-            i = 0
-            for link in self.robot.links:
+            for i, link in enumerate(self.robot.links):
                 # Get info
                 if link.isprismatic():
                     j_type = 'p'
@@ -570,8 +570,12 @@ class GraphicalRobot:  # pragma nocover
                     length = link.mesh
                 angle_lims = link.qlim  # Angle limits
                 theta = link.theta  # Current angle
-                i += 1
                 self.append_link(j_type, pose, length, angle_lims, theta)
+
+            # Apply colours
+            for i, joint in enumerate(self.joints):
+                link_colour = list(robot_colours(i))[:3]
+                joint.set_texture(colour=link_colour)
 
         # Add the robot to the canvas UI
         graphics_canvas.add_robot(self)
