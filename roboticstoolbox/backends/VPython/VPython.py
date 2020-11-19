@@ -12,7 +12,7 @@ from time import perf_counter, sleep
 import imageio
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.robot import Robot as r
+import roboticstoolbox.robot.Robot as r
 
 GraphicsCanvas3D = None
 GraphicsCanvas2D = None
@@ -165,7 +165,7 @@ class VPython(Connector):  # pragma nocover
                 "Figure number must be between 0 and total number of canvases")
 
         # If DHRobot given
-        if isinstance(id, r):
+        if isinstance(id, r.Robot):
             robot = None
             # Find first occurrence of it that is in the correct canvas
             for i in range(len(self.robots)):
