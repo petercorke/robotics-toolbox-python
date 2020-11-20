@@ -10,9 +10,20 @@ env = rp.backends.VPython()  # lgtm [py/call-to-non-callable]
 env.launch()
 
 #  PUMA560
-# puma = rp.models.DH.Puma560()
-# env.add(0, 'Puma', puma)
+puma = rp.models.DH.Puma560()
+env.add(0, 'Puma', puma)
 
+
+# Example 1
+# qt = rp.tools.trajectory.jtraj(puma.qz, puma.qr, 50)
+# env.record_start(5)
+# for q in qt.q:
+#     time.sleep(1/5)
+#     env.step(puma, q=q)
+# env.record_stop('vpython_jtraj_video.mp4', save_fps=25)
+
+
+# Example 2
 # env.record_start(10)
 #
 # time.sleep(1)
