@@ -391,9 +391,10 @@ class VPython(Connector):  # pragma nocover
 
         self._thread_lock.release()
 
-    def record_stop(self, filename):
+    def record_stop(self, filename, save_fps=None):
         """
         Stop recording screencaps of a scene and combine them into a movie
+        Save_fps is different to record fps. Will save the media file at the given save fps.
         """
         #
         self._thread_lock.acquire()
@@ -409,7 +410,8 @@ class VPython(Connector):  # pragma nocover
         # Wait for thread to finish
         self._recording_thread.join()
 
-        sleep(2)  # Quick sleep to ensure all downloads are done
+        sleep(3)  # Quick sleep to ensure all downloads are done
+        # (higher framerates can lag behind)
 
         # Get downloads directory
         opsys = platform.system()
@@ -428,7 +430,9 @@ class VPython(Connector):  # pragma nocover
 
         files = [file for file in glob.glob(fp_in)]
 
-        writer = imageio.get_writer(fp_out, fps=self._recording_fps)
+        if save_fps is None:
+            save_fps = self._recording_fps
+        writer = imageio.get_writer(fp_out, fps=save_fps)
 
         for f in files:
             writer.append_data(imageio.imread(f))  # Add it to the video
