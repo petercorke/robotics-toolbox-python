@@ -44,6 +44,9 @@ class TestVPython(unittest.TestCase):
             # Give time for VPython to exit
             time.sleep(1)
 
+    #  TODO
+    #   COMMENTED OUT UNTIL CAN RUN ON GITHUB ACTIONS
+    #   CAN STILL BE EXECUTED ON PERSONAL MACHINE LOCALLY
     #####################################################################
     # def test_get_pose_x_vector(self):
     #     self.assertEqual(get_pose_x_vec(self.se3), vector(1, 0, 0))
