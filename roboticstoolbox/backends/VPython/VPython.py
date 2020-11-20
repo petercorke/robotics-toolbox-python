@@ -12,7 +12,7 @@ from time import perf_counter, sleep
 import imageio
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.robot.DHLink import DHLink
-import roboticstoolbox.robot.Robot as r
+from roboticstoolbox.robot.Robot import Robot as r
 
 GraphicsCanvas3D = None
 GraphicsCanvas2D = None
