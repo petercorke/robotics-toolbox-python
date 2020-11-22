@@ -13,11 +13,13 @@ from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds
-from roboticstoolbox.robot.DHDynamics import DHDynamicsMixin
 from ansitable import ANSITable, Column
 
+from roboticstoolbox.robot.DHLink import _check_rne
+from frne import init, frne, delete
 
-class DHRobot(Robot, DHDynamicsMixin):
+
+class DHRobot(Robot):
     """
     Class for robots defined using Denavit-Hartenberg notation
 
@@ -233,29 +235,29 @@ class DHRobot(Robot, DHDynamicsMixin):
             tool=self.tool,
             gravity=self.gravity)
 
-    def copy(self):
-        """
-        Copy a robot
+    # def copy(self):
+    #     """
+    #     Copy a robot
 
-        :return: A deepish copy of the robot
-        :rtype: Robot subclass instance
-        """
+    #     :return: A deepish copy of the robot
+    #     :rtype: Robot subclass instance
+    #     """
 
-        L = [link.copy() for link in self]
+    #     L = [link.copy() for link in self]
 
-        new = DHRobot(
-            L,
-            name=self.name,
-            manufacturer=self.manufacturer,
-            base=self.base,
-            tool=self.tool,
-            gravity=self.gravity)
+    #     new = DHRobot(
+    #         L,
+    #         name=self.name,
+    #         manufacturer=self.manufacturer,
+    #         base=self.base,
+    #         tool=self.tool,
+    #         gravity=self.gravity)
 
-        new.q = self.q
-        new.qd = self.qd
-        new.qdd = self.qdd
+    #     new.q = self.q
+    #     new.qd = self.qd
+    #     new.qdd = self.qdd
 
-        return new
+    #     return new
 
     @property
     def mdh(self):
@@ -1247,6 +1249,434 @@ class DHRobot(Robot, DHDynamicsMixin):
         Jdot = v[:, 0]
 
         return Jdot
+        
+# -------------------------------------------------------------------------- #
+
+    def _init_rne(self):
+        # Compress link data into a 1D array
+        L = np.zeros(24 * self.n)
+
+        for i in range(self.n):
+            j = i * 24
+            L[j] = self.links[i].alpha
+            L[j + 1] = self.links[i].a
+            L[j + 2] = self.links[i].theta
+            L[j + 3] = self.links[i].d
+            L[j + 4] = self.links[i].sigma
+            L[j + 5] = self.links[i].offset
+            L[j + 6] = self.links[i].m
+            L[j + 7:j + 10] = self.links[i].r.flatten()
+            L[j + 10:j + 19] = self.links[i].I.flatten()
+            L[j + 19] = self.links[i].Jm
+            L[j + 20] = self.links[i].G
+            L[j + 21] = self.links[i].B
+            L[j + 22:j + 24] = self.links[i].Tc.flatten()
+
+        self._rne_ob = init(self.n, self.mdh, L, self.gravity)
+
+    def delete_rne(self):
+        """
+        Frees the memory holding the robot object in c if the robot object
+        has been initialised in c.
+        """
+        if self._rne_ob is not None:
+            delete(self._rne_ob)
+            self._dynchanged = False
+            self._rne_ob = None
+
+    @_check_rne
+    def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
+        r"""
+        Inverse dynamics
+
+        :param q: Joint coordinates
+        :type q: ndarray(n)
+        :param qd: Joint velocity
+        :type qd: ndarray(n)
+        :param qdd: The joint accelerations of the robot
+        :type qdd: ndarray(n)
+        :param grav: Gravity vector to overwrite robots gravity value
+        :type grav: ndarray(6)
+        :param fext: Specify wrench acting on the end-effector
+                     :math:`W=[F_x F_y F_z M_x M_y M_z]`
+        :type fext: ndarray(6)
+
+        ``tau = rne(q, qd, qdd, grav, fext)`` is the joint torque required for
+        the robot to achieve the specified joint position ``q`` (1xn), velocity
+        ``qd`` (1xn) and acceleration ``qdd`` (1xn), where n is the number of
+        robot joints. ``fext`` describes the wrench acting on the end-effector
+
+        Trajectory operation:
+        If q, qd and qdd (mxn) are matrices with m cols representing a
+        trajectory then tau (mxn) is a matrix with cols corresponding to each
+        trajectory step.
+
+        .. note::
+            - The torque computed contains a contribution due to armature
+              inertia and joint friction.
+            - If a model has no dynamic parameters set the result is zero.
+
+        :seealso: :func:`rne_python`
+        """
+        trajn = 1
+
+        try:
+            q = getvector(q, self.n, 'row')
+            qd = getvector(qd, self.n, 'row')
+            qdd = getvector(qdd, self.n, 'row')
+        except ValueError:
+            trajn = q.shape[0]
+            verifymatrix(q, (trajn, self.n))
+            verifymatrix(qd, (trajn, self.n))
+            verifymatrix(qdd, (trajn, self.n))
+
+        if grav is None:
+            grav = self.gravity
+        else:
+            grav = getvector(grav, 3)
+
+        # The c function doesn't handle base rotation, so we need to hack the
+        # gravity vector instead
+        grav = self.base.R.T @ grav
+
+        if fext is None:
+            fext = np.zeros(6)
+        else:
+            fext = getvector(fext, 6)
+
+        tau = np.zeros((trajn, self.n))
+
+        for i in range(trajn):
+            tau[i, :] = frne(
+                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], grav, fext)
+
+        if trajn == 1:
+            return tau[0, :]
+        else:
+            return tau
+
+    def rne_python(
+            self, Q, QD=None, QDD=None,
+            grav=None, fext=None, debug=False, basewrench=False):
+        """
+        Compute inverse dynamics via recursive Newton-Euler formulation
+
+        :param Q: Joint coordinates
+        :param QD: Joint velocity
+        :param QDD: Joint acceleration
+        :param grav: [description], defaults to None
+        :type grav: [type], optional
+        :param fext: end-effector wrench, defaults to None
+        :type fext: 6-element array-like, optional
+        :param debug: print debug information to console, defaults to False
+        :type debug: bool, optional
+        :param basewrench: compute the base wrench, defaults to False
+        :type basewrench: bool, optional
+        :raises ValueError: for misshaped inputs
+        :return: Joint force/torques
+        :rtype: NumPy array
+
+        Recursive Newton-Euler for standard Denavit-Hartenberg notation.
+
+        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (n,) where n is
+          the number of robot joints.  The result has shape (n,).
+        - ``rne_dh(q, qd, qdd)`` where the arguments have shape (m,n) where n
+          is the number of robot joints and where m is the number of steps in
+          the joint trajectory.  The result has shape (m,n).
+        - ``rne_dh(p)`` where the input is a 1D array ``p`` = [q, qd, qdd] with
+          shape (3n,), and the result has shape (n,).
+        - ``rne_dh(p)`` where the input is a 2D array ``p`` = [q, qd, qdd] with
+          shape (m,3n) and the result has shape (m,n).
+
+        .. note::
+            - This is a pure Python implementation and slower than the .rne()
+            which is written in C.
+            - This version supports symbolic model parameters
+            - Verified against MATLAB code
+
+        :seealso: :func:`rne`
+        """
+
+        def removesmall(x):
+            return x
+
+        n = self.n
+
+        if self.symbolic:
+            dtype = 'O'
+        else:
+            dtype = None
+
+        z0 = np.array([0, 0, 1], dtype=dtype)
+
+        if grav is None:
+            grav = self.gravity  # default gravity from the object
+        else:
+            grav = getvector(grav, 3)
+
+        if fext is None:
+            fext = np.zeros((6,), dtype=dtype)
+        else:
+            fext = getvector(fext, 6)
+
+        if debug:
+            print('grav', grav)
+            print('fext', fext)
+
+        # unpack the joint coordinates and derivatives
+        if Q is not None and QD is None and QDD is None:
+            # single argument case
+            Q = getmatrix(Q, (None, self.n * 3))
+            q = Q[:, 0:n]
+            qd = Q[:, n:2 * n]
+            qdd = Q[:, 2 * n:]
+
+        else:
+            # 3 argument case
+            q = getmatrix(Q, (None, self.n))
+            qd = getmatrix(QD, (None, self.n))
+            qdd = getmatrix(QDD, (None, self.n))
+
+        nk = q.shape[0]
+
+        tau = np.zeros((nk, n), dtype=dtype)
+        if basewrench:
+            wbase = np.zeros((nk, n), dtype=dtype)
+
+        for k in range(nk):
+            # take the k'th row of data
+            q_k = q[k, :]
+            qd_k = qd[k, :]
+            qdd_k = qdd[k, :]
+
+            if debug:
+                print('q_k', q_k)
+                print('qd_k', qd_k)
+                print('qdd_k', qdd_k)
+                print()
+
+            # joint vector quantities stored columwise in matrix
+            #  m suffix for matrix
+            Fm = np.zeros((3, n), dtype=dtype)
+            Nm = np.zeros((3, n), dtype=dtype)
+            # if robot.issym
+            #     pstarm = sym([]);
+            # else
+            #     pstarm = [];
+            pstarm = np.zeros((3, n), dtype=dtype)
+            Rm = []
+
+            # rotate base velocity and acceleration into L1 frame
+            Rb = t2r(self.base.A).T
+            # base has zero angular velocity
+            w = Rb @ np.zeros((3,), dtype=dtype)
+            # base has zero angular acceleration
+            wd = Rb @ np.zeros((3,), dtype=dtype)
+            vd = Rb @ grav
+
+            # ----------------  initialize some variables ----------------- #
+
+            for j in range(n):
+                link = self.links[j]
+
+                # compute the link rotation matrix
+                if link.sigma == 0:
+                    # revolute axis
+                    Tj = link.A(q_k[j]).A
+                    d = link.d
+                else:
+                    # prismatic
+                    Tj = link.A(link.theta).A
+                    d = q_k[j]
+
+                # compute pstar:
+                #   O_{j-1} to O_j in {j}, negative inverse of link xform
+                alpha = link.alpha
+                if self.mdh:
+                    pstar = np.r_[
+                        link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
+                    if j == 0:
+                        if self._base:
+                            Tj = self._base.A @ Tj
+                            pstar = self._base.A @ pstar
+                else:
+                    pstar = np.r_[
+                        link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
+
+                # stash them for later
+                Rm.append(t2r(Tj))
+                pstarm[:, j] = pstar
+
+            # -----------------  the forward recursion -------------------- #
+
+            for j, link in enumerate(self.links):
+
+                Rt = Rm[j].T    # transpose!!
+                pstar = pstarm[:, j]
+                r = link.r
+
+                # statement order is important here
+
+                if self.mdh:
+                    if link.isrevolute():
+                        # revolute axis
+                        w_ = Rt @ w + z0 * qd_k[j]
+                        wd_ = Rt @ wd \
+                            + z0 * qdd_k[j] \
+                            + _cross(Rt @ w, z0 * qd_k[j])
+                        vd_ = Rt @ _cross(wd, pstar) \
+                            + _cross(w, _cross(w, pstar)) \
+                            + vd
+                    else:
+                        # prismatic axis
+                        w_ = Rt @ w
+                        wd_ = Rt @ wd
+                        vd_ = Rt @ (
+                            _cross(wd, pstar)
+                            + _cross(w, _cross(w, pstar))
+                            + vd
+                            ) \
+                            + 2 * _cross(Rt @ w, z0 * qd_k[j]) \
+                            + z0 * qdd_k[j]
+                    # trailing underscore means new value, update here
+                    w = w_
+                    wd = wd_
+                    vd = vd_
+                else:
+                    if link.isrevolute():
+                        # revolute axis
+                        wd = Rt @ (
+                            wd + z0 * qdd_k[j]
+                            + _cross(w, z0 * qd_k[j]))
+                        w = Rt @ (w + z0 * qd_k[j])
+                        vd = _cross(wd, pstar) \
+                            + _cross(w, _cross(w, pstar)) \
+                            + Rt @ vd
+                    else:
+                        # prismatic axis
+                        w = Rt @ w
+                        wd = Rt @ wd
+                        vd = Rt @  (z0 * qdd_k[j] + vd) \
+                            + _cross(wd, pstar) \
+                            + 2 * _cross(w, Rt @ z0 * qd_k[j]) \
+                            + _cross(w, _cross(w, pstar))
+
+                vhat = _cross(wd, r) \
+                    + _cross(w, _cross(w, r)) \
+                    + vd
+                Fm[:, j] = link.m * vhat
+                Nm[:, j] = link.I @ wd + _cross(w, link.I @ w)
+
+                if debug:
+                    print('w:     ', removesmall(w))
+                    print('wd:    ', removesmall(wd))
+                    print('vd:    ', removesmall(vd))
+                    print('vdbar: ', removesmall(vhat))
+                    print()
+
+            if debug:
+                print('Fm\n', Fm)
+                print('Nm\n', Nm)
+
+            # -----------------  the backward recursion -------------------- #
+
+            f = fext[:3]      # force/moments on end of arm
+            nn = fext[3:]
+
+            for j in range(n - 1, -1, -1):
+                link = self.links[j]
+                r = link.r
+
+                #
+                # order of these statements is important, since both
+                # nn and f are functions of previous f.
+                #
+                if self.mdh:
+                    if j == (n - 1):
+                        R = np.eye(3, dtype=dtype)
+                        pstar = np.zeros((3,), dtype=dtype)
+                    else:
+                        R = Rm[j + 1]
+                        pstar = pstarm[:, j + 1]
+
+                    f_ = R @ f + Fm[:, j]
+                    nn_ = R @ nn \
+                        + _cross(pstar, R @ f) \
+                        + _cross(pstar, Fm[:, j]) \
+                        + Nm[:, j]
+                    f = f_
+                    nn = nn_
+
+                else:
+                    pstar = pstarm[:, j]
+                    if j == (n - 1):
+                        R = np.eye(3, dtype=dtype)
+                    else:
+                        R = Rm[j + 1]
+
+                    nn = R @ (nn + _cross(R.T @ pstar, f)) \
+                        + _cross(pstar + r, Fm[:, j]) \
+                        + Nm[:, j]
+                    f = R @ f + Fm[:, j]
+
+                if debug:
+                    print('f: ', removesmall(f))
+                    print('n: ', removesmall(nn))
+
+                R = Rm[j]
+                if self.mdh:
+                    if link.isrevolute():
+                        # revolute axis
+                        t = nn @ z0
+                    else:
+                        # prismatic
+                        t = f @ z0
+                else:
+                    if link.isrevolute():
+                        # revolute axis
+                        t = nn @ (R.T @ z0)
+                    else:
+                        # prismatic
+                        t = f @ (R.T @ z0)
+
+                # add joint inertia and friction
+                #  no Coulomb friction if model is symbolic
+                tau[k, j] = t \
+                    + link.G ** 2 * link.Jm * qdd_k[j] \
+                    - link.friction(qd_k[j], coulomb=not self.symbolic)
+                if debug:
+                    print(
+                        f'j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}')  # noqa
+                    print()
+
+            # compute the base wrench and save it
+            if basewrench:
+                R = Rm[0]
+                nn = R @ nn
+                f = R @ f
+                wbase[k, :] = np.r_[f, nn]
+
+        # if self.symbolic:
+        #     # simplify symbolic expressions
+        #     print(
+        #       'start symbolic simplification, this might take a while...')
+        #     # from sympy import trigsimp
+
+        #     # tau = trigsimp(tau)
+        #     # consider using multiprocessing to spread over cores
+        #     #  https://stackoverflow.com/questions/33844085/using-multiprocessing-with-sympy  # noqa
+        #     print('done')
+        #     if tau.shape[0] == 1:
+        #         return tau.reshape(self.n)
+        #     else:
+        #         return tau
+
+        if tau.shape[0] == 1:
+            return tau.flatten()
+        else:
+            return tau
+
+# -------------------------------------------------------------------------- #
 
     def ikine3(self, T, left=True, elbow_up=True):
         """
@@ -1571,73 +2001,17 @@ class DHRobot(Robot, DHDynamicsMixin):
         else:
             return qt, success, err
 
-    # def jacob0v(self, q=None):
-    #     """
-    #     Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
-    #     configuration q, which relates the velocity in the end-effector frame
-    #     to velocity in the base frame
-
-    #     Jv = jacob0v() as above except uses the stored q value of the
-    #     robot object.
-
-    #     :param q: The joint configuration of the robot (Optional,
-    #         if not supplied will use the stored q values).
-    #     :type q: float ndarray(n)
-
-    #     :returns J: The velocity Jacobian in 0 frame
-    #     :rtype J: float ndarray(6,6)
-
-    #     """
-
-    #     if q is None:
-    #         q = np.copy(self.q)
-    #     else:
-    #         q = getvector(q, self.n)
-
-    #     R = self.fkine(q).R
-
-    #     Jv = np.zeros((6, 6), dtype=R.dtype)
-    #     Jv[:3, :3] = R
-    #     Jv[3:, 3:] = R
-
-    #     return Jv
-
-    # def jacobev(self, q=None):
-    #     """
-    #     Jv = jacobev(q) is the spatial velocity Jacobian, at joint
-    #     configuration q, which relates the velocity in the base frame to the
-    #     velocity in the end-effector frame.
-
-    #     Jv = jacobev() as above except uses the stored q value of the
-    #     robot object.
-
-    #     :param q: The joint configuration of the robot (Optional,
-    #         if not supplied will use the stored q values).
-    #     :type q: float ndarray(n)
-
-    #     :returns J: The velocity Jacobian in ee frame
-    #     :rtype J: float ndarray(6,6)
-
-    #     """
-
-    #     if q is None:
-    #         q = np.copy(self.q)
-    #     else:
-    #         q = getvector(q, self.n)
-
-    #     R = self.fkine(q).R
-
-    #     Jv = np.zeros((6, 6), dtype=R.dtype)
-    #     Jv[:3, :3] = R.T
-    #     Jv[3:, 3:] = R.T
-
-    #     return Jv
-
 
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
+
+def _cross(a, b):
+    return np.r_[
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]]
 
 
 if __name__ == "__main__":   # pragma nocover

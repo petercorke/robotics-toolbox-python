@@ -21,6 +21,7 @@ from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath
 from ansitable import ANSITable, Column
 
+from spatialmath import SpatialAcceleration, SpatialVelocity, SpatialInertia, SpatialForce
 
 class ERobot(Robot):
     """
@@ -1389,6 +1390,60 @@ class ERobot(Robot):
 
         return False
 
+
+
+# inverse dynamics (recursive Newton-Euler) using spatial vector notation
+    def  rne( robot, q, qd, qdd ):
+        
+        n = robot.n
+
+        # allocate intermediate variables
+        Xup = SE3.Alloc(n)
+        Xtree = SE3.Alloc(n)
+
+        v = SpatialVelocity.Alloc(n)
+        a = SpatialAcceleration.Alloc(n)
+        f = SpatialForce.Alloc(n)
+        I = SpatialInertia.Alloc(n)
+        s = [None for i in range(n)]   # joint motion subspace
+        Q = np.zeros((n,))   # joint torque/force
+
+        # initialize intermediate variables
+        for j, link in enumerate(robot):
+            I[j] = SpatialInertia(m=link.m, r=link.r)
+            Xtree[j] = link.Ts
+            s[j] = link.v.s
+
+        a_grav = SpatialAcceleration(robot.gravity)
+        
+        # forward recursion
+        for j in range(0, n):
+            vJ = SpatialVelocity(s[j] * qd[j])
+
+            # transform from parent(j) to j
+            Xup[j] = robot[j].A(q[j]).inv()
+
+            if robot[j].parent is None:
+                v[j] = vJ
+                a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
+            else:
+                jp = robot[j].parent.jindex
+                v[j] = Xup[j] * v[jp] + vJ
+                a[j] = Xup[j] * a[jp] \
+                    + SpatialAcceleration(s[j] * qdd[j]) \
+                    + v[j] @ vJ
+
+            f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
+        
+        # backward recursion
+        for j in reversed(range(0, n)):
+            Q[j] = f[j].dot(s[j])
+
+            if robot[j].parent is not None:
+                jp = robot[j].parent.jindex
+                f[jp] = f[jp] + Xup[j] * f[j]
+
+        return Q
 
 if __name__ == "__main__":  # pragma nocover
 

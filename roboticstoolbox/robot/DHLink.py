@@ -11,6 +11,17 @@ from roboticstoolbox.robot.ETS import ETS
 
 _eps = np.finfo(np.float64).eps
 
+from functools import wraps
+def _check_rne(func):
+    @wraps(func)
+    def wrapper_check_rne(*args, **kwargs):
+        if args[0]._rne_ob is None or args[0]._dynchanged:
+            args[0].delete_rne()
+            args[0]._init_rne()
+        args[0]._rne_changed = False
+        return func(*args, **kwargs)
+    return wrapper_check_rne
+
 # --------------------------------------------------------------#
 
 try:  # pragma: no cover

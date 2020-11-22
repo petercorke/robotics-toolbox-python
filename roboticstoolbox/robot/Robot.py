@@ -18,6 +18,8 @@ from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.backends.Swift import Swift
 
+from roboticstoolbox.robot.Dynamics import DynamicsMixin
+
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -35,7 +37,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot:
+class Robot(DynamicsMixin):
 
     _color = True
 
@@ -111,6 +113,9 @@ class Robot:
         #         data[2][idx]]
         # else:
         #     self.basemesh = None
+
+    def copy(self):
+        return copy.deepcopy(self)
 
     def __getitem__(self, i):
         """
@@ -256,37 +261,7 @@ class Robot:
         else:  # pragma nocover
             return ""
 
-    def dyntable(self):
-        """
-        Pretty print the dynamic parameters (Robot superclass)
 
-        The dynamic parameters are printed in a table, with one row per link.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.links[2].dyntable()
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.dyntable()
-        """
-        table = ANSITable(
-            Column("j", colalign=">", headalign="^"),
-            Column("m", colalign="<", headalign="^"),
-            Column("r", colalign="<", headalign="^"),
-            Column("I", colalign="<", headalign="^"),
-            Column("Jm", colalign="<", headalign="^"),
-            Column("B", colalign="<", headalign="^"),
-            Column("Tc", colalign="<", headalign="^"),
-            Column("G", colalign="<", headalign="^"), border="thin")
-
-        for j, link in enumerate(self):
-            table.row(link.name, *link._dyn2list())
-        return str(table)
 
     def linkcolormap(self, linkcolors="viridis"):
         """
@@ -462,32 +437,6 @@ class Robot:
         else:
             raise ValueError('tool must be set to None (no tool) or an SE3')
 
-# --------------------------------------------------------------------- #
-
-    @property
-    def gravity(self):
-        """
-        Get/set default gravitational acceleration (Robot superclass)
-
-        - ``robot.name`` is the default gravitational acceleration
-
-        :return: robot name
-        :rtype: ndarray(3,)
-
-        - ``robot.name = ...`` checks and sets default gravitational
-          acceleration
-
-        .. note:: If the z-axis is upward, out of the Earth, this should be
-            a positive number.
-        """
-        return self._gravity
-
-    @gravity.setter
-    def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3)
-        self.dynchanged()
-
-# --------------------------------------------------------------------- #
 
     @property
     def qlim(self):
@@ -1147,94 +1096,6 @@ class Robot:
         else:
             return qstar, success, error
 
-# --------------------------------------------------------------------- #
-
-    def friction(self, qd):
-        r"""
-        Manipulator joint friction (Robot superclass)
-
-        :param qd: The joint velocities of the robot
-        :type qd: ndarray(n)
-
-        :return: The joint friction forces/torques for the robot
-        :rtype: ndarray(n,)
-
-        ``robot.friction(qd)`` is a vector of joint friction
-        forces/torques for the robot moving with joint velocities ``qd``.
-
-        The friction model includes:
-
-        - Viscous friction which is a linear function of velocity.
-        - Coulomb friction which is proportional to sign(qd).
-
-        .. math::
-
-            \tau_j = G^2 B \dot{q}_j + |G_j| \left\{ \begin{array}{ll}
-                \tau_{C,j}^+ & \mbox{if $\dot{q}_j > 0$} \\
-                \tau_{C,j}^- & \mbox{if $\dot{q}_j < 0$} \end{array} \right.
-
-        .. note::
-
-            - The friction value should be added to the motor output torque to
-              determine the nett torque. It has a negative value when qd > 0.
-            - The returned friction value is referred to the output of the
-              gearbox.
-            - The friction parameters in the Link object are referred to the
-              motor.
-            - Motor viscous friction is scaled up by :math:`G^2`.
-            - Motor Coulomb friction is scaled up by math:`G`.
-            - The appropriate Coulomb friction value to use in the
-              non-symmetric case depends on the sign of the joint velocity,
-              not the motor velocity.
-            - Coulomb friction is zero for zero joint velocity, stiction is
-              not modeled.
-            - The absolute value of the gear ratio is used.  Negative gear
-              ratios are tricky: the Puma560 robot has negative gear ratio for
-              joints 1 and 3.
-            - The absolute value of the gear ratio is used. Negative gear
-              ratios are tricky: the Puma560 has negative gear ratio for
-              joints 1 and 3.
-
-        :seealso: :func:`Robot.nofriction`, :func:`Link.friction`
-        """
-
-        qd = getvector(qd, self.n)
-        tau = np.zeros(self.n)
-
-        for i in range(self.n):
-            tau[i] = self.links[i].friction(qd[i])
-
-        return tau
-
-# --------------------------------------------------------------------- #
-
-    def nofriction(self, coulomb=True, viscous=False):
-        """
-        Remove manipulator joint friction (Robot superclass)
-
-        :param coulomb: set the Coulomb friction to 0
-        :type coulomb: bool
-        :param viscous: set the viscous friction to 0
-        :type viscous: bool
-        :return: A copy of the robot with dynamic parameters perturbed
-        :rtype: Robot subclass
-
-        ``nofriction()`` copies the robot and returns
-        a robot with the same link parameters except the Coulomb and/or viscous
-        friction parameter are set to zero.
-
-        :seealso: :func:`Robot.friction`, :func:`Link.nofriction`
-        """
-
-        # shallow copy the robot object
-        self.delete_rne()  # remove the inherited C pointers
-        nf = copy.copy(self)
-        nf.name = 'NF/' + self.name
-
-        # add the modified links (copies)
-        nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
-
-        return nf
 
 # --------------------------------------------------------------------- #
 

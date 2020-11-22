@@ -2,8 +2,7 @@ import copy
 from abc import ABC
 import numpy as np
 from functools import wraps
-from spatialmath.base.argcheck import getvector, \
-    isscalar, isvector, ismatrix
+from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from ansitable import ANSITable, Column
 
 
@@ -31,6 +30,7 @@ def _listen_dyn(func):
             args[0]._robot.dynchanged()
         return func(*args)
     return wrapper_listen_dyn
+
 
 
 class Link(ABC):
