@@ -735,24 +735,24 @@ class DHRobot(Robot):
             # MDH case
             for j, link in enumerate(self):
                 if link.sigma == 0:
-                    tw[j] = Twist3.R(T[j].a, T[j].t)
+                    tw[j] = Twist3.Revolute(T[j].a, T[j].t)
                 else:
-                    tw[j] = Twist3.P(T[j].a)
+                    tw[j] = Twist3.Prismatic(T[j].a)
         else:
             # DH case
             for j, link in enumerate(self):
                 if j == 0:
                     # first link case
                     if link.sigma == 0:
-                        tw[j] = Twist3.R([0, 0, 1], [0, 0, 0])  # revolute
+                        tw[j] = Twist3.Revolute([0, 0, 1], [0, 0, 0])  # revolute
                     else:
-                        tw[j] = Twist3.P([0, 0, 1])  # prismatic
+                        tw[j] = Twist3.Prismatic([0, 0, 1])  # prismatic
                 else:
                     # subsequent links
                     if link.sigma == 0:
-                        tw[j] = Twist3.R(T[j-1].a, T[j-1].t)  # revolute
+                        tw[j] = Twist3.Revolute(T[j-1].a, T[j-1].t)  # revolute
                     else:
-                        tw[j] = Twist3.P(T[j-1].a)  # prismatic
+                        tw[j] = Twist3.Prismatic(T[j-1].a)  # prismatic
 
         return tw, T[-1]
 
