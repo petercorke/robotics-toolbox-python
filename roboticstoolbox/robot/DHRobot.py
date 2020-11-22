@@ -10,6 +10,7 @@ from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
 from spatialmath.base.transforms3d import tr2jac, trinv
+from spatialmath.base.transformsNd import t2r
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 from scipy.optimize import minimize, Bounds
@@ -33,7 +34,7 @@ class DHRobot(Robot):
     :type base: SE3
     :param tool: Location of the tool
     :type tool: SE3
-    :param gravity: The gravity vector
+    :param gravity: Gravitational acceleration vector
     :type gravity: ndarray(3)
 
     A concrete superclass for arm type robots defined using Denavit-Hartenberg
@@ -1285,7 +1286,7 @@ class DHRobot(Robot):
             self._rne_ob = None
 
     @_check_rne
-    def rne(self, q, qd=None, qdd=None, grav=None, fext=None):
+    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None):
         r"""
         Inverse dynamics
 
@@ -1295,8 +1296,8 @@ class DHRobot(Robot):
         :type qd: ndarray(n)
         :param qdd: The joint accelerations of the robot
         :type qdd: ndarray(n)
-        :param grav: Gravity vector to overwrite robots gravity value
-        :type grav: ndarray(6)
+        :param gravity: Gravitational acceleration to override robot's gravity value
+        :type gravity: ndarray(6)
         :param fext: Specify wrench acting on the end-effector
                      :math:`W=[F_x F_y F_z M_x M_y M_z]`
         :type fext: ndarray(6)
@@ -1330,14 +1331,14 @@ class DHRobot(Robot):
             verifymatrix(qd, (trajn, self.n))
             verifymatrix(qdd, (trajn, self.n))
 
-        if grav is None:
-            grav = self.gravity
+        if gravity is None:
+            gravity = self.gravity
         else:
-            grav = getvector(grav, 3)
+            gravity = getvector(gravity, 3)
 
         # The c function doesn't handle base rotation, so we need to hack the
         # gravity vector instead
-        grav = self.base.R.T @ grav
+        gravity = self.base.R.T @ gravity
 
         if fext is None:
             fext = np.zeros(6)
@@ -1348,7 +1349,7 @@ class DHRobot(Robot):
 
         for i in range(trajn):
             tau[i, :] = frne(
-                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], grav, fext)
+                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], gravity, fext)
 
         if trajn == 1:
             return tau[0, :]
@@ -1357,17 +1358,18 @@ class DHRobot(Robot):
 
     def rne_python(
             self, Q, QD=None, QDD=None,
-            grav=None, fext=None, debug=False, basewrench=False):
+            gravity=None, fext=None, debug=False, basewrench=False):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
         :param Q: Joint coordinates
         :param QD: Joint velocity
         :param QDD: Joint acceleration
-        :param grav: [description], defaults to None
-        :type grav: [type], optional
+        :param gravity: gravitational acceleration, defaults to attribute
+            of self
+        :type gravity: array_like(3), optional
         :param fext: end-effector wrench, defaults to None
-        :type fext: 6-element array-like, optional
+        :type fext: array-like(6), optional
         :param debug: print debug information to console, defaults to False
         :type debug: bool, optional
         :param basewrench: compute the base wrench, defaults to False
@@ -1409,10 +1411,10 @@ class DHRobot(Robot):
 
         z0 = np.array([0, 0, 1], dtype=dtype)
 
-        if grav is None:
-            grav = self.gravity  # default gravity from the object
+        if gravity is None:
+            gravity = self.gravity  # default gravity from the object
         else:
-            grav = getvector(grav, 3)
+            gravity = getvector(gravity, 3)
 
         if fext is None:
             fext = np.zeros((6,), dtype=dtype)
@@ -1420,7 +1422,7 @@ class DHRobot(Robot):
             fext = getvector(fext, 6)
 
         if debug:
-            print('grav', grav)
+            print('grav', gravity)
             print('fext', fext)
 
         # unpack the joint coordinates and derivatives
@@ -1472,7 +1474,7 @@ class DHRobot(Robot):
             w = Rb @ np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = Rb @ np.zeros((3,), dtype=dtype)
-            vd = Rb @ grav
+            vd = Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #
 

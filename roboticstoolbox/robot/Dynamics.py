@@ -889,25 +889,25 @@ class DynamicsMixin:
         else:
             return taui
 
-    def gravload(self, q=None, grav=None):
+    def gravload(self, q=None, gravity=None):
         """
         Compute gravity load
 
         :param q: Joint coordinates
         :type q: ndarray(n)
-        :param grav: The gravity vector (Optional, if not supplied will
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
             use the stored gravity values).
-        :type grav: ndarray(3)
+        :type gravity: ndarray(3)
 
         :return: The generalised joint force/torques due to gravity
         :rtype: ndarray(n)
 
-        ``taug = gravload(q)`` calculates the joint gravity loading (n) for
+        ``robot.gravload(q)`` calculates the joint gravity loading (n) for
         the robot in the joint configuration ``q`` and using the default
         gravitational acceleration specified in the DHRobot object.
 
-        ``taug = gravload(q, grav)`` as above except the gravitational
-        acceleration is explicitly specified as `grav``.
+        ``robot.gravload(q, gravity=g)`` as above except the gravitational
+        acceleration is explicitly specified as ``g``.
 
         Example:
 
@@ -925,32 +925,20 @@ class DynamicsMixin:
 
         """
 
-        trajn = 1
+        q = getmatrix(q, (None, self.n))
 
-        if q is None:
-            q = self.q
+        if gravity is None:
+            gravity = self.gravity
+        else:
+            gravity = getvector(gravity, 3)
 
-        if grav is None:
-            grav = getvector(np.copy(self.gravity), 3, 'row')
+        taug = np.zeros((q.shape[0], self.n))
+        z = np.zeros(self.n)
 
-        try:
-            q = getvector(q, self.n, 'row')
-            grav = getvector(grav, 3, 'row')
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
+        for k, qk in enumerate(q):
+            taug[k, :] = self.rne(qk, z, z, gravity=gravity)
 
-        if grav.shape[0] < trajn:
-            grav = (grav.T @ np.ones((1, trajn))).T
-        verifymatrix(grav, (trajn, 3))
-
-        taug = np.zeros((trajn, self.n))
-
-        for i in range(trajn):
-            taug[i, :] = self.rne(
-                 q[i, :], np.zeros(self.n), np.zeros(self.n), grav[i, :])
-
-        if trajn == 1:
+        if q.shape[0] == 1:
             return taug[0, :]
         else:
             return taug

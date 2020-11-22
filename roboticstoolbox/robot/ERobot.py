@@ -1393,7 +1393,7 @@ class ERobot(Robot):
 
 
 # inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def  rne( robot, q, qd, qdd ):
+    def  rne( robot, q, qd, qdd, gravity=None):
         
         n = robot.n
 
@@ -1414,8 +1414,11 @@ class ERobot(Robot):
             Xtree[j] = link.Ts
             s[j] = link.v.s
 
-        a_grav = SpatialAcceleration(robot.gravity)
-        
+        if gravity is None:
+            a_grav = SpatialAcceleration(robot.gravity)
+        else:
+            a_grav = SpatialAcceleration(gravity)
+            
         # forward recursion
         for j in range(0, n):
             vJ = SpatialVelocity(s[j] * qd[j])
