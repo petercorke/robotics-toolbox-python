@@ -902,7 +902,7 @@ class TestDHRobot(unittest.TestCase):
         t1 = puma.rne(puma.qn, z, o)
         t2 = puma.rne(puma.qn, o, o)
         t3 = puma.rne(puma.qn, o, z)
-        t4 = puma.rne(puma.qn, o, o, grav=[0, 0, 0])
+        t4 = puma.rne(puma.qn, o, o, gravity=[0, 0, 0])
         t5 = puma.rne(puma.qn, z, z, fext=fext)
 
         nt.assert_array_almost_equal(t0, tr0, decimal=4)
@@ -1028,13 +1028,10 @@ class TestDHRobot(unittest.TestCase):
 
         tau0 = puma.gravload(q)
         tau1 = puma.gravload(np.c_[q, q].T)
-        tau2 = puma.gravload(q=np.c_[q, q].T, grav=np.c_[grav, grav].T)
 
         nt.assert_array_almost_equal(tau0, taur, decimal=4)
         nt.assert_array_almost_equal(tau1[0, :], taur, decimal=4)
         nt.assert_array_almost_equal(tau1[1, :], taur, decimal=4)
-        nt.assert_array_almost_equal(tau2[0, :], taur, decimal=4)
-        nt.assert_array_almost_equal(tau2[1, :], taur, decimal=4)
 
     def test_itorque(self):
         puma = rp.models.DH.Puma560()

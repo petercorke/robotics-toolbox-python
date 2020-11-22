@@ -467,7 +467,7 @@ class DynamicsMixin:
             qdI = np.zeros((self.n, self.n))
             qddI = np.eye(self.n)
 
-            M = self.rne(qI, qdI, qddI, grav=[0, 0, 0])
+            M = self.rne(qI, qdI, qddI, gravity=[0, 0, 0])
 
             # Compute gravity and coriolis torque torques resulting from zero
             # acceleration at given velocity & with gravity acting.
@@ -625,7 +625,7 @@ class DynamicsMixin:
             zero = np.zeros((self.n))
             qdd = np.zeros((self.n))
             qdd[j] = 1
-            M = self.rne(q, zero, qdd, grav=[0, 0, 0])
+            M = self.rne(q, zero, qdd, gravity=[0, 0, 0])
             J = link.Jm + M[j] / abs(link.G) ** 2
 
             # compute friction
@@ -738,7 +738,7 @@ class DynamicsMixin:
                 (np.c_[qk] @ np.ones((1, self.n))).T,
                 np.zeros((self.n, self.n)),
                 np.eye(self.n),
-                grav=[0, 0, 0])
+                gravity=[0, 0, 0])
 
         if q.shape[0] == 1:
             return In[0, :, :]
@@ -807,7 +807,7 @@ class DynamicsMixin:
                 QD = np.zeros(self.n)
                 QD[i] = 1
                 tau = r1.rne(
-                    qk, QD, np.zeros(self.n), grav=[0, 0, 0])
+                    qk, QD, np.zeros(self.n), gravity=[0, 0, 0])
                 Csq[k, :, i] = Csq[k, :, i] + tau
 
         # Find the torques that depend on a pair of finite joint speeds,
@@ -821,7 +821,7 @@ class DynamicsMixin:
                     QD = np.zeros(self.n)
                     QD[i] = 1
                     QD[j] = 1
-                    tau = r1.rne(qk, QD, np.zeros(self.n), grav=[0, 0, 0])
+                    tau = r1.rne(qk, QD, np.zeros(self.n), gravity=[0, 0, 0])
 
                     C[k, :, j] = C[k, :, j] + \
                         (tau - Csq[k, :, j] - Csq[k, :, i]) * qdk[i] / 2
@@ -882,7 +882,7 @@ class DynamicsMixin:
 
         for k, (qk, qddk) in enumerate(zip(q, qdd)):
             taui[k, :] = self.rne(
-                qk, np.zeros(self.n), qddk, grav=[0, 0, 0])
+                qk, np.zeros(self.n), qddk, gravity=[0, 0, 0])
 
         if q.shape[0] == 1:
             return taui[0, :]
