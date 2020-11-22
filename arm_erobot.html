@@ -191,10 +191,10 @@
 <p><em>Code author: Jesse Haviland</em></p>
 <div class="section" id="erobot">
 <h2>ERobot<a class="headerlink" href="#erobot" title="Permalink to this headline">¶</a></h2>
-<div class="graphviz"><img src="_images/inheritance-70ab6ebe28e11059e059198c081bf678e652c9fb.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-f86ad11689271d49a1ffa1860fb2f364aa9f35b1.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
 <map id="inheritanced41b53372b" name="inheritanced41b53372b">
-<area shape="rect" id="node1" href="#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="153,5,269,31"/>
-<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="5,5,105,31"/>
+<area shape="rect" id="node3" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="244,5,344,31"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="392,5,508,31"/>
 </map><p>The various models <a class="reference internal" href="#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
 <span class="target" id="module-roboticstoolbox.robot.ERobot"></span><p>Created on Tue Apr 24 15:48:52 2020
 &#64;author: Jesse Haviland</p>
@@ -741,6 +741,95 @@ damper becomes active</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
+<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formulates an inequality contraint which, when optimised for will
+make it impossible for the robot to run into a collision. Requires
+See examples/neo.py for use case</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<em>float</em>) – The minimum distance in which a joint is allowed to
+approach the collision object shape</p></li>
+<li><p><strong>di</strong> (<em>float</em>) – The influence distance in which the velocity
+damper becomes active</p></li>
+<li><p><strong>xi</strong> (<em>float</em>) – The gain for the velocity damper</p></li>
+<li><p><strong>from_link</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – The first link to consider, defaults to the base
+link</p></li>
+<li><p><strong>to_link</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – The last link to consider, will consider all links
+between from_link and to_link in the robot, defaults to the
+end-effector link</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Ain, Bin as the inequality contraints for an omptimisor</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6), ndarray(6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.accel">
+<code class="sig-name descname">accel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">torque</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute acceleration due to applied torque</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint velocity</p></li>
+<li><p><strong>torque</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint torques of the robot</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Joint accelerations of the robot</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">qdd</span> <span class="pre">=</span> <span class="pre">accel(q,</span> <span class="pre">qd,</span> <span class="pre">torque)</span></code> calculates a vector (n) of joint
+accelerations that result from applying the actuator force/torque (n)
+to the manipulator in state <cite>q</cite> (n) and <cite>qd</cite> (n), and <code class="docutils literal notranslate"><span class="pre">n</span></code> is
+the number of robot joints.</p>
+<p><span class="math notranslate nohighlight">\(\ddot{q} = \mathbf{I}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)\)</span></p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">accel</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<span class="go">array([ -7.5544, -12.22  ,  -6.4022,  -5.4303,  -4.9518,  -2.1178])</span>
+</pre></div>
+</div>
+<p><strong>Trajectory operation</strong></p>
+<p>If <cite>q</cite>, <cite>qd</cite>, torque are matrices (m,n) then <code class="docutils literal notranslate"><span class="pre">qdd</span></code> is a matrix (m,n)
+where each row is the acceleration corresponding to the equivalent cols
+of q, qd, torque.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Useful for simulation of manipulator dynamics, in
+conjunction with a numerical integration function.</p></li>
+<li><p>Uses the method 1 of Walker and Orin to compute the forward
+dynamics.</p></li>
+<li><p>Featherstone’s method is more efficient for robots with large
+numbers of joints.</p></li>
+<li><p>Joint friction is considered.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Efficient dynamic computer simulation of robotic mechanisms,
+M. W. Walker and D. E. Orin,
+ASME Journa of Dynamic Systems, Measurement and Control, vol.
+104, no. 3, pp. 205-211, 1982.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.addconfiguration">
 <code class="sig-name descname">addconfiguration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.addconfiguration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a named joint configuration (Robot superclass)</p>
@@ -791,9 +880,140 @@ is an identity matrix.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.cinertia">
+<code class="sig-name descname">cinertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.cinertia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cartesian manipulator inertia matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The inertia matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6,6)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.cinertia(q)</span></code> is the Cartesian (operational space) inertia
+matrix which relates Cartesian force/torque to Cartesian
+acceleration at the joint configuration q.</p>
+<p>:math:<a href="#id1"><span class="problematic" id="id2">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+</pre></div>
+</div>
+<p><strong>Trajectory operation</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> is a matrix (m,n), each row is interpretted as a joint state
+vector, and the result is a 3d-matrix (n,n,m) where each plane
+corresponds to the Cartesian inertia for the corresponding
+row of <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Assumes that the operational space has 6 DOF.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.inertia" title="roboticstoolbox.robot.ERobot.ERobot.inertia"><code class="xref py py-func docutils literal notranslate"><span class="pre">inertia()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.closest_point">
+<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.closest_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
+distance between this robot and shape, provided it is less than
+inf_dist. It will also return the points on self and shape in the
+world frame which connect the line of length distance between the
+shapes. If the distance is negative then the shapes are collided.
+:param shape: The shape to compare distance to
+:type shape: Shape
+:param inf_dist: The minimum distance within which to consider</p>
+<blockquote>
+<div><p>the shape</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>d, p1, p2 where d is the distance between the shapes,
+p1 and p2 are the points in the world frame on the respective
+shapes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float, SE3, SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.configurations_str">
 <code class="sig-name descname">configurations_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.configurations_str" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.coriolis">
+<code class="sig-name descname">coriolis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.coriolis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coriolis and centripetal term</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint velocity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Velocity matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n,n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">coriolis(q,</span> <span class="pre">qd)</span></code> calculates the Coriolis/centripetal matrix (n,n)
+for the robot in configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and velocity <code class="docutils literal notranslate"><span class="pre">qd</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code>
+is the number of joints.</p>
+<p>The product <span class="math notranslate nohighlight">\(\mathbf{C} \dot{q}\)</span> is the vector of joint
+force/torque due to velocity coupling. The diagonal elements are due to
+centripetal effects and the off-diagonal elements are due to Coriolis
+effects. This matrix is also known as the velocity coupling matrix,
+since it describes the disturbance forces on any joint due to
+velocity of all other joints.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">coriolis</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">6</span><span class="p">,)))</span>
+<span class="go">array([[-0.4017, -0.5513, -0.2025, -0.0007, -0.0013,  0.    ],</span>
+<span class="go">       [ 0.2023, -0.1937, -0.3868, -0.    , -0.002 ,  0.    ],</span>
+<span class="go">       [ 0.1987,  0.193 , -0.    ,  0.    , -0.0001,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.0007,  0.0007,  0.0001,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ]])</span>
+</pre></div>
+</div>
+<p><strong>Trajectory operation</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> and <cite>qd</cite> are matrices (m,n), each row is interpretted as a
+joint configuration, and the result (n,n,m) is a 3d-matrix where
+each plane corresponds to a row of <code class="docutils literal notranslate"><span class="pre">q</span></code> and <code class="docutils literal notranslate"><span class="pre">qd</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Joint viscous friction is also a joint force proportional to
+velocity but it is eliminated in the computation of this value.</p></li>
+<li><p>Computationally slow, involves <span class="math notranslate nohighlight">\(n^2/2\)</span> invocations of RNE.</p></li>
+</ul>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.dynchanged">
@@ -817,6 +1037,131 @@ dynamic parameters is invalid.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.fdyn">
+<code class="sig-name descname">fdyn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span></em>, <em class="sig-param"><span class="n">torqfun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qd0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solver</span><span class="o">=</span><span class="default_value">'RK45'</span></em>, <em class="sig-param"><span class="n">sargs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fdyn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate forward dynamics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>float</em>) – integration time</p></li>
+<li><p><strong>q0</strong> (<em>array_like</em>) – initial joint coordinates</p></li>
+<li><p><strong>qd0</strong> (<em>array_like</em>) – initial joint velocities, assumed zero if not given</p></li>
+<li><p><strong>torqfun</strong> – a function that computes torque as a function of time</p></li>
+</ul>
+</dd>
+</dl>
+<p>and/or state
+:type torqfun: callable
+:param targs: argumments passed to <code class="docutils literal notranslate"><span class="pre">torqfun</span></code>
+:type targs: dict
+:type solver: name of scipy solver to use, RK45 is the default
+:param solver: str
+:type sargs: arguments passed to the solver
+:param sargs: dict
+:type dt: time step for results
+:param dt: float
+:param progress: show progress bar, default False
+:type progress: bool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot trajectory</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>namedtuple</p>
+</dd>
+</dl>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">R.fdyn(T,</span> <span class="pre">q)</span></code> integrates the dynamics of the robot with zero
+input torques over the time  interval 0 to <code class="docutils literal notranslate"><span class="pre">T</span></code> and returns the
+trajectory as a namedtuple with elements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code> the time vector (M,)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">q</span></code> the joint coordinates (M,n)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qd</span></code> the joint velocities (M,n)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">R.fdyn(T,</span> <span class="pre">q,</span> <span class="pre">torqfun)</span></code> as above but the torque applied to the
+joints is given by the provided function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tau</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>where the inputs are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the robot object</p></li>
+<li><p>current time</p></li>
+<li><p>current joint coordinates (n,)</p></li>
+<li><p>current joint velocity (n,)</p></li>
+<li><p>args, optional keyword arguments can be specified, these are
+passed in from the <code class="docutils literal notranslate"><span class="pre">targs</span></code> kewyword argument.</p></li>
+</ul>
+</div></blockquote>
+<p>The function must return a Numpy array (n,) of joint forces/torques.</p>
+<p>Examples:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>to apply zero joint torque to the robot without Coulomb
+friction:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">myfunc</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
+
+<span class="n">tg</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">nofriction</span><span class="p">()</span><span class="o">.</span><span class="n">fdyn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">myfunc</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tg</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">tg</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We could also use a lambda function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tg</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">nofriction</span><span class="p">()</span><span class="o">.</span><span class="n">fdyn</span><span class="p">(</span>
+    <span class="mi">5</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">r</span><span class="o">.</span><span class="n">n</span><span class="p">,)))</span>
+</pre></div>
+</div>
+</li>
+<li><p>the robot is controlled by a PD controller. We first define a
+function to compute the control which has additional parameters for
+the setpoint and control gains (qstar, P, D):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">myfunc</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">D</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">qstar</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">P</span> <span class="o">+</span> <span class="n">qd</span> <span class="o">*</span> <span class="n">D</span>  <span class="c1"># P, D are (6,)</span>
+
+<span class="n">targs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;qstar&#39;</span><span class="p">:</span> <span class="n">VALUE</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="n">VALUE</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="n">VALUE</span><span class="p">}</span>
+<span class="n">tg</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fdyn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">myfunc</span><span class="p">,</span> <span class="n">targs</span><span class="o">=</span><span class="n">targs</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+<p>Many integrators have variable step length which is problematic if we
+want to animate the result.  If <code class="docutils literal notranslate"><span class="pre">dt</span></code> is specified then the solver
+results are interpolated in time steps of <code class="docutils literal notranslate"><span class="pre">dt</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>This function performs poorly with non-linear joint friction,</p></li>
+</ul>
+<p>such as Coulomb friction.  The R.nofriction() method can be used
+to set this friction to zero.
+- If the function is not specified then zero force/torque is
+applied to the manipulator joints.
+- Interpolation is performed using <cite>ScipY integrate.ode
+&lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html&gt;</cite>
+- The SciPy RK45 integrator is used by default
+- Interpolation is performed using <cite>SciPy interp1
+&lt;https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html&gt;</cite></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DHRobot.accel()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">DHRobot.nofriction()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">DHRobot.rne()</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -941,6 +1286,43 @@ acceleration</p></li>
 <p>If the z-axis is upward, out of the Earth, this should be
 a positive number.</p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.gravload">
+<code class="sig-name descname">gravload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.gravload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute gravity load</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>gravity</strong> (<em>ndarray</em><em>(</em><em>3</em><em>)</em>) – Gravitational acceleration (Optional, if not supplied will
+use the stored gravity values).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The generalised joint force/torques due to gravity</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.gravload(q)</span></code> calculates the joint gravity loading (n) for
+the robot in the joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and using the default
+gravitational acceleration specified in the DHRobot object.</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.gravload(q,</span> <span class="pre">gravity=g)</span></code> as above except the gravitational
+acceleration is explicitly specified as <code class="docutils literal notranslate"><span class="pre">g</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">gravload</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+<span class="go">array([ 0.    , 37.4837,  0.2489,  0.    ,  0.    ,  0.    ])</span>
+</pre></div>
+</div>
+<p><strong>Trajectory operation</strong></p>
+<p>If q is a matrix (nxm) each column is interpreted as a joint
+configuration vector, and the result is a matrix (nxm) each column
+being the corresponding joint torques.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1174,33 +1556,131 @@ Where omega is some gain matrix, currently not modifiable.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
-<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
-<dd><p>Formulates an inequality contraint which, when optimised for will
-make it impossible for the robot to run into a collision. Requires
-See examples/neo.py for use case</p>
+<dt id="roboticstoolbox.robot.ERobot.ERobot.inertia">
+<code class="sig-name descname">inertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.inertia" title="Permalink to this definition">¶</a></dt>
+<dd><p>DHRobot.INERTIA Manipulator inertia matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The inertia matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n,n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">inertia(q)</span></code> is the symmetric joint inertia matrix (n,n) which
+relates joint torque to joint acceleration for the robot at joint
+configuration q.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">inertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+<span class="go">array([[ 3.9611, -0.1627, -0.1389,  0.0016, -0.0004,  0.    ],</span>
+<span class="go">       [-0.1627,  4.4566,  0.3727,  0.    ,  0.0019,  0.    ],</span>
+<span class="go">       [-0.1389,  0.3727,  0.9387,  0.    ,  0.0019,  0.    ],</span>
+<span class="go">       [ 0.0016,  0.    ,  0.    ,  0.1924,  0.    ,  0.    ],</span>
+<span class="go">       [-0.0004,  0.0019,  0.0019,  0.    ,  0.1713,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.1941]])</span>
+</pre></div>
+</div>
+<p><strong>Trajectory operation</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> is a matrix (m,n), each row is interpretted as a joint state
+vector, and the result is a 3d-matrix (nxnxk) where each plane
+corresponds to the inertia for the corresponding row of q.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The diagonal elements <code class="docutils literal notranslate"><span class="pre">I[j,j]</span></code> are the inertia seen by joint
+actuator <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p></li>
+<li><p>The off-diagonal elements <code class="docutils literal notranslate"><span class="pre">I[j,k]</span></code> are coupling inertias that
+relate acceleration on joint <code class="docutils literal notranslate"><span class="pre">j</span></code> to force/torque on
+joint <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p></li>
+<li><p>The diagonal terms include the motor inertia reflected through
+the gear ratio.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.cinertia" title="roboticstoolbox.robot.ERobot.ERobot.cinertia"><code class="xref py py-func docutils literal notranslate"><span class="pre">cinertia()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.itorque">
+<code class="sig-name descname">itorque</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qdd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.itorque" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inertia torque</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<em>float</em>) – The minimum distance in which a joint is allowed to
-approach the collision object shape</p></li>
-<li><p><strong>di</strong> (<em>float</em>) – The influence distance in which the velocity
-damper becomes active</p></li>
-<li><p><strong>xi</strong> (<em>float</em>) – The gain for the velocity damper</p></li>
-<li><p><strong>from_link</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – The first link to consider, defaults to the base
-link</p></li>
-<li><p><strong>to_link</strong> (<a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – The last link to consider, will consider all links
-between from_link and to_link in the robot, defaults to the
-end-effector link</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>qdd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint acceleration</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Ain, Bin as the inequality contraints for an omptimisor</p>
+<dd class="field-even"><p>The inertia torque vector</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray(6), ndarray(6)</p>
+<dd class="field-odd"><p>ndarray(n)</p>
 </dd>
 </dl>
+<p><code class="docutils literal notranslate"><span class="pre">itorque(q,</span> <span class="pre">qdd)</span></code> is the inertia force/torque vector (n) at
+the specified joint configuration q (n) and acceleration qdd (n), and
+<code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints.
+It is <span class="math notranslate nohighlight">\(\mathbf{I}(q) \ddot{q}\)</span>.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">itorque</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">6</span><span class="p">,)))</span>
+<span class="go">array([1.8304, 2.3343, 0.5872, 0.0971, 0.0873, 0.0971])</span>
+</pre></div>
+</div>
+<p><strong>Trajectory operation</strong></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> and <code class="docutils literal notranslate"><span class="pre">qdd</span></code> are matrices (m,n), each row is interpretted as a
+joint configuration, and the result is a matrix (m,n) where each row is
+the corresponding joint torques.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the robot model contains non-zero motor inertia then this
+will be included in the result.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.inertia" title="roboticstoolbox.robot.ERobot.ERobot.inertia"><code class="xref py py-func docutils literal notranslate"><span class="pre">inertia()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jointdynamics">
+<code class="sig-name descname">jointdynamics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jointdynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer function of joint actuator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint velocity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transfer function denominators</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of 2-tuples</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tf</span> <span class="pre">=</span> <span class="pre">jointdynamics(qd,</span> <span class="pre">q)</span></code> calculates a vector of n
+continuous-time transfer functions that represent the transfer
+function 1/(Js+B) for each joint based on the dynamic parameters
+of the robot and the configuration q (n). n is the number of robot
+joints.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tf</span> <span class="pre">=</span> <span class="pre">jointdynamics(q,</span> <span class="pre">qd)</span></code> as above but include the linearized
+effects of Coulomb friction when operating at joint velocity QD
+(1xN).</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
@@ -1258,7 +1738,7 @@ tuples or hexstrings.</p></li>
 matplotlib documentation.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a href="#id1"><span class="problematic" id="id2">`</span></a>Specifying colors</p></li>
+<li><p><a href="#id3"><span class="problematic" id="id4">`</span></a>Specifying colors</p></li>
 </ul>
 <p>&lt;<a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py</a>&gt;`_
 - <a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p>
@@ -1355,6 +1835,145 @@ friction parameter are set to zero.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
 <dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.friction()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.nofriction()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.pay">
+<code class="sig-name descname">pay</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">W</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.pay" title="Permalink to this definition">¶</a></dt>
+<dd><p>tau = pay(W, J) Returns the generalised joint force/torques due to a
+payload wrench W applied to the end-effector. Where the manipulator
+Jacobian is J (6xn), and n is the number of robot joints.</p>
+<p>tau = pay(W, q, frame) as above but the Jacobian is calculated at pose
+q in the frame given by frame which is 0 for base frame, 1 for
+end-effector frame.</p>
+<p>Uses the formula tau = J’W, where W is a wrench vector applied at the
+end effector, W = [Fx Fy Fz Mx My Mz]’.</p>
+<dl class="simple">
+<dt>Trajectory operation:</dt><dd><p>In the case q is nxm or J is 6xnxm then tau is nxm where each row
+is the generalised force/torque at the pose given by corresponding
+row of q.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>W</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – A wrench vector applied at the end effector,
+W = [Fx Fy Fz Mx My Mz]</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>J</strong> (<em>ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – The manipulator Jacobian (Optional, if not supplied will
+use the q value).</p></li>
+<li><p><strong>frame</strong> (<em>int</em>) – The frame in which to torques are expressed in when J
+is not supplied. 0 means base frame of the robot, 1 means end-
+effector frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Joint forces/torques due to w</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Wrench vector and Jacobian must be from the same reference
+frame.</p></li>
+<li><p>Tool transforms are taken into consideration when frame=1.</p></li>
+<li><p>Must have a constant wrench - no trajectory support for this
+yet.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.paycap">
+<code class="sig-name descname">paycap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">tauR</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.paycap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static payload capacity of a robot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>w</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The payload wrench</p></li>
+<li><p><strong>tauR</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>2</em><em>)</em>) – Joint torque matrix minimum and maximums</p></li>
+<li><p><strong>frame</strong> (<em>str</em>) – The frame in which to torques are expressed in when J
+is not supplied. ‘base’ means base frame of the robot, ‘ee’ means
+end-effector frame</p></li>
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The maximum permissible payload wrench</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Joint index (zero indexed) which hits its
+force/torque limit</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">wmax,</span> <span class="pre">joint</span> <span class="pre">=</span> <span class="pre">paycap(q,</span> <span class="pre">w,</span> <span class="pre">f,</span> <span class="pre">tauR)</span></code> returns the maximum permissible
+payload wrench <code class="docutils literal notranslate"><span class="pre">wmax</span></code> (6) applied at the end-effector, and the index
+of the joint (zero indexed) which hits its force/torque limit at that
+wrench. <code class="docutils literal notranslate"><span class="pre">q</span></code> (n) is the manipulator pose, <code class="docutils literal notranslate"><span class="pre">w</span></code> the payload wrench
+(6), <code class="docutils literal notranslate"><span class="pre">f</span></code> the wrench reference frame and tauR (nx2) is a matrix of
+joint forces/torques (first col is maximum, second col minimum).</p>
+<p><strong>Trajectory operation:</strong></p>
+<p>In the case q is nxm then wmax is Mx6 and J is Mx1 where the rows are
+the results at the pose given by corresponding row of q.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Wrench vector and Jacobian must be from the same reference frame</p></li>
+<li><p>Tool transforms are taken into consideration for frame=1.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.payload">
+<code class="sig-name descname">payload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span></em>, <em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">array([0.0, 0.0, 0.0])</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.payload" title="Permalink to this definition">¶</a></dt>
+<dd><p>payload(m, p) adds payload mass adds a payload with point mass m at
+position p in the end-effector coordinate frame.</p>
+<p>payload(m) adds payload mass adds a payload with point mass m at
+in the end-effector coordinate frame.</p>
+<p>payload(0) removes added payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>float</em>) – mass (kg)</p></li>
+<li><p><strong>p</strong> (<em>ndarray</em><em>(</em><em>3</em><em>,</em><em>1</em><em>)</em>) – position in end-effector frame</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.perturb">
+<code class="sig-name descname">perturb</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p</span><span class="o">=</span><span class="default_value">0.1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.perturb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perturb robot parameters</p>
+<p>rp = perturb(p) is a new robot object in which the dynamic parameters
+(link mass and inertia) have been perturbed. The perturbation is
+multiplicative so that values are multiplied by random numbers in the
+interval (1-p) to (1+p). The name string of the perturbed robot is
+prefixed by ‘P/’.</p>
+<p>Useful for investigating the robustness of various model-based control
+schemes. For example to vary parameters in the range +/- 10 percent
+is: r2 = puma.perturb(0.1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>float</em>) – The percent (+/-) to be perturbed. Default 10%</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A copy of the robot with dynamic parameters perturbed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot">DHRobot</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1646,6 +2265,14 @@ end-effector position.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.printdyn">
+<code class="sig-name descname">printdyn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.printdyn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print dynamic parameters</p>
+<p>Display the kinematic and dynamic parameters to the console in
+reable format</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.qmincon">
 <code class="sig-name descname">qmincon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.qmincon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move away from joint limits</p>
@@ -1884,32 +2511,6 @@ end-effector position.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.closest_point">
-<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.closest_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
-distance between this robot and shape, provided it is less than
-inf_dist. It will also return the points on self and shape in the
-world frame which connect the line of length distance between the
-shapes. If the distance is negative then the shapes are collided.
-:param shape: The shape to compare distance to
-:type shape: Shape
-:param inf_dist: The minimum distance within which to consider</p>
-<blockquote>
-<div><p>the shape</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>d, p1, p2 where d is the distance between the shapes,
-p1 and p2 are the points in the world frame on the respective
-shapes</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float, SE3, SE3</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.collided">
 <code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.collided" title="Permalink to this definition">¶</a></dt>
 <dd><p>collided(shape) checks if this robot and shape have collided
@@ -1918,6 +2519,11 @@ shapes</p>
 :returns: True if shapes have collided
 :rtype: bool</p>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.rne">
+<code class="sig-name descname">rne</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">qdd</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.rne"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.rne" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -2689,7 +3295,7 @@ shapes</p>
 
 </div>
 <div class="section" id="e-models">
-<span id="id3"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
+<span id="id5"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="defined-using-ets">
 <h3>Defined using ETS<a class="headerlink" href="#defined-using-ets" title="Permalink to this headline">¶</a></h3>
 <p>A number of models are defined in terms of elementary transform sequences.
@@ -3815,7 +4421,7 @@ characteristics.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Nov-2020.
+        Last updated on 22-Nov-2020.
       </span>
 
     </p>

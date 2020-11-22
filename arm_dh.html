@@ -198,15 +198,15 @@ Denavit-Hartenberg notation.</p>
 </div>
 <div class="section" id="dhrobot">
 <h2>DHRobot<a class="headerlink" href="#dhrobot" title="Permalink to this headline">¶</a></h2>
-<div class="graphviz"><img src="_images/inheritance-814f69642f47cc8f585045de2d01045f87349a6c.png" alt="Inheritance diagram of roboticstoolbox.DHRobot" usemap="#inheritance48ba2c3a1a" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-2a007d03e20cc29b9607416c43bababa48d0874c.png" alt="Inheritance diagram of roboticstoolbox.DHRobot" usemap="#inheritance48ba2c3a1a" class="inheritance graphviz" /></div>
 <map id="inheritance48ba2c3a1a" name="inheritance48ba2c3a1a">
-<area shape="rect" id="node2" href="#roboticstoolbox.robot.DHRobot.DHRobot" target="_top" title="Class for robots defined using Denavit&#45;Hartenberg notation" alt="" coords="284,31,424,56"/>
-<area shape="rect" id="node3" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="71,55,171,80"/>
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.DHRobot.DHRobot" target="_top" title="Class for robots defined using Denavit&#45;Hartenberg notation" alt="" coords="392,5,532,31"/>
+<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="244,5,344,31"/>
 </map><p>The various <a class="reference internal" href="#dh-models"><span class="std std-ref">Models</span></a> all subclass this class.</p>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot">
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.DHRobot.</code><code class="sig-name descname">DHRobot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">L</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Robot.Robot</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHDynamics.DHDynamicsMixin</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Robot.Robot</span></code></a></p>
 <p>Class for robots defined using Denavit-Hartenberg notation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -216,7 +216,7 @@ Denavit-Hartenberg notation.</p>
 <li><p><strong>manufacturer</strong> (<em>str</em>) – Manufacturer of the robot</p></li>
 <li><p><strong>base</strong> (<em>SE3</em>) – Locaation of the base</p></li>
 <li><p><strong>tool</strong> (<em>SE3</em>) – Location of the tool</p></li>
-<li><p><strong>gravity</strong> (<em>ndarray</em><em>(</em><em>3</em><em>)</em>) – The gravity vector</p></li>
+<li><p><strong>gravity</strong> (<em>ndarray</em><em>(</em><em>3</em><em>)</em>) – Gravitational acceleration vector</p></li>
 </ul>
 </dd>
 </dl>
@@ -239,20 +239,6 @@ M.Spong, S. Hutchinson &amp; M. Vidyasagar, Wiley 2006.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.copy">
-<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copy a robot</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A deepish copy of the robot</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Robot subclass instance</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.mdh">
 <em class="property">property </em><code class="sig-name descname">mdh</code><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.mdh" title="Permalink to this definition">¶</a></dt>
@@ -1032,6 +1018,107 @@ O Khatib, IEEE Journal on Robotics and Automation, 1987.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.delete_rne">
+<code class="sig-name descname">delete_rne</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.delete_rne"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.delete_rne" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frees the memory holding the robot object in c if the robot object
+has been initialised in c.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.rne">
+<code class="sig-name descname">rne</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qdd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fext</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.rne"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse dynamics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
+<li><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint velocity</p></li>
+<li><p><strong>qdd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint accelerations of the robot</p></li>
+<li><p><strong>gravity</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Gravitational acceleration to override robot’s gravity value</p></li>
+<li><p><strong>fext</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Specify wrench acting on the end-effector
+<span class="math notranslate nohighlight">\(W=[F_x F_y F_z M_x M_y M_z]\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">tau</span> <span class="pre">=</span> <span class="pre">rne(q,</span> <span class="pre">qd,</span> <span class="pre">qdd,</span> <span class="pre">grav,</span> <span class="pre">fext)</span></code> is the joint torque required for
+the robot to achieve the specified joint position <code class="docutils literal notranslate"><span class="pre">q</span></code> (1xn), velocity
+<code class="docutils literal notranslate"><span class="pre">qd</span></code> (1xn) and acceleration <code class="docutils literal notranslate"><span class="pre">qdd</span></code> (1xn), where n is the number of
+robot joints. <code class="docutils literal notranslate"><span class="pre">fext</span></code> describes the wrench acting on the end-effector</p>
+<p>Trajectory operation:
+If q, qd and qdd (mxn) are matrices with m cols representing a
+trajectory then tau (mxn) is a matrix with cols corresponding to each
+trajectory step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The torque computed contains a contribution due to armature
+inertia and joint friction.</p></li>
+<li><p>If a model has no dynamic parameters set the result is zero.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne_python" title="roboticstoolbox.robot.DHRobot.DHRobot.rne_python"><code class="xref py py-func docutils literal notranslate"><span class="pre">rne_python()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.rne_python">
+<code class="sig-name descname">rne_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Q</span></em>, <em class="sig-param"><span class="n">QD</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">QDD</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fext</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">basewrench</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.rne_python"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne_python" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute inverse dynamics via recursive Newton-Euler formulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> – Joint coordinates</p></li>
+<li><p><strong>QD</strong> – Joint velocity</p></li>
+<li><p><strong>QDD</strong> – Joint acceleration</p></li>
+<li><p><strong>gravity</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – gravitational acceleration, defaults to attribute
+of self</p></li>
+<li><p><strong>fext</strong> (<em>array-like</em><em>(</em><em>6</em><em>)</em><em>, </em><em>optional</em>) – end-effector wrench, defaults to None</p></li>
+<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – print debug information to console, defaults to False</p></li>
+<li><p><strong>basewrench</strong> (<em>bool</em><em>, </em><em>optional</em>) – compute the base wrench, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – for misshaped inputs</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Joint force/torques</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>NumPy array</p>
+</dd>
+</dl>
+<p>Recursive Newton-Euler for standard Denavit-Hartenberg notation.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(q,</span> <span class="pre">qd,</span> <span class="pre">qdd)</span></code> where the arguments have shape (n,) where n is
+the number of robot joints.  The result has shape (n,).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(q,</span> <span class="pre">qd,</span> <span class="pre">qdd)</span></code> where the arguments have shape (m,n) where n
+is the number of robot joints and where m is the number of steps in
+the joint trajectory.  The result has shape (m,n).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(p)</span></code> where the input is a 1D array <code class="docutils literal notranslate"><span class="pre">p</span></code> = [q, qd, qdd] with
+shape (3n,), and the result has shape (n,).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(p)</span></code> where the input is a 2D array <code class="docutils literal notranslate"><span class="pre">p</span></code> = [q, qd, qdd] with
+shape (m,3n) and the result has shape (m,n).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>This is a pure Python implementation and slower than the .rne()</p></li>
+</ul>
+<p>which is written in C.
+- This version supports symbolic model parameters
+- Verified against MATLAB code</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne" title="roboticstoolbox.robot.DHRobot.DHRobot.rne"><code class="xref py py-func docutils literal notranslate"><span class="pre">rne()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikine3">
 <code class="sig-name descname">ikine3</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">left</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">elbow_up</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ikine3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine3" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analytical inverse kinematics for three link robots</p>
@@ -1349,6 +1436,11 @@ row of <code class="docutils literal notranslate"><span class="pre">q</span></co
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.coriolis">
 <code class="sig-name descname">coriolis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.coriolis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coriolis and centripetal term</p>
@@ -1399,13 +1491,6 @@ velocity but it is eliminated in the computation of this value.</p></li>
 <li><p>Computationally slow, involves <span class="math notranslate nohighlight">\(n^2/2\)</span> invocations of RNE.</p></li>
 </ul>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.delete_rne">
-<code class="sig-name descname">delete_rne</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.delete_rne" title="Permalink to this definition">¶</a></dt>
-<dd><p>Frees the memory holding the robot object in c if the robot object
-has been initialised in c.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1683,13 +1768,13 @@ a positive number.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.gravload">
-<code class="sig-name descname">gravload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.gravload" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">gravload</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.gravload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute gravity load</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
-<li><p><strong>grav</strong> (<em>ndarray</em><em>(</em><em>3</em><em>)</em>) – The gravity vector (Optional, if not supplied will
+<li><p><strong>gravity</strong> (<em>ndarray</em><em>(</em><em>3</em><em>)</em>) – Gravitational acceleration (Optional, if not supplied will
 use the stored gravity values).</p></li>
 </ul>
 </dd>
@@ -1700,11 +1785,11 @@ use the stored gravity values).</p></li>
 <dd class="field-odd"><p>ndarray(n)</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">taug</span> <span class="pre">=</span> <span class="pre">gravload(q)</span></code> calculates the joint gravity loading (n) for
+<p><code class="docutils literal notranslate"><span class="pre">robot.gravload(q)</span></code> calculates the joint gravity loading (n) for
 the robot in the joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and using the default
 gravitational acceleration specified in the DHRobot object.</p>
-<p><code class="docutils literal notranslate"><span class="pre">taug</span> <span class="pre">=</span> <span class="pre">gravload(q,</span> <span class="pre">grav)</span></code> as above except the gravitational
-acceleration is explicitly specified as <cite>grav`</cite>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.gravload(q,</span> <span class="pre">gravity=g)</span></code> as above except the gravitational
+acceleration is explicitly specified as <code class="docutils literal notranslate"><span class="pre">g</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -2823,99 +2908,6 @@ optimisation for the corresponding trajectory step.</p>
 <p class="admonition-title">Note</p>
 <p>Robot must be redundant.</p>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.rne">
-<code class="sig-name descname">rne</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qdd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fext</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inverse dynamics</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p></li>
-<li><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint velocity</p></li>
-<li><p><strong>qdd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint accelerations of the robot</p></li>
-<li><p><strong>grav</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Gravity vector to overwrite robots gravity value</p></li>
-<li><p><strong>fext</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Specify wrench acting on the end-effector
-<span class="math notranslate nohighlight">\(W=[F_x F_y F_z M_x M_y M_z]\)</span></p></li>
-</ul>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">tau</span> <span class="pre">=</span> <span class="pre">rne(q,</span> <span class="pre">qd,</span> <span class="pre">qdd,</span> <span class="pre">grav,</span> <span class="pre">fext)</span></code> is the joint torque required for
-the robot to achieve the specified joint position <code class="docutils literal notranslate"><span class="pre">q</span></code> (1xn), velocity
-<code class="docutils literal notranslate"><span class="pre">qd</span></code> (1xn) and acceleration <code class="docutils literal notranslate"><span class="pre">qdd</span></code> (1xn), where n is the number of
-robot joints. <code class="docutils literal notranslate"><span class="pre">fext</span></code> describes the wrench acting on the end-effector</p>
-<p>Trajectory operation:
-If q, qd and qdd (mxn) are matrices with m cols representing a
-trajectory then tau (mxn) is a matrix with cols corresponding to each
-trajectory step.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>The torque computed contains a contribution due to armature
-inertia and joint friction.</p></li>
-<li><p>If a model has no dynamic parameters set the result is zero.</p></li>
-</ul>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne_python" title="roboticstoolbox.robot.DHRobot.DHRobot.rne_python"><code class="xref py py-func docutils literal notranslate"><span class="pre">rne_python()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.rne_python">
-<code class="sig-name descname">rne_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Q</span></em>, <em class="sig-param"><span class="n">QD</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">QDD</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">grav</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fext</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">basewrench</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne_python" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute inverse dynamics via recursive Newton-Euler formulation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Q</strong> – Joint coordinates</p></li>
-<li><p><strong>QD</strong> – Joint velocity</p></li>
-<li><p><strong>QDD</strong> – Joint acceleration</p></li>
-<li><p><strong>grav</strong> (<em>[</em><em>type</em><em>]</em><em>, </em><em>optional</em>) – [description], defaults to None</p></li>
-<li><p><strong>fext</strong> (<em>6-element array-like</em><em>, </em><em>optional</em>) – end-effector wrench, defaults to None</p></li>
-<li><p><strong>debug</strong> (<em>bool</em><em>, </em><em>optional</em>) – print debug information to console, defaults to False</p></li>
-<li><p><strong>basewrench</strong> (<em>bool</em><em>, </em><em>optional</em>) – compute the base wrench, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ValueError</strong> – for misshaped inputs</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Joint force/torques</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>NumPy array</p>
-</dd>
-</dl>
-<p>Recursive Newton-Euler for standard Denavit-Hartenberg notation.</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(q,</span> <span class="pre">qd,</span> <span class="pre">qdd)</span></code> where the arguments have shape (n,) where n is
-the number of robot joints.  The result has shape (n,).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(q,</span> <span class="pre">qd,</span> <span class="pre">qdd)</span></code> where the arguments have shape (m,n) where n
-is the number of robot joints and where m is the number of steps in
-the joint trajectory.  The result has shape (m,n).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(p)</span></code> where the input is a 1D array <code class="docutils literal notranslate"><span class="pre">p</span></code> = [q, qd, qdd] with
-shape (3n,), and the result has shape (n,).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">rne_dh(p)</span></code> where the input is a 2D array <code class="docutils literal notranslate"><span class="pre">p</span></code> = [q, qd, qdd] with
-shape (m,3n) and the result has shape (m,n).</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>This is a pure Python implementation and slower than the .rne()</p></li>
-</ul>
-<p>which is written in C.
-- This version supports symbolic model parameters
-- Verified against MATLAB code</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.rne" title="roboticstoolbox.robot.DHRobot.DHRobot.rne"><code class="xref py py-func docutils literal notranslate"><span class="pre">rne()</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -4712,7 +4704,7 @@ conventions.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Nov-2020.
+        Last updated on 22-Nov-2020.
       </span>
 
     </p>

@@ -177,6 +177,7 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span><span class="p">,</span> <span class="n">PurePosixPath</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SpatialAcceleration</span><span class="p">,</span> <span class="n">SpatialVelocity</span><span class="p">,</span> <span class="n">SpatialInertia</span><span class="p">,</span> <span class="n">SpatialForce</span>
 
 <div class="viewcode-block" id="ERobot"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot">[docs]</a><span class="k">class</span> <span class="nc">ERobot</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1543,8 +1544,65 @@
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">collided</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="kc">False</span></div></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
+
+
+<span class="c1"># inverse dynamics (recursive Newton-Euler) using spatial vector notation</span>
+<div class="viewcode-block" id="ERobot.rne"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.rne">[docs]</a>    <span class="k">def</span>  <span class="nf">rne</span><span class="p">(</span> <span class="n">robot</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">qdd</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        
+        <span class="n">n</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">n</span>
+
+        <span class="c1"># allocate intermediate variables</span>
+        <span class="n">Xup</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">Xtree</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">v</span> <span class="o">=</span> <span class="n">SpatialVelocity</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">SpatialForce</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">SpatialInertia</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>   <span class="c1"># joint motion subspace</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,))</span>   <span class="c1"># joint torque/force</span>
+
+        <span class="c1"># initialize intermediate variables</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">robot</span><span class="p">):</span>
+            <span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SpatialInertia</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">link</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">link</span><span class="o">.</span><span class="n">r</span><span class="p">)</span>
+            <span class="n">Xtree</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">Ts</span>
+            <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">s</span>
+
+        <span class="k">if</span> <span class="n">gravity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">a_grav</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a_grav</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">gravity</span><span class="p">)</span>
+            
+        <span class="c1"># forward recursion</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">vJ</span> <span class="o">=</span> <span class="n">SpatialVelocity</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">qd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+            <span class="c1"># transform from parent(j) to j</span>
+            <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">robot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">vJ</span>
+                <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a_grav</span> <span class="o">+</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">qdd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">jp</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">jindex</span>
+                <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">+</span> <span class="n">vJ</span>
+                <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> \
+                    <span class="o">+</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">qdd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> \
+                    <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="n">vJ</span>
+
+            <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        
+        <span class="c1"># backward recursion</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)):</span>
+            <span class="n">Q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">robot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">jp</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">jindex</span>
+                <span class="n">f</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">+</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">Q</span></div></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
@@ -1589,7 +1647,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Nov-2020.
+        Last updated on 22-Nov-2020.
       </span>
 
     </p>

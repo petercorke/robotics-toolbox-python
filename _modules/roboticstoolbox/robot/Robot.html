@@ -174,6 +174,8 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.Swift</span> <span class="kn">import</span> <span class="n">Swift</span>
 
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Dynamics</span> <span class="kn">import</span> <span class="n">DynamicsMixin</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
@@ -191,7 +193,7 @@
 <span class="c1"># ikine functions need: fkine, jacobe, qlim methods from subclass</span>
 
 
-<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">:</span>
+<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">DynamicsMixin</span><span class="p">):</span>
 
     <span class="n">_color</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -267,6 +269,9 @@
         <span class="c1">#         data[2][idx]]</span>
         <span class="c1"># else:</span>
         <span class="c1">#     self.basemesh = None</span>
+
+<div class="viewcode-block" id="Robot.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.__getitem__"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -412,37 +417,7 @@
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="Robot.dyntable"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.dyntable">[docs]</a>    <span class="k">def</span> <span class="nf">dyntable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Pretty print the dynamic parameters (Robot superclass)</span>
 
-<span class="sd">        The dynamic parameters are printed in a table, with one row per link.</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
-<span class="sd">            &gt;&gt;&gt; robot.links[2].dyntable()</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
-<span class="sd">            &gt;&gt;&gt; robot.dyntable()</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;j&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;I&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Jm&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;Tc&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
-            <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span> <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">link</span><span class="o">.</span><span class="n">_dyn2list</span><span class="p">())</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.linkcolormap"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.linkcolormap">[docs]</a>    <span class="k">def</span> <span class="nf">linkcolormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linkcolors</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -618,32 +593,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;tool must be set to None (no tool) or an SE3&#39;</span><span class="p">)</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get/set default gravitational acceleration (Robot superclass)</span>
-
-<span class="sd">        - ``robot.name`` is the default gravitational acceleration</span>
-
-<span class="sd">        :return: robot name</span>
-<span class="sd">        :rtype: ndarray(3,)</span>
-
-<span class="sd">        - ``robot.name = ...`` checks and sets default gravitational</span>
-<span class="sd">          acceleration</span>
-
-<span class="sd">        .. note:: If the z-axis is upward, out of the Earth, this should be</span>
-<span class="sd">            a positive number.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span>
-
-    <span class="nd">@gravity</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gravity_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gravity</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">gravity_new</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dynchanged</span><span class="p">()</span>
-
-<span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1303,94 +1252,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">error</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
-
-<div class="viewcode-block" id="Robot.friction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.friction">[docs]</a>    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Manipulator joint friction (Robot superclass)</span>
-
-<span class="sd">        :param qd: The joint velocities of the robot</span>
-<span class="sd">        :type qd: ndarray(n)</span>
-
-<span class="sd">        :return: The joint friction forces/torques for the robot</span>
-<span class="sd">        :rtype: ndarray(n,)</span>
-
-<span class="sd">        ``robot.friction(qd)`` is a vector of joint friction</span>
-<span class="sd">        forces/torques for the robot moving with joint velocities ``qd``.</span>
-
-<span class="sd">        The friction model includes:</span>
-
-<span class="sd">        - Viscous friction which is a linear function of velocity.</span>
-<span class="sd">        - Coulomb friction which is proportional to sign(qd).</span>
-
-<span class="sd">        .. math::</span>
-
-<span class="sd">            \tau_j = G^2 B \dot{q}_j + |G_j| \left\{ \begin{array}{ll}</span>
-<span class="sd">                \tau_{C,j}^+ &amp; \mbox{if $\dot{q}_j &gt; 0$} \\</span>
-<span class="sd">                \tau_{C,j}^- &amp; \mbox{if $\dot{q}_j &lt; 0$} \end{array} \right.</span>
-
-<span class="sd">        .. note::</span>
-
-<span class="sd">            - The friction value should be added to the motor output torque to</span>
-<span class="sd">              determine the nett torque. It has a negative value when qd &gt; 0.</span>
-<span class="sd">            - The returned friction value is referred to the output of the</span>
-<span class="sd">              gearbox.</span>
-<span class="sd">            - The friction parameters in the Link object are referred to the</span>
-<span class="sd">              motor.</span>
-<span class="sd">            - Motor viscous friction is scaled up by :math:`G^2`.</span>
-<span class="sd">            - Motor Coulomb friction is scaled up by math:`G`.</span>
-<span class="sd">            - The appropriate Coulomb friction value to use in the</span>
-<span class="sd">              non-symmetric case depends on the sign of the joint velocity,</span>
-<span class="sd">              not the motor velocity.</span>
-<span class="sd">            - Coulomb friction is zero for zero joint velocity, stiction is</span>
-<span class="sd">              not modeled.</span>
-<span class="sd">            - The absolute value of the gear ratio is used.  Negative gear</span>
-<span class="sd">              ratios are tricky: the Puma560 robot has negative gear ratio for</span>
-<span class="sd">              joints 1 and 3.</span>
-<span class="sd">            - The absolute value of the gear ratio is used. Negative gear</span>
-<span class="sd">              ratios are tricky: the Puma560 has negative gear ratio for</span>
-<span class="sd">              joints 1 and 3.</span>
-
-<span class="sd">        :seealso: :func:`Robot.nofriction`, :func:`Link.friction`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">tau</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">tau</span></div>
-
-<span class="c1"># --------------------------------------------------------------------- #</span>
-
-<div class="viewcode-block" id="Robot.nofriction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.nofriction">[docs]</a>    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove manipulator joint friction (Robot superclass)</span>
-
-<span class="sd">        :param coulomb: set the Coulomb friction to 0</span>
-<span class="sd">        :type coulomb: bool</span>
-<span class="sd">        :param viscous: set the viscous friction to 0</span>
-<span class="sd">        :type viscous: bool</span>
-<span class="sd">        :return: A copy of the robot with dynamic parameters perturbed</span>
-<span class="sd">        :rtype: Robot subclass</span>
-
-<span class="sd">        ``nofriction()`` copies the robot and returns</span>
-<span class="sd">        a robot with the same link parameters except the Coulomb and/or viscous</span>
-<span class="sd">        friction parameter are set to zero.</span>
-
-<span class="sd">        :seealso: :func:`Robot.friction`, :func:`Link.nofriction`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># shallow copy the robot object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">delete_rne</span><span class="p">()</span>  <span class="c1"># remove the inherited C pointers</span>
-        <span class="n">nf</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">nf</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;NF/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-
-        <span class="c1"># add the modified links (copies)</span>
-        <span class="n">nf</span><span class="o">.</span><span class="n">_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">nofriction</span><span class="p">(</span><span class="n">coulomb</span><span class="p">,</span> <span class="n">viscous</span><span class="p">)</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">nf</span></div>
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -2119,7 +1980,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Nov-2020.
+        Last updated on 22-Nov-2020.
       </span>
 
     </p>
