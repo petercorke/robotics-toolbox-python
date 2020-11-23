@@ -25,6 +25,8 @@ from roboticstoolbox.backends.VPython.grid import GraphicsGrid
 
 class TestVPython(unittest.TestCase):
 
+    env = None
+
     @classmethod
     def setUpClass(cls):
         cls.env = VPython()
@@ -46,9 +48,7 @@ class TestVPython(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         with cls.assertRaises(cls, SystemExit):
-            temp = GraphicsCanvas3D()
-            close_localhost_session(temp)
-            del temp
+            cls.env.close()
             # Give time for VPython to exit
             time.sleep(1)
 
