@@ -20,6 +20,8 @@ class Gripper():
             if link.isjoint:
                 self._n += 1
 
+        print(self.n)
+
         self.q = np.zeros(self.n)
         self._links = elinks
 
@@ -46,8 +48,8 @@ class Gripper():
                     raise ValueError(
                         'gripper joint index {link.jindex} was '
                         'repeated or out of range')
-                jset -= set(link.jindex)
-            if len(jset) > 0:
+                jset -= set([link.jindex])
+            if len(jset) > 0:   # pragma nocover # is impossible
                 raise ValueError('gripper joints {jset} were not assigned')
         else:
             # must be a mixture of ELinks with/without jindex
