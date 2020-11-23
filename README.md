@@ -219,3 +219,31 @@ pip3 install -e .
 The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub.
 
 Or you can run them, and experiment with them, at [mybinder.org](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks).
+
+## Toolbox Research Applications
+
+The toolbox is incredibly useful for developing and prototyping algorithms for research, thanks to the exhaustive set of well documented and mature robotic functions exposed through clean and painless APIs. Additionally, the ease at which a user can visualize their algorithm supports a rapid prototyping paradigm.
+
+### Publication List
+
+**A Purely-Reactive Manipulability-Maximising Motion Controller**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python.
+
+[[Paper](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc/)] [[Video](https://youtu.be/Vu_rcPlaADI)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/mmc.py)]
+
+<p>
+  <a href="https://youtu.be/Vu_rcPlaADI">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/mmc_youtube.png" width="560" height="315">
+  </a>
+</p>
+
+<br>
+
+**NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Paper](https://arxiv.org/abs/2010.08686)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/neo.py)]
+
+<p>
+  <a href="https://youtu.be/jSLPJBr8QTY">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/neo_youtube.png" width="560" height="315">
+  </a>
+</p>
