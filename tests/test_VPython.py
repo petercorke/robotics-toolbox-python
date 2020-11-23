@@ -845,6 +845,19 @@ class TestVPython(unittest.TestCase):
     def test_backend_remove(self):
         pass
 
+    # ##########################################################################
+    def test_2d_init(self):
+        pass
+
+    def test_2d_grid_visiblity(self):
+        pass
+
+    def test_2d_plot(self):
+        # Correct inputs
+        # Too many of each inputs
+        # Edge cases
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()
