@@ -9,6 +9,8 @@ from numpy import array
 from math import pi
 import time
 
+from roboticstoolbox.backends import VPython
+
 from roboticstoolbox.backends.VPython.common_functions import \
     get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, get_pose_pos, \
     vpython_to_se3, wrap_to_pi, close_localhost_session, \
@@ -23,8 +25,14 @@ from roboticstoolbox.backends.VPython.grid import GraphicsGrid
 
 class TestVPython(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.env = VPython()
+
     def setUp(self):
-        self.robot_scene = GraphicsCanvas3D()
+        self.env.launch()
+        # Get the last scene
+        self.robot_scene = self.env.canvases[len(self.env.canvases)-1]
 
         #    0.707107 -0.707107  0         0
         #    0.707107  0.707107  0         1
@@ -807,8 +815,8 @@ class TestVPython(unittest.TestCase):
     # ##########################################################################
     # def test_import_object(self):
     #     # Update Scene
-    #     scene = GraphicsCanvas3D(title="Test Import Object")
-    #     scene.grid_visibility(False)
+    #     self.robot_scene.scene.title = "Test Import Object"
+    #     self.robot_scene.grid_visibility(False)
 
     #     # Check num objects
     #     # num_obj = len(scene.scene.objects)
@@ -826,6 +834,16 @@ class TestVPython(unittest.TestCase):
     #     # to know correct amount
     #     # self.assertEqual(len(scene.scene.objects), num_obj + 1)  # 1 object
     #     # was added to the scene
+
+    # ##########################################################################
+    def test_backend_add(self):
+        pass
+
+    def test_backend_step(self):
+        pass
+
+    def test_backend_remove(self):
+        pass
 
 
 if __name__ == '__main__':
