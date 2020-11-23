@@ -8,6 +8,7 @@ import threading
 import glob
 import os
 import platform
+import warnings
 from time import perf_counter, sleep
 import imageio
 from roboticstoolbox.backends.Connector import Connector
@@ -383,6 +384,9 @@ class VPython(Connector):  # pragma nocover
 
         if not self._recording:
             print("VPython Recording...")
+            if fps > 10:
+                warnings.warn("The chosen recording fps ({0}) could result in lagging video quality."
+                              "Consider lowering fps and robot speed (e.g. 5fps)".format(fps), RuntimeWarning)
             self._recording = True
             self._recording_fps = fps
             # Spawn a thread
