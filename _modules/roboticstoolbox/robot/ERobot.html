@@ -176,8 +176,9 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Gripper</span> <span class="kn">import</span> <span class="n">Gripper</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span><span class="p">,</span> <span class="n">PurePosixPath</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SpatialAcceleration</span><span class="p">,</span> <span class="n">SpatialVelocity</span><span class="p">,</span> \
+    <span class="n">SpatialInertia</span><span class="p">,</span> <span class="n">SpatialForce</span>
 
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SpatialAcceleration</span><span class="p">,</span> <span class="n">SpatialVelocity</span><span class="p">,</span> <span class="n">SpatialInertia</span><span class="p">,</span> <span class="n">SpatialForce</span>
 
 <div class="viewcode-block" id="ERobot"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot">[docs]</a><span class="k">class</span> <span class="nc">ERobot</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -204,7 +205,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># TODO do we need tool and base as well?</span>
-    <span class="c1"># TODO doco for ee_link, can be a list</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -332,8 +332,8 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s1">&#39;joint index </span><span class="si">{link.jindex}</span><span class="s1"> was &#39;</span>
                         <span class="s1">&#39;repeated or out of range&#39;</span><span class="p">)</span>
-                <span class="n">jset</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">jset</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma nocover  # is impossible</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;joints </span><span class="si">{jset}</span><span class="s1"> were not assigned&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># must be a mixture of ELinks with/without jindex</span>
@@ -377,23 +377,23 @@
 
         <span class="k">return</span> <span class="n">visited</span></div>
 
-<div class="viewcode-block" id="ERobot.dfs_path"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.dfs_path">[docs]</a>    <span class="k">def</span> <span class="nf">dfs_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">visited</span> <span class="o">=</span> <span class="p">[</span><span class="n">l1</span><span class="p">]</span>
+    <span class="c1"># def dfs_path(self, l1, l2):</span>
+    <span class="c1">#     path = []</span>
+    <span class="c1">#     visited = [l1]</span>
 
-        <span class="k">def</span> <span class="nf">vis_children</span><span class="p">(</span><span class="n">link</span><span class="p">):</span>
-            <span class="n">visited</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+    <span class="c1">#     def vis_children(link):</span>
+    <span class="c1">#         visited.append(link)</span>
 
-            <span class="k">for</span> <span class="n">li</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">li</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+    <span class="c1">#         for li in link.child:</span>
+    <span class="c1">#             if li not in visited:</span>
 
-                    <span class="k">if</span> <span class="n">li</span> <span class="o">==</span> <span class="n">l2</span> <span class="ow">or</span> <span class="n">vis_children</span><span class="p">(</span><span class="n">li</span><span class="p">):</span>
-                        <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">li</span><span class="p">)</span>
-                        <span class="k">return</span> <span class="kc">True</span>
-        <span class="n">vis_children</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span>
-        <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span>
-        <span class="n">path</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">path</span></div>
+    <span class="c1">#                 if li == l2 or vis_children(li):</span>
+    <span class="c1">#                     path.append(li)</span>
+    <span class="c1">#                     return True</span>
+    <span class="c1">#     vis_children(l1)</span>
+    <span class="c1">#     path.append(l1)</span>
+    <span class="c1">#     path.reverse()</span>
+    <span class="c1">#     return path</span>
 
 <div class="viewcode-block" id="ERobot.to_dict"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ob</span> <span class="o">=</span> <span class="p">{</span>
@@ -535,7 +535,7 @@
                 <span class="n">tld</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">/</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">tld</span><span class="p">)</span>
             <span class="n">urdf_string</span> <span class="o">=</span> <span class="n">xacro</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">tld</span><span class="p">)</span>
             <span class="n">urdf</span> <span class="o">=</span> <span class="n">URDF</span><span class="o">.</span><span class="n">loadstr</span><span class="p">(</span><span class="n">urdf_string</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="n">urdf</span> <span class="o">=</span> <span class="n">URDF</span><span class="o">.</span><span class="n">loadstr</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">file_path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">urdf</span><span class="o">.</span><span class="n">elinks</span><span class="p">,</span> <span class="n">urdf</span><span class="o">.</span><span class="n">name</span></div>
@@ -645,7 +645,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_base_link</span> <span class="o">=</span> <span class="n">link</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># self._base_link = self.links[link]</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;must be an ELink&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Must be an ELink&#39;</span><span class="p">)</span>
         <span class="c1"># self._reset_fk_path()</span>
 <span class="c1"># --------------------------------------------------------------------- #</span>
     <span class="c1"># TODO  get configuration string</span>
@@ -669,7 +669,7 @@
                 <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ELink</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">link</span><span class="p">]):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ee_links</span> <span class="o">=</span> <span class="n">link</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;expecting an ELink or list of ELinks&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;expecting an ELink or list of ELinks&#39;</span><span class="p">)</span>
         <span class="c1"># self._reset_fk_path()</span>
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -1546,11 +1546,9 @@
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
+    <span class="c1"># inverse dynamics (recursive Newton-Euler) using spatial vector notation</span>
+<div class="viewcode-block" id="ERobot.rne"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.rne">[docs]</a>    <span class="k">def</span> <span class="nf">rne</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">qdd</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-
-<span class="c1"># inverse dynamics (recursive Newton-Euler) using spatial vector notation</span>
-<div class="viewcode-block" id="ERobot.rne"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.rne">[docs]</a>    <span class="k">def</span>  <span class="nf">rne</span><span class="p">(</span> <span class="n">robot</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">qdd</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        
         <span class="n">n</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">n</span>
 
         <span class="c1"># allocate intermediate variables</span>
@@ -1560,7 +1558,7 @@
         <span class="n">v</span> <span class="o">=</span> <span class="n">SpatialVelocity</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="n">a</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">SpatialForce</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-        <span class="n">I</span> <span class="o">=</span> <span class="n">SpatialInertia</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">SpatialInertia</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># noqa</span>
         <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>   <span class="c1"># joint motion subspace</span>
         <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,))</span>   <span class="c1"># joint torque/force</span>
 
@@ -1574,7 +1572,7 @@
             <span class="n">a_grav</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">a_grav</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">gravity</span><span class="p">)</span>
-            
+
         <span class="c1"># forward recursion</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
             <span class="n">vJ</span> <span class="o">=</span> <span class="n">SpatialVelocity</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">qd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
@@ -1593,7 +1591,7 @@
                     <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="n">vJ</span>
 
             <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
-        
+
         <span class="c1"># backward recursion</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)):</span>
             <span class="n">Q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
@@ -1603,6 +1601,7 @@
                 <span class="n">f</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">+</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">Q</span></div></div>
+
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
@@ -1647,7 +1646,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 22-Nov-2020.
+        Last updated on 23-Nov-2020.
       </span>
 
     </p>
