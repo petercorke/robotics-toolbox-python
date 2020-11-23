@@ -11,16 +11,17 @@ class Gripper():
 
     def __init__(
             self,
-            elinks
+            elinks,
+            name=''
             ):
 
         self._n = 0
 
+        self.name = name
+
         for link in elinks:
             if link.isjoint:
                 self._n += 1
-
-        print(self.n)
 
         self.q = np.zeros(self.n)
         self._links = elinks
@@ -125,3 +126,19 @@ class Gripper():
                 robot[i]
         """
         return self._links
+
+# --------------------------------------------------------------------- #
+
+    @property
+    def name(self):
+        """
+        Gripper name
+
+        :return: The gripper name
+        :rtype: string
+        """
+        return self._name
+
+    @name.setter
+    def name(self, new_name):
+        self._name = new_name

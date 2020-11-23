@@ -672,21 +672,13 @@ class TestERobot(unittest.TestCase):
         self.assertTrue(c0)
         self.assertFalse(c1)
 
-    # def test_gripper(self):
-    #     e1 = rtb.ELink(rtb.ETS.rz(), jindex=0)
-    #     e2 = rtb.ELink(rtb.ETS.rz(), jindex=0, parent=e1)
-    #     e3 = rtb.ELink(rtb.ETS.rz(), jindex=1, parent=e2)
-    #     e4 = rtb.ELink(rtb.ETS.rz(), jindex=2, parent=e3)
-
-    #     # with self.assertRaises(ValueError):
-    #     rtb.ERobot([e1, e2, e3, e4], gripper_links=e2)
-
     def test_invdyn(self):
         # create a 2 link robot
         # Example from Spong etal. 2nd edition, p. 260
         E = rtb.ETS
         l1 = rtb.ELink(ets=E.ry(), m=1, r=[0.5, 0, 0], name='l1')
-        l2 = rtb.ELink(ets=E.tx(1) * E.ry(), m=1, r=[0.5, 0, 0], parent=l1, name='l2')
+        l2 = rtb.ELink(
+            ets=E.tx(1) * E.ry(), m=1, r=[0.5, 0, 0], parent=l1, name='l2')
         robot = rtb.ERobot([l1, l2], name="simple 2 link")
         z = np.zeros(robot.n)
 
@@ -704,7 +696,7 @@ class TestERobot(unittest.TestCase):
         nt.assert_array_almost_equal(tau, np.r_[0, 0])
 
         # check velocity terms
-        robot.gravity = [0,0,0]
+        robot.gravity = [0, 0, 0]
         q = [0, -pi/2]
         h = -0.5 * sin(q[1])
 
@@ -739,6 +731,7 @@ class TestERobot(unittest.TestCase):
         tau = robot.rne(q, z, [1, 1])
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':   # pragma nocover
 
     unittest.main()
