@@ -20,8 +20,9 @@ from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath
 from ansitable import ANSITable, Column
+from spatialmath import SpatialAcceleration, SpatialVelocity, \
+    SpatialInertia, SpatialForce
 
-from spatialmath import SpatialAcceleration, SpatialVelocity, SpatialInertia, SpatialForce
 
 class ERobot(Robot):
     """
@@ -48,7 +49,6 @@ class ERobot(Robot):
     """
 
     # TODO do we need tool and base as well?
-    # TODO doco for ee_link, can be a list
 
     def __init__(
             self,
@@ -176,8 +176,8 @@ class ERobot(Robot):
                     raise ValueError(
                         'joint index {link.jindex} was '
                         'repeated or out of range')
-                jset -= set(link.jindex)
-            if len(jset) > 0:
+                jset -= set([link.jindex])
+            if len(jset) > 0:  # pragma nocover  # is impossible
                 raise ValueError('joints {jset} were not assigned')
         else:
             # must be a mixture of ELinks with/without jindex
@@ -221,23 +221,23 @@ class ERobot(Robot):
 
         return visited
 
-    def dfs_path(self, l1, l2):
-        path = []
-        visited = [l1]
+    # def dfs_path(self, l1, l2):
+    #     path = []
+    #     visited = [l1]
 
-        def vis_children(link):
-            visited.append(link)
+    #     def vis_children(link):
+    #         visited.append(link)
 
-            for li in link.child:
-                if li not in visited:
+    #         for li in link.child:
+    #             if li not in visited:
 
-                    if li == l2 or vis_children(li):
-                        path.append(li)
-                        return True
-        vis_children(l1)
-        path.append(l1)
-        path.reverse()
-        return path
+    #                 if li == l2 or vis_children(li):
+    #                     path.append(li)
+    #                     return True
+    #     vis_children(l1)
+    #     path.append(l1)
+    #     path.reverse()
+    #     return path
 
     def to_dict(self):
         ob = {
@@ -379,7 +379,7 @@ class ERobot(Robot):
                 tld = base_path / PurePosixPath(tld)
             urdf_string = xacro.main(file_path, tld)
             urdf = URDF.loadstr(urdf_string, file_path)
-        else:
+        else:  # pragma nocover
             urdf = URDF.loadstr(open(file_path).read(), file_path)
 
         return urdf.elinks, urdf.name
@@ -489,7 +489,7 @@ class ERobot(Robot):
             self._base_link = link
         else:
             # self._base_link = self.links[link]
-            raise ValueError('must be an ELink')
+            raise TypeError('Must be an ELink')
         # self._reset_fk_path()
 # --------------------------------------------------------------------- #
     # TODO  get configuration string
@@ -513,7 +513,7 @@ class ERobot(Robot):
                 all([isinstance(x, ELink) for x in link]):
             self._ee_links = link
         else:
-            raise ValueError('expecting an ELink or list of ELinks')
+            raise TypeError('expecting an ELink or list of ELinks')
         # self._reset_fk_path()
 # --------------------------------------------------------------------- #
 
@@ -1390,11 +1390,9 @@ class ERobot(Robot):
 
         return False
 
+    # inverse dynamics (recursive Newton-Euler) using spatial vector notation
+    def rne(robot, q, qd, qdd, gravity=None):
 
-
-# inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def  rne( robot, q, qd, qdd, gravity=None):
-        
         n = robot.n
 
         # allocate intermediate variables
@@ -1404,7 +1402,7 @@ class ERobot(Robot):
         v = SpatialVelocity.Alloc(n)
         a = SpatialAcceleration.Alloc(n)
         f = SpatialForce.Alloc(n)
-        I = SpatialInertia.Alloc(n)
+        I = SpatialInertia.Alloc(n)  # noqa
         s = [None for i in range(n)]   # joint motion subspace
         Q = np.zeros((n,))   # joint torque/force
 
@@ -1418,7 +1416,7 @@ class ERobot(Robot):
             a_grav = SpatialAcceleration(robot.gravity)
         else:
             a_grav = SpatialAcceleration(gravity)
-            
+
         # forward recursion
         for j in range(0, n):
             vJ = SpatialVelocity(s[j] * qd[j])
@@ -1437,7 +1435,7 @@ class ERobot(Robot):
                     + v[j] @ vJ
 
             f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
-        
+
         # backward recursion
         for j in reversed(range(0, n)):
             Q[j] = f[j].dot(s[j])
@@ -1447,6 +1445,7 @@ class ERobot(Robot):
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
+
 
 if __name__ == "__main__":  # pragma nocover
 

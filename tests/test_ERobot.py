@@ -11,6 +11,7 @@ import unittest
 import spatialmath as sm
 from math import pi, sin, cos
 
+
 class TestERobot(unittest.TestCase):
 
     def test_ets_init(self):
@@ -28,14 +29,31 @@ class TestERobot(unittest.TestCase):
         with self.assertRaises(ValueError):
             rtb.ERobot([e1, e2, e3, e4])
 
-    # def test_jindex(self):
-    #     e1 = rtb.ELink(rtb.ETS.rz(), jindex=0)
-    #     e2 = rtb.ELink(rtb.ETS.rz(), jindex=1, parent=e1)
-    #     e3 = rtb.ELink(rtb.ETS.rz(), jindex=2, parent=e2)
-    #     e4 = rtb.ELink(rtb.ETS.rz(), jindex=3, parent=e3)
+    def test_jindex(self):
+        e1 = rtb.ELink(rtb.ETS.rz(), jindex=0)
+        e2 = rtb.ELink(rtb.ETS.rz(), jindex=1, parent=e1)
+        e3 = rtb.ELink(rtb.ETS.rz(), jindex=2, parent=e2)
+        e4 = rtb.ELink(rtb.ETS.rz(), jindex=0, parent=e3)
 
-    #     # with self.assertRaises(ValueError):
-    #     rtb.ERobot([e1, e2, e3, e4])
+        # with self.assertRaises(ValueError):
+        rtb.ERobot([e1, e2, e3, e4], gripper_links=e4)
+
+    def test_jindex_fail(self):
+        e1 = rtb.ELink(rtb.ETS.rz(), jindex=0)
+        e2 = rtb.ELink(rtb.ETS.rz(), jindex=1, parent=e1)
+        e3 = rtb.ELink(rtb.ETS.rz(), jindex=2, parent=e2)
+        e4 = rtb.ELink(rtb.ETS.rz(), jindex=5, parent=e3)
+
+        with self.assertRaises(ValueError):
+            rtb.ERobot([e1, e2, e3, e4])
+
+        e1 = rtb.ELink(rtb.ETS.rz(), jindex=0)
+        e2 = rtb.ELink(rtb.ETS.rz(), jindex=1, parent=e1)
+        e3 = rtb.ELink(rtb.ETS.rz(), jindex=2, parent=e2)
+        e4 = rtb.ELink(rtb.ETS.rz(), parent=e3)
+
+        with self.assertRaises(ValueError):
+            rtb.ERobot([e1, e2, e3, e4])
 
     def test_panda(self):
         panda = rtb.models.ETS.Panda()
@@ -452,20 +470,36 @@ class TestERobot(unittest.TestCase):
             rtb.ERobot([1, 2], base=sm.SE3.Rx(1.3))
 
     def test_dict(self):
-        panda = rtb.models.ETS.Panda()
+        panda = rtb.models.Panda()
+        panda.grippers[0].links[0].collision.append(rtb.Box([1, 1, 1]))
         panda.to_dict()
 
         wx = rtb.models.wx250s()
         wx.to_dict()
 
-    # def test_fkdict(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     fkd = panda.fk_dict()
+    def test_fkdict(self):
+        panda = rtb.models.Panda()
+        panda.grippers[0].links[0].collision.append(rtb.Box([1, 1, 1]))
+        panda.fk_dict()
 
-    #     for i in range(len(panda.ets)):
-    #         nt.assert_array_almost_equal(
-    #             panda.ets[i]._fk.t,
-    #             fkd['links'][i]['t'])
+    def test_elinks(self):
+        panda = rtb.models.Panda()
+        self.assertEquals(
+            panda.elinks[0], panda.link_dict[panda.elinks[0].name])
+
+    def test_base_link_setter(self):
+        panda = rtb.models.Panda()
+
+        with self.assertRaises(TypeError):
+            panda.base_link = [1]
+
+    def test_ee_link_setter(self):
+        panda = rtb.models.Panda()
+
+        panda.ee_links = panda.links[5]
+
+        with self.assertRaises(TypeError):
+            panda.ee_links = [1]
 
     def test_qlim(self):
         panda = rtb.models.ETS.Panda()
