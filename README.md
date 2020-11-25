@@ -244,6 +244,6 @@ The toolbox is incredibly useful for developing and prototyping algorithms for r
 
 <p>
   <a href="https://youtu.be/jSLPJBr8QTY">
-    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/neo_youtube.png" width="560" height="315">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/neo_youtube.png" width="560">
   </a>
 </p>
