@@ -9,6 +9,8 @@
 [![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
 [![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
+![pypi downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)
+[![GitHub stars](https://img.shields.io/github/stars/petercorke/robotics-toolbox-python.svg?style=social&label=Star)](https://GitHub.com/petercorke/robotics-toolbox-python/stargazers/)
 
 
 <table style="border:0px">
