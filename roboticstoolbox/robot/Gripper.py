@@ -11,10 +11,13 @@ class Gripper():
 
     def __init__(
             self,
-            elinks
+            elinks,
+            name=''
             ):
 
         self._n = 0
+
+        self.name = name
 
         for link in elinks:
             if link.isjoint:
@@ -46,8 +49,8 @@ class Gripper():
                     raise ValueError(
                         'gripper joint index {link.jindex} was '
                         'repeated or out of range')
-                jset -= set(link.jindex)
-            if len(jset) > 0:
+                jset -= set([link.jindex])
+            if len(jset) > 0:   # pragma nocover # is impossible
                 raise ValueError('gripper joints {jset} were not assigned')
         else:
             # must be a mixture of ELinks with/without jindex
@@ -123,3 +126,19 @@ class Gripper():
                 robot[i]
         """
         return self._links
+
+# --------------------------------------------------------------------- #
+
+    @property
+    def name(self):
+        """
+        Gripper name
+
+        :return: The gripper name
+        :rtype: string
+        """
+        return self._name
+
+    @name.setter
+    def name(self, new_name):
+        self._name = new_name

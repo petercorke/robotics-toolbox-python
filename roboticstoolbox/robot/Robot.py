@@ -1096,7 +1096,6 @@ class Robot(DynamicsMixin):
         else:
             return qstar, success, error
 
-
 # --------------------------------------------------------------------- #
 
     def plot(
