@@ -61,6 +61,7 @@ class Robot(DynamicsMixin):
         self.base = base
         self.tool = tool
         self.basemesh = None
+        self._reach = None
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')

@@ -515,6 +515,39 @@ class ERobot(Robot):
         else:
             raise TypeError('expecting an ELink or list of ELinks')
         # self._reset_fk_path()
+
+    @property
+    def reach(self):
+        r"""
+        Reach of the robot
+
+        :return: Maximum reach of the robot
+        :rtype: float
+
+        A conservative estimate of the reach of the robot. It is computed as
+        the sum of the translational ETs that define the link transform.
+
+        .. note:: 
+        
+            - Probably an overestimate of reach
+            - Used by numerical inverse kinematics to scale translational
+              error.
+            - For a prismatic joint, uses ``qlim`` if it is set
+
+        .. warning:: Computed on the first access. If kinematic parameters 
+              subsequently change this will not be reflected.
+        """
+        if self._reach is None:
+            d = 0
+            for link in self:
+                for et in link.ets():
+                    if et.isprismatic:
+                        d += abs(et.eta)
+                if link.isprismatic and link.qlim is not None:
+                    d += link.qlim[1]
+            self._reach = d
+        return self._reach
+
 # --------------------------------------------------------------------- #
 
     # @property

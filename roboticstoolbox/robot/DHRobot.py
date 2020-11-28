@@ -437,11 +437,28 @@ class DHRobot(Robot):
         :return: Maximum reach of the robot
         :rtype: float
 
-        The reach is computed as :math:`\sum_j |a_j| + |d_j|`
+        A conservative estimate of the reach of the robot. It is computed as
+        :math:`\sum_j |a_j| + |d_j|` where :math:`d_j` is taken as the maximum
+        joint coordinate (``qlim``) if the joint is primsmatic.
 
-        .. note:: Probably an overestimate.
+        .. note:: 
+        
+            - Probably an overestimate of reach
+            - Used by numerical inverse kinematics to scale translational
+              error.
+            - For a prismatic joint, uses ``qlim`` if it is set
+
+        .. warning:: Computed on the first access. If kinematic parameters 
+              subsequently change this will not be reflected.
         """
-        return np.sum(np.abs([self.a, self.d]))
+        if self._reach is None:
+            d = 0
+            for link in self:
+                d += abs(link.a) + (link.d)
+                if link.isprismatic and link.qlim is not None:
+                    d += link.qlim[1]
+            self._reach = d
+        return self._reach
 
     def A(self, j, q=None):
         """
