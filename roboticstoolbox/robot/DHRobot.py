@@ -923,9 +923,6 @@ class DHRobot(Robot):
         - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity.
 
-        - ``robot.jacobe(q)` as above except uses the stored q value of the
-          robot object.
-
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
@@ -938,10 +935,7 @@ class DHRobot(Robot):
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
         """  # noqa
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        q = getvector(q, self.n)
 
         n = self.n
         L = self.links
@@ -986,11 +980,8 @@ class DHRobot(Robot):
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+        - ``robot.jacob0(q)`` is the manipulator Jacobian matrix which maps
           joint velocity to end-effector spatial velocity.
-
-        - ``robot.jacobe()`` as above except uses the stored q value of the
-        robot object.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.
@@ -1003,7 +994,7 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
         """  # noqa
-        q = self._getq(q)
+        q = base.getvector(q, self.n)
 
         if T is None:
             T = self.fkine(q)
