@@ -112,17 +112,20 @@ orientation parallel to y-axis (O=+Y)).
 from spatialmath import SE3
 
 T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-q_pickup, *_ = robot.ikunc(T)   # solve IK, ignore additional outputs
-print(q_pickup)                 # display joint angles
+sol = robot.ikine_unc(T)         # solve IK
+print(sol.q)                    # display joint angles
 
-	[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
+	[-0.01044    7.876    1.557    -6.81    1.571    4.686   0.5169]
 
-print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
+print(robot.fkine(sol.q))    # FK shows that desired end-effector pose was achieved
 
-	  -1          -1.31387e-11-1.57726e-09 0.0999999    
-	  -1.31386e-11 1          -7.46658e-08 0.2          
-	   1.57726e-09-7.46658e-08-1           0.5          
-	   0           0           0           1
+	Out[35]: 
+	SE3:┏                                           ┓
+		┃-1         -4e-08      0.000521   0.615    ┃
+		┃ 2.79e-08   1          0.00013    0.154    ┃
+		┃-0.000521   0.00013   -1          0.105    ┃
+		┃ 0          0          0          1        ┃
+		┗                                           ┛
 ```
 
 Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
