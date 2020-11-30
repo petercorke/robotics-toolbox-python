@@ -136,7 +136,7 @@ qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
 robot.plot(qt.q, movie='panda1.gif')
 ```
 
-![Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda1.gif)
+![Panda trajectory animation](./docs/figs/panda1.gif)
 
 which uses the default matplotlib backend.  Grey arrows show the joint axes and the colored frame shows the end-effector pose.
 
@@ -177,7 +177,7 @@ for qk in qt.q:             # for each joint configuration on trajectory
 ```
 
 <p align="center">
- <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif">
+ <img src="./docs/figs/panda2.gif">
 </p>
 
 # Getting going
