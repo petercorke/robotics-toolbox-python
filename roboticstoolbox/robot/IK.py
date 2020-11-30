@@ -5,15 +5,19 @@
 
 import numpy as np
 from collections import namedtuple
-from roboticstoolbox.tools.null import null
+# from roboticstoolbox.tools.null import null
 from spatialmath import base
-from spatialmath import SE3, Twist3
-from scipy.optimize import minimize, Bounds, LinearConstraint
+from spatialmath import SE3  # , Twist3
+from scipy.optimize import minimize, Bounds  # , LinearConstraint
 import math
-iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual",
+iksol = namedtuple(
+    "IKsolution",
+    "q, success, reason, iterations, residual",
     defaults=(None, False, None, None, None))
 
+
 # ===================================================================== #
+
 class IKMixin:
 
     def ikine_LM(
@@ -30,7 +34,8 @@ class IKMixin:
             transpose=None):
 
         """
-        Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+        (Robot superclass)
 
         :param T: The desired end-effector pose or pose trajectory
         :type T: SE3
@@ -40,11 +45,12 @@ class IKMixin:
             and rotation about X, Y and Z respectively.
         :type mask: ndarray(6)
         :param ilimit: maximum number of iterations (default 500)
-        :type ilimit: int 
-        :param rlimit: maximum number of consecutive step rejections (default 100)
-        :type rlimit: int 
+        :type ilimit: int
+        :param rlimit: maximum number of consecutive step rejections
+            (default 100)
+        :type rlimit: int
         :param tol: final error tolerance (default 1e-10)
-        :type tol: float 
+        :type tol: float
         :param L: initial value of lambda
         :type L: float (default 0.1)
         :param Lmin: minimum allowable value of lambda
@@ -61,9 +67,9 @@ class IKMixin:
 
 
         ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can
-        be used for robots with any number of degrees of freedom. The return
-        value ``sol`` is a named tuple with elements:
+        to the robot end-effector pose ``T`` which is an ``SE3`` object. This
+        method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ============================================================
         Element         Type        Description
@@ -77,10 +83,10 @@ class IKMixin:
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) > 1`` it is considered to be a trajectory, and the result
+        is a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``.
+        The initial estimate of q for each time step is taken as the solution
+        from the previous time step.
 
         **Underactuated robots:**
 
@@ -104,8 +110,8 @@ class IKMixin:
         ``sol = robot.ikine_LM(T, search=True)`` as above but peforms a
         brute-force search with initial conditions chosen randomly from the
         entire configuration space.  If a numerical solution is found from that
-        initial condition, it is returned, otherwise another initial condition is
-        chosen.
+        initial condition, it is returned, otherwise another initial condition
+        is chosen.
 
         .. note::
 
@@ -115,7 +121,7 @@ class IKMixin:
               distances and angles without any kind of weighting.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
@@ -133,14 +139,15 @@ class IKMixin:
             - Robotics, Vision & Control, P. Corke, Springer 2011,
               Section 8.4.
 
-        :seealso: :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`
-        """
+        :seealso: :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`,
+            :func:`ikine_min`
+        """  # noqa
 
         if not isinstance(T, SE3):
             T = SE3(T)
 
         solutions = []
-   
+
         if search:
             # Randomised search for a starting point
             # quiet = True
@@ -187,8 +194,9 @@ class IKMixin:
         if mask is not None:
             mask = base.getvector(mask, 6)
             if not self.n >= np.sum(mask):
-                raise ValueError('Number of robot DOF must be >= the number '
-                                'of 1s in the mask matrix')
+                raise ValueError(
+                    'Number of robot DOF must be >= the number '
+                    'of 1s in the mask matrix')
         else:
             mask = np.ones(6)
         W = np.diag(mask)
@@ -264,7 +272,7 @@ class IKMixin:
                 q[k] += + 2 * np.pi
 
                 nm = np.linalg.norm(W @ e)
-                qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
+                # qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
                 # print(f"λ={Li:8.2g}, |e|={nm:8.2g}: q={qs}")
 
             # LM process finished, for better or worse
@@ -292,7 +300,8 @@ class IKMixin:
             ):
 
         """
-        Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+        (Robot superclass)
 
         :param T: The desired end-effector pose or pose trajectory
         :type T: SE3
@@ -302,18 +311,18 @@ class IKMixin:
             and rotation about X, Y and Z respectively.
         :type mask: ndarray(6)
         :param ilimit: maximum number of iterations (default 500)
-        :type ilimit: int 
+        :type ilimit: int
         :param tol: final error tolerance (default 1e-10)
-        :type tol: float 
+        :type tol: float
         :param ωN: damping coefficient
         :type ωN: float (default 1e-3)
         :return: inverse kinematic solution
         :rtype: named tuple
 
         ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can
-        be used for robots with any number of degrees of freedom. The return
-        value ``sol`` is a named tuple with elements:
+        to the robot end-effector pose ``T`` which is an ``SE3`` object. This
+        method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ============================================================
         Element         Type        Description
@@ -327,10 +336,10 @@ class IKMixin:
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) > 1`` it is considered to be a trajectory, and the result
+        is a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``.
+        The initial estimate of q for each time step is taken as the solution
+        from the previous time step.
 
         **Underactuated robots:**
 
@@ -351,14 +360,14 @@ class IKMixin:
 
         .. note::
 
-            - Implements a modified Levenberg-Marquadt variable-step-size solver
-              which is quite robust in practice.
+            - Implements a modified Levenberg-Marquadt variable-step-size
+              solver which is quite robust in practice.
             - The tolerance is computed on the norm of the error between
               current and desired tool pose.  This norm is computed from
               distances and angles without any kind of weighting.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
@@ -372,11 +381,12 @@ class IKMixin:
 
         :references:
             - "Solvability-Unconcerned Inverse Kinematics by the
-              Levenberg–Marquardt Method", T. Sugihara, IEEE T-RO, 27(5), 
+              Levenberg–Marquardt Method", T. Sugihara, IEEE T-RO, 27(5),
               October 2011, pp. 984-991.
 
-        :seealso: :func:`ikine_LM`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`
-        """
+        :seealso: :func:`ikine_LM`, :func:`ikine_unc`, :func:`ikine_con`,
+            :func:`ikine_min`
+        """  # noqa
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -386,7 +396,7 @@ class IKMixin:
         def angle_axis(T, Td):
             d = base.transl(Td) - base.transl(T)
             R = base.t2r(Td) @ base.t2r(T).T
-            l = np.r_[R[2,1]-R[1,2], R[0,2]-R[2,0], R[1,0]-R[0,1]]
+            l = np.r_[R[2, 1]-R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]  # noqa
             if base.iszerovec(l):
                 # diagonal matrix case
                 if np.trace(R) > 0:
@@ -410,8 +420,9 @@ class IKMixin:
         if mask is not None:
             mask = base.getvector(mask, 6)
             if not self.n >= np.sum(mask):
-                raise ValueError('Number of robot DOF must be >= the number '
-                                'of 1s in the mask matrix')
+                raise ValueError(
+                    'Number of robot DOF must be >= the number '
+                    'of 1s in the mask matrix')
         else:
             mask = np.ones(6)
         W = np.diag(mask)
@@ -462,7 +473,7 @@ class IKMixin:
                 q[k] += + 2 * np.pi
 
                 nm = np.linalg.norm(W @ e)
-                qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
+                # qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
                 # print(f"|e|={E:8.2g}: q={qs}")
 
             # LM process finished, for better or worse
@@ -499,9 +510,9 @@ class IKMixin:
         :rtype: named tuple
 
 
-        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose T which is an SE3 object.  The
-        return value ``sol`` is a named tuple with elements:
+        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n)
+        corresponding to the robot end-effector pose T which is an SE3 object.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ============================================================
         Element         Type        Description
@@ -515,10 +526,10 @@ class IKMixin:
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) > 1`` it is considered to be a trajectory, and the result
+        is a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``.
+        The initial estimate of q for each time step is taken as the solution
+        from the previous time step.
 
         .. note::
 
@@ -527,27 +538,28 @@ class IKMixin:
             - Can be used for robots with arbitrary degrees of freedom.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
               efficient than analytic inverse kinematic solutions derived
               symbolically.
-            - The objective function (error) is 
+            - The objective function (error) is
               :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`
               where :math:`\mat{\Omega}` is a diagonal matrix.
             - Joint offsets, if defined, are accounted for in the solution.
 
-        .. warning:: 
-        
+        .. warning::
+
             - The objective function is rather uncommon.
             - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
               uses a scalar cost-function and does not provide a Jacobian.
 
         :author: Bryan Moutrie, for RTB-MATLAB
 
-        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_con`, :func:`ikine_min`
-        """
+        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_con`,
+            :func:`ikine_min`
+        """  # noqa
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -597,9 +609,9 @@ class IKMixin:
         :rtype: named tuple
 
 
-        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose T which is an SE3 object.  The
-        return value ``sol`` is a named tuple with elements:
+        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n)
+        corresponding to the robot end-effector pose T which is an SE3 object.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ============================================================
         Element         Type        Description
@@ -613,10 +625,10 @@ class IKMixin:
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) > 1`` it is considered to be a trajectory, and the result
+        is a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``.
+        The initial estimate of q for each time step is taken as the solution
+        from the previous time step.
 
         .. note::
 
@@ -625,28 +637,29 @@ class IKMixin:
             - Can be used for robots with arbitrary degrees of freedom.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
               efficient than analytic inverse kinematic solutions derived
               symbolically.
-            - The objective function (error) is 
+            - The objective function (error) is
               :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`
               where :math:`\mat{\Omega}` is a diagonal matrix.
             - Joint offsets, if defined, are accounted for in the solution.
 
-        .. warning:: 
-        
+        .. warning::
+
             - The objective function is rather uncommon.
             - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
               uses a scalar cost-function and does not provide a Jacobian.
 
         :author: Bryan Moutrie, for RTB-MATLAB
 
-        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_min`
+        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`,
+            :func:`ikine_min`
 
-        """
+        """  # noqa
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -670,9 +683,9 @@ class IKMixin:
         for Tk in T:
             res = minimize(
                 cost,
-                q0, 
+                q0,
                 args=(Tk.A, omega),
-                bounds=bnds, 
+                bounds=bnds,
                 tol=1e-8,
                 options={'ftol': 1e-10})
 
@@ -687,8 +700,9 @@ class IKMixin:
 
 # --------------------------------------------------------------------- #
 
-    def ikine_min(self, T, q0=None, pweight=1.0, stiffness=0.0,
-               qlimits=True, ilimit=1000):
+    def ikine_min(
+            self, T, q0=None, pweight=1.0, stiffness=0.0,
+            qlimits=True, ilimit=1000):
         """
         Inverse kinematics by optimization with joint limits (Robot superclass)
 
@@ -725,10 +739,10 @@ class IKMixin:
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) > 1`` it is considered to be a trajectory, and the result
+        is a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``.
+        The initial estimate of q for each time step is taken as the solution
+        from the previous time step.
 
         .. note::
 
@@ -738,12 +752,12 @@ class IKMixin:
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
             - This norm is computed from distances and angles and ``pweight``
-              can be used to scale the position error norm to be congruent 
+              can be used to scale the position error norm to be congruent
               with rotation error norm.
-            - For a highly redundant robot ``stiffness`` can be used to impose 
+            - For a highly redundant robot ``stiffness`` can be used to impose
               a smoothness contraint on joint angles, tending toward solutions
               with are smooth curves.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
@@ -755,14 +769,15 @@ class IKMixin:
             - Joint offsets, if defined, are accounted for in the solution.
             - Joint limits become explicit bounds if 'qlimits' is set.
 
-        .. warning:: 
-        
+        .. warning::
+
             - The objective function is rather uncommon.
             - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
               uses a scalar cost-function and does not provide a Jacobian.
 
-        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`
-        """
+        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`,
+            :func:`ikine_con`
+        """  # noqa
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -802,7 +817,7 @@ class IKMixin:
 
                 res = minimize(
                     cost,
-                    q0, 
+                    q0,
                     args=(Tk.A, pweight, col, stiffness),
                     bounds=bounds,
                     options={'gtol': 1e-6, 'maxiter': ilimit})
@@ -810,7 +825,7 @@ class IKMixin:
                 # No joint limits, unconstrained optimization
                 res = minimize(
                     cost,
-                    q0, 
+                    q0,
                     args=(Tk.A, pweight, col, stiffness),
                     options={'gtol': 1e-6, 'maxiter': ilimit})
 
@@ -822,7 +837,6 @@ class IKMixin:
             return solutions[0]
         else:
             return solutions
-
 
     # def qmincon(self, q=None):
     #     """
