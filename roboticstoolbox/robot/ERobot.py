@@ -1373,56 +1373,6 @@ class ERobot(Robot):
 
         return Ain, bin
 
-    def closest_point(self, shape, inf_dist=1.0):
-        '''
-        closest_point(shape, inf_dist) returns the minimum euclidean
-        distance between this robot and shape, provided it is less than
-        inf_dist. It will also return the points on self and shape in the
-        world frame which connect the line of length distance between the
-        shapes. If the distance is negative then the shapes are collided.
-        :param shape: The shape to compare distance to
-        :type shape: Shape
-        :param inf_dist: The minimum distance within which to consider
-            the shape
-        :type inf_dist: float
-        :returns: d, p1, p2 where d is the distance between the shapes,
-            p1 and p2 are the points in the world frame on the respective
-            shapes
-        :rtype: float, SE3, SE3
-        '''
-
-        d = 10000
-        p1 = None,
-        p2 = None
-
-        for link in self.links:
-            td, tp1, tp2 = link.closest_point(shape, inf_dist)
-
-            if td is not None and td < d:
-                d = td
-                p1 = tp1
-                p2 = tp2
-
-        if d == 10000:
-            d = None
-
-        return d, p1, p2
-
-    def collided(self, shape):
-        '''
-        collided(shape) checks if this robot and shape have collided
-        :param shape: The shape to compare distance to
-        :type shape: Shape
-        :returns: True if shapes have collided
-        :rtype: bool
-        '''
-
-        for link in self.links:
-            if link.collided(shape):
-                return True
-
-        return False
-
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
     def rne(robot, q, qd, qdd, gravity=None):
 

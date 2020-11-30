@@ -32,7 +32,6 @@ def _listen_dyn(func):
     return wrapper_listen_dyn
 
 
-
 class Link(ABC):
     """
     Link superclass
@@ -701,6 +700,62 @@ class Link(ABC):
     @_listen_dyn
     def G(self, G_new):
         self._G = G_new
+
+# -------------------------------------------------------------------------- #
+
+    def closest_point(self, shape, inf_dist=1.0):
+        '''
+        closest_point(shape, inf_dist) returns the minimum euclidean
+        distance between this link and shape, provided it is less than
+        inf_dist. It will also return the points on self and shape in the
+        world frame which connect the line of length distance between the
+        shapes. If the distance is negative then the shapes are collided.
+
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param inf_dist: The minimum distance within which to consider
+            the shape
+        :type inf_dist: float
+
+        :returns: d, p1, p2 where d is the distance between the shapes,
+            p1 and p2 are the points in the world frame on the respective
+            shapes
+        :rtype: float, SE3, SE3
+        '''
+
+        d = 10000
+        p1 = None,
+        p2 = None
+
+        for col in self.collision:
+            td, tp1, tp2 = col.closest_point(shape, inf_dist)
+
+            if td is not None and td < d:
+                d = td
+                p1 = tp1
+                p2 = tp2
+
+        if d == 10000:
+            d = None
+
+        return d, p1, p2
+
+    def collided(self, shape):
+        '''
+        collided(shape) checks if this link and shape have collided
+
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+
+        :returns: True if shapes have collided
+        :rtype: bool
+        '''
+
+        for col in self.collision:
+            if col.collided(shape):
+                return True
+
+        return False
 
 
 if __name__ == "__main__":  # pragma nocover
