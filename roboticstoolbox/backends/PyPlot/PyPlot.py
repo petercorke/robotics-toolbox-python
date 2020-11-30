@@ -202,19 +202,23 @@ class PyPlot(Connector):
         """
         Add a robot to the graphical scene
 
-        :param ob: [description]
-        :type ob: [type]
-        :param readonly: [description], defaults to False
+        :param ob: The object to add to the plot (robot or ellipse)
+        :type ob: DHRobot or EllipsePlot
+        :param readonly: Do not update the state of the object
+            (i.e. display not simulate), defaults to False
         :type readonly: bool, optional
-        :param display: [description], defaults to True
+        :param display: Display the object, defaults to True
         :type display: bool, optional
-        :param jointaxes: [description], defaults to True
+        :param jointaxes: Show the joint axes of the robot with arrows,
+            defaults to True
         :type jointaxes: bool, optional
-        :param eeframe: [description], defaults to True
+        :param eeframe: Show the end-effector frame of the robot,
+            defaults to True
         :type eeframe: bool, optional
-        :param shadow: [description], defaults to True
+        :param shadow: Display a shadow of the robot on the x-y gound plane,
+            defaults to True
         :type shadow: bool, optional
-        :param name: [description], defaults to True
+        :param name: Display the name of the robot, defaults to True
         :type name: bool, optional
 
         ``id = env.add(robot)`` adds the ``robot`` to the graphical
@@ -227,10 +231,6 @@ class PyPlot(Connector):
               when the ``step()`` method is called.
 
         """
-        # TODO please fill in the options
-        # TODO it seems that add has different args for every backend, are
-        # any common ones?  If yes, they should be in the superclass and we
-        # pass kwargs to that
 
         super().add()
 
@@ -240,13 +240,16 @@ class PyPlot(Connector):
                     ob, self.ax, readonly, display,
                     jointaxes, eeframe, shadow, name))
             self.robots[len(self.robots) - 1].draw()
+            id = len(self.robots)
 
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
             self.ellipses.append(ob)
             self.ellipses[len(self.ellipses) - 1].draw()
+            id = len(self.ellipses)
 
         self._set_axes_equal()
+        return id
 
     def remove(self):
         """
