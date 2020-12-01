@@ -316,6 +316,7 @@ class IKMixin:
         :type tol: float
         :param ωN: damping coefficient
         :type ωN: float (default 1e-3)
+
         :return: inverse kinematic solution
         :rtype: named tuple
 
@@ -396,7 +397,7 @@ class IKMixin:
         def angle_axis(T, Td):
             d = base.transl(Td) - base.transl(T)
             R = base.t2r(Td) @ base.t2r(T).T
-            l = np.r_[R[2, 1]-R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]  # noqa
+            l = np.r_[R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]  # noqa
             if base.iszerovec(l):
                 # diagonal matrix case
                 if np.trace(R) > 0:
@@ -436,6 +437,8 @@ class IKMixin:
         for Tk in T:
             iterations = 0
             failure = None
+            nm = None
+
             while True:
                 # Update the count and test against iteration limit
                 iterations += 1
