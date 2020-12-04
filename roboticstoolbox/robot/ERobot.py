@@ -64,6 +64,10 @@ class ERobot(Robot):
         self._ee_links = []
         self._base_link = None
 
+        # Ordered links, we reorder the input elinks to be in depth first
+        # search order
+        orlinks = []
+
         if isinstance(elinks, ETS):
             # were passed an ETS string
             ets = elinks
@@ -164,6 +168,8 @@ class ERobot(Robot):
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
+                orlinks.append(link)
+
             # visit all links in DFS order
             self.dfs_links(
                 self.base_link, lambda link: visit_link(link, jindex))
@@ -191,7 +197,7 @@ class ERobot(Robot):
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
 
-        super().__init__(elinks, **kwargs)
+        super().__init__(orlinks, **kwargs)
 
     def dfs_links(self, start, func=None):
         """
@@ -713,7 +719,7 @@ class ERobot(Robot):
         else:
             q = getvector(q, self.n)
 
-        for link in self.links:
+        for link in self.elinks:
             if link.isjoint:
                 t = link.A(q[link.jindex])
             else:
