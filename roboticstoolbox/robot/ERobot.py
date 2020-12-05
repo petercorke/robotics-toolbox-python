@@ -168,7 +168,8 @@ class ERobot(Robot):
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
-                orlinks.append(link)
+                if link in elinks:
+                    orlinks.append(link)
 
             # visit all links in DFS order
             self.dfs_links(
