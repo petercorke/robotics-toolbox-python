@@ -605,27 +605,26 @@ class ERobot(Robot):
 
     def fkine(self, q=None, from_link=None, to_link=None):
         '''
-        Evaluates the forward kinematics of a robot based on its ETS and
-        joint angles q.
+        Forward kinematics
 
-        T = fkine(q) evaluates forward kinematics for the robot at joint
-        configuration q.
-
-        T = fkine() as above except uses the stored q value of the
-        robot object.
-
-        Trajectory operation:
-        Calculates fkine for each point on a trajectory of joints q where
-        q is (nxm) and the returning SE3 in (m)
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
         :return: The transformation matrix representing the pose of the
             end-effector
-        :rtype: SE3
+        :rtype: SE3 instance
 
-        :notes:
+        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at joint
+          configuration ``q``.
+
+        - ``T = robot.fkine(q, start=link1, end=link2)``
+
+        **Trajectory operation**:
+
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+
+        .. note::
+
             - The robot's base or tool transform, if present, are incorporated
               into the result.
 
@@ -685,7 +684,7 @@ class ERobot(Robot):
 
     def fkine_all(self, q=None):
         '''
-        Tall = fkine_all(q) evaluates fkine for each joint within a robot and
+        Tall = robot.fkine_all(q) evaluates fkine for each joint within a robot and
         returns a trajecotry of poses.
 
         Tall = fkine_all() as above except uses the stored q value of the
@@ -698,7 +697,8 @@ class ERobot(Robot):
         :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
 
-        :notes:
+        .. note::
+
             - The robot's base transform, if present, are incorporated
               into the result.
 
@@ -844,10 +844,43 @@ class ERobot(Robot):
 
         return path, n
 
-    def jacob0(
-            self, q=None, from_link=None, to_link=None,
-            offset=None, T=None):
+    def jacob0(self, q=None, from_link=None, to_link=None, offset=None, T=None):
+        """
+        [summary]
 
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param from_link: [description], defaults to None
+        :type from_link: [type], optional
+        :param to_link: [description], defaults to None
+        :type to_link: [type], optional
+        :param offset: [description], defaults to None
+        :type offset: [type], optional
+        :param T: [description], defaults to None
+        :type T: [type], optional
+        :return J: Manipulator Jacobian in the base frame
+        :rtype: ndarray(6,n)
+
+        - ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          end-effector frame.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the geometric Jacobian as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
+        """
         if from_link is None:
             from_link = self.base_link
 
@@ -925,20 +958,30 @@ class ERobot(Robot):
 
     def jacobe(self, q=None, from_link=None, to_link=None, offset=None):
         """
-        Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity. v = Je*qd in the
-        end-effector frame.
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :return J: Manipulator Jacobian in the end-effector frame
+        :rtype: ndarray(6,n)
 
-        Je = jacobe() as above except uses the stored q value of the
-        robot object.
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          end-effector frame.
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        :return J: The manipulator Jacobian in ee frame
-        :rtype: float ndarray(6,n)
+        Example:
 
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
         """
 
         if from_link is None:

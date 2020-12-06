@@ -11,6 +11,7 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
+from spatialmath import base
 from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath.base.transformsNd import t2r
 from spatialmath import SE3, Twist3
@@ -914,8 +915,7 @@ class DHRobot(Robot):
         r"""
         Manipulator Jacobian in end-effector frame
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
+        :param q: Joint coordinate vector
         :type q: ndarray(n)
         :return J: The manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
@@ -933,6 +933,11 @@ class DHRobot(Robot):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
         """  # noqa
 
         q = getvector(q, self.n)
@@ -973,7 +978,7 @@ class DHRobot(Robot):
         r"""
         Manipulator Jacobian in world frame
 
-        :param q: Joint coordinate
+        :param q: Joint coordinate vector
         :type q: ndarray(n)
         :param T: Forward kinematics if known, SE(3 matrix)
         :type T: SE3 instance
@@ -993,6 +998,11 @@ class DHRobot(Robot):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
         """  # noqa
         q = base.getvector(q, self.n)
 
