@@ -59,7 +59,6 @@ class IKMixin:
         :return: inverse kinematic solution
         :rtype: named tuple
 
-
         ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can
         be used for robots with any number of degrees of freedom. The return
@@ -188,12 +187,12 @@ class IKMixin:
             mask = base.getvector(mask, 6)
             if not self.n >= np.sum(mask):
                 raise ValueError('Number of robot DOF must be >= the number '
-                                'of 1s in the mask matrix')
+                                 'of 1s in the mask matrix')
         else:
             mask = np.ones(6)
         W = np.diag(mask)
 
-        tcount = 0  # Total iteration count
+        tcount = 0    # Total iteration count
         rejcount = 0  # Rejected step count
         nm = 0
 
@@ -217,7 +216,6 @@ class IKMixin:
 
                 # Are we there yet?
                 if np.linalg.norm(W @ e) < tol:
-                    # print(iterations)
                     break
 
                 # Compute the Jacobian
@@ -228,12 +226,17 @@ class IKMixin:
                 if transpose is not None:
                     # Do the simple Jacobian transpose with constant gain
                     dq = transpose * J.T @ e    # lgtm [py/multiple-definition]
+                    q += dq
                 else:
                     # Do the damped inverse Gauss-Newton with
                     # Levenberg-Marquadt
+                    # dq = np.linalg.inv(
+                    #     JtJ + ((Li + Lmin) * np.eye(self.n))
+                    # ) @ J.T @ W @ e
                     dq = np.linalg.inv(
-                        JtJ + ((Li + Lmin) * np.eye(self.n))
+                        JtJ + ((Li + Lmin) * np.diag(np.diag(JtJ)))
                     ) @ J.T @ W @ e
+                    # print(J.T @ W @ e)
 
                     # Compute possible new value of
                     qnew = q + dq
@@ -395,6 +398,15 @@ class IKMixin:
                 else:
                     # (1, -1, -1), (-1, 1, -1) or (-1, -1, 1) case
                     a = np.pi / 2 * (np.diag(R) + 1)
+                    # # as per Sekiguchi paper
+                    # if R[1,0] > 0 and R[2,1] > 0 and R[0,2] > 0:
+                    #     a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) + 1)
+                    # elif R[1,0] > 0: # (2)
+                    #     a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) @ np.r_[1,1,-1] + 1)
+                    # elif R[0,2] > 0: # (3)
+                    #     a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) @ np.r_[1,-1,1] + 1)
+                    # elif R[2,1] > 0: # (4)
+                    #     a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) @ np.r_[-1,1,1] + 1)
             else:
                 # non-diagonal matrix case
                 ln = base.norm(l)
@@ -440,19 +452,19 @@ class IKMixin:
                 if E < tol:
                     break
 
-                # Compute the Jacobian
+                # Compute the Jacobian and projection matrices
                 J = self.jacob0(q)
+                WN = E * np.eye(self.n) + wN * np.eye(self.n)
+                H = J.T @ W @ J + WN  # n x n
+                g = J.T @ W @ e       # n x 1
 
-                JtJ = J.T @ W @ J
-
-                # Do the damped inverse Gauss-Newton with
-                # Levenberg-Marquadt
-                dq = np.linalg.inv(
-                    JtJ + (E + wN) * np.eye(self.n)
-                ) @ J.T @ W @ e
-
-                # Compute possible new value of
-                q += dq
+                # Compute new value of q
+                q += np.linalg.inv(H) @ g  # n x 1
+                # print(np.linalg.norm(np.linalg.inv(H) @ g))
+                # print(e)
+                # print(g)
+                # print(q)
+                # print(J)
 
                 # Wrap angles for revolute joints
                 k = np.logical_and(q > np.pi, revolutes)
@@ -461,13 +473,12 @@ class IKMixin:
                 k = np.logical_and(q < -np.pi, revolutes)
                 q[k] += + 2 * np.pi
 
-                nm = np.linalg.norm(W @ e)
                 qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
-                # print(f"|e|={E:8.2g}: q={qs}")
+                # print(f"|e|={E:8.2g}, det(H)={np.linalg.det(H)}: q={qs}")
 
             # LM process finished, for better or worse
             # failure will be None or an error message
-            solution = iksol(q, failure is None, failure, iterations, nm)
+            solution = iksol(q, failure is None, failure, iterations, E)
             solutions.append(solution)
 
             tcount += iterations
@@ -572,7 +583,8 @@ class IKMixin:
                 cost,
                 q0,
                 args=(Tk.A, omega),
-                options={'gtol': 1e-6, 'maxiter': ilimit})
+                tol=1e-8,
+                options={'gtol': 1e-8, 'maxiter': ilimit})
 
             solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
             solutions.append(solution)
@@ -897,3 +909,21 @@ class IKMixin:
     #         return qstar[0, :], success[0], error[0]
     #     else:
     #         return qstar, success, error
+
+
+if __name__ == "__main__":
+
+    import roboticstoolbox as rtb
+    from spatialmath import SE3
+
+    # np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:9.5g}" if abs(x) > 1e-10 else f"{0:9.5g}"})
+
+
+    robot = rtb.models.DH.Panda()
+
+    T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+    sol = robot.ikine_LMS(T)         # solve IK
+    print(sol)                    # display joint angles
+
+    print(T)
+    print(robot.fkine(sol.q)) 
