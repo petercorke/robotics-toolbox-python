@@ -10,7 +10,6 @@
 [![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
 ![pypi downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)
-[![GitHub stars](https://img.shields.io/github/stars/petercorke/robotics-toolbox-python.svg?style=social&label=Star)](https://GitHub.com/petercorke/robotics-toolbox-python/stargazers/)
 
 
 <table style="border:0px">
@@ -137,7 +136,7 @@ qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
 robot.plot(qt.q, movie='panda1.gif')
 ```
 
-![Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda1.gif)
+![Panda trajectory animation](./docs/figs/panda1.gif)
 
 which uses the default matplotlib backend.  Grey arrows show the joint axes and the colored frame shows the end-effector pose.
 
@@ -178,7 +177,7 @@ for qk in qt.q:             # for each joint configuration on trajectory
 ```
 
 <p align="center">
- <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif">
+ <img src="./docs/figs/panda2.gif">
 </p>
 
 # Getting going

@@ -16,13 +16,14 @@ from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath.base.transformsNd import t2r
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
-from scipy.optimize import minimize, Bounds
+# from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 
 from roboticstoolbox.robot.DHLink import _check_rne
 from frne import init, frne, delete
 
 iksol = namedtuple("IKsolution", "q, success, reason", defaults=(None,) * 3)
+
 
 class DHRobot(Robot):
     """
@@ -445,14 +446,13 @@ class DHRobot(Robot):
         :math:`\sum_j |a_j| + |d_j|` where :math:`d_j` is taken as the maximum
         joint coordinate (``qlim``) if the joint is primsmatic.
 
-        .. note:: 
-        
+        .. note::
             - Probably an overestimate of reach
             - Used by numerical inverse kinematics to scale translational
               error.
             - For a prismatic joint, uses ``qlim`` if it is set
 
-        .. warning:: Computed on the first access. If kinematic parameters 
+        .. warning:: Computed on the first access. If kinematic parameters
               subsequently change this will not be reflected.
         """
         if self._reach is None:
@@ -765,7 +765,8 @@ class DHRobot(Robot):
                 if j == 0:
                     # first link case
                     if link.sigma == 0:
-                        tw[j] = Twist3.Revolute([0, 0, 1], [0, 0, 0])  # revolute
+                        # revolute
+                        tw[j] = Twist3.Revolute([0, 0, 1], [0, 0, 0])
                     else:
                         tw[j] = Twist3.Prismatic([0, 0, 1])  # prismatic
                 else:
@@ -1004,7 +1005,7 @@ class DHRobot(Robot):
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
         """  # noqa
-        q = base.getvector(q, self.n)
+        q = getvector(q, self.n)
 
         if T is None:
             T = self.fkine(q)
@@ -1317,7 +1318,8 @@ class DHRobot(Robot):
         :type qd: ndarray(n)
         :param qdd: The joint accelerations of the robot
         :type qdd: ndarray(n)
-        :param gravity: Gravitational acceleration to override robot's gravity value
+        :param gravity: Gravitational acceleration to override robot's gravity
+            value
         :type gravity: ndarray(6)
         :param fext: Specify wrench acting on the end-effector
                      :math:`W=[F_x F_y F_z M_x M_y M_z]`
@@ -1709,7 +1711,7 @@ class DHRobot(Robot):
         if self._tool is not None:
             T = self.tool.inv() * T
 
-        q = np.zeros((6,))
+        # q = np.zeros((6,))
         solutions = []
 
         for k, Tk in enumerate(T):
@@ -1761,6 +1763,7 @@ class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
+
 
 def _cross(a, b):
     return np.r_[
