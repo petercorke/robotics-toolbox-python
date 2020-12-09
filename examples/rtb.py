@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 -i
+#!/usr/bin/env python3
 
 # a simple Robotics Toolbox "shell", runs Python3 and loads in NumPy, RTB, SMTB
 # 
@@ -20,6 +20,7 @@ import matplotlib as plt         # lgtm [py/unused-import]
 import roboticstoolbox as rtb    # lgtm [py/unused-import]
 from spatialmath import *        # lgtm [py/polluting-import]
 from spatialmath.base import *   # lgtm [py/polluting-import]
+
 
 # setup defaults
 np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"})
@@ -55,3 +56,7 @@ if args.script is not None:
     if not path.exists():
         raise ValueError(f"script does not exist: {args.script}")
     exec(path.read_text())
+
+# drop into IPython
+import IPython
+IPython.embed()

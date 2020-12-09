@@ -18,7 +18,7 @@ class Connector(ABC):
     @abstractmethod
     def launch(self):
         '''
-        env = launch(args) launch the external program with an empty or
+        launch(args) launch the external program with an empty or
         specific scene as defined by args
 
         '''
@@ -28,7 +28,7 @@ class Connector(ABC):
     @abstractmethod
     def step(self):
         '''
-        state = step(args) triggers the external program to make a time step
+        step(dt) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
         the robot's actions.
 
@@ -46,7 +46,7 @@ class Connector(ABC):
     @abstractmethod
     def reset(self):
         '''
-        state = reset() triggers the external program to reset to the
+        reset() triggers the external program to reset to the
         original state defined by launch
 
         '''
@@ -56,7 +56,7 @@ class Connector(ABC):
     @abstractmethod
     def restart(self):
         '''
-        state = restart() triggers the external program to close and relaunch
+        restart() triggers the external program to close and relaunch
         to thestate defined by launch
 
         '''
@@ -66,7 +66,7 @@ class Connector(ABC):
     @abstractmethod
     def close(self):
         '''
-        state = close() triggers the external program to gracefully close
+        close() triggers the external program to gracefully close
 
         '''
 
@@ -79,9 +79,9 @@ class Connector(ABC):
     @abstractmethod
     def add(self):
         '''
-        id = add(robot) adds the robot to the external environment. robot must
-        be of an appropriate class. This adds a robot object to a list of
-        robots which will act upon the step() method being called.
+        id = add(object) adds the object to the external environment. object must
+        be of an appropriate class. This adds a object object to a list of
+        objects which will act upon the step() method being called.
 
         '''
 
@@ -90,7 +90,7 @@ class Connector(ABC):
     @abstractmethod
     def remove(self):
         '''
-        id = remove(robot) removes the robot to the external environment.
+        remove(id) removes the object from the external environment.
 
         '''
 

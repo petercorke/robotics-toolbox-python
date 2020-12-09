@@ -9,6 +9,7 @@
 [![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
 [![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/petercorke/robotics-toolbox-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/petercorke/robotics-toolbox-python/context:python)
+![pypi downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)
 
 
 <table style="border:0px">
@@ -110,17 +111,20 @@ orientation parallel to y-axis (O=+Y)).
 from spatialmath import SE3
 
 T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-q_pickup, *_ = robot.ikunc(T)   # solve IK, ignore additional outputs
-print(q_pickup)                 # display joint angles
+sol = robot.ikine_unc(T)         # solve IK
+print(sol.q)                    # display joint angles
 
-	[ 1.10903519  1.21806211  0.10114796  1.49547496  0.33270093 -0.29437262 -0.8927488 ]
+	[-0.01044    7.876    1.557    -6.81    1.571    4.686   0.5169]
 
-print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
+print(robot.fkine(sol.q))    # FK shows that desired end-effector pose was achieved
 
-	  -1          -1.31387e-11-1.57726e-09 0.0999999    
-	  -1.31386e-11 1          -7.46658e-08 0.2          
-	   1.57726e-09-7.46658e-08-1           0.5          
-	   0           0           0           1
+	Out[35]: 
+	SE3:┏                                           ┓
+		┃-1         -4e-08      0.000521   0.615    ┃
+		┃ 2.79e-08   1          0.00013    0.154    ┃
+		┃-0.000521   0.00013   -1          0.105    ┃
+		┃ 0          0          0          1        ┃
+		┗                                           ┛
 ```
 
 Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
@@ -132,7 +136,7 @@ qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
 robot.plot(qt.q, movie='panda1.gif')
 ```
 
-![Panda trajectory animation](https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda1.gif)
+![Panda trajectory animation](./docs/figs/panda1.gif)
 
 which uses the default matplotlib backend.  Grey arrows show the joint axes and the colored frame shows the end-effector pose.
 
@@ -173,7 +177,7 @@ for qk in qt.q:             # for each joint configuration on trajectory
 ```
 
 <p align="center">
- <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/panda2.gif">
+ <img src="./docs/figs/panda2.gif">
 </p>
 
 # Getting going
@@ -219,3 +223,31 @@ pip3 install -e .
 The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub.
 
 Or you can run them, and experiment with them, at [mybinder.org](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks).
+
+## Toolbox Research Applications
+
+The toolbox is incredibly useful for developing and prototyping algorithms for research, thanks to the exhaustive set of well documented and mature robotic functions exposed through clean and painless APIs. Additionally, the ease at which a user can visualize their algorithm supports a rapid prototyping paradigm.
+
+### Publication List
+
+**A Purely-Reactive Manipulability-Maximising Motion Controller**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python.
+
+[[Paper](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc/)] [[Video](https://youtu.be/Vu_rcPlaADI)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/mmc.py)]
+
+<p>
+  <a href="https://youtu.be/Vu_rcPlaADI">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/mmc_youtube.png" width="560">
+  </a>
+</p>
+
+<br>
+
+**NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Paper](https://arxiv.org/abs/2010.08686)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/neo.py)]
+
+<p>
+  <a href="https://youtu.be/jSLPJBr8QTY">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/neo_youtube.png" width="560">
+  </a>
+</p>

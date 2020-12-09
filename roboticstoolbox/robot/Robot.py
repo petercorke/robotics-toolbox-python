@@ -19,6 +19,7 @@ from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.backends.Swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
+from roboticstoolbox.robot.IK import IKMixin
 
 try:
     from matplotlib import colors
@@ -37,7 +38,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(DynamicsMixin):
+class Robot(DynamicsMixin, IKMixin):
 
     _color = True
 
@@ -61,6 +62,7 @@ class Robot(DynamicsMixin):
         self.base = base
         self.tool = tool
         self.basemesh = None
+        self._reach = None
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
@@ -311,6 +313,144 @@ class Robot(DynamicsMixin):
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
 
+    def manipulability(self, q=None, J=None, method='yoshikawa', axes='all', **kwargs):
+        """
+        Manipulability measure
+
+        :param q: Joint coordinates
+        :type q: ndarray(n), or ndarray(m,n)
+        :param J: Jacobian if already computed, optional
+        :type J: ndarray(6,n)
+        :param method: method to use, "yoshikawa" (default), "condition", 
+            "minsingular"  or "asada"
+        :type method: str
+        :param axes: Task space axes to consider: "all" [default],
+            "trans" or "rot"
+        :type axes: str
+        :param kwargs: extra arguments to pass to ``jacob0``
+        :return: manipulability
+        :rtype: float or ndarray(m)
+
+        - ``manipulability(q)`` is the scalar manipulability index
+          for the robot at the joint configuration ``q``.  It indicates
+          dexterity, that is, how well conditioned the robot is for motion 
+          with respect to the 6 degrees of Cartesian motion.  The values is
+          zero if the robot is at a singularity.
+
+        Various measures are supported:
+          
+        +-------------------+-------------------------------------------------+
+        | Measure           |       Description                               |
+        +-------------------+-------------------------------------------------+
+        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
+        |                   | from singularity                                |
+        +-------------------+-------------------------------------------------+
+        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
+        |                   | of the velocity ellipsoid                       |
+        +-------------------+-------------------------------------------------+
+        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
+        |                   | *distance*  from singularity                    |
+        +-------------------+-------------------------------------------------+
+        | ``"asada"``       | Isotropy of the task-space acceleration         |
+        |                   | ellipsoid which is a function of the Cartesian  |
+        |                   | inertia matrix which depends on the inertial    |
+        |                   | parameters                                      |
+        +-------------------+-------------------------------------------------+
+
+        **Trajectory operation**:
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        .. note::
+            - The "all" option includes rotational and translational
+              dexterity, but this involves adding different units. It can be
+              more useful to look at the translational and rotational
+              manipulability separately.
+            - Examples in the RVC book (1st edition) can be replicated by
+              using the "all" option
+            - Asada's measure requires inertial a robot model with inertial
+              parameters.
+
+        :references:
+            - Analysis and control of robot manipulators with redundancy,
+              T. Yoshikawa,
+              Robotics Research: The First International Symposium
+              (M. Brady and R. Paul, eds.),
+              pp. 735-747, The MIT press, 1984.
+            - A geometrical representation of manipulator dynamics and its
+              application to arm design, H. Asada,
+              Journal of Dynamic Systems, Measurement, and Control,
+              vol. 105, p. 131, 1983.
+            - Robotics, Vision & Control, P. Corke, Springer 2011.
+
+        """
+        if axes == 'all':
+            axes = [True, True, True, True, True, True]
+        elif axes.startswith('trans'):
+            axes = [True, True, True, False, False, False]
+        elif axes.startswith('rot'):
+            axes = [False, False, False, True, True, True]
+        else:
+            raise ValueError('axes must be all, trans or rot')
+
+        def yoshikawa(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            if J.shape[0] == J.shape[1]:
+                # simplified case for square matrix
+                return abs(np.linalg.det(J))
+            else:
+                m2 = np.linalg.det(J @ J.T)
+                return np.sqrt(abs(m2))
+
+        def invcondition(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            return 1 / np.linalg.cond(J) # return 1/cond(J)
+
+        def minsingular(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            s = np.linalg.svd(J, compute_uv=False)
+            return s[-1]  # return last/smallest singular value of J
+
+        def asada(robot, J, q, axes, **kwargs):
+            dof = np.sum(axes)
+            if np.linalg.matrix_rank(J) < 6:
+                return 0
+            Ji = np.linalg.pinv(J)
+            Mx = Ji.T @ robot.inertia(q) @ Ji
+            d = np.where(axes)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = np.linalg.eig(Mx)
+            return np.min(e) / np.max(e)
+
+        # choose the handler function
+        if method == 'yoshikawa':
+            mfunc = yoshikawa
+        elif method == 'invcondition':
+            mfunc = condition
+        elif method == 'minsingular':
+            mfunc = minsingular
+        elif method == 'asada':
+            mfunc = asada
+        else:
+            raise ValueError(
+                "Invalid method chosen")
+
+        q = getmatrix(q, (None, self.n))
+        w = np.zeros(q.shape[0])
+
+        for k, qk in enumerate(q):
+            if J is None:
+                Jk = self.jacob0(qk, **kwargs)
+            w[k] = mfunc(self, Jk, qk, axes)
+
+        if len(w) == 1:
+            return w[0]
+        else:
+            return w
+
 # --------------------------------------------------------------------- #
 
     @property
@@ -559,542 +699,6 @@ class Robot(DynamicsMixin):
             raise ValueError(
                 'Control type must be one of \'p\', \'v\', or \'a\'')
 
-# ===================================================================== #
-
-    def ikine(
-            self, T,
-            ilimit=500,
-            rlimit=100,
-            tol=1e-10,
-            Y=0.1,
-            Ymin=0,
-            mask=None,
-            q0=None,
-            search=False,
-            slimit=100,
-            transpose=None):
-
-        """
-        Numerical inverse kinematics by optimization (Robot superclass)
-
-        :param T: The desired end-effector pose
-        :type T: SE3 with 1 or ``m`` values
-        :param ilimit: maximum number of iterations
-        :type ilimit: int (default 500)
-        :param rlimit: maximum number of consecutive step rejections
-        :type rlimit: int (default 100)
-        :param tol: final error tolerance
-        :type tol: float (default 1e-10)
-        :param Y: initial value of lambda
-        :type Y: float (default 0.1)
-        :param Ymin: minimum allowable value of lambda
-        :type Ymin: float (default 0)
-        :param mask: mask vector that correspond to translation in X, Y and Z
-            and rotation about X, Y and Z respectively.
-        :type mask: float ndarray(6)
-        :param q0: initial joint configuration (default all zeros)
-        :type q0: float ndarray(n) (default all zeros)
-        :param search: search over all configurations
-        :type search: bool
-        :param slimit: maximum number of search attempts
-        :type slimit: int (default 100)
-        :param transpose: use Jacobian transpose with step size A, rather
-            than Levenberg-Marquadt
-        :type transpose: float
-
-        :return: The calculated joint values
-        :rtype: float ndarray(n)
-        :return: IK solver failed
-        :rtype: bool or list of bool
-        :return: If failed, what went wrong
-        :rtype: List of str
-
-        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)
-        corresponding to the robot end-effector pose ``T`` which is an ``SE3``
-        instance. ``failure`` is True if the solver failed, and ``reason``
-        contains details of the failure.
-
-        This method can be used for robots with any number of degrees of
-        freedom.
-
-        **Trajectory operation:**
-
-        If ``T`` contains ``m`` > 1 values, ie. a trajectory, then returns the
-        joint coordinates corresponding to each of the pose values in ``T``.
-        ``q`` (m,n) where ``n`` is the number of robot joints. The initial
-        estimate of ``q`` for each time step is taken as the solution from the
-        previous time step. Returns trajectory of joints ``q`` (m,n), list of
-        failure (m) and list of error reasons (m).
-
-        **Underactuated robots:**
-
-        For the case where the manipulator has fewer than 6 DOF the
-        solution space has more dimensions than can be spanned by the
-        manipulator joint coordinates.
-
-        In this case we specify the ``mask`` option where the ``mask`` vector
-        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
-        will be ignored in reaching a solution.  The mask vector has six
-        elements that correspond to translation in X, Y and Z, and rotation
-        about X, Y and Z respectively. The value should be 0 (for ignore)
-        or 1. The number of non-zero elements should equal the number of
-        manipulator DOF.
-
-        For example when using a 3 DOF manipulator rotation orientation might
-        be unimportant in which case use the option: mask = [1 1 1 0 0 0].
-
-        For robots with 4 or 5 DOF this method is very difficult to use since
-        orientation is specified by T in world coordinates and the achievable
-        orientations are a function of the tool position.
-
-        .. note::
-
-            - Solution is computed iteratively.
-            - Implements a Levenberg-Marquadt variable step size solver.
-            - The tolerance is computed on the norm of the error between
-              current and desired tool pose.  This norm is computed from
-              distances and angles without any kind of weighting.
-            - The inverse kinematic solution is generally not unique, and
-              depends on the initial guess q0 (defaults to 0).
-            - The default value of q0 is zero which is a poor choice for most
-              manipulators (eg. puma560, twolink) since it corresponds to a
-              kinematic singularity.
-            - Such a solution is completely general, though much less
-              efficient than specific inverse kinematic solutions derived
-              symbolically, like ikine6s or ikine3.
-            - This approach allows a solution to be obtained at a singularity,
-              but the joint angles within the null space are arbitrarily
-              assigned.
-            - Joint offsets, if defined, are added to the inverse kinematics
-              to generate q.
-            - Joint limits are not considered in this solution.
-            - The 'search' option peforms a brute-force search with initial
-              conditions chosen from the entire configuration space.
-            - If the search option is used any prismatic joint must have
-              joint limits defined.
-
-        :references:
-            - Robotics, Vision & Control, P. Corke, Springer 2011,
-              Section 8.4.
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-        err = []
-
-        try:
-            if q0 is not None:
-                if trajn == 1:
-                    q0 = getvector(q0, self.n, 'row')
-                else:
-                    verifymatrix(q0, (trajn, self.n))
-            else:
-                q0 = np.zeros((trajn, self.n))
-        except ValueError:
-            verifymatrix(q0, (trajn, self.n))
-
-        if mask is not None:
-            mask = getvector(mask, 6)
-        else:
-            mask = np.ones(6)
-
-        if search:
-            # Randomised search for a starting point
-            search = False
-            # quiet = True
-
-            qlim = self.qlim
-            qspan = qlim[1] - qlim[0]  # range of joint motion
-
-            for k in range(slimit):
-                q0n = np.random.rand(self.n) * qspan + qlim[0, :]
-
-                # fprintf('Trying q = %s\n', num2str(q))
-
-                q, _, _ = self.ikine(
-                    T,
-                    ilimit,
-                    rlimit,
-                    tol,
-                    Y,
-                    Ymin,
-                    mask,
-                    q0n,
-                    search,
-                    slimit,
-                    transpose)
-
-                if not np.sum(np.abs(q)) == 0:
-                    return q, True, err
-
-            q = np.array([])   # pragma nocover
-            return q, False, err   # pragma nocover
-
-        if not self.n >= np.sum(mask):
-            raise ValueError('Number of robot DOF must be >= the same number '
-                             'of 1s in the mask matrix')
-        W = np.diag(mask)
-
-        # Preallocate space for results
-        qt = np.zeros((len(T), self.n))
-
-        # Total iteration count
-        tcount = 0
-
-        # Rejected step count
-        rejcount = 0
-
-        failed = []
-        nm = 0
-
-        revolutes = []
-        for i in range(self.n):
-            revolutes.append(not self.links[i].sigma)
-
-        for i in range(len(T)):
-            iterations = 0
-            q = np.copy(q0[i, :])
-            Yl = Y
-
-            while True:
-                # Update the count and test against iteration limit
-                iterations += 1
-
-                if iterations > ilimit:
-                    err.append('ikine: iteration limit {0} exceeded '
-                               ' (pose {1}), final err {2}'.format(
-                                   ilimit, i, nm))
-                    failed.append(True)
-                    break
-
-                e = tr2delta(self.fkine(q).A, T[i].A)
-
-                # Are we there yet
-                if np.linalg.norm(W @ e) < tol:
-                    # print(iterations)
-                    failed.append(False)
-                    break
-
-                # Compute the Jacobian
-                J = self.jacobe(q)
-
-                JtJ = J.T @ W @ J
-
-                if transpose is not None:
-                    # Do the simple Jacobian transpose with constant gain
-                    dq = transpose * J.T @ e    # lgtm [py/multiple-definition]
-                else:
-                    # Do the damped inverse Gauss-Newton with
-                    # Levenberg-Marquadt
-                    dq = np.linalg.inv(
-                        JtJ + ((Yl + Ymin) * np.eye(self.n))
-                    ) @ J.T @ W @ e
-
-                    # Compute possible new value of
-                    qnew = q + dq
-
-                    # And figure out the new error
-                    enew = tr2delta(self.fkine(qnew).A, T[i].A)
-
-                    # Was it a good update?
-                    if np.linalg.norm(W @ enew) < np.linalg.norm(W @ e):
-                        # Step is accepted
-                        q = qnew
-                        e = enew
-                        Yl = Yl / 2
-                        rejcount = 0
-                    else:
-                        # Step is rejected, increase the damping and retry
-                        Yl = Yl * 2
-                        rejcount += 1
-                        if rejcount > rlimit:
-                            err.append(
-                                'ikine: rejected-step limit {0} exceeded '
-                                '(pose {1}), final err {2}'.format(
-                                    rlimit, i, np.linalg.norm(W @ enew)))
-                            failed.append(True)
-                            break
-
-                # Wrap angles for revolute joints
-                k = (q > np.pi) & revolutes
-                q[k] -= 2 * np.pi
-
-                k = (q < -np.pi) & revolutes
-                q[k] += + 2 * np.pi
-
-                nm = np.linalg.norm(W @ e)
-
-            qt[i, :] = q
-            tcount += iterations
-
-        if any(failed):
-            err.append(
-                'failed to converge: try a different '
-                'initial value of joint coordinates')
-
-        if trajn == 1:
-            qt = qt[0, :]
-            failed = failed[0]
-
-        return qt, failed, err
-
-# --------------------------------------------------------------------- #
-
-    def ikunc(self, T, q0=None, ilimit=1000):
-        """
-        Inverse manipulator by optimization without joint limits (Robot
-        superclass)
-
-        q, success, err = ikunc(T) are the joint coordinates (n) corresponding
-        to the robot end-effector pose T which is an SE3 object or
-        homogenenous transform matrix (4x4), and n is the number of robot
-        joints. Also returns success and err which is the scalar final value
-        of the objective function.
-
-        q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the
-        initial joint coordinates q0 used for the minimisation.
-
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects (m) or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is mxn
-        where n is the number of robot joints. The initial estimate of q
-        for each time step is taken as the solution from the previous time
-        step.
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param ilimit: Iteration limit (default 1000)
-        :type ilimit: bool
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: Final pose error
-        :rtype error: float
-
-        .. note::
-            - Joint limits are not considered in this solution.
-            - Can be used for robots with arbitrary degrees of freedom.
-            - In the case of multiple feasible solutions, the solution
-              returned depends on the initial choice of q0
-            - Works by minimizing the error between the forward kinematics of
-              the joint angle solution and the end-effector frame as an
-              optimisation.
-            - The objective function (error) is described as:
-              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-              Where omega is some gain matrix, currently not modifiable.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-
-        if q0 is None:
-            q0 = np.zeros((trajn, self.n))
-
-        verifymatrix(q0, (trajn, self.n))
-
-        qt = np.zeros((trajn, self.n))
-        success = []
-        err = []
-
-        omega = np.diag([1, 1, 1, 3 / self.reach])
-
-        def sumsqr(arr):
-            return np.sum(np.power(arr, 2))
-
-        for i in range(trajn):
-
-            Ti = T[i]
-
-            res = minimize(
-                lambda q: sumsqr(((
-                    np.linalg.inv(Ti.A) @ self.fkine(q).A) - np.eye(4)) @
-                    omega),
-                q0[i, :],
-                options={'gtol': 1e-6, 'maxiter': ilimit})
-
-            qt[i, :] = res.x
-            success.append(res.success)
-            err.append(res.fun)
-
-        if trajn == 1:
-            return qt[0, :], success[0], err[0]
-        else:
-            return qt, success, err
-
-# --------------------------------------------------------------------- #
-
-    def ikcon(self, T, q0=None):
-        """
-        Inverse kinematics by optimization with joint limits (Robot superclass)
-
-        q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
-        corresponding to the robot end-effector pose T which is an SE3 object
-        or homogenenous transform matrix (4x4), and N is the number of robot
-        joints. Initial joint coordinates Q0 used for the minimisation.
-
-        q, success, err = ikcon(T) as above but q0 is set to 0.
-
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. q is mxn
-        where n is the number of robot joints. The initial estimate of q
-        for each time step is taken as the solution from the previous time
-        step. Retruns trajectory of joints q (mxn), list of success (m) and
-        list of errors (m)
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param q0: initial joint configuration (default all zeros)
-        :type q0: float ndarray(n) (default all zeros)
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: Final pose error
-        :rtype error: float
-
-        .. note::
-            - Joint limits are considered in this solution.
-            - Can be used for robots with arbitrary degrees of freedom.
-            - In the case of multiple feasible solutions, the solution
-              returned depends on the initial choice of q0.
-            - Works by minimizing the error between the forward kinematics
-              of the joint angle solution and the end-effector frame as an
-              optimisation.
-            - The objective function (error) is described as:
-              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-              Where omega is some gain matrix, currently not modifiable.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-
-        try:
-            if q0 is not None:
-                q0 = getvector(q0, self.n, 'row')
-            else:
-                q0 = np.zeros((trajn, self.n))
-        except ValueError:
-            verifymatrix(q0, (trajn, self.n))
-
-        # create output variables
-        qstar = np.zeros((trajn, self.n))
-        error = []
-        exitflag = []
-
-        omega = np.diag([1, 1, 1, 3 / self.reach])
-
-        def cost(q, T, omega):
-            return np.sum(
-                (
-                    (np.linalg.pinv(T.A) @ self.fkine(q).A - np.eye(4)) @
-                    omega) ** 2
-            )
-
-        bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
-
-        for i in range(trajn):
-            Ti = T[i]
-            res = minimize(
-                lambda q: cost(q, Ti, omega),
-                q0[i, :], bounds=bnds, options={'gtol': 1e-6})
-            qstar[i, :] = res.x
-            error.append(res.fun)
-            exitflag.append(res.success)
-
-        if trajn > 1:
-            return qstar, exitflag, error
-        else:
-            return qstar[0, :], exitflag[0], error[0]
-
-# --------------------------------------------------------------------- #
-
-    def qmincon(self, q=None):
-        """
-        Move away from joint limits
-
-        :param q: Joint coordinates
-        :type q: ndarray(n)
-        :retrun qs: The calculated joint values
-        :rtype qs: ndarray(n)
-        :return: Optimisation solved (True) or failed (False)
-        :rtype: bool
-        :return: Final value of the objective function
-        :rtype: float
-
-        ``qs, success, err = qmincon(q)`` exploits null space motion and
-        returns a set of joint angles ``qs`` (n) that result in the same
-        end-effector pose but are away from the joint coordinate limits.
-        ``n`` is the number of robot joints. ``success`` is True for
-        successful optimisation. ``err`` is the scalar final value of
-        the objective function.
-
-        **Trajectory operation**
-
-        In all cases if ``q`` is (m,n) it is taken as a pose sequence and
-        ``qmincon()`` returns the adjusted joint coordinates (m,n)
-        corresponding to each of the configurations in the sequence.
-
-        ``err`` and ``success`` are also (m) and indicate the results of
-        optimisation for the corresponding trajectory step.
-
-        .. note:: Robot must be redundant.
-
-        """
-
-        def sumsqr(A):
-            return np.sum(A**2)
-
-        def cost(x, ub, lb, qm, N):
-            return sumsqr(
-                (2 * (N @ x + qm) - ub - lb) / (ub - lb))
-
-        q = getmatrix(q, (None, self.n))
-
-        qstar = np.zeros((q.shape[0], self.n))
-        error = np.zeros(q.shape[0])
-        success = np.zeros(q.shape[0])
-
-        lb = self.qlim[0, :]
-        ub = self.qlim[1, :]
-
-        for k, qk in enumerate(q):
-
-            J = self.jacobe(qk)
-
-            N = null(J)
-
-            x0 = np.zeros(N.shape[1])
-            A = np.r_[N, -N]
-            b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
-
-            con = LinearConstraint(A, -np.inf, b)
-
-            res = minimize(
-                lambda x: cost(x, ub, lb, qk, N),
-                x0, constraints=con)
-
-            qstar[k, :] = qk + N @ res.x
-            error[k] = res.fun
-            success[k] = res.success
-
-        if q.shape[0] == 1:
-            return qstar[0, :], success[0], error[0]
-        else:
-            return qstar, success, error
 
 
 # --------------------------------------------------------------------- #
@@ -1809,3 +1413,55 @@ class Robot(DynamicsMixin):
             env.hold()
 
         return env
+
+# --------------------------------------------------------------------- #
+
+    def closest_point(self, shape, inf_dist=1.0):
+        '''
+        closest_point(shape, inf_dist) returns the minimum euclidean
+        distance between this robot and shape, provided it is less than
+        inf_dist. It will also return the points on self and shape in the
+        world frame which connect the line of length distance between the
+        shapes. If the distance is negative then the shapes are collided.
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param inf_dist: The minimum distance within which to consider
+            the shape
+        :type inf_dist: float
+        :returns: d, p1, p2 where d is the distance between the shapes,
+            p1 and p2 are the points in the world frame on the respective
+            shapes
+        :rtype: float, SE3, SE3
+        '''
+
+        d = 10000
+        p1 = None,
+        p2 = None
+
+        for link in self.links:
+            td, tp1, tp2 = link.closest_point(shape, inf_dist)
+
+            if td is not None and td < d:
+                d = td
+                p1 = tp1
+                p2 = tp2
+
+        if d == 10000:
+            d = None
+
+        return d, p1, p2
+
+    def collided(self, shape):
+        '''
+        collided(shape) checks if this robot and shape have collided
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :returns: True if shapes have collided
+        :rtype: bool
+        '''
+
+        for link in self.links:
+            if link.collided(shape):
+                return True
+
+        return False

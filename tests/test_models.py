@@ -147,7 +147,7 @@ class TestModels(unittest.TestCase):
     def test_pr2(self):
         rp.models.PR2()
 
-    def test_ikine6s_puma(self):
+    def test_ikine_a_puma(self):
         # self.skipTest("Need new spatialmath pypi release")
         r0 = rp.models.DH.Puma560()
         q = r0.qr
@@ -160,8 +160,12 @@ class TestModels(unittest.TestCase):
             1.77635684e-15,  1.57079633e+00, -1.57079633e+00,  3.14159265e+00,
             -5.77315973e-15,  3.14159265e+00]
 
-        q0 = r0.ikine_a(T)
-        q1 = r0.ikine_a(T, 'rdf')
+        sol0 = r0.ikine_a(T)
+        sol1 = r0.ikine_a(T, 'rdf')
 
-        nt.assert_array_almost_equal(q0, qr0, decimal=4)
-        nt.assert_array_almost_equal(q1, qr1, decimal=4)
+        nt.assert_array_almost_equal(sol0.q, qr0, decimal=4)
+        nt.assert_array_almost_equal(sol1.q, qr1, decimal=4)
+
+if __name__ == '__main__':  # pragma nocover
+    unittest.main()
+    # pytest.main(['tests/test_SerialLink.py'])

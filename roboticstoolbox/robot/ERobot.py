@@ -20,8 +20,9 @@ from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from pathlib import PurePath, PurePosixPath
 from ansitable import ANSITable, Column
+from spatialmath import SpatialAcceleration, SpatialVelocity, \
+    SpatialInertia, SpatialForce
 
-from spatialmath import SpatialAcceleration, SpatialVelocity, SpatialInertia, SpatialForce
 
 class ERobot(Robot):
     """
@@ -48,7 +49,6 @@ class ERobot(Robot):
     """
 
     # TODO do we need tool and base as well?
-    # TODO doco for ee_link, can be a list
 
     def __init__(
             self,
@@ -63,6 +63,10 @@ class ERobot(Robot):
         self._n = 0
         self._ee_links = []
         self._base_link = None
+
+        # Ordered links, we reorder the input elinks to be in depth first
+        # search order
+        orlinks = []
 
         if isinstance(elinks, ETS):
             # were passed an ETS string
@@ -164,6 +168,9 @@ class ERobot(Robot):
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
+                if link in elinks:
+                    orlinks.append(link)
+
             # visit all links in DFS order
             self.dfs_links(
                 self.base_link, lambda link: visit_link(link, jindex))
@@ -176,8 +183,8 @@ class ERobot(Robot):
                     raise ValueError(
                         'joint index {link.jindex} was '
                         'repeated or out of range')
-                jset -= set(link.jindex)
-            if len(jset) > 0:
+                jset -= set([link.jindex])
+            if len(jset) > 0:  # pragma nocover  # is impossible
                 raise ValueError('joints {jset} were not assigned')
         else:
             # must be a mixture of ELinks with/without jindex
@@ -191,7 +198,7 @@ class ERobot(Robot):
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
 
-        super().__init__(elinks, **kwargs)
+        super().__init__(orlinks, **kwargs)
 
     def dfs_links(self, start, func=None):
         """
@@ -221,23 +228,23 @@ class ERobot(Robot):
 
         return visited
 
-    def dfs_path(self, l1, l2):
-        path = []
-        visited = [l1]
+    # def dfs_path(self, l1, l2):
+    #     path = []
+    #     visited = [l1]
 
-        def vis_children(link):
-            visited.append(link)
+    #     def vis_children(link):
+    #         visited.append(link)
 
-            for li in link.child:
-                if li not in visited:
+    #         for li in link.child:
+    #             if li not in visited:
 
-                    if li == l2 or vis_children(li):
-                        path.append(li)
-                        return True
-        vis_children(l1)
-        path.append(l1)
-        path.reverse()
-        return path
+    #                 if li == l2 or vis_children(li):
+    #                     path.append(li)
+    #                     return True
+    #     vis_children(l1)
+    #     path.append(l1)
+    #     path.reverse()
+    #     return path
 
     def to_dict(self):
         ob = {
@@ -379,7 +386,7 @@ class ERobot(Robot):
                 tld = base_path / PurePosixPath(tld)
             urdf_string = xacro.main(file_path, tld)
             urdf = URDF.loadstr(urdf_string, file_path)
-        else:
+        else:  # pragma nocover
             urdf = URDF.loadstr(open(file_path).read(), file_path)
 
         return urdf.elinks, urdf.name
@@ -489,7 +496,7 @@ class ERobot(Robot):
             self._base_link = link
         else:
             # self._base_link = self.links[link]
-            raise ValueError('must be an ELink')
+            raise TypeError('Must be an ELink')
         # self._reset_fk_path()
 # --------------------------------------------------------------------- #
     # TODO  get configuration string
@@ -513,8 +520,41 @@ class ERobot(Robot):
                 all([isinstance(x, ELink) for x in link]):
             self._ee_links = link
         else:
-            raise ValueError('expecting an ELink or list of ELinks')
+            raise TypeError('expecting an ELink or list of ELinks')
         # self._reset_fk_path()
+
+    @property
+    def reach(self):
+        r"""
+        Reach of the robot
+
+        :return: Maximum reach of the robot
+        :rtype: float
+
+        A conservative estimate of the reach of the robot. It is computed as
+        the sum of the translational ETs that define the link transform.
+
+        .. note:: 
+        
+            - Probably an overestimate of reach
+            - Used by numerical inverse kinematics to scale translational
+              error.
+            - For a prismatic joint, uses ``qlim`` if it is set
+
+        .. warning:: Computed on the first access. If kinematic parameters 
+              subsequently change this will not be reflected.
+        """
+        if self._reach is None:
+            d = 0
+            for link in self:
+                for et in link.ets():
+                    if et.isprismatic:
+                        d += abs(et.eta)
+                if link.isprismatic and link.qlim is not None:
+                    d += link.qlim[1]
+            self._reach = d
+        return self._reach
+
 # --------------------------------------------------------------------- #
 
     # @property
@@ -572,27 +612,26 @@ class ERobot(Robot):
 
     def fkine(self, q=None, from_link=None, to_link=None):
         '''
-        Evaluates the forward kinematics of a robot based on its ETS and
-        joint angles q.
+        Forward kinematics
 
-        T = fkine(q) evaluates forward kinematics for the robot at joint
-        configuration q.
-
-        T = fkine() as above except uses the stored q value of the
-        robot object.
-
-        Trajectory operation:
-        Calculates fkine for each point on a trajectory of joints q where
-        q is (nxm) and the returning SE3 in (m)
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
         :return: The transformation matrix representing the pose of the
             end-effector
-        :rtype: SE3
+        :rtype: SE3 instance
 
-        :notes:
+        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at joint
+          configuration ``q``.
+
+        - ``T = robot.fkine(q, start=link1, end=link2)``
+
+        **Trajectory operation**:
+
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+
+        .. note::
+
             - The robot's base or tool transform, if present, are incorporated
               into the result.
 
@@ -652,7 +691,7 @@ class ERobot(Robot):
 
     def fkine_all(self, q=None):
         '''
-        Tall = fkine_all(q) evaluates fkine for each joint within a robot and
+        Tall = robot.fkine_all(q) evaluates fkine for each joint within a robot and
         returns a trajecotry of poses.
 
         Tall = fkine_all() as above except uses the stored q value of the
@@ -665,7 +704,8 @@ class ERobot(Robot):
         :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
 
-        :notes:
+        .. note::
+
             - The robot's base transform, if present, are incorporated
               into the result.
 
@@ -680,7 +720,7 @@ class ERobot(Robot):
         else:
             q = getvector(q, self.n)
 
-        for link in self.links:
+        for link in self.elinks:
             if link.isjoint:
                 t = link.A(q[link.jindex])
             else:
@@ -811,10 +851,43 @@ class ERobot(Robot):
 
         return path, n
 
-    def jacob0(
-            self, q=None, from_link=None, to_link=None,
-            offset=None, T=None):
+    def jacob0(self, q=None, from_link=None, to_link=None, offset=None, T=None):
+        """
+        [summary]
 
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param from_link: [description], defaults to None
+        :type from_link: [type], optional
+        :param to_link: [description], defaults to None
+        :type to_link: [type], optional
+        :param offset: [description], defaults to None
+        :type offset: [type], optional
+        :param T: [description], defaults to None
+        :type T: [type], optional
+        :return J: Manipulator Jacobian in the base frame
+        :rtype: ndarray(6,n)
+
+        - ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          end-effector frame.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the geometric Jacobian as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
+        """
         if from_link is None:
             from_link = self.base_link
 
@@ -892,20 +965,30 @@ class ERobot(Robot):
 
     def jacobe(self, q=None, from_link=None, to_link=None, offset=None):
         """
-        Je = jacobe(q) is the manipulator Jacobian matrix which maps joint
-        velocity to end-effector spatial velocity. v = Je*qd in the
-        end-effector frame.
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :return J: Manipulator Jacobian in the end-effector frame
+        :rtype: ndarray(6,n)
 
-        Je = jacobe() as above except uses the stored q value of the
-        robot object.
+        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          end-effector frame.
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        :return J: The manipulator Jacobian in ee frame
-        :rtype: float ndarray(6,n)
+        Example:
 
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
         """
 
         if from_link is None:
@@ -981,51 +1064,6 @@ class ERobot(Robot):
 
         return H
 
-    def manipulability(self, q=None, J=None, from_link=None, to_link=None):
-        """
-        Calculates the manipulability index (scalar) robot at the joint
-        configuration q. It indicates dexterity, that is, how isotropic the
-        robot's motion is with respect to the 6 degrees of Cartesian motion.
-        The measure is high when the manipulator is capable of equal motion
-        in all directions and low when the manipulator is close to a
-        singularity. One of J or q is required. Supply J if already
-        calculated to save computation time
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param J: The manipulator Jacobian in any frame
-        :type J: float ndarray(6,n)
-        :return: The manipulability index
-        :rtype: float
-
-        :references:
-            - Analysis and control of robot manipulators with redundancy,
-              T. Yoshikawa,
-            - Robotics Research: The First International Symposium (M. Brady
-              and R. Paul, eds.), pp. 735-747, The MIT press, 1984.
-
-        """
-
-        if from_link is None:
-            from_link = self.base_link
-
-        if to_link is None:
-            to_link = self.ee_links[0]
-
-        path, n = self.get_path(from_link, to_link)
-
-        if J is None:
-            if q is None:
-                q = np.copy(self.q)
-            else:
-                q = getvector(q, n)
-
-            J = self.jacob0(q, from_link, to_link)
-        else:
-            verifymatrix(J, (6, n))
-
-        return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
     def jacobm(self, q=None, J=None, H=None, from_link=None, to_link=None):
         """
@@ -1340,61 +1378,9 @@ class ERobot(Robot):
 
         return Ain, bin
 
-    def closest_point(self, shape, inf_dist=1.0):
-        '''
-        closest_point(shape, inf_dist) returns the minimum euclidean
-        distance between this robot and shape, provided it is less than
-        inf_dist. It will also return the points on self and shape in the
-        world frame which connect the line of length distance between the
-        shapes. If the distance is negative then the shapes are collided.
-        :param shape: The shape to compare distance to
-        :type shape: Shape
-        :param inf_dist: The minimum distance within which to consider
-            the shape
-        :type inf_dist: float
-        :returns: d, p1, p2 where d is the distance between the shapes,
-            p1 and p2 are the points in the world frame on the respective
-            shapes
-        :rtype: float, SE3, SE3
-        '''
+    # inverse dynamics (recursive Newton-Euler) using spatial vector notation
+    def rne(robot, q, qd, qdd, gravity=None):
 
-        d = 10000
-        p1 = None,
-        p2 = None
-
-        for link in self.links:
-            td, tp1, tp2 = link.closest_point(shape, inf_dist)
-
-            if td is not None and td < d:
-                d = td
-                p1 = tp1
-                p2 = tp2
-
-        if d == 10000:
-            d = None
-
-        return d, p1, p2
-
-    def collided(self, shape):
-        '''
-        collided(shape) checks if this robot and shape have collided
-        :param shape: The shape to compare distance to
-        :type shape: Shape
-        :returns: True if shapes have collided
-        :rtype: bool
-        '''
-
-        for link in self.links:
-            if link.collided(shape):
-                return True
-
-        return False
-
-
-
-# inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def  rne( robot, q, qd, qdd, gravity=None):
-        
         n = robot.n
 
         # allocate intermediate variables
@@ -1404,7 +1390,7 @@ class ERobot(Robot):
         v = SpatialVelocity.Alloc(n)
         a = SpatialAcceleration.Alloc(n)
         f = SpatialForce.Alloc(n)
-        I = SpatialInertia.Alloc(n)
+        I = SpatialInertia.Alloc(n)  # noqa
         s = [None for i in range(n)]   # joint motion subspace
         Q = np.zeros((n,))   # joint torque/force
 
@@ -1418,7 +1404,7 @@ class ERobot(Robot):
             a_grav = SpatialAcceleration(robot.gravity)
         else:
             a_grav = SpatialAcceleration(gravity)
-            
+
         # forward recursion
         for j in range(0, n):
             vJ = SpatialVelocity(s[j] * qd[j])
@@ -1437,7 +1423,7 @@ class ERobot(Robot):
                     + v[j] @ vJ
 
             f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
-        
+
         # backward recursion
         for j in reversed(range(0, n)):
             Q[j] = f[j].dot(s[j])
@@ -1447,6 +1433,7 @@ class ERobot(Robot):
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
+
 
 if __name__ == "__main__":  # pragma nocover
 

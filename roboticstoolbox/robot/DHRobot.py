@@ -3,21 +3,26 @@
 @author Jesse Haviland
 """
 
+from collections import namedtuple
+
 import numpy as np
 from roboticstoolbox.robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
+from spatialmath import base
 from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath.base.transformsNd import t2r
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
-from scipy.optimize import minimize, Bounds
+# from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 
 from roboticstoolbox.robot.DHLink import _check_rne
 from frne import init, frne, delete
+
+iksol = namedtuple("IKsolution", "q, success, reason", defaults=(None,) * 3)
 
 
 class DHRobot(Robot):
@@ -437,11 +442,27 @@ class DHRobot(Robot):
         :return: Maximum reach of the robot
         :rtype: float
 
-        The reach is computed as :math:`\sum_j |a_j| + |d_j|`
+        A conservative estimate of the reach of the robot. It is computed as
+        :math:`\sum_j |a_j| + |d_j|` where :math:`d_j` is taken as the maximum
+        joint coordinate (``qlim``) if the joint is primsmatic.
 
-        .. note:: Probably an overestimate.
+        .. note::
+            - Probably an overestimate of reach
+            - Used by numerical inverse kinematics to scale translational
+              error.
+            - For a prismatic joint, uses ``qlim`` if it is set
+
+        .. warning:: Computed on the first access. If kinematic parameters
+              subsequently change this will not be reflected.
         """
-        return np.sum(np.abs([self.a, self.d]))
+        if self._reach is None:
+            d = 0
+            for link in self:
+                d += abs(link.a) + (link.d)
+                if link.isprismatic and link.qlim is not None:
+                    d += link.qlim[1]
+            self._reach = d
+        return self._reach
 
     def A(self, j, q=None):
         """
@@ -744,7 +765,8 @@ class DHRobot(Robot):
                 if j == 0:
                     # first link case
                     if link.sigma == 0:
-                        tw[j] = Twist3.Revolute([0, 0, 1], [0, 0, 0])  # revolute
+                        # revolute
+                        tw[j] = Twist3.Revolute([0, 0, 1], [0, 0, 0])
                     else:
                         tw[j] = Twist3.Prismatic([0, 0, 1])  # prismatic
                 else:
@@ -894,17 +916,13 @@ class DHRobot(Robot):
         r"""
         Manipulator Jacobian in end-effector frame
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
+        :param q: Joint coordinate vector
         :type q: ndarray(n)
         :return J: The manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
 
         - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity.
-
-        - ``robot.jacobe(q)` as above except uses the stored q value of the
-          robot object.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
@@ -916,12 +934,14 @@ class DHRobot(Robot):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
         """  # noqa
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        q = getvector(q, self.n)
 
         n = self.n
         L = self.links
@@ -959,18 +979,15 @@ class DHRobot(Robot):
         r"""
         Manipulator Jacobian in world frame
 
-        :param q: Joint coordinate
+        :param q: Joint coordinate vector
         :type q: ndarray(n)
         :param T: Forward kinematics if known, SE(3 matrix)
         :type T: SE3 instance
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+        - ``robot.jacob0(q)`` is the manipulator Jacobian matrix which maps
           joint velocity to end-effector spatial velocity.
-
-        - ``robot.jacobe()`` as above except uses the stored q value of the
-        robot object.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.
@@ -982,149 +999,18 @@ class DHRobot(Robot):
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
+
+        .. note:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a 
+            velocity twist as per the text by Lynch & Park.
         """  # noqa
-        q = self._getq(q)
+        q = getvector(q, self.n)
 
         if T is None:
             T = self.fkine(q)
 
         return tr2jac(trinv(T.A)) @ self.jacobe(q)
-
-    def manipulability(self, q=None, method='yoshikawa', axes='all'):
-        """
-        Manipulability measure
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: ndarray(n), or ndarray(m,n)
-        :param method: method to use, "yoshikawa" (default) or "asada"
-        :type method: str
-        :param axes: Task space axes to consider: "all" [default],
-            "trans", "rot"
-        :type axes: str
-        :return: manipulability
-        :rtype: float or ndarray(m)
-
-        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar)
-          for the robot at the joint configuration ``q``.  It indicates
-          dexterity, that is, how isotropic the robot's motion is with respect
-          to the 6 degrees of Cartesian motion. The measure is high when the
-          manipulator is capable of equal motion in all directions and low when
-          the manipulator is close to a singularity. Yoshikawa's manipulability
-          measure is based on the shape of the velocity ellipsoid and depends
-          only on kinematic parameters.
-
-        - ``manipulability(q, method='asada')`` as above except computes the
-          Asada manipulability measure. Asada's manipulability measure is based
-          on the shape of the acceleration ellipsoid which in turn is a
-          function of the Cartesian inertia matrix and the dynamic parameters.
-          The scalar measure computed here is the ratio of the smallest/largest
-          ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
-          ratio of 1, but in practice will be less than 1.
-
-        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which
-          of the 6 degrees-of-freedom to consider in the measurement. For
-          example
-          ``axes="trans"`` to consider only translation or
-          ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
-          motion.
-
-        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
-        manipulability indices for each joint configuration specified by a row
-        of ``q``.
-
-        .. note::
-            - The "all" option includes rotational and translational
-              dexterity, but this involves adding different units. It can be
-              more useful to look at the translational and rotational
-              manipulability separately.
-            - Examples in the RVC book (1st edition) can be replicated by
-              using the "all" option
-
-        :references:
-            - Analysis and control of robot manipulators with redundancy,
-              T. Yoshikawa,
-              Robotics Research: The First International Symposium
-              (M. Brady and R. Paul, eds.),
-              pp. 735-747, The MIT press, 1984.
-            - A geometrical representation of manipulator dynamics and its
-              application to arm design, H. Asada,
-              Journal of Dynamic Systems, Measurement, and Control,
-              vol. 105, p. 131, 1983.
-            - Robotics, Vision & Control, P. Corke, Springer 2011.
-
-        """
-        if axes == 'all':
-            axes = [1, 1, 1, 1, 1, 1]
-        elif axes.startswith('trans'):
-            axes = [1, 1, 1, 0, 0, 0]
-        elif axes.startswith('rot'):
-            axes = [0, 0, 0, 1, 1, 1]
-        else:
-            raise ValueError('axes must be all, trans or rot')
-
-        def yoshi(robot, q, axes):
-            J = robot.jacob0(q)
-            J = J[axes, :]
-            m2 = np.linalg.det(J @ J.T)
-            # m2 = np.maximum(0.0, m2)  # clip it to positive
-            return np.sqrt(abs(m2))
-
-        def asada(robot, q, axes, dof):
-            J = robot.jacob0(q)
-
-            if np.linalg.matrix_rank(J) < 6:
-                return 0
-
-            Ji = np.linalg.pinv(J)
-            M = robot.inertia(q)
-            Mx = Ji.T @ M @ Ji
-            d = np.where(axes)[0]
-            Mx = Mx[d]
-            Mx = Mx[:, d.tolist()]
-            e, _ = np.linalg.eig(Mx)
-
-            return np.min(e) / np.max(e)
-
-        axes = getvector(axes, 6)
-        axes = axes > 0
-
-        trajn = 1
-
-        if q is None:
-            q = self.q
-
-        try:
-            q = getvector(q, self.n, 'row')
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-
-        w = np.zeros(trajn)
-
-        if method == 'yoshikawa':
-            for i in range(trajn):
-                w[i] = yoshi(self, q[i, :], axes)
-
-            if trajn == 1:
-                return w[0]
-            else:
-                return w
-
-        elif method == 'asada':
-            dof = np.sum(axes)
-
-            for i in range(trajn):
-                w[i] = asada(self, q[i, :], axes, dof)
-
-            if trajn == 1:
-                return w[0]
-            else:
-                return w
-
-        else:
-            raise ValueError(
-                'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
 
     def jacob_dot(self, q=None, qd=None):
         """
@@ -1250,7 +1136,7 @@ class DHRobot(Robot):
         Jdot = v[:, 0]
 
         return Jdot
-        
+
 # -------------------------------------------------------------------------- #
 
     def _init_rne(self):
@@ -1296,7 +1182,8 @@ class DHRobot(Robot):
         :type qd: ndarray(n)
         :param qdd: The joint accelerations of the robot
         :type qdd: ndarray(n)
-        :param gravity: Gravitational acceleration to override robot's gravity value
+        :param gravity: Gravitational acceleration to override robot's gravity
+            value
         :type gravity: ndarray(6)
         :param fext: Specify wrench acting on the end-effector
                      :math:`W=[F_x F_y F_z M_x M_y M_z]`
@@ -1680,144 +1567,7 @@ class DHRobot(Robot):
 
 # -------------------------------------------------------------------------- #
 
-    def ikine3(self, T, left=True, elbow_up=True):
-        """
-        Analytical inverse kinematics for three link robots
-
-        q = ikine3(T) is the joint coordinates (3) corresponding to the robot
-        end-effector pose T represented by the homogenenous transform.  This
-        is a analytic solution for a 3-axis robot (such as the first three
-        joints of a robot like the Puma 560). This will have the arm to the
-        left and the elbow up.
-
-        q = ikine3(T, left, elbow_up) as above except the arm location and
-        elbow position can be specified.
-
-        Trajectory operation:
-        In all cases if T is a vector of SE3 objects (m) or a homogeneous
-        transform sequence (4x4xm) then returns the joint coordinates
-        corresponding to each of the transforms in the sequence. Q is 3xm.
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param left: True for arm to the left (default), else arm to the right
-        :type left: bool
-        :param elbow_up: True for elbow up (default), else elbow down
-        :type elbow_up: bool
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-
-        :notes:
-            - The same as IKINE6S without the wrist.
-            - The inverse kinematic solution is generally not unique, and
-              depends on the configuration string.
-            - Joint offsets, if defined, are added to the inverse kinematics
-              to generate q.
-
-        :reference:
-            - Inverse kinematics for a PUMA 560 based on the equations by Paul
-              and Zhang. From The International Journal of Robotics Research
-              Vol. 5, No. 2, Summer 1986, p. 32-44
-
-        """
-
-        if not self.n == 3:
-            raise ValueError(
-                "Function only applicable to three degree of freedom robots")
-
-        if self.mdh:
-            raise ValueError(
-                "Function only applicable to robots with standard DH "
-                "parameters")
-
-        if not self.isrevolute() == [True, True, True]:
-            raise ValueError(
-                "Function only applicable to robots with revolute joints")
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        trajn = len(T)
-
-        qt = np.zeros((trajn, 3))
-
-        for j in range(trajn):
-            theta = np.zeros(3)
-
-            a2 = self.links[1].a
-            a3 = self.links[2].a
-            d3 = self.links[2].d
-
-            # undo base transformation
-            Ti = np.linalg.inv(self.base.A) @ T[j].A
-
-            # The following parameters are extracted from the Homogeneous
-            # Transformation
-            Px = Ti[0, 3]
-            Py = Ti[1, 3]
-            Pz = Ti[2, 3]
-
-            # The configuration parameter determines what n1,n2 values are
-            # used and how many solutions are determined which have values
-            # of -1 or +1.
-
-            if left:
-                n1 = -1
-            else:
-                n1 = 1
-
-            if not elbow_up:
-                if n1 == 1:
-                    n2 = -1
-                else:
-                    n2 = 1
-            else:
-                if n1 == 1:
-                    n2 = 1
-                else:
-                    n2 = -1
-
-            # Solve for theta[0]
-            # based on the configuration parameter n1
-
-            r = np.sqrt(Px**2 + Py**2)
-
-            if n1 == 1:
-                theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-            else:
-                theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
-
-            # Solve for theta[1]
-            # based on the configuration parameter n2
-
-            V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
-            r = np.sqrt(V114**2 + Pz**2)
-
-            Psi = np.arccos(
-                (a2**2 - d3**2 - a3**2 + V114**2 + Pz**2)
-                / (2.0 * a2 * r))
-
-            theta[1] = np.arctan2(Pz, V114) + n2 * Psi
-
-            # Solve for theta[2]
-            num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
-            den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
-            theta[2] = np.arctan2(a3, d3) - np.arctan2(num, den)
-
-            # remove the link offset angles
-            for i in range(3):
-                theta[i] -= self.links[i].offset
-
-            # Append to trajectory
-            qt[j, :] = theta
-
-        if trajn == 1:
-            return qt[0, :]
-        else:
-            return qt
-
-    def ikine_6s(self, T, config, _ikfunc):
+    def ikine_6s(self, T, config, ikfunc):
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
         if self._base is not None:
@@ -1825,11 +1575,16 @@ class DHRobot(Robot):
         if self._tool is not None:
             T = self.tool.inv() * T
 
-        q = np.zeros((len(T), 6))
-        for k, Tk in enumerate(T):
-            theta = _ikfunc(Tk, config)
+        # q = np.zeros((6,))
+        solutions = []
 
-            if not np.all(np.isnan(theta)):
+        for k, Tk in enumerate(T):
+            # get model specific solution for first 3 joints
+            theta = ikfunc(self, Tk, config)
+
+            if theta is None or np.any(np.isnan(theta)):
+                solution = iksol(None, False)
+            else:
                 # Solve for the wrist rotation
                 # We need to account for some random translations between the
                 # first and last 3 joints (d4) and also d6,a6,alpha6 in the
@@ -1859,155 +1614,20 @@ class DHRobot(Robot):
                 # Remove the link offset angles
                 theta = theta - self.offset
 
-                q[k, :] = theta
+                solution = iksol(theta, True)
+                solutions.append(solution)
 
-            if q.shape[0] == 1:
-                return q[0]
-            else:
-                return q
-
-    def ikinem(self, T, q0=None, pweight=1.0, stiffness=0.0,
-               qlimits=True, ilimit=1000, nolm=False):
-        """
-        Numerical inverse kinematics with joint limits
-        q, success, err = ikinem(T) is the joint coordinates corresponding to
-        the robot end-effector pose T which is a homogenenous transform.
-
-        q, success, err = R.ikinem(T, q0, pweight, stiffness, qlimits, ilimit,
-        nolm) as above except with options defined such as the initial
-        estimate of the joint coordinates q0.
-
-        Trajectory operation:
-        In all cases if T is 4x4xm it is taken as a homogeneous transform
-        sequence and ikinem(T) returns the joint coordinates corresponding to
-        each of the transforms in the sequence. q is mxn where n is the number
-        of robot joints. The initial estimate of q for each time step is taken
-        as the solution from the previous time step.
-
-        :param T: The desired end-effector pose
-        :type T: SE3 or SE3 trajectory
-        :param pweight: weighting on position error norm compared to rotation
-            error (default 1)
-        :type pweight: float
-        :param stiffness: Stiffness used to impose a smoothness contraint on
-            joint angles, useful when n is large (default 0)
-        :type stiffness: float
-        :param qlimits: Enforce joint limits (default True)
-        :type qlimits: bool
-        :param ilimit: Iteration limit (default 1000)
-        :type ilimit: bool
-        :param nolm: Disable Levenberg-Marquadt
-        :type nolm: bool
-
-        :retrun q: The calculated joint values
-        :rtype q: float ndarray(n)
-        :retrun success: IK solved (True) or failed (False)
-        :rtype success: bool
-        :retrun error: Final pose error
-        :rtype error: float
-
-        :notes:
-            - PROTOTYPE CODE UNDER DEVELOPMENT, intended to do numerical
-              inverse kinematics with joint limits
-            - The inverse kinematic solution is generally not unique, and
-              depends on the initial guess q0 (defaults to 0).
-            - The function to be minimized is highly nonlinear and the
-              solution is often trapped in a local minimum, adjust q0 if this
-              happens.
-            - The default value of q0 is zero which is a poor choice for most
-              manipulators (eg. puma560, twolink) since it corresponds to a
-              kinematic singularity.
-            - Such a solution is completely general, though much less
-              efficient than specific inverse kinematic solutions derived
-              symbolically, like ikine6s or ikine3.
-            - Uses Levenberg-Marquadt minimizer LMFsolve if it can be found,
-              if 'nolm' is not given, and 'qlimits' false
-            - The error function to be minimized is computed on the norm of
-              the error between current and desired tool pose.  This norm is
-              computed from distances and angles and 'pweight' can be used to
-              scale the position error norm to be congruent with rotation
-              error norm.
-            - This approach allows a solution to obtained at a singularity,
-              but the joint angles within the null space are arbitrarily
-              assigned.
-            - Joint offsets, if defined, are added to the inverse kinematics
-              to generate q.
-            - Joint limits become explicit contraints if 'qlimits' is set.
-
-        """
-
-        if not isinstance(T, SE3):
-            T = SE3(T)
-
-        # TODO use getmatrix
-        trajn = len(T)
-
-        if q0 is None:
-            q0 = np.zeros((trajn, self.n))
-
-        verifymatrix(q0, (trajn, self.n))
-
-        qt = np.zeros((trajn, self.n))
-        success = []
-        err = []
-        col = 2
-
-        # Define the cost function to minimise
-        def cost(q, T, pweight, col, stiffness):
-            Tq = self.fkine(q)
-
-            # find the pose error in SE(3)
-            dT = T.t - Tq.t
-
-            # translation error
-            E = np.linalg.norm(dT) * pweight
-
-            # Rotation error
-            # Find dot product of
-            dd = np.dot(T.A[0:3, col], Tq.A[0:3, col])
-            E += np.arccos(dd)**2 * 1000
-
-            if stiffness > 0:
-                # Enforce a continuity constraint on joints, minimum bend
-                E += np.sum(np.diff(q)**2) * stiffness
-
-            return E
-
-        for i in range(trajn):
-
-            Ti = T[i]
-
-            if qlimits:
-                bnds = Bounds(self.qlim[0, :], self.qlim[1, :])
-
-                res = minimize(
-                    lambda q: cost(q, Ti, pweight, col, stiffness),
-                    q0[i, :], bounds=bnds,
-                    options={'gtol': 1e-6, 'maxiter': ilimit})
-            else:
-                # No joint limits, unconstrained optimization
-                res = minimize(
-                    lambda q: cost(q, Ti, pweight, col, stiffness),
-                    q0[i, :],
-                    options={'gtol': 1e-6, 'maxiter': ilimit})
-
-            if res.success and i < trajn - 1:
-                q0[i + 1, :] = res.x
-
-            qt[i, :] = res.x
-            success.append(res.success)
-            err.append(res.fun)
-
-        if trajn == 1:
-            return qt[0, :], success[0], err[0]
+        if len(solutions) == 1:
+            return solutions[0]
         else:
-            return qt, success, err
+            return solutions
 
 
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')
         super().__init__(*args, **kwargs)
+
 
 def _cross(a, b):
     return np.r_[

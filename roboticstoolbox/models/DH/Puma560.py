@@ -55,6 +55,9 @@ class Puma560(DHRobot):
         - Gravity load torque is the motor torque necessary to keep the joint
           static, and is thus -ve of the gravity caused torque.
 
+    .. warning:: Compared to the MATLAB version of the Toolbox this model
+        includes the pedestal, making the z-coordinates 26 inches larger.
+        
     :references:
         - "A search for consensus among model parameters reported for the PUMA
           560 robot", P. Corke and B. Armstrong-Helouvry,
@@ -81,11 +84,11 @@ class Puma560(DHRobot):
         deg = pi / 180
         inch = 0.0254
 
-        # base = 0.672      # from mounting surface to shoulder axis
+        base = 26.45 * inch    # from mounting surface to shoulder axis
 
         L = [
             RevoluteDH(
-                d=0,  # d=base,  # link length (Dennavit-Hartenberg notation)
+                d=base,       # link length (Dennavit-Hartenberg notation)
                 a=0,          # link offset (Dennavit-Hartenberg notation)
                 alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
                 I=[0, 0.35, 0, 0, 0, 0],
@@ -166,7 +169,6 @@ class Puma560(DHRobot):
                 qlim=[-266*deg, 266*deg]
             )
         ]
-        base = SE3(0, 0, 26.45*inch)  # pedestal
 
         super().__init__(
             L,
@@ -174,8 +176,7 @@ class Puma560(DHRobot):
             manufacturer="Unimation",
             keywords=('dynamics', 'symbolic', 'mesh'),
             symbolic=symbolic,
-            meshdir="meshes/UNIMATE/puma560",
-            base=base
+            meshdir="meshes/UNIMATE/puma560"
         )
 
         # zero angles, L shaped pose
@@ -190,79 +191,108 @@ class Puma560(DHRobot):
         # nominal table top picking pose
         self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
 
-    def _ikine(self, T, config):
-        # Puma model with shoulder and elbow offsets
-        # - Inverse kinematics for a PUMA 560,
-        #   Paul and Zhang,
-        #   The International Journal of Robotics Research,
-        #   Vol. 5, No. 2, Summer 1986, p. 32-44
-
-        # based on MATLAB code by Robert Biro with Gary Von McMurray,
-        # GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95
-
-        # config is l|r  u|d  f|n
-
-        a2 = self.links[1].a
-        a3 = self.links[2].a
-        # d1 = self.links[0].d
-        d3 = self.links[2].d
-        d4 = self.links[3].d
-
-        # The following parameters are extracted from the Homogeneous
-        # Transformation as defined in equation 1, p. 34
-
-        Px, Py, Pz = T.t
-
-        theta = np.zeros((3,))
-
-        # Solve for theta[0]
-        # r is defined in equation 38, p. 39.
-        # theta[0] uses equations 40 and 41, p.39,
-        # based on the configuration parameter n1
-
-        r = np.sqrt(Px**2 + Py**2)
-        if 'r' in config:
-            theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-        else:
-            theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
-
-        # Solve for theta[1]
-        # V114 is defined in equation 43, p.39.
-        # r is defined in equation 47, p.39.
-        # Psi is defined in equation 49, p.40.
-        # theta[1] uses equations 50 and 51, p.40, based on the
-        # configuration parameter n2
-        if 'u' in config:
-            n2 = 1
-        else:
-            n2 = -1
-
-        if 'r' in config:
-            n2 = -n2
-
-        V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
-
-        r = np.sqrt(V114**2 + Pz**2)
-
-        Psi = np.arccos(
-            (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
-            / (2.0 * a2 * r))
-
-        if np.isnan(Psi):
-            theta = []    # pragma nocover
-        else:
-            theta[1] = np.arctan2(Pz, V114) + n2 * Psi
-
-            # Solve for theta[2]
-            # theta[2] uses equation 57, p. 40.
-            num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
-            den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
-            theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
-
-        return theta
-
     def ikine_a(self, T, config="lun"):
-        return self.ikine_6s(T, config, self._ikine)
+        """
+        Analytic inverse kinematic solution
+
+        :param T: end-effector pose
+        :type T: SE3
+        :param config: arm configuration, defaults to "lun"
+        :type config: str, optional
+        :return: joint angle vector in radians
+        :rtype: ndarray(6)
+
+        ``robot.ikine_a(T, config)`` is the joint angle vector which achieves the
+        end-effector pose ``T```.  The configuration string selects the specific
+        solution and is a sting comprising the following letters:
+
+        ======   ==============================================
+        Letter   Meaning
+        ======   ==============================================
+        l        Choose the left-handed configuration
+        r        Choose the right-handed configuration
+        u        Choose the elbow up configuration
+        d        Choose the elbow down configuration
+        n        Choose the wrist not-flipped configuration
+        f        Choose the wrist flipped configuration
+        ======   ==============================================
+
+
+        :reference:
+            - Inverse kinematics for a PUMA 560,
+              Paul and Zhang,
+              The International Journal of Robotics Research,
+              Vol. 5, No. 2, Summer 1986, p. 32-44
+
+        :author: based on MATLAB code by Robert Biro with Gary Von McMurray,
+            GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95
+ 
+        """
+        def ik3(robot, T, config):
+
+            # solve for the first three joints
+
+            a2 = robot.links[1].a
+            a3 = robot.links[2].a
+            d1 = robot.links[0].d
+            d3 = robot.links[2].d
+            d4 = robot.links[3].d
+
+            # The following parameters are extracted from the Homogeneous
+            # Transformation as defined in equation 1, p. 34
+            
+            Px, Py, Pz = T.t
+            Pz -= d1  # offset the pedestal height
+            theta = np.zeros((3,))
+
+            # Solve for theta[0]
+            # r is defined in equation 38, p. 39.
+            # theta[0] uses equations 40 and 41, p.39,
+            # based on the configuration parameter n1
+
+            r = np.sqrt(Px**2 + Py**2)
+            if 'r' in config:
+                theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
+            else:
+                theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
+
+            # Solve for theta[1]
+            # V114 is defined in equation 43, p.39.
+            # r is defined in equation 47, p.39.
+            # Psi is defined in equation 49, p.40.
+            # theta[1] uses equations 50 and 51, p.40, based on the
+            # configuration parameter n2
+            if 'u' in config:
+                n2 = 1
+            else:
+                n2 = -1
+
+            if 'r' in config:
+                n2 = -n2
+
+            V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
+
+            r = np.sqrt(V114**2 + Pz**2)
+
+            Psi = np.arccos(
+                (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
+                / (2.0 * a2 * r))
+
+            if np.isnan(Psi):
+                theta = None    # pragma nocover
+            else:
+                theta[1] = np.arctan2(Pz, V114) + n2 * Psi
+
+                # Solve for theta[2]
+                # theta[2] uses equation 57, p. 40.
+                num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
+                den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
+                theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
+
+            return theta
+
+
+        return self.ikine_6s(T, config, ik3)
 
 
 if __name__ == '__main__':    # pragma nocover
