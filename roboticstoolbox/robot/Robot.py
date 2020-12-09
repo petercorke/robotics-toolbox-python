@@ -313,6 +313,144 @@ class Robot(DynamicsMixin, IKMixin):
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
 
+    def manipulability(self, q=None, J=None, method='yoshikawa', axes='all', **kwargs):
+        """
+        Manipulability measure
+
+        :param q: Joint coordinates
+        :type q: ndarray(n), or ndarray(m,n)
+        :param J: Jacobian if already computed, optional
+        :type J: ndarray(6,n)
+        :param method: method to use, "yoshikawa" (default), "condition", 
+            "minsingular"  or "asada"
+        :type method: str
+        :param axes: Task space axes to consider: "all" [default],
+            "trans" or "rot"
+        :type axes: str
+        :param kwargs: extra arguments to pass to ``jacob0``
+        :return: manipulability
+        :rtype: float or ndarray(m)
+
+        - ``manipulability(q)`` is the scalar manipulability index
+          for the robot at the joint configuration ``q``.  It indicates
+          dexterity, that is, how well conditioned the robot is for motion 
+          with respect to the 6 degrees of Cartesian motion.  The values is
+          zero if the robot is at a singularity.
+
+        Various measures are supported:
+          
+        +-------------------+-------------------------------------------------+
+        | Measure           |       Description                               |
+        +-------------------+-------------------------------------------------+
+        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
+        |                   | from singularity                                |
+        +-------------------+-------------------------------------------------+
+        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
+        |                   | of the velocity ellipsoid                       |
+        +-------------------+-------------------------------------------------+
+        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
+        |                   | *distance*  from singularity                    |
+        +-------------------+-------------------------------------------------+
+        | ``"asada"``       | Isotropy of the task-space acceleration         |
+        |                   | ellipsoid which is a function of the Cartesian  |
+        |                   | inertia matrix which depends on the inertial    |
+        |                   | parameters                                      |
+        +-------------------+-------------------------------------------------+
+
+        **Trajectory operation**:
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        .. note::
+            - The "all" option includes rotational and translational
+              dexterity, but this involves adding different units. It can be
+              more useful to look at the translational and rotational
+              manipulability separately.
+            - Examples in the RVC book (1st edition) can be replicated by
+              using the "all" option
+            - Asada's measure requires inertial a robot model with inertial
+              parameters.
+
+        :references:
+            - Analysis and control of robot manipulators with redundancy,
+              T. Yoshikawa,
+              Robotics Research: The First International Symposium
+              (M. Brady and R. Paul, eds.),
+              pp. 735-747, The MIT press, 1984.
+            - A geometrical representation of manipulator dynamics and its
+              application to arm design, H. Asada,
+              Journal of Dynamic Systems, Measurement, and Control,
+              vol. 105, p. 131, 1983.
+            - Robotics, Vision & Control, P. Corke, Springer 2011.
+
+        """
+        if axes == 'all':
+            axes = [True, True, True, True, True, True]
+        elif axes.startswith('trans'):
+            axes = [True, True, True, False, False, False]
+        elif axes.startswith('rot'):
+            axes = [False, False, False, True, True, True]
+        else:
+            raise ValueError('axes must be all, trans or rot')
+
+        def yoshikawa(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            if J.shape[0] == J.shape[1]:
+                # simplified case for square matrix
+                return abs(np.linalg.det(J))
+            else:
+                m2 = np.linalg.det(J @ J.T)
+                return np.sqrt(abs(m2))
+
+        def invcondition(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            return 1 / np.linalg.cond(J) # return 1/cond(J)
+
+        def minsingular(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            s = np.linalg.svd(J, compute_uv=False)
+            return s[-1]  # return last/smallest singular value of J
+
+        def asada(robot, J, q, axes, **kwargs):
+            dof = np.sum(axes)
+            if np.linalg.matrix_rank(J) < 6:
+                return 0
+            Ji = np.linalg.pinv(J)
+            Mx = Ji.T @ robot.inertia(q) @ Ji
+            d = np.where(axes)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = np.linalg.eig(Mx)
+            return np.min(e) / np.max(e)
+
+        # choose the handler function
+        if method == 'yoshikawa':
+            mfunc = yoshikawa
+        elif method == 'invcondition':
+            mfunc = condition
+        elif method == 'minsingular':
+            mfunc = minsingular
+        elif method == 'asada':
+            mfunc = asada
+        else:
+            raise ValueError(
+                "Invalid method chosen")
+
+        q = getmatrix(q, (None, self.n))
+        w = np.zeros(q.shape[0])
+
+        for k, qk in enumerate(q):
+            if J is None:
+                Jk = self.jacob0(qk, **kwargs)
+            w[k] = mfunc(self, Jk, qk, axes)
+
+        if len(w) == 1:
+            return w[0]
+        else:
+            return w
+
 # --------------------------------------------------------------------- #
 
     @property

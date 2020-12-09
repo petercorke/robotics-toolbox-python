@@ -1064,51 +1064,6 @@ class ERobot(Robot):
 
         return H
 
-    def manipulability(self, q=None, J=None, from_link=None, to_link=None):
-        """
-        Calculates the manipulability index (scalar) robot at the joint
-        configuration q. It indicates dexterity, that is, how isotropic the
-        robot's motion is with respect to the 6 degrees of Cartesian motion.
-        The measure is high when the manipulator is capable of equal motion
-        in all directions and low when the manipulator is close to a
-        singularity. One of J or q is required. Supply J if already
-        calculated to save computation time
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param J: The manipulator Jacobian in any frame
-        :type J: float ndarray(6,n)
-        :return: The manipulability index
-        :rtype: float
-
-        :references:
-            - Analysis and control of robot manipulators with redundancy,
-              T. Yoshikawa,
-            - Robotics Research: The First International Symposium (M. Brady
-              and R. Paul, eds.), pp. 735-747, The MIT press, 1984.
-
-        """
-
-        if from_link is None:
-            from_link = self.base_link
-
-        if to_link is None:
-            to_link = self.ee_links[0]
-
-        path, n = self.get_path(from_link, to_link)
-
-        if J is None:
-            if q is None:
-                q = np.copy(self.q)
-            else:
-                q = getvector(q, n)
-
-            J = self.jacob0(q, from_link, to_link)
-        else:
-            verifymatrix(J, (6, n))
-
-        return np.sqrt(np.linalg.det(J @ np.transpose(J)))
 
     def jacobm(self, q=None, J=None, H=None, from_link=None, to_link=None):
         """
