@@ -28,7 +28,7 @@ class Puma560(DHRobot):
     :param symbolic: use symbolic constants
     :type symbolic: bool
 
-    ``Puma560()`` is a class which models a Unimation Puma560 robot and
+    ``Puma560()`` is an object which models a Unimation Puma560 robot and
     describes its kinematic and dynamic characteristics using standard DH
     conventions.
 
@@ -299,9 +299,4 @@ if __name__ == '__main__':    # pragma nocover
 
     puma = Puma560(symbolic=False)
     print(puma)
-    T = SE3(0.5, 0.2, 0.5) * SE3.OA([0, 0, 1], [1, 0, 0])
-    (q, failed, reason) = puma.ikine(T)
-    print(failed, q)
-    qq = puma.ikine_a(T)
-    print(qq)
-    print(puma.fkine(qq))
+    print(puma.dyntable())
