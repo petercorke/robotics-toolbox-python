@@ -343,18 +343,18 @@ class Robot(DynamicsMixin, IKMixin):
         | Measure           |       Description                               |
         +-------------------+-------------------------------------------------+
         | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
-        |                   | from singularity                                |
+        |                   | from singularity [Yoshikawa85]_                 |
         +-------------------+-------------------------------------------------+
         | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
-        |                   | of the velocity ellipsoid                       |
+        |                   | of the velocity ellipsoid [Klein87]_            |
         +-------------------+-------------------------------------------------+
         | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
-        |                   | *distance*  from singularity                    |
+        |                   | *distance*  from singularity [Klein87]_         |
         +-------------------+-------------------------------------------------+
         | ``"asada"``       | Isotropy of the task-space acceleration         |
         |                   | ellipsoid which is a function of the Cartesian  |
         |                   | inertia matrix which depends on the inertial    |
-        |                   | parameters                                      |
+        |                   | parameters [Asada83]_                           |
         +-------------------+-------------------------------------------------+
 
         **Trajectory operation**:
@@ -364,6 +364,8 @@ class Robot(DynamicsMixin, IKMixin):
         of ``q``.
 
         .. note::
+
+            - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
             - The "all" option includes rotational and translational
               dexterity, but this involves adding different units. It can be
               more useful to look at the translational and rotational
@@ -374,16 +376,18 @@ class Robot(DynamicsMixin, IKMixin):
               parameters.
 
         :references:
-            - Analysis and control of robot manipulators with redundancy,
-              T. Yoshikawa,
-              Robotics Research: The First International Symposium
-              (M. Brady and R. Paul, eds.),
-              pp. 735-747, The MIT press, 1984.
-            - A geometrical representation of manipulator dynamics and its
-              application to arm design, H. Asada,
-              Journal of Dynamic Systems, Measurement, and Control,
-              vol. 105, p. 131, 1983.
-            - Robotics, Vision & Control, P. Corke, Springer 2011.
+        
+        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T., The International Journal of Robotics Research. 1985;4(2):3-9. doi:10.1177/027836498500400201
+        .. [Asada83] A geometrical representation of manipulator dynamics and 
+                its application to arm design, H. Asada,
+                Journal of Dynamic Systems, Measurement, and Control,
+                vol. 105, p. 131, 1983.
+        .. [Klein87] Dexterity Measures for the Design and Control of 
+                Kinematically Redundant Manipulators. Klein CA, Blaho BE. 
+                The International Journal of Robotics Research. 1987;6(2):72-83.
+                doi:10.1177/027836498700600206
+
+        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
 
         """
         if axes == 'all':
