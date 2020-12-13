@@ -319,7 +319,7 @@ class Robot(DynamicsMixin, IKMixin):
 
         :param q: Joint coordinates
         :type q: ndarray(n), or ndarray(m,n)
-        :param J: Jacobian if already computed, optional
+        :param J: Jacobian in world frame if already computed, optional
         :type J: ndarray(6,n)
         :param method: method to use, "yoshikawa" (default), "condition", 
             "minsingular"  or "asada"
