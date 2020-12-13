@@ -447,7 +447,9 @@ class DHRobot(Robot):
         joint coordinate (``qlim``) if the joint is primsmatic.
 
         .. note::
-            - Probably an overestimate of reach
+
+            - This is the *length sum* referred to in Craig's book
+            - Probably an overestimate of the actual reach
             - Used by numerical inverse kinematics to scale translational
               error.
             - For a prismatic joint, uses ``qlim`` if it is set
@@ -459,7 +461,7 @@ class DHRobot(Robot):
             d = 0
             for link in self:
                 d += abs(link.a) + (link.d)
-                if link.isprismatic and link.qlim is not None:
+                if link.isprismatic() and link.qlim is not None:
                     d += link.qlim[1]
             self._reach = d
         return self._reach
