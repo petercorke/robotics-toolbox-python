@@ -708,7 +708,7 @@ class Robot(DynamicsMixin, IKMixin):
 # --------------------------------------------------------------------- #
 
     def plot(
-            self, q, backend='Swift', block=True, dt=0.050,
+            self, q, backend=None, block=True, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
             jointaxes=True, eeframe=True, shadow=True, name=True, movie=None
             ):
@@ -718,7 +718,8 @@ class Robot(DynamicsMixin, IKMixin):
         :param q: The joint configuration of the robot.
         :type q: float ndarray(n)
         :param backend: The graphical backend to use, currently 'swift'
-            and 'pyplot' are implemented. Defaults to 'swift'
+            and 'pyplot' are implemented. Defaults to 'swift' of an ``ERobot``
+            and 'pyplot` for a ``DHRobot``
         :type backend: string
         :param block: Block operation of the code and keep the figure open
         :type block: bool
@@ -779,6 +780,12 @@ class Robot(DynamicsMixin, IKMixin):
         """
 
         env = None
+
+        if backend is None:
+            if isinstance(self, rtb.DHRobot):
+                backend = 'pyplot'
+            else:
+                backend = 'swift'
 
         if backend.lower() == 'swift':  # pragma nocover
             if isinstance(self, rtb.ERobot):
