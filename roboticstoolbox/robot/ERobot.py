@@ -9,7 +9,7 @@ from os.path import splitext
 import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix
+from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
 from roboticstoolbox.robot.ELink import ELink, ETS
 # from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
@@ -610,20 +610,22 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def fkine(self, q=None, from_link=None, to_link=None):
+    def fkine(self, q=None, endlink=None, tool=None):
         '''
         Forward kinematics
 
         :param q: Joint coordinates
         :type q: ndarray(n) or ndarray(m,n)
+        :param endlink: end-effector to compute forward kinematics for
+        :type endlink: str or ELink
+        :param tool: tool transform, optional
+        :type tool: SE3
         :return: The transformation matrix representing the pose of the
             end-effector
         :rtype: SE3 instance
 
-        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at joint
-          configuration ``q``.
-
-        - ``T = robot.fkine(q, start=link1, end=link2)``
+        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
+          joint configuration ``q``.
 
         **Trajectory operation**:
 
@@ -632,8 +634,14 @@ class ERobot(Robot):
 
         .. note::
 
-            - The robot's base or tool transform, if present, are incorporated
+            - For a robot with a single end-effector there is no need to 
+              specify ``endlink``
+            - For a robot with multiple end-effectors, the ``endlink`` must
+              be specified.
+            - The robot's base tool transform, if set, is incorporated
               into the result.
+            - A tool transform, if provided, is incorporated into the result.
+            - Works from the end-effector link to the base
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -641,53 +649,38 @@ class ERobot(Robot):
 
         '''
 
-        if from_link is None:
-            from_link = self.base_link
+        q = getmatrix(q, (None, self.n))
 
-        if to_link is None:
-            to_link = self.ee_links[0]
+        if tool is not None:
+            Ttool = tool.A
 
-        trajn = 1
+        endlink = self._get_ee(endlink)
 
-        if q is None:
-            q = self.q
+        T = SE3.Empty()
+        for k, qk in enumerate(q):
 
-        path, n = self.get_path(from_link, to_link)
+            link = endlink  # start with last link
 
-        use_jindex = True
-
-        try:
-            q = getvector(q, self.n, 'col')
-
-        except ValueError:
-            try:
-                q = getvector(q, n, 'col')
-                use_jindex = False
-                j = 0
-            except ValueError:
-                trajn = q.shape[1]
-                verifymatrix(q, (self.n, trajn))
-
-        for i in range(trajn):
-            tr = self.base.A
-            for link in path:
-                if link.isjoint:
-                    if use_jindex:
-                        T = link.A(q[link.jindex, i], fast=True)
-                    else:
-                        T = link.A(q[j, i], fast=True)
-                        j += 1
-                else:
-                    T = link.A(fast=True)
-
-                tr = tr @ T
-
-            if i == 0:
-                t = SE3(tr)
+            # add tool if provided
+            if tool is None:
+                Tk = link.A(qk[link.jindex], fast=True)
             else:
-                t.append(SE3(tr))
+                Tk = link.A(qk[link.jindex], fast=True) @ Ttool
 
-        return t
+            # add remaining links, back toward the base
+            while True:
+                link = link.parent
+                if link is None:
+                    break
+                Tk = link.A(qk[link.jindex], fast=True) @ Tk
+
+            # add base transform if it is set
+            if self.base is not None:
+                Tk = self.base.A @ Tk
+
+            T.append(SE3(Tk))
+
+        return T
 
     def fkine_all(self, q=None):
         '''
@@ -715,10 +708,7 @@ class ERobot(Robot):
 
         '''
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, self.n)
+        q = getvector(q, self.n)
 
         for link in self.elinks:
             if link.isjoint:
@@ -832,9 +822,11 @@ class ERobot(Robot):
 
     #     return J
 
-    def get_path(self, from_link, to_link):
+    def get_path(self, from_link=None, to_link=None):
         path = []
         n = 0
+        if from_link is None:
+            from_link = self.base_link
         link = to_link
 
         path.append(link)
@@ -851,9 +843,41 @@ class ERobot(Robot):
 
         return path, n
 
-    def jacob0(self, q=None, from_link=None, to_link=None, offset=None, T=None):
+    def _get_ee(self, endlink=None):
         """
-        [summary]
+        Get and validate an end-effector
+
+        :param endlink: name or reference to end-effector, defaults to None
+        :type endlink: str or ELink, optional
+        :raises ValueError: end-effector not known or ambiguous
+        :raises ValueError: [description]
+        :raises TypeError: unknown type provided
+        :return: end-effector link
+        :rtype: ELink
+
+        Helper method to find or validate an end-effector.
+        """
+        if endlink is None:
+            # if not specified choose the end-effector if just one
+            if len(self.ee_links) == 1:
+                endlink = self.ee_links[0]
+            else:
+                # if more than one EE, user must choose
+                raise ValueError('Must specify which end-effector')
+        else:
+            # end effector is specified
+            if isinstance(endlink, str):
+                endlink = self.link_dict[endlink]
+            elif isinstance(endlink, ELink):
+                if endlink not in self.links:
+                    raise ValueError('endlink not in robot links')
+            else:
+                raise TypeError('unknown endlink type')
+        return endlink
+
+    def jacob0(self, q=None, endlink=None, offset=None, T=None):
+        """
+        Manipulator geometric Jacobian in the world frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
@@ -888,29 +912,25 @@ class ERobot(Robot):
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
         """
-        if from_link is None:
-            from_link = self.base_link
-
-        if to_link is None:
-            to_link = self.ee_links[0]
 
         if offset is None:
             offset = SE3()
 
-        path, n = self.get_path(from_link, to_link)
+        endlink = self._get_ee(endlink)
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            try:
-                q = getvector(q, n)
-            except ValueError:
-                q = getvector(q, self.n)
+        path, n = self.get_path(to_link=endlink)
+
+        # if q is None:
+        #     q = np.copy(self.q)
+        # else:
+        #     try:
+        #         q = getvector(q, n)
+        #     except ValueError:
+        #         q = getvector(q, self.n)
+        q = getvector(q, self.n)
 
         if T is None:
-            T = (self.base.inv()
-                 * self.fkine(q, from_link=from_link, to_link=to_link)
-                 * offset)
+            T = self.base.inv() * self.fkine(q, endlink=endlink) * offset
 
         T = T.A
         U = np.eye(4)
@@ -920,9 +940,9 @@ class ERobot(Robot):
         for link in path:
 
             if link.isjoint:
-                U = U @ link.A(q[j], fast=True)
+                U = U @ link.A(q[link.jindex], fast=True)
 
-                if link == to_link:
+                if link == endlink:
                     U = U @ offset.A
 
                 Tu = np.linalg.inv(U) @ T
@@ -963,8 +983,10 @@ class ERobot(Robot):
 
         return J
 
-    def jacobe(self, q=None, from_link=None, to_link=None, offset=None):
+    def jacobe(self, q=None, endlink=None, offset=None):
         """
+        Manipulator geometric Jacobian in the end-effector frame
+
         :param q: Joint coordinate vector
         :type q: ndarray(n)
         :return J: Manipulator Jacobian in the end-effector frame
@@ -991,29 +1013,21 @@ class ERobot(Robot):
             velocity twist as per the text by Lynch & Park.
         """
 
-        if from_link is None:
-            from_link = self.base_link
-
-        if to_link is None:
-            to_link = self.ee_links[0]
-
-        if offset is None:
-            offset = SE3()
-
-        if q is None:
-            q = np.copy(self.q)
+        # if q is None:
+        #     q = np.copy(self.q)
         # else:
         #     q = getvector(q, n)
+        q = getvector(q, self.n)
 
-        T = (self.base.inv()
-             * self.fkine(q, from_link=from_link, to_link=to_link)
-             * offset)
+        T = self.base.inv() * self.fkine(q, endlink=endlink)
+        if offset is not None:
+            T *= offset
 
-        J0 = self.jacob0(q, from_link, to_link, offset, T)
-        Je = self.jacobev(q, from_link, to_link, offset, T) @ J0
+        J0 = self.jacob0(q, endlink, offset, T)
+        Je = self.jacobev(q, endlink, offset, T) @ J0
         return Je
 
-    def hessian0(self, q=None, J0=None, from_link=None, to_link=None):
+    def hessian0(self, q=None, J0=None, endlink=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
@@ -1028,26 +1042,32 @@ class ERobot(Robot):
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
+        H[i,j,k] is d2 u_i / dq_j dq_k
+
+        where u = {t_x, t_y, t_z, r_x, r_y, r_z}
+
+        J[i,j] is d u_i / dq_j
+
+        where u = {t_x, t_y, t_z, ζ_x, ζ_y, ζ_z}
+
+        v = J qd
+
+        a = Jd qd + J qdd
+
+        Jd = H qd
+
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
         """
 
-        if from_link is None:
-            from_link = self.base_link
+        endlink = self._get_ee()
 
-        if to_link is None:
-            to_link = self.ee_links[0]
-
-        path, n = self.get_path(from_link, to_link)
+        path, n = self.get_path(to_link=endlink)
 
         if J0 is None:
-            if q is None:
-                q = np.copy(self.q)
-            else:
-                q = getvector(q, n)
-
-            J0 = self.jacob0(q, from_link, to_link)
+            q = getvector(q, n)
+            J0 = self.jacob0(q, endlink=endlink)
         else:
             verifymatrix(J0, (6, n))
 
@@ -1183,7 +1203,7 @@ class ERobot(Robot):
         recurse(self.base_link)
 
     def jacobev(
-            self, q=None, from_link=None, to_link=None,
+            self, q=None, endlink=None,
             offset=None, T=None):
         """
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
@@ -1202,25 +1222,17 @@ class ERobot(Robot):
 
         """
 
-        if from_link is None:
-            from_link = self.base_link
-
-        if to_link is None:
-            to_link = self.ee_links[0]
-
-        if offset is None:
-            offset = SE3()
+        endlink = self._get_ee(endlink)
 
         if T is None:
-            r = (self.base.inv() * self.fkine(
-                    q, from_link, to_link) * offset).R
-            r = np.linalg.inv(r)
-        else:
-            r = np.linalg.inv(T.R)
+            T = self.base.inv() * self.fkine(q, endlink=endlink)
+            if offset is not None:
+                T *= offset
+        R = (T.R).T
 
         Jv = np.zeros((6, 6))
-        Jv[:3, :3] = r
-        Jv[3:, 3:] = r
+        Jv[:3, :3] = R
+        Jv[3:, 3:] = R
 
         return Jv
 
@@ -1440,8 +1452,10 @@ if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
-    p = rtb.models.URDF.Panda()
-    print(p[1].m)
+    p = rtb.models.ETS.Puma560()
+    p.fkine(p.qz)
+    p.jacob0(p.qz)
+    p.jacobe(p.qz)
 
     # robot = rtb.models.ETS.Panda()
     # print(robot)
