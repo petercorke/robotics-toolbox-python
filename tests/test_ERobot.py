@@ -521,7 +521,7 @@ class TestERobot(unittest.TestCase):
         l5 = rtb.ELink(rtb.ETS.tx(0.1), rtb.ETS.tz(), parent=l4)
 
         r = rtb.ERobot([l0, l1, l2, l3, l4, l5])
-        r.q = [1, 2, 3, 1, 2, 3]
+        q = [1, 2, 3, 1, 2, 3]
 
         ans = np.array([
             [-0., 0.08752679, -0.74761985, 0.41198225, 0.05872664, 0.90929743],
@@ -534,7 +534,7 @@ class TestERobot(unittest.TestCase):
             [0., 0.84147098, -0.2248451, 0., 0., 0.]
         ])
 
-        nt.assert_array_almost_equal(r.jacob0(), ans)
+        nt.assert_array_almost_equal(r.jacob0(q), ans)
 
     # def test_plot(self):
     #     panda = rtb.models.ETS.Panda()
