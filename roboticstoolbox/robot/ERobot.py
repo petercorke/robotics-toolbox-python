@@ -253,7 +253,7 @@ class ERobot(Robot):
             'n': self.n
         }
 
-        self.fkine_all()
+        self.fkine_all(self.q)
 
         for link in self.links:
             li = {
@@ -312,7 +312,7 @@ class ERobot(Robot):
             'links': []
         }
 
-        self.fkine_all()
+        self.fkine_all(self.q)
 
         # Do the robot
         for link in self.links:
@@ -534,14 +534,14 @@ class ERobot(Robot):
         A conservative estimate of the reach of the robot. It is computed as
         the sum of the translational ETs that define the link transform.
 
-        .. note:: 
-        
+        .. note::
+
             - Probably an overestimate of reach
             - Used by numerical inverse kinematics to scale translational
               error.
             - For a prismatic joint, uses ``qlim`` if it is set
 
-        .. warning:: Computed on the first access. If kinematic parameters 
+        .. warning:: Computed on the first access. If kinematic parameters
               subsequently change this will not be reflected.
         """
         if self._reach is None:
@@ -610,14 +610,16 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def fkine(self, q=None, endlink=None, tool=None):
+    def fkine(self, q, endlink=None, startlink=None, tool=None):
         '''
         Forward kinematics
 
         :param q: Joint coordinates
         :type q: ndarray(n) or ndarray(m,n)
-        :param endlink: end-effector to compute forward kinematics for
+        :param endlink: end-effector to compute forward kinematics to
         :type endlink: str or ELink
+        :param startlink: the link to compute forward kinematics from
+        :type startlink: str or ELink
         :param tool: tool transform, optional
         :type tool: SE3
         :return: The transformation matrix representing the pose of the
@@ -634,7 +636,7 @@ class ERobot(Robot):
 
         .. note::
 
-            - For a robot with a single end-effector there is no need to 
+            - For a robot with a single end-effector there is no need to
               specify ``endlink``
             - For a robot with multiple end-effectors, the ``endlink`` must
               be specified.
@@ -654,7 +656,7 @@ class ERobot(Robot):
         if tool is not None:
             Ttool = tool.A
 
-        endlink = self._get_ee(endlink)
+        endlink, startlink = self._get_limit_links(endlink, startlink)
 
         T = SE3.Empty()
         for k, qk in enumerate(q):
@@ -670,9 +672,14 @@ class ERobot(Robot):
             # add remaining links, back toward the base
             while True:
                 link = link.parent
+
                 if link is None:
                     break
+
                 Tk = link.A(qk[link.jindex], fast=True) @ Tk
+
+                if link is startlink:
+                    break
 
             # add base transform if it is set
             if self.base is not None:
@@ -682,10 +689,10 @@ class ERobot(Robot):
 
         return T
 
-    def fkine_all(self, q=None):
+    def fkine_all(self, q):
         '''
-        Tall = robot.fkine_all(q) evaluates fkine for each joint within a robot and
-        returns a trajecotry of poses.
+        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
+        robot and returns a trajecotry of poses.
 
         Tall = fkine_all() as above except uses the stored q value of the
         robot object.
@@ -716,12 +723,13 @@ class ERobot(Robot):
             else:
                 t = link.A()
 
+            # Update the links internal transform wrt the base frame
             if link.parent is None:
                 link._fk = self.base * t
             else:
                 link._fk = link.parent._fk * t
 
-            # Update the collision objects transform as well
+            # Update the link model transforms as well
             for col in link.collision:
                 col.wT = link._fk
 
@@ -731,7 +739,6 @@ class ERobot(Robot):
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                # print(link.jindex)
                 if link.isjoint:
                     t = link.A(gripper.q[link.jindex])
                 else:
@@ -739,7 +746,7 @@ class ERobot(Robot):
 
                 link._fk = link.parent._fk * t
 
-                # Update the collision objects transform as well
+                # Update the link model transforms as well
                 for col in link.collision:
                     col.wT = link._fk
 
@@ -822,18 +829,19 @@ class ERobot(Robot):
 
     #     return J
 
-    def get_path(self, from_link=None, to_link=None):
+    def get_path(self, endlink=None, startlink=None):
         path = []
         n = 0
-        if from_link is None:
-            from_link = self.base_link
-        link = to_link
+
+        endlink, startlink = self._get_limit_links(endlink, startlink)
+
+        link = endlink
 
         path.append(link)
         if link.isjoint:
             n += 1
 
-        while link != from_link:
+        while link != startlink:
             link = link.parent
             path.append(link)
             if link.isjoint:
@@ -843,19 +851,21 @@ class ERobot(Robot):
 
         return path, n
 
-    def _get_ee(self, endlink=None):
+    def _get_limit_links(self, endlink=None, startlink=None):
         """
-        Get and validate an end-effector
+        Get and validate an end-effector, and a base link
 
         :param endlink: name or reference to end-effector, defaults to None
         :type endlink: str or ELink, optional
-        :raises ValueError: end-effector not known or ambiguous
+        :param startlink: name or reference to a base link, defaults to None
+        :type startlink: str or ELink, optional
+        :raises ValueError: link not known or ambiguous
         :raises ValueError: [description]
         :raises TypeError: unknown type provided
-        :return: end-effector link
-        :rtype: ELink
+        :return: end-effector link, base link
+        :rtype: ELink, Elink
 
-        Helper method to find or validate an end-effector.
+        Helper method to find or validate an end-effector and base link.
         """
         if endlink is None:
             # if not specified choose the end-effector if just one
@@ -873,22 +883,39 @@ class ERobot(Robot):
                     raise ValueError('endlink not in robot links')
             else:
                 raise TypeError('unknown endlink type')
-        return endlink
 
-    def jacob0(self, q=None, endlink=None, offset=None, T=None):
+        if startlink is None:
+            startlink = self.base_link
+        else:
+            # end effector is specified
+            if isinstance(startlink, str):
+                startlink = self.link_dict[startlink]
+            elif isinstance(startlink, ELink):
+                if startlink not in self.links:
+                    raise ValueError('startlink not in robot links')
+            else:
+                raise TypeError('unknown endlink type')
+
+        return endlink, startlink
+
+    def jacob0(self, q, endlink=None, startlink=None, offset=None, T=None):
         """
-        Manipulator geometric Jacobian in the world frame
+        Manipulator geometric Jacobian in the base frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param from_link: [description], defaults to None
-        :type from_link: [type], optional
-        :param to_link: [description], defaults to None
-        :type to_link: [type], optional
-        :param offset: [description], defaults to None
-        :type offset: [type], optional
-        :param T: [description], defaults to None
-        :type T: [type], optional
+        :param endlink: the final link which the Jacobian represents
+        :type endlink: str or ELink
+        :param startlink: the first link which the Jacobian represents
+        :type startlink: str or ELink
+        :param offset: a static offset transformation matrix to apply to the
+            end of endlink, defaults to None
+        :type offset: SE3, optional
+        :param T: The transformation matrix of the reference point which the
+            Jacobian represents with respect to the base frame. Use this to
+            avoid caluclating forward kinematics to save time, defaults
+            to None
+        :type T: SE3, optional
         :return J: Manipulator Jacobian in the base frame
         :rtype: ndarray(6,n)
 
@@ -911,26 +938,20 @@ class ERobot(Robot):
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
-        """
+        """  # noqa
 
         if offset is None:
             offset = SE3()
 
-        endlink = self._get_ee(endlink)
+        endlink, startlink = self._get_limit_links(endlink, startlink)
 
-        path, n = self.get_path(to_link=endlink)
+        path, n = self.get_path(endlink, startlink)
 
-        # if q is None:
-        #     q = np.copy(self.q)
-        # else:
-        #     try:
-        #         q = getvector(q, n)
-        #     except ValueError:
-        #         q = getvector(q, self.n)
         q = getvector(q, self.n)
 
         if T is None:
-            T = self.base.inv() * self.fkine(q, endlink=endlink) * offset
+            T = self.base.inv() * \
+                self.fkine(q, endlink=endlink, startlink=startlink) * offset
 
         T = T.A
         U = np.eye(4)
@@ -983,12 +1004,24 @@ class ERobot(Robot):
 
         return J
 
-    def jacobe(self, q=None, endlink=None, offset=None):
+    def jacobe(self, q, endlink=None, startlink=None, offset=None, T=None):
         """
         Manipulator geometric Jacobian in the end-effector frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
+        :param endlink: the final link which the Jacobian represents
+        :type endlink: str or ELink
+        :param startlink: the first link which the Jacobian represents
+        :type startlink: str or ELink
+        :param offset: a static offset transformation matrix to apply to the
+            end of endlink, defaults to None
+        :type offset: SE3, optional
+        :param T: The transformation matrix of the reference point which the
+            Jacobian represents with respect to the base frame. Use this to
+            avoid caluclating forward kinematics to save time, defaults
+            to None
+        :type T: SE3, optional
         :return J: Manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
 
@@ -1011,23 +1044,26 @@ class ERobot(Robot):
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
-        """
+        """  # noqa
 
-        # if q is None:
-        #     q = np.copy(self.q)
-        # else:
-        #     q = getvector(q, n)
         q = getvector(q, self.n)
 
-        T = self.base.inv() * self.fkine(q, endlink=endlink)
-        if offset is not None:
-            T *= offset
+        if offset is None:
+            offset = SE3()
 
-        J0 = self.jacob0(q, endlink, offset, T)
-        Je = self.jacobev(q, endlink, offset, T) @ J0
+        endlink, startlink = self._get_limit_links(endlink, startlink)
+
+        path, n = self.get_path(endlink, startlink)
+
+        if T is None:
+            T = self.base.inv() * \
+                self.fkine(q, endlink=endlink, startlink=startlink) * offset
+
+        J0 = self.jacob0(q, endlink, startlink, offset, T)
+        Je = self.jacobev(q, endlink, startlink, offset, T) @ J0
         return Je
 
-    def hessian0(self, q=None, J0=None, endlink=None):
+    def hessian0(self, q=None, J0=None, endlink=None, startlink=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
@@ -1039,6 +1075,11 @@ class ERobot(Robot):
         :type q: float ndarray(n)
         :param J0: The manipulator Jacobian in the 0 frame
         :type J0: float ndarray(6,n)
+        :param endlink: the final link which the Hessian represents
+        :type endlink: str or ELink
+        :param startlink: the first link which the Hessian represents
+        :type startlink: str or ELink
+
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
@@ -1061,9 +1102,8 @@ class ERobot(Robot):
               Sequence, J. Haviland and P. Corke
         """
 
-        endlink = self._get_ee()
-
-        path, n = self.get_path(to_link=endlink)
+        endlink, startlink = self._get_limit_links(endlink, startlink)
+        path, n = self.get_path(endlink, startlink)
 
         if J0 is None:
             q = getvector(q, n)
@@ -1084,8 +1124,7 @@ class ERobot(Robot):
 
         return H
 
-
-    def jacobm(self, q=None, J=None, H=None, from_link=None, to_link=None):
+    def jacobm(self, q=None, J=None, H=None, endlink=None, startlink=None):
         """
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
@@ -1099,6 +1138,11 @@ class ERobot(Robot):
         :type J: float ndarray(6,n)
         :param H: The manipulator Hessian in any frame
         :type H: float ndarray(6,n,n)
+        :param endlink: the final link which the Hessian represents
+        :type endlink: str or ELink
+        :param startlink: the first link which the Hessian represents
+        :type startlink: str or ELink
+
         :return: The manipulability Jacobian
         :rtype: float ndarray(n)
 
@@ -1107,13 +1151,8 @@ class ERobot(Robot):
               Sequence, J. Haviland and P. Corke
         """
 
-        if from_link is None:
-            from_link = self.base_link
-
-        if to_link is None:
-            to_link = self.ee_links[0]
-
-        path, n = self.get_path(from_link, to_link)
+        endlink, startlink = self._get_limit_links(endlink, startlink)
+        path, n = self.get_path(endlink, startlink)
 
         if J is None:
             if q is None:
@@ -1121,17 +1160,17 @@ class ERobot(Robot):
             else:
                 q = getvector(q, n)
 
-            J = self.jacob0(q, from_link, to_link)
+            J = self.jacob0(q, startlink=startlink, endlink=endlink)
         else:
             verifymatrix(J, (6, n))
 
         if H is None:
-            H = self.hessian0(J0=J, from_link=from_link, to_link=to_link)
+            H = self.hessian0(J0=J, startlink=startlink, endlink=endlink)
         else:
             verifymatrix(H, (6, n, n))
 
         manipulability = self.manipulability(
-            J=J, from_link=from_link, to_link=to_link)
+            q, J=J, startlink=startlink, endlink=endlink)
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((n, 1))
 
@@ -1203,29 +1242,38 @@ class ERobot(Robot):
         recurse(self.base_link)
 
     def jacobev(
-            self, q=None, endlink=None,
+            self, q, endlink=None, startlink=None,
             offset=None, T=None):
         """
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the base frame to the
         velocity in the end-effector frame.
 
-        Jv = jacobev() as above except uses the stored q value of the
-        robot object.
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param endlink: the final link which the Jacobian represents
+        :type endlink: str or ELink
+        :param startlink: the first link which the Jacobian represents
+        :type startlink: str or ELink
+        :param offset: a static offset transformation matrix to apply to the
+            end of endlink, defaults to None
+        :type offset: SE3, optional
+        :param T: The transformation matrix of the reference point which the
+            Jacobian represents with respect to the base frame. Use this to
+            avoid caluclating forward kinematics to save time, defaults
+            to None
+        :type T: SE3, optional
 
         :returns J: The velocity Jacobian in ee frame
         :rtype J: float ndarray(6,6)
 
         """
 
-        endlink = self._get_ee(endlink)
+        endlink, startlink = self._get_limit_links(endlink, startlink)
 
         if T is None:
-            T = self.base.inv() * self.fkine(q, endlink=endlink)
+            T = self.base.inv() * \
+                self.fkine(q, endlink=endlink, startlink=startlink)
             if offset is not None:
                 T *= offset
         R = (T.R).T
@@ -1236,29 +1284,46 @@ class ERobot(Robot):
 
         return Jv
 
-    def jacob0v(self, q=None):
+    def jacob0v(
+            self, q, endlink=None, startlink=None,
+            offset=None, T=None):
         """
         Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the end-effector frame
         to velocity in the base frame
 
-        Jv = jacob0v() as above except uses the stored q value of the
-        robot object.
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param endlink: the final link which the Jacobian represents
+        :type endlink: str or ELink
+        :param startlink: the first link which the Jacobian represents
+        :type startlink: str or ELink
+        :param offset: a static offset transformation matrix to apply to the
+            end of endlink, defaults to None
+        :type offset: SE3, optional
+        :param T: The transformation matrix of the reference point which the
+            Jacobian represents with respect to the base frame. Use this to
+            avoid caluclating forward kinematics to save time, defaults
+            to None
+        :type T: SE3, optional
 
         :returns J: The velocity Jacobian in 0 frame
         :rtype J: float ndarray(6,6)
 
         """
 
-        r = (self.base.inv() * self.fkine(q)).R
+        endlink, startlink = self._get_limit_links(endlink, startlink)
+
+        if T is None:
+            T = self.base.inv() * \
+                self.fkine(q, endlink=endlink, startlink=startlink)
+            if offset is not None:
+                T *= offset
+        R = (T.R)
 
         Jv = np.zeros((6, 6))
-        Jv[:3, :3] = r
-        Jv[3:, 3:] = r
+        Jv[:3, :3] = R
+        Jv[3:, 3:] = R
 
         return Jv
 
