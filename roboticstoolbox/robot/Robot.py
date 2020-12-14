@@ -263,8 +263,6 @@ class Robot(DynamicsMixin, IKMixin):
         else:  # pragma nocover
             return ""
 
-
-
     def linkcolormap(self, linkcolors="viridis"):
         """
         Create a colormap for robot joints
@@ -304,7 +302,7 @@ class Robot(DynamicsMixin, IKMixin):
                 <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
                 - `Colormaps
                 <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
-        """
+        """  # noqa
 
         if isinstance(linkcolors, list) and len(linkcolors) == self.n:
             # provided a list of color names
@@ -313,15 +311,18 @@ class Robot(DynamicsMixin, IKMixin):
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
 
-    def manipulability(self, q=None, J=None, method='yoshikawa', axes='all', **kwargs):
+    def manipulability(
+            self, q=None, J=None, method='yoshikawa',
+            axes='all', **kwargs):
         """
         Manipulability measure
 
-        :param q: Joint coordinates
+        :param q: Joint coordinates, one of J or q required
         :type q: ndarray(n), or ndarray(m,n)
-        :param J: Jacobian in world frame if already computed, optional
+        :param J: Jacobian in world frame if already computed, one of J or
+            q required
         :type J: ndarray(6,n)
-        :param method: method to use, "yoshikawa" (default), "condition", 
+        :param method: method to use, "yoshikawa" (default), "condition",
             "minsingular"  or "asada"
         :type method: str
         :param axes: Task space axes to consider: "all" [default],
@@ -333,12 +334,12 @@ class Robot(DynamicsMixin, IKMixin):
 
         - ``manipulability(q)`` is the scalar manipulability index
           for the robot at the joint configuration ``q``.  It indicates
-          dexterity, that is, how well conditioned the robot is for motion 
+          dexterity, that is, how well conditioned the robot is for motion
           with respect to the 6 degrees of Cartesian motion.  The values is
           zero if the robot is at a singularity.
 
         Various measures are supported:
-          
+
         +-------------------+-------------------------------------------------+
         | Measure           |       Description                               |
         +-------------------+-------------------------------------------------+
@@ -376,16 +377,18 @@ class Robot(DynamicsMixin, IKMixin):
               parameters.
 
         :references:
-        
-        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T., The International Journal of Robotics Research. 1985;4(2):3-9. doi:10.1177/027836498500400201
-        .. [Asada83] A geometrical representation of manipulator dynamics and 
+
+        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
+                The International Journal of Robotics Research.
+                1985;4(2):3-9. doi:10.1177/027836498500400201
+        .. [Asada83] A geometrical representation of manipulator dynamics and
                 its application to arm design, H. Asada,
                 Journal of Dynamic Systems, Measurement, and Control,
                 vol. 105, p. 131, 1983.
-        .. [Klein87] Dexterity Measures for the Design and Control of 
-                Kinematically Redundant Manipulators. Klein CA, Blaho BE. 
-                The International Journal of Robotics Research. 1987;6(2):72-83.
-                doi:10.1177/027836498700600206
+        .. [Klein87] Dexterity Measures for the Design and Control of
+                Kinematically Redundant Manipulators. Klein CA, Blaho BE.
+                The International Journal of Robotics Research.
+                1987;6(2):72-83. doi:10.1177/027836498700600206
 
         - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
 
@@ -410,7 +413,7 @@ class Robot(DynamicsMixin, IKMixin):
 
         def invcondition(robot, J, q, axes, **kwargs):
             J = J[axes, :]
-            return 1 / np.linalg.cond(J) # return 1/cond(J)
+            return 1 / np.linalg.cond(J)  # return 1/cond(J)
 
         def minsingular(robot, J, q, axes, **kwargs):
             J = J[axes, :]
@@ -442,13 +445,18 @@ class Robot(DynamicsMixin, IKMixin):
             raise ValueError(
                 "Invalid method chosen")
 
-        q = getmatrix(q, (None, self.n))
-        w = np.zeros(q.shape[0])
+        # Calculate manipulability based on supplied Jacobian
+        if J is not None:
+            w = [mfunc(self, J, q, axes)]
 
-        for k, qk in enumerate(q):
-            if J is None:
+        # Otherwise use the q vector/matrix
+        else:
+            q = getmatrix(q, (None, self.n))
+            w = np.zeros(q.shape[0])
+
+            for k, qk in enumerate(q):
                 Jk = self.jacob0(qk, **kwargs)
-            w[k] = mfunc(self, Jk, qk, axes)
+                w[k] = mfunc(self, Jk, qk, axes)
 
         if len(w) == 1:
             return w[0]
@@ -581,7 +589,6 @@ class Robot(DynamicsMixin, IKMixin):
         else:
             raise ValueError('tool must be set to None (no tool) or an SE3')
 
-
     @property
     def qlim(self):
         r"""
@@ -702,8 +709,6 @@ class Robot(DynamicsMixin, IKMixin):
         else:
             raise ValueError(
                 'Control type must be one of \'p\', \'v\', or \'a\'')
-
-
 
 # --------------------------------------------------------------------- #
 
