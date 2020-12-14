@@ -938,7 +938,7 @@ class Robot(DynamicsMixin, IKMixin):
             raise NotImplementedError(
                 "ERobot fellipse not implemented yet")
 
-        ell = EllipsePlot(self, 'f', opt, centre=centre)
+        ell = EllipsePlot(self, q, 'f', opt, centre=centre)
         return ell
 
     def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
@@ -976,7 +976,7 @@ class Robot(DynamicsMixin, IKMixin):
             raise NotImplementedError(
                 "ERobot vellipse not implemented yet")
 
-        ell = EllipsePlot(self, 'v', opt, centre=centre)
+        ell = EllipsePlot(self, q, 'v', opt, centre=centre)
         return ell
 
     def plot_ellipse(
