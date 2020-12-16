@@ -10,6 +10,7 @@ from math import pi
 import time
 
 from roboticstoolbox.backends import VPython
+from roboticstoolbox.models.DH.Puma560 import Puma560
 
 from roboticstoolbox.backends.VPython.common_functions import \
     get_pose_x_vec, get_pose_y_vec, get_pose_z_vec, get_pose_pos, \
@@ -836,27 +837,106 @@ class TestVPython(unittest.TestCase):
     #     # was added to the scene
 
     # ##########################################################################
-    def test_backend_add(self):
-        pass
-
-    def test_backend_step(self):
-        pass
-
-    def test_backend_remove(self):
-        pass
-
-    # ##########################################################################
-    def test_2d_init(self):
-        pass
-
-    def test_2d_grid_visiblity(self):
-        pass
-
-    def test_2d_plot(self):
-        # Correct inputs
-        # Too many of each inputs
-        # Edge cases
-        pass
+    # def test_backend_add(self):
+    #     # Create robot
+    #     p = Puma560()
+    #
+    #     # Count num objects
+    #     num_prior = len(self.robot_scene.scene.objects)
+    #
+    #     # Add robot
+    #     self.env.add(len(self.env.canvases)-1, 'puma', p)
+    #
+    #     # Verify num objects
+    #     num_post = len(self.robot_scene.scene.objects)
+    #     self.assertGreater(num_post, num_prior)
+    #
+    # def test_backend_step(self):
+    #     # Create robot
+    #     p = Puma560()
+    #
+    #     # Add robot
+    #     self.env.add(len(self.env.canvases)-1, 'puma', p)
+    #
+    #     # Note positions of objects
+    #     positions_prior = [obj.pos for obj in self.robot_scene.scene.objects]
+    #
+    #     # Step
+    #     self.env.step(p, q=p.qr, fig_num=len(self.env.canvases)-1)
+    #
+    #     # Verify positions changed
+    #     positions_after = [obj.pos for obj in self.robot_scene.scene.objects]
+    #     self.assertNotEqual(positions_prior, positions_after)
+    #
+    # def test_backend_remove(self):
+    #     # Create robot
+    #     p = Puma560()
+    #
+    #     # Count objects
+    #     num_prior = len(self.robot_scene.scene.objects)
+    #
+    #     # Add robot
+    #     self.env.add(len(self.env.canvases) - 1, 'puma', p)
+    #
+    #     # Count objects
+    #     num_mid = len(self.robot_scene.scene.objects)
+    #
+    #     # Remove
+    #     self.env.remove(p, fig_num=len(self.env.canvases)-1)
+    #
+    #     # Count objects
+    #     num_post = len(self.robot_scene.scene.objects)
+    #     self.assertGreater(num_mid, num_prior)
+    #     self.assertGreater(num_post, num_mid)
+    #     self.assertEqual(num_prior, num_post)
+    #
+    # # ##########################################################################
+    # def test_2d_init(self):
+    #     # Create a scene
+    #     self.env.launch(is_3d=False)
+    #
+    #     try:
+    #         # Put a box in the created scene
+    #         box(canvas=self.env.canvases[len(self.env.canvases) - 1])
+    #     except Exception:
+    #         # Something went wrong
+    #         self.assertEqual(False, True)
+    #
+    # def test_2d_grid_visiblity(self):
+    #     # Create a scene, with grid=True (default)
+    #     self.env.launch(is_3d=False, grid=True)
+    #
+    #     # Check all objects in scene are visible (default scene will just have
+    #     # grid, assuming init has grid=True)
+    #     self.assertGreater(len(self.env.canvases[len(self.env.canvases) - 1].scene.objects), 0)
+    #
+    #     # Change visibility
+    #     self.env.canvases[len(self.env.canvases) - 1].grid_visibility(False)
+    #
+    #     # Check all are invisible
+    #     # Invisible objects are not shown in the objects list
+    #     self.assertEqual(len(self.env.canvases[len(self.env.canvases) - 1].scene.objects), 0)
+    #
+    # def test_2d_plot(self):
+    #     # Create scene
+    #     self.env.launch(is_3d=False)
+    #     scene = self.env.canvases[len(self.env.canvases) - 1]
+    #
+    #     # Correct input
+    #     scene.plot([1, 2, 3, 4], [3, 2, 5, 2], 'rs-')
+    #
+    #     # Rearranged correct input
+    #     scene.plot([1, 2, 3, 4], [3, 2, 5, 2], 's-r')
+    #
+    #     # Empty inputs
+    #     scene.plot([], [], '')  # Shouldn't draw or throw errors
+    #
+    #     # Error checks
+    #     self.assertRaises(ValueError, scene.plot, [1, 1], 's7:')  # Unknown Character
+    #     self.assertRaises(ValueError, scene.plot, [1, 1], '-:r')  # Too many line segments
+    #     self.assertRaises(ValueError, scene.plot, [1, 1], 'rcs')  # Too many colour segments
+    #     self.assertRaises(ValueError, scene.plot, [1, 1], 'dsg')  # Too many marker segments
+    #     self.assertRaises(ValueError, scene.plot, [1, 1], [1, 2, 3])  # Different num values
 
 
 if __name__ == '__main__':
