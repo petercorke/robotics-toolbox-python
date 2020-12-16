@@ -9,17 +9,19 @@ from ansitable import ANSITable, Column
 #  * T, the end-effector pose
 #  * q0, the initial joint angles for solution
 
-# Puma robot case
-# robot = rtb.models.DH.Puma560()
-# q = robot.qn
-# q0 = robot.qz
-# T = robot.fkine(q)
+example = 'puma'  # 'panda'
 
-# Panda robot case
-robot = rtb.models.DH.Panda()
-q0 = robot.qr
-T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-# this pose does quite badly, it's from the RTB README.md
+if example == 'puma':
+    # Puma robot case
+    robot = rtb.models.DH.Puma560()
+    q = robot.qn
+    q0 = robot.qz
+    T = robot.fkine(q)
+elif example == 'panda':
+    # Panda robot case
+    robot = rtb.models.DH.Panda()
+    T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+    q0 = robot.qz
 
 # build the list of IK methods to test
 ikfuncs = [ 
@@ -27,10 +29,9 @@ ikfuncs = [
     robot.ikine_LMS, # Levenberg-Marquadt (Sugihara)
     robot.ikine_unc, #numerical solution with no constraints 
     robot.ikine_con, # numerical solution with constraints
-    robot.ikine_min  # numerical solution 2 with constraints
 ]
-if "ikine_a" in robot:
-    ikfuncs.append(robot.ikine_a)    # analytic solution
+if hasattr(robot, "ikine_a"):
+    ikfuncs.insert(0, robot.ikine_a)    # analytic solution
 
 # setup to run timeit
 setup = '''
@@ -65,8 +66,11 @@ for ik in ikfuncs:
     err = np.linalg.norm(T - robot.fkine(sol.q))
     print('  error', err)
 
-    # evaluate the execution time
-    t = timeit.timeit(stmt=statement, setup=setup, number=N)
+    if N > 0:
+        # evaluate the execution time
+        t = timeit.timeit(stmt=statement, setup=setup, number=N)
+    else:
+        t = 0
 
     # add it to the output table
     table.row(ik.__name__, t/N*1e6, err)

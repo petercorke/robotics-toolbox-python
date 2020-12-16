@@ -331,42 +331,33 @@ class ELink(Link):
         """
         Link transform matrix
 
-        T = A(q) is the link homogeneous transformation matrix (4x4)
-        corresponding to the link variable q
-
         :param q: Joint coordinate (radians or metres). Not required for links
             with no variable
         :type q: float
-        :return T: link homogeneous transformation matrix
-        :rtype T: SE3
+        :param fast: return NumPy array instead of ``SE3``
+        :type param: bool
+        :return T: link frame transformation matrix
+        :rtype T: SE3 or ndarray(4,4)
+
+        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body 
+          transformation from the previous to the current link frame to
+          the next, which depends on the joint coordinate ``q``.
 
         """
 
-        # j = 0
-        # tr = SE3()
-
-        if self.isjoint and q is None:
-            raise ValueError("q is required for variable joints")
-
-        # for k in range(self.M):
-        #     if self.ets[k].jtype == self.ets[k].VARIABLE:
-        #         T = self.ets[k].T(q)
-        #         j += 1
-        #     else:
-        #         T = self.ets[k].T()
-
-        #     tr = tr * T
-
-        if self.v is not None:
-            if fast:
-                return self.Ts.A @ self.v.T(q)
-            else:
-                return SE3(self.Ts.A @ self.v.T(q), check=False)
+        if self.isjoint:
+            # a variable joint
+            if q is None:
+                raise ValueError("q is required for variable joints")
+            T = self.Ts.A @ self.v.T(q)
         else:
-            if fast:
-                return self.Ts.A
-            else:
-                return self.Ts
+            # a fixed joint
+            T = self.Ts.A
+
+        if fast:
+            return T
+        else:
+            return SE3(T, check=False)
 
     def ets(self):
         if self.v is None:

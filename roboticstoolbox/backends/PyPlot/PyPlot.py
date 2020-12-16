@@ -111,6 +111,9 @@ class PyPlot(Connector):
             self.ax.set_ylim3d([limits[2], limits[3]])
             self.ax.set_zlim3d([limits[4], limits[5]])
 
+        # disable the display of value under cursor
+        self.ax.format_coord = lambda x, y: ''
+
         plt.ion()
         plt.show()
 
@@ -151,7 +154,7 @@ class PyPlot(Connector):
         self._set_axes_equal()
         # plt.ion()
         plt.draw()
-        # plt.pause(dt)
+        plt.pause(dt)
 
         self._update_robots()
 

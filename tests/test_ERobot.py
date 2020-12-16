@@ -140,7 +140,7 @@ class TestERobot(unittest.TestCase):
         ])
 
         panda.q = q1
-        nt.assert_array_almost_equal(panda.fkine().A, ans)
+        # nt.assert_array_almost_equal(panda.fkine().A, ans)
         nt.assert_array_almost_equal(panda.fkine(q2).A, ans)
         nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
         nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
@@ -149,7 +149,7 @@ class TestERobot(unittest.TestCase):
     def test_fkine_traj(self):
         panda = rtb.models.ETS.Panda()
         q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        qq = np.c_[q, q, q, q]
+        qq = np.r_[q, q, q, q]
 
         ans = np.array([
             [-0.50827907, -0.57904589,  0.63746234,  0.44682295],
@@ -171,8 +171,8 @@ class TestERobot(unittest.TestCase):
         p.q = q
         pm.q = q
 
-        p.fkine_all()
-        r2 = pm.fkine_all()
+        p.fkine_all(q)
+        r2 = pm.fkine_all(q)
 
         for i in range(7):
             nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
@@ -210,7 +210,7 @@ class TestERobot(unittest.TestCase):
         ])
 
         panda.q = q1
-        nt.assert_array_almost_equal(panda.jacob0(), ans)
+        # nt.assert_array_almost_equal(panda.jacob0(), ans)
         nt.assert_array_almost_equal(panda.jacob0(q2), ans)
         nt.assert_array_almost_equal(panda.jacob0(q3), ans)
         nt.assert_array_almost_equal(panda.jacob0(q4), ans)
@@ -365,7 +365,7 @@ class TestERobot(unittest.TestCase):
         ])
 
         panda.q = q1
-        nt.assert_array_almost_equal(panda.hessian0(), ans)
+        # nt.assert_array_almost_equal(panda.hessian0(), ans)
         nt.assert_array_almost_equal(panda.hessian0(q2), ans)
         nt.assert_array_almost_equal(panda.hessian0(q3), ans)
         nt.assert_array_almost_equal(panda.hessian0(q4), ans)
@@ -383,21 +383,15 @@ class TestERobot(unittest.TestCase):
         panda = rtb.models.ETS.Panda()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
-        q3 = np.expand_dims(q1, 0)
-        q4 = np.expand_dims(q1, 1)
 
         ans = 0.006559178039088341
 
         panda.q = q1
-        nt.assert_array_almost_equal(panda.manipulability(), ans)
         nt.assert_array_almost_equal(panda.manipulability(q2), ans)
-        nt.assert_array_almost_equal(panda.manipulability(q3), ans)
-        nt.assert_array_almost_equal(panda.manipulability(q4), ans)
         # self.assertRaises(ValueError, panda.manipulability)
         self.assertRaises(TypeError, panda.manipulability, 'Wfgsrth')
         self.assertRaises(
-            ValueError, panda.manipulability, [1, 3], np.array([1, 5]))
-        self.assertRaises(TypeError, panda.manipulability, [1, 3], 'qwe')
+            ValueError, panda.manipulability, [1, 3])
 
     def test_jacobm(self):
         panda = rtb.models.ETS.Panda()
@@ -454,7 +448,7 @@ class TestERobot(unittest.TestCase):
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
         panda.q = q1
 
-        nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
+        # nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
         nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
 
     def test_init(self):
@@ -521,7 +515,7 @@ class TestERobot(unittest.TestCase):
         l5 = rtb.ELink(rtb.ETS.tx(0.1), rtb.ETS.tz(), parent=l4)
 
         r = rtb.ERobot([l0, l1, l2, l3, l4, l5])
-        r.q = [1, 2, 3, 1, 2, 3]
+        q = [1, 2, 3, 1, 2, 3]
 
         ans = np.array([
             [-0., 0.08752679, -0.74761985, 0.41198225, 0.05872664, 0.90929743],
@@ -534,7 +528,7 @@ class TestERobot(unittest.TestCase):
             [0., 0.84147098, -0.2248451, 0., 0., 0.]
         ])
 
-        nt.assert_array_almost_equal(r.jacob0(), ans)
+        nt.assert_array_almost_equal(r.jacob0(q), ans)
 
     # def test_plot(self):
     #     panda = rtb.models.ETS.Panda()
