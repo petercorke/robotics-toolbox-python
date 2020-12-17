@@ -8,14 +8,14 @@ from roboticstoolbox.robot.ELink import ELink
 
 class Planar_Y(ERobot):
     """
-    Create model of Franka-Emika Panda manipulator
+    Create model of a branched planar manipulator::
 
-    panda = Panda() creates a robot object representing the Franka-Emika
-    Panda robot arm. This robot is represented using the elementary
-    transform sequence (ETS).
+        L0 -- L1 -+- L2a -- L3a -- EEa
+                |
+                +- L2b -- L3b -- EEb
 
-    ETS taken from [1] based on
-    https://frankaemika.github.io/docs/control_parameters.html
+    ``Planar_Y()`` creates a planar branched manipulator model.
+
 
     :references:
         - Kinematic Derivatives using the Elementary Transform
@@ -103,37 +103,4 @@ if __name__ == '__main__':   # pragma nocover
     robot = Planar_Y()
     print(robot)
 
-    q = robot.qy
-    print(robot.fkine(q, endlink='eea'))
-    print(robot.fkine(q, endlink='eeb'))
 
-    print(robot.fkine(q, endlink='eeb', startlink='eea'))
-
-    # print(robot.n)
-    # print(robot.elinks)
-    # for link in robot:
-    #     print(link.name, link)
-    #     print(link.ets, link.v, link.isjoint)
-    #     print(link.parent, link.child)
-    #     print(link.Ts)
-    #     print(link.geometry, link.collision)
-
-    #     print()
-
-    # from ansitable import ANSITable, Column
-
-    # table = ANSITable(
-    #     Column("link"),
-    #     Column("parent"),
-    #     Column("ETS", headalign="^", colalign="<"),
-    #     border="thin")
-    # for link in robot:
-    #     if link.isjoint:
-    #         color = ""
-    #     else:
-    #         color = "<<blue>>"
-    #     table.row(
-    #         color + link.name,
-    #         link.parent.name if link.parent is not None else "-",
-    #         link.ets())
-    # table.print()
