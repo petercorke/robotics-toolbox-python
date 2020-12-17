@@ -667,39 +667,100 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def dotfile(self, file):
+    def dotfile(self, file, etsbox=False, jtype=False, static=True):
         """
         Write a GraphViz dot file representing the robot link.
         
         :param file: Name of file to write to
         :type file: str
+        :param etsbox: Put the link ETS in a box, otherwise an edge label
+        :type etsbox: bool
+        :param jtype: Arrowhead to node indicates revolute or prismatic type
+        :type jtype: bool
+        :param static: Show static joints in blue and bold
+        :type static: bool
 
         The file can be processed using dot::
             
             % dot -Tpng -o out.png dotfile.dot
 
-        - The base link is shown as a grey circle
-        - Link frames are indicated by circles
-        - ETS transforms are indicated by rounded boxes
+        The nodes are:
+
+            - The base link is shown as a grey circle
+            - Link frames are indicated by circles
+            - ETS transforms are indicated by rounded boxes
+
+        The edges are:
+
+            - an arrow if jtype is False or the joint is fixed
+            - an arrow with a round head if jtype is True and the joint is
+              revolute
+            - an arrow with a box head if jtype is True and the joint is
+              prismatic
+
         """
         with open(file, 'w') as file:
             
             header = r"""digraph G {
 
-graph [rankdir=LR]
+  graph [rankdir=LR];
+
 """
+
+            def draw_edge(link, etsbox, jtype, static):
+                # draw the edge
+                if jtype:
+                    if link.isprismatic:
+                        edge_options = 'arrowhead="box", arrowtail="inv", dir="both"'
+                    elif link.isrevolute:
+                        edge_options = 'arrowhead="dot", arrowtail="inv", dir="both"'
+                    else:
+                        edge_options = 'arrowhead="normal"'
+                else:
+                    edge_options = 'arrowhead="normal"'
+
+                if link.parent is None:
+                    parent = 'BASE'
+                else:
+                    parent = link.parent.name
+
+                if etsbox:
+                    # put the ets fragment in a box
+                    if not link.isjoint and static:
+                        node_options = ', fontcolor="blue"'
+                    else:
+                        node_options = ''
+                    file.write('  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(link.name, link.ets().__str__(q=f"q{link.jindex}"), node_options))
+                    file.write('  {} -> {}_ets;\n'.format(parent, link.name))
+                    file.write('  {}_ets -> {} [{}];\n'.format(link.name, link.name, edge_options))
+                else:
+                    # put the ets fragment as an edge label
+                    if not link.isjoint and static:
+                        edge_options += 'fontcolor="blue"'
+                    file.write('  {} -> {} [label="{}", {}];\n'.format(parent, link.name, link.ets().__str__(q=f"q{link.jindex}"), edge_options))
+
             file.write(header)
 
             # add the base link
-            file.write('\t{} [shape=circle, style=filled, fillcolor=gray]\n'.format(self.base_link.name))
+            file.write('  BASE [shape=square, style=filled, fillcolor=gray]\n')
 
             # add the links
             for link in self:
-                if link.parent is not None:
-                    file.write('\t{}_x [shape=box, style=rounded, label="{}"]\n'.format(link.name, link.ets().__str__(q=f"q{link.jindex}")))
-                    file.write('\t{} [shape=circle, label="{}"]\n'.format(link.name, link.name))
-                    file.write('\t{} -> {}_x\n'.format(link.parent.name, link.name))
-                    file.write('\t{}_x -> {}\n'.format(link.name, link.name))
+                # draw the link frame node (circle) or ee node (doublecircle)
+                if link in self.ee_links:
+                    # end-effector
+                    node_options = 'shape="doublecircle", color="blue", fontcolor="blue"'
+                else:
+                    node_options = 'shape="circle"'
+
+                file.write('  {} [{}];\n'.format(link.name, node_options))
+
+                draw_edge(link, etsbox, jtype, static)
+
+            for gripper in self.grippers:
+                for link in gripper.links:
+                    file.write('  {} [shape=cds];\n'.format(link.name))
+                    draw_edge(link, etsbox, jtype, static)
 
             file.write('}\n')
 # --------------------------------------------------------------------- #
