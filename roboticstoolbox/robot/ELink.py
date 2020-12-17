@@ -70,6 +70,10 @@ class ELink(Link):
 
         if v is None and len(ets) > 0 and ets[-1].isjoint:
             v = ets.pop()
+            if jindex is not None:
+                v.jindex = jindex
+            elif jindex is None and v.jindex is not None:
+                jindex = v.jindex
 
         # TODO simplify this logic, can be ELink class or None
         if isinstance(parent, list):
@@ -243,14 +247,25 @@ class ELink(Link):
         """
         return self.v.isrevolute
 
+    @property
     def isprismatic(self):
         """
         Checks if the joint is of prismatic type
 
-        :return: Ture if is prismatic
+        :return: True if is prismatic
         :rtype: bool
         """
-        return self.v.isprismatic
+        return self.isjoint and self.v.isprismatic
+
+    @property
+    def isrevolute(self):
+        """
+        Checks if the joint is of revolute type
+
+        :return: True if is revolute
+        :rtype: bool
+        """
+        return self.isjoint and self.v.isrevolute
 
     # @property
     # def ets(self):

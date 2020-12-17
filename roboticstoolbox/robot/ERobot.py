@@ -55,6 +55,7 @@ class ERobot(Robot):
             elinks,
             base_link=None,
             gripper_links=None,
+            checkjindex=True,
             **kwargs
             ):
 
@@ -179,15 +180,16 @@ class ERobot(Robot):
 
         elif all([link.jindex is not None for link in elinks if link.isjoint]):
             # jindex set on all, check they are unique and sequential
-            jset = set(range(self._n))
-            for link in elinks:
-                if link.isjoint and link.jindex not in jset:
-                    raise ValueError(
-                        f'joint index {link.jindex} was '
-                        'repeated or out of range')
-                jset -= set([link.jindex])
-            if len(jset) > 0:  # pragma nocover  # is impossible
-                raise ValueError(f'joints {jset} were not assigned')
+            if checkjindex:
+                jset = set(range(self._n))
+                for link in elinks:
+                    if link.isjoint and link.jindex not in jset:
+                        raise ValueError(
+                            f'joint index {link.jindex} was '
+                            'repeated or out of range')
+                    jset -= set([link.jindex])
+                if len(jset) > 0:  # pragma nocover  # is impossible
+                    raise ValueError(f'joints {jset} were not assigned')
             orlinks = elinks
         else:
             # must be a mixture of ELinks with/without jindex
