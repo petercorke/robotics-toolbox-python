@@ -580,28 +580,80 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def ets(self, ee=None):
-        if ee is None:
-            if len(self.ee_links) == 1:
-                link = self.ee_links[0]
-            else:
-                raise ValueError(
-                    'robot has multiple end-effectors, specify one')
-        # elif isinstance(ee, str) and ee in self._linkdict:
-        #     ee = self._linkdict[ee]
-        elif isinstance(ee, ELink) and ee in self._links:
-            link = ee
-        else:
-            raise ValueError('end-effector is not valid')
+    # def ets(self, ee=None):
+    #     if ee is None:
+    #         if len(self.ee_links) == 1:
+    #             link = self.ee_links[0]
+    #         else:
+    #             raise ValueError(
+    #                 'robot has multiple end-effectors, specify one')
+    #     # elif isinstance(ee, str) and ee in self._linkdict:
+    #     #     ee = self._linkdict[ee]
+    #     elif isinstance(ee, ELink) and ee in self._links:
+    #         link = ee
+    #     else:
+    #         raise ValueError('end-effector is not valid')
 
-        ets = ETS()
+    #     ets = ETS()
 
-        # build the ETS string from ee back to root
-        while link is not None:
-            ets = link.ets() * ets
-            link = link.parent
+    #     # build the ETS string from ee back to root
+    #     while link is not None:
+    #         ets = link.ets() * ets
+    #         link = link.parent
 
-        return ets
+    #     return ets
+
+
+    def ets(self, start=None, end=None, explored=None, path=None):
+        """
+        ERobot to ETS
+
+        :param start: start of path, defaults to ``base_link``
+        :type start: ELink or str, optional
+        :param end: end of path, defaults to end-effector
+        :type end: ELink or str, optional
+        :raises ValueError: a link does not belong to this ERobot
+        :raises TypeError: a bad link argument
+        :return: elementary transform sequence
+        :rtype: ETS instance
+
+        - ``robot.ets()`` is an ETS representing the kinematics from base to
+          end-effector.
+        - ``robot.ets(end=link)`` is an ETS representing the kinematics from
+          base to the link ``link`` specified as an ELink reference or a name.
+        - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
+          from link ``l1`` to link ``l2``.
+        """
+        v = self._getlink(start, self.base_link)
+        if end is None and len(self.ee_links) > 1:
+            raise ValueError('ambiguous, specify which end-effector is required')
+        end = self._getlink(end, self.ee_links[0])
+
+        if explored is None:
+            explored = set()
+        if path is None:
+            path = ETS()
+
+        explored.add(v)
+        if v == end:
+            return path
+
+        # visit child nodes
+        for w in v.child:
+            if w not in explored:
+                p = self.ets(w, end, explored, path * w.ets())
+                if p:
+                    return p
+
+        # visit parent node
+        if v.parent is not None:
+            w = v.parent
+            if w not in explored:
+                p = self.ets(w, end, explored, path * v.ets().inv())
+                if p:
+                    return p
+
+        return None
 
     def config(self):
         s = ''
