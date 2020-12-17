@@ -918,27 +918,48 @@ graph [rankdir=LR]
                 raise ValueError('Must specify which end-effector')
         else:
             # end effector is specified
-            if isinstance(endlink, str):
-                endlink = self.link_dict[endlink]
-            elif isinstance(endlink, ELink):
-                if endlink not in self.links:
-                    raise ValueError('endlink not in robot links')
-            else:
-                raise TypeError('unknown endlink type')
+            endlink = self._getlink(endlink)
 
         if startlink is None:
             startlink = self.base_link
         else:
-            # end effector is specified
-            if isinstance(startlink, str):
-                startlink = self.link_dict[startlink]
-            elif isinstance(startlink, ELink):
-                if startlink not in self.links:
-                    raise ValueError('startlink not in robot links')
-            else:
-                raise TypeError('unknown endlink type')
+            # start effector is specified
+            startlink = self._getlink(startlink)
 
         return endlink, startlink
+
+    def _getlink(self, link, default=None):
+        """
+        Validate reference to ELink
+
+        :param link: link
+        :type link: ELink or str
+        :raises ValueError: link does not belong to this ERobot
+        :raises TypeError: bad argument
+        :return: link reference
+        :rtype: ELink
+
+        ``robot._getlink(link)`` is a validated reference to an ELink within
+        the ERobot ``robot``.  If ``link`` is:
+        
+        -  an ``ELink`` reference it is validated as belonging to
+          ``robot``.
+        - a string, then it looked up in the robot's link name dictionary, and
+          an ELink reference returned.
+        """
+        if link is None:
+            link = default
+
+        if isinstance(link, str):
+            if link not in self.link_dict:
+                raise ValueError(f'no link named {link}')
+            return self.link_dict[link]
+        elif isinstance(link, ELink):
+            if link not in self.links:
+                raise ValueError('link not in robot links')
+            return link
+        else:
+            raise TypeError('unknown argument')
 
     def jacob0(self, q, endlink=None, startlink=None, offset=None, T=None):
         """
