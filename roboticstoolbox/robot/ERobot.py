@@ -1373,7 +1373,7 @@ class ERobot(Robot):
             Column("link", headalign="^"),
             Column("parent", headalign="^"),
             Column("joint", headalign="^"),
-            Column("ETS", headalign="^", colalign=">"),
+            Column("ETS", headalign="^", colalign="<"),
             border="thin")
         for k, link in enumerate(self):
             color = "" if link.isjoint else "<<blue>>"
