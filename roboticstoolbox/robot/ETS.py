@@ -3,18 +3,19 @@
 @author: Jesse Haviland
 @author: Peter Corke
 """
-from collections import UserList, namedtuple
+from collections import UserList
+from types import SimpleNamespace
+import copy
 from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix
-
-
+    
 class SuperETS(UserList, ABC):
 
     # T is a NumPy array (4,4) or None
-    ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
+    # ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
     def __init__(
             self, axis_func=None, axis=None, eta=None,
@@ -85,7 +86,7 @@ class SuperETS(UserList, ABC):
             raise ValueError('axis_func must be callable or ndarray')
 
         # Save all the params in a named tuple
-        e = self.ets_tuple(eta, axis_func, axis, joint, T, j, flip)
+        e = SimpleNamespace(eta=eta, axis_func=axis_func, axis=axis, joint=joint, T=T, jindex=j, flip=flip)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -232,6 +233,12 @@ class SuperETS(UserList, ABC):
             >>> print(e.jindex)
         """
         return self.data[0].jindex
+
+    @jindex.setter
+    def jindex(self, j):
+        if not isinstance(j, int) or j < 0:
+            raise TypeError(f'jindex is {j}, must be an int >= 0')
+        self.data[0].jindex = j
 
     @property
     def isrevolute(self):
@@ -773,20 +780,20 @@ class SuperETS(UserList, ABC):
         """  # noqa
 
         inv = ETS()
-        for e in reversed(self.data):
-            # get the named tuple from the list, and convert to a dict
-            etdict = e._asdict()
+        for ns in reversed(self.data):
+            # get the namespace from the list
 
-            # update the dict to make this an inverse
-            if etdict['joint']:
-                etdict['flip'] ^= True   # toggle flip status
-            elif etdict['axis'][0] == 'C':
-                etdict['T'] = trinv(etdict['T'])
-            elif etdict['eta'] is not None:
-                etdict['T'] = trinv(etdict['T'])
-                etdict['eta'] = -etdict['eta']
+            # clone it, and invert the elements to create an inverse
+            nsi = copy.copy(ns)
+            if nsi.joint:
+                nsi.flip ^= True   # toggle flip status
+            elif nsi.axis[0] == 'C':
+                nsi.T = trinv(nsi.T)
+            elif nsi.eta is not None:
+                nsi.T = trinv(nsi.T)
+                nsi.eta = -nsi.eta
             et = ETS()  # create a new ETS instance
-            et.data = [self.ets_tuple(**etdict)]  # set it's data from the dict
+            et.data = [nsi]  # set it's data from the dict
             inv *= et
         return inv
 
