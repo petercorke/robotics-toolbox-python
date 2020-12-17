@@ -613,6 +613,43 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
+    def dotfile(self, file):
+        """
+        Write a GraphViz dot file representing the robot link.
+        
+        :param file: Name of file to write to
+        :type file: str
+
+        The file can be processed using dot::
+            
+            % dot -Tpng -o out.png dotfile.dot
+
+        - The base link is shown as a grey circle
+        - Link frames are indicated by circles
+        - ETS transforms are indicated by rounded boxes
+        """
+        with open(file, 'w') as file:
+            
+            header = r"""digraph G {
+
+graph [rankdir=LR]
+"""
+            file.write(header)
+
+            # add the base link
+            file.write('\t{} [shape=circle, style=filled, fillcolor=gray]\n'.format(self.base_link.name))
+
+            # add the links
+            for link in self:
+                if link.parent is not None:
+                    file.write('\t{}_x [shape=box, style=rounded, label="{}"]\n'.format(link.name, link.ets().__str__(q=f"q{link.jindex}")))
+                    file.write('\t{} [shape=circle, label="{}"]\n'.format(link.name, link.name))
+                    file.write('\t{} -> {}_x\n'.format(link.parent.name, link.name))
+                    file.write('\t{}_x -> {}\n'.format(link.name, link.name))
+
+            file.write('}\n')
+# --------------------------------------------------------------------- #
+
     def fkine(self, q, endlink=None, startlink=None, tool=None):
         '''
         Forward kinematics
