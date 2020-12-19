@@ -1585,7 +1585,7 @@ class DHRobot(Robot):
             theta = ikfunc(self, Tk, config)
 
             if theta is None or np.any(np.isnan(theta)):
-                solution = iksol(None, False)
+                solution = iksol(None, False, "")
             else:
                 # Solve for the wrist rotation
                 # We need to account for some random translations between the
@@ -1616,7 +1616,7 @@ class DHRobot(Robot):
                 # Remove the link offset angles
                 theta = theta - self.offset
 
-                solution = iksol(theta, True)
+                solution = iksol(theta, True, "")
                 solutions.append(solution)
 
         if len(solutions) == 1:
