@@ -10,7 +10,7 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix, iseye
     
 class SuperETS(UserList, ABC):
 
@@ -477,7 +477,8 @@ class SuperETS(UserList, ABC):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    ets *= ETS._CONST(const)
+                    if not iseye(const):
+                        ets *= ETS._CONST(const)
                     const = None
                 ets *= et  # emit the joint ET
             else:
@@ -489,7 +490,8 @@ class SuperETS(UserList, ABC):
 
         if const is not None:
             # flush the constant, tool transform
-            ets *= ETS._CONST(const)
+            if not iseye(const):
+                ets *= ETS._CONST(const)
         return ets
 
     def __str__(self, q=None):
