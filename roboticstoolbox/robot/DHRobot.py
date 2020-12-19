@@ -22,7 +22,7 @@ from ansitable import ANSITable, Column
 from roboticstoolbox.robot.DHLink import _check_rne
 from frne import init, frne, delete
 
-iksol = namedtuple("IKsolution", "q, success, reason", defaults=(None,) * 3)
+iksol = namedtuple("IKsolution", "q, success, reason")
 
 
 class DHRobot(Robot):
