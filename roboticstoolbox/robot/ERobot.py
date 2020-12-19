@@ -1097,9 +1097,10 @@ class ERobot(Robot):
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param endlink: the final link which the Jacobian represents
+        :param endlink: the particular link whose velocity the Jacobian describes, defaults
+            to the end-effector if only one is present
         :type endlink: str or ELink
-        :param startlink: the first link which the Jacobian represents
+        :param startlink: the link considered as the base frame, defaults to the robots's base frame
         :type startlink: str or ELink
         :param offset: a static offset transformation matrix to apply to the
             end of endlink, defaults to None
@@ -1131,12 +1132,13 @@ class ERobot(Robot):
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
+
+        .. warning:: ``startlink`` and ``endlink`` must be on the same branch,
+            with ``startlink`` closest to the base.
         """  # noqa
 
         if offset is None:
             offset = SE3()
-
-        endlink, startlink = self._get_limit_links(endlink, startlink)
 
         path, n = self.get_path(endlink, startlink)
 
@@ -1145,7 +1147,6 @@ class ERobot(Robot):
         if T is None:
             T = self.base.inv() * \
                 self.fkine(q, endlink=endlink, startlink=startlink) * offset
-
         T = T.A
         U = np.eye(4)
         j = 0
@@ -1203,9 +1204,10 @@ class ERobot(Robot):
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param endlink: the final link which the Jacobian represents
+        :param endlink: the particular link whose velocity the Jacobian describes, defaults
+            to the end-effector if only one is present
         :type endlink: str or ELink
-        :param startlink: the first link which the Jacobian represents
+        :param startlink: the link considered as the base frame, defaults to the robots's base frame
         :type startlink: str or ELink
         :param offset: a static offset transformation matrix to apply to the
             end of endlink, defaults to None
@@ -1237,6 +1239,9 @@ class ERobot(Robot):
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
+
+        .. warning:: ``startlink`` and ``endlink`` must be on the same branch,
+            with ``startlink`` closest to the base.
         """  # noqa
 
         q = getvector(q, self.n)
