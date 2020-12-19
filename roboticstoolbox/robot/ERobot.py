@@ -638,14 +638,18 @@ class ERobot(Robot):
 
         if explored is None:
             explored = set()
-        if path is None:
-            path = ETS()
+        toplevel = path is None
 
         explored.add(v)
         if v == end:
             return path
 
+        # unlike regular DFS, the neighbours of the node are its children
+        # and its parent.
+
         # visit child nodes
+        if toplevel:
+            path = v.ets()
         for w in v.child:
             if w not in explored:
                 p = self.ets(w, end, explored, path * w.ets())
@@ -653,6 +657,8 @@ class ERobot(Robot):
                     return p
 
         # visit parent node
+        if toplevel:
+            path = ETS()
         if v.parent is not None:
             w = v.parent
             if w not in explored:
