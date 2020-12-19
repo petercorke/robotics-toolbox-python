@@ -197,7 +197,7 @@ class IKMixin:
         nm = 0
 
         # bool vector indicating revolute joints
-        revolutes = np.array([link.isrevolute() for link in self])
+        revolutes = np.array([link.isrevolute for link in self])
 
         q = q0
         for Tk in T:

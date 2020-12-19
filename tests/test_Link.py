@@ -125,10 +125,10 @@ class TestDHLink(unittest.TestCase):
         l0 = rp.DHLink(sigma=0)
         l1 = rp.DHLink(sigma=1)
 
-        self.assertEqual(l0.isrevolute(), True)
-        self.assertEqual(l0.isprismatic(), False)
-        self.assertEqual(l1.isrevolute(), False)
-        self.assertEqual(l1.isprismatic(), True)
+        self.assertEqual(l0.isrevolute, True)
+        self.assertEqual(l0.isprismatic, False)
+        self.assertEqual(l1.isrevolute, False)
+        self.assertEqual(l1.isprismatic, True)
 
     def test_add(self):
         l0 = rp.DHLink()
