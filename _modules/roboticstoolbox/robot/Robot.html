@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
 
   
   
@@ -175,6 +176,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.Swift</span> <span class="kn">import</span> <span class="n">Swift</span>
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Dynamics</span> <span class="kn">import</span> <span class="n">DynamicsMixin</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.IK</span> <span class="kn">import</span> <span class="n">IKMixin</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
@@ -193,7 +195,7 @@
 <span class="c1"># ikine functions need: fkine, jacobe, qlim methods from subclass</span>
 
 
-<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">DynamicsMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">DynamicsMixin</span><span class="p">,</span> <span class="n">IKMixin</span><span class="p">):</span>
 
     <span class="n">_color</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -217,6 +219,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">base</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">tool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reach</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;keywords must be a list or tuple&#39;</span><span class="p">)</span>
@@ -417,8 +420,6 @@
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
 
-
-
 <div class="viewcode-block" id="Robot.linkcolormap"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.linkcolormap">[docs]</a>    <span class="k">def</span> <span class="nf">linkcolormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linkcolors</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a colormap for robot joints</span>
@@ -458,7 +459,7 @@
 <span class="sd">                &lt;https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py&gt;`_</span>
 <span class="sd">                - `Colormaps</span>
 <span class="sd">                &lt;https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py&gt;`_</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
             <span class="c1"># provided a list of color names</span>
@@ -466,6 +467,158 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># assume it is a colormap name</span>
             <span class="k">return</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Robot.manipulability"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.manipulability">[docs]</a>    <span class="k">def</span> <span class="nf">manipulability</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;yoshikawa&#39;</span><span class="p">,</span>
+            <span class="n">axes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Manipulability measure</span>
+
+<span class="sd">        :param q: Joint coordinates, one of J or q required</span>
+<span class="sd">        :type q: ndarray(n), or ndarray(m,n)</span>
+<span class="sd">        :param J: Jacobian in world frame if already computed, one of J or</span>
+<span class="sd">            q required</span>
+<span class="sd">        :type J: ndarray(6,n)</span>
+<span class="sd">        :param method: method to use, &quot;yoshikawa&quot; (default), &quot;condition&quot;,</span>
+<span class="sd">            &quot;minsingular&quot;  or &quot;asada&quot;</span>
+<span class="sd">        :type method: str</span>
+<span class="sd">        :param axes: Task space axes to consider: &quot;all&quot; [default],</span>
+<span class="sd">            &quot;trans&quot; or &quot;rot&quot;</span>
+<span class="sd">        :type axes: str</span>
+<span class="sd">        :param kwargs: extra arguments to pass to ``jacob0``</span>
+<span class="sd">        :return: manipulability</span>
+<span class="sd">        :rtype: float or ndarray(m)</span>
+
+<span class="sd">        - ``manipulability(q)`` is the scalar manipulability index</span>
+<span class="sd">          for the robot at the joint configuration ``q``.  It indicates</span>
+<span class="sd">          dexterity, that is, how well conditioned the robot is for motion</span>
+<span class="sd">          with respect to the 6 degrees of Cartesian motion.  The values is</span>
+<span class="sd">          zero if the robot is at a singularity.</span>
+
+<span class="sd">        Various measures are supported:</span>
+
+<span class="sd">        +-------------------+-------------------------------------------------+</span>
+<span class="sd">        | Measure           |       Description                               |</span>
+<span class="sd">        +-------------------+-------------------------------------------------+</span>
+<span class="sd">        | ``&quot;yoshikawa&quot;``   | Volume of the velocity ellipsoid, *distance*    |</span>
+<span class="sd">        |                   | from singularity [Yoshikawa85]_                 |</span>
+<span class="sd">        +-------------------+-------------------------------------------------+</span>
+<span class="sd">        | ``&quot;invcondition&quot;``| Inverse condition number of Jacobian, isotropy  |</span>
+<span class="sd">        |                   | of the velocity ellipsoid [Klein87]_            |</span>
+<span class="sd">        +-------------------+-------------------------------------------------+</span>
+<span class="sd">        | ``&quot;minsingular&quot;`` | Minimum singular value of the Jacobian,         |</span>
+<span class="sd">        |                   | *distance*  from singularity [Klein87]_         |</span>
+<span class="sd">        +-------------------+-------------------------------------------------+</span>
+<span class="sd">        | ``&quot;asada&quot;``       | Isotropy of the task-space acceleration         |</span>
+<span class="sd">        |                   | ellipsoid which is a function of the Cartesian  |</span>
+<span class="sd">        |                   | inertia matrix which depends on the inertial    |</span>
+<span class="sd">        |                   | parameters [Asada83]_                           |</span>
+<span class="sd">        +-------------------+-------------------------------------------------+</span>
+
+<span class="sd">        **Trajectory operation**:</span>
+
+<span class="sd">        If ``q`` is a matrix (m,n) then the result (m,) is a vector of</span>
+<span class="sd">        manipulability indices for each joint configuration specified by a row</span>
+<span class="sd">        of ``q``.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Invokes the ``jacob0`` method of the robot if ``J`` is not passed</span>
+<span class="sd">            - The &quot;all&quot; option includes rotational and translational</span>
+<span class="sd">              dexterity, but this involves adding different units. It can be</span>
+<span class="sd">              more useful to look at the translational and rotational</span>
+<span class="sd">              manipulability separately.</span>
+<span class="sd">            - Examples in the RVC book (1st edition) can be replicated by</span>
+<span class="sd">              using the &quot;all&quot; option</span>
+<span class="sd">            - Asada&#39;s measure requires inertial a robot model with inertial</span>
+<span class="sd">              parameters.</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,</span>
+<span class="sd">                The International Journal of Robotics Research.</span>
+<span class="sd">                1985;4(2):3-9. doi:10.1177/027836498500400201</span>
+<span class="sd">        .. [Asada83] A geometrical representation of manipulator dynamics and</span>
+<span class="sd">                its application to arm design, H. Asada,</span>
+<span class="sd">                Journal of Dynamic Systems, Measurement, and Control,</span>
+<span class="sd">                vol. 105, p. 131, 1983.</span>
+<span class="sd">        .. [Klein87] Dexterity Measures for the Design and Control of</span>
+<span class="sd">                Kinematically Redundant Manipulators. Klein CA, Blaho BE.</span>
+<span class="sd">                The International Journal of Robotics Research.</span>
+<span class="sd">                1987;6(2):72-83. doi:10.1177/027836498700600206</span>
+
+<span class="sd">        - Robotics, Vision &amp; Control, Chap 8, P. Corke, Springer 2011.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">axes</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;trans&#39;</span><span class="p">):</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;rot&#39;</span><span class="p">):</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;axes must be all, trans or rot&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">yoshikawa</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">J</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">J</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># simplified case for square matrix</span>
+                <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">J</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">m2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">J</span> <span class="o">@</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">m2</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">invcondition</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>  <span class="c1"># return 1/cond(J)</span>
+
+        <span class="k">def</span> <span class="nf">minsingular</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># return last/smallest singular value of J</span>
+
+        <span class="k">def</span> <span class="nf">asada</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">dof</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="n">Ji</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+            <span class="n">Mx</span> <span class="o">=</span> <span class="n">Ji</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">robot</span><span class="o">.</span><span class="n">inertia</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">@</span> <span class="n">Ji</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">axes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Mx</span> <span class="o">=</span> <span class="n">Mx</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
+            <span class="n">Mx</span> <span class="o">=</span> <span class="n">Mx</span><span class="p">[:,</span> <span class="n">d</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+            <span class="n">e</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">Mx</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="c1"># choose the handler function</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;yoshikawa&#39;</span><span class="p">:</span>
+            <span class="n">mfunc</span> <span class="o">=</span> <span class="n">yoshikawa</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;invcondition&#39;</span><span class="p">:</span>
+            <span class="n">mfunc</span> <span class="o">=</span> <span class="n">condition</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;minsingular&#39;</span><span class="p">:</span>
+            <span class="n">mfunc</span> <span class="o">=</span> <span class="n">minsingular</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;asada&#39;</span><span class="p">:</span>
+            <span class="n">mfunc</span> <span class="o">=</span> <span class="n">asada</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid method chosen&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate manipulability based on supplied Jacobian</span>
+        <span class="k">if</span> <span class="n">J</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="n">mfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">axes</span><span class="p">)]</span>
+
+        <span class="c1"># Otherwise use the q vector/matrix</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">getmatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">qk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+                <span class="n">Jk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">qk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">w</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">mfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Jk</span><span class="p">,</span> <span class="n">qk</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">w</span></div>
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -593,7 +746,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;tool must be set to None (no tool) or an SE3&#39;</span><span class="p">)</span>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -614,7 +766,7 @@
         <span class="n">limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;undefined prismatic joint limit&#39;</span><span class="p">)</span>
@@ -715,547 +867,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s1">&#39;Control type must be one of </span><span class="se">\&#39;</span><span class="s1">p</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="s1">v</span><span class="se">\&#39;</span><span class="s1">, or </span><span class="se">\&#39;</span><span class="s1">a</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
 
-<span class="c1"># ===================================================================== #</span>
-
-<div class="viewcode-block" id="Robot.ikine"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.ikine">[docs]</a>    <span class="k">def</span> <span class="nf">ikine</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span>
-            <span class="n">ilimit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-            <span class="n">rlimit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-            <span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
-            <span class="n">Y</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-            <span class="n">Ymin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">search</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">slimit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-            <span class="n">transpose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Numerical inverse kinematics by optimization (Robot superclass)</span>
-
-<span class="sd">        :param T: The desired end-effector pose</span>
-<span class="sd">        :type T: SE3 with 1 or ``m`` values</span>
-<span class="sd">        :param ilimit: maximum number of iterations</span>
-<span class="sd">        :type ilimit: int (default 500)</span>
-<span class="sd">        :param rlimit: maximum number of consecutive step rejections</span>
-<span class="sd">        :type rlimit: int (default 100)</span>
-<span class="sd">        :param tol: final error tolerance</span>
-<span class="sd">        :type tol: float (default 1e-10)</span>
-<span class="sd">        :param Y: initial value of lambda</span>
-<span class="sd">        :type Y: float (default 0.1)</span>
-<span class="sd">        :param Ymin: minimum allowable value of lambda</span>
-<span class="sd">        :type Ymin: float (default 0)</span>
-<span class="sd">        :param mask: mask vector that correspond to translation in X, Y and Z</span>
-<span class="sd">            and rotation about X, Y and Z respectively.</span>
-<span class="sd">        :type mask: float ndarray(6)</span>
-<span class="sd">        :param q0: initial joint configuration (default all zeros)</span>
-<span class="sd">        :type q0: float ndarray(n) (default all zeros)</span>
-<span class="sd">        :param search: search over all configurations</span>
-<span class="sd">        :type search: bool</span>
-<span class="sd">        :param slimit: maximum number of search attempts</span>
-<span class="sd">        :type slimit: int (default 100)</span>
-<span class="sd">        :param transpose: use Jacobian transpose with step size A, rather</span>
-<span class="sd">            than Levenberg-Marquadt</span>
-<span class="sd">        :type transpose: float</span>
-
-<span class="sd">        :return: The calculated joint values</span>
-<span class="sd">        :rtype: float ndarray(n)</span>
-<span class="sd">        :return: IK solver failed</span>
-<span class="sd">        :rtype: bool or list of bool</span>
-<span class="sd">        :return: If failed, what went wrong</span>
-<span class="sd">        :rtype: List of str</span>
-
-<span class="sd">        ``q, failure, reason = ikine(T)`` are the joint coordinates (n)</span>
-<span class="sd">        corresponding to the robot end-effector pose ``T`` which is an ``SE3``</span>
-<span class="sd">        instance. ``failure`` is True if the solver failed, and ``reason``</span>
-<span class="sd">        contains details of the failure.</span>
-
-<span class="sd">        This method can be used for robots with any number of degrees of</span>
-<span class="sd">        freedom.</span>
-
-<span class="sd">        **Trajectory operation:**</span>
-
-<span class="sd">        If ``T`` contains ``m`` &gt; 1 values, ie. a trajectory, then returns the</span>
-<span class="sd">        joint coordinates corresponding to each of the pose values in ``T``.</span>
-<span class="sd">        ``q`` (m,n) where ``n`` is the number of robot joints. The initial</span>
-<span class="sd">        estimate of ``q`` for each time step is taken as the solution from the</span>
-<span class="sd">        previous time step. Returns trajectory of joints ``q`` (m,n), list of</span>
-<span class="sd">        failure (m) and list of error reasons (m).</span>
-
-<span class="sd">        **Underactuated robots:**</span>
-
-<span class="sd">        For the case where the manipulator has fewer than 6 DOF the</span>
-<span class="sd">        solution space has more dimensions than can be spanned by the</span>
-<span class="sd">        manipulator joint coordinates.</span>
-
-<span class="sd">        In this case we specify the ``mask`` option where the ``mask`` vector</span>
-<span class="sd">        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that</span>
-<span class="sd">        will be ignored in reaching a solution.  The mask vector has six</span>
-<span class="sd">        elements that correspond to translation in X, Y and Z, and rotation</span>
-<span class="sd">        about X, Y and Z respectively. The value should be 0 (for ignore)</span>
-<span class="sd">        or 1. The number of non-zero elements should equal the number of</span>
-<span class="sd">        manipulator DOF.</span>
-
-<span class="sd">        For example when using a 3 DOF manipulator rotation orientation might</span>
-<span class="sd">        be unimportant in which case use the option: mask = [1 1 1 0 0 0].</span>
-
-<span class="sd">        For robots with 4 or 5 DOF this method is very difficult to use since</span>
-<span class="sd">        orientation is specified by T in world coordinates and the achievable</span>
-<span class="sd">        orientations are a function of the tool position.</span>
-
-<span class="sd">        .. note::</span>
-
-<span class="sd">            - Solution is computed iteratively.</span>
-<span class="sd">            - Implements a Levenberg-Marquadt variable step size solver.</span>
-<span class="sd">            - The tolerance is computed on the norm of the error between</span>
-<span class="sd">              current and desired tool pose.  This norm is computed from</span>
-<span class="sd">              distances and angles without any kind of weighting.</span>
-<span class="sd">            - The inverse kinematic solution is generally not unique, and</span>
-<span class="sd">              depends on the initial guess q0 (defaults to 0).</span>
-<span class="sd">            - The default value of q0 is zero which is a poor choice for most</span>
-<span class="sd">              manipulators (eg. puma560, twolink) since it corresponds to a</span>
-<span class="sd">              kinematic singularity.</span>
-<span class="sd">            - Such a solution is completely general, though much less</span>
-<span class="sd">              efficient than specific inverse kinematic solutions derived</span>
-<span class="sd">              symbolically, like ikine6s or ikine3.</span>
-<span class="sd">            - This approach allows a solution to be obtained at a singularity,</span>
-<span class="sd">              but the joint angles within the null space are arbitrarily</span>
-<span class="sd">              assigned.</span>
-<span class="sd">            - Joint offsets, if defined, are added to the inverse kinematics</span>
-<span class="sd">              to generate q.</span>
-<span class="sd">            - Joint limits are not considered in this solution.</span>
-<span class="sd">            - The &#39;search&#39; option peforms a brute-force search with initial</span>
-<span class="sd">              conditions chosen from the entire configuration space.</span>
-<span class="sd">            - If the search option is used any prismatic joint must have</span>
-<span class="sd">              joint limits defined.</span>
-
-<span class="sd">        :references:</span>
-<span class="sd">            - Robotics, Vision &amp; Control, P. Corke, Springer 2011,</span>
-<span class="sd">              Section 8.4.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-
-        <span class="n">trajn</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-        <span class="n">err</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">q0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;row&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="p">(</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="p">(</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">search</span><span class="p">:</span>
-            <span class="c1"># Randomised search for a starting point</span>
-            <span class="n">search</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="c1"># quiet = True</span>
-
-            <span class="n">qlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span>
-            <span class="n">qspan</span> <span class="o">=</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># range of joint motion</span>
-
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">slimit</span><span class="p">):</span>
-                <span class="n">q0n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">qspan</span> <span class="o">+</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-
-                <span class="c1"># fprintf(&#39;Trying q = %s\n&#39;, num2str(q))</span>
-
-                <span class="n">q</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ikine</span><span class="p">(</span>
-                    <span class="n">T</span><span class="p">,</span>
-                    <span class="n">ilimit</span><span class="p">,</span>
-                    <span class="n">rlimit</span><span class="p">,</span>
-                    <span class="n">tol</span><span class="p">,</span>
-                    <span class="n">Y</span><span class="p">,</span>
-                    <span class="n">Ymin</span><span class="p">,</span>
-                    <span class="n">mask</span><span class="p">,</span>
-                    <span class="n">q0n</span><span class="p">,</span>
-                    <span class="n">search</span><span class="p">,</span>
-                    <span class="n">slimit</span><span class="p">,</span>
-                    <span class="n">transpose</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">err</span>
-
-            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>   <span class="c1"># pragma nocover</span>
-            <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">err</span>   <span class="c1"># pragma nocover</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of robot DOF must be &gt;= the same number &#39;</span>
-                             <span class="s1">&#39;of 1s in the mask matrix&#39;</span><span class="p">)</span>
-        <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
-
-        <span class="c1"># Preallocate space for results</span>
-        <span class="n">qt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="c1"># Total iteration count</span>
-        <span class="n">tcount</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="c1"># Rejected step count</span>
-        <span class="n">rejcount</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="n">failed</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">nm</span> <span class="o">=</span> <span class="mi">0</span>
-
-        <span class="n">revolutes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">revolutes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)):</span>
-            <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">q0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
-            <span class="n">Yl</span> <span class="o">=</span> <span class="n">Y</span>
-
-            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="c1"># Update the count and test against iteration limit</span>
-                <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
-
-                <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">ilimit</span><span class="p">:</span>
-                    <span class="n">err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ikine: iteration limit </span><span class="si">{0}</span><span class="s1"> exceeded &#39;</span>
-                               <span class="s1">&#39; (pose </span><span class="si">{1}</span><span class="s1">), final err </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                                   <span class="n">ilimit</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nm</span><span class="p">))</span>
-                    <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="k">break</span>
-
-                <span class="n">e</span> <span class="o">=</span> <span class="n">tr2delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
-
-                <span class="c1"># Are we there yet</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
-                    <span class="c1"># print(iterations)</span>
-                    <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="k">break</span>
-
-                <span class="c1"># Compute the Jacobian</span>
-                <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-
-                <span class="n">JtJ</span> <span class="o">=</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">J</span>
-
-                <span class="k">if</span> <span class="n">transpose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># Do the simple Jacobian transpose with constant gain</span>
-                    <span class="n">dq</span> <span class="o">=</span> <span class="n">transpose</span> <span class="o">*</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">e</span>    <span class="c1"># lgtm [py/multiple-definition]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># Do the damped inverse Gauss-Newton with</span>
-                    <span class="c1"># Levenberg-Marquadt</span>
-                    <span class="n">dq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span>
-                        <span class="n">JtJ</span> <span class="o">+</span> <span class="p">((</span><span class="n">Yl</span> <span class="o">+</span> <span class="n">Ymin</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-                    <span class="p">)</span> <span class="o">@</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">e</span>
-
-                    <span class="c1"># Compute possible new value of</span>
-                    <span class="n">qnew</span> <span class="o">=</span> <span class="n">q</span> <span class="o">+</span> <span class="n">dq</span>
-
-                    <span class="c1"># And figure out the new error</span>
-                    <span class="n">enew</span> <span class="o">=</span> <span class="n">tr2delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">qnew</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
-
-                    <span class="c1"># Was it a good update?</span>
-                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">enew</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">):</span>
-                        <span class="c1"># Step is accepted</span>
-                        <span class="n">q</span> <span class="o">=</span> <span class="n">qnew</span>
-                        <span class="n">e</span> <span class="o">=</span> <span class="n">enew</span>
-                        <span class="n">Yl</span> <span class="o">=</span> <span class="n">Yl</span> <span class="o">/</span> <span class="mi">2</span>
-                        <span class="n">rejcount</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="c1"># Step is rejected, increase the damping and retry</span>
-                        <span class="n">Yl</span> <span class="o">=</span> <span class="n">Yl</span> <span class="o">*</span> <span class="mi">2</span>
-                        <span class="n">rejcount</span> <span class="o">+=</span> <span class="mi">1</span>
-                        <span class="k">if</span> <span class="n">rejcount</span> <span class="o">&gt;</span> <span class="n">rlimit</span><span class="p">:</span>
-                            <span class="n">err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                <span class="s1">&#39;ikine: rejected-step limit </span><span class="si">{0}</span><span class="s1"> exceeded &#39;</span>
-                                <span class="s1">&#39;(pose </span><span class="si">{1}</span><span class="s1">), final err </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                                    <span class="n">rlimit</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">enew</span><span class="p">)))</span>
-                            <span class="n">failed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-                            <span class="k">break</span>
-
-                <span class="c1"># Wrap angles for revolute joints</span>
-                <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">revolutes</span>
-                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-
-                <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">q</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">revolutes</span>
-                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-
-                <span class="n">nm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span>
-
-            <span class="n">qt</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">q</span>
-            <span class="n">tcount</span> <span class="o">+=</span> <span class="n">iterations</span>
-
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">failed</span><span class="p">):</span>
-            <span class="n">err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s1">&#39;failed to converge: try a different &#39;</span>
-                <span class="s1">&#39;initial value of joint coordinates&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">qt</span> <span class="o">=</span> <span class="n">qt</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">failed</span> <span class="o">=</span> <span class="n">failed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">qt</span><span class="p">,</span> <span class="n">failed</span><span class="p">,</span> <span class="n">err</span></div>
-
-<span class="c1"># --------------------------------------------------------------------- #</span>
-
-<div class="viewcode-block" id="Robot.ikunc"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.ikunc">[docs]</a>    <span class="k">def</span> <span class="nf">ikunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ilimit</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inverse manipulator by optimization without joint limits (Robot</span>
-<span class="sd">        superclass)</span>
-
-<span class="sd">        q, success, err = ikunc(T) are the joint coordinates (n) corresponding</span>
-<span class="sd">        to the robot end-effector pose T which is an SE3 object or</span>
-<span class="sd">        homogenenous transform matrix (4x4), and n is the number of robot</span>
-<span class="sd">        joints. Also returns success and err which is the scalar final value</span>
-<span class="sd">        of the objective function.</span>
-
-<span class="sd">        q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the</span>
-<span class="sd">        initial joint coordinates q0 used for the minimisation.</span>
-
-<span class="sd">        Trajectory operation:</span>
-<span class="sd">        In all cases if T is a vector of SE3 objects (m) or a homogeneous</span>
-<span class="sd">        transform sequence (4x4xm) then returns the joint coordinates</span>
-<span class="sd">        corresponding to each of the transforms in the sequence. q is mxn</span>
-<span class="sd">        where n is the number of robot joints. The initial estimate of q</span>
-<span class="sd">        for each time step is taken as the solution from the previous time</span>
-<span class="sd">        step.</span>
-
-<span class="sd">        :param T: The desired end-effector pose</span>
-<span class="sd">        :type T: SE3 or SE3 trajectory</span>
-<span class="sd">        :param ilimit: Iteration limit (default 1000)</span>
-<span class="sd">        :type ilimit: bool</span>
-
-<span class="sd">        :retrun q: The calculated joint values</span>
-<span class="sd">        :rtype q: float ndarray(n)</span>
-<span class="sd">        :retrun success: IK solved (True) or failed (False)</span>
-<span class="sd">        :rtype success: bool</span>
-<span class="sd">        :retrun error: Final pose error</span>
-<span class="sd">        :rtype error: float</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            - Joint limits are not considered in this solution.</span>
-<span class="sd">            - Can be used for robots with arbitrary degrees of freedom.</span>
-<span class="sd">            - In the case of multiple feasible solutions, the solution</span>
-<span class="sd">              returned depends on the initial choice of q0</span>
-<span class="sd">            - Works by minimizing the error between the forward kinematics of</span>
-<span class="sd">              the joint angle solution and the end-effector frame as an</span>
-<span class="sd">              optimisation.</span>
-<span class="sd">            - The objective function (error) is described as:</span>
-<span class="sd">              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )</span>
-<span class="sd">              Where omega is some gain matrix, currently not modifiable.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-
-        <span class="n">trajn</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="p">(</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="n">qt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">success</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">err</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach</span><span class="p">])</span>
-
-        <span class="k">def</span> <span class="nf">sumsqr</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
-
-            <span class="n">Ti</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">sumsqr</span><span class="p">(((</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Ti</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="o">@</span>
-                    <span class="n">omega</span><span class="p">),</span>
-                <span class="n">q0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
-                <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;gtol&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="n">ilimit</span><span class="p">})</span>
-
-            <span class="n">qt</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
-            <span class="n">success</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">)</span>
-            <span class="n">err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">qt</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">success</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">err</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">qt</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">err</span></div>
-
-<span class="c1"># --------------------------------------------------------------------- #</span>
-
-<div class="viewcode-block" id="Robot.ikcon"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.ikcon">[docs]</a>    <span class="k">def</span> <span class="nf">ikcon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inverse kinematics by optimization with joint limits (Robot superclass)</span>
-
-<span class="sd">        q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)</span>
-<span class="sd">        corresponding to the robot end-effector pose T which is an SE3 object</span>
-<span class="sd">        or homogenenous transform matrix (4x4), and N is the number of robot</span>
-<span class="sd">        joints. Initial joint coordinates Q0 used for the minimisation.</span>
-
-<span class="sd">        q, success, err = ikcon(T) as above but q0 is set to 0.</span>
-
-<span class="sd">        Trajectory operation:</span>
-<span class="sd">        In all cases if T is a vector of SE3 objects or a homogeneous</span>
-<span class="sd">        transform sequence (4x4xm) then returns the joint coordinates</span>
-<span class="sd">        corresponding to each of the transforms in the sequence. q is mxn</span>
-<span class="sd">        where n is the number of robot joints. The initial estimate of q</span>
-<span class="sd">        for each time step is taken as the solution from the previous time</span>
-<span class="sd">        step. Retruns trajectory of joints q (mxn), list of success (m) and</span>
-<span class="sd">        list of errors (m)</span>
-
-<span class="sd">        :param T: The desired end-effector pose</span>
-<span class="sd">        :type T: SE3 or SE3 trajectory</span>
-<span class="sd">        :param q0: initial joint configuration (default all zeros)</span>
-<span class="sd">        :type q0: float ndarray(n) (default all zeros)</span>
-
-<span class="sd">        :retrun q: The calculated joint values</span>
-<span class="sd">        :rtype q: float ndarray(n)</span>
-<span class="sd">        :retrun success: IK solved (True) or failed (False)</span>
-<span class="sd">        :rtype success: bool</span>
-<span class="sd">        :retrun error: Final pose error</span>
-<span class="sd">        :rtype error: float</span>
-
-<span class="sd">        .. note::</span>
-<span class="sd">            - Joint limits are considered in this solution.</span>
-<span class="sd">            - Can be used for robots with arbitrary degrees of freedom.</span>
-<span class="sd">            - In the case of multiple feasible solutions, the solution</span>
-<span class="sd">              returned depends on the initial choice of q0.</span>
-<span class="sd">            - Works by minimizing the error between the forward kinematics</span>
-<span class="sd">              of the joint angle solution and the end-effector frame as an</span>
-<span class="sd">              optimisation.</span>
-<span class="sd">            - The objective function (error) is described as:</span>
-<span class="sd">              sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )</span>
-<span class="sd">              Where omega is some gain matrix, currently not modifiable.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-
-        <span class="n">trajn</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">q0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;row&#39;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">verifymatrix</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="p">(</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="c1"># create output variables</span>
-        <span class="n">qstar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">trajn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">exitflag</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach</span><span class="p">])</span>
-
-        <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="o">@</span>
-                    <span class="n">omega</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="p">)</span>
-
-        <span class="n">bnds</span> <span class="o">=</span> <span class="n">Bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
-            <span class="n">Ti</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">cost</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">Ti</span><span class="p">,</span> <span class="n">omega</span><span class="p">),</span>
-                <span class="n">q0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bnds</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;gtol&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">})</span>
-            <span class="n">qstar</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
-            <span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
-            <span class="n">exitflag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">trajn</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">exitflag</span><span class="p">,</span> <span class="n">error</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">qstar</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">exitflag</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-
-<span class="c1"># --------------------------------------------------------------------- #</span>
-
-<div class="viewcode-block" id="Robot.qmincon"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.qmincon">[docs]</a>    <span class="k">def</span> <span class="nf">qmincon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Move away from joint limits</span>
-
-<span class="sd">        :param q: Joint coordinates</span>
-<span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :retrun qs: The calculated joint values</span>
-<span class="sd">        :rtype qs: ndarray(n)</span>
-<span class="sd">        :return: Optimisation solved (True) or failed (False)</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        :return: Final value of the objective function</span>
-<span class="sd">        :rtype: float</span>
-
-<span class="sd">        ``qs, success, err = qmincon(q)`` exploits null space motion and</span>
-<span class="sd">        returns a set of joint angles ``qs`` (n) that result in the same</span>
-<span class="sd">        end-effector pose but are away from the joint coordinate limits.</span>
-<span class="sd">        ``n`` is the number of robot joints. ``success`` is True for</span>
-<span class="sd">        successful optimisation. ``err`` is the scalar final value of</span>
-<span class="sd">        the objective function.</span>
-
-<span class="sd">        **Trajectory operation**</span>
-
-<span class="sd">        In all cases if ``q`` is (m,n) it is taken as a pose sequence and</span>
-<span class="sd">        ``qmincon()`` returns the adjusted joint coordinates (m,n)</span>
-<span class="sd">        corresponding to each of the configurations in the sequence.</span>
-
-<span class="sd">        ``err`` and ``success`` are also (m) and indicate the results of</span>
-<span class="sd">        optimisation for the corresponding trajectory step.</span>
-
-<span class="sd">        .. note:: Robot must be redundant.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">def</span> <span class="nf">sumsqr</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-        <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">qm</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">sumsqr</span><span class="p">(</span>
-                <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">@</span> <span class="n">x</span> <span class="o">+</span> <span class="n">qm</span><span class="p">)</span> <span class="o">-</span> <span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ub</span> <span class="o">-</span> <span class="n">lb</span><span class="p">))</span>
-
-        <span class="n">q</span> <span class="o">=</span> <span class="n">getmatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="n">qstar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">success</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-        <span class="n">lb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">qk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
-
-            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">qk</span><span class="p">)</span>
-
-            <span class="n">N</span> <span class="o">=</span> <span class="n">null</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-
-            <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="n">N</span><span class="p">]</span>
-            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ub</span> <span class="o">-</span> <span class="n">qk</span><span class="p">,</span> <span class="n">qk</span> <span class="o">-</span> <span class="n">lb</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
-
-            <span class="n">con</span> <span class="o">=</span> <span class="n">LinearConstraint</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-
-            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span><span class="p">,</span> <span class="n">qk</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span>
-                <span class="n">x0</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="n">con</span><span class="p">)</span>
-
-            <span class="n">qstar</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">qk</span> <span class="o">+</span> <span class="n">N</span> <span class="o">@</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
-            <span class="n">error</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span>
-            <span class="n">success</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span>
-
-        <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">qstar</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">success</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">error</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">qstar</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">error</span></div>
-
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="Robot.plot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;Swift&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.050</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.050</span><span class="p">,</span>
             <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span>
             <span class="p">):</span>
@@ -1265,7 +880,8 @@
 <span class="sd">        :param q: The joint configuration of the robot.</span>
 <span class="sd">        :type q: float ndarray(n)</span>
 <span class="sd">        :param backend: The graphical backend to use, currently &#39;swift&#39;</span>
-<span class="sd">            and &#39;pyplot&#39; are implemented. Defaults to &#39;swift&#39;</span>
+<span class="sd">            and &#39;pyplot&#39; are implemented. Defaults to &#39;swift&#39; of an ``ERobot``</span>
+<span class="sd">            and &#39;pyplot` for a ``DHRobot``</span>
 <span class="sd">        :type backend: string</span>
 <span class="sd">        :param block: Block operation of the code and keep the figure open</span>
 <span class="sd">        :type block: bool</span>
@@ -1326,6 +942,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">env</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
+                <span class="n">backend</span> <span class="o">=</span> <span class="s1">&#39;pyplot&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">backend</span> <span class="o">=</span> <span class="s1">&#39;swift&#39;</span>
 
         <span class="k">if</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
@@ -1473,7 +1095,7 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;ERobot fellipse not implemented yet&quot;</span><span class="p">)</span>
 
-        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ell</span></div>
 
 <div class="viewcode-block" id="Robot.vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">vellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
@@ -1511,7 +1133,7 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;ERobot vellipse not implemented yet&quot;</span><span class="p">)</span>
 
-        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ell</span></div>
 
 <div class="viewcode-block" id="Robot.plot_ellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.plot_ellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ellipse</span><span class="p">(</span>
@@ -1963,7 +1585,59 @@
         <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
             <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">env</span></div></div>
+        <span class="k">return</span> <span class="n">env</span></div>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="Robot.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
+<span class="sd">        distance between this robot and shape, provided it is less than</span>
+<span class="sd">        inf_dist. It will also return the points on self and shape in the</span>
+<span class="sd">        world frame which connect the line of length distance between the</span>
+<span class="sd">        shapes. If the distance is negative then the shapes are collided.</span>
+<span class="sd">        :param shape: The shape to compare distance to</span>
+<span class="sd">        :type shape: Shape</span>
+<span class="sd">        :param inf_dist: The minimum distance within which to consider</span>
+<span class="sd">            the shape</span>
+<span class="sd">        :type inf_dist: float</span>
+<span class="sd">        :returns: d, p1, p2 where d is the distance between the shapes,</span>
+<span class="sd">            p1 and p2 are the points in the world frame on the respective</span>
+<span class="sd">            shapes</span>
+<span class="sd">        :rtype: float, SE3, SE3</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="mi">10000</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+            <span class="n">td</span><span class="p">,</span> <span class="n">tp1</span><span class="p">,</span> <span class="n">tp2</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">td</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">td</span> <span class="o">&lt;</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">td</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">tp1</span>
+                <span class="n">p2</span> <span class="o">=</span> <span class="n">tp2</span>
+
+        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">10000</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
+
+<div class="viewcode-block" id="Robot.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.DHRobot.Robot.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        collided(shape) checks if this robot and shape have collided</span>
+<span class="sd">        :param shape: The shape to compare distance to</span>
+<span class="sd">        :type shape: Shape</span>
+<span class="sd">        :returns: True if shapes have collided</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">collided</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div></div>
 </pre></div>
 
            </div>
@@ -1979,7 +1653,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

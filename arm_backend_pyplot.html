@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
 
   
   
@@ -277,13 +278,17 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ob</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
-<li><p><strong>readonly</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to False</p></li>
-<li><p><strong>display</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to True</p></li>
-<li><p><strong>jointaxes</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to True</p></li>
-<li><p><strong>eeframe</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to True</p></li>
-<li><p><strong>shadow</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to True</p></li>
-<li><p><strong>name</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to True</p></li>
+<li><p><strong>ob</strong> (<a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><em>DHRobot</em></a><em> or </em><em>EllipsePlot</em>) – The object to add to the plot (robot or ellipse)</p></li>
+<li><p><strong>readonly</strong> (<em>bool</em><em>, </em><em>optional</em>) – Do not update the state of the object
+(i.e. display not simulate), defaults to False</p></li>
+<li><p><strong>display</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display the object, defaults to True</p></li>
+<li><p><strong>jointaxes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the joint axes of the robot with arrows,
+defaults to True</p></li>
+<li><p><strong>eeframe</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the end-effector frame of the robot,
+defaults to True</p></li>
+<li><p><strong>shadow</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display a shadow of the robot on the x-y gound plane,
+defaults to True</p></li>
+<li><p><strong>name</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display the name of the robot, defaults to True</p></li>
 </ul>
 </dd>
 </dl>
@@ -431,7 +436,7 @@ running for the backend to keep it responsive.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

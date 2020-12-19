@@ -1,0 +1,1275 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>roboticstoolbox.robot.IK &mdash; Robotics Toolbox for Python  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.robot.IK</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.robot.IK</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author Jesse Haviland</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.null</span> <span class="kn">import</span> <span class="n">null</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">Twist3</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Bounds</span><span class="p">,</span> <span class="n">LinearConstraint</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="c1"># iksol = namedtuple(&quot;IKsolution&quot;, &quot;q, success, reason, iterations, residual&quot;,</span>
+<span class="c1">#     defaults=(None, False, None, None, None)) # Py &gt;= 3.7 only</span>
+<span class="n">iksol</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;IKsolution&quot;</span><span class="p">,</span> <span class="s2">&quot;q, success, reason, iterations, residual&quot;</span><span class="p">)</span>
+
+<span class="c1"># ===================================================================== #</span>
+<span class="k">class</span> <span class="nc">IKMixin</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">ikine_LM</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span>
+            <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+            <span class="n">rlimit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
+            <span class="n">L</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+            <span class="n">Lmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">search</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">slimit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">transpose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)</span>
+
+<span class="sd">        :param T: The desired end-effector pose or pose trajectory</span>
+<span class="sd">        :type T: SE3</span>
+<span class="sd">        :param q0: initial joint configuration (default all zeros)</span>
+<span class="sd">        :type q0: ndarray(n)</span>
+<span class="sd">        :param mask: mask vector that correspond to translation in X, Y and Z</span>
+<span class="sd">            and rotation about X, Y and Z respectively.</span>
+<span class="sd">        :type mask: ndarray(6)</span>
+<span class="sd">        :param ilimit: maximum number of iterations (default 500)</span>
+<span class="sd">        :type ilimit: int </span>
+<span class="sd">        :param rlimit: maximum number of consecutive step rejections (default 100)</span>
+<span class="sd">        :type rlimit: int </span>
+<span class="sd">        :param tol: final error tolerance (default 1e-10)</span>
+<span class="sd">        :type tol: float </span>
+<span class="sd">        :param L: initial value of lambda</span>
+<span class="sd">        :type L: float (default 0.1)</span>
+<span class="sd">        :param Lmin: minimum allowable value of lambda</span>
+<span class="sd">        :type Lmin: float (default 0)</span>
+<span class="sd">        :param search: search over all configurations</span>
+<span class="sd">        :type search: bool</span>
+<span class="sd">        :param slimit: maximum number of search attempts</span>
+<span class="sd">        :type slimit: int (default 100)</span>
+<span class="sd">        :param transpose: use Jacobian transpose with step size A, rather</span>
+<span class="sd">            than Levenberg-Marquadt</span>
+<span class="sd">        :type transpose: float</span>
+<span class="sd">        :return: inverse kinematic solution</span>
+<span class="sd">        :rtype: named tuple</span>
+
+<span class="sd">        ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding</span>
+<span class="sd">        to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can</span>
+<span class="sd">        be used for robots with any number of degrees of freedom. The return</span>
+<span class="sd">        value ``sol`` is a named tuple with elements:</span>
+
+<span class="sd">        ============    ==========  ============================================================</span>
+<span class="sd">        Element         Type        Description</span>
+<span class="sd">        ============    ==========  ============================================================</span>
+<span class="sd">        ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``</span>
+<span class="sd">        ``success``     bool        whether a solution was found</span>
+<span class="sd">        ``reason``      str         reason for the failure</span>
+<span class="sd">        ``iterations``  int         number of iterations</span>
+<span class="sd">        ``residual``    float       final value of cost function</span>
+<span class="sd">        ============    ==========  ============================================================</span>
+
+<span class="sd">        **Trajectory operation**:</span>
+
+<span class="sd">        If ``len(T) &gt; 1`` it is considered to be a trajectory, and the result is</span>
+<span class="sd">        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The</span>
+<span class="sd">        initial estimate of q for each time step is taken as the solution from</span>
+<span class="sd">        the previous time step.</span>
+
+<span class="sd">        **Underactuated robots:**</span>
+
+<span class="sd">        For the case where the manipulator has fewer than 6 DOF the</span>
+<span class="sd">        solution space has more dimensions than can be spanned by the</span>
+<span class="sd">        manipulator joint coordinates.</span>
+
+<span class="sd">        In this case we specify the ``mask`` option where the ``mask`` vector</span>
+<span class="sd">        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that</span>
+<span class="sd">        will be ignored in reaching a solution.  The mask vector has six</span>
+<span class="sd">        elements that correspond to translation in X, Y and Z, and rotation</span>
+<span class="sd">        about X, Y and Z respectively. The value should be 0 (for ignore)</span>
+<span class="sd">        or 1. The number of non-zero elements must equal the number of</span>
+<span class="sd">        manipulator DOF.</span>
+
+<span class="sd">        For example when using a 3 DOF manipulator tool orientation might</span>
+<span class="sd">        be unimportant, in which case use the option ``mask=[1 1 1 0 0 0]``.</span>
+
+<span class="sd">        **Global search**:</span>
+
+<span class="sd">        ``sol = robot.ikine_LM(T, search=True)`` as above but peforms a</span>
+<span class="sd">        brute-force search with initial conditions chosen randomly from the</span>
+<span class="sd">        entire configuration space.  If a numerical solution is found from that</span>
+<span class="sd">        initial condition, it is returned, otherwise another initial condition is</span>
+<span class="sd">        chosen.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Implements a Levenberg-Marquadt variable-step-size solver.</span>
+<span class="sd">            - The tolerance is computed on the norm of the error between</span>
+<span class="sd">              current and desired tool pose.  This norm is computed from</span>
+<span class="sd">              distances and angles without any kind of weighting.</span>
+<span class="sd">            - The inverse kinematic solution is generally not unique, and</span>
+<span class="sd">              depends on the initial guess ``q0``.</span>
+<span class="sd">            - The default value of ``q0`` is zero which is a poor choice for </span>
+<span class="sd">              most manipulators since it often corresponds to a</span>
+<span class="sd">              kinematic singularity.</span>
+<span class="sd">            - Such a solution is completely general, though much less</span>
+<span class="sd">              efficient than analytic inverse kinematic solutions derived</span>
+<span class="sd">              symbolically.</span>
+<span class="sd">            - This approach allows a solution to be obtained at a singularity,</span>
+<span class="sd">              but the joint angles within the null space are arbitrarily</span>
+<span class="sd">              assigned.</span>
+<span class="sd">            - Joint offsets, if defined, are accounted for in the solution.</span>
+<span class="sd">            - Joint limits are not considered in this solution.</span>
+<span class="sd">            - If the search option is used any prismatic joint must have</span>
+<span class="sd">              joint limits defined.</span>
+
+<span class="sd">        :references:</span>
+<span class="sd">            - Robotics, Vision &amp; Control, P. Corke, Springer 2011,</span>
+<span class="sd">              Section 8.4.</span>
+
+<span class="sd">        :seealso: :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+   
+        <span class="k">if</span> <span class="n">search</span><span class="p">:</span>
+            <span class="c1"># Randomised search for a starting point</span>
+            <span class="c1"># quiet = True</span>
+
+            <span class="n">qlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span>
+            <span class="n">qspan</span> <span class="o">=</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># range of joint motion</span>
+
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">slimit</span><span class="p">):</span>
+                <span class="c1"># choose a random joint coordinate</span>
+                <span class="n">q0_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">qspan</span> <span class="o">+</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+
+                <span class="c1"># recurse into the solver</span>
+                <span class="n">solution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span>
+                    <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">q0_k</span><span class="p">,</span>
+                    <span class="n">mask</span><span class="p">,</span>
+                    <span class="n">ilimit</span><span class="p">,</span>
+                    <span class="n">rlimit</span><span class="p">,</span>
+                    <span class="n">tol</span><span class="p">,</span>
+                    <span class="n">L</span><span class="p">,</span>
+                    <span class="n">Lmin</span><span class="p">,</span>
+                    <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">slimit</span><span class="p">,</span>
+                    <span class="n">transpose</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">solution</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+                    <span class="n">q0</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">q</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># we&#39;re done</span>
+                        <span class="k">return</span> <span class="n">solution</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># more to do on the trajectory</span>
+                        <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+                        <span class="k">del</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># no solution found, stop now</span>
+                <span class="k">return</span> <span class="n">iksol</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of robot DOF must be &gt;= the number &#39;</span>
+                                 <span class="s1">&#39;of 1s in the mask matrix&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="n">tcount</span> <span class="o">=</span> <span class="mi">0</span>    <span class="c1"># Total iteration count</span>
+        <span class="n">rejcount</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Rejected step count</span>
+        <span class="n">nm</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># bool vector indicating revolute joints</span>
+        <span class="n">revolutes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="n">q0</span>
+        <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
+            <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">Li</span> <span class="o">=</span> <span class="n">L</span>  <span class="c1"># lambda</span>
+            <span class="n">failure</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># Update the count and test against iteration limit</span>
+                <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">ilimit</span><span class="p">:</span>
+                    <span class="n">failure</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;iteration limit </span><span class="si">{</span><span class="n">ilimit</span><span class="si">}</span><span class="s2"> exceeded&quot;</span>
+                    <span class="k">break</span>
+
+                <span class="n">e</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">tr2delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">Tk</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+
+                <span class="c1"># Are we there yet?</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># Compute the Jacobian</span>
+                <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+                <span class="n">JtJ</span> <span class="o">=</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">J</span>
+
+                <span class="k">if</span> <span class="n">transpose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Do the simple Jacobian transpose with constant gain</span>
+                    <span class="n">dq</span> <span class="o">=</span> <span class="n">transpose</span> <span class="o">*</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">e</span>    <span class="c1"># lgtm [py/multiple-definition]</span>
+                    <span class="n">q</span> <span class="o">+=</span> <span class="n">dq</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Do the damped inverse Gauss-Newton with</span>
+                    <span class="c1"># Levenberg-Marquadt</span>
+                    <span class="c1"># dq = np.linalg.inv(</span>
+                    <span class="c1">#     JtJ + ((Li + Lmin) * np.eye(self.n))</span>
+                    <span class="c1"># ) @ J.T @ W @ e</span>
+                    <span class="n">dq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span>
+                        <span class="n">JtJ</span> <span class="o">+</span> <span class="p">((</span><span class="n">Li</span> <span class="o">+</span> <span class="n">Lmin</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">JtJ</span><span class="p">)))</span>
+                    <span class="p">)</span> <span class="o">@</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">e</span>
+                    <span class="c1"># print(J.T @ W @ e)</span>
+
+                    <span class="c1"># Compute possible new value of</span>
+                    <span class="n">qnew</span> <span class="o">=</span> <span class="n">q</span> <span class="o">+</span> <span class="n">dq</span>
+
+                    <span class="c1"># And figure out the new error</span>
+                    <span class="n">enew</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">tr2delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">qnew</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">Tk</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+
+                    <span class="c1"># Was it a good update?</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">enew</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">):</span>
+                        <span class="c1"># Step is accepted</span>
+                        <span class="n">q</span> <span class="o">=</span> <span class="n">qnew</span>
+                        <span class="n">e</span> <span class="o">=</span> <span class="n">enew</span>
+                        <span class="n">Li</span> <span class="o">/=</span> <span class="mi">2</span>
+                        <span class="n">rejcount</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Step is rejected, increase the damping and retry</span>
+                        <span class="n">Li</span> <span class="o">*=</span> <span class="mi">2</span>
+                        <span class="n">rejcount</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">rejcount</span> <span class="o">&gt;</span> <span class="n">rlimit</span><span class="p">:</span>
+                            <span class="n">failure</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;rejected-step limit </span><span class="si">{</span><span class="n">rlimit</span><span class="si">}</span><span class="s2"> exceeded&quot;</span>
+                            <span class="k">break</span>
+
+                <span class="c1"># Wrap angles for revolute joints</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">q</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">revolutes</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+                <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">q</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">revolutes</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+                <span class="n">nm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">qs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{:8.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span>
+                <span class="c1"># print(f&quot;λ={Li:8.2g}, |e|={nm:8.2g}: q={qs}&quot;)</span>
+
+            <span class="c1"># LM process finished, for better or worse</span>
+            <span class="c1"># failure will be None or an error message</span>
+            <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">failure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">failure</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">nm</span><span class="p">)</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+
+            <span class="n">tcount</span> <span class="o">+=</span> <span class="n">iterations</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="k">def</span> <span class="nf">ikine_LMS</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span>
+            <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
+            <span class="n">wN</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+            <span class="n">Lmin</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)</span>
+
+<span class="sd">        :param T: The desired end-effector pose or pose trajectory</span>
+<span class="sd">        :type T: SE3</span>
+<span class="sd">        :param q0: initial joint configuration (default all zeros)</span>
+<span class="sd">        :type q0: ndarray(n)</span>
+<span class="sd">        :param mask: mask vector that correspond to translation in X, Y and Z</span>
+<span class="sd">            and rotation about X, Y and Z respectively.</span>
+<span class="sd">        :type mask: ndarray(6)</span>
+<span class="sd">        :param ilimit: maximum number of iterations (default 500)</span>
+<span class="sd">        :type ilimit: int </span>
+<span class="sd">        :param tol: final error tolerance (default 1e-10)</span>
+<span class="sd">        :type tol: float </span>
+<span class="sd">        :param ωN: damping coefficient</span>
+<span class="sd">        :type ωN: float (default 1e-3)</span>
+<span class="sd">        :return: inverse kinematic solution</span>
+<span class="sd">        :rtype: named tuple</span>
+
+<span class="sd">        ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding</span>
+<span class="sd">        to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can</span>
+<span class="sd">        be used for robots with any number of degrees of freedom. The return</span>
+<span class="sd">        value ``sol`` is a named tuple with elements:</span>
+
+<span class="sd">        ============    ==========  ============================================================</span>
+<span class="sd">        Element         Type        Description</span>
+<span class="sd">        ============    ==========  ============================================================</span>
+<span class="sd">        ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``</span>
+<span class="sd">        ``success``     bool        whether a solution was found</span>
+<span class="sd">        ``reason``      str         reason for the failure</span>
+<span class="sd">        ``iterations``  int         number of iterations</span>
+<span class="sd">        ``residual``    float       final value of cost function</span>
+<span class="sd">        ============    ==========  ============================================================</span>
+
+<span class="sd">        **Trajectory operation**:</span>
+
+<span class="sd">        If ``len(T) &gt; 1`` it is considered to be a trajectory, and the result is</span>
+<span class="sd">        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The</span>
+<span class="sd">        initial estimate of q for each time step is taken as the solution from</span>
+<span class="sd">        the previous time step.</span>
+
+<span class="sd">        **Underactuated robots:**</span>
+
+<span class="sd">        For the case where the manipulator has fewer than 6 DOF the</span>
+<span class="sd">        solution space has more dimensions than can be spanned by the</span>
+<span class="sd">        manipulator joint coordinates.</span>
+
+<span class="sd">        In this case we specify the ``mask`` option where the ``mask`` vector</span>
+<span class="sd">        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that</span>
+<span class="sd">        will be ignored in reaching a solution.  The mask vector has six</span>
+<span class="sd">        elements that correspond to translation in X, Y and Z, and rotation</span>
+<span class="sd">        about X, Y and Z respectively. The value should be 0 (for ignore)</span>
+<span class="sd">        or 1. The number of non-zero elements should equal the number of</span>
+<span class="sd">        manipulator DOF.</span>
+
+<span class="sd">        For example when using a 3 DOF manipulator rotation orientation might</span>
+<span class="sd">        be unimportant in which case use the option: mask = [1 1 1 0 0 0].</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Implements a modified Levenberg-Marquadt variable-step-size solver</span>
+<span class="sd">              which is quite robust in practice.</span>
+<span class="sd">            - The tolerance is computed on the norm of the error between</span>
+<span class="sd">              current and desired tool pose.  This norm is computed from</span>
+<span class="sd">              distances and angles without any kind of weighting.</span>
+<span class="sd">            - The inverse kinematic solution is generally not unique, and</span>
+<span class="sd">              depends on the initial guess ``q0``.</span>
+<span class="sd">            - The default value of ``q0`` is zero which is a poor choice for </span>
+<span class="sd">              most manipulators since it often corresponds to a</span>
+<span class="sd">              kinematic singularity.</span>
+<span class="sd">            - Such a solution is completely general, though much less</span>
+<span class="sd">              efficient than analytic inverse kinematic solutions derived</span>
+<span class="sd">              symbolically.</span>
+<span class="sd">            - This approach allows a solution to be obtained at a singularity,</span>
+<span class="sd">              but the joint angles within the null space are arbitrarily</span>
+<span class="sd">              assigned.</span>
+<span class="sd">            - Joint offsets, if defined, are accounted for in the solution.</span>
+<span class="sd">            - Joint limits are not considered in this solution.</span>
+
+<span class="sd">        :references:</span>
+<span class="sd">            - &quot;Solvability-Unconcerned Inverse Kinematics by the</span>
+<span class="sd">              Levenberg–Marquardt Method&quot;, T. Sugihara, IEEE T-RO, 27(5), </span>
+<span class="sd">              October 2011, pp. 984-991.</span>
+
+<span class="sd">        :seealso: :func:`ikine_LM`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of robot DOF must be &gt;= the number &#39;</span>
+                                <span class="s1">&#39;of 1s in the mask matrix&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="n">tcount</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Total iteration count</span>
+
+        <span class="c1"># bool vector indicating revolute joints</span>
+        <span class="n">revolutes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">()</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="n">q0</span>
+        <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
+            <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">failure</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># Update the count and test against iteration limit</span>
+                <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">iterations</span> <span class="o">&gt;</span> <span class="n">ilimit</span><span class="p">:</span>
+                    <span class="n">failure</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;iteration limit </span><span class="si">{</span><span class="n">ilimit</span><span class="si">}</span><span class="s2"> exceeded&quot;</span>
+                    <span class="k">break</span>
+
+                <span class="n">e</span> <span class="o">=</span> <span class="n">_angle_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">Tk</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+
+                <span class="c1"># Are we there yet?</span>
+                <span class="n">E</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">e</span>
+                <span class="k">if</span> <span class="n">E</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># Compute the Jacobian and projection matrices</span>
+                <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+                <span class="n">WN</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="n">wN</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">H</span> <span class="o">=</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">J</span> <span class="o">+</span> <span class="n">WN</span>  <span class="c1"># n x n</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">J</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">W</span> <span class="o">@</span> <span class="n">e</span>       <span class="c1"># n x 1</span>
+
+                <span class="c1"># Compute new value of q</span>
+                <span class="n">q</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">H</span><span class="p">)</span> <span class="o">@</span> <span class="n">g</span>  <span class="c1"># n x 1</span>
+                <span class="c1"># print(np.linalg.norm(np.linalg.inv(H) @ g))</span>
+                <span class="c1"># print(e)</span>
+                <span class="c1"># print(g)</span>
+                <span class="c1"># print(q)</span>
+                <span class="c1"># print(J)</span>
+
+                <span class="c1"># Wrap angles for revolute joints</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">q</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">revolutes</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+                <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">q</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">revolutes</span><span class="p">)</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+                <span class="n">qs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{:8.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">qi</span><span class="p">)</span> <span class="k">for</span> <span class="n">qi</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span>
+                <span class="c1"># print(f&quot;|e|={E:8.2g}, det(H)={np.linalg.det(H)}: q={qs}&quot;)</span>
+
+            <span class="c1"># LM process finished, for better or worse</span>
+            <span class="c1"># failure will be None or an error message</span>
+            <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">failure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">failure</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+
+            <span class="n">tcount</span> <span class="o">+=</span> <span class="n">iterations</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span>
+
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># def ikine_unc(self, T, q0=None, ilimit=1000, tol=1e-16, stiffness=0, costfun=None):</span>
+    <span class="c1">#     r&quot;&quot;&quot;</span>
+    <span class="c1">#     Inverse manipulator by optimization without joint limits (Robot</span>
+    <span class="c1">#     superclass)</span>
+
+    <span class="c1">#     :param T: The desired end-effector pose or pose trajectory</span>
+    <span class="c1">#     :type T: SE3</span>
+    <span class="c1">#     :param q0: initial joint configuration (default all zeros)</span>
+    <span class="c1">#     :type q0: ndarray(n)</span>
+    <span class="c1">#     :param tol: Tolerance (default 1e-16)</span>
+    <span class="c1">#     :type tol: tol</span>
+    <span class="c1">#     :param ilimit: Iteration limit (default 1000)</span>
+    <span class="c1">#     :type ilimit: int</span>
+    <span class="c1">#     :param stiffness: Stiffness used to impose a smoothness contraint on</span>
+    <span class="c1">#         joint angles, useful when n is large (default 0)</span>
+    <span class="c1">#     :type stiffness: float</span>
+    <span class="c1">#     :param costfun: User supplied cost term, optional</span>
+    <span class="c1">#     :type costfun: callable</span>
+    <span class="c1">#     :return: inverse kinematic solution</span>
+    <span class="c1">#     :rtype: named tuple</span>
+
+    <span class="c1">#     ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding</span>
+    <span class="c1">#     to the robot end-effector pose T which is an SE3 object.  The</span>
+    <span class="c1">#     return value ``sol`` is a named tuple with elements:</span>
+
+    <span class="c1">#     ============    ==========  ============================================================</span>
+    <span class="c1">#     Element         Type        Description</span>
+    <span class="c1">#     ============    ==========  ============================================================</span>
+    <span class="c1">#     ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``</span>
+    <span class="c1">#     ``success``     bool        whether a solution was found</span>
+    <span class="c1">#     ``reason``      str         reason for the failure</span>
+    <span class="c1">#     ``iterations``  int         number of iterations</span>
+    <span class="c1">#     ``residual``    float       final value of cost function</span>
+    <span class="c1">#     ============    ==========  ============================================================</span>
+
+    <span class="c1">#     This method the Scipy SLSQP minimizer to minimize the squared norm of a</span>
+    <span class="c1">#     vector :math:`[d,a]` with components respectively the translation error</span>
+    <span class="c1">#     and rotation error in Euler vector form, between the desired pose and</span>
+    <span class="c1">#     the current estimate obtained by inverse kinematics.</span>
+
+    <span class="c1">#     **Additional cost terms**:</span>
+
+    <span class="c1">#     This method supports two additional costs:</span>
+
+    <span class="c1">#     - ``stiffness`` imposes a penalty on joint variation :math:`\sum_{j=1}^N (q_j - q_{j-1})^2`</span>
+    <span class="c1">#       which tends to keep the arm straight</span>
+    <span class="c1">#     - ``costfun`` add a cost given by a user-specified function ``costfun(q)``</span>
+
+    <span class="c1">#     **Trajectory operation**:</span>
+
+    <span class="c1">#     If ``len(T) &gt; 1`` it is considered to be a trajectory, and the result is</span>
+    <span class="c1">#     a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The</span>
+    <span class="c1">#     initial estimate of q for each time step is taken as the solution from</span>
+    <span class="c1">#     the previous time step.</span>
+
+
+    <span class="c1">#     .. note::</span>
+
+    <span class="c1">#         - Uses ``SciPy.minimize`` SLSQP without bounds.</span>
+    <span class="c1">#         - Joint limits are not considered in this solution.</span>
+    <span class="c1">#         - Can be used for robots with arbitrary degrees of freedom.</span>
+    <span class="c1">#         - The inverse kinematic solution is generally not unique, and</span>
+    <span class="c1">#           depends on the initial guess ``q0``.</span>
+    <span class="c1">#         - The default value of ``q0`` is zero which is a poor choice for </span>
+    <span class="c1">#           most manipulators since it often corresponds to a</span>
+    <span class="c1">#           kinematic singularity.</span>
+    <span class="c1">#         - Such a solution is completely general, though much less</span>
+    <span class="c1">#           efficient than analytic inverse kinematic solutions derived</span>
+    <span class="c1">#           symbolically.</span>
+    <span class="c1">#         - The objective function (error) is </span>
+    <span class="c1">#           :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`</span>
+    <span class="c1">#           where :math:`\mat{\Omega}` is a diagonal matrix.</span>
+    <span class="c1">#         - Joint offsets, if defined, are accounted for in the solution.</span>
+
+    <span class="c1">#     .. warning:: </span>
+        
+    <span class="c1">#         - The objective function is rather uncommon.</span>
+    <span class="c1">#         - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it</span>
+    <span class="c1">#           uses a scalar cost-function and does not provide a Jacobian.</span>
+
+    <span class="c1">#     :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_con`, :func:`ikine_min`</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     if not isinstance(T, SE3):</span>
+    <span class="c1">#         T = SE3(T)</span>
+
+    <span class="c1">#     if q0 is None:</span>
+    <span class="c1">#         q0 = np.zeros((self.n))</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         q0 = base.getvector(q0, self.n)</span>
+
+    <span class="c1">#     solutions = []</span>
+
+    <span class="c1">#     wr = 1 / self.reach</span>
+    <span class="c1">#     weight = np.r_[wr, wr, wr, 1, 1, 1]</span>
+
+    <span class="c1">#     def cost(q, T, weight, costfun, stiffness):</span>
+    <span class="c1">#         # T, weight, costfun, stiffness = args</span>
+    <span class="c1">#         e = _angle_axis(self.fkine(q).A, T) * weight</span>
+    <span class="c1">#         E = (e**2).sum()</span>
+
+    <span class="c1">#         if stiffness &gt; 0:</span>
+    <span class="c1">#             # Enforce a continuity constraint on joints, minimum bend</span>
+    <span class="c1">#             E += np.sum(np.diff(q)**2) * stiffness</span>
+
+    <span class="c1">#         if costfun is not None:</span>
+    <span class="c1">#             E += (e**2).sum() + costfun(q)</span>
+
+    <span class="c1">#         return E</span>
+
+    <span class="c1">#     for Tk in T:</span>
+
+    <span class="c1">#         res = minimize(</span>
+    <span class="c1">#             cost,</span>
+    <span class="c1">#             q0,</span>
+    <span class="c1">#             args=(Tk.A, weight, costfun, stiffness),</span>
+    <span class="c1">#             tol=tol,</span>
+    <span class="c1">#             method=&#39;SLSQP&#39;,</span>
+    <span class="c1">#             options={&#39;maxiter&#39;: ilimit}</span>
+    <span class="c1">#             )</span>
+
+    <span class="c1">#             # final gradient tolerance must be &lt; gtol for success, bump</span>
+    <span class="c1">#             # this number up a bit</span>
+    <span class="c1">#             # SLSQP seems to work better than BFGS, L-BFGS-B</span>
+
+    <span class="c1">#         solution = iksol(res.x, res.success, res.message, res.nit, res.fun)</span>
+    <span class="c1">#         solutions.append(solution)</span>
+    <span class="c1">#         q0 = res.x  # use this solution as initial estimate for next time</span>
+
+    <span class="c1">#     if len(T) == 1:</span>
+    <span class="c1">#         return solutions[0]</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return solutions</span>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="k">def</span> <span class="nf">ikine_min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ilimit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stiffness</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">costfun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inverse kinematics by optimization with joint limits (Robot superclass)</span>
+
+<span class="sd">        :param T: The desired end-effector pose or pose trajectory</span>
+<span class="sd">        :type T: SE3</span>
+<span class="sd">        :param q0: initial joint configuration (default all zeros)</span>
+<span class="sd">        :type q0: ndarray(n)</span>
+<span class="sd">        :param qlim: enforce joint limits</span>
+<span class="sd">        :type qlim: bool</span>
+<span class="sd">        :param ilimit: Iteration limit (default 1000)</span>
+<span class="sd">        :type ilimit: int</span>
+<span class="sd">        :param tol: Tolerance (default 1e-16)</span>
+<span class="sd">        :type tol: tol</span>
+<span class="sd">        :param method: minimization method to use</span>
+<span class="sd">        :type method: str</span>
+<span class="sd">        :param stiffness: Stiffness used to impose a smoothness contraint on</span>
+<span class="sd">            joint angles, useful when n is large (default 0)</span>
+<span class="sd">        :type stiffness: float</span>
+<span class="sd">        :param costfun: User supplied cost term, optional</span>
+<span class="sd">        :type costfun: callable</span>
+<span class="sd">        :return: inverse kinematic solution</span>
+<span class="sd">        :rtype: named tuple</span>
+
+<span class="sd">        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding</span>
+<span class="sd">        to the robot end-effector pose T which is an SE3 object.  The</span>
+<span class="sd">        return value ``sol`` is a named tuple with elements:</span>
+
+<span class="sd">        ============    ==========  ============================================================</span>
+<span class="sd">        Element         Type        Description</span>
+<span class="sd">        ============    ==========  ============================================================</span>
+<span class="sd">        ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``</span>
+<span class="sd">        ``success``     bool        whether a solution was found</span>
+<span class="sd">        ``reason``      str         reason for the failure</span>
+<span class="sd">        ``iterations``  int         number of iterations</span>
+<span class="sd">        ``residual``    float       final value of cost function</span>
+<span class="sd">        ============    ==========  ============================================================</span>
+
+<span class="sd">        **Minimization method**:</span>
+
+<span class="sd">        By default this method uses:</span>
+
+<span class="sd">        - the Scipy ``SLSQP`` minimizer for the case of no joint limits</span>
+<span class="sd">        - the Scipy ``trust-constr`` minimizer for the case with joint limits. </span>
+<span class="sd">          This gives good results but is very slow.  An alternative is </span>
+<span class="sd">          ``L-BFGS-B`` but for redundant robots can sometimes give poor results,</span>
+<span class="sd">          pushing against the joint limits when there is no need to.</span>
+<span class="sd">          </span>
+<span class="sd">        In both case the function to be minimized is the squared norm of a </span>
+<span class="sd">        vector :math:`[d,a]` with components respectively the</span>
+<span class="sd">        translation error and rotation error in Euler vector form, between the</span>
+<span class="sd">        desired pose and the current estimate obtained by inverse kinematics.</span>
+
+<span class="sd">        **Additional cost terms**:</span>
+
+<span class="sd">        This method supports two additional costs:</span>
+
+<span class="sd">        - ``stiffness`` imposes a penalty on joint variation </span>
+<span class="sd">          :math:`\sum_{j=1}^N (q_j - q_{j-1})^2` which tends to keep the </span>
+<span class="sd">          arm straight</span>
+<span class="sd">        - ``costfun`` add a cost given by a user-specified function ``costfun(q)``</span>
+
+<span class="sd">        **Trajectory operation**:</span>
+
+<span class="sd">        If ``len(T) &gt; 1`` it is considered to be a trajectory, and the result is</span>
+<span class="sd">        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The</span>
+<span class="sd">        initial estimate of q for each time step is taken as the solution from</span>
+<span class="sd">        the previous time step.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Uses ``SciPy.minimize`` with bounds.</span>
+<span class="sd">            - Joint limits are considered in this solution.</span>
+<span class="sd">            - Can be used for robots with arbitrary degrees of freedom.</span>
+<span class="sd">            - The inverse kinematic solution is generally not unique, and</span>
+<span class="sd">              depends on the initial guess ``q0``.</span>
+<span class="sd">            - The default value of ``q0`` is zero which is a poor choice for </span>
+<span class="sd">              most manipulators since it often corresponds to a</span>
+<span class="sd">              kinematic singularity.</span>
+<span class="sd">            - Such a solution is completely general, though much less</span>
+<span class="sd">              efficient than analytic inverse kinematic solutions derived</span>
+<span class="sd">              symbolically.</span>
+<span class="sd">            - The objective function (error) is </span>
+<span class="sd">              :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`</span>
+<span class="sd">              where :math:`\mat{\Omega}` is a diagonal matrix.</span>
+<span class="sd">            - Joint offsets, if defined, are accounted for in the solution.</span>
+
+<span class="sd">        .. warning:: </span>
+<span class="sd">        </span>
+<span class="sd">            - The objective function is rather uncommon.</span>
+<span class="sd">            - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it</span>
+<span class="sd">              uses a scalar cost-function and does not provide a Jacobian.</span>
+
+<span class="sd">        :author: Bryan Moutrie, for RTB-MATLAB</span>
+
+<span class="sd">        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_min`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">wr</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">wr</span><span class="p">,</span> <span class="n">wr</span><span class="p">,</span> <span class="n">wr</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">optdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="n">ilimit</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">optdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;options must be a dict&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">qlim</span><span class="p">:</span>
+            <span class="c1"># dealing with joint limits</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">Bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+
+            <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">method</span><span class="o">=</span><span class="s1">&#39;trust-constr&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># no joint limits</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;SLSQP&#39;</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">costfun</span><span class="p">,</span> <span class="n">stiffness</span><span class="p">):</span>
+            <span class="c1"># T, weight, costfun, stiffness = args</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">_angle_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">weight</span>
+            <span class="n">E</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">stiffness</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Enforce a continuity constraint on joints, minimum bend</span>
+                <span class="n">E</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">stiffness</span>
+
+            <span class="k">if</span> <span class="n">costfun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">E</span> <span class="o">+=</span> <span class="p">(</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">costfun</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">E</span>
+
+        <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+                <span class="n">cost</span><span class="p">,</span>
+                <span class="n">q0</span><span class="p">,</span> 
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">Tk</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">costfun</span><span class="p">,</span> <span class="n">stiffness</span><span class="p">),</span>
+                <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="n">options</span>
+            <span class="p">)</span>
+
+            <span class="c1"># trust-constr seems to work better than L-BFGS-B which often</span>
+            <span class="c1"># runs a joint up against its limit and terminates with position </span>
+            <span class="c1"># error.</span>
+            <span class="c1"># but &#39;truts-constr&#39; is 5x slower</span>
+
+            <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">nit</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>  <span class="c1"># use this solution as initial estimate for next time</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># def ikine_min(self, T, q0=None, pweight=1.0, stiffness=0.0,</span>
+    <span class="c1">#            qlimits=True, ilimit=1000):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Inverse kinematics by optimization with joint limits (Robot superclass)</span>
+
+    <span class="c1">#     :param T: The desired end-effector pose or pose trajectory</span>
+    <span class="c1">#     :type T: SE3</span>
+    <span class="c1">#     :param q0: initial joint configuration (default all zeros)</span>
+    <span class="c1">#     :type q0: ndarray(n)</span>
+    <span class="c1">#     :param pweight: weighting on position error norm compared to rotation</span>
+    <span class="c1">#         error (default 1)</span>
+    <span class="c1">#     :type pweight: float</span>
+    <span class="c1">#     :param stiffness: Stiffness used to impose a smoothness contraint on</span>
+    <span class="c1">#         joint angles, useful when n is large (default 0)</span>
+    <span class="c1">#     :type stiffness: float</span>
+    <span class="c1">#     :param qlimits: Enforce joint limits (default True)</span>
+    <span class="c1">#     :type qlimits: bool</span>
+    <span class="c1">#     :param ilimit: Iteration limit (default 1000)</span>
+    <span class="c1">#     :type ilimit: bool</span>
+    <span class="c1">#     :return: inverse kinematic solution</span>
+    <span class="c1">#     :rtype: named tuple</span>
+
+    <span class="c1">#     ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding</span>
+    <span class="c1">#     to the robot end-effector pose T which is an SE3 object.  The</span>
+    <span class="c1">#     return value ``sol`` is a named tuple with elements:</span>
+
+    <span class="c1">#     ============    ==========  ============================================================</span>
+    <span class="c1">#     Element         Type        Description</span>
+    <span class="c1">#     ============    ==========  ============================================================</span>
+    <span class="c1">#     ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``</span>
+    <span class="c1">#     ``success``     bool        whether a solution was found</span>
+    <span class="c1">#     ``reason``      str         reason for the failure</span>
+    <span class="c1">#     ``iterations``  int         number of iterations</span>
+    <span class="c1">#     ``residual``    float       final value of cost function</span>
+    <span class="c1">#     ============    ==========  ============================================================</span>
+
+    <span class="c1">#     **Trajectory operation**:</span>
+
+    <span class="c1">#     If ``len(T) &gt; 1`` it is considered to be a trajectory, and the result is</span>
+    <span class="c1">#     a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The</span>
+    <span class="c1">#     initial estimate of q for each time step is taken as the solution from</span>
+    <span class="c1">#     the previous time step.</span>
+
+    <span class="c1">#     .. note::</span>
+
+    <span class="c1">#         - PROTOTYPE CODE UNDER DEVELOPMENT, intended to do numerical</span>
+    <span class="c1">#           inverse kinematics with joint limits</span>
+    <span class="c1">#         - Uses ``SciPy.minimize`` with/without constraints.</span>
+    <span class="c1">#         - The inverse kinematic solution is generally not unique, and</span>
+    <span class="c1">#           depends on the initial guess ``q0``.</span>
+    <span class="c1">#         - This norm is computed from distances and angles and ``pweight``</span>
+    <span class="c1">#           can be used to scale the position error norm to be congruent </span>
+    <span class="c1">#           with rotation error norm.</span>
+    <span class="c1">#         - For a highly redundant robot ``stiffness`` can be used to impose </span>
+    <span class="c1">#           a smoothness contraint on joint angles, tending toward solutions</span>
+    <span class="c1">#           with are smooth curves.</span>
+    <span class="c1">#         - The default value of ``q0`` is zero which is a poor choice for </span>
+    <span class="c1">#           most manipulators since it often corresponds to a</span>
+    <span class="c1">#           kinematic singularity.</span>
+    <span class="c1">#         - Such a solution is completely general, though much less</span>
+    <span class="c1">#           efficient than analytic inverse kinematic solutions derived</span>
+    <span class="c1">#           symbolically.</span>
+    <span class="c1">#         - This approach allows a solution to obtained at a singularity,</span>
+    <span class="c1">#           but the joint angles within the null space are arbitrarily</span>
+    <span class="c1">#           assigned.</span>
+    <span class="c1">#         - Joint offsets, if defined, are accounted for in the solution.</span>
+    <span class="c1">#         - Joint limits become explicit bounds if &#39;qlimits&#39; is set.</span>
+
+    <span class="c1">#     .. warning:: </span>
+        
+    <span class="c1">#         - The objective function is rather uncommon.</span>
+    <span class="c1">#         - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it</span>
+    <span class="c1">#           uses a scalar cost-function and does not provide a Jacobian.</span>
+
+    <span class="c1">#     :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     if not isinstance(T, SE3):</span>
+    <span class="c1">#         T = SE3(T)</span>
+
+    <span class="c1">#     if q0 is None:</span>
+    <span class="c1">#         q0 = np.zeros((self.n,))</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         q0 = base.getvector(q0, self.n)</span>
+
+    <span class="c1">#     col = 2</span>
+    <span class="c1">#     solutions = []</span>
+
+    <span class="c1">#     # Define the cost function to minimise</span>
+    <span class="c1">#     def cost(q, *args):</span>
+    <span class="c1">#         T, pweight, col, stiffness = args</span>
+    <span class="c1">#         Tq = self.fkine(q).A</span>
+
+    <span class="c1">#         # translation error</span>
+    <span class="c1">#         dT = base.transl(T) - base.transl(Tq)</span>
+    <span class="c1">#         E = np.linalg.norm(dT) * pweight</span>
+
+    <span class="c1">#         # Rotation error</span>
+    <span class="c1">#         # Find dot product of two columns</span>
+    <span class="c1">#         dd = np.dot(T[0:3, col], Tq[0:3, col])</span>
+    <span class="c1">#         E += np.arccos(dd)**2 * 1000</span>
+
+    <span class="c1">#         if stiffness &gt; 0:</span>
+    <span class="c1">#             # Enforce a continuity constraint on joints, minimum bend</span>
+    <span class="c1">#             E += np.sum(np.diff(q)**2) * stiffness</span>
+
+    <span class="c1">#         return E</span>
+
+    <span class="c1">#     for Tk in T:</span>
+
+    <span class="c1">#         if qlimits:</span>
+    <span class="c1">#             bounds = Bounds(self.qlim[0, :], self.qlim[1, :])</span>
+
+    <span class="c1">#             res = minimize(</span>
+    <span class="c1">#                 cost,</span>
+    <span class="c1">#                 q0, </span>
+    <span class="c1">#                 args=(Tk.A, pweight, col, stiffness),</span>
+    <span class="c1">#                 bounds=bounds,</span>
+    <span class="c1">#                 options={&#39;gtol&#39;: 1e-6, &#39;maxiter&#39;: ilimit})</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             # No joint limits, unconstrained optimization</span>
+    <span class="c1">#             # final gradient tolerance must be &lt; gtol for success, bump</span>
+    <span class="c1">#             # this number up a bit</span>
+    <span class="c1">#             res = minimize(</span>
+    <span class="c1">#                 cost,</span>
+    <span class="c1">#                 q0, </span>
+    <span class="c1">#                 args=(Tk.A, pweight, col, stiffness),</span>
+    <span class="c1">#                 options={&#39;gtol&#39;: 1e-6, &#39;maxiter&#39;: ilimit})</span>
+
+    <span class="c1">#         solution = iksol(res.x, res.success, res.message, res.nit, res.fun)</span>
+    <span class="c1">#         solutions.append(solution)</span>
+    <span class="c1">#         q0 = res.x  # use this solution as initial estimate for next time</span>
+
+    <span class="c1">#     if len(T) == 1:</span>
+    <span class="c1">#         return solutions[0]</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return solutions</span>
+
+
+    <span class="c1"># def qmincon(self, q=None):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Move away from joint limits</span>
+
+    <span class="c1">#     :param q: Joint coordinates</span>
+    <span class="c1">#     :type q: ndarray(n)</span>
+    <span class="c1">#     :retrun qs: The calculated joint values</span>
+    <span class="c1">#     :rtype qs: ndarray(n)</span>
+    <span class="c1">#     :return: Optimisation solved (True) or failed (False)</span>
+    <span class="c1">#     :rtype: bool</span>
+    <span class="c1">#     :return: Final value of the objective function</span>
+    <span class="c1">#     :rtype: float</span>
+
+    <span class="c1">#     ``qs, success, err = qmincon(q)`` exploits null space motion and</span>
+    <span class="c1">#     returns a set of joint angles ``qs`` (n) that result in the same</span>
+    <span class="c1">#     end-effector pose but are away from the joint coordinate limits.</span>
+    <span class="c1">#     ``n`` is the number of robot joints. ``success`` is True for</span>
+    <span class="c1">#     successful optimisation. ``err`` is the scalar final value of</span>
+    <span class="c1">#     the objective function.</span>
+
+    <span class="c1">#     **Trajectory operation**</span>
+
+    <span class="c1">#     In all cases if ``q`` is (m,n) it is taken as a pose sequence and</span>
+    <span class="c1">#     ``qmincon()`` returns the adjusted joint coordinates (m,n)</span>
+    <span class="c1">#     corresponding to each of the configurations in the sequence.</span>
+
+    <span class="c1">#     ``err`` and ``success`` are also (m) and indicate the results of</span>
+    <span class="c1">#     optimisation for the corresponding trajectory step.</span>
+
+    <span class="c1">#     .. note:: Robot must be redundant.</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     def sumsqr(A):</span>
+    <span class="c1">#         return np.sum(A**2)</span>
+
+    <span class="c1">#     def cost(x, ub, lb, qm, N):</span>
+    <span class="c1">#         return sumsqr(</span>
+    <span class="c1">#             (2 * (N @ x + qm) - ub - lb) / (ub - lb))</span>
+
+    <span class="c1">#     q = getmatrix(q, (None, self.n))</span>
+
+    <span class="c1">#     qstar = np.zeros((q.shape[0], self.n))</span>
+    <span class="c1">#     error = np.zeros(q.shape[0])</span>
+    <span class="c1">#     success = np.zeros(q.shape[0])</span>
+
+    <span class="c1">#     lb = self.qlim[0, :]</span>
+    <span class="c1">#     ub = self.qlim[1, :]</span>
+
+    <span class="c1">#     for k, qk in enumerate(q):</span>
+
+    <span class="c1">#         J = self.jacobe(qk)</span>
+
+    <span class="c1">#         N = null(J)</span>
+
+    <span class="c1">#         x0 = np.zeros(N.shape[1])</span>
+    <span class="c1">#         A = np.r_[N, -N]</span>
+    <span class="c1">#         b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)</span>
+
+    <span class="c1">#         con = LinearConstraint(A, -np.inf, b)</span>
+
+    <span class="c1">#         res = minimize(</span>
+    <span class="c1">#             lambda x: cost(x, ub, lb, qk, N),</span>
+    <span class="c1">#             x0, constraints=con)</span>
+
+    <span class="c1">#         qstar[k, :] = qk + N @ res.x</span>
+    <span class="c1">#         error[k] = res.fun</span>
+    <span class="c1">#         success[k] = res.success</span>
+
+    <span class="c1">#     if q.shape[0] == 1:</span>
+    <span class="c1">#         return qstar[0, :], success[0], error[0]</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return qstar, success, error</span>
+
+<span class="k">def</span> <span class="nf">_angle_axis</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Td</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transl</span><span class="p">(</span><span class="n">Td</span><span class="p">)</span> <span class="o">-</span> <span class="n">base</span><span class="o">.</span><span class="n">transl</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">t2r</span><span class="p">(</span><span class="n">Td</span><span class="p">)</span> <span class="o">@</span> <span class="n">base</span><span class="o">.</span><span class="n">t2r</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">iszerovec</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+        <span class="c1"># diagonal matrix case</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># (1,1,1) case</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># non-diagonal matrix case</span>
+        <span class="n">ln</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ln</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">l</span> <span class="o">/</span> <span class="n">ln</span>
+        
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">_angle_axis_sekiguchi</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Td</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transl</span><span class="p">(</span><span class="n">Td</span><span class="p">)</span> <span class="o">-</span> <span class="n">base</span><span class="o">.</span><span class="n">transl</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">t2r</span><span class="p">(</span><span class="n">Td</span><span class="p">)</span> <span class="o">@</span> <span class="n">base</span><span class="o">.</span><span class="n">t2r</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">iszerovec</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+        <span class="c1"># diagonal matrix case</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># (1,1,1) case</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># (1, -1, -1), (-1, 1, -1) or (-1, -1, 1) case</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># as per Sekiguchi paper</span>
+            <span class="k">if</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># (2)</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># (3)</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># (4)</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># non-diagonal matrix case</span>
+        <span class="n">ln</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ln</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">l</span> <span class="o">/</span> <span class="n">ln</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+    <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+
+    <span class="c1"># np.set_printoptions(linewidth=120, formatter={&#39;float&#39;: lambda x: f&quot;{x:9.5g}&quot; if abs(x) &gt; 1e-10 else f&quot;{0:9.5g}&quot;})</span>
+
+
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">OA</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ikine_LMS</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>         <span class="c1"># solve IK</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>                    <span class="c1"># display joint angles</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
+    <span class="n">robot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ikine_unc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">costfun</span><span class="o">=</span><span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-6</span> <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
+    <span class="n">robot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 19-Dec-2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

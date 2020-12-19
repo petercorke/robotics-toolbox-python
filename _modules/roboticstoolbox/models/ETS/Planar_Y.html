@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>roboticstoolbox.models.ETS.Planar_Y &mdash; Robotics Toolbox for Python  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="../../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.models.ETS.Planar_Y</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.models.ETS.Planar_Y</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ELink</span> <span class="kn">import</span> <span class="n">ELink</span>
+
+
+<div class="viewcode-block" id="Planar_Y"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.Planar_Y">[docs]</a><span class="k">class</span> <span class="nc">Planar_Y</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create model of a branched planar manipulator::</span>
+
+<span class="sd">        L0 -- L1 -+- L2a -- L3a -- EEa</span>
+<span class="sd">                |</span>
+<span class="sd">                +- L2b -- L3b -- EEb</span>
+
+<span class="sd">    ``Planar_Y()`` creates a planar branched manipulator model.</span>
+
+
+<span class="sd">    :references:</span>
+<span class="sd">        - Kinematic Derivatives using the Elementary Transform</span>
+<span class="sd">          Sequence, J. Haviland and P. Corke</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+        <span class="n">mm</span> <span class="o">=</span> <span class="mf">1e-3</span>
+        <span class="n">tool_offset</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># trunk of the tree</span>
+        <span class="n">l0</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link0&#39;</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="n">l1</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link1&#39;</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l0</span>
+        <span class="p">)</span>
+
+        <span class="c1"># branch 1</span>
+        <span class="n">l2</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2a&#39;</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l1</span>
+        <span class="p">)</span>
+
+        <span class="n">l3</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3a&#39;</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l2</span>
+        <span class="p">)</span>
+
+        <span class="n">eea</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eea&#39;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l3</span>
+        <span class="p">)</span>
+
+        <span class="c1"># branch 2</span>
+        <span class="n">l4</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2b&#39;</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l1</span>
+        <span class="p">)</span>
+
+        <span class="n">l5</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3b&#39;</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l4</span>
+        <span class="p">)</span>
+
+        <span class="n">eeb</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eeb&#39;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l5</span>
+        <span class="p">)</span>
+
+        <span class="n">elinks</span> <span class="o">=</span> <span class="p">[</span><span class="n">l0</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">l3</span><span class="p">,</span> <span class="n">l4</span><span class="p">,</span> <span class="n">l5</span><span class="p">,</span> <span class="n">eea</span><span class="p">,</span> <span class="n">eeb</span><span class="p">]</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">elinks</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Planar-Y&#39;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
+            <span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
+            <span class="s2">&quot;qy&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">Planar_Y</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+      <span class="lastupdated">
+        Last updated on 19-Dec-2020.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

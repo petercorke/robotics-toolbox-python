@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
 
   
   
@@ -226,6 +227,10 @@
 
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">jindex</span>
+            <span class="k">elif</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">jindex</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span>
 
         <span class="c1"># TODO simplify this logic, can be ELink class or None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -280,7 +285,10 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, parent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
@@ -293,12 +301,16 @@
 <span class="sd">        :return: Pretty print of the robot link</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># name = self.__class__.__name__</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">parent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">parent</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;name[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -390,23 +402,34 @@
     <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="n">j</span>
 
-<div class="viewcode-block" id="ELink.isrevolute"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the joint is of revolute type</span>
 
 <span class="sd">        :return: Ture if is revolute</span>
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrevolute</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrevolute</span>
 
-<div class="viewcode-block" id="ELink.isprismatic"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.isprismatic">[docs]</a>    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the joint is of prismatic type</span>
 
-<span class="sd">        :return: Ture if is prismatic</span>
+<span class="sd">        :return: True if is prismatic</span>
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isprismatic</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isprismatic</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of revolute type</span>
+
+<span class="sd">        :return: True if is revolute</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrevolute</span>
 
     <span class="c1"># @property</span>
     <span class="c1"># def ets(self):</span>
@@ -487,42 +510,33 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link transform matrix</span>
 
-<span class="sd">        T = A(q) is the link homogeneous transformation matrix (4x4)</span>
-<span class="sd">        corresponding to the link variable q</span>
-
 <span class="sd">        :param q: Joint coordinate (radians or metres). Not required for links</span>
 <span class="sd">            with no variable</span>
 <span class="sd">        :type q: float</span>
-<span class="sd">        :return T: link homogeneous transformation matrix</span>
-<span class="sd">        :rtype T: SE3</span>
+<span class="sd">        :param fast: return NumPy array instead of ``SE3``</span>
+<span class="sd">        :type param: bool</span>
+<span class="sd">        :return T: link frame transformation matrix</span>
+<span class="sd">        :rtype T: SE3 or ndarray(4,4)</span>
+
+<span class="sd">        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body </span>
+<span class="sd">          transformation from the previous to the current link frame to</span>
+<span class="sd">          the next, which depends on the joint coordinate ``q``.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># j = 0</span>
-        <span class="c1"># tr = SE3()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;q is required for variable joints&quot;</span><span class="p">)</span>
-
-        <span class="c1"># for k in range(self.M):</span>
-        <span class="c1">#     if self.ets[k].jtype == self.ets[k].VARIABLE:</span>
-        <span class="c1">#         T = self.ets[k].T(q)</span>
-        <span class="c1">#         j += 1</span>
-        <span class="c1">#     else:</span>
-        <span class="c1">#         T = self.ets[k].T()</span>
-
-        <span class="c1">#     tr = tr * T</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="c1"># a variable joint</span>
+            <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;q is required for variable joints&quot;</span><span class="p">)</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span></div>
+            <span class="c1"># a fixed joint</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span>
+
+        <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ELink.ets"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -562,61 +576,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span>
-
-<div class="viewcode-block" id="ELink.closest_point"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
-<span class="sd">        distance between this link and shape, provided it is less than</span>
-<span class="sd">        inf_dist. It will also return the points on self and shape in the</span>
-<span class="sd">        world frame which connect the line of length distance between the</span>
-<span class="sd">        shapes. If the distance is negative then the shapes are collided.</span>
-
-<span class="sd">        :param shape: The shape to compare distance to</span>
-<span class="sd">        :type shape: Shape</span>
-<span class="sd">        :param inf_dist: The minimum distance within which to consider</span>
-<span class="sd">            the shape</span>
-<span class="sd">        :type inf_dist: float</span>
-
-<span class="sd">        :returns: d, p1, p2 where d is the distance between the shapes,</span>
-<span class="sd">            p1 and p2 are the points in the world frame on the respective</span>
-<span class="sd">            shapes</span>
-<span class="sd">        :rtype: float, SE3, SE3</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="n">d</span> <span class="o">=</span> <span class="mi">10000</span>
-        <span class="n">p1</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">p2</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
-            <span class="n">td</span><span class="p">,</span> <span class="n">tp1</span><span class="p">,</span> <span class="n">tp2</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">td</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">td</span> <span class="o">&lt;</span> <span class="n">d</span><span class="p">:</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">td</span>
-                <span class="n">p1</span> <span class="o">=</span> <span class="n">tp1</span>
-                <span class="n">p2</span> <span class="o">=</span> <span class="n">tp2</span>
-
-        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">10000</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
-
-<div class="viewcode-block" id="ELink.collided"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        collided(shape) checks if this link and shape have collided</span>
-
-<span class="sd">        :param shape: The shape to compare distance to</span>
-<span class="sd">        :type shape: Shape</span>
-
-<span class="sd">        :returns: True if shapes have collided</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">collided</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="k">return</span> <span class="kc">False</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span></div>
 </pre></div>
 
            </div>
@@ -632,7 +592,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

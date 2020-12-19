@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
 
   
   
@@ -178,12 +179,6 @@
 <dt id="roboticstoolbox.robot.ETS.SuperETS">
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ETS.</code><code class="sig-name descname">SuperETS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em>, <em class="sig-param"><span class="n">j</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#SuperETS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.SuperETS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.UserList</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<dl class="py attribute">
-<dt id="roboticstoolbox.robot.ETS.SuperETS.ets_tuple">
-<code class="sig-name descname">ets_tuple</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.SuperETS.ets_tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">ETS3</span></code></p>
-</dd></dl>
-
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.SuperETS.eta">
 <em class="property">property </em><code class="sig-name descname">eta</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.SuperETS.eta" title="Permalink to this definition">¶</a></dt>
@@ -319,10 +314,10 @@ or moves in the opposite direction.</p>
 <span class="go">       [0, 0, 0, 1]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eflip</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eflip</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="go">array([[1, 0, 0, 1],</span>
-<span class="go">       [0, 1, 0, 0],</span>
-<span class="go">       [0, 0, 1, 0],</span>
-<span class="go">       [0, 0, 0, 1]])</span>
+<span class="go">array([[ 1,  0,  0, -1],</span>
+<span class="go">       [ 0,  1,  0,  0],</span>
+<span class="go">       [ 0,  0,  1,  0],</span>
+<span class="go">       [ 0,  0,  0,  1]])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -790,9 +785,9 @@ individual ETs in the reverse order.</p>
 <span class="go">tx(-1) * Rx(q3) * tx(-1) * Rz(-q2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
-<span class="go">   1           0           0           0            </span>
-<span class="go">   0           1           0           0            </span>
-<span class="go">   0           0           1           0            </span>
+<span class="go">   0.982983    0.11938     0.139618    0            </span>
+<span class="go">  -0.11938    -0.162517    0.979457    0            </span>
+<span class="go">   0.139618   -0.979457   -0.1455      0            </span>
 <span class="go">   0           0           0           1            </span>
 
 </pre></div>
@@ -1490,12 +1485,6 @@ stored internally in radians</p>
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="roboticstoolbox.robot.ETS.ETS2.ets_tuple">
-<code class="sig-name descname">ets_tuple</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.ets_tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">ETS3</span></code></p>
-</dd></dl>
-
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS2.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.eval" title="Permalink to this definition">¶</a></dt>
@@ -1592,9 +1581,9 @@ individual ETs in the reverse order.</p>
 <span class="go">tx(-1) * Rx(q3) * tx(-1) * Rz(-q2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
-<span class="go">   1           0           0           0            </span>
-<span class="go">   0           1           0           0            </span>
-<span class="go">   0           0           1           0            </span>
+<span class="go">   0.982983    0.11938     0.139618    0            </span>
+<span class="go">  -0.11938    -0.162517    0.979457    0            </span>
+<span class="go">   0.139618   -0.979457   -0.1455      0            </span>
 <span class="go">   0           0           0           1            </span>
 
 </pre></div>
@@ -1657,10 +1646,10 @@ or moves in the opposite direction.</p>
 <span class="go">       [0, 0, 0, 1]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eflip</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eflip</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="go">array([[1, 0, 0, 1],</span>
-<span class="go">       [0, 1, 0, 0],</span>
-<span class="go">       [0, 0, 1, 0],</span>
-<span class="go">       [0, 0, 0, 1]])</span>
+<span class="go">array([[ 1,  0,  0, -1],</span>
+<span class="go">       [ 0,  1,  0,  0],</span>
+<span class="go">       [ 0,  0,  1,  0],</span>
+<span class="go">       [ 0,  0,  0,  1]])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -2674,12 +2663,6 @@ stored internally in radians</p>
 </div>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="roboticstoolbox.robot.ETS.ETS.ets_tuple">
-<code class="sig-name descname">ets_tuple</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ets_tuple" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">ETS3</span></code></p>
-</dd></dl>
-
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS.eval">
 <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.eval" title="Permalink to this definition">¶</a></dt>
@@ -2776,9 +2759,9 @@ individual ETs in the reverse order.</p>
 <span class="go">tx(-1) * Rx(q3) * tx(-1) * Rz(-q2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">*</span> <span class="n">e</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
-<span class="go">   1           0           0           0            </span>
-<span class="go">   0           1           0           0            </span>
-<span class="go">   0           0           1           0            </span>
+<span class="go">   0.982983    0.11938     0.139618    0            </span>
+<span class="go">  -0.11938    -0.162517    0.979457    0            </span>
+<span class="go">   0.139618   -0.979457   -0.1455      0            </span>
 <span class="go">   0           0           0           1            </span>
 
 </pre></div>
@@ -2841,10 +2824,10 @@ or moves in the opposite direction.</p>
 <span class="go">       [0, 0, 0, 1]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eflip</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">eflip</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="go">array([[1, 0, 0, 1],</span>
-<span class="go">       [0, 1, 0, 0],</span>
-<span class="go">       [0, 0, 1, 0],</span>
-<span class="go">       [0, 0, 0, 1]])</span>
+<span class="go">array([[ 1,  0,  0, -1],</span>
+<span class="go">       [ 0,  1,  0,  0],</span>
+<span class="go">       [ 0,  0,  1,  0],</span>
+<span class="go">       [ 0,  0,  0,  1]])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -3087,7 +3070,7 @@ instance is modified.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
 
   
   
@@ -257,8 +258,6 @@
             <span class="n">meshdir</span><span class="o">=</span><span class="s1">&#39;meshes/FRANKA-EMIKA/Panda&#39;</span><span class="p">,</span>
             <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">)</span>
 
-        <span class="c1"># tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span></div>
 
@@ -267,6 +266,7 @@
 
     <span class="n">panda</span> <span class="o">=</span> <span class="n">Panda</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
+
 </pre></div>
 
            </div>
@@ -282,7 +282,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

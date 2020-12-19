@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
 
   
   
@@ -159,18 +160,19 @@
 <span class="sd">@author: Jesse Haviland</span>
 <span class="sd">@author: Peter Corke</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">UserList</span><span class="p">,</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">UserList</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">getunit</span><span class="p">,</span> <span class="n">trotx</span><span class="p">,</span> <span class="n">troty</span><span class="p">,</span> <span class="n">trotz</span><span class="p">,</span> \
-    <span class="n">issymbol</span><span class="p">,</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">transl2</span><span class="p">,</span> <span class="n">trot2</span><span class="p">,</span> <span class="n">removesmall</span><span class="p">,</span> <span class="n">trinv</span><span class="p">,</span> <span class="n">verifymatrix</span>
-
-
+    <span class="n">issymbol</span><span class="p">,</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">transl2</span><span class="p">,</span> <span class="n">trot2</span><span class="p">,</span> <span class="n">removesmall</span><span class="p">,</span> <span class="n">trinv</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">iseye</span>
+    
 <div class="viewcode-block" id="SuperETS"><a class="viewcode-back" href="../../../mobile.html#roboticstoolbox.robot.ETS.SuperETS">[docs]</a><span class="k">class</span> <span class="nc">SuperETS</span><span class="p">(</span><span class="n">UserList</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 
     <span class="c1"># T is a NumPy array (4,4) or None</span>
-    <span class="n">ets_tuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ETS3&#39;</span><span class="p">,</span> <span class="s1">&#39;eta axis_func axis joint T jindex flip&#39;</span><span class="p">)</span>
+    <span class="c1"># ets_tuple = namedtuple(&#39;ETS3&#39;, &#39;eta axis_func axis joint T jindex flip&#39;)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">axis_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -241,7 +243,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;axis_func must be callable or ndarray&#39;</span><span class="p">)</span>
 
         <span class="c1"># Save all the params in a named tuple</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets_tuple</span><span class="p">(</span><span class="n">eta</span><span class="p">,</span> <span class="n">axis_func</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">joint</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">flip</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> <span class="n">axis_func</span><span class="o">=</span><span class="n">axis_func</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="n">joint</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
 
         <span class="c1"># And make it the only value of this instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span>
@@ -389,6 +391,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">jindex</span>
 
+    <span class="nd">@jindex</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;jindex is </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">, must be an int &gt;= 0&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">j</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -527,6 +535,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isflip</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="n">q</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis_func</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T</span></div>
@@ -626,7 +636,8 @@
                 <span class="c1"># a joint</span>
                 <span class="k">if</span> <span class="n">const</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="c1"># flush the constant</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">_CONST</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">iseye</span><span class="p">(</span><span class="n">const</span><span class="p">):</span>
+                        <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">_CONST</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
                     <span class="n">const</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">ets</span> <span class="o">*=</span> <span class="n">et</span>  <span class="c1"># emit the joint ET</span>
             <span class="k">else</span><span class="p">:</span>
@@ -638,7 +649,8 @@
 
         <span class="k">if</span> <span class="n">const</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># flush the constant, tool transform</span>
-            <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">_CONST</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">iseye</span><span class="p">(</span><span class="n">const</span><span class="p">):</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">_CONST</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ets</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -929,20 +941,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="n">inv</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-            <span class="c1"># get the named tuple from the list, and convert to a dict</span>
-            <span class="n">etdict</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="c1"># get the namespace from the list</span>
 
-            <span class="c1"># update the dict to make this an inverse</span>
-            <span class="k">if</span> <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;joint&#39;</span><span class="p">]:</span>
-                <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;flip&#39;</span><span class="p">]</span> <span class="o">^=</span> <span class="kc">True</span>   <span class="c1"># toggle flip status</span>
-            <span class="k">elif</span> <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;axis&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
-                <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trinv</span><span class="p">(</span><span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
-            <span class="k">elif</span> <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trinv</span><span class="p">(</span><span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span>
-                <span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">etdict</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span>
+            <span class="c1"># clone it, and invert the elements to create an inverse</span>
+            <span class="n">nsi</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nsi</span><span class="o">.</span><span class="n">joint</span><span class="p">:</span>
+                <span class="n">nsi</span><span class="o">.</span><span class="n">flip</span> <span class="o">^=</span> <span class="kc">True</span>   <span class="c1"># toggle flip status</span>
+            <span class="k">elif</span> <span class="n">nsi</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+                <span class="n">nsi</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">trinv</span><span class="p">(</span><span class="n">nsi</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">nsi</span><span class="o">.</span><span class="n">eta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">nsi</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">trinv</span><span class="p">(</span><span class="n">nsi</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">nsi</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="o">-</span><span class="n">nsi</span><span class="o">.</span><span class="n">eta</span>
             <span class="n">et</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>  <span class="c1"># create a new ETS instance</span>
-            <span class="n">et</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ets_tuple</span><span class="p">(</span><span class="o">**</span><span class="n">etdict</span><span class="p">)]</span>  <span class="c1"># set it&#39;s data from the dict</span>
+            <span class="n">et</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">nsi</span><span class="p">]</span>  <span class="c1"># set it&#39;s data from the dict</span>
             <span class="n">inv</span> <span class="o">*=</span> <span class="n">et</span>
         <span class="k">return</span> <span class="n">inv</span></div></div>
 
@@ -1259,7 +1271,7 @@
 
         <span class="c1"># we will work with NumPy arrays for maximum speed</span>
         <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">A</span>
-        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># SE(3) matrix</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
 
@@ -1268,13 +1280,13 @@
             <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
                 <span class="c1"># joint variable</span>
                 <span class="c1"># U = U @ link.A(q[j], fast=True)</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">et</span><span class="o">.</span><span class="n">axis_func</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">et</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
 
                 <span class="c1"># TODO???</span>
                 <span class="c1"># if link == to_link:</span>
                 <span class="c1">#     U = U @ offset.A</span>
 
-                <span class="n">Tu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">@</span> <span class="n">T</span>
+                <span class="n">Tu</span> <span class="o">=</span> <span class="n">trinv</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">@</span> <span class="n">T</span>
                 <span class="n">n</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
                 <span class="n">o</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
                 <span class="n">a</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
@@ -1629,7 +1641,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

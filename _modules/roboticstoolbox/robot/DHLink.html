@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
 
   
   
@@ -316,10 +317,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">qvar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:   theta=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="si">}</span><span class="s2">, &quot;</span> \
                 <span class="sa">f</span><span class="s2">&quot;a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">, alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:  theta=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">, &quot;</span> \
                 <span class="sa">f</span><span class="s2">&quot; a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  &quot;</span> \
                 <span class="sa">f</span><span class="s2">&quot;alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -573,8 +574,8 @@
 
         <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-    <span class="c1"># TODO these next 2 should be properties</span>
-<div class="viewcode-block" id="DHLink.isrevolute"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the joint is of revolute type</span>
 
@@ -587,9 +588,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
+            <span class="k">return</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="DHLink.isprismatic"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.isprismatic">[docs]</a>    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the joint is of prismatic type</span>
 
@@ -602,7 +604,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
+            <span class="k">return</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="DHLink.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ets</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
@@ -614,14 +616,14 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
                 <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
 
@@ -639,7 +641,7 @@
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
 
@@ -949,7 +951,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

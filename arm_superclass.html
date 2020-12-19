@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
 
   
   
@@ -189,15 +190,15 @@
 <h1>Superclasses<a class="headerlink" href="#superclasses" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="robot">
 <h2>Robot<a class="headerlink" href="#robot" title="Permalink to this headline">¶</a></h2>
-<div class="graphviz"><img src="_images/inheritance-7c31f817f993335eaba3c3ea04ebd8e6dd69c0a3.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-96a364f3e1daf3d049ee831638d3702f0d0b8f0f.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
 <map id="inheritanced41b53372b" name="inheritanced41b53372b">
-<area shape="rect" id="node3" href="#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="244,5,344,31"/>
-<area shape="rect" id="node2" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="392,5,508,31"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="244,31,344,56"/>
+<area shape="rect" id="node2" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="392,31,508,56"/>
 </map><p>The various models <a class="reference internal" href="arm_erobot.html#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
 <span class="target" id="module-roboticstoolbox.robot.Robot"></span><dl class="py class">
 <dt id="roboticstoolbox.robot.Robot.Robot">
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Robot.</code><code class="sig-name descname">Robot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">links</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'noname'</span></em>, <em class="sig-param"><span class="n">manufacturer</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">comment</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">base</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tool</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gravity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">meshdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">keywords</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">symbolic</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Dynamics.DynamicsMixin</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Dynamics.DynamicsMixin</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.IK.IKMixin</span></code></p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.gravity">
 <em class="property">property </em><code class="sig-name descname">gravity</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.gravity" title="Permalink to this definition">¶</a></dt>
@@ -382,6 +383,113 @@ matplotlib documentation.</p>
 </li>
 </ul>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.manipulability">
+<code class="sig-name descname">manipulability</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'yoshikawa'</span></em>, <em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">'all'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.manipulability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.manipulability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manipulability measure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em><em>, or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – Joint coordinates, one of J or q required</p></li>
+<li><p><strong>J</strong> (<em>ndarray</em><em>(</em><em>6</em><em>,</em><em>n</em><em>)</em>) – Jacobian in world frame if already computed, one of J or
+q required</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – method to use, “yoshikawa” (default), “condition”,
+“minsingular”  or “asada”</p></li>
+<li><p><strong>axes</strong> (<em>str</em>) – Task space axes to consider: “all” [default],
+“trans” or “rot”</p></li>
+<li><p><strong>kwargs</strong> – extra arguments to pass to <code class="docutils literal notranslate"><span class="pre">jacob0</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>manipulability</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float or ndarray(m)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">manipulability(q)</span></code> is the scalar manipulability index
+for the robot at the joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>.  It indicates
+dexterity, that is, how well conditioned the robot is for motion
+with respect to the 6 degrees of Cartesian motion.  The values is
+zero if the robot is at a singularity.</p></li>
+</ul>
+<p>Various measures are supported:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Measure</p></td>
+<td><p>Description</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;yoshikawa&quot;</span></code></p></td>
+<td><p>Volume of the velocity ellipsoid, <em>distance</em>
+from singularity <a class="reference internal" href="#yoshikawa85" id="id3"><span>[Yoshikawa85]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;invcondition&quot;</span></code></p></td>
+<td><p>Inverse condition number of Jacobian, isotropy
+of the velocity ellipsoid <a class="reference internal" href="#klein87" id="id4"><span>[Klein87]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;minsingular&quot;</span></code></p></td>
+<td><p>Minimum singular value of the Jacobian,
+<em>distance</em>  from singularity <a class="reference internal" href="#klein87" id="id5"><span>[Klein87]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;asada&quot;</span></code></p></td>
+<td><p>Isotropy of the task-space acceleration
+ellipsoid which is a function of the Cartesian
+inertia matrix which depends on the inertial
+parameters <a class="reference internal" href="#asada83" id="id6"><span>[Asada83]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trajectory operation</strong>:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">q</span></code> is a matrix (m,n) then the result (m,) is a vector of
+manipulability indices for each joint configuration specified by a row
+of <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Invokes the <code class="docutils literal notranslate"><span class="pre">jacob0</span></code> method of the robot if <code class="docutils literal notranslate"><span class="pre">J</span></code> is not passed</p></li>
+<li><p>The “all” option includes rotational and translational
+dexterity, but this involves adding different units. It can be
+more useful to look at the translational and rotational
+manipulability separately.</p></li>
+<li><p>Examples in the RVC book (1st edition) can be replicated by
+using the “all” option</p></li>
+<li><p>Asada’s measure requires inertial a robot model with inertial
+parameters.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<dl class="citation">
+<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id3">Yoshikawa85</a></span></dt>
+<dd><p>Manipulability of Robotic Mechanisms. Yoshikawa T.,
+The International Journal of Robotics Research.
+1985;4(2):3-9. doi:10.1177/027836498500400201</p>
+</dd>
+<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id6">Asada83</a></span></dt>
+<dd><p>A geometrical representation of manipulator dynamics and
+its application to arm design, H. Asada,
+Journal of Dynamic Systems, Measurement, and Control,
+vol. 105, p. 131, 1983.</p>
+</dd>
+<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id4">1</a>,<a href="#id5">2</a>)</span></dt>
+<dd><p>Dexterity Measures for the Design and Control of
+Kinematically Redundant Manipulators. Klein CA, Blaho BE.
+The International Journal of Robotics Research.
+1987;6(2):72-83. doi:10.1177/027836498700600206</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>Robotics, Vision &amp; Control, Chap 8, P. Corke, Springer 2011.</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
@@ -570,30 +678,6 @@ is an identity matrix.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.Robot.Robot.qdd">
-<em class="property">property </em><code class="sig-name descname">qdd</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qdd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get/set robot joint acceleration (Robot superclass)</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span></code> is the robot joint acceleration</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>robot joint acceleration</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(n,)</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot joint acceleration</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>???</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.accel">
 <code class="sig-name descname">accel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">torque</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.accel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute acceleration due to applied torque</p>
@@ -670,7 +754,7 @@ ASME Journa of Dynamic Systems, Measurement and Control, vol.
 <p><code class="docutils literal notranslate"><span class="pre">robot.cinertia(q)</span></code> is the Cartesian (operational space) inertia
 matrix which relates Cartesian force/torque to Cartesian
 acceleration at the joint configuration q.</p>
-<p>:math:<a href="#id3"><span class="problematic" id="id4">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
+<p>:math:<a href="#id7"><span class="problematic" id="id8">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -983,6 +1067,274 @@ being the corresponding joint torques.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikine_LM">
+<code class="sig-name descname">ikine_LM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">500</span></em>, <em class="sig-param"><span class="n">rlimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-10</span></em>, <em class="sig-param"><span class="n">L</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">Lmin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">search</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">slimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">transpose</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_LM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em>) – The desired end-effector pose or pose trajectory</p></li>
+<li><p><strong>q0</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+<li><p><strong>mask</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – mask vector that correspond to translation in X, Y and Z
+and rotation about X, Y and Z respectively.</p></li>
+<li><p><strong>ilimit</strong> (<em>int</em>) – maximum number of iterations (default 500)</p></li>
+<li><p><strong>rlimit</strong> (<em>int</em>) – maximum number of consecutive step rejections (default 100)</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – final error tolerance (default 1e-10)</p></li>
+<li><p><strong>L</strong> (<em>float</em><em> (</em><em>default 0.1</em><em>)</em>) – initial value of lambda</p></li>
+<li><p><strong>Lmin</strong> (<em>float</em><em> (</em><em>default 0</em><em>)</em>) – minimum allowable value of lambda</p></li>
+<li><p><strong>search</strong> (<em>bool</em>) – search over all configurations</p></li>
+<li><p><strong>slimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of search attempts</p></li>
+<li><p><strong>transpose</strong> (<em>float</em>) – use Jacobian transpose with step size A, rather
+than Levenberg-Marquadt</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>inverse kinematic solution</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>named tuple</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_LM(T)</span></code> are the joint coordinates (n) corresponding
+to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This method can
+be used for robots with any number of degrees of freedom. The return
+value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p><strong>Trajectory operation</strong>:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
+a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
+initial estimate of q for each time step is taken as the solution from
+the previous time step.</p>
+<p><strong>Underactuated robots:</strong></p>
+<p>For the case where the manipulator has fewer than 6 DOF the
+solution space has more dimensions than can be spanned by the
+manipulator joint coordinates.</p>
+<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector
+(6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+will be ignored in reaching a solution.  The mask vector has six
+elements that correspond to translation in X, Y and Z, and rotation
+about X, Y and Z respectively. The value should be 0 (for ignore)
+or 1. The number of non-zero elements must equal the number of
+manipulator DOF.</p>
+<p>For example when using a 3 DOF manipulator tool orientation might
+be unimportant, in which case use the option <code class="docutils literal notranslate"><span class="pre">mask=[1</span> <span class="pre">1</span> <span class="pre">1</span> <span class="pre">0</span> <span class="pre">0</span> <span class="pre">0]</span></code>.</p>
+<p><strong>Global search</strong>:</p>
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_LM(T,</span> <span class="pre">search=True)</span></code> as above but peforms a
+brute-force search with initial conditions chosen randomly from the
+entire configuration space.  If a numerical solution is found from that
+initial condition, it is returned, otherwise another initial condition is
+chosen.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Implements a Levenberg-Marquadt variable-step-size solver.</p></li>
+<li><p>The tolerance is computed on the norm of the error between
+current and desired tool pose.  This norm is computed from
+distances and angles without any kind of weighting.</p></li>
+<li><p>The inverse kinematic solution is generally not unique, and
+depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+most manipulators since it often corresponds to a
+kinematic singularity.</p></li>
+<li><p>Such a solution is completely general, though much less
+efficient than analytic inverse kinematic solutions derived
+symbolically.</p></li>
+<li><p>This approach allows a solution to be obtained at a singularity,
+but the joint angles within the null space are arbitrarily
+assigned.</p></li>
+<li><p>Joint offsets, if defined, are accounted for in the solution.</p></li>
+<li><p>Joint limits are not considered in this solution.</p></li>
+<li><p>If the search option is used any prismatic joint must have
+joint limits defined.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control, P. Corke, Springer 2011,
+Section 8.4.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_LMS" title="roboticstoolbox.robot.Robot.Robot.ikine_LMS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_LMS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_unc()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_con()</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="roboticstoolbox.robot.Robot.Robot.ikine_min"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_min()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikine_LMS">
+<code class="sig-name descname">ikine_LMS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">500</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-10</span></em>, <em class="sig-param"><span class="n">wN</span><span class="o">=</span><span class="default_value">0.001</span></em>, <em class="sig-param"><span class="n">Lmin</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em>) – The desired end-effector pose or pose trajectory</p></li>
+<li><p><strong>q0</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+<li><p><strong>mask</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – mask vector that correspond to translation in X, Y and Z
+and rotation about X, Y and Z respectively.</p></li>
+<li><p><strong>ilimit</strong> (<em>int</em>) – maximum number of iterations (default 500)</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – final error tolerance (default 1e-10)</p></li>
+<li><p><strong>ωN</strong> (<em>float</em><em> (</em><em>default 1e-3</em><em>)</em>) – damping coefficient</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>inverse kinematic solution</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>named tuple</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_LM(T)</span></code> are the joint coordinates (n) corresponding
+to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This method can
+be used for robots with any number of degrees of freedom. The return
+value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p><strong>Trajectory operation</strong>:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
+a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
+initial estimate of q for each time step is taken as the solution from
+the previous time step.</p>
+<p><strong>Underactuated robots:</strong></p>
+<p>For the case where the manipulator has fewer than 6 DOF the
+solution space has more dimensions than can be spanned by the
+manipulator joint coordinates.</p>
+<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector
+(6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+will be ignored in reaching a solution.  The mask vector has six
+elements that correspond to translation in X, Y and Z, and rotation
+about X, Y and Z respectively. The value should be 0 (for ignore)
+or 1. The number of non-zero elements should equal the number of
+manipulator DOF.</p>
+<p>For example when using a 3 DOF manipulator rotation orientation might
+be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Implements a modified Levenberg-Marquadt variable-step-size solver
+which is quite robust in practice.</p></li>
+<li><p>The tolerance is computed on the norm of the error between
+current and desired tool pose.  This norm is computed from
+distances and angles without any kind of weighting.</p></li>
+<li><p>The inverse kinematic solution is generally not unique, and
+depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+most manipulators since it often corresponds to a
+kinematic singularity.</p></li>
+<li><p>Such a solution is completely general, though much less
+efficient than analytic inverse kinematic solutions derived
+symbolically.</p></li>
+<li><p>This approach allows a solution to be obtained at a singularity,
+but the joint angles within the null space are arbitrarily
+assigned.</p></li>
+<li><p>Joint offsets, if defined, are accounted for in the solution.</p></li>
+<li><p>Joint limits are not considered in this solution.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>“Solvability-Unconcerned Inverse Kinematics by the
+Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5), 
+October 2011, pp. 984-991.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_LM" title="roboticstoolbox.robot.Robot.Robot.ikine_LM"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_LM()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_unc()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_con()</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="roboticstoolbox.robot.Robot.Robot.ikine_min"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_min()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikine_min">
+<code class="sig-name descname">ikine_min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">costfun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>SE3</em>) – The desired end-effector pose or pose trajectory</p></li>
+<li><p><strong>q0</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
+<li><p><strong>qlim</strong> (<em>bool</em>) – enforce joint limits</p></li>
+<li><p><strong>ilimit</strong> (<em>int</em>) – Iteration limit (default 1000)</p></li>
+<li><p><strong>tol</strong> (<em>tol</em>) – Tolerance (default 1e-16)</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – minimization method to use</p></li>
+<li><p><strong>stiffness</strong> (<em>float</em>) – Stiffness used to impose a smoothness contraint on
+joint angles, useful when n is large (default 0)</p></li>
+<li><p><strong>costfun</strong> (<em>callable</em>) – User supplied cost term, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>inverse kinematic solution</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>named tuple</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_unc(T)</span></code> are the joint coordinates (n) corresponding
+to the robot end-effector pose T which is an SE3 object.  The
+return value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p><strong>Minimization method</strong>:</p>
+<p>By default this method uses:</p>
+<ul class="simple">
+<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> minimizer for the case of no joint limits</p></li>
+<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">trust-constr</span></code> minimizer for the case with joint limits. 
+This gives good results but is very slow.  An alternative is 
+<code class="docutils literal notranslate"><span class="pre">L-BFGS-B</span></code> but for redundant robots can sometimes give poor results,
+pushing against the joint limits when there is no need to.</p></li>
+</ul>
+<p>In both case the function to be minimized is the squared norm of a 
+vector <span class="math notranslate nohighlight">\([d,a]\)</span> with components respectively the
+translation error and rotation error in Euler vector form, between the
+desired pose and the current estimate obtained by inverse kinematics.</p>
+<p><strong>Additional cost terms</strong>:</p>
+<p>This method supports two additional costs:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation 
+<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the 
+arm straight</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">costfun</span></code> add a cost given by a user-specified function <code class="docutils literal notranslate"><span class="pre">costfun(q)</span></code></p></li>
+</ul>
+<p><strong>Trajectory operation</strong>:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
+a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
+initial estimate of q for each time step is taken as the solution from
+the previous time step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">SciPy.minimize</span></code> with bounds.</p></li>
+<li><p>Joint limits are considered in this solution.</p></li>
+<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
+<li><p>The inverse kinematic solution is generally not unique, and
+depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+most manipulators since it often corresponds to a
+kinematic singularity.</p></li>
+<li><p>Such a solution is completely general, though much less
+efficient than analytic inverse kinematic solutions derived
+symbolically.</p></li>
+<li><p>The objective function (error) is 
+<span class="math notranslate nohighlight">\(\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2\)</span>
+where <span class="math notranslate nohighlight">\(\mat{\Omega}\)</span> is a diagonal matrix.</p></li>
+<li><p>Joint offsets, if defined, are accounted for in the solution.</p></li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<ul class="simple">
+<li><p>The objective function is rather uncommon.</p></li>
+<li><p>Order of magnitude slower than <code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> or <code class="docutils literal notranslate"><span class="pre">ikine_LMS</span></code>, it
+uses a scalar cost-function and does not provide a Jacobian.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Author</dt>
+<dd class="field-odd"><p>Bryan Moutrie, for RTB-MATLAB</p>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_LM" title="roboticstoolbox.robot.Robot.Robot.ikine_LM"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_LM()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_LMS" title="roboticstoolbox.robot.Robot.Robot.ikine_LMS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_LMS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_unc()</span></code>, <a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="roboticstoolbox.robot.Robot.Robot.ikine_min"><code class="xref py py-func docutils literal notranslate"><span class="pre">ikine_min()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.inertia">
 <code class="sig-name descname">inertia</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.inertia" title="Permalink to this definition">¶</a></dt>
 <dd><p>DHRobot.INERTIA Manipulator inertia matrix</p>
@@ -1286,6 +1638,30 @@ reable format</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.qdd">
+<em class="property">property </em><code class="sig-name descname">qdd</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qdd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint acceleration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span></code> is the robot joint acceleration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint acceleration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the robot joint acceleration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.control_type">
 <em class="property">property </em><code class="sig-name descname">control_type</code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.control_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get/set robot control mode (Robot superclass)</p>
@@ -1310,290 +1686,16 @@ reable format</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.Robot.Robot.ikine">
-<code class="sig-name descname">ikine</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">500</span></em>, <em class="sig-param"><span class="n">rlimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-10</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">Ymin</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">mask</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">search</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">slimit</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">transpose</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.ikine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numerical inverse kinematics by optimization (Robot superclass)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>T</strong> (SE3 with 1 or <code class="docutils literal notranslate"><span class="pre">m</span></code> values) – The desired end-effector pose</p></li>
-<li><p><strong>ilimit</strong> (<em>int</em><em> (</em><em>default 500</em><em>)</em>) – maximum number of iterations</p></li>
-<li><p><strong>rlimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of consecutive step rejections</p></li>
-<li><p><strong>tol</strong> (<em>float</em><em> (</em><em>default 1e-10</em><em>)</em>) – final error tolerance</p></li>
-<li><p><strong>Y</strong> (<em>float</em><em> (</em><em>default 0.1</em><em>)</em>) – initial value of lambda</p></li>
-<li><p><strong>Ymin</strong> (<em>float</em><em> (</em><em>default 0</em><em>)</em>) – minimum allowable value of lambda</p></li>
-<li><p><strong>mask</strong> (<em>float ndarray</em><em>(</em><em>6</em><em>)</em>) – mask vector that correspond to translation in X, Y and Z
-and rotation about X, Y and Z respectively.</p></li>
-<li><p><strong>q0</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>) </em><em>(</em><em>default all zeros</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
-<li><p><strong>search</strong> (<em>bool</em>) – search over all configurations</p></li>
-<li><p><strong>slimit</strong> (<em>int</em><em> (</em><em>default 100</em><em>)</em>) – maximum number of search attempts</p></li>
-<li><p><strong>transpose</strong> (<em>float</em>) – use Jacobian transpose with step size A, rather
-than Levenberg-Marquadt</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The calculated joint values</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>IK solver failed</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool or list of bool</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>If failed, what went wrong</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List of str</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">q,</span> <span class="pre">failure,</span> <span class="pre">reason</span> <span class="pre">=</span> <span class="pre">ikine(T)</span></code> are the joint coordinates (n)
-corresponding to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code>
-instance. <code class="docutils literal notranslate"><span class="pre">failure</span></code> is True if the solver failed, and <code class="docutils literal notranslate"><span class="pre">reason</span></code>
-contains details of the failure.</p>
-<p>This method can be used for robots with any number of degrees of
-freedom.</p>
-<p><strong>Trajectory operation:</strong></p>
-<p>If <code class="docutils literal notranslate"><span class="pre">T</span></code> contains <code class="docutils literal notranslate"><span class="pre">m</span></code> &gt; 1 values, ie. a trajectory, then returns the
-joint coordinates corresponding to each of the pose values in <code class="docutils literal notranslate"><span class="pre">T</span></code>.
-<code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n) where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints. The initial
-estimate of <code class="docutils literal notranslate"><span class="pre">q</span></code> for each time step is taken as the solution from the
-previous time step. Returns trajectory of joints <code class="docutils literal notranslate"><span class="pre">q</span></code> (m,n), list of
-failure (m) and list of error reasons (m).</p>
-<p><strong>Underactuated robots:</strong></p>
-<p>For the case where the manipulator has fewer than 6 DOF the
-solution space has more dimensions than can be spanned by the
-manipulator joint coordinates.</p>
-<p>In this case we specify the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector
-(6) specifies the Cartesian DOF (in the wrist coordinate frame) that
-will be ignored in reaching a solution.  The mask vector has six
-elements that correspond to translation in X, Y and Z, and rotation
-about X, Y and Z respectively. The value should be 0 (for ignore)
-or 1. The number of non-zero elements should equal the number of
-manipulator DOF.</p>
-<p>For example when using a 3 DOF manipulator rotation orientation might
-be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
-<p>For robots with 4 or 5 DOF this method is very difficult to use since
-orientation is specified by T in world coordinates and the achievable
-orientations are a function of the tool position.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>Solution is computed iteratively.</p></li>
-<li><p>Implements a Levenberg-Marquadt variable step size solver.</p></li>
-<li><p>The tolerance is computed on the norm of the error between
-current and desired tool pose.  This norm is computed from
-distances and angles without any kind of weighting.</p></li>
-<li><p>The inverse kinematic solution is generally not unique, and
-depends on the initial guess q0 (defaults to 0).</p></li>
-<li><p>The default value of q0 is zero which is a poor choice for most
-manipulators (eg. puma560, twolink) since it corresponds to a
-kinematic singularity.</p></li>
-<li><p>Such a solution is completely general, though much less
-efficient than specific inverse kinematic solutions derived
-symbolically, like ikine6s or ikine3.</p></li>
-<li><p>This approach allows a solution to be obtained at a singularity,
-but the joint angles within the null space are arbitrarily
-assigned.</p></li>
-<li><p>Joint offsets, if defined, are added to the inverse kinematics
-to generate q.</p></li>
-<li><p>Joint limits are not considered in this solution.</p></li>
-<li><p>The ‘search’ option peforms a brute-force search with initial
-conditions chosen from the entire configuration space.</p></li>
-<li><p>If the search option is used any prismatic joint must have
-joint limits defined.</p></li>
-</ul>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">References</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>Robotics, Vision &amp; Control, P. Corke, Springer 2011,
-Section 8.4.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.Robot.Robot.ikunc">
-<code class="sig-name descname">ikunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.ikunc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikunc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inverse manipulator by optimization without joint limits (Robot
-superclass)</p>
-<p>q, success, err = ikunc(T) are the joint coordinates (n) corresponding
-to the robot end-effector pose T which is an SE3 object or
-homogenenous transform matrix (4x4), and n is the number of robot
-joints. Also returns success and err which is the scalar final value
-of the objective function.</p>
-<p>q, success, err = robot.ikunc(T, q0, ilimit) as above but specify the
-initial joint coordinates q0 used for the minimisation.</p>
-<p>Trajectory operation:
-In all cases if T is a vector of SE3 objects (m) or a homogeneous
-transform sequence (4x4xm) then returns the joint coordinates
-corresponding to each of the transforms in the sequence. q is mxn
-where n is the number of robot joints. The initial estimate of q
-for each time step is taken as the solution from the previous time
-step.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>T</strong> (<em>SE3</em><em> or </em><em>SE3 trajectory</em>) – The desired end-effector pose</p></li>
-<li><p><strong>ilimit</strong> (<em>bool</em>) – Iteration limit (default 1000)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Retrun q</dt>
-<dd class="field-even"><p>The calculated joint values</p>
-</dd>
-<dt class="field-odd">Rtype q</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-<dt class="field-even">Retrun success</dt>
-<dd class="field-even"><p>IK solved (True) or failed (False)</p>
-</dd>
-<dt class="field-odd">Rtype success</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-<dt class="field-even">Retrun error</dt>
-<dd class="field-even"><p>Final pose error</p>
-</dd>
-<dt class="field-odd">Rtype error</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>Joint limits are not considered in this solution.</p></li>
-<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
-<li><p>In the case of multiple feasible solutions, the solution
-returned depends on the initial choice of q0</p></li>
-<li><p>Works by minimizing the error between the forward kinematics of
-the joint angle solution and the end-effector frame as an
-optimisation.</p></li>
-<li><p>The objective function (error) is described as:
-sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-Where omega is some gain matrix, currently not modifiable.</p></li>
-</ul>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.Robot.Robot.ikcon">
-<code class="sig-name descname">ikcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.ikcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikcon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
-<p>q, success, err = ikcon(T, q0) calculates the joint coordinates (1xn)
-corresponding to the robot end-effector pose T which is an SE3 object
-or homogenenous transform matrix (4x4), and N is the number of robot
-joints. Initial joint coordinates Q0 used for the minimisation.</p>
-<p>q, success, err = ikcon(T) as above but q0 is set to 0.</p>
-<p>Trajectory operation:
-In all cases if T is a vector of SE3 objects or a homogeneous
-transform sequence (4x4xm) then returns the joint coordinates
-corresponding to each of the transforms in the sequence. q is mxn
-where n is the number of robot joints. The initial estimate of q
-for each time step is taken as the solution from the previous time
-step. Retruns trajectory of joints q (mxn), list of success (m) and
-list of errors (m)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>T</strong> (<em>SE3</em><em> or </em><em>SE3 trajectory</em>) – The desired end-effector pose</p></li>
-<li><p><strong>q0</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>) </em><em>(</em><em>default all zeros</em><em>)</em>) – initial joint configuration (default all zeros)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Retrun q</dt>
-<dd class="field-even"><p>The calculated joint values</p>
-</dd>
-<dt class="field-odd">Rtype q</dt>
-<dd class="field-odd"><p>float ndarray(n)</p>
-</dd>
-<dt class="field-even">Retrun success</dt>
-<dd class="field-even"><p>IK solved (True) or failed (False)</p>
-</dd>
-<dt class="field-odd">Rtype success</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-<dt class="field-even">Retrun error</dt>
-<dd class="field-even"><p>Final pose error</p>
-</dd>
-<dt class="field-odd">Rtype error</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>Joint limits are considered in this solution.</p></li>
-<li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
-<li><p>In the case of multiple feasible solutions, the solution
-returned depends on the initial choice of q0.</p></li>
-<li><p>Works by minimizing the error between the forward kinematics
-of the joint angle solution and the end-effector frame as an
-optimisation.</p></li>
-<li><p>The objective function (error) is described as:
-sumsqr( (inv(T)*robot.fkine(q) - eye(4)) * omega )
-Where omega is some gain matrix, currently not modifiable.</p></li>
-</ul>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.Robot.Robot.qmincon">
-<code class="sig-name descname">qmincon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.qmincon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qmincon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Move away from joint limits</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinates</p>
-</dd>
-<dt class="field-even">Retrun qs</dt>
-<dd class="field-even"><p>The calculated joint values</p>
-</dd>
-<dt class="field-odd">Rtype qs</dt>
-<dd class="field-odd"><p>ndarray(n)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Optimisation solved (True) or failed (False)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Final value of the objective function</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">qs,</span> <span class="pre">success,</span> <span class="pre">err</span> <span class="pre">=</span> <span class="pre">qmincon(q)</span></code> exploits null space motion and
-returns a set of joint angles <code class="docutils literal notranslate"><span class="pre">qs</span></code> (n) that result in the same
-end-effector pose but are away from the joint coordinate limits.
-<code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of robot joints. <code class="docutils literal notranslate"><span class="pre">success</span></code> is True for
-successful optimisation. <code class="docutils literal notranslate"><span class="pre">err</span></code> is the scalar final value of
-the objective function.</p>
-<p><strong>Trajectory operation</strong></p>
-<p>In all cases if <code class="docutils literal notranslate"><span class="pre">q</span></code> is (m,n) it is taken as a pose sequence and
-<code class="docutils literal notranslate"><span class="pre">qmincon()</span></code> returns the adjusted joint coordinates (m,n)
-corresponding to each of the configurations in the sequence.</p>
-<p><code class="docutils literal notranslate"><span class="pre">err</span></code> and <code class="docutils literal notranslate"><span class="pre">success</span></code> are also (m) and indicate the results of
-optimisation for the corresponding trajectory step.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Robot must be redundant.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">'Swift'</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">movie</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">block</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">fellipse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">movie</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Graphical display and animation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot.</p></li>
 <li><p><strong>backend</strong> (<em>string</em>) – The graphical backend to use, currently ‘swift’
-and ‘pyplot’ are implemented. Defaults to ‘swift’</p></li>
+and ‘pyplot’ are implemented. Defaults to ‘swift’ of an <code class="docutils literal notranslate"><span class="pre">ERobot</span></code>
+and ‘pyplot` for a <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code></p></li>
 <li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
 <li><p><strong>dt</strong> (<em>float</em>) – if q is a trajectory, this describes the delay in
 seconds between frames</p></li>
@@ -2078,6 +2180,42 @@ occurs.</p></li>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.closest_point">
+<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.closest_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
+distance between this robot and shape, provided it is less than
+inf_dist. It will also return the points on self and shape in the
+world frame which connect the line of length distance between the
+shapes. If the distance is negative then the shapes are collided.
+:param shape: The shape to compare distance to
+:type shape: Shape
+:param inf_dist: The minimum distance within which to consider</p>
+<blockquote>
+<div><p>the shape</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>d, p1, p2 where d is the distance between the shapes,
+p1 and p2 are the points in the world frame on the respective
+shapes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float, SE3, SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.collided">
+<code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.collided" title="Permalink to this definition">¶</a></dt>
+<dd><p>collided(shape) checks if this robot and shape have collided
+:param shape: The shape to compare distance to
+:type shape: Shape
+:returns: True if shapes have collided
+:rtype: bool</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -2089,7 +2227,7 @@ occurs.</p></li>
 <area shape="rect" id="node1" href="#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,5,209,31"/>
 </map><span class="target" id="module-roboticstoolbox.robot.Link"></span><dl class="py class">
 <dt id="roboticstoolbox.robot.Link.Link">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Link.</code><code class="sig-name descname">Link</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">m</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">r</span><span class="o">=</span><span class="default_value">array([0.0, 0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">I</span><span class="o">=</span><span class="default_value">array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])</span></em>, <em class="sig-param"><span class="n">Jm</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">B</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">Tc</span><span class="o">=</span><span class="default_value">array([0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">mesh</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">geometry</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">collision</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.Link.</code><code class="sig-name descname">Link</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">m</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">r</span><span class="o">=</span><span class="default_value">array([0.0, 0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">I</span><span class="o">=</span><span class="default_value">array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])</span></em>, <em class="sig-param"><span class="n">Jm</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">B</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">Tc</span><span class="o">=</span><span class="default_value">array([0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">mesh</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">geometry</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">collision</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Link superclass</p>
 <dl class="field-list simple">
@@ -2575,6 +2713,50 @@ be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.closest_point">
+<code class="sig-name descname">closest_point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">inf_dist</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.closest_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.closest_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>closest_point(shape, inf_dist) returns the minimum euclidean
+distance between this link and shape, provided it is less than
+inf_dist. It will also return the points on self and shape in the
+world frame which connect the line of length distance between the
+shapes. If the distance is negative then the shapes are collided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>Shape</em>) – The shape to compare distance to</p></li>
+<li><p><strong>inf_dist</strong> (<em>float</em>) – The minimum distance within which to consider
+the shape</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
+p1 and p2 are the points in the world frame on the respective
+shapes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float, SE3, SE3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Link.Link.collided">
+<code class="sig-name descname">collided</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link.collided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.collided" title="Permalink to this definition">¶</a></dt>
+<dd><p>collided(shape) checks if this link and shape have collided</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>shape</strong> (<em>Shape</em>) – The shape to compare distance to</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if shapes have collided</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -2603,7 +2785,7 @@ be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>

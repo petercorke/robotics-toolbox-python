@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
 
   
   
@@ -169,12 +170,19 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that models a ball manipulator</span>
 
-<span class="sd">    ``Ball()`` is a class which models a ball robot and</span>
-<span class="sd">    describes its kinematic characteristics using standard DH</span>
-<span class="sd">    conventions.</span>
+<span class="sd">    :param N: number of links, defaults to 10</span>
+<span class="sd">    :type N: int, optional</span>
+<span class="sd">    :param symbolic: [description], defaults to False</span>
+<span class="sd">    :type symbolic: bool, optional</span>
 
-<span class="sd">    The ball robot is an *abstract* robot with an arbitrary number of joints</span>
-<span class="sd">    that folds into a ball shape.</span>
+<span class="sd">    The ball robot is an *abstract* robot with an arbitrary number of joints.</span>
+<span class="sd">    At zero joint angles it is straight along the x-axis, and as the joint</span>
+<span class="sd">    angles are increased (equally) it wraps up into a 3D ball shape.</span>
+
+<span class="sd">    - ``Ball()`` is an object which describes the kinematic characteristics of</span>
+<span class="sd">      a ball robot using standard DH conventions.</span>
+
+<span class="sd">    - ``Ball(N)`` as above, but models a robot with ``N`` joints.</span>
 
 <span class="sd">    .. runblock:: pycon</span>
 
@@ -187,21 +195,13 @@
 <span class="sd">        - qz, zero joint angles</span>
 <span class="sd">        - q1, ball shaped configuration</span>
 
-<span class="sd">    .. note::</span>
-<span class="sd">        - SI units are used.</span>
-<span class="sd">        - The model includes armature inertia and gear ratios.</span>
-<span class="sd">        - The value of m1 is given as 0 here.  Armstrong found no value for it</span>
-<span class="sd">          and it does not appear in the equation for tau1 after the</span>
-<span class="sd">          substituion is made to inertia about link frame rather than COG</span>
-<span class="sd">          frame.</span>
-<span class="sd">        - Gravity load torque is the motor torque necessary to keep the joint</span>
-<span class="sd">          static, and is thus -ve of the gravity caused torque.</span>
-
 <span class="sd">    :references:</span>
 
 <span class="sd">        - &quot;A divide and conquer articulated-body algorithm for parallel</span>
 <span class="sd">          O(log(n)) calculation of rigid body dynamics, Part 2&quot;,</span>
 <span class="sd">          Int. J. Robotics Research, 18(9), pp 876-892.</span>
+
+<span class="sd">    :seealso: :func:`Hyper`, :func:`Ball`</span>
 
 <span class="sd">    .. codeauthor:: Peter Corke</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -212,29 +212,28 @@
         <span class="n">q1</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-            <span class="n">q1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fract</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
 
         <span class="c1"># and build a serial link manipulator</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Ball</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ball&#39;</span><span class="p">)</span>
 
         <span class="c1"># zero angles, ball pose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q1&quot;</span><span class="p">,</span> <span class="n">q1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">_fract</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)])</span></div>
 
-    <span class="k">def</span> <span class="nf">_fract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="n">theta1</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">theta2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span>
+<span class="k">def</span> <span class="nf">_fract</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="c1"># i is &quot;i-1&quot; as per the paper</span>
+    <span class="n">theta1</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">theta2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span>
 
-        <span class="n">out</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span>
-        <span class="k">if</span> <span class="n">out</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fract</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">out</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">theta1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">theta2</span>
-        <span class="k">return</span> <span class="n">f</span></div>
-
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">theta1</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">theta1</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">theta2</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_fract</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
 
@@ -255,7 +254,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 25-Nov-2020.
+        Last updated on 19-Dec-2020.
       </span>
 
     </p>
