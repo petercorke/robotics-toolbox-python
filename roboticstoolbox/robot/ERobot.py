@@ -69,6 +69,7 @@ class ERobot(Robot):
         # search order
         orlinks = []
 
+        link_number = 0
         if isinstance(elinks, ETS):
             # were passed an ETS string
             ets = elinks
@@ -98,6 +99,12 @@ class ERobot(Robot):
             n = 0
             for link in elinks:
                 if isinstance(link, ELink):
+                    # if link has no name, give it one
+                    if link.name is None:
+                        link.name = f"link-{link_number}"
+                        link_number += 1
+                    
+                    # put it in the link dictionary, check for duplicates
                     if link.name in self._linkdict:
                         raise ValueError(f'link name {link.name} is not unique')
                     self._linkdict[link.name] = link
