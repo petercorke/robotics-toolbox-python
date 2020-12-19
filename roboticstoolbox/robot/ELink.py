@@ -128,7 +128,10 @@ class ELink(Link):
 
     def __repr__(self):
         name = self.__class__.__name__
-        s = f"{self.name}, ets={self.ets()}"
+        if self.name is None:
+            s = f"ets={self.ets()}"
+        else:
+            s = f"{self.name}, ets={self.ets()}"
         if self.parent is not None:
             s += f", parent={self.parent.name}"
         args = [s] + super()._params()
@@ -141,12 +144,16 @@ class ELink(Link):
         :return: Pretty print of the robot link
         :rtype: str
         """
-        # name = self.__class__.__name__
-        if self.parent is None:
-            parent = ""
+        name = self.__class__.__name__
+
+        if self.name is None:
+            return f"{name}[{self.ets()}] "
         else:
-            parent = f" [{self.parent.name}]"
-        return f"name[{self.name}({parent}): {self.ets()}] "
+            if self.parent is None:
+                parent = ""
+            else:
+                parent = f" [{self.parent.name}]"
+            return f"{name}[{self.name}({parent}): {self.ets()}] "
 
     @property
     def v(self):
