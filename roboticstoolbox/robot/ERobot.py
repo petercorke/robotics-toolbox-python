@@ -1015,6 +1015,8 @@ class ERobot(Robot):
 
         while link != startlink:
             link = link.parent
+            if link is None:
+                raise ValueError(f'cannot find path from {startlink.name} to {endlink.name}')
             path.append(link)
             if link.isjoint:
                 n += 1
