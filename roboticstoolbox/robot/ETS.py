@@ -378,6 +378,8 @@ class SuperETS(UserList, ABC):
 
         """
         if self.isjoint:
+            if self.isflip:
+                q = -q
             return self.axis_func(q)
         else:
             return self.data[0].T
@@ -1112,7 +1114,7 @@ class ETS(SuperETS):
 
         # we will work with NumPy arrays for maximum speed
         T = T.A
-        U = np.eye(4)
+        U = np.eye(4)  # SE(3) matrix
         j = 0
         J = np.zeros((6, n))
 
@@ -1121,13 +1123,13 @@ class ETS(SuperETS):
             if et.isjoint:
                 # joint variable
                 # U = U @ link.A(q[j], fast=True)
-                U = U @ et.axis_func(q[j])
+                U = U @ et.T(q[j])
 
                 # TODO???
                 # if link == to_link:
                 #     U = U @ offset.A
 
-                Tu = np.linalg.inv(U) @ T
+                Tu = trinv(U) @ T
                 n = U[:3, 0]
                 o = U[:3, 1]
                 a = U[:3, 2]
