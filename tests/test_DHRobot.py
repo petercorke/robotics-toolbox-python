@@ -918,25 +918,33 @@ class TestDHRobot(unittest.TestCase):
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
 
-    @unittest.skip("IK rework needed")
     def test_ikine_unc(self):
         puma = rp.models.DH.Puma560()
 
         T = puma.fkine(puma.qn)
 
-        sol = puma.ikine_unc(T)
+        sol = puma.ikine_min(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=4)
+        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
+
+        q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
+        sol = puma.ikine_min(T, q0=q0)
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
 
     def test_ikine_con(self):
         puma = rp.models.DH.Puma560()
 
         T = puma.fkine(puma.qn)
 
-        sol = puma.ikine_con(T)
+        sol = puma.ikine_min(T, qlim=True)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=3)
+        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
 
+        q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
+        sol = puma.ikine_min(T, q0=q0, qlim=True)
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
 
     # def test_ikine_min(self):
     #     puma = rp.models.DH.Puma560()
@@ -951,8 +959,8 @@ class TestDHRobot(unittest.TestCase):
 
         # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
 
-        self.assertTrue(sol0[0].success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol0[0].q)), 0, places=4)
+        # self.assertTrue(sol0[0].success)
+        # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol0[0].q)), 0, places=4)
         # TODO: second solution fails, even though starting value is the
         # solution.  see https://stackoverflow.com/questions/34663539/scipy-optimize-fmin-l-bfgs-b-returns-abnormal-termination-in-lnsrch
         # documentation is pretty bad.
