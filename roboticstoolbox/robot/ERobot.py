@@ -699,7 +699,8 @@ class ERobot(Robot):
 
         The nodes are:
 
-            - The base link is shown as a grey circle
+            - Base is shown as a grey square.  This is the world frame origin,
+              but can be changed using the ``base`` attribute of the robot.
             - Link frames are indicated by circles
             - ETS transforms are indicated by rounded boxes
 
@@ -710,6 +711,9 @@ class ERobot(Robot):
               revolute
             - an arrow with a box head if jtype is True and the joint is
               prismatic
+
+        Edge labels or nodes in blue have a fixed transformation to the 
+        preceding link.
 
         """
         with open(file, 'w') as file:
