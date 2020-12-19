@@ -3,16 +3,20 @@
 @author Micah Huth
 """
 
-import roboticstoolbox as rp
-# import time
+import roboticstoolbox as rtb
+import time
+from roboticstoolbox.backends import VPython
 
-env = rp.backends.VPython()  # lgtm [py/call-to-non-callable]
+env = VPython.VPython()  # lgtm [py/call-to-non-callable]
 env.launch()
 
 #  PUMA560
-puma = rp.models.DH.Puma560()
+puma = rtb.models.DH.Puma560()
 env.add(0, 'Puma', puma)
 
+for i in range(1000):
+    env.step(puma)
+    time.sleep(0.1)
 
 # Example 1
 # qt = rp.tools.trajectory.jtraj(puma.qz, puma.qr, 50)
