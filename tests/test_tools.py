@@ -71,7 +71,11 @@ class Testtools(unittest.TestCase):
         self.assertTrue(arrived1)
 
     def test_jsingu(self):
-        r = rp.models.Panda()
+        r = rp.models.Puma560()
         J = r.jacob0(r.qz)
 
         rp.jsingu(J)
+
+if __name__ == '__main__':  # pragma nocover
+    unittest.main()
+    # pytest.main(['tests/test_SerialLink.py'])
