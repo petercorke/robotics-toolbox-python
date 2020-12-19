@@ -10,8 +10,9 @@ from spatialmath import base
 from spatialmath import SE3, Twist3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 import math
-iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual",
-    defaults=(None, False, None, None, None))
+# iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual",
+#     defaults=(None, False, None, None, None)) # Py >= 3.7 only
+iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual")
 
 # ===================================================================== #
 class IKMixin:
@@ -176,7 +177,7 @@ class IKMixin:
                         del T[0]
             else:
                 # no solution found, stop now
-                return iksol()
+                return iksol(None, False, None, None, None)
 
         if q0 is None:
             q0 = np.zeros((self.n,))
