@@ -6,8 +6,10 @@ Introduction
 Introduction
 ============
 
-The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support the
-first author’s PhD research and was first published in 1995-6 [Corke95]_
+*This is a modified version of a paper submitted to ICRA2020*
+
+The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support
+Peter Corke’s PhD research and was first published in 1995-6 [Corke95]_
 [Corke96]_. It has evolved over 25 years to track changes and improvements to
 the MATLAB language and ecosystem, such as the addition of structures, objects,
 lists (cell arrays) and strings, myriad of other improvements to the language,
@@ -297,13 +299,16 @@ We can now easily perform standard kinematic operations
     >>> print(puma.qr)
     >>> T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])  # forward kinematics
     >>> print(T)
-    >>> q, *_ = puma.ikine(T)                           # inverse kinematics
-    >>> print(q)
+    >>> sol = puma.ikine_LM(T)                          # inverse kinematics
+    >>> print(sol)
 
 The Toolbox supports named joint configurations and these are shown in the table
-at lines ??.
+at lines 16-22.
 
-``ikine`` is a generalised iterative numerical solution based on Levenberg-Marquadt minimization, and additional status results are also returned.
+``ikine_LM`` is a generalised iterative numerical solution based on
+Levenberg-Marquadt minimization, and additional status results are also
+returned as part of a named tuple.
+
 The default plot method::
 
     >>> puma.plot(q)
@@ -362,7 +367,7 @@ or pure rotation -- each with either a constant parameter or a free parameter wh
     >>> robot = rtb.ERobot(e)
     >>> print(robot)
 
-Line 3 defines the unique lengths of the Puma robot, and line ?? defines the kinematic chain in
+Line 3 defines the unique lengths of the Puma robot, and line 4 defines the kinematic chain in
 terms of elementary transforms.
 In line 7 we pass this to the constructor for an ``ERobot`` which partitions the
 elementary transform sequence into a series of links and joints -- link frames are declared
@@ -382,7 +387,7 @@ Provided models, such as for Panda or Puma, are again encapsulated as classes:
 .. runblock:: pycon
 
     >>> import roboticstoolbox as rtb
-    >>> panda = rtb.models.URDF.Panda()
+    >>> panda = rtb.models.DH.Panda()
     >>> print(panda)
     >>> T = panda.fkine(panda.qz)
     >>> print(T)
@@ -390,6 +395,21 @@ Provided models, such as for Panda or Puma, are again encapsulated as classes:
 and kinematic operations are performed using methods with the same name
 as discussed above.
 For branched robots, with multiple end-effectors,  the name of the frame of interest must be provided.
+
+Some URDF models have multiple end-effectors, in which case the particular
+end-effector must be specified.
+
+.. runblock:: pycon
+
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.URDF.Panda()
+    >>> print(panda)
+    >>> T = panda.fkine(panda.qz, endlink='panda_hand')
+    >>> print(T)
+
+In the table above we see the end-effectors indicated by @ (determined automatically
+from the URDF file), so we specify one of these.  We can also specify any
+other link in order to determine the pose of that link's coordinate frame.
 
 This URDF model comes with meshes provided as Collada file which provide
 detailed geometry and color.  This can be visualized using the Swift simulator:
@@ -411,7 +431,7 @@ Animations can be recorded as MP4 files or animated GIF files which are useful f
 Trajectories
 ============
 
-A joint-spae trajectory for the Puma robot from its zero angle 
+A joint-space trajectory for the Puma robot from its zero angle 
 pose to the upright (or READY) pose in 100 steps is
 
 .. runblock:: pycon
@@ -449,17 +469,21 @@ two points specified by a pair of poses in :math:`\SE{3}`
     >>> T1 = SE3(0.4, 0.5, 0.2)
     >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, len(t))
     >>> len(Ts)
-    >>> qs, *_ = puma.ikine(Ts)
-    >>> qs.shape
+    >>> sol = puma.ikine_LM(Ts)                 # array of named tuples
+    >>> qt = np.array([x.q for x in sol])    # convert to 2d matrix 
+    >>> qt.shape
 
 At line 9 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance with 200 values.
 
 At line 11 we compute the inverse kinematics of each pose in the trajectory
-using a single call to the ``ikine`` method.
-At line 13 we see that the result ``qs`` is is an array of joint coordinates, one row per timestep.
-In this case the starting 
+using a single call to the ``ikine_LM`` method.
+The result is a list of named tuples, which gives the IK success status for
+each time step.
+At line 12 we convert this into an array, with one row per time step, and each
+row is a joint coordinate.
+The starting 
 joint coordinates for each inverse kinematic solution
-is taken as the result of the previous solution.
+is taken as the result of the solution at the previous time step.
 
 
 Symbolic manipulation
@@ -472,7 +496,7 @@ As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. Fo
     >>> import roboticstoolbox as rtb
     >>> import spatialmath.base as base
     >>> phi, theta, psi = base.sym.symbol('phi, theta, psi')
-    >>> rtb.rpy2r(phi, theta, psi)
+    >>> base.rpy2r(phi, theta, psi)
 
 The capability extends to forward kinematics
 
@@ -529,7 +553,7 @@ For all robot classes we can compute manipulability
     >>> puma = rtb.models.DH.Puma560()
     >>> m = puma.manipulability(puma.qn)
     >>> print("Yoshikawa manipulability is", m)
-    >>> m = puma.manipulability(puma.qn, "asada")
+    >>> m = puma.manipulability(puma.qn, method="asada")
     >>> print("Asada manipulability is", m)
 
 for the Yoshikawa and Asada measures respectively, and
