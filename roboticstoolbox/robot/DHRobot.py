@@ -718,6 +718,32 @@ class DHRobot(Robot):
             if revolute[k] else q[k] for k in range(len(q))
         ])
 
+    def dhunique(self):
+        """
+        Print the unique DH parameters
+
+        Print a table showing all the non-zero DH parameters, and their
+        values.  This is the minimum set of kinematic parameters required
+        to describe the robot.
+        """
+
+        table = ANSITable(
+            Column("param"),
+            Column("value", headalign="^", colalign="<", fmt="{:.4g}"),
+            border="thin")
+        for j, link in enumerate(self):
+            if link.isprismatic:
+                if link.theta != 0:
+                    table.row(f"θ{j}", link.theta)
+            elif link.isrevolute:
+                if link.d != 0:
+                    table.row(f"d{j}", link.d)
+            if link.a != 0:
+                    table.row(f"a{j}", link.a)
+            if link.alpha != 0:
+                    table.row(f"⍺{j}", link.alpha)
+        table.print()
+
     def twists(self, q=None):
         """
         Joint axes as  twists
