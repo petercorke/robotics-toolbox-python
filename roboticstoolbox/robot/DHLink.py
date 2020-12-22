@@ -477,7 +477,7 @@ class DHLink(Link):
         else:
             # DH format: theta d a alpha
 
-            if self.isrevolute():
+            if self.isrevolute:
                 ets *= ETS.rz(flip=self.flip)
                 if self.offset != 0:
                     ets *= ETS.rz(self.offset)
