@@ -5,7 +5,11 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 import sys
+import os
 from os.path import splitext
+import tempfile
+import subprocess
+import webbrowser
 import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3
@@ -680,12 +684,61 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def dotfile(self, file, etsbox=False, jtype=False, static=True):
+    def showgraph(self, **kwargs):
         """
-        Write a GraphViz dot file representing the robot link.
+        Display a link transform graph in browser
+        
+        :param etsbox: Put the link ETS in a box, otherwise an edge label
+        :type etsbox: bool
+        :param jtype: Arrowhead to node indicates revolute or prismatic type
+        :type jtype: bool
+        :param static: Show static joints in blue and bold
+        :type static: bool
+
+        ``robot.showgraph()`` displays a graph of the robot's link frames
+        and the ETS between them.  It uses GraphViz dot.
+
+        The nodes are:
+
+            - Base is shown as a grey square.  This is the world frame origin,
+              but can be changed using the ``base`` attribute of the robot.
+            - Link frames are indicated by circles
+            - ETS transforms are indicated by rounded boxes
+
+        The edges are:
+
+            - an arrow if `jtype` is False or the joint is fixed
+            - an arrow with a round head if `jtype` is True and the joint is
+              revolute
+            - an arrow with a box head if `jtype` is True and the joint is
+              prismatic
+
+        Edge labels or nodes in blue have a fixed transformation to the 
+        preceding link.
+
+        :seealso: :func:`dotfile`
+        """
+
+        # create the temporary dotfile
+        dotfile = tempfile.TemporaryFile(mode="w")
+        self.dotfile(dotfile, **kwargs)
+
+        # rewind the dot file, create PDF file in the filesystem, run dot
+        dotfile.seek(0)
+        pdffile = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+        subprocess.run("dot -Tpdf", shell=True, stdin=dotfile, stdout=pdffile)
+
+        # open the PDF file in browser (hopefully portable), then cleanup
+        webbrowser.open(f"file://{pdffile.name}")
+        os.remove(pdffile.name)
+
+
+    def dotfile(self, filename, etsbox=False, jtype=False, static=True):
+        """
+        Write a link transform graph as a GraphViz dot file
         
         :param file: Name of file to write to
-        :type file: str
+        :type file: str or file
         :param etsbox: Put the link ETS in a box, otherwise an edge label
         :type etsbox: bool
         :param jtype: Arrowhead to node indicates revolute or prismatic type
@@ -706,80 +759,90 @@ class ERobot(Robot):
 
         The edges are:
 
-            - an arrow if jtype is False or the joint is fixed
-            - an arrow with a round head if jtype is True and the joint is
+            - an arrow if `jtype` is False or the joint is fixed
+            - an arrow with a round head if `jtype` is True and the joint is
               revolute
-            - an arrow with a box head if jtype is True and the joint is
+            - an arrow with a box head if `jtype` is True and the joint is
               prismatic
 
         Edge labels or nodes in blue have a fixed transformation to the 
         preceding link.
 
-        """
-        with open(file, 'w') as file:
-            
-            header = r"""digraph G {
+        .. note:: If ``filename`` is a file object then the file will *not*
+            be closed after the GraphViz model is written.
 
-  graph [rankdir=LR];
+        :seealso: :func:`showgraph`
+        """
+        if isinstance(filename, str):
+            file = open(filename, 'w')
+        else:
+            file = filename
+            
+        header = r"""digraph G {
+
+graph [rankdir=LR];
 
 """
 
-            def draw_edge(link, etsbox, jtype, static):
-                # draw the edge
-                if jtype:
-                    if link.isprismatic:
-                        edge_options = 'arrowhead="box", arrowtail="inv", dir="both"'
-                    elif link.isrevolute:
-                        edge_options = 'arrowhead="dot", arrowtail="inv", dir="both"'
-                    else:
-                        edge_options = 'arrowhead="normal"'
+        def draw_edge(link, etsbox, jtype, static):
+            # draw the edge
+            if jtype:
+                if link.isprismatic:
+                    edge_options = 'arrowhead="box", arrowtail="inv", dir="both"'
+                elif link.isrevolute:
+                    edge_options = 'arrowhead="dot", arrowtail="inv", dir="both"'
                 else:
                     edge_options = 'arrowhead="normal"'
+            else:
+                edge_options = 'arrowhead="normal"'
 
-                if link.parent is None:
-                    parent = 'BASE'
+            if link.parent is None:
+                parent = 'BASE'
+            else:
+                parent = link.parent.name
+
+            if etsbox:
+                # put the ets fragment in a box
+                if not link.isjoint and static:
+                    node_options = ', fontcolor="blue"'
                 else:
-                    parent = link.parent.name
+                    node_options = ''
+                file.write('  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(link.name, link.ets().__str__(q=f"q{link.jindex}"), node_options))
+                file.write('  {} -> {}_ets;\n'.format(parent, link.name))
+                file.write('  {}_ets -> {} [{}];\n'.format(link.name, link.name, edge_options))
+            else:
+                # put the ets fragment as an edge label
+                if not link.isjoint and static:
+                    edge_options += 'fontcolor="blue"'
+                file.write('  {} -> {} [label="{}", {}];\n'.format(parent, link.name, link.ets().__str__(q=f"q{link.jindex}"), edge_options))
 
-                if etsbox:
-                    # put the ets fragment in a box
-                    if not link.isjoint and static:
-                        node_options = ', fontcolor="blue"'
-                    else:
-                        node_options = ''
-                    file.write('  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(link.name, link.ets().__str__(q=f"q{link.jindex}"), node_options))
-                    file.write('  {} -> {}_ets;\n'.format(parent, link.name))
-                    file.write('  {}_ets -> {} [{}];\n'.format(link.name, link.name, edge_options))
-                else:
-                    # put the ets fragment as an edge label
-                    if not link.isjoint and static:
-                        edge_options += 'fontcolor="blue"'
-                    file.write('  {} -> {} [label="{}", {}];\n'.format(parent, link.name, link.ets().__str__(q=f"q{link.jindex}"), edge_options))
+        file.write(header)
 
-            file.write(header)
+        # add the base link
+        file.write('  BASE [shape=square, style=filled, fillcolor=gray]\n')
 
-            # add the base link
-            file.write('  BASE [shape=square, style=filled, fillcolor=gray]\n')
+        # add the links
+        for link in self:
+            # draw the link frame node (circle) or ee node (doublecircle)
+            if link in self.ee_links:
+                # end-effector
+                node_options = 'shape="doublecircle", color="blue", fontcolor="blue"'
+            else:
+                node_options = 'shape="circle"'
 
-            # add the links
-            for link in self:
-                # draw the link frame node (circle) or ee node (doublecircle)
-                if link in self.ee_links:
-                    # end-effector
-                    node_options = 'shape="doublecircle", color="blue", fontcolor="blue"'
-                else:
-                    node_options = 'shape="circle"'
+            file.write('  {} [{}];\n'.format(link.name, node_options))
 
-                file.write('  {} [{}];\n'.format(link.name, node_options))
+            draw_edge(link, etsbox, jtype, static)
 
+        for gripper in self.grippers:
+            for link in gripper.links:
+                file.write('  {} [shape=cds];\n'.format(link.name))
                 draw_edge(link, etsbox, jtype, static)
 
-            for gripper in self.grippers:
-                for link in gripper.links:
-                    file.write('  {} [shape=cds];\n'.format(link.name))
-                    draw_edge(link, etsbox, jtype, static)
+        file.write('}\n')
 
-            file.write('}\n')
+        if isinstance(filename, str):
+            close(file)
 # --------------------------------------------------------------------- #
 
     def fkine(self, q, endlink=None, startlink=None, tool=None):
