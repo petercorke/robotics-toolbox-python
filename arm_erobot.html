@@ -31,7 +31,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
@@ -504,13 +503,56 @@ from link <code class="docutils literal notranslate"><span class="pre">l1</span>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.dotfile">
-<code class="sig-name descname">dotfile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">etsbox</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">jtype</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">static</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.dotfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.dotfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write a GraphViz dot file representing the robot link.</p>
+<dt id="roboticstoolbox.robot.ERobot.ERobot.showgraph">
+<code class="sig-name descname">showgraph</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.showgraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.showgraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display a link transform graph in browser</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<em>str</em>) – Name of file to write to</p></li>
+<li><p><strong>etsbox</strong> (<em>bool</em>) – Put the link ETS in a box, otherwise an edge label</p></li>
+<li><p><strong>jtype</strong> (<em>bool</em>) – Arrowhead to node indicates revolute or prismatic type</p></li>
+<li><p><strong>static</strong> (<em>bool</em>) – Show static joints in blue and bold</p></li>
+</ul>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.showgraph()</span></code> displays a graph of the robot’s link frames
+and the ETS between them.  It uses GraphViz dot.</p>
+<p>The nodes are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Base is shown as a grey square.  This is the world frame origin,
+but can be changed using the <code class="docutils literal notranslate"><span class="pre">base</span></code> attribute of the robot.</p></li>
+<li><p>Link frames are indicated by circles</p></li>
+<li><p>ETS transforms are indicated by rounded boxes</p></li>
+</ul>
+</div></blockquote>
+<p>The edges are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>an arrow if <cite>jtype</cite> is False or the joint is fixed</p></li>
+<li><p>an arrow with a round head if <cite>jtype</cite> is True and the joint is
+revolute</p></li>
+<li><p>an arrow with a box head if <cite>jtype</cite> is True and the joint is
+prismatic</p></li>
+</ul>
+</div></blockquote>
+<p>Edge labels or nodes in blue have a fixed transformation to the 
+preceding link.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.dotfile" title="roboticstoolbox.robot.ERobot.ERobot.dotfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">dotfile()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.dotfile">
+<code class="sig-name descname">dotfile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">etsbox</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">jtype</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">static</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.dotfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.dotfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a link transform graph as a GraphViz dot file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<em>str</em><em> or </em><em>file</em>) – Name of file to write to</p></li>
 <li><p><strong>etsbox</strong> (<em>bool</em>) – Put the link ETS in a box, otherwise an edge label</p></li>
 <li><p><strong>jtype</strong> (<em>bool</em>) – Arrowhead to node indicates revolute or prismatic type</p></li>
 <li><p><strong>static</strong> (<em>bool</em>) – Show static joints in blue and bold</p></li>
@@ -533,15 +575,25 @@ but can be changed using the <code class="docutils literal notranslate"><span cl
 <p>The edges are:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>an arrow if jtype is False or the joint is fixed</p></li>
-<li><p>an arrow with a round head if jtype is True and the joint is
+<li><p>an arrow if <cite>jtype</cite> is False or the joint is fixed</p></li>
+<li><p>an arrow with a round head if <cite>jtype</cite> is True and the joint is
 revolute</p></li>
-<li><p>an arrow with a box head if jtype is True and the joint is
+<li><p>an arrow with a box head if <cite>jtype</cite> is True and the joint is
 prismatic</p></li>
 </ul>
 </div></blockquote>
 <p>Edge labels or nodes in blue have a fixed transformation to the 
 preceding link.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">filename</span></code> is a file object then the file will <em>not</em>
+be closed after the GraphViz model is written.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.showgraph" title="roboticstoolbox.robot.ERobot.ERobot.showgraph"><code class="xref py py-func docutils literal notranslate"><span class="pre">showgraph()</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1097,12 +1149,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -4802,7 +4854,7 @@ characteristics.</p>
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Dec-2020.
+        Last updated on 23-Dec-2020.
       </span>
 
     </p>

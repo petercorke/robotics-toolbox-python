@@ -31,7 +31,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
@@ -162,7 +161,11 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">splitext</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="c1"># import spatialmath as sp</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
@@ -837,12 +840,61 @@
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="ERobot.dotfile"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.dotfile">[docs]</a>    <span class="k">def</span> <span class="nf">dotfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">etsbox</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">jtype</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.showgraph"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.showgraph">[docs]</a>    <span class="k">def</span> <span class="nf">showgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write a GraphViz dot file representing the robot link.</span>
+<span class="sd">        Display a link transform graph in browser</span>
+<span class="sd">        </span>
+<span class="sd">        :param etsbox: Put the link ETS in a box, otherwise an edge label</span>
+<span class="sd">        :type etsbox: bool</span>
+<span class="sd">        :param jtype: Arrowhead to node indicates revolute or prismatic type</span>
+<span class="sd">        :type jtype: bool</span>
+<span class="sd">        :param static: Show static joints in blue and bold</span>
+<span class="sd">        :type static: bool</span>
+
+<span class="sd">        ``robot.showgraph()`` displays a graph of the robot&#39;s link frames</span>
+<span class="sd">        and the ETS between them.  It uses GraphViz dot.</span>
+
+<span class="sd">        The nodes are:</span>
+
+<span class="sd">            - Base is shown as a grey square.  This is the world frame origin,</span>
+<span class="sd">              but can be changed using the ``base`` attribute of the robot.</span>
+<span class="sd">            - Link frames are indicated by circles</span>
+<span class="sd">            - ETS transforms are indicated by rounded boxes</span>
+
+<span class="sd">        The edges are:</span>
+
+<span class="sd">            - an arrow if `jtype` is False or the joint is fixed</span>
+<span class="sd">            - an arrow with a round head if `jtype` is True and the joint is</span>
+<span class="sd">              revolute</span>
+<span class="sd">            - an arrow with a box head if `jtype` is True and the joint is</span>
+<span class="sd">              prismatic</span>
+
+<span class="sd">        Edge labels or nodes in blue have a fixed transformation to the </span>
+<span class="sd">        preceding link.</span>
+
+<span class="sd">        :seealso: :func:`dotfile`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># create the temporary dotfile</span>
+        <span class="n">dotfile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dotfile</span><span class="p">(</span><span class="n">dotfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># rewind the dot file, create PDF file in the filesystem, run dot</span>
+        <span class="n">dotfile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pdffile</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.pdf&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;dot -Tpdf&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">dotfile</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">pdffile</span><span class="p">)</span>
+
+        <span class="c1"># open the PDF file in browser (hopefully portable), then cleanup</span>
+        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file://</span><span class="si">{</span><span class="n">pdffile</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pdffile</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ERobot.dotfile"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.dotfile">[docs]</a>    <span class="k">def</span> <span class="nf">dotfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">etsbox</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">jtype</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a link transform graph as a GraphViz dot file</span>
 <span class="sd">        </span>
 <span class="sd">        :param file: Name of file to write to</span>
-<span class="sd">        :type file: str</span>
+<span class="sd">        :type file: str or file</span>
 <span class="sd">        :param etsbox: Put the link ETS in a box, otherwise an edge label</span>
 <span class="sd">        :type etsbox: bool</span>
 <span class="sd">        :param jtype: Arrowhead to node indicates revolute or prismatic type</span>
@@ -863,80 +915,90 @@
 
 <span class="sd">        The edges are:</span>
 
-<span class="sd">            - an arrow if jtype is False or the joint is fixed</span>
-<span class="sd">            - an arrow with a round head if jtype is True and the joint is</span>
+<span class="sd">            - an arrow if `jtype` is False or the joint is fixed</span>
+<span class="sd">            - an arrow with a round head if `jtype` is True and the joint is</span>
 <span class="sd">              revolute</span>
-<span class="sd">            - an arrow with a box head if jtype is True and the joint is</span>
+<span class="sd">            - an arrow with a box head if `jtype` is True and the joint is</span>
 <span class="sd">              prismatic</span>
 
 <span class="sd">        Edge labels or nodes in blue have a fixed transformation to the </span>
 <span class="sd">        preceding link.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-            
-            <span class="n">header</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;digraph G {</span>
+<span class="sd">        .. note:: If ``filename`` is a file object then the file will *not*</span>
+<span class="sd">            be closed after the GraphViz model is written.</span>
 
-<span class="s2">  graph [rankdir=LR];</span>
+<span class="sd">        :seealso: :func:`showgraph`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span>
+            
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;digraph G {</span>
+
+<span class="s2">graph [rankdir=LR];</span>
 
 <span class="s2">&quot;&quot;&quot;</span>
 
-            <span class="k">def</span> <span class="nf">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">):</span>
-                <span class="c1"># draw the edge</span>
-                <span class="k">if</span> <span class="n">jtype</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
-                        <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;box&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
-                    <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-                        <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;dot&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;normal&quot;&#39;</span>
+        <span class="k">def</span> <span class="nf">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">):</span>
+            <span class="c1"># draw the edge</span>
+            <span class="k">if</span> <span class="n">jtype</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
+                    <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;box&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
+                    <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;dot&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;normal&quot;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;normal&quot;&#39;</span>
 
-                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">parent</span> <span class="o">=</span> <span class="s1">&#39;BASE&#39;</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="s1">&#39;BASE&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="k">if</span> <span class="n">etsbox</span><span class="p">:</span>
+                <span class="c1"># put the ets fragment in a box</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">static</span><span class="p">:</span>
+                    <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;, fontcolor=&quot;blue&quot;&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">parent</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">_ets [shape=box, style=rounded, label=&quot;</span><span class="si">{}</span><span class="s1">&quot;</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">node_options</span><span class="p">))</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1">_ets;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">_ets -&gt; </span><span class="si">{}</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">edge_options</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># put the ets fragment as an edge label</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">static</span><span class="p">:</span>
+                    <span class="n">edge_options</span> <span class="o">+=</span> <span class="s1">&#39;fontcolor=&quot;blue&quot;&#39;</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> [label=&quot;</span><span class="si">{}</span><span class="s1">&quot;, </span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">edge_options</span><span class="p">))</span>
 
-                <span class="k">if</span> <span class="n">etsbox</span><span class="p">:</span>
-                    <span class="c1"># put the ets fragment in a box</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">static</span><span class="p">:</span>
-                        <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;, fontcolor=&quot;blue&quot;&#39;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">_ets [shape=box, style=rounded, label=&quot;</span><span class="si">{}</span><span class="s1">&quot;</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">node_options</span><span class="p">))</span>
-                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1">_ets;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">_ets -&gt; </span><span class="si">{}</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">edge_options</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># put the ets fragment as an edge label</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">static</span><span class="p">:</span>
-                        <span class="n">edge_options</span> <span class="o">+=</span> <span class="s1">&#39;fontcolor=&quot;blue&quot;&#39;</span>
-                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> [label=&quot;</span><span class="si">{}</span><span class="s1">&quot;, </span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">edge_options</span><span class="p">))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
 
-            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="c1"># add the base link</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  BASE [shape=square, style=filled, fillcolor=gray]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="c1"># add the base link</span>
-            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  BASE [shape=square, style=filled, fillcolor=gray]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># add the links</span>
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="c1"># draw the link frame node (circle) or ee node (doublecircle)</span>
+            <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">:</span>
+                <span class="c1"># end-effector</span>
+                <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;shape=&quot;doublecircle&quot;, color=&quot;blue&quot;, fontcolor=&quot;blue&quot;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;shape=&quot;circle&quot;&#39;</span>
 
-            <span class="c1"># add the links</span>
-            <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-                <span class="c1"># draw the link frame node (circle) or ee node (doublecircle)</span>
-                <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">:</span>
-                    <span class="c1"># end-effector</span>
-                    <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;shape=&quot;doublecircle&quot;, color=&quot;blue&quot;, fontcolor=&quot;blue&quot;&#39;</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;shape=&quot;circle&quot;&#39;</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">node_options</span><span class="p">))</span>
 
-                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">node_options</span><span class="p">))</span>
+            <span class="n">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">)</span>
 
+        <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> [shape=cds];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
-                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> [shape=cds];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                    <span class="n">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">close</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="ERobot.fkine"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1914,7 +1976,7 @@
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Dec-2020.
+        Last updated on 23-Dec-2020.
       </span>
 
     </p>

@@ -31,7 +31,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
@@ -204,8 +203,9 @@
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>Introduction<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support the
-first author’s PhD research and was first published in 1995-6 <a class="reference internal" href="#corke95" id="id2"><span>[Corke95]</span></a>
+<p><em>This is a modified version of a paper submitted to ICRA2020</em></p>
+<p>The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support
+Peter Corke’s PhD research and was first published in 1995-6 <a class="reference internal" href="#corke95" id="id2"><span>[Corke95]</span></a>
 <a class="reference internal" href="#corke96" id="id3"><span>[Corke96]</span></a>. It has evolved over 25 years to track changes and improvements to
 the MATLAB language and ecosystem, such as the addition of structures, objects,
 lists (cell arrays) and strings, myriad of other improvements to the language,
@@ -502,13 +502,83 @@ specified using additional keyword arguments.</p>
 </pre></div>
 </div>
 <p>We can now easily perform standard kinematic operations</p>
-<div class="highlight-pycon notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span>
+<div class="highlight-pycon notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>                  <span class="c1"># instantiate robot model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
+<span class="go">┏━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃         dⱼ         ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1 ┃ 0.6718299999999999 ┃      0 ┃  90.0° ┃ -160.0° ┃ 160.0° ┃</span>
+<span class="go">┃ q2 ┃                  0 ┃ 0.4318 ┃   0.0° ┃ -110.0° ┃ 110.0° ┃</span>
+<span class="go">┃ q3 ┃            0.15005 ┃ 0.0203 ┃ -90.0° ┃ -135.0° ┃ 135.0° ┃</span>
+<span class="go">┃ q4 ┃             0.4318 ┃      0 ┃  90.0° ┃ -266.0° ┃ 266.0° ┃</span>
+<span class="go">┃ q5 ┃                  0 ┃      0 ┃ -90.0° ┃ -100.0° ┃ 100.0° ┃</span>
+<span class="go">┃ q6 ┃                  0 ┃      0 ┃   0.0° ┃ -266.0° ┃ 266.0° ┃</span>
+<span class="go">┗━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
+
+<span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
+<span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
+<span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
+<span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
+<span class="go">│  qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
+<span class="go">│  qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
+<span class="go">│  qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
+<span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+<span class="go">[ 0.      1.5708 -1.5708  0.      0.      0.    ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>  <span class="c1"># forward kinematics</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">   0.121698   -0.606672   -0.785582    0.247803     </span>
+<span class="go">   0.818364    0.509197   -0.266456   -0.12594      </span>
+<span class="go">   0.561667   -0.610465    0.558446    1.14629      </span>
+<span class="go">   0           0           0           1            </span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+<span class="go">IKsolution(q=array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), success=True, reason=None, iterations=12, residual=8.514893490954293e-13)</span>
 </pre></div>
 </td></tr></table></div>
 <p>The Toolbox supports named joint configurations and these are shown in the table
-at lines ??.</p>
-<p><code class="docutils literal notranslate"><span class="pre">ikine</span></code> is a generalised iterative numerical solution based on Levenberg-Marquadt minimization, and additional status results are also returned.
-The default plot method:</p>
+at lines 16-22.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> is a generalised iterative numerical solution based on
+Levenberg-Marquadt minimization, and additional status results are also
+returned as part of a named tuple.</p>
+<p>The default plot method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -590,7 +660,7 @@ or pure rotation – each with either a constant parameter or a free parameter w
 
 </pre></div>
 </td></tr></table></div>
-<p>Line 3 defines the unique lengths of the Puma robot, and line ?? defines the kinematic chain in
+<p>Line 3 defines the unique lengths of the Puma robot, and line 4 defines the kinematic chain in
 terms of elementary transforms.
 In line 7 we pass this to the constructor for an <code class="docutils literal notranslate"><span class="pre">ERobot</span></code> which partitions the
 elementary transform sequence into a series of links and joints – link frames are declared
@@ -603,15 +673,83 @@ can also represent more general branched mechanisms.</p>
 <p>The final approach to manipulator modeling is to an import a URDF file.  The Toolbox includes a parser with built-in xacro processor
 which makes many models from the ROS universe available.</p>
 <p>Provided models, such as for Panda or Puma, are again encapsulated as classes:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: Must specify which end-effector</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;T&#39; is not defined</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
+<span class="go">┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃</span>
+<span class="go">┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃</span>
+<span class="go">┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃</span>
+<span class="go">┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃</span>
+<span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
+
+<span class="go">┌─────┬───────────────────────────────────────┐</span>
+<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
+<span class="go">└─────┴───────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
+<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
+<span class="go">│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">   0.707107    0.707107    0           0.088        </span>
+<span class="go">   0.707107   -0.707107    0           0            </span>
+<span class="go">   0           0          -1           0.823        </span>
+<span class="go">   0           0           0           1            </span>
+
 </pre></div>
 </div>
 <p>and kinematic operations are performed using methods with the same name
 as discussed above.
 For branched robots, with multiple end-effectors,  the name of the frame of interest must be provided.</p>
+<p>Some URDF models have multiple end-effectors, in which case the particular
+end-effector must be specified.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
+<span class="go">┌───┬─────────────┬─────────────┬──────────────────┬─────────────────────────────────────────────┐</span>
+<span class="go">│id │    link     │   parent    │      joint       │                     ETS                     │</span>
+<span class="go">├───┼─────────────┼─────────────┼──────────────────┼─────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │ panda_link0 │           - │                  │                                             │</span>
+<span class="go">│ 1 │ panda_link1 │ panda_link0 │     panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
+<span class="go">│ 2 │ panda_link2 │ panda_link1 │     panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
+<span class="go">│ 3 │ panda_link3 │ panda_link2 │     panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
+<span class="go">│ 4 │ panda_link4 │ panda_link3 │     panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
+<span class="go">│ 5 │ panda_link5 │ panda_link4 │     panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
+<span class="go">│ 6 │ panda_link6 │ panda_link5 │     panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
+<span class="go">│ 7 │ panda_link7 │ panda_link6 │     panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
+<span class="go">│ 8 │ panda_link8 │ panda_link7 │     panda_joint8 │ tz(0.107)                                   │</span>
+<span class="go">│ 9 │ @panda_hand │ panda_link8 │ panda_hand_joint │ Rz(-45°)                                    │</span>
+<span class="go">└───┴─────────────┴─────────────┴──────────────────┴─────────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
+<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
+<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
+<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
+<span class="go">│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="s1">&#39;panda_hand&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="go">   0.707107    0.707107    0           0.088        </span>
+<span class="go">   0.707107   -0.707107    0           0            </span>
+<span class="go">   0           0          -1           0.926        </span>
+<span class="go">   0           0           0           1            </span>
+
+</pre></div>
+</div>
+<p>In the table above we see the end-effectors indicated by &#64; (determined automatically
+from the URDF file), so we specify one of these.  We can also specify any
+other link in order to determine the pose of that link’s coordinate frame.</p>
 <p>This URDF model comes with meshes provided as Collada file which provide
 detailed geometry and color.  This can be visualized using the Swift simulator:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qz</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;swift&quot;</span><span class="p">)</span>
@@ -629,7 +767,7 @@ Animations can be recorded as MP4 files or animated GIF files which are useful f
 </div>
 <div class="section" id="trajectories">
 <h2>Trajectories<a class="headerlink" href="#trajectories" title="Permalink to this headline">¶</a></h2>
-<p>A joint-spae trajectory for the Puma robot from its zero angle
+<p>A joint-space trajectory for the Puma robot from its zero angle
 pose to the upright (or READY) pose in 100 steps is</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -651,21 +789,61 @@ function:</p>
 </div>
 <p>Straight line (Cartesian) paths can be generated in a similar way between
 two points specified by a pair of poses in <span class="math notranslate nohighlight">\(\SE{3}\)</span></p>
-<div class="highlight-pycon notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span>
+<div class="highlight-pycon notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.010</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T0</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T1</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Ts</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">trajectory</span><span class="o">.</span><span class="n">ctraj</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">Ts</span><span class="p">)</span>
+<span class="go">200</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Ts</span><span class="p">)</span>                 <span class="c1"># array of named tuples</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">q</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sol</span><span class="p">])</span>    <span class="c1"># convert to 2d matrix</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qt</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(200, 6)</span>
 </pre></div>
 </td></tr></table></div>
 <p>At line 9 we see that the resulting trajectory, <code class="docutils literal notranslate"><span class="pre">Ts</span></code>, is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance with 200 values.</p>
 <p>At line 11 we compute the inverse kinematics of each pose in the trajectory
-using a single call to the <code class="docutils literal notranslate"><span class="pre">ikine</span></code> method.
-At line 13 we see that the result <code class="docutils literal notranslate"><span class="pre">qs</span></code> is is an array of joint coordinates, one row per timestep.
-In this case the starting
+using a single call to the <code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> method.
+The result is a list of named tuples, which gives the IK success status for
+each time step.
+At line 12 we convert this into an array, with one row per time step, and each
+row is a joint coordinate.
+The starting
 joint coordinates for each inverse kinematic solution
-is taken as the result of the previous solution.</p>
+is taken as the result of the solution at the previous time step.</p>
 </div>
 <div class="section" id="symbolic-manipulation">
 <h2>Symbolic manipulation<a class="headerlink" href="#symbolic-manipulation" title="Permalink to this headline">¶</a></h2>
 <p>As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. For example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spatialmath.base</span> <span class="k">as</span> <span class="nn">base</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;phi, theta, psi&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span><span class="o">.</span><span class="n">rpy2r</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">psi</span><span class="p">)</span>
+<span class="go">array([[cos(psi)*cos(theta),</span>
+<span class="go">        sin(phi)*sin(theta)*cos(psi) - sin(psi)*cos(phi),</span>
+<span class="go">        sin(phi)*sin(psi) + sin(theta)*cos(phi)*cos(psi)],</span>
+<span class="go">       [sin(psi)*cos(theta),</span>
+<span class="go">        sin(phi)*sin(psi)*sin(theta) + cos(phi)*cos(psi),</span>
+<span class="go">        -sin(phi)*cos(psi) + sin(psi)*sin(theta)*cos(phi)],</span>
+<span class="go">       [-sin(theta), sin(phi)*cos(theta), cos(phi)*cos(theta)]],</span>
+<span class="go">      dtype=object)</span>
 </pre></div>
 </div>
 <p>The capability extends to forward kinematics</p>
@@ -714,7 +892,14 @@ At a singular configuration</p>
 </div>
 <p>in the base or end-effector frames respectively, as 3D NumPy arrays in <span class="math notranslate nohighlight">\(\mathbb{R}^{6 \times n \times n}\)</span>.</p>
 <p>For all robot classes we can compute manipulability</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">TypeError: string indices must be integers</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Yoshikawa manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="go">Yoshikawa manipulability is 0.07861716534599998</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asada&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Asada manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+<span class="go">Asada manipulability is 0.004374613728166504</span>
 </pre></div>
 </div>
 <p>for the Yoshikawa and Asada measures respectively, and</p>
@@ -960,7 +1145,7 @@ and a minimalist block-diagram simulation tool <a class="reference internal" hre
         
         &copy; Copyright 2020, Jesse Haviland and Peter Corke
       <span class="lastupdated">
-        Last updated on 20-Dec-2020.
+        Last updated on 23-Dec-2020.
       </span>
 
     </p>
