@@ -192,8 +192,6 @@ class Bug2(Navigation):
             else:
                 path.append(robot)
 
-
-
         if movie is not None:
             anim.done()
 
@@ -224,12 +222,12 @@ class Bug2(Navigation):
         l = None
         y = None
 
+        if all(self._goal == position):
+            return None  # we have arrived
+
         if self._step == 1:
             # Step 1.  Move along the M-line toward the goal
-
-            if all(self._goal == position):
-                return None  # we have arrived
-
+            self.message(f"{position}: moving along the M-line (step 1)")
             # motion on line toward goal
             d = self._goal - position
             if abs(d[0]) > abs(d[1]):
@@ -247,22 +245,22 @@ class Bug2(Navigation):
 
             # detect if next step is an obstacle
             if self.is_occupied(position + np.r_[dx, dy]):
-                # self.message(n + "obstacle!")
+                self.message(f"  {position}: obstacle at {position + np.r_[dx, dy]}")
                 self.h.append(position)
                 self._step = 2  # transition to step 2
+                self.message(f"  {position}: change to step 2")
 
                 # get a list of all the points around the obstacle
                 self._edge, _ = edgelist(self._occ_grid_nav == 0, position)
-                self._k = 2
+                self._k = 1
             else:
                 n = position + np.array([dx, dy])
 
         if self._step == 2:
-                # Step 2.  Move around the obstacle until we reach a point
-                # on the M-line closer than when we started.
-            if all(self._goal == position):
-                return None
+            # Step 2.  Move around the obstacle until we reach a point
+            # on the M-line closer than when we started.
 
+            self.message(f"{position}: moving around the obstacle (step 2)")
             if self._k <= len(self._edge):
                 n = self._edge[self._k]  # next edge point
             else:
@@ -272,16 +270,16 @@ class Bug2(Navigation):
 
             # are we on the M-line now ?
             if abs(np.inner(np.r_[position, 1], self._m_line)) <= 0.5:
-                self.message(f"{n}: moving along the M-line")
+                self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle?
                 if base.norm(position - self._goal) < base.norm(self._h[-1] - self._goal):
                     # self._j += 1
                     self._step = 1  # transition to step 1
+                    self.message(f"  {position}: change to step 1")
                     return n
 
             # no, keep going around
-            self.message(f"{n}: keep moving around obstacle")
             self._k += 1
 
         return n
@@ -405,7 +403,6 @@ def edgelist(im, p, direction=1):
         # check if we are back where we started
         if p0 is None:
                 p0 = p  # make a note of where we started
-                print(p0)
         else:
             if all(p == p0):
                 break
@@ -485,17 +482,3 @@ def col_norm(x):
 class Error(Exception):
     """Base class for other exceptions"""
     pass
-
-
-if __name__ == "__main__":
-
-    import numpy as np
-
-    map = np.zeros((10,10), dtype=np.uint8)
-    map[3:6,4:7] = 1
-    print(map)
-    e, d = edgelist(map, [4,4])
-    print(len(e), e)
-    print(d)
-
-    e, d = edgelist(map, [5,4])
