@@ -1,11 +1,14 @@
 from roboticstoolbox.mobile.vehicle import *
 from roboticstoolbox.mobile.bug2 import Bug2
 from roboticstoolbox.mobile.dx_form import DXform
+from roboticstoolbox.mobile.dstar import DStar
+
 __all__ = [
     'Bicycle',
     'Unicycle',
     'Bug2',
-    'DXform'
+    'DXform',
+    'DStar',
 ]
 
 # __doc__ = """
