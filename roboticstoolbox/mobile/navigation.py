@@ -455,7 +455,10 @@ class Navigation:
             return False
 
         p = base.getvector(p, 2, 'list')
-        return self._occ_grid_nav[p[1], p[0]] > 0
+        try:
+            return self._occ_grid_nav[p[1], p[0]] > 0
+        except IndexError:
+            return True  # points outside the map are considered occupied
 
         # if x is not None:
         #     if np.size(x) == 2:
