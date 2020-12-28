@@ -481,14 +481,13 @@ class Navigation:
         pass
 
     def rand(self, **kwargs):
-
         return self._privaterandom.uniform(**kwargs)
 
     def randn(self, **kwargs):
         return self._privaterandom.normal(**kwargs)
 
-    def randi(self, **kwargs):
-        return self._privaterandom.integers(**kwargs)
+    def randi(self, *pos, **kwargs):
+        return self._privaterandom.integers(*pos, **kwargs)
 
     def verbosity(self, v):
         self._verbose = v
