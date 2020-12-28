@@ -203,10 +203,9 @@ class Navigation:
             self.plot()
 
         robot = self._start
-        path = []
+        path = [robot]
 
         while True:
-            print(robot)
             if animate:
                 plt.plot(robot[0], robot[1], 'y.', 12)
                 plt.pause(0.05)
