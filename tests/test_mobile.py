@@ -155,6 +155,9 @@ class TestNavigation(unittest.TestCase):
             d = np.linalg.norm(path[k] - path[k+1])
             self.assertTrue(d < 1.5)
 
+        bug.plot()
+        bug.plot(path=path)
+
     def test_dxform(self):
 
         from scipy.io import loadmat
@@ -186,6 +189,9 @@ class TestNavigation(unittest.TestCase):
             d = np.linalg.norm(path[k] - path[k+1])
             self.assertTrue(d < 1.5)
             
+        dx.plot()
+        dx.plot(path=path)
+
 class TestVehicle(unittest.TestCase):
 	pass
 # function setupOnce(testCase)
