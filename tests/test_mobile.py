@@ -10,7 +10,7 @@ import numpy as np
 import spatialmath.base as sm
 import unittest
 
-from roboticstoolbox import Bug2, DXform
+from roboticstoolbox import Bug2, DXform, loadmat
 from roboticstoolbox.mobile.bug2 import edgelist
 
 class TestNavigation(unittest.TestCase):
@@ -126,13 +126,11 @@ class TestNavigation(unittest.TestCase):
 
     def test_bug2(self):
 
-        from scipy.io import loadmat
-
-        vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/map1.mat", squeeze_me=True, struct_as_record=False)
+        vars = loadmat("../data/map1.mat")
         map = vars['map']
 
         bug = Bug2(map)
-        bug.plan()
+        # bug.plan()
         path = bug.query([20, 10], [50, 35])
 
         # valid path
@@ -160,9 +158,7 @@ class TestNavigation(unittest.TestCase):
 
     def test_dxform(self):
 
-        from scipy.io import loadmat
-
-        vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/map1.mat", squeeze_me=True, struct_as_record=False)
+        vars = loadmat("../data/map1.mat")
         map = vars['map']
 
         dx = DXform(map)
