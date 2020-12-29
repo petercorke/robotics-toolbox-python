@@ -126,7 +126,7 @@ class TestNavigation(unittest.TestCase):
 
     def test_bug2(self):
 
-        vars = loadmat("../data/map1.mat")
+        vars = loadmat("data/map1.mat")
         map = vars['map']
 
         bug = Bug2(map)
@@ -158,7 +158,7 @@ class TestNavigation(unittest.TestCase):
 
     def test_dxform(self):
 
-        vars = loadmat("../data/map1.mat")
+        vars = loadmat("data/map1.mat")
         map = vars['map']
 
         dx = DXform(map)
