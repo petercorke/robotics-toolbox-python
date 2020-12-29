@@ -58,6 +58,7 @@ def _path_datafile(filename):
     p = p.resolve()
     if not p.exists():
         raise ValueError(f"File '{p}' does not exist")
+    print("_path_datafile", __file__, filename, p)
     return str(p)
 
 if __name__ == "__main__":
