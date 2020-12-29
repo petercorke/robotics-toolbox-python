@@ -144,7 +144,7 @@ class Bug2(Navigation):
             % See also Animate.
         """
         anim = None
-        if movie is not None and movie != np.array([]):
+        if movie is not None:
             anim = Animate(movie)
             animate = True
 
@@ -183,7 +183,7 @@ class Bug2(Navigation):
             robot = self.next(robot)
 
             # have we been here before, ie. in a loop
-            if any(map(lambda x: all(robot == x), path)):
+            if any([all(robot == x) for x in path]):
                 raise RuntimeError('trapped')
 
             # are we there yet?
@@ -217,7 +217,6 @@ class Bug2(Navigation):
             plt.plot([x_min, x_max], y, ls, zorder=10)
 
     def next(self, position):
-        position = position[:]
 
         l = None
         y = None
@@ -232,16 +231,16 @@ class Bug2(Navigation):
             d = self._goal - position
             if abs(d[0]) > abs(d[1]):
                 # line slope less than 45 deg
-                dx = np.sign(d[0])
+                dx = 1 if d[0] >= 0 else -1  # np.sign(d[0])
                 l = self._m_line
                 y = -((position[0] + dx) * l[0] + l[2]) / l[1]
-                dy = round(y - position[1])
+                dy = int(round(y - position[1]))
             else:
                 # line slope greater than 45 deg
-                dy = np.sign(d[1])
+                dy = 1 if d[1] >= 0 else -1  # np.sign(d[1])
                 l = self._m_line
                 x = -((position[1] + dy) * l[1] + l[2]) / l[0]
-                dx = round(x - position[0])
+                dx = int(round(x - position[0]))
 
             # detect if next step is an obstacle
             if self.is_occupied(position + np.r_[dx, dy]):
@@ -454,31 +453,38 @@ def hom_line(x1, y1, x2, y2):
     # from the line
     return line / np.linalg.norm(line[0:2])
 
-# Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
-def sub2ind(array_shape, rows, cols):
-    ind = rows*array_shape[1] + cols
-    ind[ind < 0] = -1
-    ind[ind >= array_shape[0]*array_shape[1]] = -1
-    return ind
+# # Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
+# def sub2ind(array_shape, rows, cols):
+#     ind = rows*array_shape[1] + cols
+#     ind[ind < 0] = -1
+#     ind[ind >= array_shape[0]*array_shape[1]] = -1
+#     return ind
 
 
-def ind2sub(array_shape, ind):
-    ind[ind < 0] = -1
-    ind[ind >= array_shape[0]*array_shape[1]] = -1
-    rows = (ind.astype('int') / array_shape[1])
-    cols = ind % array_shape[1]
-    return rows, cols
+# def ind2sub(array_shape, ind):
+#     ind[ind < 0] = -1
+#     ind[ind >= array_shape[0]*array_shape[1]] = -1
+#     rows = (ind.astype('int') / array_shape[1])
+#     cols = ind % array_shape[1]
+#     return rows, cols
 
-def col_norm(x):
-    y = np.array([])
-    if x.ndim > 1:
-        x = np.column_stack(x)
-        for vector in x:
-            y = np.append(y, np.linalg.norm(vector))
-    else:
-        y = np.linalg.norm(x)
-    return y
+# def col_norm(x):
+#     y = np.array([])
+#     if x.ndim > 1:
+#         x = np.column_stack(x)
+#         for vector in x:
+#             y = np.append(y, np.linalg.norm(vector))
+#     else:
+#         y = np.linalg.norm(x)
+#     return y
 
-class Error(Exception):
-    """Base class for other exceptions"""
-    pass
+if __name__ == "__main__":
+
+    from roboticstoolbox import loadmat
+
+    vars = loadmat("../data/map1.mat")
+    map = vars['map']
+
+    bug = Bug2(map)
+    # bug.plan()
+    path = bug.query([20, 10], [50, 35])
