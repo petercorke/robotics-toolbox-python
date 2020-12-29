@@ -54,7 +54,7 @@ def _path_datafile(filename):
     folder *roboticstoolbox*.
     """
 
-    p = Path(__file__).parent.parent / Path(filename)
+    p = Path(__file__).parent / Path(filename)
     p = p.resolve()
     if not p.exists():
         raise ValueError(f"File '{p}' does not exist")
