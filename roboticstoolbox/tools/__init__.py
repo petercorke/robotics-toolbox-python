@@ -7,6 +7,8 @@ from roboticstoolbox.tools.trajectory import tpoly, \
 from roboticstoolbox.tools.numerical import jacobian_numerical, \
     hessian_numerical
 from roboticstoolbox.tools.jsingu import jsingu
+from roboticstoolbox.tools.data import loaddata, loadmat
+
 
 __all__ = [
     'null',
@@ -22,4 +24,6 @@ __all__ = [
     'jsingu',
     'jacobian_numerical',
     'hessian_numerical',
+    'loaddata',
+    'loadmat',
 ]
