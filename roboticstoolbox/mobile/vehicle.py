@@ -22,10 +22,10 @@ class Vehicle(ABC):
         self._covar = np.array([]) # TODO, just set to None?
         self._r_dim = 0.2
         self._dt = 0.1
-        self._x0 = np.r_[0, 0, 0]
+        self._x0 = np.zeros((3,), dtype=float)
         self._x = None
         self._speed_max = 1
-        self._v_handle = np.array([])
+        self._vehicle_plot = None
         self._driver = None
         self._odometry = None
 
@@ -37,7 +37,7 @@ class Vehicle(ABC):
         if l is not None:
             self._l = l
         if x0 is not None:
-            self._x0 = x0
+            self._x0 = base.getvector(x0, 3)
             # TODO: Add assert
         if dt is not None:
             self._dt = dt
@@ -48,11 +48,11 @@ class Vehicle(ABC):
         if steer_max is not None:
             self._steer_max = steer_max
 
-        self._x_hist = np.array([])
+        self._x_hist = np.empty((0,3))
 
     def __str__(self):
         s = f"{self.__class__.__name__}: "
-        s += f"x = {self.x}"
+        s += f"x = {self._x}"
         return s
 
     @property
@@ -122,12 +122,11 @@ class Vehicle(ABC):
     # Example
     def init(self, x0=None):
         if x0 is not None:
-            self._x = x0
+            self._x = base.getvector(x0, 3)
         else:
             self._x = self._x0
 
-        self._x_hist = np.array([])
-
+        self._x_hist = np.empty((0,3))
         if self._driver is not None:
             self._driver.init()  # TODO: make this work?
 
@@ -169,14 +168,16 @@ class Vehicle(ABC):
         driver._veh = self
 
     def update(self, u):
-        xp = self._x
-        self._x[0] = self._x[0] + u[0] * self._dt * np.cos(self._x[2])
-        self._x[1] = self._x[1] + u[0] * self._dt * np.sin(self._x[2])
-        self._x[2] = self._x[2] + u[0] * self._dt / self._l * u[1]
-        odo = np.array([col_norm(self._x[0:2] - xp[0:2], self._x[2] - xp[2])])  # TODO: Right indexing?
+        v = u[0]
+        theta = self._x[2]
+        xp = np.array(self._x)
+        self._x[0] += v * self._dt * np.cos(theta)
+        self._x[1] += v * self._dt * np.sin(theta)
+        self._x[2] += v * self._dt / self._l * u[1]
+        odo = np.r_[np.linalg.norm(self._x[0:2] - xp[0:2]), self._x[2] - xp[2]]
         self._odometry = odo
 
-        self._x_hist = np.concatenate(self._x_hist, np.transpose(self._x))
+        self._x_hist = np.vstack((self._x_hist, self._x))
         return odo
 
     def step(self, speed=None, steer=None):
@@ -184,7 +185,7 @@ class Vehicle(ABC):
         odo = self.update(u)
 
         if self._v is not None:
-            odo = self._odometry + np.random.rand(1, 2) * linalg.sqrtm(self._v)  # TODO: linalg imported?
+            odo = self._odometry + linalg.sqrtm(self._v) @ np.random.randn(2)
 
         return odo
 
@@ -192,7 +193,7 @@ class Vehicle(ABC):
         u = np.zeros(2)
         if speed is None and steer is None:
             if self._driver is not None:
-                speed, steep = self._driver.demand()
+                speed, steer = self._driver.demand()
             else:
                 speed = 0
                 steer = 0
@@ -209,21 +210,24 @@ class Vehicle(ABC):
 
         return u
 
-    def run(self, n_steps=None):
+    def run(self, n_steps=None, plot=True):
         if n_steps is None:
             n_steps = 1000
         if self._driver is not None:
             self._driver.init()
-        if self._driver is not None:
-            self._driver.plot()
+            if plot:
+                self._driver.plot()
 
-        self._plot()
-        for i in range(0, n_steps):
+        if plot:
+            self.plot()
+        for i in range(n_steps):
             self.step()
-            # TODO: There's a nargout here... is this really needed or can it be done differently?
+            if plot:
+                self.plot()
+                plt.pause(0.1)
+            print(i, self._x)
 
-        p = self._x_hist
-        return p
+        return self._x_hist
 
     def run_2(self, t, x0, speed, steer):
         self.init(x0)
@@ -234,13 +238,12 @@ class Vehicle(ABC):
         p = self._x_hist
         return p
 
-    def plot(self):
-        # TODO: Add vargin arguments. There's more here.
-        if self._v_handle is None:
-            self._v_handle = plot_v(self._x)
-
-        pos = self._x
-        plot_v(self._v_handle, pos)
+    def plot(self, path=None):
+        if path is None:
+            if self._vehicle_plot is None:
+                self._vehicle_plot = VehicleAnimation(self._x)
+            else:
+                self._vehicle_plot.update(self._x)
 
     def plot_xy(self):
         # TODO: this also has some vargin
@@ -262,16 +265,26 @@ class Vehicle(ABC):
         return min(self._speed_max, max(v, -self._speed_max));
 
 
-def plot_v(handle=None, pose_x=None):
-    # TODO add vargin stuff
-    if handle is not None:
-        plot_vehicle(pose_x, handle)
-    else:
-        handle = None
-        fillcolor = 'b'
-        alpha = 0.5
-        h = plot_vehicle(pose_x, handle, fillcolor, alpha)
-        return h
+class VehicleAnimation:
+
+    # TODO update with triangle, image etc, handle orientation
+
+    def __init__(self, x=None):
+
+        self._ax = plt.gca()
+        self._reference = plt.plot(x[0], x[1], marker='o', markersize=12)[0]
+
+    def update(self, x):
+        self._reference.set_xdata(x[0])
+        self._reference.set_ydata(x[1])
+        plt.draw()
+
+    def __del__(self):
+
+        if self._reference is not None:
+            print('deleting vehicle graphics object')
+            self._ax.remove(self._reference)
+
 
 
 # ========================================================================= #
@@ -284,14 +297,13 @@ class Bicycle(Vehicle):
                 covar=0,
                 speed_max=1,
                 l=1, 
-                x0=np.array([0, 0, 0]),
+                x0=None,
                 dt=0.1, 
                 r_dim=0.2, 
                 verbose=None
                 ):
         super().__init__(covar, speed_max, l, x0, dt, r_dim, steer_max, verbose)
 
-        self._x = np.r_[0, 0, 0]
         self._l = 1
         self._steer_max = 0.5
         self._accel_max = np.inf
@@ -321,8 +333,8 @@ class Bicycle(Vehicle):
 
     def __str__(self):
 
-        s = super.__str__(self)
-        s += f"\n  L={self._l}, steer_max={self._steer_max}, vel_max={self._vel_max}, accel_max={self.accel_max}"
+        s = super().__str__()
+        s += f"\n  L={self._l}, steer_max={self._steer_max}, speed_max={self._speed_max}, accel_max={self._accel_max}"
         return s
 
     @property
@@ -353,17 +365,17 @@ class Bicycle(Vehicle):
         speed_maxNotes::
         speed_max- Supports vectorized operation where X and XN (Nx3).
         """
-        
+        x = base.getvector(x, 3)
+        odo = base.getvector(odo, 2)
+
         if w is None:
-            w = np.array([0, 0])
+            w = [0, 0]
 
         dd = odo[0] + w[0]
         dth = odo[1] + w[1]
-        thp = x[:, 2]
+        thp = x[2]
         # TODO not sure when vectorized version is needed
-        x_next = x + [dd * np.cos(thp), dd * np.sin(thp), np.ones(np.size(x, 0)*dth)]
-
-        return x_next
+        return x + np.r_[dd * np.cos(thp), dd * np.sin(thp), dth]
 
     def deriv(self, t, x, u):  # TODO: I have no idea where Y comes from, here!
         """
@@ -465,13 +477,12 @@ class Unicycle(Vehicle):
                 covar=0,
                 speed_max=1,
                 w=1,
-                x0=np.array([0, 0, 0]),
+                x0=None,
                 dt=0.1,
                 r_dim=0.2, 
                 verbose=None):
         super().__init__(covar, speed_max, l, x0, dt, r_dim, steer_max, verbose)
 
-        self._x = np.r_[0, 0, 0]
         self._w = 1
         self._steer_max = 0.5
         self._accel_max = np.inf
@@ -501,7 +512,7 @@ class Unicycle(Vehicle):
 
     def __str__(self):
 
-        s = super.__str__(self)
+        s = super().__str__()
         s += f"\n  W={self._w}, steer_max={self._steer_max}, vel_max={self._vel_max}, accel_max={self.accel_max}"
         return s
 
@@ -523,3 +534,236 @@ class Unicycle(Vehicle):
         vd = u[1]
 
         return np.r_[v * cos(theta), v * sin(theta), v / self.w]
+
+# ========================================================================= #
+
+class RandomPath:
+    """
+        RandomPath Vehicle driver class
+
+    Create a "driver" object capable of steering a Vehicle subclass object through random 
+    waypoints within a rectangular region and at constant speed.
+
+    The driver object is connected to a Vehicle object by the latter's
+    add_driver() method.  The driver's demand() method is invoked on every
+    call to the Vehicle's step() method.
+
+    Methods::
+    init       reset the random number generator
+    demand     speed and steer angle to next waypoint
+    display    display the state and parameters in human readable form
+    char       convert to string
+    plot      
+    Properties::
+    goal          current goal/waypoint coordinate
+    veh           the Vehicle object being controlled
+    dim           dimensions of the work space (2x1) [m]
+    speed         speed of travel [m/s]
+    dthresh       proximity to waypoint at which next is chosen [m]
+
+    Example::
+
+    veh = Bicycle(V);
+    veh.add_driver( RandomPath(20, 2) );
+
+    Notes::
+    - It is possible in some cases for the vehicle to move outside the desired
+    region, for instance if moving to a waypoint near the edge, the limited
+    turning circle may cause the vehicle to temporarily move outside.
+    - The vehicle chooses a new waypoint when it is closer than property
+    closeenough to the current waypoint.
+    - Uses its own random number stream so as to not influence the performance
+    of other randomized algorithms such as path planning.
+
+    Reference::
+
+    Robotics, Vision & Control, Chap 6,
+    Peter Corke,
+    Springer 2011
+
+    See also Vehicle, Bicycle, Unicycle.
+
+
+
+
+    TODO
+    should be a subclass of VehicleDriver
+    Vehicle should be an abstract superclass
+    dim should be checked, can be a 4-vector like axis()
+    """
+
+    def __init__(self, dim, speed=1, dthresh=0.05, show=True, seed=None):
+        """
+        [summary]
+
+        :param dim: [description]
+        :type dim: [type]
+        :param speed: [description], defaults to 1
+        :type speed: int, optional
+        :param dthresh: [description], defaults to 0.05
+        :type dthresh: float, optional
+        :param show: [description], defaults to True
+        :type show: bool, optional
+        :raises ValueError: [description]
+
+        %RandomPath.RandomPath Create a driver object
+        %
+        % D = RandomPath(D, OPTIONS) returns a "driver" object capable of driving
+        % a Vehicle subclass object through random waypoints.  The waypoints are positioned
+        % inside a rectangular region of dimension D interpreted as:
+        %      - D scalar; X: -D to +D, Y: -D to +D
+        %      - D (1x2); X: -D(1) to +D(1), Y: -D(2) to +D(2)
+        %      - D (1x4); X: D(1) to D(2), Y: D(3) to D(4)
+        %
+        % Options::
+        % 'speed',S      Speed along path (default 1m/s).
+        % 'dthresh',D    Distance from goal at which next goal is chosen.
+        %
+        % See also Vehicle.
+                """
+        
+        # TODO options to specify region, maybe accept a Map object?
+        
+        dim = base.getvector(dim)
+
+        if len(dim) == 1:
+                self._xrange = np.r_[-dim, dim]
+                self._yrange = np.r_[-dim, dim]
+        elif len(dim) == 2:
+                self._xrange = np.r_[-dim[0], dim[0]]
+                self._yrange = np.r_[-dim[1], dim[1]]
+        elif len(dim) == 4:
+                self._xrange = np.r_[dim[0], dim[1]]
+                self._yrange = np.r_[dim[2], dim[3]]
+        else:
+            raise ValueError('bad dimension specified')
+        
+        self._speed = speed
+        self._dthresh = dthresh * np.diff(self._xrange)
+        self._show = show
+        self._h_goal = None
+        
+        self._d_prev = np.inf
+        self._randstream = np.random.RandomState()
+        self._seed = seed
+        self.verbose = True
+
+    def init(self):
+        """
+        [summary]
+        
+        %RandomPath.init Reset random number generator
+        %
+        % R.init() resets the random number generator used to create the waypoints.
+        % This enables the sequence of random waypoints to be repeated.
+        %
+        % Notes::
+        % - Called by Vehicle.run.
+        %
+        % See also RANDSTREAM.
+        """
+        self._goal = None
+        self._randstream.seed(self._seed)
+        # delete(driver.h_goal);   % delete the goal
+        # driver.h_goal = [];
+        
+
+    # called by Vehicle superclass
+    
+    def plot(self):
+        plt.clf()
+        plt.axis(np.r_[self._xrange, self._yrange])
+        
+        plt.xlabel('x blah')
+        plt.ylabel('y')
+
+
+    ## private method, invoked from demand() to compute a new waypoint
+    
+    def choose_goal(self):
+        
+        # choose a uniform random goal within inner 80% of driving area
+        while True:
+            r = self._randstream.rand() * 0.8 + 0.1
+            gx = self._xrange @ np.r_[r, 1-r]
+
+            r = self._randstream.rand() * 0.8 + 0.1
+            gy = self._yrange @ np.r_[r, 1-r]
+
+            self._goal = np.r_[gx, gy]
+
+            # check not too close to last goal
+            if np.linalg.norm(self._goal - self._veh._x[0:2]) > 2 * self._dthresh:
+                break
+
+        if self.verbose:
+            print(f"set goal: {self._goal}")
+
+        # update the goal marker
+        if self._show and self._h_goal is None:
+            self._h_goal = plt.plot(self._goal[0], self._goal[1], 'rd', markersize=12, markerfacecolor='r')[0]
+        else:
+            self._h_goal.set_xdata(self._goal[0])
+            self._h_goal.set_ydata(self._goal[1])
+
+
+    def demand(self):
+        """    %RandomPath.demand Compute speed and heading to waypoint
+            %
+            % [SPEED,STEER] = R.demand() is the speed and steer angle to
+            % drive the vehicle toward the next waypoint.  When the vehicle is
+            % within R.dtresh a new waypoint is chosen.
+            %
+            % See also Vehicle."""
+
+        if self._goal is None:
+            self.choose_goal()
+
+        # if nearly at goal point, choose the next one
+        d = np.linalg.norm(self._veh._x[0:2] - self._goal)
+        if d < self._dthresh:
+            self.choose_goal()
+        # elif d > 2 * self._d_prev:
+        #     self.choose_goal()
+        # self._d_prev = d
+
+        speed = self._speed
+
+        goal_heading = math.atan2(self._goal[1]-self._veh._x[1], self._goal[0]-self._veh._x[0])
+        d_heading = base.angdiff(goal_heading, self._veh._x[2])
+        steer = d_heading
+
+        print('  ', speed, steer)
+        return speed, steer
+
+    def __str__(self):
+        """%RandomPath.char Convert to string
+        %
+        % s = R.char() is a string showing driver parameters and state in in 
+        % a compact human readable format. """
+
+        s = 'RandomPath driver object\n'
+        s += f"  current goal={self._goal}, X {self._xrange[0]} : {self._xrange[1]}; Y {self._yrange[0]} : {self._yrange[1]}, dthresh={self.dthresh}"
+
+
+if __name__ == "__main__":
+    from math import pi
+
+    V = np.diag(np.r_[0.02, 0.5 * pi / 180] ** 2)
+
+    veh = Bicycle(covar=V)
+    print(veh)
+
+    odo = veh.step(1, 0.3)
+    print(odo)
+
+    print(veh.x)
+
+    print(veh.f([0, 0, 0], odo))
+
+    veh.add_driver(RandomPath(10))
+
+    p = veh.run(1000, plot=True)
+    # plt.show()
+    print(p)
+    veh.plot(p)
