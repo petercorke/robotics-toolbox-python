@@ -63,7 +63,7 @@ class DXform(Navigation):
     # Use plot from parent class
 
     def next(self, robot):
-        if self._distance_map is None or self._distance_map == np.array([]):
+        if self._distance_map is None:
             Error("No distance map computed, you need to plan.")
 
         directions = np.array([

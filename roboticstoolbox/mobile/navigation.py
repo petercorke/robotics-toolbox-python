@@ -57,14 +57,14 @@ class Navigation:
         else:
             self._occ_grid_nav = self._occ_grid
 
-        if goal != np.array([]):
+        if goal is not None:
             self._goal = np.transpose(goal)
 
         # Simplification of matlab code
         self._privaterandom = np.random.default_rng(seed=seed)
 
         rs = np.random.RandomState()
-        if seed != np.array([]):
+        if seed is not None:
             rs = np.random.RandomState(seed)
 
         self._seed_0 = rs.get_state()
