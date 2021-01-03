@@ -1334,7 +1334,7 @@ class ERobot(Robot):
             if q is None:
                 q = np.copy(self.q)
             else:
-                q = getvector(q, n)
+                q = getvector(q, self.n)
 
             J = self.jacob0(q, startlink=startlink, endlink=endlink)
         else:

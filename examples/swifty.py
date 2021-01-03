@@ -52,7 +52,7 @@ panda.q = panda.qr
 T = panda.fkine(panda.qr)
 # T = sm.SE3(0.8, 0.2, 0.1) * sm.SE3.OA([0, 1, 0], [0, 0, -1])
 
-sol = robot.ikine_LM(T)         # solve IK
+sol = robot.ikine_LMS(T)         # solve IK
 
 
 qt = rtb.jtraj(robot.qz, sol.q, 50)
@@ -63,3 +63,6 @@ env.add(panda)              # add robot to the 3D scene
 for qk in qt.q:             # for each joint configuration on trajectory
     panda.q = qk          # update the robot state
     env.step()            # update visualization
+
+print(panda.fkine(panda.q))
+print(T)
