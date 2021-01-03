@@ -22,7 +22,7 @@ from ansitable import ANSITable, Column
 from roboticstoolbox.robot.DHLink import _check_rne
 from frne import init, frne, delete
 
-iksol = namedtuple("IKsolution", "q, success, reason", defaults=(None,) * 3)
+iksol = namedtuple("IKsolution", "q, success, reason")
 
 
 class DHRobot(Robot):
@@ -120,7 +120,7 @@ class DHRobot(Robot):
             if L.offset != 0:
                 sign = "+" if L.offset > 0 else "-"
                 offset = abs(L.offset)
-                if link.isprismatic():
+                if link.isprismatic:
                     s += f" {sign} {offset:}"
                 else:
                     s += f" {sign} {offset * deg:.3g}\u00b0"
@@ -156,13 +156,13 @@ class DHRobot(Robot):
                 )
             for j, L in enumerate(self):
                 if has_qlim:
-                    if L.isprismatic():
+                    if L.isprismatic:
                         ql = [qlim[0, j], qlim[1, j]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
                     ql = []
-                if L.isprismatic():
+                if L.isprismatic:
                     table.row(
                         L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
                 else:
@@ -180,13 +180,13 @@ class DHRobot(Robot):
                 )
             for j, L in enumerate(self):
                 if has_qlim:
-                    if L.isprismatic():
+                    if L.isprismatic:
                         ql = [qlim[0, j], qlim[1, j]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
                     ql = []
-                if L.isprismatic():
+                if L.isprismatic:
                     table.row(
                         angle(L.theta), qstr(j, L), L.a, angle(L.alpha), *ql)
                 else:
@@ -461,7 +461,7 @@ class DHRobot(Robot):
             d = 0
             for link in self:
                 d += abs(link.a) + (link.d)
-                if link.isprismatic() and link.qlim is not None:
+                if link.isprismatic and link.qlim is not None:
                     d += link.qlim[1]
             self._reach = d
         return self._reach
@@ -596,7 +596,7 @@ class DHRobot(Robot):
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.isprismatic()
         """
-        return [link.isprismatic() for link in self]
+        return [link.isprismatic for link in self]
 
     def isrevolute(self):
         """
@@ -623,7 +623,7 @@ class DHRobot(Robot):
         p = []
 
         for i in range(self.n):
-            p.append(self.links[i].isrevolute())
+            p.append(self.links[i].isrevolute)
 
         return p
 
@@ -647,7 +647,7 @@ class DHRobot(Robot):
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.config()
         """
-        return ''.join(['R' if L.isrevolute() else 'P' for L in self])
+        return ''.join(['R' if L.isrevolute else 'P' for L in self])
 
     def todegrees(self, q=None):
         """
@@ -717,6 +717,32 @@ class DHRobot(Robot):
             q[k] * np.pi / 180.0
             if revolute[k] else q[k] for k in range(len(q))
         ])
+
+    def dhunique(self):
+        """
+        Print the unique DH parameters
+
+        Print a table showing all the non-zero DH parameters, and their
+        values.  This is the minimum set of kinematic parameters required
+        to describe the robot.
+        """
+
+        table = ANSITable(
+            Column("param"),
+            Column("value", headalign="^", colalign="<", fmt="{:.4g}"),
+            border="thin")
+        for j, link in enumerate(self):
+            if link.isprismatic:
+                if link.theta != 0:
+                    table.row(f"θ{j}", link.theta)
+            elif link.isrevolute:
+                if link.d != 0:
+                    table.row(f"d{j}", link.d)
+            if link.a != 0:
+                    table.row(f"a{j}", link.a)
+            if link.alpha != 0:
+                    table.row(f"⍺{j}", link.alpha)
+        table.print()
 
     def twists(self, q=None):
         """
@@ -1409,7 +1435,7 @@ class DHRobot(Robot):
                 # statement order is important here
 
                 if self.mdh:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
                         wd_ = Rt @ wd \
@@ -1434,7 +1460,7 @@ class DHRobot(Robot):
                     wd = wd_
                     vd = vd_
                 else:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         wd = Rt @ (
                             wd + z0 * qdd_k[j]
@@ -1516,14 +1542,14 @@ class DHRobot(Robot):
 
                 R = Rm[j]
                 if self.mdh:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         t = nn @ z0
                     else:
                         # prismatic
                         t = f @ z0
                 else:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         t = nn @ (R.T @ z0)
                     else:
@@ -1585,7 +1611,7 @@ class DHRobot(Robot):
             theta = ikfunc(self, Tk, config)
 
             if theta is None or np.any(np.isnan(theta)):
-                solution = iksol(None, False)
+                solution = iksol(None, False, "")
             else:
                 # Solve for the wrist rotation
                 # We need to account for some random translations between the
@@ -1616,7 +1642,7 @@ class DHRobot(Robot):
                 # Remove the link offset angles
                 theta = theta - self.offset
 
-                solution = iksol(theta, True)
+                solution = iksol(theta, True, "")
                 solutions.append(solution)
 
         if len(solutions) == 1:

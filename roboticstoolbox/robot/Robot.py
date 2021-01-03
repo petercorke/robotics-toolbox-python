@@ -609,7 +609,7 @@ class Robot(DynamicsMixin, IKMixin):
         limits = np.zeros((2, self.n))
         for j, link in enumerate(self):
             if link.qlim is None:
-                if link.isrevolute():
+                if link.isrevolute:
                     v = np.r_[-np.pi, np.pi]
                 else:
                     raise ValueError('undefined prismatic joint limit')

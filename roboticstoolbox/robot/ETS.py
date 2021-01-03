@@ -10,7 +10,7 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix, iseye
     
 class SuperETS(UserList, ABC):
 
@@ -378,6 +378,8 @@ class SuperETS(UserList, ABC):
 
         """
         if self.isjoint:
+            if self.isflip:
+                q = -q
             return self.axis_func(q)
         else:
             return self.data[0].T
@@ -477,7 +479,8 @@ class SuperETS(UserList, ABC):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    ets *= ETS._CONST(const)
+                    if not iseye(const):
+                        ets *= ETS._CONST(const)
                     const = None
                 ets *= et  # emit the joint ET
             else:
@@ -489,7 +492,8 @@ class SuperETS(UserList, ABC):
 
         if const is not None:
             # flush the constant, tool transform
-            ets *= ETS._CONST(const)
+            if not iseye(const):
+                ets *= ETS._CONST(const)
         return ets
 
     def __str__(self, q=None):
@@ -1110,7 +1114,7 @@ class ETS(SuperETS):
 
         # we will work with NumPy arrays for maximum speed
         T = T.A
-        U = np.eye(4)
+        U = np.eye(4)  # SE(3) matrix
         j = 0
         J = np.zeros((6, n))
 
@@ -1119,13 +1123,13 @@ class ETS(SuperETS):
             if et.isjoint:
                 # joint variable
                 # U = U @ link.A(q[j], fast=True)
-                U = U @ et.axis_func(q[j])
+                U = U @ et.T(q[j])
 
                 # TODO???
                 # if link == to_link:
                 #     U = U @ offset.A
 
-                Tu = np.linalg.inv(U) @ T
+                Tu = trinv(U) @ T
                 n = U[:3, 0]
                 o = U[:3, 1]
                 a = U[:3, 2]

@@ -3,6 +3,7 @@
 @author Micah Huth
 """
 
+import numpy as np
 from vpython import box, compound, color, sqrt
 from roboticstoolbox.backends.VPython.canvas import draw_reference_frame_axes
 from roboticstoolbox.backends.VPython.common_functions import \
@@ -534,23 +535,23 @@ class GraphicalRobot:  # pragma nocover
             # Update name
             self.name = self.robot.name
             # Get initial poses
-            zero_angles = self.robot.qz
-            all_poses = self.robot.fkine_all(zero_angles)
+            zero_angles = np.zeros((self.robot.n,))
+            all_poses = self.robot.fkine_all(zero_angles, old=False)
             # Create the base
             if robot.basemesh is not None:
-                self.append_link("s", robot.base, robot.basemesh, [0, 0], 0)
+                self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
             # else: assume no base joint
             robot_colours = robot.linkcolormap()
             # Create the joints
             for i, link in enumerate(self.robot.links):
                 # Get info
-                if link.isprismatic():
+                if link.isprismatic:
                     j_type = 'p'
-                elif link.isrevolute():
+                elif link.isrevolute:
                     j_type = 'r'
                 else:
                     j_type = 's'
-                pose = all_poses[i]   # Pose
+                pose = all_poses[i+1]   # link frame pose
                 if link.mesh is None:
                     if i == 0:
                         x1, x2 = SE3().t[0], all_poses[i].t[0]

@@ -160,10 +160,10 @@ class DHLink(Link):
         else:
             qvar = f"q{self.id}"
         cls = self.__class__.__name__
-        if self.isrevolute():
+        if self.isrevolute:
             s = f"{cls}:   theta={qvar}{offset},  d={self.d}, " \
                 f"a={self.a}, alpha={self.alpha}"
-        else:
+        elif self.isprismatic:
             s = f"{cls}:  theta={self.theta},  d={qvar}{offset}, " \
                 f" a={self.a},  " \
                 f"alpha={self.alpha}"
@@ -417,7 +417,7 @@ class DHLink(Link):
 
         return SE3(T, check=False)
 
-    # TODO these next 2 should be properties
+    @property
     def isrevolute(self):
         """
         Checks if the joint is of revolute type
@@ -433,6 +433,7 @@ class DHLink(Link):
         else:
             return False
 
+    @property
     def isprismatic(self):
         """
         Checks if the joint is of prismatic type
@@ -458,14 +459,14 @@ class DHLink(Link):
             if self.alpha != 0:
                 ets *= ETS.rx(self.alpha)
 
-            if self.isrevolute():
+            if self.isrevolute:
                 if self.offset != 0:
                     ets *= ETS.rz(self.offset)
                 ets *= ETS.rz(flip=self.flip)  # joint
 
                 if self.d != 0:
                     ets *= ETS.tz(self.d)
-            else:
+            elif self.isprismatic:
                 if self.theta != 0:
                     ets *= ETS.rz(self.theta)
 
@@ -476,14 +477,14 @@ class DHLink(Link):
         else:
             # DH format: theta d a alpha
 
-            if self.isrevolute():
+            if self.isrevolute:
                 ets *= ETS.rz(flip=self.flip)
                 if self.offset != 0:
                     ets *= ETS.rz(self.offset)
 
                 if self.d != 0:
                     ets *= ETS.tz(self.d)
-            else:
+            elif self.isprismatic:
                 if self.theta != 0:
                     ets *= ETS.rz(self.theta)
 
