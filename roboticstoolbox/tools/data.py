@@ -47,6 +47,7 @@ def loaddata(filename, handler, **kwargs):
     :seealso: :func:`path_to_datafile`
     """
     path = path_to_datafile(filename)
+    print("loaddata: ", path)
     return handler(path, **kwargs)
 
 def path_to_datafile(filename):
@@ -72,6 +73,7 @@ def path_to_datafile(filename):
         loadmat('foo.dat')         # read ./foo.dat
         loadmat('~/data/foo.dat')  # read ~/data/foo.dat
     """
+    print("path_to_data: ", filename, __file__)
     filename = Path(filename)
     
     if filename.parent == Path():
