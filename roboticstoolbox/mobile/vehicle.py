@@ -22,7 +22,7 @@ class Vehicle(ABC):
     def __init__(self, covar=None, speed_max=np.inf, accel_max=np.inf, x0=None, dt=0.1,
                  control=None, animation=None, verbose=False, dim=10):
         r"""
-        Superclass for vehicle kino-dynamic models
+        Superclass for vehicle kinematic models
 
         :param covar: odometry covariance, defaults to zero
         :type covar: ndarray(2,2), optional
@@ -260,7 +260,7 @@ class Vehicle(ABC):
 
     def add_driver(self, driver):
         """
-        Add a driver agent
+        Add a driver agent (superclass method)
 
         :param driver: a driver agent object
         :type driver: VehicleDriver subclass
@@ -277,7 +277,7 @@ class Vehicle(ABC):
 
     def run(self, N=1000, x0=None, control=None, animation=None, plot=True):
         """
-        Simulate motion of vehicle
+        Simulate motion of vehicle (superclass method)
 
         :param N: Number of simulation steps, defaults to 1000
         :type N: int, optional
@@ -330,7 +330,7 @@ class Vehicle(ABC):
 
     def init(self, x0=None, animation=None, plot=False, control=None):
         """
-        Initialize for simulation
+        Initialize for simulation (superclass method)
 
         :param x0: Initial state, defaults to value given to Vehicle constructor
         :type x0: array_like(3) or array_like(2)
@@ -390,7 +390,7 @@ class Vehicle(ABC):
 
     def step(self, u1=None, u2=None):
         """
-        Step simulator by one time step
+        Step simulator by one time step (superclass method)
 
         :return: odometry :math:`(\delta_d, \delta_\theta)`
         :rtype: ndarray(2)
@@ -453,7 +453,7 @@ class Vehicle(ABC):
 
     def eval_control(self, control, x):
         """
-        Evaluate vehicle control input
+        Evaluate vehicle control input (superclass method)
 
         :param control: vehicle control
         :type control: [type]
@@ -500,7 +500,7 @@ class Vehicle(ABC):
 
     def stopif(self, stop):
         """
-        Stop the simulation
+        Stop the simulation (superclass method)
 
         :param stop: stop condition
         :type stop: bool
@@ -515,7 +515,7 @@ class Vehicle(ABC):
 
     def plot(self, path=None, block=True):
         """
-        [summary]
+        [summary] (superclass method)
 
         :param path: [description], defaults to None
         :type path: [type], optional
@@ -540,7 +540,7 @@ class Vehicle(ABC):
 
     def limits_va(self, v):
         """
-        Apply velocity and acceleration limits
+        Apply velocity and acceleration limits (superclass method)
 
         :param v: commanded velocity
         :type v: float
@@ -564,7 +564,7 @@ class Vehicle(ABC):
 
     def path(self, t=10, u=None, x0=None):
         """
-        Compute path by integration
+        Compute path by integration (superclass method)
 
         :param t: [description], defaults to None
         :type t: [type], optional
@@ -621,14 +621,16 @@ class Bicycle(Vehicle):
                 **kwargs
                 ):
         r"""
-        Create new bicycle kino-dynamic model
+        Create new bicycle kinematic model
 
         :param l: wheel base, defaults to 1
         :type l: float, optional
         :param steer_max: [description], defaults to :math:`0.45\pi`
         :type steer_max: float, optional
-        :param **kwargs: additional arguments passed to :func:`Vehicle`
+        :param **kwargs: additional arguments passed to :class:`Vehicle`
             constructor
+
+        :seealso: :class:`.Vehicle`
         """
         super().__init__(**kwargs)
 
@@ -803,6 +805,16 @@ class Unicycle(Vehicle):
     def __init__(self,
                 w=1,
                 **kwargs):
+        r"""
+        Create new unicycle kinematic model
+
+        :param w: vehicle width, defaults to 1
+        :type w: float, optional
+        :param **kwargs: additional arguments passed to :class:`Vehicle`
+            constructor
+
+        :seealso: :class:`.Vehicle`
+        """
         super().__init__(**kwargs)
         self._w = w
 
