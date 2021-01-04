@@ -1066,6 +1066,22 @@ graph [rankdir=LR];
     #     return J
 
     def get_path(self, endlink=None, startlink=None):
+        """
+        Find a path from startlink to endlink. The endlink must come after
+        the startlink (ie endlink must be further away from the base link
+        of the robot than startlink) in the kinematic chain and both links
+        must be a part of the same branch within the robot structure. This
+        method is a work in progress while an approach which generalises
+        to all applications is designed.
+
+        :param endlink: name or reference to end-effector, defaults to None
+        :type endlink: str or ELink, optional
+        :param startlink: name or reference to a base link, defaults to None
+        :type startlink: str or ELink, optional
+        :raises ValueError: link not known or ambiguous
+        :return: the path from startlink to endlink
+        :rtype: list of Link
+        """
         path = []
         n = 0
 
