@@ -615,7 +615,6 @@ class ERobot(Robot):
 
     #     return ets
 
-
     def ets(self, start=None, end=None, explored=None, path=None):
         """
         ERobot to ETS
@@ -638,7 +637,8 @@ class ERobot(Robot):
         """
         v = self._getlink(start, self.base_link)
         if end is None and len(self.ee_links) > 1:
-            raise ValueError('ambiguous, specify which end-effector is required')
+            raise ValueError(
+                'ambiguous, specify which end-effector is required')
         end = self._getlink(end, self.ee_links[0])
 
         if explored is None:
@@ -688,7 +688,7 @@ class ERobot(Robot):
     def showgraph(self, **kwargs):
         """
         Display a link transform graph in browser
-        
+
         :param etsbox: Put the link ETS in a box, otherwise an edge label
         :type etsbox: bool
         :param jtype: Arrowhead to node indicates revolute or prismatic type
@@ -714,7 +714,7 @@ class ERobot(Robot):
             - an arrow with a box head if `jtype` is True and the joint is
               prismatic
 
-        Edge labels or nodes in blue have a fixed transformation to the 
+        Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
 
         :seealso: :func:`dotfile`
@@ -733,11 +733,10 @@ class ERobot(Robot):
         webbrowser.open(f"file://{pdffile.name}")
         os.remove(pdffile.name)
 
-
     def dotfile(self, filename, etsbox=False, jtype=False, static=True):
         """
         Write a link transform graph as a GraphViz dot file
-        
+
         :param file: Name of file to write to
         :type file: str or file
         :param etsbox: Put the link ETS in a box, otherwise an edge label
@@ -748,7 +747,7 @@ class ERobot(Robot):
         :type static: bool
 
         The file can be processed using dot::
-            
+
             % dot -Tpng -o out.png dotfile.dot
 
         The nodes are:
@@ -766,7 +765,7 @@ class ERobot(Robot):
             - an arrow with a box head if `jtype` is True and the joint is
               prismatic
 
-        Edge labels or nodes in blue have a fixed transformation to the 
+        Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
 
         .. note:: If ``filename`` is a file object then the file will *not*
@@ -778,7 +777,7 @@ class ERobot(Robot):
             file = open(filename, 'w')
         else:
             file = filename
-            
+
         header = r"""digraph G {
 
 graph [rankdir=LR];
@@ -789,9 +788,11 @@ graph [rankdir=LR];
             # draw the edge
             if jtype:
                 if link.isprismatic:
-                    edge_options = 'arrowhead="box", arrowtail="inv", dir="both"'
+                    edge_options = \
+                        'arrowhead="box", arrowtail="inv", dir="both"'
                 elif link.isrevolute:
-                    edge_options = 'arrowhead="dot", arrowtail="inv", dir="both"'
+                    edge_options = \
+                        'arrowhead="dot", arrowtail="inv", dir="both"'
                 else:
                     edge_options = 'arrowhead="normal"'
             else:
@@ -808,14 +809,21 @@ graph [rankdir=LR];
                     node_options = ', fontcolor="blue"'
                 else:
                     node_options = ''
-                file.write('  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(link.name, link.ets().__str__(q=f"q{link.jindex}"), node_options))
+                file.write(
+                    '  {}_ets [shape=box, style=rounded, '
+                    'label="{}"{}];\n'.format(
+                        link.name, link.ets().__str__(
+                            q=f"q{link.jindex}"), node_options))
                 file.write('  {} -> {}_ets;\n'.format(parent, link.name))
-                file.write('  {}_ets -> {} [{}];\n'.format(link.name, link.name, edge_options))
+                file.write('  {}_ets -> {} [{}];\n'.format(
+                    link.name, link.name, edge_options))
             else:
                 # put the ets fragment as an edge label
                 if not link.isjoint and static:
                     edge_options += 'fontcolor="blue"'
-                file.write('  {} -> {} [label="{}", {}];\n'.format(parent, link.name, link.ets().__str__(q=f"q{link.jindex}"), edge_options))
+                file.write('  {} -> {} [label="{}", {}];\n'.format(
+                    parent, link.name, link.ets().__str__(
+                        q=f"q{link.jindex}"), edge_options))
 
         file.write(header)
 
@@ -827,7 +835,8 @@ graph [rankdir=LR];
             # draw the link frame node (circle) or ee node (doublecircle)
             if link in self.ee_links:
                 # end-effector
-                node_options = 'shape="doublecircle", color="blue", fontcolor="blue"'
+                node_options = \
+                    'shape="doublecircle", color="blue", fontcolor="blue"'
             else:
                 node_options = 'shape="circle"'
 
@@ -843,7 +852,8 @@ graph [rankdir=LR];
         file.write('}\n')
 
         if isinstance(filename, str):
-            close(file)
+            close(file)  # noqa
+
 # --------------------------------------------------------------------- #
 
     def fkine(self, q, endlink=None, startlink=None, tool=None):
@@ -918,7 +928,7 @@ graph [rankdir=LR];
                     break
 
             # add base transform if it is set
-            if self.base is not None:
+            if self.base is not None and startlink == self.base_link:
                 Tk = self.base.A @ Tk
 
             T.append(SE3(Tk))
@@ -1066,6 +1076,22 @@ graph [rankdir=LR];
     #     return J
 
     def get_path(self, endlink=None, startlink=None):
+        """
+        Find a path from startlink to endlink. The endlink must come after
+        the startlink (ie endlink must be further away from the base link
+        of the robot than startlink) in the kinematic chain and both links
+        must be a part of the same branch within the robot structure. This
+        method is a work in progress while an approach which generalises
+        to all applications is designed.
+
+        :param endlink: name or reference to end-effector, defaults to None
+        :type endlink: str or ELink, optional
+        :param startlink: name or reference to a base link, defaults to None
+        :type startlink: str or ELink, optional
+        :raises ValueError: link not known or ambiguous
+        :return: the path from startlink to endlink
+        :rtype: list of Link
+        """
         path = []
         n = 0
 
@@ -1080,7 +1106,9 @@ graph [rankdir=LR];
         while link != startlink:
             link = link.parent
             if link is None:
-                raise ValueError(f'cannot find path from {startlink.name} to {endlink.name}')
+                raise ValueError(
+                    f'cannot find path from {startlink.name} to'
+                    f' {endlink.name}')
             path.append(link)
             if link.isjoint:
                 n += 1
@@ -1106,8 +1134,16 @@ graph [rankdir=LR];
         Helper method to find or validate an end-effector and base link.
         """
         if endlink is None:
-            # if not specified choose the end-effector if just one
-            if len(self.ee_links) == 1:
+
+            # if we have a gripper, use it
+            if len(self.grippers) == 1:
+                endlink = self.grippers[0].elinks[0]
+            elif len(self.grippers) > 1:
+                # if more than one gripper, user must choose
+                raise ValueError('Must specify which gripper')
+
+            # no grippers, use ee link if just one
+            elif len(self.ee_links) == 1:
                 endlink = self.ee_links[0]
             else:
                 # if more than one EE, user must choose
@@ -1137,7 +1173,7 @@ graph [rankdir=LR];
 
         ``robot._getlink(link)`` is a validated reference to an ELink within
         the ERobot ``robot``.  If ``link`` is:
-        
+
         -  an ``ELink`` reference it is validated as belonging to
           ``robot``.
         - a string, then it looked up in the robot's link name dictionary, and
