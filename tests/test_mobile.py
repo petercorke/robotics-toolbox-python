@@ -12,6 +12,11 @@ import unittest
 
 from roboticstoolbox import Bug2, DXform, loadmat
 from roboticstoolbox.mobile.bug2 import edgelist
+from roboticstoolbox.mobile.landmarkmap import *
+from roboticstoolbox.mobile.drivers import *
+from roboticstoolbox.mobile.sensors import *
+
+# ======================================================================== #
 
 class TestNavigation(unittest.TestCase):
 
@@ -126,7 +131,7 @@ class TestNavigation(unittest.TestCase):
 
     def test_bug2(self):
 
-        vars = loadmat("data/map1.mat")
+        vars = loadmat("map1.mat")
         map = vars['map']
 
         bug = Bug2(map)
@@ -158,7 +163,7 @@ class TestNavigation(unittest.TestCase):
 
     def test_dxform(self):
 
-        vars = loadmat("data/map1.mat")
+        vars = loadmat("map1.mat")
         map = vars['map']
 
         dx = DXform(map)
@@ -187,6 +192,125 @@ class TestNavigation(unittest.TestCase):
             
         dx.plot()
         dx.plot(path=path)
+
+# ======================================================================== #
+
+class RangeBearingSensorTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.veh = rtb.Bicycle()
+        self.map = rtb.LandmarkMap(20)
+        self.rs = RangeBearingSensor(self.veh, self.map)
+
+    def test_init(self):
+
+        self.assertIsInstance(self.rs.map, rtb.LandmarkMap)
+        self.assertIsInstance(self.rs.robot, rtb.Vehicle)
+        
+        self.assertIsInstance(str(self.rs), str)            
+
+    def test_reading(self):
+        
+        z = self.rs.reading()
+        self.assertIsInstance(z, np.ndarray)
+        self.assertEqual(z.shape, (2,))
+
+        # test missing samples
+        rs = RangeBearingSensor(self.veh, self.map, every=2)
+
+        z = rs.reading()
+        self.assertIsInstance(z, np.ndarray)
+        self.assertEqual(z.shape, (2,))
+
+        z = rs.reading()
+        self.assertEqual(z, (None, None))
+
+        z = rs.reading()
+        self.assertIsInstance(z, np.ndarray)
+        self.assertEqual(z.shape, (2,))
+
+    def test_h(self):
+
+        z = self.rs.h([0,0,0], 10)
+        self.assertIsInstance(z, np.ndarray)
+        self.assertEqual(z.shape, (2,))
+
+        z = self.rs.h([0,0,0], [3,4])
+        self.assertIsInstance(z, np.ndarray)
+        self.assertEqual(z.shape, (2,))
+
+        z = self.rs.h([0,0,0])
+        self.assertIsInstance(z, np.ndarray)
+        self.assertEqual(z.shape, (20,2))
+
+        # if vehicle at landmark 10 range=bearing=0
+        x = np.r_[self.map.landmark(10), 0]
+        z = self.rs.h(x, 10)
+        self.assertEqual(tuple(z), (0, 0))
+
+    def test_plot(self):
+
+        # map = LandmarkMap(20)
+        # map.plot(block=False)
+        pass
+
+# ======================================================================== #
+
+class LandMarkTest(unittest.TestCase):
+    
+    def test_init(self):
+
+        map = LandmarkMap(20)
+
+        self.assertEqual(map.nlandmarks, 20)
+        
+        lm = map.landmark(0)
+        self.assertIsInstance(lm, np.ndarray)
+        self.assertTrue(lm.shape, (2,))
+
+        self.assertIsInstance(str(lm), str)
+
+        self.assertEqual(map.x.shape, (20,))
+        self.assertEqual(map.y.shape, (20,))
+        self.assertEqual(map.xy.shape, (2,20))
+
+    def test_range(self):
+        map = LandmarkMap(1000, dim=[-10, 10, 100, 200])
+
+        self.assertTrue(map._map.shape, (2,1000))
+
+        x = map.x
+        y = map.y
+        self.assertTrue(all([-10 <= a <= 10 for a in x]))
+        self.assertTrue(all([100 <= a <= 200 for a in y]))
+
+    def test_plot(self):
+
+        map = LandmarkMap(20)
+        map.plot(block=False)
+
+# ======================================================================== #
+
+class DriversTest(unittest.TestCase):
+    
+    def test_init(self):
+
+        rp = rtb.RandomPath(10)
+
+        self.assertIsInstance(str(rp), str)
+
+        rp.init()
+
+        veh = rtb.Bicycle()
+
+        veh.control = rp
+
+        self.assertIs(veh.control, rp)
+        self.assertIs(rp.vehicle, veh)
+
+        u = rp.demand()
+        self.assertIsInstance(u, np.ndarray)
+        self.assertTrue(u.shape, (2,))
 
 class TestVehicle(unittest.TestCase):
 	pass

@@ -2,13 +2,26 @@ from roboticstoolbox.mobile.vehicle import *
 from roboticstoolbox.mobile.bug2 import Bug2
 from roboticstoolbox.mobile.dx_form import DXform
 from roboticstoolbox.mobile.dstar import DStar
+from roboticstoolbox.mobile.landmarkmap import LandmarkMap
+from roboticstoolbox.mobile.sensors import RangeBearingSensor
+from roboticstoolbox.mobile.drivers import *
+from roboticstoolbox.mobile.animations import *
 
 __all__ = [
+    'Vehicle',
     'Bicycle',
     'Unicycle',
     'Bug2',
     'DXform',
     'DStar',
+    'VehicleMarker',
+    'VehiclePolygon',
+    'VehicleIcon',
+    'VehicleDriver',
+    'RandomPath',
+    'PurePursuit',
+    'LandmarkMap',
+    'RangeBearingSensor',
 ]
 
 # __doc__ = """
