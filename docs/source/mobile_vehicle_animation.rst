@@ -4,14 +4,19 @@ Mobile robot animations
 These classes create a graphical object that can be animated to show vehicle
 position or pose.  They are all subclasses of ``VehicleAnimation``.
 
+
+Simple marker
+^^^^^^^^^^^^^
+
 .. autoclass:: roboticstoolbox.mobile.VehicleMarker
    :members:
    :undoc-members:
    :show-inheritance:
-   :show-inheritance:
    :inherited-members:
    :special-members: __init__
-   :member-order: bysource
+
+Polygon shape
+^^^^^^^^^^^^^
 
 .. autoclass:: roboticstoolbox.mobile.VehiclePolygon
    :members:
@@ -19,7 +24,9 @@ position or pose.  They are all subclasses of ``VehicleAnimation``.
    :show-inheritance:
    :inherited-members:
    :special-members: __init__
-   :member-order: groupwise
+
+Image icon
+^^^^^^^^^^
 
 .. autoclass:: roboticstoolbox.mobile.VehicleIcon
    :members:
