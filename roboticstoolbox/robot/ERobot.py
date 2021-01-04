@@ -1134,8 +1134,16 @@ graph [rankdir=LR];
         Helper method to find or validate an end-effector and base link.
         """
         if endlink is None:
-            # if not specified choose the end-effector if just one
-            if len(self.ee_links) == 1:
+
+            # if we have a gripper, use it
+            if len(self.grippers) == 1:
+                endlink = self.grippers[0].elinks[0]
+            elif len(self.grippers) > 1:
+                # if more than one gripper, user must choose
+                raise ValueError('Must specify which gripper')
+
+            # no grippers, use ee link if just one
+            elif len(self.ee_links) == 1:
                 endlink = self.ee_links[0]
             else:
                 # if more than one EE, user must choose
