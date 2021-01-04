@@ -76,18 +76,22 @@ def path_to_datafile(filename):
     print("path_to_data: ", filename, __file__)
     filename = Path(filename)
     
+    import os
+
     if filename.parent == Path():
         # just a filename, no path, assume it is in roboticstoolbox/data
         p = Path(__file__).parent.parent / 'data' / filename
         print(f"p={p}")
+        print(p.exists(), os.path.exists(str(p)))
         if p.exists():
             print(f"returning")
             return str(p.resolve())
 
     
     p = filename.expanduser()
+    print(f"continuing, filename={filename}, p={p}")
     p = p.resolve()
-    print(f"continuing p={p}")
+    print(f"after resolve p={p}")
     if not p.exists():
         print(f"File '{p}' does not exist")
         raise FileNotFoundError(f"File '{p}' does not exist")
