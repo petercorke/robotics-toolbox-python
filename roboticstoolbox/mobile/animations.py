@@ -105,7 +105,7 @@ class VehiclePolygon(VehicleAnimation):
 
     def __init__(self, shape='car', scale=1, **kwargs):
         """
-        Create graphical animation of vehicle as an icon
+        Create graphical animation of vehicle as a polygon
 
         :param shape: polygon shape, defaults to 'car'
         :type shape: str
@@ -127,9 +127,10 @@ class VehiclePolygon(VehicleAnimation):
             veh.run(animation=a)
 
         ``shape`` can be:
+
             * ``"car"``  a rectangle with a pointy front
             * ``"triangle"`` a triangle
-            * an Nx2 array of vertices, does not have to be closed.
+            * an Nx2 NumPy array of vertices, does not have to be closed.
 
         :seealso: :func:`~Vehicle`
         """
@@ -209,6 +210,15 @@ class VehicleIcon(VehicleAnimation):
             * ``"greycar"`` a grey and white car (top view)
             * ``"redcar"`` a red car (top view)
             * path to an image file, including extension
+
+        .. image:: ../../roboticstoolbox/data/greycar.png
+          :width: 200px
+          :align: center
+
+        .. image:: ../../roboticstoolbox/data/redcar.png
+          :width: 300px
+          :align: center
+
 
         The car is scaled to an image with a length of ``scale`` in the units of
         the plot.
