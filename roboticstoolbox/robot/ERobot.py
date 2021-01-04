@@ -107,10 +107,11 @@ class ERobot(Robot):
                     if link.name is None:
                         link.name = f"link-{link_number}"
                         link_number += 1
-                    
+
                     # put it in the link dictionary, check for duplicates
                     if link.name in self._linkdict:
-                        raise ValueError(f'link name {link.name} is not unique')
+                        raise ValueError(
+                            f'link name {link.name} is not unique')
                     self._linkdict[link.name] = link
                 else:
                     raise TypeError("Input can be only ELink")

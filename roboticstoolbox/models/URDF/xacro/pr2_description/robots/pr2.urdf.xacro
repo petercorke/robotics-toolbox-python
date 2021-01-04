@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pr2" >
 
+  <!-- materials for visualization -->
+  <xacro:include filename="$(find pr2_description)/urdf/materials.urdf.xacro" />
+
   <!-- The following included files set up definitions of parts of the robot body -->
   <!-- misc common stuff? -->
   <xacro:include filename="$(find pr2_description)/urdf/common.xacro" />
@@ -26,8 +29,7 @@
   <xacro:include filename="$(find pr2_description)/urdf/sensors/projector_wg6802418.urdf.xacro" />
   <!-- generic simulator_gazebo plugins for starting mechanism control, ros time, ros battery -->
   <xacro:include filename="$(find pr2_description)/gazebo/gazebo.urdf.xacro" />
-  <!-- materials for visualization -->
-  <xacro:include filename="$(find pr2_description)/urdf/materials.urdf.xacro" />
+
 
   <!-- Now we can start using the macros included above to define the actual PR2 -->
 

@@ -196,6 +196,7 @@ class Macro(object):
 
 
 def eval_extension(s):  # pragma: no cover
+
     if s == '$(cwd)':
         return os.getcwd()
 

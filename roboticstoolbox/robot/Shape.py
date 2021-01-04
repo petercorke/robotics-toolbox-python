@@ -100,7 +100,7 @@ class Shape(object):
             't': fk.t.tolist(),
             'q': r2q(fk.R).tolist(),
             'v': self.v.tolist(),
-            'color': self.color
+            'color': list(self.color)
         }
 
         return shape
