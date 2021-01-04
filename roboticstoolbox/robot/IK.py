@@ -643,10 +643,11 @@ class IKMixin:
         By default this method uses:
 
         - the Scipy ``SLSQP`` minimizer for the case of no joint limits
-        - the Scipy ``trust-constr`` minimizer for the case with joint limits. 
-          This gives good results but is very slow.  An alternative is 
-          ``L-BFGS-B`` but for redundant robots can sometimes give poor results,
-          pushing against the joint limits when there is no need to.
+        - the Scipy ``trust-constr`` minimizer for the case with joint limits.
+          This gives good results but is very slow.  An alternative is
+          ``L-BFGS-B`` (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
+          robots can sometimes give poor results, pushing against the joint
+          limits when there is no need to.
           
         In both case the function to be minimized is the squared norm of a 
         vector :math:`[d,a]` with components respectively the
