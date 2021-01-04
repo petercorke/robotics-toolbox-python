@@ -23,8 +23,7 @@ def loadmat(filename):
     """
     from scipy.io import loadmat
 
-    path = path_to_datafile(filename)
-    return loaddata(path, loadmat, squeeze_me=True, struct_as_record=False)
+    return loaddata(filename, loadmat, squeeze_me=True, struct_as_record=False)
 
 def loaddata(filename, handler, **kwargs):
     """
@@ -79,7 +78,7 @@ def path_to_datafile(filename):
         # just a filename, no path, assume it is in roboticstoolbox/data
         p = Path(__file__).parent.parent / 'data' / filename
         if p.exists():
-            return str(p)
+            return str(p.resolve())
 
     p = filename.expanduser()
     p = p.resolve()
@@ -91,9 +90,9 @@ if __name__ == "__main__":
 
     a = loadmat("map1.mat")
     print(a)
-    a = loadmat("roboticstoolbox/data/map1.mat")
-    print(a)
-    a = loadmat("roboticstoolbox/data/../data/map1.mat")
-    print(a)
+    # a = loadmat("roboticstoolbox/data/map1.mat")
+    # print(a)
+    # a = loadmat("roboticstoolbox/data/../data/map1.mat")
+    # print(a)
     a = loadmat("~/code/robotics-toolbox-python/roboticstoolbox/data/map1.mat")
     print(a)
