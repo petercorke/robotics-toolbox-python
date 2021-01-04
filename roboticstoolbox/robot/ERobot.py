@@ -1137,7 +1137,7 @@ graph [rankdir=LR];
 
             # if we have a gripper, use it
             if len(self.grippers) == 1:
-                endlink = self.grippers[0].elinks[0]
+                endlink = self.grippers[0].links[0]
             elif len(self.grippers) > 1:
                 # if more than one gripper, user must choose
                 raise ValueError('Must specify which gripper')
