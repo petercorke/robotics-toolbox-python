@@ -13,8 +13,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        #os: [windows-latest, ubuntu-latest, macos-latest]
         #python-version: [3.6, 3.7, 3.8]
+        os: [wubuntu-latest]
         python-version: [3.8]
 
     steps:
@@ -33,7 +34,8 @@ jobs:
         echo "========================"
         pwd -L
         pwd -P
-        ls -R /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/roboticstoolbox
+        printenv
+        #ls -R /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/roboticstoolbox
         pytest --timeout=30 --timeout_method thread -s
   codecov:
     # If all tests pass:
