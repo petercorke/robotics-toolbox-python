@@ -29,6 +29,9 @@ jobs:
       run: |
         pip install .[dev,collision,vpython]
         pip install pytest-timeout
+        echo "========================"
+        pwd -L
+        pwd -P
         ls -R
         pytest --timeout=30 --timeout_method thread -s
   codecov:
