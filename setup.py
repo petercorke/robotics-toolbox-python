@@ -50,7 +50,10 @@ def package_files(directory):
     return paths
 
 
-extra_files = package_files('roboticstoolbox/models/URDF/xacro')
+extra_files1 = package_files('roboticstoolbox/models/URDF/xacro')
+extra_files2 = package_files('roboticstoolbox/data')
+
+extra_files = extra_files1 + extra_files2
 
 frne = Extension(
         'frne',
