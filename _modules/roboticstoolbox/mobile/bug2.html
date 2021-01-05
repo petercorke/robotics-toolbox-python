@@ -1,0 +1,713 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>roboticstoolbox.mobile.bug2 &mdash; Robotics Toolbox for Python  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.mobile.bug2</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.mobile.bug2</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Python Bug Planner</span>
+<span class="sd">@Author: Kristian Gibson</span>
+<span class="sd">TODO: Comments + Sphynx Docs Structured Text</span>
+<span class="sd">TODO: Bug-fix, testing</span>
+
+<span class="sd">Not ready for use yet.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">disp</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
+
+<span class="kn">from</span> <span class="nn">spatialmath.pose2d</span> <span class="kn">import</span> <span class="n">SE2</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.animate</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.navigation</span> <span class="kn">import</span> <span class="n">Navigation</span>
+
+
+<div class="viewcode-block" id="Bug2"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.Bug2">[docs]</a><span class="k">class</span> <span class="nc">Bug2</span><span class="p">(</span><span class="n">Navigation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occ_grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">                    %Bug2.Bug2 Construct a Bug2 navigation object </span>
+<span class="sd">            %</span>
+<span class="sd">            % B = Bug2(MAP, OPTIONS) is a bug2 navigation object, and MAP is an occupancy grid,</span>
+<span class="sd">            % a representation of a planar world as a matrix whose elements are 0 (free</span>
+<span class="sd">            % space) or 1 (occupied).</span>
+<span class="sd">            %</span>
+<span class="sd">            % Options::</span>
+<span class="sd">            % &#39;goal&#39;,G      Specify the goal point (1x2)</span>
+<span class="sd">            % &#39;inflate&#39;,K   Inflate all obstacles by K cells.</span>
+<span class="sd">            %</span>
+<span class="sd">            % See also Navigation.Navigation.</span>
+
+<span class="sd">                    %Navigation.Navigation Create a Navigation object</span>
+<span class="sd">        %</span>
+<span class="sd">        % N = Navigation(OCCGRID, OPTIONS) is a Navigation object that holds an</span>
+<span class="sd">        % occupancy grid OCCGRID.  A number of options can be be passed.</span>
+<span class="sd">        %</span>
+<span class="sd">        % Options::</span>
+<span class="sd">        % &#39;goal&#39;,G        Specify the goal point (2x1)</span>
+<span class="sd">        % &#39;inflate&#39;,K     Inflate all obstacles by K cells.</span>
+<span class="sd">        % &#39;private&#39;       Use private random number stream.</span>
+<span class="sd">        % &#39;reset&#39;         Reset random number stream.</span>
+<span class="sd">        % &#39;verbose&#39;       Display debugging information</span>
+<span class="sd">        % &#39;seed&#39;,S        Set the initial state of the random number stream.  S must</span>
+<span class="sd">        %                 be a proper random number generator state such as saved in</span>
+<span class="sd">        %                 the seed0 property of an earlier run.</span>
+<span class="sd">        %</span>
+<span class="sd">        % Notes::</span>
+<span class="sd">        % - In the occupancy grid a value of zero means free space and non-zero means</span>
+<span class="sd">        %   occupied (not driveable).</span>
+<span class="sd">        % - Obstacle inflation is performed with a round structuring element (kcircle) </span>
+<span class="sd">        %   with radius given by the &#39;inflate&#39; option.</span>
+<span class="sd">        % - Inflation requires either MVTB or IPT installed.</span>
+<span class="sd">        % - The &#39;private&#39; option creates a private random number stream for the methods </span>
+<span class="sd">        %   rand, randn and randi.  If not given the global stream is used.</span>
+<span class="sd">        %</span>
+<span class="sd">        % See also randstream.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">occ_grid</span><span class="o">=</span><span class="n">occ_grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_h</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_edge</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            [type]: [description]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">j</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_j</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">edge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">k</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span>
+
+<div class="viewcode-block" id="Bug2.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.Bug2.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">current</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        [summary]</span>
+
+<span class="sd">        :param start: [description], defaults to None</span>
+<span class="sd">        :type start: [type], optional</span>
+<span class="sd">        :param goal: [description], defaults to None</span>
+<span class="sd">        :type goal: [type], optional</span>
+<span class="sd">        :param animate: [description], defaults to False</span>
+<span class="sd">        :type animate: bool, optional</span>
+<span class="sd">        :param movie: [description], defaults to None</span>
+<span class="sd">        :type movie: [type], optional</span>
+<span class="sd">        :param current: [description], defaults to False</span>
+<span class="sd">        :type current: bool, optional</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+
+<span class="sd">                    %Bug2.query  Find a path</span>
+<span class="sd">            %</span>
+<span class="sd">            % B.query(START, GOAL, OPTIONS) is the path (Nx2) from START (1x2) to GOAL</span>
+<span class="sd">            % (1x2).  Row are the coordinates of successive points along the path.  If</span>
+<span class="sd">            % either START or GOAL is [] the grid map is displayed and the user is</span>
+<span class="sd">            % prompted to select a point by clicking on the plot.</span>
+<span class="sd">            %</span>
+<span class="sd">            % Options::</span>
+<span class="sd">            %  &#39;animate&#39;   show a simulation of the robot moving along the path</span>
+<span class="sd">            %  &#39;movie&#39;,M   create a movie</span>
+<span class="sd">            %  &#39;current&#39;   show the current position position as a black circle</span>
+<span class="sd">            %</span>
+<span class="sd">            % Notes::</span>
+<span class="sd">            % - START and GOAL are given as X,Y coordinates in the grid map, not as</span>
+<span class="sd">            %   MATLAB row and column coordinates.</span>
+<span class="sd">            % - START and GOAL are tested to ensure they lie in free space.</span>
+<span class="sd">            % - The Bug2 algorithm is completely reactive so there is no planning</span>
+<span class="sd">            %   method.</span>
+<span class="sd">            % - If the bug does a lot of back tracking it&#39;s hard to see the current</span>
+<span class="sd">            %   position, use the &#39;current&#39; option.</span>
+<span class="sd">            % - For the movie option if M contains an extension a movie file with that</span>
+<span class="sd">            %   extension is created.  Otherwise a folder will be created containing</span>
+<span class="sd">            %   individual frames.</span>
+<span class="sd">            %</span>
+<span class="sd">            % See also Animate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">anim</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">anim</span> <span class="o">=</span> <span class="n">Animate</span><span class="p">(</span><span class="n">movie</span><span class="p">)</span>
+            <span class="n">animate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># make sure start and goal are set and valid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
+
+        <span class="c1"># compute the m-line</span>
+        <span class="c1">#  create homogeneous representation of the line</span>
+        <span class="c1">#  line*[x y 1]&#39; = 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span> <span class="o">=</span> <span class="n">hom_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_m_line</span><span class="p">()</span>
+
+        <span class="n">robot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># iterate using the next() method until we reach the goal</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;y.&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">current</span><span class="p">:</span>
+                    <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">anim</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">current</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+
+            <span class="c1"># move to next point on path</span>
+            <span class="n">robot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+            <span class="c1"># have we been here before, ie. in a loop</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">all</span><span class="p">(</span><span class="n">robot</span> <span class="o">==</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">path</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;trapped&#39;</span><span class="p">)</span>
+
+            <span class="c1"># are we there yet?</span>
+            <span class="k">if</span> <span class="n">robot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">movie</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">done</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">path</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Bug2.plot_m_line"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.Bug2.plot_m_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ls</span> <span class="o">=</span> <span class="s1">&#39;k--&#39;</span>
+
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+        <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># handle the case that the line is vertical</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                     <span class="p">[</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># regular line</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="p">[</span><span class="n">x_min</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="p">])</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Bug2.next"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.Bug2.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">==</span> <span class="n">position</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># we have arrived</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Step 1.  Move along the M-line toward the goal</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: moving along the M-line (step 1)&quot;</span><span class="p">)</span>
+            <span class="c1"># motion on line toward goal</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">-</span> <span class="n">position</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="c1"># line slope less than 45 deg</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># np.sign(d[0])</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">)</span> <span class="o">*</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># line slope greater than 45 deg</span>
+                <span class="n">dy</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># np.sign(d[1])</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span> <span class="o">*</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+            <span class="c1"># detect if next step is an obstacle</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_occupied</span><span class="p">(</span><span class="n">position</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: obstacle at </span><span class="si">{</span><span class="n">position</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># transition to step 2</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: change to step 2&quot;</span><span class="p">)</span>
+
+                <span class="c1"># get a list of all the points around the obstacle</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_edge</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">edgelist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_occ_grid_nav</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">position</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># Step 2.  Move around the obstacle until we reach a point</span>
+            <span class="c1"># on the M-line closer than when we started.</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: moving around the obstacle (step 2)&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_edge</span><span class="p">):</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="p">]</span>  <span class="c1"># next edge point</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># we are at the end of the list of edge points, we</span>
+                <span class="c1"># are back where we started.  Step 2.c test.</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;robot is trapped&#39;</span><span class="p">)</span>
+
+            <span class="c1"># are we on the M-line now ?</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: crossed the M-line&quot;</span><span class="p">)</span>
+
+                <span class="c1"># are we closer than when we encountered the obstacle?</span>
+                <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_h</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">):</span>
+                    <span class="c1"># self._j += 1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># transition to step 1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: change to step 1&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">n</span>
+
+            <span class="c1"># no, keep going around</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">n</span></div>
+        
+<div class="viewcode-block" id="Bug2.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.Bug2.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Error</span><span class="p">(</span><span class="s1">&#39;RTB:Bug2:badcall&#39;</span><span class="p">,</span> <span class="s1">&#39;This class has no plan method&#39;</span><span class="p">)</span></div></div>
+
+<span class="c1"># Ported from Peter Corke&#39;s edgelist function found:</span>
+<span class="c1"># https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m</span>
+
+<span class="c1">#  these are directions of 8-neighbours in a clockwise direction</span>
+<span class="n">_dirs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">edgelist</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find edge of a region</span>
+
+<span class="sd">    :param im: binary image</span>
+<span class="sd">    :type im: ndarray(h,w,int)</span>
+<span class="sd">    :param p: initial point</span>
+<span class="sd">    :type p: array_like(2)</span>
+<span class="sd">    :param direction: direction to traverse region, +1 clockwise [default], -1</span>
+<span class="sd">        counter-clockwise</span>
+<span class="sd">    :type direction: int, optional</span>
+<span class="sd">    :raises ValueError: initial point is not on the edge</span>
+<span class="sd">    :raises RuntimeError: not able to find path to the goal</span>
+<span class="sd">    :return: edge list, direction vector list</span>
+<span class="sd">    :rtype: tuple of lists</span>
+
+<span class="sd">    ``edge, dirs = edgelist(im, seed)`` is the boundary/contour/edge of a region</span>
+<span class="sd">    in the binary image ``im``.  ``seed=[X,Y]`` is the coordinate of a point on</span>
+<span class="sd">    the edge of the region of interest, but belonging to the region.</span>
+
+<span class="sd">    ``edge`` is a list of coordinates (2) of edge pixels of a region in theThe</span>
+<span class="sd">    elements of the edgelist are NumPy ndarray(2).</span>
+
+<span class="sd">    ``dirs`` is a list of integers representing the direction of the edge from</span>
+<span class="sd">    the corresponding point in ``edge`` to the next point in ``edge``.  The</span>
+<span class="sd">    integers in the range 0 to 7 represent directions: W SW S SE E NW N NW</span>
+<span class="sd">    respectively.</span>
+
+<span class="sd">    - Coordinates are given and returned assuming the matrix is an image, so the</span>
+<span class="sd">      indices are always in the form (x,y) or (column,row).</span>
+<span class="sd">    - ``im` is a binary image where 0 is assumed to be background, non-zero </span>
+<span class="sd">      is an object.</span>
+<span class="sd">    - ``p`` must be a point on the edge of the region.</span>
+<span class="sd">    - The initial point is always the first and last element of the returned edgelist.</span>
+<span class="sd">    - 8-direction chain coding can give incorrect results when used with</span>
+<span class="sd">      blobs founds using 4-way connectivty.</span>
+
+<span class="sd">    :Reference:</span>
+
+<span class="sd">    - METHODS TO ESTIMATE AREAS AND PERIMETERS OF BLOB-LIKE OBJECTS: A COMPARISON</span>
+<span class="sd">      Luren Yang, Fritz Albregtsen, Tor Lgnnestad and Per Grgttum</span>
+<span class="sd">      IAPR Workshop on Machine Vision Applications Dec. 13-15, 1994, Kawasaki</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">neighbours</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">neighbours</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">stop</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pix0</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># color of pixel we start at</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;specified coordinate is not within image&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">adjacent_point</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pix0</span><span class="p">)</span>
+
+    <span class="c1"># find an adjacent point outside the blob</span>
+    <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;no neighbour outside the blob&#39;</span><span class="p">)</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span>  <span class="c1"># initialize the edge list</span>
+    <span class="nb">dir</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initialize the direction list</span>
+    <span class="n">p0</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+
+        <span class="c1"># find which direction is Q</span>
+        <span class="n">dq</span> <span class="o">=</span> <span class="n">q</span> <span class="o">-</span> <span class="n">p</span>
+        <span class="k">for</span> <span class="n">kq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="c1"># get index of neighbour&#39;s direction in range [1,8]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dq</span> <span class="o">==</span> <span class="n">_dirs</span><span class="p">[</span><span class="n">kq</span><span class="p">]):</span>
+                <span class="k">break</span>
+
+        <span class="c1"># now test for directions relative to Q</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">neighbours</span><span class="p">:</span>
+            <span class="c1"># get index of neighbour&#39;s direction in range [1,8]</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">kq</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span>
+            <span class="c1"># if k &gt; 7:</span>
+            <span class="c1">#     k = k - 7</span>
+            
+
+            <span class="c1"># compute coordinate of the k&#39;th neighbour</span>
+            <span class="n">nk</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">_dirs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">im</span><span class="p">[</span><span class="n">nk</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nk</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="n">pix0</span><span class="p">:</span>
+                    <span class="c1"># if this neighbour is in the blob it is the next edge pixel</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">nk</span>
+                    <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Something went wrong calculating edgelist&quot;</span><span class="p">)</span>
+
+            <span class="n">q</span> <span class="o">=</span> <span class="n">nk</span>
+
+        <span class="nb">dir</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="c1"># check if we are back where we started</span>
+        <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">p0</span> <span class="o">=</span> <span class="n">p</span>  <span class="c1"># make a note of where we started</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">p</span> <span class="o">==</span> <span class="n">p0</span><span class="p">):</span>
+                <span class="k">break</span>
+
+        <span class="c1"># keep going, add this point to the edgelist</span>
+        <span class="n">e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    
+
+    <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="nb">dir</span>
+
+<span class="c1"># Ported from Peter Corke&#39;s adjacent_point function found:</span>
+<span class="c1"># https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m</span>
+
+<span class="k">def</span> <span class="nf">adjacent_point</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">pix0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find adjacent point</span>
+
+<span class="sd">    :param im: occupancy grid</span>
+<span class="sd">    :type im: ndarray(m,n)</span>
+<span class="sd">    :param seed: initial point</span>
+<span class="sd">    :type seed: ndarray(2)</span>
+<span class="sd">    :param pix0: value of occupancy grid at ``seed`` coordinate</span>
+<span class="sd">    :type pix0: int</span>
+<span class="sd">    :return: coordinate of a neighbour</span>
+<span class="sd">    :rtype: ndarray(2) or None</span>
+
+<span class="sd">    Is a neighbouring point of the coordinate ``seed`` that is not within the</span>
+<span class="sd">    region containing the coordinate ``seed``, ie. it is a neighbour but</span>
+<span class="sd">    outside.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_dirs</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">+</span> <span class="n">d</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">im</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">pix0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">p</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span> 
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="c1"># Implementation of Peter Corke&#39;s matlab homline function from:</span>
+<span class="c1"># https://github.com/petercorke/spatialmath-matlab/blob/master/homline.m</span>
+<span class="k">def</span> <span class="nf">hom_line</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># normalize so that the result of x*l&#39; is the pixel distance</span>
+    <span class="c1"># from the line</span>
+    <span class="k">return</span> <span class="n">line</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="c1"># # Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315</span>
+<span class="c1"># def sub2ind(array_shape, rows, cols):</span>
+<span class="c1">#     ind = rows*array_shape[1] + cols</span>
+<span class="c1">#     ind[ind &lt; 0] = -1</span>
+<span class="c1">#     ind[ind &gt;= array_shape[0]*array_shape[1]] = -1</span>
+<span class="c1">#     return ind</span>
+
+
+<span class="c1"># def ind2sub(array_shape, ind):</span>
+<span class="c1">#     ind[ind &lt; 0] = -1</span>
+<span class="c1">#     ind[ind &gt;= array_shape[0]*array_shape[1]] = -1</span>
+<span class="c1">#     rows = (ind.astype(&#39;int&#39;) / array_shape[1])</span>
+<span class="c1">#     cols = ind % array_shape[1]</span>
+<span class="c1">#     return rows, cols</span>
+
+<span class="c1"># def col_norm(x):</span>
+<span class="c1">#     y = np.array([])</span>
+<span class="c1">#     if x.ndim &gt; 1:</span>
+<span class="c1">#         x = np.column_stack(x)</span>
+<span class="c1">#         for vector in x:</span>
+<span class="c1">#             y = np.append(y, np.linalg.norm(vector))</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         y = np.linalg.norm(x)</span>
+<span class="c1">#     return y</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">loadmat</span>
+
+    <span class="nb">vars</span> <span class="o">=</span> <span class="n">loadmat</span><span class="p">(</span><span class="s2">&quot;../data/map1.mat&quot;</span><span class="p">)</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">[</span><span class="s1">&#39;map&#39;</span><span class="p">]</span>
+
+    <span class="n">bug</span> <span class="o">=</span> <span class="n">Bug2</span><span class="p">(</span><span class="nb">map</span><span class="p">)</span>
+    <span class="c1"># bug.plan()</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">bug</span><span class="o">.</span><span class="n">query</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">35</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">
+        Last updated on 05-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

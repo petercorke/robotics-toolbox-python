@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Introduction &mdash; Robotics Toolbox for Python  documentation</title>
   
@@ -18,7 +18,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -54,7 +57,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
           
 
           
@@ -165,6 +168,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -176,7 +181,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -187,10 +192,10 @@
   
   <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
       
-        <a href="arm.html" class="btn btn-neutral float-right" title="Manipulator arms" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="arm.html" class="btn btn-neutral float-right" title="Manipulator arms" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Robotics Toolbox for Python" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Robotics Toolbox for Python" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
       
   </div>
   
@@ -570,7 +575,7 @@ specified using additional keyword arguments.</p>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-<span class="go">IKsolution(q=array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), success=True, reason=None, iterations=12, residual=8.514893490954293e-13)</span>
+<span class="go">IKsolution(q=array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), success=True, reason=None, iterations=12, residual=8.513951146341011e-13)</span>
 </pre></div>
 </td></tr></table></div>
 <p>The Toolbox supports named joint configurations and these are shown in the table
@@ -715,21 +720,21 @@ For branched robots, with multiple end-effectors,  the name of the frame of inte
 end-effector must be specified.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
-<span class="go">┌───┬─────────────┬─────────────┬──────────────────┬─────────────────────────────────────────────┐</span>
-<span class="go">│id │    link     │   parent    │      joint       │                     ETS                     │</span>
-<span class="go">├───┼─────────────┼─────────────┼──────────────────┼─────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │ panda_link0 │           - │                  │                                             │</span>
-<span class="go">│ 1 │ panda_link1 │ panda_link0 │     panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
-<span class="go">│ 2 │ panda_link2 │ panda_link1 │     panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
-<span class="go">│ 3 │ panda_link3 │ panda_link2 │     panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
-<span class="go">│ 4 │ panda_link4 │ panda_link3 │     panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
-<span class="go">│ 5 │ panda_link5 │ panda_link4 │     panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
-<span class="go">│ 6 │ panda_link6 │ panda_link5 │     panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
-<span class="go">│ 7 │ panda_link7 │ panda_link6 │     panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
-<span class="go">│ 8 │ panda_link8 │ panda_link7 │     panda_joint8 │ tz(0.107)                                   │</span>
-<span class="go">│ 9 │ @panda_hand │ panda_link8 │ panda_hand_joint │ Rz(-45°)                                    │</span>
-<span class="go">└───┴─────────────┴─────────────┴──────────────────┴─────────────────────────────────────────────┘</span>
+<span class="go">┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐</span>
+<span class="go">│id │     link     │   parent    │    joint     │                     ETS                     │</span>
+<span class="go">├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │  panda_link0 │           - │              │                                             │</span>
+<span class="go">│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
+<span class="go">│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
+<span class="go">│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
+<span class="go">│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
+<span class="go">│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
+<span class="go">│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
+<span class="go">│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
+<span class="go">│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ tz(0.107)                                   │</span>
+<span class="go">└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
@@ -899,7 +904,7 @@ At a singular configuration</p>
 <span class="go">Yoshikawa manipulability is 0.07861716534599998</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asada&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Asada manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-<span class="go">Asada manipulability is 0.004374613728166504</span>
+<span class="go">Asada manipulability is 0.004374613728166503</span>
 </pre></div>
 </div>
 <p>for the Yoshikawa and Asada measures respectively, and</p>
@@ -1127,25 +1132,18 @@ and a minimalist block-diagram simulation tool <a class="reference internal" hre
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="arm.html" class="btn btn-neutral float-right" title="Manipulator arms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="Robotics Toolbox for Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="arm.html" class="btn btn-neutral float-right" title="Manipulator arms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Robotics Toolbox for Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+        &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 23-Dec-2020.
+        Last updated on 05-Jan-2021.
       </span>
 
     </p>
@@ -1153,14 +1151,13 @@ and a minimalist block-diagram simulation tool <a class="reference internal" hre
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1186,6 +1183,7 @@ and a minimalist block-diagram simulation tool <a class="reference internal" hre
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
     ga('create', 'G-11Q6WJM565', 'auto');
+    
     ga('send', 'pageview');
     </script>
 

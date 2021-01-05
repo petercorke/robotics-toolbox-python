@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Mobile robot animations &mdash; Robotics Toolbox for Python  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Mobile robot planner" href="mobile_planner.html" />
+    <link rel="prev" title="Mobile robot kinematic models" href="mobile_vehicle.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html">Mobile robot kinematic models</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mobile robot animations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simple-marker">Simple marker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polygon-shape">Polygon shape</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-icon">Image icon</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html">Mobile robot planner</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="mobile.html">Mobile robots</a> &raquo;</li>
+        
+      <li>Mobile robot animations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/mobile_vehicle_animation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="mobile_planner.html" class="btn btn-neutral float-right" title="Mobile robot planner" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+      
+      
+        <a href="mobile_vehicle.html" class="btn btn-neutral float-left" title="Mobile robot kinematic models" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mobile-robot-animations">
+<h1>Mobile robot animations<a class="headerlink" href="#mobile-robot-animations" title="Permalink to this headline">¶</a></h1>
+<p>These classes create a graphical object that can be animated to show vehicle
+position or pose.  They are all subclasses of <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code>.</p>
+<div class="section" id="simple-marker">
+<h2>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="roboticstoolbox.mobile.VehicleMarker">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.mobile.</code><code class="sig-name descname">VehicleMarker</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleMarker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.animations.VehicleAnimation</span></code></p>
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehicleMarker.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleMarker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create graphical animation of vehicle as a marker</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – additional arguments passed to matplotlib <code class="docutils literal notranslate"><span class="pre">plot</span></code>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>animation object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>VehicleAnimation</p>
+</dd>
+</dl>
+<p>Creates an object that can be passed to a <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass to depict
+the moving robot as a simple matplotlib marker during simulation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehicleMarker</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">driver</span><span class="o">=</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+<span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A marker can only indicate vehicle position, not orientation.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Vehicle()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehicleMarker.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add vehicle animation to the current plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ax</strong> (<em>Axes</em><em>, </em><em>optional</em>) – Axis to add to, defaults to current axis</p>
+</dd>
+</dl>
+<p>A reference to the animation object is kept, and it will be deleted
+from the plot when the <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code> object is garbage collected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehicleMarker.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the vehicle animation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em>(</em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>3</em><em>)</em>) – vehicle state</p>
+</dd>
+</dl>
+<p>The graphical depiction of the vehicle position or pose is updated.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="polygon-shape">
+<h2>Polygon shape<a class="headerlink" href="#polygon-shape" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="roboticstoolbox.mobile.VehiclePolygon">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.mobile.</code><code class="sig-name descname">VehiclePolygon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">'car'</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehiclePolygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.animations.VehicleAnimation</span></code></p>
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehiclePolygon.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">'car'</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehiclePolygon.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create graphical animation of vehicle as a polygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>str</em>) – polygon shape, defaults to ‘car’</p></li>
+<li><p><strong>scale</strong> (<em>float</em>) – Length of the vehicle on the plot, defaults to 1</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to matplotlib patch such as
+<code class="docutils literal notranslate"><span class="pre">color</span></code> (face+edge), <code class="docutils literal notranslate"><span class="pre">alpha</span></code>, <code class="docutils literal notranslate"><span class="pre">facecolor</span></code>, <code class="docutils literal notranslate"><span class="pre">edgecolor</span></code>,
+<code class="docutils literal notranslate"><span class="pre">linewidth</span></code> etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – unknown shape name</p></li>
+<li><p><strong>TypeError</strong> – bad shape argument</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>animation object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>VehicleAnimation</p>
+</dd>
+</dl>
+<p>Creates an object that can be passed to a <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass to 
+depict the moving robot as a polygon during simulation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="s1">&#39;car&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">shape</span></code> can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;car&quot;</span></code>  a rectangle with a pointy front</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;triangle&quot;</span></code> a triangle</p></li>
+<li><p>an Nx2 NumPy array of vertices, does not have to be closed.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Vehicle()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehiclePolygon.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add vehicle animation to the current plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ax</strong> (<em>Axes</em><em>, </em><em>optional</em>) – Axis to add to, defaults to current axis</p>
+</dd>
+</dl>
+<p>A reference to the animation object is kept, and it will be deleted
+from the plot when the <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code> object is garbage collected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehiclePolygon.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the vehicle animation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em>(</em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>3</em><em>)</em>) – vehicle state</p>
+</dd>
+</dl>
+<p>The graphical depiction of the vehicle position or pose is updated.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="image-icon">
+<h2>Image icon<a class="headerlink" href="#image-icon" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="roboticstoolbox.mobile.VehicleIcon">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.mobile.</code><code class="sig-name descname">VehicleIcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleIcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.animations.VehicleAnimation</span></code></p>
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehicleIcon.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleIcon.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create graphical animation of vehicle as an icon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Standard icon name or a path to an image</p></li>
+<li><p><strong>origin</strong> (<em>2-tuple</em>) – Origin of the vehicle coordinate frame, defaults to centre</p></li>
+<li><p><strong>scale</strong> (<em>float</em>) – Length of the vehicle on the plot, defaults to 1</p></li>
+<li><p><strong>rotation</strong> (<em>float</em>) – Vehicle icon heading in degrees, defaults to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Icon file not found</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>animation object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>VehicleAnimation</p>
+</dd>
+</dl>
+<p>Creates an object that can be passed to a <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass to 
+depict the moving robot as a polygon during simulation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehicleIcon</span><span class="p">(</span><span class="s1">&#39;redcar&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">filename</span></code> can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;greycar&quot;</span></code> a grey and white car (top view)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;redcar&quot;</span></code> a red car (top view)</p></li>
+<li><p>path to an image file, including extension</p></li>
+</ul>
+</div></blockquote>
+<a class="reference internal image-reference" href="_images/greycar.png"><img alt="_images/greycar.png" class="align-center" src="_images/greycar.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/redcar.png"><img alt="_images/redcar.png" class="align-center" src="_images/redcar.png" style="width: 300px;" /></a>
+<p>The car is scaled to an image with a length of <code class="docutils literal notranslate"><span class="pre">scale</span></code> in the units of
+the plot.</p>
+<p>The vehicle rotates about its <code class="docutils literal notranslate"><span class="pre">origin</span></code> which is expressed in terms of
+normalized coordinates in the range 0 to 1.  By default it is in the
+middle of the icon image, (0.2, 0.5) moves it toward the back of the
+vehicle, (0.8, 0.5) moves it toward the front of the vehicle.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The standard icons are kept in <code class="docutils literal notranslate"><span class="pre">roboticstoolbox/data</span></code></p></li>
+<li><p>By default the image is assumed to contain a car parallel to
+the x-axis and facing right.  If the vehicle is facing upward
+set <code class="docutils literal notranslate"><span class="pre">rotation</span></code> to 90.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Vehicle()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehicleIcon.add">
+<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add vehicle animation to the current plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ax</strong> (<em>Axes</em><em>, </em><em>optional</em>) – Axis to add to, defaults to current axis</p>
+</dd>
+</dl>
+<p>A reference to the animation object is kept, and it will be deleted
+from the plot when the <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code> object is garbage collected.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.mobile.VehicleIcon.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the vehicle animation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em>(</em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>3</em><em>)</em>) – vehicle state</p>
+</dd>
+</dl>
+<p>The graphical depiction of the vehicle position or pose is updated.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="mobile_planner.html" class="btn btn-neutral float-right" title="Mobile robot planner" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mobile_vehicle.html" class="btn btn-neutral float-left" title="Mobile robot kinematic models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">
+        Last updated on 05-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

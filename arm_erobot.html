@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>ERobot models &mdash; Robotics Toolbox for Python  documentation</title>
   
@@ -18,7 +18,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -54,7 +57,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Robotics Toolbox for Python
+            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
           
 
           
@@ -148,6 +151,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -163,7 +168,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/arm_erobot.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -174,10 +179,10 @@
   
   <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
       
-        <a href="arm_superclass.html" class="btn btn-neutral float-right" title="Superclasses" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="arm_superclass.html" class="btn btn-neutral float-right" title="Superclasses" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
       
       
-        <a href="arm_ets.html" class="btn btn-neutral float-left" title="Elementary transform sequence (ETS) models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="arm_ets.html" class="btn btn-neutral float-left" title="Elementary transform sequence (ETS) models" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
       
   </div>
   
@@ -536,7 +541,7 @@ revolute</p></li>
 prismatic</p></li>
 </ul>
 </div></blockquote>
-<p>Edge labels or nodes in blue have a fixed transformation to the 
+<p>Edge labels or nodes in blue have a fixed transformation to the
 preceding link.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
@@ -582,7 +587,7 @@ revolute</p></li>
 prismatic</p></li>
 </ul>
 </div></blockquote>
-<p>Edge labels or nodes in blue have a fixed transformation to the 
+<p>Edge labels or nodes in blue have a fixed transformation to the
 preceding link.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -686,7 +691,30 @@ Sequence, J. Haviland and P. Corke</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.get_path">
 <code class="sig-name descname">get_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.get_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.get_path" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Find a path from startlink to endlink. The endlink must come after
+the startlink (ie endlink must be further away from the base link
+of the robot than startlink) in the kinematic chain and both links
+must be a part of the same branch within the robot structure. This
+method is a work in progress while an approach which generalises
+to all applications is designed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a><em>, </em><em>optional</em>) – name or reference to end-effector, defaults to None</p></li>
+<li><p><strong>startlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a><em>, </em><em>optional</em>) – name or reference to a base link, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – link not known or ambiguous</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the path from startlink to endlink</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of Link</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0">
@@ -1149,12 +1177,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1790,10 +1818,11 @@ return value <code class="docutils literal notranslate"><span class="pre">sol</s
 <p>By default this method uses:</p>
 <ul class="simple">
 <li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> minimizer for the case of no joint limits</p></li>
-<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">trust-constr</span></code> minimizer for the case with joint limits. 
-This gives good results but is very slow.  An alternative is 
-<code class="docutils literal notranslate"><span class="pre">L-BFGS-B</span></code> but for redundant robots can sometimes give poor results,
-pushing against the joint limits when there is no need to.</p></li>
+<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">trust-constr</span></code> minimizer for the case with joint limits.
+This gives good results but is very slow.  An alternative is
+<code class="docutils literal notranslate"><span class="pre">L-BFGS-B</span></code> (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
+robots can sometimes give poor results, pushing against the joint
+limits when there is no need to.</p></li>
 </ul>
 <p>In both case the function to be minimized is the squared norm of a 
 vector <span class="math notranslate nohighlight">\([d,a]\)</span> with components respectively the
@@ -2949,7 +2978,7 @@ end-effector link</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ets</strong> (<a class="reference internal" href="mobile.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><em>ETS</em></a>) – kinematic - The elementary transforms which make up the link</p></li>
+<li><p><strong>ets</strong> (<a class="reference internal" href="arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><em>ETS</em></a>) – kinematic - The elementary transforms which make up the link</p></li>
 <li><p><strong>qlim</strong> (<em>float ndarray</em><em>(</em><em>2</em><em>)</em>) – joint variable limits [min max]</p></li>
 <li><p><strong>m</strong> (<em>float</em>) – dynamic - link mass</p></li>
 <li><p><strong>r</strong> (<em>SE3</em>) – dynamic - position of COM with respect to link frame</p></li>
@@ -3050,6 +3079,7 @@ identity) followed by an optional joint variable transform.
 This property returns the whether the</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># link with joint</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># static link</span>
@@ -3132,6 +3162,7 @@ at zero.</p>
 <p>This is a reference to</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># base link has no parent</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># second link&#39;s parent</span>
 <span class="go">ELink(panda_link0, ets=)</span>
@@ -3836,116 +3867,22 @@ Sequence, J. Haviland and P. Corke</p></li>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">Caster is an invalid color name, using default color</span>
-<span class="go">Wheel_l is an invalid color name, using default color</span>
-<span class="go">Wheel_r is an invalid color name, using default color</span>
-<span class="go">Caster is an invalid color name, using default color</span>
-<span class="go">Wheel_l is an invalid color name, using default color</span>
-<span class="go">Wheel_r is an invalid color name, using default color</span>
-<span class="go">Caster is an invalid color name, using default color</span>
-<span class="go">Wheel_l is an invalid color name, using default color</span>
-<span class="go">Wheel_r is an invalid color name, using default color</span>
-<span class="go">Caster is an invalid color name, using default color</span>
-<span class="go">Wheel_l is an invalid color name, using default color</span>
-<span class="go">Wheel_r is an invalid color name, using default color</span>
-<span class="go">Grey2 is an invalid color name, using default color</span>
-<span class="go">RollLinks is an invalid color name, using default color</span>
-<span class="go">RollLinks is an invalid color name, using default color</span>
-<span class="go">RollLinks is an invalid color name, using default color</span>
-<span class="go">RollLinks is an invalid color name, using default color</span>
-<span class="go">RollLinks is an invalid color name, using default color</span>
-<span class="go">RollLinks is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR3.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR5.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR10.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Puma560.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px100.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px150.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx150.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx200.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300s.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx200.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250s.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Mico.py</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/PR2.py</span>
 <span class="go">┌────────┬──────────┬────────────────────┬────────────┬─────┬───────────────────────────────────────────────┬──────────┐</span>
 <span class="go">│ class  │  model   │    manufacturer    │ model type │ DoF │                                        config │ keywords │</span>
 <span class="go">├────────┼──────────┼────────────────────┼────────────┼─────┼───────────────────────────────────────────────┼──────────┤</span>
@@ -3979,21 +3916,21 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────┬─────────────┬──────────────────┬─────────────────────────────────────────────┐</span>
-<span class="go">│id │    link     │   parent    │      joint       │                     ETS                     │</span>
-<span class="go">├───┼─────────────┼─────────────┼──────────────────┼─────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │ panda_link0 │           - │                  │                                             │</span>
-<span class="go">│ 1 │ panda_link1 │ panda_link0 │     panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
-<span class="go">│ 2 │ panda_link2 │ panda_link1 │     panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
-<span class="go">│ 3 │ panda_link3 │ panda_link2 │     panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
-<span class="go">│ 4 │ panda_link4 │ panda_link3 │     panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
-<span class="go">│ 5 │ panda_link5 │ panda_link4 │     panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
-<span class="go">│ 6 │ panda_link6 │ panda_link5 │     panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
-<span class="go">│ 7 │ panda_link7 │ panda_link6 │     panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
-<span class="go">│ 8 │ panda_link8 │ panda_link7 │     panda_joint8 │ tz(0.107)                                   │</span>
-<span class="go">│ 9 │ @panda_hand │ panda_link8 │ panda_hand_joint │ Rz(-45°)                                    │</span>
-<span class="go">└───┴─────────────┴─────────────┴──────────────────┴─────────────────────────────────────────────┘</span>
+<span class="go">┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐</span>
+<span class="go">│id │     link     │   parent    │    joint     │                     ETS                     │</span>
+<span class="go">├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │  panda_link0 │           - │              │                                             │</span>
+<span class="go">│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
+<span class="go">│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
+<span class="go">│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
+<span class="go">│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
+<span class="go">│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
+<span class="go">│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
+<span class="go">│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
+<span class="go">│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ tz(0.107)                                   │</span>
+<span class="go">└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
@@ -4025,6 +3962,7 @@ definition from a URDF file.  The model describes its kinematic and
 graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR3</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR3.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬────────────────────────────────────┐</span>
 <span class="go">│id │      link      │     parent     │             joint              │                ETS                 │</span>
@@ -4070,6 +4008,7 @@ definition from a URDF file.  The model describes its kinematic and
 graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR5</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR5.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
 <span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
@@ -4115,6 +4054,7 @@ definition from a URDF file.  The model describes its kinematic and
 graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR10</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR10.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
 <span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
@@ -4160,6 +4100,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Puma560.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────┬────────┬───────┬───────────────────────────────────────────────────────────┐</span>
 <span class="go">│id │  link  │ parent │ joint │                            ETS                            │</span>
@@ -4205,15 +4146,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px100</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px100.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
@@ -4267,16 +4200,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px150</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px150.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
@@ -4331,16 +4255,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx150</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx150.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
@@ -4395,16 +4310,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx200</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx200.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
@@ -4459,16 +4365,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                    ETS                    │</span>
@@ -4523,17 +4420,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300s</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300s.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬───────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │       parent        │    joint     │                    ETS                    │</span>
@@ -4589,16 +4476,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx200</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx200.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
@@ -4653,16 +4531,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                    ETS                     │</span>
@@ -4717,17 +4586,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250s</span><span class="p">()</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
-<span class="go">interbotix_black is an invalid color name, using default color</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250s.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬────────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │       parent        │    joint     │                    ETS                     │</span>
@@ -4783,6 +4642,7 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Mico</span><span class="p">()</span>
+<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Mico.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────────────┬────────────────────────┬─────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────┐</span>
 <span class="go">│id │            link             │         parent         │            joint            │                                           ETS                                            │</span>
@@ -4836,25 +4696,18 @@ characteristics.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="arm_superclass.html" class="btn btn-neutral float-right" title="Superclasses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="arm_ets.html" class="btn btn-neutral float-left" title="Elementary transform sequence (ETS) models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="arm_superclass.html" class="btn btn-neutral float-right" title="Superclasses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="arm_ets.html" class="btn btn-neutral float-left" title="Elementary transform sequence (ETS) models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Jesse Haviland and Peter Corke
+        &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 23-Dec-2020.
+        Last updated on 05-Jan-2021.
       </span>
 
     </p>
@@ -4862,14 +4715,13 @@ characteristics.</p>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -4895,6 +4747,7 @@ characteristics.</p>
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
     ga('create', 'G-11Q6WJM565', 'auto');
+    
     ga('send', 'pageview');
     </script>
 
