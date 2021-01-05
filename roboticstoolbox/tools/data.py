@@ -1,4 +1,7 @@
 from pathlib import Path
+import roboticstoolbox.tools.trajectory as tt
+import sys
+import importlib
 
 def loadmat(filename):
     """
@@ -73,21 +76,21 @@ def path_to_datafile(filename):
         loadmat('foo.dat')         # read ./foo.dat
         loadmat('~/data/foo.dat')  # read ~/data/foo.dat
     """
-    print("path_to_data: ", filename, __file__)
+
+
     filename = Path(filename)
-    
-    import os
 
     if filename.parent == Path():
         # just a filename, no path, assume it is in roboticstoolbox/data
-        p = Path(__file__).parent.parent / 'data' / filename
+        import inspect
+        path = Path(inspect.getframeinfo(inspect.currentframe()).filename)
+
+        p = Path(__file__).resolve().parent.parent / 'data' / filename
         print(f"p={p}")
-        print(p.exists(), os.path.exists(str(p)))
         if p.exists():
             print(f"returning")
             return str(p.resolve())
 
-    
     p = filename.expanduser()
     print(f"continuing, filename={filename}, p={p}")
     p = p.resolve()
@@ -108,3 +111,17 @@ if __name__ == "__main__":
     # print(a)
     a = loadmat("~/code/robotics-toolbox-python/roboticstoolbox/data/map1.mat")
     print(a)
+
+
+    # print("***** ", tt.__file__)
+    # print("***** ", loadmat.__module__)
+    # import inspect, os
+    # filename = inspect.getframeinfo(inspect.currentframe()).filename
+    # path = os.path.dirname(os.path.abspath(filename))
+    # print("**1 ", path)
+    # path = os.path.dirname(os.path.abspath(__file__))
+    # print("**2 ", path)
+    # # classpath = sys.modules[self.__module__].__file__
+    # #         print("***** ", classpath)
+    # print("path_to_data: ", filename, __file__)
+    # filename = Path(filename)
