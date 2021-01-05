@@ -100,7 +100,7 @@ class Shape(object):
             't': fk.t.tolist(),
             'q': r2q(fk.R).tolist(),
             'v': self.v.tolist(),
-            'color': self.color
+            'color': list(self.color)
         }
 
         return shape
@@ -174,7 +174,7 @@ class Shape(object):
                 try:
                     value = mpc.to_rgba(value)
                 except ValueError:
-                    print('{0} was an invalid color name, using default color')
+                    print(f'{value} is an invalid color name, using default color')
                     value = default_color
             else:  # pragma nocover
                 value = default_color

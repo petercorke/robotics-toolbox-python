@@ -84,7 +84,7 @@ class Link(ABC):
 
     def __init__(
             self,
-            name='',
+            name=None,
             qlim=None,
             flip=False,
             m=0.0,

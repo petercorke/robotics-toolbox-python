@@ -263,8 +263,6 @@ class Robot(DynamicsMixin, IKMixin):
         else:  # pragma nocover
             return ""
 
-
-
     def linkcolormap(self, linkcolors="viridis"):
         """
         Create a colormap for robot joints
@@ -304,7 +302,7 @@ class Robot(DynamicsMixin, IKMixin):
                 <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
                 - `Colormaps
                 <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
-        """
+        """  # noqa
 
         if isinstance(linkcolors, list) and len(linkcolors) == self.n:
             # provided a list of color names
@@ -312,6 +310,158 @@ class Robot(DynamicsMixin, IKMixin):
         else:
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
+
+    def manipulability(
+            self, q=None, J=None, method='yoshikawa',
+            axes='all', **kwargs):
+        """
+        Manipulability measure
+
+        :param q: Joint coordinates, one of J or q required
+        :type q: ndarray(n), or ndarray(m,n)
+        :param J: Jacobian in world frame if already computed, one of J or
+            q required
+        :type J: ndarray(6,n)
+        :param method: method to use, "yoshikawa" (default), "condition",
+            "minsingular"  or "asada"
+        :type method: str
+        :param axes: Task space axes to consider: "all" [default],
+            "trans" or "rot"
+        :type axes: str
+        :param kwargs: extra arguments to pass to ``jacob0``
+        :return: manipulability
+        :rtype: float or ndarray(m)
+
+        - ``manipulability(q)`` is the scalar manipulability index
+          for the robot at the joint configuration ``q``.  It indicates
+          dexterity, that is, how well conditioned the robot is for motion
+          with respect to the 6 degrees of Cartesian motion.  The values is
+          zero if the robot is at a singularity.
+
+        Various measures are supported:
+
+        +-------------------+-------------------------------------------------+
+        | Measure           |       Description                               |
+        +-------------------+-------------------------------------------------+
+        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
+        |                   | from singularity [Yoshikawa85]_                 |
+        +-------------------+-------------------------------------------------+
+        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
+        |                   | of the velocity ellipsoid [Klein87]_            |
+        +-------------------+-------------------------------------------------+
+        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
+        |                   | *distance*  from singularity [Klein87]_         |
+        +-------------------+-------------------------------------------------+
+        | ``"asada"``       | Isotropy of the task-space acceleration         |
+        |                   | ellipsoid which is a function of the Cartesian  |
+        |                   | inertia matrix which depends on the inertial    |
+        |                   | parameters [Asada83]_                           |
+        +-------------------+-------------------------------------------------+
+
+        **Trajectory operation**:
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        .. note::
+
+            - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
+            - The "all" option includes rotational and translational
+              dexterity, but this involves adding different units. It can be
+              more useful to look at the translational and rotational
+              manipulability separately.
+            - Examples in the RVC book (1st edition) can be replicated by
+              using the "all" option
+            - Asada's measure requires inertial a robot model with inertial
+              parameters.
+
+        :references:
+
+        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
+                The International Journal of Robotics Research.
+                1985;4(2):3-9. doi:10.1177/027836498500400201
+        .. [Asada83] A geometrical representation of manipulator dynamics and
+                its application to arm design, H. Asada,
+                Journal of Dynamic Systems, Measurement, and Control,
+                vol. 105, p. 131, 1983.
+        .. [Klein87] Dexterity Measures for the Design and Control of
+                Kinematically Redundant Manipulators. Klein CA, Blaho BE.
+                The International Journal of Robotics Research.
+                1987;6(2):72-83. doi:10.1177/027836498700600206
+
+        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
+
+        """
+        if axes == 'all':
+            axes = [True, True, True, True, True, True]
+        elif axes.startswith('trans'):
+            axes = [True, True, True, False, False, False]
+        elif axes.startswith('rot'):
+            axes = [False, False, False, True, True, True]
+        else:
+            raise ValueError('axes must be all, trans or rot')
+
+        def yoshikawa(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            if J.shape[0] == J.shape[1]:
+                # simplified case for square matrix
+                return abs(np.linalg.det(J))
+            else:
+                m2 = np.linalg.det(J @ J.T)
+                return np.sqrt(abs(m2))
+
+        def invcondition(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            return 1 / np.linalg.cond(J)  # return 1/cond(J)
+
+        def minsingular(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            s = np.linalg.svd(J, compute_uv=False)
+            return s[-1]  # return last/smallest singular value of J
+
+        def asada(robot, J, q, axes, **kwargs):
+            dof = np.sum(axes)
+            if np.linalg.matrix_rank(J) < 6:
+                return 0
+            Ji = np.linalg.pinv(J)
+            Mx = Ji.T @ robot.inertia(q) @ Ji
+            d = np.where(axes)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = np.linalg.eig(Mx)
+            return np.min(e) / np.max(e)
+
+        # choose the handler function
+        if method == 'yoshikawa':
+            mfunc = yoshikawa
+        elif method == 'invcondition':
+            mfunc = condition
+        elif method == 'minsingular':
+            mfunc = minsingular
+        elif method == 'asada':
+            mfunc = asada
+        else:
+            raise ValueError(
+                "Invalid method chosen")
+
+        # Calculate manipulability based on supplied Jacobian
+        if J is not None:
+            w = [mfunc(self, J, q, axes)]
+
+        # Otherwise use the q vector/matrix
+        else:
+            q = getmatrix(q, (None, self.n))
+            w = np.zeros(q.shape[0])
+
+            for k, qk in enumerate(q):
+                Jk = self.jacob0(qk, **kwargs)
+                w[k] = mfunc(self, Jk, qk, axes)
+
+        if len(w) == 1:
+            return w[0]
+        else:
+            return w
 
 # --------------------------------------------------------------------- #
 
@@ -439,7 +589,6 @@ class Robot(DynamicsMixin, IKMixin):
         else:
             raise ValueError('tool must be set to None (no tool) or an SE3')
 
-
     @property
     def qlim(self):
         r"""
@@ -460,7 +609,7 @@ class Robot(DynamicsMixin, IKMixin):
         limits = np.zeros((2, self.n))
         for j, link in enumerate(self):
             if link.qlim is None:
-                if link.isrevolute():
+                if link.isrevolute:
                     v = np.r_[-np.pi, np.pi]
                 else:
                     raise ValueError('undefined prismatic joint limit')
@@ -561,12 +710,10 @@ class Robot(DynamicsMixin, IKMixin):
             raise ValueError(
                 'Control type must be one of \'p\', \'v\', or \'a\'')
 
-
-
 # --------------------------------------------------------------------- #
 
     def plot(
-            self, q, backend='Swift', block=True, dt=0.050,
+            self, q, backend=None, block=True, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
             jointaxes=True, eeframe=True, shadow=True, name=True, movie=None
             ):
@@ -576,7 +723,8 @@ class Robot(DynamicsMixin, IKMixin):
         :param q: The joint configuration of the robot.
         :type q: float ndarray(n)
         :param backend: The graphical backend to use, currently 'swift'
-            and 'pyplot' are implemented. Defaults to 'swift'
+            and 'pyplot' are implemented. Defaults to 'swift' of an ``ERobot``
+            and 'pyplot` for a ``DHRobot``
         :type backend: string
         :param block: Block operation of the code and keep the figure open
         :type block: bool
@@ -637,6 +785,12 @@ class Robot(DynamicsMixin, IKMixin):
         """
 
         env = None
+
+        if backend is None:
+            if isinstance(self, rtb.DHRobot):
+                backend = 'pyplot'
+            else:
+                backend = 'swift'
 
         if backend.lower() == 'swift':  # pragma nocover
             if isinstance(self, rtb.ERobot):
@@ -784,7 +938,7 @@ class Robot(DynamicsMixin, IKMixin):
             raise NotImplementedError(
                 "ERobot fellipse not implemented yet")
 
-        ell = EllipsePlot(self, 'f', opt, centre=centre)
+        ell = EllipsePlot(self, q, 'f', opt, centre=centre)
         return ell
 
     def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
@@ -822,7 +976,7 @@ class Robot(DynamicsMixin, IKMixin):
             raise NotImplementedError(
                 "ERobot vellipse not implemented yet")
 
-        ell = EllipsePlot(self, 'v', opt, centre=centre)
+        ell = EllipsePlot(self, q, 'v', opt, centre=centre)
         return ell
 
     def plot_ellipse(

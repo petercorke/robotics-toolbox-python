@@ -8,11 +8,13 @@ import threading
 import glob
 import os
 import platform
+import warnings
 from time import perf_counter, sleep
 import imageio
 from roboticstoolbox.backends.Connector import Connector
-from roboticstoolbox.robot.DHLink import DHLink
-from roboticstoolbox.robot.Robot import Robot as r
+# from roboticstoolbox.robot.DHLink import DHLink
+# from roboticstoolbox.robot.Robot import Robot as r
+from roboticstoolbox import DHLink, DHRobot
 
 GraphicsCanvas3D = None
 GraphicsCanvas2D = None
@@ -165,7 +167,7 @@ class VPython(Connector):  # pragma nocover
                 "Figure number must be between 0 and total number of canvases")
 
         # If DHRobot given
-        if isinstance(id, r.Robot):
+        if isinstance(id, DHRobot):
             robot = None
             # Find first occurrence of it that is in the correct canvas
             for i in range(len(self.robots)):
@@ -383,6 +385,9 @@ class VPython(Connector):  # pragma nocover
 
         if not self._recording:
             print("VPython Recording...")
+            if fps > 10:
+                warnings.warn("The chosen recording fps ({0}) could result in lagging video quality."
+                              "Consider lowering fps and robot speed (e.g. 5fps)".format(fps), RuntimeWarning)
             self._recording = True
             self._recording_fps = fps
             # Spawn a thread

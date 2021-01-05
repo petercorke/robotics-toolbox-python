@@ -84,8 +84,8 @@ class TestTrajectory(unittest.TestCase):
 
     def test_lspb(self):
 
-        s1 = 1
-        s2 = 2
+        s1 = 1.
+        s2 = 2.
 
         # no boundary conditions
 
@@ -135,16 +135,14 @@ class TestTrajectory(unittest.TestCase):
 
         self.assertAlmostEqual(sd[5], 0.2)
 
-        tr.lspb(s1, s1, 1)
-
         with self.assertRaises(TypeError):
             tr.lspb(s1, s2, 'not time')
 
         with self.assertRaises(ValueError):
-            tr.lspb(s1, s2, 1, V=0.000000001)
+            tr.lspb(s1, s2, t, V=0.000000001)
 
         with self.assertRaises(ValueError):
-            tr.lspb(s1, s1 * 2, 0.1, V=10000000000000000000)
+            tr.lspb(s1, s2, t, V=10000000000000000000)
 
     def test_tg1plot(self):
         s1 = 1

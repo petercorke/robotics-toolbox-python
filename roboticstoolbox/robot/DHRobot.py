@@ -22,7 +22,7 @@ from ansitable import ANSITable, Column
 from roboticstoolbox.robot.DHLink import _check_rne
 from frne import init, frne, delete
 
-iksol = namedtuple("IKsolution", "q, success, reason", defaults=(None,) * 3)
+iksol = namedtuple("IKsolution", "q, success, reason")
 
 
 class DHRobot(Robot):
@@ -120,7 +120,7 @@ class DHRobot(Robot):
             if L.offset != 0:
                 sign = "+" if L.offset > 0 else "-"
                 offset = abs(L.offset)
-                if link.isprismatic():
+                if link.isprismatic:
                     s += f" {sign} {offset:}"
                 else:
                     s += f" {sign} {offset * deg:.3g}\u00b0"
@@ -156,13 +156,13 @@ class DHRobot(Robot):
                 )
             for j, L in enumerate(self):
                 if has_qlim:
-                    if L.isprismatic():
+                    if L.isprismatic:
                         ql = [qlim[0, j], qlim[1, j]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
                     ql = []
-                if L.isprismatic():
+                if L.isprismatic:
                     table.row(
                         L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
                 else:
@@ -180,13 +180,13 @@ class DHRobot(Robot):
                 )
             for j, L in enumerate(self):
                 if has_qlim:
-                    if L.isprismatic():
+                    if L.isprismatic:
                         ql = [qlim[0, j], qlim[1, j]]
                     else:
                         ql = [angle(qlim[k, j], "{:.1f}") for k in [0, 1]]
                 else:
                     ql = []
-                if L.isprismatic():
+                if L.isprismatic:
                     table.row(
                         angle(L.theta), qstr(j, L), L.a, angle(L.alpha), *ql)
                 else:
@@ -447,7 +447,9 @@ class DHRobot(Robot):
         joint coordinate (``qlim``) if the joint is primsmatic.
 
         .. note::
-            - Probably an overestimate of reach
+
+            - This is the *length sum* referred to in Craig's book
+            - Probably an overestimate of the actual reach
             - Used by numerical inverse kinematics to scale translational
               error.
             - For a prismatic joint, uses ``qlim`` if it is set
@@ -594,7 +596,7 @@ class DHRobot(Robot):
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.isprismatic()
         """
-        return [link.isprismatic() for link in self]
+        return [link.isprismatic for link in self]
 
     def isrevolute(self):
         """
@@ -621,7 +623,7 @@ class DHRobot(Robot):
         p = []
 
         for i in range(self.n):
-            p.append(self.links[i].isrevolute())
+            p.append(self.links[i].isrevolute)
 
         return p
 
@@ -645,7 +647,7 @@ class DHRobot(Robot):
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.config()
         """
-        return ''.join(['R' if L.isrevolute() else 'P' for L in self])
+        return ''.join(['R' if L.isrevolute else 'P' for L in self])
 
     def todegrees(self, q=None):
         """
@@ -715,6 +717,32 @@ class DHRobot(Robot):
             q[k] * np.pi / 180.0
             if revolute[k] else q[k] for k in range(len(q))
         ])
+
+    def dhunique(self):
+        """
+        Print the unique DH parameters
+
+        Print a table showing all the non-zero DH parameters, and their
+        values.  This is the minimum set of kinematic parameters required
+        to describe the robot.
+        """
+
+        table = ANSITable(
+            Column("param"),
+            Column("value", headalign="^", colalign="<", fmt="{:.4g}"),
+            border="thin")
+        for j, link in enumerate(self):
+            if link.isprismatic:
+                if link.theta != 0:
+                    table.row(f"θ{j}", link.theta)
+            elif link.isrevolute:
+                if link.d != 0:
+                    table.row(f"d{j}", link.d)
+            if link.a != 0:
+                    table.row(f"a{j}", link.a)
+            if link.alpha != 0:
+                    table.row(f"⍺{j}", link.alpha)
+        table.print()
 
     def twists(self, q=None):
         """
@@ -1011,142 +1039,6 @@ class DHRobot(Robot):
             T = self.fkine(q)
 
         return tr2jac(trinv(T.A)) @ self.jacobe(q)
-
-    def manipulability(self, q=None, method='yoshikawa', axes='all'):
-        """
-        Manipulability measure
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: ndarray(n), or ndarray(m,n)
-        :param method: method to use, "yoshikawa" (default) or "asada"
-        :type method: str
-        :param axes: Task space axes to consider: "all" [default],
-            "trans", "rot"
-        :type axes: str
-        :return: manipulability
-        :rtype: float or ndarray(m)
-
-        - ``manipulability(q)`` is the Yoshikawa manipulability index (scalar)
-          for the robot at the joint configuration ``q``.  It indicates
-          dexterity, that is, how isotropic the robot's motion is with respect
-          to the 6 degrees of Cartesian motion. The measure is high when the
-          manipulator is capable of equal motion in all directions and low when
-          the manipulator is close to a singularity. Yoshikawa's manipulability
-          measure is based on the shape of the velocity ellipsoid and depends
-          only on kinematic parameters.
-
-        - ``manipulability(q, method='asada')`` as above except computes the
-          Asada manipulability measure. Asada's manipulability measure is based
-          on the shape of the acceleration ellipsoid which in turn is a
-          function of the Cartesian inertia matrix and the dynamic parameters.
-          The scalar measure computed here is the ratio of the smallest/largest
-          ellipsoid axis. Ideally the ellipsoid would be spherical, giving a
-          ratio of 1, but in practice will be less than 1.
-
-        - ``maniplty(q, method, axes)`` as above except ``axes`` specify which
-          of the 6 degrees-of-freedom to consider in the measurement. For
-          example
-          ``axes="trans"`` to consider only translation or
-          ``axes="rot"`` to consider only rotation. Defaults to ``"all"``
-          motion.
-
-        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
-        manipulability indices for each joint configuration specified by a row
-        of ``q``.
-
-        .. note::
-            - The "all" option includes rotational and translational
-              dexterity, but this involves adding different units. It can be
-              more useful to look at the translational and rotational
-              manipulability separately.
-            - Examples in the RVC book (1st edition) can be replicated by
-              using the "all" option
-
-        :references:
-            - Analysis and control of robot manipulators with redundancy,
-              T. Yoshikawa,
-              Robotics Research: The First International Symposium
-              (M. Brady and R. Paul, eds.),
-              pp. 735-747, The MIT press, 1984.
-            - A geometrical representation of manipulator dynamics and its
-              application to arm design, H. Asada,
-              Journal of Dynamic Systems, Measurement, and Control,
-              vol. 105, p. 131, 1983.
-            - Robotics, Vision & Control, P. Corke, Springer 2011.
-
-        """
-        if axes == 'all':
-            axes = [1, 1, 1, 1, 1, 1]
-        elif axes.startswith('trans'):
-            axes = [1, 1, 1, 0, 0, 0]
-        elif axes.startswith('rot'):
-            axes = [0, 0, 0, 1, 1, 1]
-        else:
-            raise ValueError('axes must be all, trans or rot')
-
-        def yoshi(robot, q, axes):
-            J = robot.jacob0(q)
-            J = J[axes, :]
-            m2 = np.linalg.det(J @ J.T)
-            # m2 = np.maximum(0.0, m2)  # clip it to positive
-            return np.sqrt(abs(m2))
-
-        def asada(robot, q, axes, dof):
-            J = robot.jacob0(q)
-
-            if np.linalg.matrix_rank(J) < 6:
-                return 0
-
-            Ji = np.linalg.pinv(J)
-            M = robot.inertia(q)
-            Mx = Ji.T @ M @ Ji
-            d = np.where(axes)[0]
-            Mx = Mx[d]
-            Mx = Mx[:, d.tolist()]
-            e, _ = np.linalg.eig(Mx)
-
-            return np.min(e) / np.max(e)
-
-        axes = getvector(axes, 6)
-        axes = axes > 0
-
-        trajn = 1
-
-        if q is None:
-            q = self.q
-
-        try:
-            q = getvector(q, self.n, 'row')
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-
-        w = np.zeros(trajn)
-
-        if method == 'yoshikawa':
-            for i in range(trajn):
-                w[i] = yoshi(self, q[i, :], axes)
-
-            if trajn == 1:
-                return w[0]
-            else:
-                return w
-
-        elif method == 'asada':
-            dof = np.sum(axes)
-
-            for i in range(trajn):
-                w[i] = asada(self, q[i, :], axes, dof)
-
-            if trajn == 1:
-                return w[0]
-            else:
-                return w
-
-        else:
-            raise ValueError(
-                'Invalid method chosen. Must be \'yoshikawa\' or \'asada\'.')
 
     def jacob_dot(self, q=None, qd=None):
         """
@@ -1543,7 +1435,7 @@ class DHRobot(Robot):
                 # statement order is important here
 
                 if self.mdh:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
                         wd_ = Rt @ wd \
@@ -1568,7 +1460,7 @@ class DHRobot(Robot):
                     wd = wd_
                     vd = vd_
                 else:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         wd = Rt @ (
                             wd + z0 * qdd_k[j]
@@ -1650,14 +1542,14 @@ class DHRobot(Robot):
 
                 R = Rm[j]
                 if self.mdh:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         t = nn @ z0
                     else:
                         # prismatic
                         t = f @ z0
                 else:
-                    if link.isrevolute():
+                    if link.isrevolute:
                         # revolute axis
                         t = nn @ (R.T @ z0)
                     else:
@@ -1719,7 +1611,7 @@ class DHRobot(Robot):
             theta = ikfunc(self, Tk, config)
 
             if theta is None or np.any(np.isnan(theta)):
-                solution = iksol(None, False)
+                solution = iksol(None, False, "")
             else:
                 # Solve for the wrist rotation
                 # We need to account for some random translations between the
@@ -1750,7 +1642,7 @@ class DHRobot(Robot):
                 # Remove the link offset angles
                 theta = theta - self.offset
 
-                solution = iksol(theta, True)
+                solution = iksol(theta, True, "")
                 solutions.append(solution)
 
         if len(solutions) == 1:

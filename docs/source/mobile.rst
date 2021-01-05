@@ -3,20 +3,13 @@ Mobile robots
 *************
 
 
-Vehicle models
---------------
+The Robotics Toolbox supports kino-dynamic vehicle models, animation, planning
+and state estimation.
 
-.. automodule:: roboticstoolbox.robot.ETS
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :inherited-members:
-   :special-members:
-   :exclude-members: count, index, sort, remove, __dict__, __weakref__, __add__, __init__, __repr__, __str__, __module__
+.. toctree::
+   :maxdepth: 2
 
-Path planning
--------------
-
-
-EKF
----
+   mobile_vehicle
+   mobile_vehicle_animation
+   mobile_planner
+   mobile_EKF

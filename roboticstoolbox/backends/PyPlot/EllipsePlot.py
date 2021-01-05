@@ -9,7 +9,7 @@ from spatialmath.base.argcheck import getvector
 
 class EllipsePlot(object):
 
-    def __init__(self, robot, etype, opt='trans', centre=[0, 0, 0], scale=0.1):
+    def __init__(self, robot, q, etype, opt='trans', centre=[0, 0, 0], scale=0.1):
 
         super(EllipsePlot, self).__init__()
 
@@ -30,6 +30,11 @@ class EllipsePlot(object):
         self.centre = centre
         self.ax = None
         self.scale = scale
+
+        if q is None:
+            self.q = robot.q
+        else:
+            self.q = q
 
         if etype == 'v':
             self.vell = True
@@ -64,10 +69,10 @@ class EllipsePlot(object):
         """
 
         if self.opt == 'trans':
-            J = self.robot.jacobe()[3:, :]
+            J = self.robot.jacobe(self.q)[3:, :]
             A = J @ J.T
         elif self.opt == 'rot':
-            J = self.robot.jacobe()[:3, :]
+            J = self.robot.jacobe(self.q)[:3, :]
             A = J @ J.T
 
         if not self.vell:
@@ -75,7 +80,7 @@ class EllipsePlot(object):
             A = np.linalg.inv(A)
 
         if isinstance(self.centre, str) and self.centre == 'ee':
-            centre = self.robot.fkine().t
+            centre = self.robot.fkine(self.q).t
         else:
             centre = self.centre
 
@@ -107,7 +112,7 @@ class EllipsePlot(object):
         """
 
         if self.opt == 'trans':
-            J = self.robot.jacobe()[:2, :]
+            J = self.robot.jacobe(self.q)[:2, :]
             A = J @ J.T
         elif self.opt == 'rot':
             raise ValueError(
@@ -119,7 +124,7 @@ class EllipsePlot(object):
             A = np.linalg.inv(A)
 
         if isinstance(self.centre, str) and self.centre == 'ee':
-            centre = self.robot.fkine().t
+            centre = self.robot.fkine(self.q).t
         else:
             centre = self.centre
 

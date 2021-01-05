@@ -22,31 +22,31 @@ class TestShape(unittest.TestCase):
 
         shape.color = [1, 2, 3]
 
-        self.assertEquals(shape.color[0], 1)
-        self.assertEquals(shape.color[1], 2)
-        self.assertEquals(shape.color[2], 3)
-        self.assertEquals(shape.color[3], 1)
+        self.assertEqual(shape.color[0], 1)
+        self.assertEqual(shape.color[1], 2)
+        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[3], 1)
 
         shape.color = [1, 2, 3, 0.5]
 
-        self.assertEquals(shape.color[0], 1)
-        self.assertEquals(shape.color[1], 2)
-        self.assertEquals(shape.color[2], 3)
-        self.assertEquals(shape.color[3], 0.5)
+        self.assertEqual(shape.color[0], 1)
+        self.assertEqual(shape.color[1], 2)
+        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[3], 0.5)
 
         shape.color = (1, 2, 3)
 
-        self.assertEquals(shape.color[0], 1)
-        self.assertEquals(shape.color[1], 2)
-        self.assertEquals(shape.color[2], 3)
-        self.assertEquals(shape.color[3], 1)
+        self.assertEqual(shape.color[0], 1)
+        self.assertEqual(shape.color[1], 2)
+        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[3], 1)
 
         shape.color = (1, 2, 3, 0.5)
 
-        self.assertEquals(shape.color[0], 1)
-        self.assertEquals(shape.color[1], 2)
-        self.assertEquals(shape.color[2], 3)
-        self.assertEquals(shape.color[3], 0.5)
+        self.assertEqual(shape.color[0], 1)
+        self.assertEqual(shape.color[1], 2)
+        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[3], 0.5)
 
     def test_closest(self):
         s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
@@ -75,7 +75,7 @@ class TestShape(unittest.TestCase):
             't': [0.0, 0.0, 0.0],
             'q': [0.7071067811865476, 0.7071067811865475, 0.0, 0.0],
             'v': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            'color': (0.95, 0.5, 0.25, 1.0)}
+            'color': [0.95, 0.5, 0.25, 1.0]}
 
         self.assertEqual(s1.to_dict(), ans)
 

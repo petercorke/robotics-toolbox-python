@@ -101,8 +101,6 @@ class Panda(DHRobot):
             meshdir='meshes/FRANKA-EMIKA/Panda',
             tool=tool)
 
-        # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
-
         self.addconfiguration("qz", [0, 0, 0, 0, 0, 0, 0])
         self.addconfiguration("qr", np.r_[0, -0.3, 0, -2.2, 0, 2.0, np.pi/4])
 
@@ -111,3 +109,4 @@ if __name__ == '__main__':   # pragma nocover
 
     panda = Panda()
     print(panda)
+

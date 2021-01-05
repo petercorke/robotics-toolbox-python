@@ -16,8 +16,8 @@
 import argparse
 from math import pi              # lgtm [py/unused-import]
 import numpy as np
-import matplotlib as plt         # lgtm [py/unused-import]
-import roboticstoolbox as rtb    # lgtm [py/unused-import]
+import matplotlib.pyplot as plt  # lgtm [py/unused-import]
+from roboticstoolbox import *    # lgtm [py/unused-import]
 from spatialmath import *        # lgtm [py/polluting-import]
 from spatialmath.base import *   # lgtm [py/polluting-import]
 
@@ -38,8 +38,8 @@ if args.backend is not None:
     plt.use(args.backend)
 
 # load some models
-puma = rtb.models.DH.Puma560()
-panda = rtb.models.DH.Panda()
+puma = models.DH.Puma560()
+panda = models.DH.Panda()
 
 # print the banner
 # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
@@ -49,6 +49,13 @@ print(r"""____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _ 
 
 for Python
 
+from roboticstoolbox import *
+from spatialmath import *
+
+func/object?       - show brief help
+help(func/object)  - show detailed help
+func/object??      - show source code
+
 """)
 
 if args.script is not None:
@@ -57,6 +64,16 @@ if args.script is not None:
         raise ValueError(f"script does not exist: {args.script}")
     exec(path.read_text())
 
-# drop into IPython
+
+## drop into IPython
 import IPython
-IPython.embed()
+from traitlets.config import Config
+
+# set configuration options, there are lots, see
+# https://ipython.readthedocs.io/en/stable/config/options/terminal.html
+c = Config()
+c.InteractiveShellEmbed.colors = "Linux"
+c.InteractiveShell.colors = 'Neutral'
+c.InteractiveShell.confirm_exit = False
+
+IPython.embed(config=c)

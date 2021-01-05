@@ -73,27 +73,11 @@ class TestRobot(unittest.TestCase):
         T = panda.fkine(q)
         Tt = sm.SE3([T, T])
 
-        l0 = rp.RevoluteDH(d=2.0)
-        l1 = rp.PrismaticDH(theta=1.0)
-        l2 = rp.PrismaticDH(theta=1, qlim=[0, 2])
-        r0 = rp.DHRobot([l0, l1])
-        r1 = rp.DHRobot([l0, l2])
-
         qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
 
         sol1 = panda.ikine_LM(T)
         sol2 = panda.ikine_LM(Tt)
         sol3 = panda.ikine_LM(T, q0=[0, 1.4, 0, 1, 0, 0.5, 1])
-
-        # Untested
-        sol5 = r0.ikine_LM(
-            T.A, mask=[1, 1, 0, 0, 0, 0],
-            transpose=5, ilimit=5)
-        sol6 = r0.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0])
-        sol7 = r0.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0], ilimit=1)
-        sol8 = r1.ikine_LM(
-            T, mask=[1, 1, 0, 0, 0, 0],
-            ilimit=1, search=True, slimit=1)
 
         self.assertTrue(sol1.success)
         self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
@@ -109,10 +93,40 @@ class TestRobot(unittest.TestCase):
         with self.assertRaises(ValueError):
             panda.ikine_LM(T, q0=[1,2])
 
-        with self.assertRaises(ValueError):
-            r0.ikine_LM(
-                T, mask=[1, 1, 0, 0, 0, 0], ilimit=1,
-                search=True, slimit=1)
+    def test_ikine_LM_mask(self):
+
+        # simple RR manipulator, solve with mask
+
+        l0 = rp.RevoluteDH(a=2.0)
+        l1 = rp.RevoluteDH(a=1)
+        
+        r = rp.DHRobot([l0, l1])  # RR manipulator
+        T = sm.SE3(-1, 2, 0)
+        sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0])
+
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4)
+
+        # test initial condition search, drop iteration limit so it has to do
+        # some searching
+        sol = r.ikine_LM(
+            T, mask=[1, 1, 0, 0, 0, 0],
+            ilimit=8, search=True)
+
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4)
+
+    def test_ikine_LM_transpose(self):
+        # need to test this on a robot with squarish Jacobian, choose Puma
+
+        r = rp.models.DH.Puma560()
+        T = r.fkine(r.qn)
+
+        sol = r.ikine_LM(T, transpose=0.5, ilimit=1000, tol=1e-6)
+
+        self.assertTrue(sol.success)
+        self.assertAlmostEqual(np.linalg.norm(T - r.fkine(sol.q)), 0, places=4)
+
 
     def test_ikine_con(self):
         panda = rp.models.DH.Panda()
@@ -124,8 +138,8 @@ class TestRobot(unittest.TestCase):
         #       -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
         #       7.84926515e-01]
 
-        sol1 = panda.ikine_con(T.A, q0=np.zeros(7))
-        sol2 = panda.ikine_con(Tt)
+        sol1 = panda.ikine_min(T.A, qlim=True, q0=np.zeros(7))
+        sol2 = panda.ikine_min(Tt, qlim=True)
 
         self.assertTrue(sol1.success)
         self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
@@ -146,9 +160,9 @@ class TestRobot(unittest.TestCase):
         T = puma.fkine(q)
         Tt = sm.SE3([T, T])
 
-        sol1 = puma.ikine_unc(Tt)
-        sol2 = puma.ikine_unc(T.A)
-        sol3 = puma.ikine_unc(T)
+        sol1 = puma.ikine_min(Tt)
+        sol2 = puma.ikine_min(T.A)
+        sol3 = puma.ikine_min(T)
 
         self.assertTrue(sol1[0].success)
         nt.assert_array_almost_equal(
@@ -175,3 +189,37 @@ class TestRobot(unittest.TestCase):
 if __name__ == '__main__':  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
+
+    # import roboticstoolbox as rtb 
+    # from spatialmath import SE3 
+
+    # l0 = rtb.RevoluteDH(a=2.0)
+    # l1 = rtb.RevoluteDH(a=1)
+    # # l1 = rp.PrismaticDH(theta=1.0)
+    # # l2 = rp.PrismaticDH(theta=1, qlim=[0, 2])
+
+    # # r0 = rtb.DHRobot([l0, l1])  # RP manipulator
+    # r1 = rtb.DHRobot([l0, l1])  # RR manipulator
+    # print(r1)
+    # T = SE3(-1, 2, 0)
+    # print(T)
+    # sol = r1.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0])
+    # print(sol)
+    # print(r1.fkine(sol.q))
+
+    # # sol = r1.ikine_LM(T, transpose=0.05, tol=1e-2, ilimit=1000, mask=[1, 1, 0, 0, 0, 0])
+    # # print(sol)
+    # # print(r1.fkine(sol.q))
+
+
+    # sol = r1.ikine_LM(
+    #     T, mask=[1, 1, 0, 0, 0, 0],
+    #     ilimit=8, search=True)
+    # print(sol)
+
+    # r = rtb.models.DH.Puma560()
+
+    # T = r.fkine(r.qn)
+
+    # sol = r.ikine_LM(T, transpose=0.5, ilimit=1000, tol=1e-6)
+    # print(sol)

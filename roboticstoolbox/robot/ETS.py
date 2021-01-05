@@ -3,18 +3,19 @@
 @author: Jesse Haviland
 @author: Peter Corke
 """
-from collections import UserList, namedtuple
+from collections import UserList
+from types import SimpleNamespace
+import copy
 from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix
-
-
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix, iseye
+    
 class SuperETS(UserList, ABC):
 
     # T is a NumPy array (4,4) or None
-    ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
+    # ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
     def __init__(
             self, axis_func=None, axis=None, eta=None,
@@ -85,7 +86,7 @@ class SuperETS(UserList, ABC):
             raise ValueError('axis_func must be callable or ndarray')
 
         # Save all the params in a named tuple
-        e = self.ets_tuple(eta, axis_func, axis, joint, T, j, flip)
+        e = SimpleNamespace(eta=eta, axis_func=axis_func, axis=axis, joint=joint, T=T, jindex=j, flip=flip)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -233,6 +234,12 @@ class SuperETS(UserList, ABC):
         """
         return self.data[0].jindex
 
+    @jindex.setter
+    def jindex(self, j):
+        if not isinstance(j, int) or j < 0:
+            raise TypeError(f'jindex is {j}, must be an int >= 0')
+        self.data[0].jindex = j
+
     @property
     def isrevolute(self):
         """
@@ -371,6 +378,8 @@ class SuperETS(UserList, ABC):
 
         """
         if self.isjoint:
+            if self.isflip:
+                q = -q
             return self.axis_func(q)
         else:
             return self.data[0].T
@@ -470,7 +479,8 @@ class SuperETS(UserList, ABC):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    ets *= ETS._CONST(const)
+                    if not iseye(const):
+                        ets *= ETS._CONST(const)
                     const = None
                 ets *= et  # emit the joint ET
             else:
@@ -482,7 +492,8 @@ class SuperETS(UserList, ABC):
 
         if const is not None:
             # flush the constant, tool transform
-            ets *= ETS._CONST(const)
+            if not iseye(const):
+                ets *= ETS._CONST(const)
         return ets
 
     def __str__(self, q=None):
@@ -773,20 +784,20 @@ class SuperETS(UserList, ABC):
         """  # noqa
 
         inv = ETS()
-        for e in reversed(self.data):
-            # get the named tuple from the list, and convert to a dict
-            etdict = e._asdict()
+        for ns in reversed(self.data):
+            # get the namespace from the list
 
-            # update the dict to make this an inverse
-            if etdict['joint']:
-                etdict['flip'] ^= True   # toggle flip status
-            elif etdict['axis'][0] == 'C':
-                etdict['T'] = trinv(etdict['T'])
-            elif etdict['eta'] is not None:
-                etdict['T'] = trinv(etdict['T'])
-                etdict['eta'] = -etdict['eta']
+            # clone it, and invert the elements to create an inverse
+            nsi = copy.copy(ns)
+            if nsi.joint:
+                nsi.flip ^= True   # toggle flip status
+            elif nsi.axis[0] == 'C':
+                nsi.T = trinv(nsi.T)
+            elif nsi.eta is not None:
+                nsi.T = trinv(nsi.T)
+                nsi.eta = -nsi.eta
             et = ETS()  # create a new ETS instance
-            et.data = [self.ets_tuple(**etdict)]  # set it's data from the dict
+            et.data = [nsi]  # set it's data from the dict
             inv *= et
         return inv
 
@@ -1103,7 +1114,7 @@ class ETS(SuperETS):
 
         # we will work with NumPy arrays for maximum speed
         T = T.A
-        U = np.eye(4)
+        U = np.eye(4)  # SE(3) matrix
         j = 0
         J = np.zeros((6, n))
 
@@ -1112,13 +1123,13 @@ class ETS(SuperETS):
             if et.isjoint:
                 # joint variable
                 # U = U @ link.A(q[j], fast=True)
-                U = U @ et.axis_func(q[j])
+                U = U @ et.T(q[j])
 
                 # TODO???
                 # if link == to_link:
                 #     U = U @ offset.A
 
-                Tu = np.linalg.inv(U) @ T
+                Tu = trinv(U) @ T
                 n = U[:3, 0]
                 o = U[:3, 1]
                 a = U[:3, 2]

@@ -70,6 +70,10 @@ class ELink(Link):
 
         if v is None and len(ets) > 0 and ets[-1].isjoint:
             v = ets.pop()
+            if jindex is not None:
+                v.jindex = jindex
+            elif jindex is None and v.jindex is not None:
+                jindex = v.jindex
 
         # TODO simplify this logic, can be ELink class or None
         if isinstance(parent, list):
@@ -124,7 +128,10 @@ class ELink(Link):
 
     def __repr__(self):
         name = self.__class__.__name__
-        s = f"{self.name}, ets={self.ets()}"
+        if self.name is None:
+            s = f"ets={self.ets()}"
+        else:
+            s = f"{self.name}, ets={self.ets()}"
         if self.parent is not None:
             s += f", parent={self.parent.name}"
         args = [s] + super()._params()
@@ -137,12 +144,16 @@ class ELink(Link):
         :return: Pretty print of the robot link
         :rtype: str
         """
-        # name = self.__class__.__name__
-        if self.parent is None:
-            parent = ""
+        name = self.__class__.__name__
+
+        if self.name is None:
+            return f"{name}[{self.ets()}] "
         else:
-            parent = f" [{self.parent.name}]"
-        return f"name[{self.name}({parent}): {self.ets()}] "
+            if self.parent is None:
+                parent = ""
+            else:
+                parent = f" [{self.parent.name}]"
+            return f"{name}[{self.name}({parent}): {self.ets()}] "
 
     @property
     def v(self):
@@ -243,14 +254,25 @@ class ELink(Link):
         """
         return self.v.isrevolute
 
+    @property
     def isprismatic(self):
         """
         Checks if the joint is of prismatic type
 
-        :return: Ture if is prismatic
+        :return: True if is prismatic
         :rtype: bool
         """
-        return self.v.isprismatic
+        return self.isjoint and self.v.isprismatic
+
+    @property
+    def isrevolute(self):
+        """
+        Checks if the joint is of revolute type
+
+        :return: True if is revolute
+        :rtype: bool
+        """
+        return self.isjoint and self.v.isrevolute
 
     # @property
     # def ets(self):
@@ -331,42 +353,33 @@ class ELink(Link):
         """
         Link transform matrix
 
-        T = A(q) is the link homogeneous transformation matrix (4x4)
-        corresponding to the link variable q
-
         :param q: Joint coordinate (radians or metres). Not required for links
             with no variable
         :type q: float
-        :return T: link homogeneous transformation matrix
-        :rtype T: SE3
+        :param fast: return NumPy array instead of ``SE3``
+        :type param: bool
+        :return T: link frame transformation matrix
+        :rtype T: SE3 or ndarray(4,4)
+
+        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body 
+          transformation from the previous to the current link frame to
+          the next, which depends on the joint coordinate ``q``.
 
         """
 
-        # j = 0
-        # tr = SE3()
-
-        if self.isjoint and q is None:
-            raise ValueError("q is required for variable joints")
-
-        # for k in range(self.M):
-        #     if self.ets[k].jtype == self.ets[k].VARIABLE:
-        #         T = self.ets[k].T(q)
-        #         j += 1
-        #     else:
-        #         T = self.ets[k].T()
-
-        #     tr = tr * T
-
-        if self.v is not None:
-            if fast:
-                return self.Ts.A @ self.v.T(q)
-            else:
-                return SE3(self.Ts.A @ self.v.T(q), check=False)
+        if self.isjoint:
+            # a variable joint
+            if q is None:
+                raise ValueError("q is required for variable joints")
+            T = self.Ts.A @ self.v.T(q)
         else:
-            if fast:
-                return self.Ts.A
-            else:
-                return self.Ts
+            # a fixed joint
+            T = self.Ts.A
+
+        if fast:
+            return T
+        else:
+            return SE3(T, check=False)
 
     def ets(self):
         if self.v is None:

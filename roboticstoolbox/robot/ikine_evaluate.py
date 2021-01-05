@@ -9,28 +9,49 @@ from ansitable import ANSITable, Column
 #  * T, the end-effector pose
 #  * q0, the initial joint angles for solution
 
-# Puma robot case
-# robot = rtb.models.DH.Puma560()
-# q = robot.qn
-# q0 = robot.qz
-# T = robot.fkine(q)
+example = 'panda'  # 'panda'
 
-# Panda robot case
-robot = rtb.models.DH.Panda()
-q0 = robot.qr
-T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-# this pose does quite badly, it's from the RTB README.md
+if example == 'puma':
+    # Puma robot case
+    robot = rtb.models.DH.Puma560()
+    q = robot.qn
+    q0 = robot.qz
+    T = robot.fkine(q)
+elif example == 'panda':
+    # Panda robot case
+    robot = rtb.models.DH.Panda()
+    T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+    q0 = robot.qz
 
 # build the list of IK methods to test
+# it's a tuple:
+#  - the method to execute
+#  - the name for the results table
+#  - the statement to execute for timeit
 ikfuncs = [ 
-    robot.ikine_LM,  # Levenberg-Marquadt
-    robot.ikine_LMS, # Levenberg-Marquadt (Sugihara)
-    robot.ikine_unc, #numerical solution with no constraints 
-    robot.ikine_con, # numerical solution with constraints
-    robot.ikine_min  # numerical solution 2 with constraints
+    (robot.ikine_LM,  # Levenberg-Marquadt
+        "ikine_LM",
+        "sol = robot.ikine_LM(T, q0)"
+    ),
+    (robot.ikine_LMS, # Levenberg-Marquadt (Sugihara)
+        "ikine_LMS",
+        "sol = robot.ikine_LMS(T, q0)"
+    ),
+    (robot.ikine_min, #numerical solution with no constraints
+        "ikine_min(qlim=False)",
+        "sol = robot.ikine_min(T, q0)"
+    ),
+    (lambda T, q0: robot.ikine_min(T, q0, qlim=True), #numerical solution with constraints
+        "ikine_min(qlim=True)",
+        "sol = robot.ikine_min(T, q0, qlim=True)"
+    )
 ]
-if "ikine_a" in robot:
-    ikfuncs.append(robot.ikine_a)    # analytic solution
+if hasattr(robot, "ikine_a"):
+    a =  (robot.ikine_a, # analytic solution
+        "ikine_a",
+        "sol = robot.ikine_a}(T)"
+    )
+    ikfuncs.insert(0, a)    
 
 # setup to run timeit
 setup = '''
@@ -47,15 +68,13 @@ table = ANSITable(
 
 # test the IK methods
 for ik in ikfuncs:
-    print('Testing:', ik.__name__)
+    print('Testing:', ik[1])
     
     # test the method, don't pass q0 to the analytic function
-    if ik.__name__ == "ikine_a":
-        sol = ik(T)
-        statement = f"sol = robot.{ik.__name__}(T)"
+    if ik[1] == "ikine_a":
+        sol = ik[0](T)
     else:
-        sol = ik(T, q0=q0)
-        statement = f"sol = robot.{ik.__name__}(T, q0=q0)"
+        sol = ik[0](T, q0=q0)
 
     # print error message if there is one
     if not sol.success:
@@ -65,11 +84,14 @@ for ik in ikfuncs:
     err = np.linalg.norm(T - robot.fkine(sol.q))
     print('  error', err)
 
-    # evaluate the execution time
-    t = timeit.timeit(stmt=statement, setup=setup, number=N)
+    if N > 0:
+        # evaluate the execution time
+        t = timeit.timeit(stmt=ik[2], setup=setup, number=N)
+    else:
+        t = 0
 
     # add it to the output table
-    table.row(ik.__name__, t/N*1e6, err)
+    table.row(ik[1], t/N*1e6, err)
 
 # pretty print the results     
 table.print()

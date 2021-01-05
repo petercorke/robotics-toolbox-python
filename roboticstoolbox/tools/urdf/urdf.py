@@ -347,8 +347,8 @@ class Material(URDFType):
 
     def __init__(self, name, color=None, texture=None):
 
-        if color is None:
-            color = name
+        # if color is None:
+        #     color = name
 
         self.name = name
         self.color = color
@@ -575,7 +575,12 @@ class Visual(URDFType):
         self.origin = origin
         self.material = material
 
-        if material is not None:
+        # Do not set material color yet. The top level URDF colors have not
+        # been parsed/defined yet so we do not know what 'Grey' or 'Blue2'
+        # mean yet. We set colors after these top level definitions come in
+
+        # Do set it if the color was defined in line by the URDF
+        if material is not None and material.color is not None:
             self.geometry.ob.color = material.color
 
     @property
@@ -1640,19 +1645,20 @@ class URDF(URDFType):
     _ELEMENTS = {
         'links': (Link, True, True),
         'joints': (Joint, False, True),
-        'transmissions': (Transmission, False, True)
+        'transmissions': (Transmission, False, True),
+        'materials': (Material, False, True),
     }
     _TAG = 'robot'
 
     def __init__(self, name, links, joints=None,
-                 transmissions=None,
+                 transmissions=None, materials=None,
                  other_xml=None):
         if joints is None:   # pragma nocover
             joints = []
         if transmissions is None:   # pragma nocover
             transmissions = []
-        # if materials is None:
-        #     materials = []
+        if materials is None:
+            materials = []
 
         # TODO, what does this next line do?
         # why arent the other things validated
@@ -1668,7 +1674,14 @@ class URDF(URDFType):
         self._links = list(links)
         self._joints = list(joints)
         self._transmissions = list(transmissions)
-        # self._materials = list(materials)
+        self._materials = list(materials)
+        self._material_map = {}
+
+        for x in self._materials:
+            if x.name in self._material_map:
+                raise ValueError('Two materials with name {} '
+                                 'found'.format(x.name))
+            self._material_map[x.name] = x
 
         # check for duplicate names
         if len(self._links) > len(set([x.name for x in self._links])):     # pragma nocover  # noqa
@@ -1865,6 +1878,20 @@ class URDF(URDFType):
         in topological order, starting from the base-most joint.
         """
         return self._actuated_joints
+
+    def _merge_materials(self):
+        """Merge the top-level material set with the link materials.
+        """
+        for link in self.links:
+            for v in link.visuals:
+                if v.material is None:
+                    continue
+                if v.material.name in self.material_map:
+                    v.material = self._material_map[v.material.name]
+                    v.geometry.ob.color = v.material.color
+                else:
+                    self._materials.append(v.material)
+                    self._material_map[v.material.name] = v.material
 
     @staticmethod
     def load(file_obj):     # pragma nocover
