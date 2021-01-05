@@ -82,10 +82,15 @@ def path_to_datafile(filename):
 
     if filename.parent == Path():
         # just a filename, no path, assume it is in roboticstoolbox/data
-        import inspect
-        path = Path(inspect.getframeinfo(inspect.currentframe()).filename)
+        # import inspect
+        # path = Path(inspect.getframeinfo(inspect.currentframe()).filename)
 
-        p = Path(__file__).resolve().parent.parent / 'data' / filename
+        class C:
+            def __init__(self):
+                self.classpath = sys.modules[self.__module__].__file__
+
+        a = C()  # instantiate
+        p = Path(a.classpath).resolve().parent.parent / 'data' / filename
         print(f"p={p}")
         if p.exists():
             print(f"returning")
