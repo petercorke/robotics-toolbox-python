@@ -35,7 +35,10 @@ jobs:
         pwd -L
         pwd -P
         printenv
-        #ls -R /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/roboticstoolbox
+        echo "============ ls -R /opt ============"
+        ls -R /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/roboticstoolbox
+        echo "============ ls -R . ============"
+        ls -R .
         pytest --timeout=30 --timeout_method thread -s
   codecov:
     # If all tests pass:
