@@ -1,5 +1,4 @@
 from pathlib import Path
-import roboticstoolbox.tools.trajectory as tt
 import sys
 
 def loadmat(filename):
