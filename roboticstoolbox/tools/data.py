@@ -1,7 +1,5 @@
 from pathlib import Path
-import roboticstoolbox.tools.trajectory as tt
 import sys
-import importlib
 
 def loadmat(filename):
     """
@@ -50,7 +48,6 @@ def loaddata(filename, handler, **kwargs):
     :seealso: :func:`path_to_datafile`
     """
     path = path_to_datafile(filename)
-    print("loaddata: ", path)
     return handler(path, **kwargs)
 
 def path_to_datafile(filename):
@@ -77,56 +74,28 @@ def path_to_datafile(filename):
         loadmat('~/data/foo.dat')  # read ~/data/foo.dat
     """
 
-
     filename = Path(filename)
 
     if filename.parent == Path():
         # just a filename, no path, assume it is in roboticstoolbox/data
-        # import inspect
-        # path = Path(inspect.getframeinfo(inspect.currentframe()).filename)
 
-        class C:
-            def __init__(self):
-                self.classpath = sys.modules[self.__module__].__file__
-
-        a = C()  # instantiate
-        p = Path(a.classpath).resolve().parent.parent / 'data' / filename
-        print(f"p={p}")
+        p = Path(__file__).resolve().parent.parent / 'data' / filename
         if p.exists():
-            print(f"returning")
             return str(p.resolve())
 
     p = filename.expanduser()
-    print(f"continuing, filename={filename}, p={p}")
     p = p.resolve()
-    print(f"after resolve p={p}")
     if not p.exists():
-        print(f"File '{p}' does not exist")
         raise FileNotFoundError(f"File '{p}' does not exist")
-    print(f"returning p={p}")
     return str(p)
 
 if __name__ == "__main__":
 
     a = loadmat("map1.mat")
     print(a)
-    # a = loadmat("roboticstoolbox/data/map1.mat")
-    # print(a)
-    # a = loadmat("roboticstoolbox/data/../data/map1.mat")
-    # print(a)
+    a = loadmat("roboticstoolbox/data/map1.mat")
+    print(a)
+    a = loadmat("roboticstoolbox/data/../data/map1.mat")
+    print(a)
     a = loadmat("~/code/robotics-toolbox-python/roboticstoolbox/data/map1.mat")
     print(a)
-
-
-    # print("***** ", tt.__file__)
-    # print("***** ", loadmat.__module__)
-    # import inspect, os
-    # filename = inspect.getframeinfo(inspect.currentframe()).filename
-    # path = os.path.dirname(os.path.abspath(filename))
-    # print("**1 ", path)
-    # path = os.path.dirname(os.path.abspath(__file__))
-    # print("**2 ", path)
-    # # classpath = sys.modules[self.__module__].__file__
-    # #         print("***** ", classpath)
-    # print("path_to_data: ", filename, __file__)
-    # filename = Path(filename)

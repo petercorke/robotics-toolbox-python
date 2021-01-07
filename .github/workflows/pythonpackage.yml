@@ -13,11 +13,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        #os: [windows-latest, ubuntu-latest, macos-latest]
-        #python-version: [3.6, 3.7, 3.8]
-        os: [ubuntu-latest]
-        python-version: [3.8]
-
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: [3.6, 3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -31,14 +28,6 @@ jobs:
       run: |
         pip install .[dev,collision,vpython]
         pip install pytest-timeout
-        echo "========================"
-        pwd -L
-        pwd -P
-        printenv
-        echo "============ ls -R /opt ============"
-        ls -R /opt/hostedtoolcache/Python/3.8.6/x64/lib/python3.8/site-packages/roboticstoolbox
-        echo "============ ls -R . ============"
-        ls -R .
         pytest --timeout=30 --timeout_method thread -s
   codecov:
     # If all tests pass:
