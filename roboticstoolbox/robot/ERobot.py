@@ -1364,6 +1364,150 @@ graph [rankdir=LR];
         Je = self.jacobev(q, endlink, startlink, offset, T) @ J0
         return Je
 
+    # def deriv(self, q, n, J0=None, endlink=None, startlink=None):
+    #     endlink, startlink = self._get_limit_links(endlink, startlink)
+
+    #     def cross(a, b):
+    #         x = a[1] * b[2] - a[2] * b[1]
+    #         y = a[2] * b[0] - a[0] * b[2]
+    #         z = a[0] * b[1] - a[1] * b[0]
+    #         return np.array([x, y, z])
+
+    #     _, nl = self.get_path(endlink, startlink)
+
+    #     J = self.jacob0(q, endlink=endlink, startlink=startlink)
+    #     H = self.hessian0(q, J, endlink, startlink)
+
+    #     d = [J, H]
+    #     size = [6, nl, nl]
+    #     count = np.array([0, 0])
+    #     c = 2
+
+    #     def add_indices(indices, c):
+    #         total = len(indices * 2)
+    #         new_indices = []
+
+    #         for i in range(total):
+    #             j = i // 2
+    #             new_indices.append([])
+    #             new_indices[i].append(indices[j][0].copy())
+    #             new_indices[i].append(indices[j][1].copy())
+
+    #             # if even number
+    #             if i % 2 == 0:
+    #                 new_indices[i][0].append(c)
+    #             # if odd number
+    #             else:
+    #                 new_indices[i][1].append(c)
+
+    #         return new_indices
+
+    #     def add_pdi(pdi):
+    #         total = len(pdi * 2)
+    #         new_pdi = []
+
+    #         for i in range(total):
+    #             j = i // 2
+    #             new_pdi.append([])
+    #             new_pdi[i].append(pdi[j][0])
+    #             new_pdi[i].append(pdi[j][1])
+
+    #             # if even number
+    #             if i % 2 == 0:
+    #                 new_pdi[i][0] += 1
+    #             # if odd number
+    #             else:
+    #                 new_pdi[i][1] += 1
+
+    #         return new_pdi
+
+    #     # these are the indices used for the hessian
+    #     # indices = [[[2, 3], [1]], [[2], [1, 3]]]
+    #     indices = [[[1], [0]]]
+
+    #     # the are the pd indices used in the corss prods
+    #     # pdi = [[2, 1], [1, 2]]
+    #     pdi = [[0, 0]]
+
+    #     while len(d) != n:
+    #         size.append(nl)
+    #         count = np.r_[count, 0]
+    #         c += 1
+    #         indices = add_indices(indices, 2)
+    #         pdi = add_pdi(pdi)
+    #         # print(indices)
+    #         # print(pdi)
+
+    #         # print("Statring:")
+    #         # print(count)
+    #         # print(size)
+    #         # print(len(d))
+
+    #         pd = np.zeros(size)
+
+    #         for i in range(nl ** c):
+    #             # print('Count: {0}'.format(count))
+
+    #             res = np.zeros(3)
+
+    #             for j in range(len(indices)):
+    #                 # print(pdi[j][0])
+    #                 pdr0 = d[pdi[j][0]]
+    #                 pdr1 = d[pdi[j][1]]
+
+    #                 idx0 = count[indices[j][0]]
+    #                 idx1 = count[indices[j][1]]
+
+    #                 res += cross(
+    #                     pdr0[(slice(3, 6), *idx0)],
+    #                     pdr1[(slice(3, 6), *idx1)])
+    #                 # print(pdr1[:3, idx1].shape)
+    #                 # res += pdr[:3, :, indices[j][0]]
+
+    #             pd[(slice(3, 6), *count)] = res
+
+    #             count[0] += 1
+    #             for j in range(len(count)):
+    #                 if count[j] == nl:
+    #                     count[j] = 0
+    #                     if (j != len(count) - 1):
+    #                         count[j + 1] += 1
+
+    #         d.append(pd)
+    #     return d[-1]
+
+    # def third(self, q=None, J0=None, endlink=None, startlink=None):
+    #     endlink, startlink = self._get_limit_links(endlink, startlink)
+    #     path, n = self.get_path(endlink, startlink)
+
+    #     def cross(a, b):
+    #         x = a[1] * b[2] - a[2] * b[1]
+    #         y = a[2] * b[0] - a[0] * b[2]
+    #         z = a[0] * b[1] - a[1] * b[0]
+    #         return np.array([x, y, z])
+
+    #     if J0 is None:
+    #         q = getvector(q, n)
+    #         J0 = self.jacob0(q, endlink=endlink)
+    #     else:
+    #         verifymatrix(J0, (6, n))
+
+    #     H0 = self.hessian0(q, J0, endlink, startlink)
+
+    #     L = np.zeros((6, n, n, n))
+
+    #     for l in range(n):
+    #         for k in range(n):
+    #             for j in range(n):
+
+    #                 # H[:3, i, j] = cross(J0[3:, j], J0[:3, i])
+    #                 L[3:, j, k, l] = cross(H0[3:, k, l], J0[3:, j]) + \
+    #                     cross(J0[3:, k], H0[3:, j, l])
+    #                 # if i != j:
+    #                 #     H[:3, j, i] = H[:3, i, j]
+
+    #     return L
+
     def hessian0(self, q=None, J0=None, endlink=None, startlink=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
@@ -1406,6 +1550,12 @@ graph [rankdir=LR];
         endlink, startlink = self._get_limit_links(endlink, startlink)
         path, n = self.get_path(endlink, startlink)
 
+        def cross(a, b):
+            x = a[1] * b[2] - a[2] * b[1]
+            y = a[2] * b[0] - a[0] * b[2]
+            z = a[0] * b[1] - a[1] * b[0]
+            return np.array([x, y, z])
+
         if J0 is None:
             q = getvector(q, n)
             J0 = self.jacob0(q, endlink=endlink)
@@ -1417,8 +1567,8 @@ graph [rankdir=LR];
         for j in range(n):
             for i in range(j, n):
 
-                H[:3, i, j] = np.cross(J0[3:, j], J0[:3, i])
-                H[3:, i, j] = np.cross(J0[3:, j], J0[3:, i])
+                H[:3, i, j] = cross(J0[3:, j], J0[:3, i])
+                H[3:, i, j] = cross(J0[3:, j], J0[3:, i])
 
                 if i != j:
                     H[:3, j, i] = H[:3, i, j]
