@@ -15,7 +15,6 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: [3.6, 3.7, 3.8]
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -29,7 +28,7 @@ jobs:
       run: |
         pip install .[dev,collision,vpython]
         pip install pytest-timeout
-        pytest --timeout=30 --timeout_method thread
+        pytest --timeout=30 --timeout_method thread -s
   codecov:
     # If all tests pass:
     # Run coverage and upload to codecov

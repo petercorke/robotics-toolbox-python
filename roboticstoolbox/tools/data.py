@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 def loadmat(filename):
     """
@@ -72,11 +73,13 @@ def path_to_datafile(filename):
         loadmat('foo.dat')         # read ./foo.dat
         loadmat('~/data/foo.dat')  # read ~/data/foo.dat
     """
+
     filename = Path(filename)
-    
+
     if filename.parent == Path():
         # just a filename, no path, assume it is in roboticstoolbox/data
-        p = Path(__file__).parent.parent / 'data' / filename
+
+        p = Path(__file__).resolve().parent.parent / 'data' / filename
         if p.exists():
             return str(p.resolve())
 
@@ -90,9 +93,9 @@ if __name__ == "__main__":
 
     a = loadmat("map1.mat")
     print(a)
-    # a = loadmat("roboticstoolbox/data/map1.mat")
-    # print(a)
-    # a = loadmat("roboticstoolbox/data/../data/map1.mat")
-    # print(a)
+    a = loadmat("roboticstoolbox/data/map1.mat")
+    print(a)
+    a = loadmat("roboticstoolbox/data/../data/map1.mat")
+    print(a)
     a = loadmat("~/code/robotics-toolbox-python/roboticstoolbox/data/map1.mat")
     print(a)

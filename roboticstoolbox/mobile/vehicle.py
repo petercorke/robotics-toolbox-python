@@ -361,11 +361,9 @@ class Vehicle(ABC):
         if control is not None:
             self._control = control
 
-        if isinstance(self._control, VehicleDriver):
-            self._control.init()
-
         self._t = 0
 
+        # initialize the graphics
         self._plot = plot
         if plot:
 
@@ -384,9 +382,14 @@ class Vehicle(ABC):
             plt.xlabel('x')
             plt.ylabel('y')
             self._ax.set_aspect('equal')
+            self._ax.figure.canvas.set_window_title(f"Robotics Toolbox for Python (Figure {self._ax.figure.number})")
 
             animation.add()  # add vehicle animation to axis
             self._timer = plt.figtext(0.85, 0.95, '')  # display time counter
+
+        # initialize the driver
+        if isinstance(self._control, VehicleDriver):
+            self._control.init(ax=self._ax)
 
     def step(self, u1=None, u2=None):
         """

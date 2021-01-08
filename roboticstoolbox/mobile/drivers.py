@@ -172,7 +172,7 @@ class RandomPath(VehicleDriver):
         """
         self._veh = v
 
-    def init(self, animate=False):
+    def init(self, ax=None):
         """
         Initialize random path driving agent
         
@@ -187,12 +187,10 @@ class RandomPath(VehicleDriver):
         % See also RANDSTREAM.
         """
         self._goal = None
-        self._animate = animate
         # delete(driver.h_goal);   % delete the goal
         # driver.h_goal = [];
-        if self._goal_marker is not None:
-            self
-            self._goal_marker = None
+        if ax is not None:
+            self._goal_marker = plt.plot(np.nan, np.nan, **self._goal_marker_style)[0]
 
     def demand(self):
         """
@@ -210,7 +208,7 @@ class RandomPath(VehicleDriver):
         # if nearly at goal point, choose the next one
         d = np.linalg.norm(self._veh._x[0:2] - self._goal)
         if d < self._dthresh:
-            self.new_goal()
+            self._new_goal()
         # elif d > 2 * self._d_prev:
         #     self.choose_goal()
         # self._d_prev = d
@@ -247,12 +245,9 @@ class RandomPath(VehicleDriver):
             print(f"set goal: {self._goal}")
 
         # update the goal marker
-        if self._animate:
-            if self._animate and self._goal_marker is None:
-                self._goal_marker = plt.plot(self._goal[0], self._goal[1], **self._goal_marker_style)[0]
-            else:
-                self._goal_marker.set_xdata(self._goal[0])
-                self._goal_marker.set_ydata(self._goal[1])
+        if self._goal_marker is not None:
+            self._goal_marker.set_xdata(self._goal[0])
+            self._goal_marker.set_ydata(self._goal[1])
 
 # ========================================================================= #
 

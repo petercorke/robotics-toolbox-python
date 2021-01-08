@@ -41,6 +41,13 @@ docs_req = [
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# list all data folders here, to ensure they get packaged
+
+data_folders = [
+    'roboticstoolbox/models/URDF/xacro',
+    'roboticstoolbox/models/DH/meshes',
+    'roboticstoolbox/data',
+]
 
 def package_files(directory):
     paths = []
@@ -49,8 +56,9 @@ def package_files(directory):
             paths.append(os.path.join('..', pathhere, filename))
     return paths
 
-
-extra_files = package_files('roboticstoolbox/models/URDF/xacro')
+extra_files = []
+for data_folder in data_folders:
+    extra_files += package_files(data_folder)
 
 frne = Extension(
         'frne',
