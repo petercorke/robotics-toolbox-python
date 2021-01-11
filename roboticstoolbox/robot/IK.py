@@ -304,7 +304,7 @@ class IKMixin:
                 e = base.tr2delta(self.fkine(q).A, Tk.A)
 
                 # Are we there yet?
-                if np.linalg.norm(W @ e) < tol:
+                if base.norm(W @ e) < tol:
                     break
 
                 # Compute the Jacobian
@@ -492,7 +492,7 @@ class IKMixin:
         tcount = 0  # Total iteration count
 
         # bool vector indicating revolute joints
-        revolutes = np.array([link.isrevolute() for link in self])
+        revolutes = np.array([link.isrevolute for link in self])
 
         q = q0
         for Tk in T:

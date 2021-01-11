@@ -800,14 +800,14 @@ class Robot(DynamicsMixin, IKMixin):
                     'Plotting in Swift is not implemented for DHRobots yet')
 
         elif backend.lower() == 'pyplot':
-            if isinstance(self, rtb.ERobot):  # pragma nocover
-                raise NotImplementedError(
-                    'Plotting in PyPlot is not implemented for ERobots yet')
-            elif isinstance(self, rtb.DHRobot):
-                env = self._plot_pyplot(
-                    q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
-                    fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
-                    shadow=shadow, name=name, movie=movie)
+            # if isinstance(self, rtb.ERobot):  # pragma nocover
+            #     raise NotImplementedError(
+            #         'Plotting in PyPlot is not implemented for ERobots yet')
+            # elif isinstance(self, rtb.DHRobot):
+            env = self._plot_pyplot(
+                q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
+                fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
+                shadow=shadow, name=name, movie=movie)
 
         return env
 

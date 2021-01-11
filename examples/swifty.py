@@ -6,6 +6,7 @@
 import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
+import numpy.testing as nt
 
 # Launch the simulator Swift
 # env = rtb.backends.Swift()
@@ -78,59 +79,83 @@ import numpy as np
 r = rtb.models.ETS.Panda()
 r.q = r.qr
 
-q1 = r.qr
-q2 = q1 + 0.1
+q2 = [1, 2, -1, -2, 1, 1, 2]
+Tep = r.fkine(q2)
+Tep = sm.SE3(0.7, 0.2, 0.1) * sm.SE3.OA([0, 1, 0], [0, 0, -1])
+
+import cProfile
+cProfile.run('qp = r.ikine_mmc(Tep)')
 
 
-def derivative(f, a, method='central', h=0.01):
-    '''Compute the difference formula for f'(a) with step size h.
 
-    Parameters
-    ----------
-    f : function
-        Vectorized function of one variable
-    a : number
-        Compute derivative at x = a
-    method : string
-        Difference formula: 'forward', 'backward' or 'central'
-    h : number
-        Step size in difference formula
-
-    Returns
-    -------
-    float
-        Difference formula:
-            central: f(a+h) - f(a-h))/2h
-            forward: f(a+h) - f(a))/h
-            backward: f(a) - f(a-h))/h
-    '''
-    if method == 'central':
-        return (f(a + h) - f(a - h))/(2*h)
-    elif method == 'forward':
-        return (f(a + h) - f(a))/h
-    elif method == 'backward':
-        return (f(a) - f(a - h))/h
-    else:
-        raise ValueError("Method must be 'central', 'forward' or 'backward'.")
+# print(r.fkine(q2))
+# print(r.fkine(qp))
 
 
-# Numerical hessian wrt q[0]
-# d = derivative(lambda x: r.jacob0(np.r_[x, q1[1:]]), q1[0], h=0.1)
-# print(np.round(h1[:, :, 0], 3))
-# print(np.round(d, 3))
+# q1 = r.qr
+# q2 = q1 + 0.1
 
-# Numerical third wrt q[0]
-d = derivative(lambda x: r.hessian0(np.r_[x, q1[1:]]), q1[0], h=0.01)
-print(np.round(d[3:, :, 0], 3))
-print(np.round(r.third(q1)[3:, :, 0, 0], 3))
 
-l = r.deriv(q1, 3)
-print(np.round(l[3:, :, 0, 0], 3))
+# def derivative(f, a, method='central', h=0.01):
+#     '''Compute the difference formula for f'(a) with step size h.
 
+#     Parameters
+#     ----------
+#     f : function
+#         Vectorized function of one variable
+#     a : number
+#         Compute derivative at x = a
+#     method : string
+#         Difference formula: 'forward', 'backward' or 'central'
+#     h : number
+#         Step size in difference formula
+
+#     Returns
+#     -------
+#     float
+#         Difference formula:
+#             central: f(a+h) - f(a-h))/2h
+#             forward: f(a+h) - f(a))/h
+#             backward: f(a) - f(a-h))/h
+#     '''
+#     if method == 'central':
+#         return (f(a + h) - f(a - h))/(2*h)
+#     elif method == 'forward':
+#         return (f(a + h) - f(a))/h
+#     elif method == 'backward':
+#         return (f(a) - f(a - h))/h
+#     else:
+#         raise ValueError("Method must be 'central', 'forward' or 'backward'.")
+
+
+# # Numerical hessian wrt q[0]
+# # d = derivative(lambda x: r.jacob0(np.r_[x, q1[1:]]), q1[0], h=0.1)
+# # print(np.round(h1[:, :, 0], 3))
+# # print(np.round(d, 3))
+
+# # Numerical third wrt q[0]
+# # d = derivative(lambda x: r.hessian0(np.r_[x, q1[1:]]), q1[0], h=0.01)
+# # print(np.round(d[:, :, 0], 3))
+# # print(np.round(r.third(q1)[:, :, 0, 0], 3))
+
+# # l = r.partial_fkine0(q1, 3)
+# # print(np.round(l[:, :, 0, 0], 3))
+
+
+# # Numerical fourth wrt q[0]
+# # d = derivative(lambda x: r.third(np.r_[x, q1[1:]]), q1[0], h=0.01)
+# # print(np.round(d[:, :, 0, 0], 3))
+
+# # l = r.partial_fkine0(q1, 4)
+# # print(np.round(l[:, :, 0, 0, 0], 3))
+
+
+
+# j = r.jacob0(r.q)
 # def runner():
-#     for i in range(10000):
-#         r.jacob0(r.q)
-#         # r.hessian0(r.q)
+#     for i in range(1):
+#         r.partial_fkine0(r.q, 7)
+#         # r.hessian0(r.q, j)
 
 
 # import cProfile

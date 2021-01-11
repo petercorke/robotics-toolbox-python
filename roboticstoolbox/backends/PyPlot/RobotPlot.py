@@ -143,13 +143,22 @@ class RobotPlot(object):
 
         # Remove oldjoint z coordinates
         if self.jointaxes:
-            for i in range(len(self.robot.links)):
-                self.joints[i].remove()
+            j = 0
+            # for joint in self.joints:
+            #     joint.remove()
 
             # Plot joint z coordinates
             for i in range(len(self.robot.links)):
-                self.joints[i] = \
-                    self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
+                if isinstance(self.robot, rp.DHRobot) or \
+                        self.robot.links[i].isjoint:
+                    self.joints.append(
+                        self._plot_quiver(
+                            loc[:, i+1], joints[:, j], '#8FC1E2', 2))
+                    j += 1
+
+            # for i in range(len(self.robot.links)):
+            #     self.joints[i] = \
+            #         self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
 
         # Update the robot links
         self.links[0].set_xdata(loc[0, :])
