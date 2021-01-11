@@ -46,6 +46,7 @@ class IKMixin:
                 # gain = gain * 2
                 # dt = dt * 2
                 # print('Up')
+                pass
             else:
                 # bad update
                 # gain = gain / 2
