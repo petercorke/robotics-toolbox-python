@@ -81,6 +81,7 @@ class RobotPlot(object):
         # Joint axes arrow calcs
         if isinstance(self.robot, rp.ERobot):
             i = 0
+            j = 0
             for link in self.robot.links:
                 loc[:, i + 1] = link._fk.t
 
@@ -94,7 +95,8 @@ class RobotPlot(object):
                     elif link.v.axis == 'Rx' or link.v.axis == 'tx':
                         Tji = link._fk * Tjx
 
-                    joints[:, i] = Tji.t
+                    joints[:, j] = Tji.t
+                    j += 1
 
                 i += 1
             loc = np.c_[loc, loc[:, -1]]
@@ -211,9 +213,14 @@ class RobotPlot(object):
 
         # Plot joint z coordinates
         if self.jointaxes:
-            for i in range(self.robot.n):
-                self.joints.append(
-                    self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2))
+            j = 0
+            for i in range(len(self.robot.links)):
+                if isinstance(self.robot, rp.DHRobot) or \
+                        self.robot.links[i].isjoint:
+                    self.joints.append(
+                        self._plot_quiver(
+                            loc[:, i+1], joints[:, j], '#8FC1E2', 2))
+                    j += 1
 
         # Plot the shadow of the robot links, draw first so robot is always
         # in front
