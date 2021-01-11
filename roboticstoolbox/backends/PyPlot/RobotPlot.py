@@ -53,11 +53,14 @@ class RobotPlot(object):
     def axes_calcs(self):
         # Joint and ee poses
         T = self.robot.fkine_all(self.robot.q)
-        Te = self.robot.fkine(self.robot.q)
+
         try:
             Te = self.robot.fkine(self.robot.q)
         except ValueError:
-            print("Branched robot's not yet supported with PyPlot backend")
+            print(
+                "\nError: Branched robot's not yet supported "
+                "with PyPlot backend\n")
+            raise
 
         Tb = self.robot.base
 
