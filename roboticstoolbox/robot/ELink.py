@@ -245,14 +245,14 @@ class ELink(Link):
     def jindex(self, j):
         self._jindex = j
 
-    def isrevolute(self):
-        """
-        Checks if the joint is of revolute type
+    # def isrevolute(self):
+    #     """
+    #     Checks if the joint is of revolute type
 
-        :return: Ture if is revolute
-        :rtype: bool
-        """
-        return self.v.isrevolute
+    #     :return: Ture if is revolute
+    #     :rtype: bool
+    #     """
+    #     return self.v.isrevolute
 
     @property
     def isprismatic(self):

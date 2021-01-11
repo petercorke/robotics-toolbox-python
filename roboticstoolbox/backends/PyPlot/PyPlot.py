@@ -180,7 +180,6 @@ class PyPlot(Connector):
 
         self._update_robots()
 
-
     def reset(self):
         """
         Reset the graphical scene
@@ -399,7 +398,7 @@ class PyPlot(Connector):
 
         if _isnotebook():
             raise RuntimeError('cannot use teach panel under Jupyter')
-        
+
         fig = self.fig
 
         # Add text to the plots
@@ -482,7 +481,6 @@ class PyPlot(Connector):
                     qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
 
             self.sjoint[i].on_changed(lambda x: update(x, text, robot))
-
 
 
 def _isnotebook():

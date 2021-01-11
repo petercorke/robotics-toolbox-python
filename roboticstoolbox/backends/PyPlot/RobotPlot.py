@@ -52,14 +52,18 @@ class RobotPlot(object):
 
     def axes_calcs(self):
         # Joint and ee poses
-        T = self.robot.fkine_all()
-        Te = self.robot.fkine()
+        T = self.robot.fkine_all(self.robot.q)
+        Te = self.robot.fkine(self.robot.q)
+        try:
+            Te = self.robot.fkine(self.robot.q)
+        except ValueError:
+            print("Branched robot's not yet supported with PyPlot backend")
+
         Tb = self.robot.base
 
         # Joint and ee position matrix
-        loc = np.zeros([3, self.robot.n + 2])
+        loc = np.zeros([3, len(self.robot.links) + 1])
         loc[:, 0] = Tb.t
-        loc[:, self.robot.n + 1] = Te.t
 
         # Joint axes position matrix
         joints = np.zeros((3, self.robot.n))
@@ -75,23 +79,33 @@ class RobotPlot(object):
         Tez = Te * Tjz
 
         # Joint axes arrow calcs
-        for i in range(self.robot.n):
-            loc[:, i + 1] = T[i].t
+        if isinstance(self.robot, rp.ERobot):
+            i = 0
+            for link in self.robot.links:
+                loc[:, i + 1] = link._fk.t
 
-            if isinstance(self.robot, rp.DHRobot) \
-                    or self.robot.ets[self.robot.q_idx[i]].axis == 'Rz' \
-                    or self.robot.ets[self.robot.q_idx[i]].axis == 'tz':
+                if link.isjoint:
+                    if link.v.axis == 'Rz' or link.v.axis == 'tz':
+                        Tji = link._fk * Tjz
+
+                    elif link.v.axis == 'Ry' or link.v.axis == 'ty':
+                        Tji = link._fk * Tjy
+
+                    elif link.v.axis == 'Rx' or link.v.axis == 'tx':
+                        Tji = link._fk * Tjx
+
+                    joints[:, i] = Tji.t
+
+                i += 1
+            loc = np.c_[loc, loc[:, -1]]
+        else:
+            # End effector offset (tool of robot)
+            loc = np.c_[loc, Te.t]
+
+            for i in range(self.robot.n):
+                loc[:, i + 1] = T[i].t
                 Tji = T[i] * Tjz
-
-            # elif self.robot.ets[self.robot.q_idx[i]].axis == 'Ry' \
-            #         or self.robot.ets[self.robot.q_idx[i]].axis == 'ty':
-            #     Tji = T[i] * Tjy
-
-            # elif self.robot.ets[self.robot.q_idx[i]].axis == 'Rx' \
-            #         or self.robot.ets[self.robot.q_idx[i]].axis == 'tx':
-            #     Tji = T[i] * Tjx
-
-            joints[:, i] = Tji.t
+                joints[:, i] = Tji.t
 
         return loc, joints, [Tex, Tey, Tez]
 
@@ -114,21 +128,21 @@ class RobotPlot(object):
             # Plot ee coordinate frame
             self.ee_axes[0] = \
                 self._plot_quiver(
-                    loc[:, self.robot.n + 1], ee[0].t, '#EE9494', 2)
+                    loc[:, -1], ee[0].t, '#EE9494', 2)
             self.ee_axes[1] = \
                 self._plot_quiver(
-                    loc[:, self.robot.n + 1], ee[1].t, '#93E7B0', 2)
+                    loc[:, -1], ee[1].t, '#93E7B0', 2)
             self.ee_axes[2] = \
                 self._plot_quiver(
-                    loc[:, self.robot.n + 1], ee[2].t, '#54AEFF', 2)
+                    loc[:, -1], ee[2].t, '#54AEFF', 2)
 
         # Remove oldjoint z coordinates
         if self.jointaxes:
-            for i in range(self.robot.n):
+            for i in range(len(self.robot.links)):
                 self.joints[i].remove()
 
             # Plot joint z coordinates
-            for i in range(self.robot.n):
+            for i in range(len(self.robot.links)):
                 self.joints[i] = \
                     self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
 
@@ -161,10 +175,10 @@ class RobotPlot(object):
             # Plot ee coordinate frame
             self.ee_axes[0] = \
                 self._plot_quiver2(
-                    loc[:, self.robot.n + 1], ee[0].t, '#EE9494', 2)
+                    loc[:, -1], ee[0].t, '#EE9494', 2)
             self.ee_axes[1] = \
                 self._plot_quiver2(
-                    loc[:, self.robot.n + 1], ee[1].t, '#93E7B0', 2)
+                    loc[:, -1], ee[1].t, '#93E7B0', 2)
 
         # Update the robot links
         self.links[0].set_xdata(loc[0, :])
@@ -187,13 +201,13 @@ class RobotPlot(object):
         if self.eeframe:
             self.ee_axes.append(
                 self._plot_quiver(
-                    loc[:, self.robot.n + 1], ee[0].t, '#EE9494', 2))
+                    loc[:, -1], ee[0].t, '#EE9494', 2))
             self.ee_axes.append(
                 self._plot_quiver(
-                    loc[:, self.robot.n + 1], ee[1].t, '#93E7B0', 2))
+                    loc[:, -1], ee[1].t, '#93E7B0', 2))
             self.ee_axes.append(
                 self._plot_quiver(
-                    loc[:, self.robot.n + 1], ee[2].t, '#54AEFF', 2))
+                    loc[:, -1], ee[2].t, '#54AEFF', 2))
 
         # Plot joint z coordinates
         if self.jointaxes:
@@ -229,10 +243,10 @@ class RobotPlot(object):
         if self.eeframe:
             self.ee_axes.append(
                 self._plot_quiver2(
-                    loc[:, self.robot.n + 1], ee[0].t, '#EE9494', 2))
+                    loc[:, -1], ee[0].t, '#EE9494', 2))
             self.ee_axes.append(
                 self._plot_quiver2(
-                    loc[:, self.robot.n + 1], ee[1].t, '#93E7B0', 2))
+                    loc[:, -1], ee[1].t, '#93E7B0', 2))
 
         # Plot the robot links
         self.links = self.ax.plot(
