@@ -9,7 +9,8 @@ req = [
     'scipy',
     'matplotlib',
     'ansitable',
-    'swift-sim>=0.6.1'
+    'swift-sim>=0.6.1',
+    'qpsolvers'
 ]
 
 collision_req = [
