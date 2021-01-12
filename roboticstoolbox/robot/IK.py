@@ -10,12 +10,100 @@ from spatialmath import base
 from spatialmath import SE3, Twist3
 from scipy.optimize import minimize, Bounds, LinearConstraint
 import math
+import qpsolvers as qp
+from roboticstoolbox.tools.p_servo import p_servo
 # iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual",
 #     defaults=(None, False, None, None, None)) # Py >= 3.7 only
 iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual")
 
 # ===================================================================== #
+
+
 class IKMixin:
+
+    def ikine_mmc(
+                self, T,
+                q0=None):
+
+        arrived = False
+
+        n = self.n
+        q = self.q
+        dt = 0.05
+
+        e_prev = 100000
+        q_last = q
+        gain = 1000.0
+
+        while not arrived:
+
+            Te = self.fkine(q)
+            eTep = Te.inv() * T
+            e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
+
+            if e < e_prev:
+                # good update
+                # gain = gain * 2
+                # dt = dt * 2
+                # print('Up')
+                pass
+            else:
+                # bad update
+                # gain = gain / 2
+                dt = dt / 2
+                # q = q_last
+                # print('Down')
+
+            e_prev = e
+            q_last = q
+            # print(gain)
+            # print(self.manipulability(q))
+            # print(e)
+
+            v, arrived = p_servo(Te, T, gain=gain, threshold=0.000001)
+
+            # Gain term (lambda) for control minimisation
+            Y = 0.01
+
+            # Quadratic component of objective function
+            Q = np.eye(n + 6)
+
+            # Joint velocity component of Q
+            Q[:n, :n] *= Y
+
+            # Slack component of Q
+            Q[n:, n:] = (1 / e) * np.eye(6)
+
+            # The equality contraints
+            Aeq = np.c_[self.jacobe(q), np.eye(6)]
+            beq = v.reshape((6,))
+
+            # The inequality constraints for joint limit avoidance
+            Ain = np.zeros((n + 6, n + 6))
+            bin = np.zeros(n + 6)
+
+            # The minimum angle (in radians) in which the joint is allowed to
+            # approach to its limit
+            ps = 0.05
+
+            # The influence angle (in radians) in which the velocity damper
+            # becomes active
+            pi = 0.9
+
+            Ain[:n, :n], bin[:n] = self.joint_velocity_damper(ps, pi, n)
+            c = np.r_[-self.jacobm(q).reshape((n,)), np.zeros(6)]
+            # lb = -np.r_[self.qdlim[:n], 10 * np.ones(6)]
+            # ub = np.r_[self.qdlim[:n], 10 * np.ones(6)]
+
+            # Solve for the joint velocities dq
+            qd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq)
+
+            for i in range(self.n):
+                q[i] += qd[i] * (dt)
+
+        return q
+
+# --------------------------------------------------------------------- #
 
     def ikine_LM(
             self, T,
@@ -140,7 +228,7 @@ class IKMixin:
             T = SE3(T)
 
         solutions = []
-   
+
         if search:
             # Randomised search for a starting point
             # quiet = True
@@ -216,7 +304,7 @@ class IKMixin:
                 e = base.tr2delta(self.fkine(q).A, Tk.A)
 
                 # Are we there yet?
-                if np.linalg.norm(W @ e) < tol:
+                if base.norm(W @ e) < tol:
                     break
 
                 # Compute the Jacobian
@@ -1031,7 +1119,8 @@ def _angle_axis_sekiguchi(T, Td):
 
     return np.r_[d, a]
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
     from spatialmath import SE3
