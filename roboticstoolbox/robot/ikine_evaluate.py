@@ -9,7 +9,7 @@ from ansitable import ANSITable, Column
 #  * T, the end-effector pose
 #  * q0, the initial joint angles for solution
 
-example = 'panda'  # 'panda'
+example = 'puma'  # 'panda'
 
 if example == 'puma':
     # Puma robot case
@@ -49,7 +49,7 @@ ikfuncs = [
 if hasattr(robot, "ikine_a"):
     a =  (robot.ikine_a, # analytic solution
         "ikine_a",
-        "sol = robot.ikine_a}(T)"
+        "sol = robot.ikine_a(T)"
     )
     ikfuncs.insert(0, a)    
 
