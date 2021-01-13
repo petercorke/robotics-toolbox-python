@@ -8,6 +8,19 @@ import spatialmath as sm
 import numpy as np
 import numpy.testing as nt
 
+import matplotlib
+import matplotlib.pyplot as plt
+
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+plt.style.use('ggplot')
+matplotlib.rcParams['font.size'] = 4.5
+matplotlib.rcParams['lines.linewidth'] = 0.5
+matplotlib.rcParams['xtick.major.size'] = 1.5
+matplotlib.rcParams['ytick.major.size'] = 1.5
+matplotlib.rcParams['axes.labelpad'] = 1
+plt.rc('grid', linestyle="-", color='#dbdbdb')
+
 # Launch the simulator Swift
 # env = rtb.backends.Swift()
 # env.launch()
@@ -76,15 +89,15 @@ import numpy.testing as nt
 # env.add(r)
 # env.hold()
 
-r = rtb.models.ETS.Panda()
-r.q = r.qr
+# r = rtb.models.ETS.Panda()
+# r.q = r.qr
 
-q2 = [1, 2, -1, -2, 1, 1, 2]
-Tep = r.fkine(q2)
-Tep = sm.SE3(0.7, 0.2, 0.1) * sm.SE3.OA([0, 1, 0], [0, 0, -1])
+# q2 = [1, 2, -1, -2, 1, 1, 2]
+# Tep = r.fkine(q2)
+# Tep = sm.SE3(0.7, 0.2, 0.1) * sm.SE3.OA([0, 1, 0], [0, 0, -1])
 
-import cProfile
-cProfile.run('qp = r.ikine_mmc(Tep)')
+# import cProfile
+# cProfile.run('qp = r.ikine_mmc(Tep)')
 
 
 
@@ -160,3 +173,64 @@ cProfile.run('qp = r.ikine_mmc(Tep)')
 
 # import cProfile
 # cProfile.run('runner()')
+
+
+fig, ax = plt.subplots()
+fig.set_size_inches(8, 8)
+
+ax.set(xlabel='Manipulability', ylabel='Condition')
+ax.grid()
+plt.grid(True)
+# ax.set_xlim(xmin=0, xmax=3.1)
+# ax.set_ylim(ymin=0, ymax=0.11)
+
+plt.ion()
+plt.show()
+
+rng = np.random.default_rng(1)
+r = rtb.models.ETS.GenericSeven()
+
+
+def randn(a, b, size):
+    return (b - a) * rng.random(size) + a
+
+
+def rand_q():
+    return randn(np.pi / 2, -np.pi / 2, (7,))
+
+
+def rand_v():
+    # return randn(0, 1, (6,))
+    return np.array([0.1, 0.1, 0.1, 0.0, 0.0, 0.0])
+
+
+for i in range(100000):
+
+    q = rand_q()
+    v = rand_v()
+
+    J = r.jacob0(q)
+    cond = np.linalg.cond(J[:3, :])
+    m = r.manipulability(J=J, axes='trans')
+
+    qd = np.linalg.pinv(J) @ v
+
+    print(np.linalg.norm(np.abs(qd)))
+
+    qd_norm = np.linalg.norm(np.abs(qd))
+
+
+    # if cond > 1000:
+    #     print(np.round(q, 2), np.round(cond), np.round(r.manipulability(q), 3))
+
+    # ax.plot(m, np.log10(cond), 'o', color='black')
+    ax.plot(m, np.log10(qd_norm), 'o', color='black')
+    # ax.plot(1, 0.002, 'o', color='black')
+    plt.pause(0.001)
+
+    # if m > 3 and cond > 30:
+    #     print(np.round(q, 2), np.round(cond), np.round(m, 3))
+
+
+plt.ioff()
+plt.show()

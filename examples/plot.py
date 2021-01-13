@@ -18,12 +18,15 @@ q = np.random.rand(100, 7)
 # Plot the joint trajectory with a 50ms delay between configurations
 # panda.plot(q=q, backend='pyplot', dt=0.050, vellipse=True, fellipse=True)
 panda.plot(q=q, backend='pyplot', dt=0.050, vellipse=False, fellipse=False)
-# # q = panda.qr
+
+# r = rp.models.ETS.GenericSeven()
+
+# q = r.qr
 
 # env = rp.backends.PyPlot()
 # env.launch()
 
-# env.add(panda)
-# print(panda)
+# env.add(r)
+# print(r)
 
 # env.hold()
