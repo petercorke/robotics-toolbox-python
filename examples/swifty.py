@@ -200,36 +200,62 @@ def rand_q():
 
 
 def rand_v():
-    # return randn(0, 1, (6,))
-    return np.array([0.1, 0.1, 0.1, 0.0, 0.0, 0.0])
+    v = randn(0, 1, (3,))
+    v = v / np.linalg.norm(v)
+
+    return np.r_[v, 0, 0, 0]
+    # return np.array([0.1, 0.1, 0.1, 0.0, 0.0, 0.0])
 
 
-for i in range(100000):
+x = []
+y = []
+
+for i in range(10000000):
 
     q = rand_q()
     v = rand_v()
 
     J = r.jacob0(q)
-    cond = np.linalg.cond(J[:3, :])
+    Jt = J[:3, :]
+    # H = r.hessian0(q)
+    # Ht = H[:3, :, :]
+
+    q_n = [10000, 0]
+    q_m = [10000, 0]
+
+    # cond = np.linalg.cond(J[:3, :])
     m = r.manipulability(J=J, axes='trans')
+    # infn = np.linalg.norm(Jt, 2)
+    psi = (np.cbrt(np.linalg.det(Jt @ np.transpose(Jt)))) / \
+        (np.trace(Jt @ np.transpose(Jt)) / 3)
 
-    qd = np.linalg.pinv(J) @ v
+    for j in range(1000):
+        qd = np.linalg.pinv(J) @ v
 
-    print(np.linalg.norm(np.abs(qd)))
+        if np.max(qd) > q_m[1]:
+            q_m[1] = np.max(qd)
 
-    qd_norm = np.linalg.norm(np.abs(qd))
+        if np.min(qd) < q_m[0]:
+            q_m[0] = np.min(qd)
 
+        if np.linalg.norm(qd) > q_n[1]:
+            q_n[1] = np.linalg.norm(qd)
+        elif np.linalg.norm(qd) < q_n[0]:
+            q_n[0] = np.linalg.norm(qd)
 
-    # if cond > 1000:
-    #     print(np.round(q, 2), np.round(cond), np.round(r.manipulability(q), 3))
+    # # ax.plot(m, np.log10(cond), 'o', color='black')
+    # ax.plot(m, infn, 'o', color='black')
+    # # ax.plot(1, 0.002, 'o', color='black')
 
-    # ax.plot(m, np.log10(cond), 'o', color='black')
-    ax.plot(m, np.log10(qd_norm), 'o', color='black')
-    # ax.plot(1, 0.002, 'o', color='black')
-    plt.pause(0.001)
+    x.append(psi)
+    y.append(np.log10(q_m[1]))
+    # y.append(psi)
 
-    # if m > 3 and cond > 30:
-    #     print(np.round(q, 2), np.round(cond), np.round(m, 3))
+    # ax.plot(m, np.log10(q_m[1]), 'o', color='black')
+
+    if len(x) % 100 == 0:
+        ax.hist2d(x, y, bins=100)
+        plt.pause(0.001)
 
 
 plt.ioff()
