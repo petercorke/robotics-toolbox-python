@@ -68,6 +68,13 @@ if args.script is not None:
 ## drop into IPython
 import IPython
 from traitlets.config import Config
+from IPython.terminal.prompts import ClassicPrompts
+from IPython.terminal.prompts import Prompts
+from pygments.token import Token
+
+class MyPrompt(Prompts):
+    def in_prompt_tokens(self, cli=None):
+        return [(Token.Prompt, '>>> ')]
 
 # set configuration options, there are lots, see
 # https://ipython.readthedocs.io/en/stable/config/options/terminal.html
@@ -75,5 +82,7 @@ c = Config()
 c.InteractiveShellEmbed.colors = "Linux"
 c.InteractiveShell.colors = 'Neutral'
 c.InteractiveShell.confirm_exit = False
+# c.InteractiveShell.prompts_class = ClassicPrompts
+c.InteractiveShell.prompts_class = MyPrompt
 
 IPython.embed(config=c)
