@@ -172,7 +172,7 @@ class DHLink(Link):
     def __repr__(self):
         name = self.__class__.__name__
         args = []
-        if self.isrevolute():
+        if self.isrevolute:
             self._format(args, "d")
         else:
             self._format(args, "theta")
