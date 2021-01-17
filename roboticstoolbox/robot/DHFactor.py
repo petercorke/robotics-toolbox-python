@@ -9,17 +9,25 @@ deg = base.pi() / sympy.Integer('180')
 
 class DHFactor(ETS):
 
-    def __init__(self, s):
+    def __init__(self, axis=None, eta=None, **kwargs):
+
+        super().__init__(axis=axis, eta=eta, **kwargs)
+
+    @classmethod
+    def parse(cls, s):
         et_re = re.compile(r"([RT][xyz])\(([^)]*)\)")
 
-        super().__init__()
         # self.data = []
 
+        jointnum = 0
+        ets = DHFactor()
+
         for axis, eta in et_re.findall(s):
-            print(axis,eta)
             if eta[0] == 'q':
                 eta = None
                 unit = None
+                j = jointnum
+                jointnum += 1
             else:
                 # eta can be given as a variable or a number
                 try:
@@ -30,40 +38,49 @@ class DHFactor(ETS):
                     eta = sympy.symbols(eta)
                 if axis[0] == 'R':
                     # convert to degrees, assumed unit in input string
-                    eta = sympy.simplify(eta * deg)
+                    eta = eta * deg
+                j = None
 
             if axis == 'Rx':
-                e = ETS.rx(eta)
+                e = DHFactor.rx(eta, j=j)
             elif axis == 'Ry':
-                e = ETS.ry(eta)
+                e = DHFactor.ry(eta, j=j)
             elif axis == 'Rz':
-                e = ETS.rz(eta)
+                e = DHFactor.rz(eta, j=j)
             elif axis == 'Tx':
-                e = ETS.tx(eta)
+                e = DHFactor.tx(eta, j=j)
             elif axis == 'Ty':
-                e = ETS.ty(eta)
+                e = DHFactor.ty(eta, j=j)
             elif axis == 'Tz':
-                e = ETS.tz(eta)
+                e = DHFactor.tz(eta, j=j)
 
-            self.data.append(e.data[0])
+            ets *= e
+        
+        return cls(ets)
 
-    def simplify(self):
+    # ---------------------------------------------------------------------- #
+
+    def simplify(self, mdh=False):
 
         self.merge()
-        self.swap(convention)
+        self.swap(mdh)
         self.merge()
         self.float_right()
         self.merge()
         self.substitute_to_z()
         self.merge()
-        for i in range(nloops):
+        print(self)
+        print('main loop')
+        for i in range(10):
             nchanges = 0
 
             nchanges += self.merge()
-            nchanges += self.swap(convention)
+            nchanges += self.swap(mdh)
             nchanges += self.merge()
+            print(ets)
             nchanges += self.eliminate_y()
             nchanges += self.merge()
+            print(ets)
 
             if nchanges == 0:
                 # try this then
@@ -74,77 +91,225 @@ class DHFactor(ETS):
             # too many iterations
             print('too many iterations')
 
+    # ---------------------------------------------------------------------- #
+
+    def float_right(self):
+        """
+        Attempt to 'float' translational terms as far to the right as
+	 * possible and across joint boundaries.
+        """
+        
+        out = DHFactor()
+        nchanges = 0
+
+        for i in range(len(self)):
+
+            this = self[i]
+            if this.isjoint or this.isprismatic:
+                out *= this
+                continue
+            
+            crossed = False
+            for j in range(i+1, len(self)):
+                next = self[j]
+
+                if next.isprismatic:
+                    continue
+                if next.isrevolute and next.axis == this.axis:
+                    crossed = True
+                    continue
+                break
+
+            if crossed:
+                del self[i]
+                self.insert(j-1, this)
+                print('floated')
+
+        return nchanges
+    # ---------------------------------------------------------------------- #
+    def swap(self, mdh=False):
+
+        #  we want to sort terms into the order:
+        # 	RZ
+        # 	TX
+        # 	TZ
+        # 	RX
+
+        def do_swap(this, next):
+            if mdh:
+                # modified DH
+                return this.axis == 'Rx' and next.axis == 'tx' \
+                    or this.axis == 'Ry' and next.axis == 'ty' \
+                    or this.axis == 'Rz' and next.axis == 'tz' \
+                    or this.axis == 'tz' and next.axis == 'tx'
+            else:
+                # standard DH
+
+                # push constant translations through rotational joints
+				# of the same type
+
+                if this.axis == 'tz' and next.axis == 'tx':
+                    return True
+
+                if next.isjoint and (
+                        this.axis == 'tx' and next.axis == 'Rx'
+                        or this.axis == 'ty' and next.axis == 'Ry'
+                        or this.axis == 'tz' and next.axis == 'Rz'):
+                    return True
+                elif not this.isjoint and (
+                        this.axis == 'Rx' and next.axis == 'tx'
+                        or this.axis == 'Ry' and next.axis == 'ty'):
+                    return True
+
+                if not this.isjoint and not next.isjoint and \
+                        this.axis == 'tz' and next.axis == 'Rz':
+                    return True
+
+                #  move Ty terms to the right
+                if this.axis == 'ty' and next.axis == 'tz' \
+                        or this.axis == 'ty' and next.axis == 'tx':
+                    return True
+
+            return False
+
+        total_changes = 0
+        while True:
+            nchanges = 0
+            for i in range(len(self) - 1):
+                this = self[i]
+                next = self[i+1]
+
+                if do_swap(this, next):
+                    del self[i]
+                    self.insert(i+1, this)
+                    nchanges += 1
+                    print(f"swapping {this} <--> {next}")
+            if nchanges == 0:
+                total_changes += nchanges
+                break
+
+        return total_changes
+
+    # ---------------------------------------------------------------------- #
+
+
+    @staticmethod
+    def subs_z(e):
+        if e.axis == 'Rx':
+            return DHFactor.ry(pi2) * DHFactor.rz(e.eta) * DHFactor.ry(-pi2)
+        elif e.axis == 'Ry':
+            return DHFactor.rx(-pi2) * DHFactor.rz(e.eta) * DHFactor.rx(pi2)
+        elif e.axis == 'tx':
+            return DHFactor.ry(pi2) * DHFactor.tz(e.eta) * DHFactor.ry(-pi2)
+        elif e.axis == 'ty':
+            return DHFactor.rx(-pi2) * DHFactor.tz(e.eta) * DHFactor.rx(pi2)
+
     def substitute_to_z(self):
         # substitute all non Z joint transforms according to rules
         nchanges = 0
-        out = ETS()
+        out = DHFactor()
         for e in self:
             if e.isjoint:
                 out *= e
             else:
                 # do a substitution
-                if e.axis == 'Rx':
-                    new = ETS.ry(pi2) * ETS.rz(e.eta) * ETS.ry(-pi2)
-                elif e.axis == 'Ry':
-                    new = ETS.rx(-pi2) * ETS.rz(e.eta) * ETS.rx(pi2)
-                elif e.axis == 'tx':
-                    new = ETS.ry(pi2) * ETS.tz(e.eta) * ETS.ry(-pi2)
-                elif e.axis == 'ty':
-                    new = ETS.rx(-pi2) * ETS.tz(e.eta) * ETS.rx(pi2)
-                else:
+                new = DHFactor.subs_z(e)
+                if new is None:
                     out *= e
                     continue
+                else:
+                    out *= new
+                    nchanges += 1
+
+        self.data = out.data
+        return nchanges
+
+    def substitute_to_z2(self):
+        # substitute all non Z joint transforms according to rules
+        nchanges = 0
+        out = DHFactor()
+        jointyet = False
+        for i in range(len(self)):
+            this = self[i]
+            if this.isjoint:
+                jointyet = True
+                continue
+            
+            if i == 0 or not jointyet:
+                continue
+
+            prev = self[i-1]
+
+            new = DHFactor.subs_z(prev)
+
+            if new is None:
+                out *= this
+                continue
+            else:
                 out *= new
                 nchanges += 1
 
         self.data = out.data
         return nchanges
+    # ---------------------------------------------------------------------- #
 
     def merge(self):
 
-        def canmerge(prev, this):
+        def can_merge(prev, this):
             return prev.axis == this.axis and not (prev.isjoint and this.isjoint)
 
-        out = ETS()
+        out = DHFactor()
+        nchanges = 0
         while len(self.data) > 0:
             this = self.pop(0)
 
             if len(self.data) > 0:
                 next = self[0]
 
-                if canmerge(this, next):
+                if can_merge(this, next):
                     new = DHFactor.add(this, next)
                     out *= new
                     self.pop(0)  # remove next from the queue
                     print(f"Merging {this * next} to {new}")
                 else:
                     out *= this
+            else:
+                out *= this
 
         self.data = out.data
+        return nchanges
         # remove zeros
 
     @staticmethod
     def add(this, that):
         if this.isjoint and not that.isjoint:
-            out = ETS(this)
+            out = DHFactor(this)
             if out.eta is None:
                 out.eta = that.eta
             else:
                 out.eta += that.eta
         elif not this.isjoint and that.isjoint:
-            out = ETS(that)
+            out = DHFactor(that)
             if out.eta is None:
                 out.eta = this.eta
             else:
                 out.eta += this.eta
+        elif not this.isjoint and not that.isjoint:
+            out = DHFactor(this)
+            if out.eta is None:
+                out.eta = that.eta
+            else:
+                out.eta += that.eta
         else:
             raise ValueError('both ET cannot be joint variables')
         return out
 
+    # ---------------------------------------------------------------------- #
+
     def eliminate_y(self):
 
         nchanges = 0
-        out = ETS()
+        out = DHFactor()
         jointyet = False
 
         def eliminate(prev, this):
@@ -153,40 +318,46 @@ class DHFactor(ETS):
 
             new = None
             if prev.axis == 'Rx' and this.axis == 'ty':  # RX.TY -> TZ.RX
-                new = ETS.tx(prev.eta) * prev
+                new = DHFactor.tx(prev.eta) * prev
             elif prev.axis == 'Rx' and this.axis == 'tz':  # RX.TZ -> TY.RX
-                new = ETS.ty(-prev.eta) * prev
+                new = DHFactor.ty(-prev.eta) * prev
             elif prev.axis == 'Ry' and this.axis == 'tz':  # RY.TX-> TZ.RY
-                new = ETS.tz(-prev.eta) * prev
+                new = DHFactor.tz(-prev.eta) * prev
             elif prev.axis == 'Ry' and this.axis == 'tz':  # RY.TZ-> TX.RY
-                new = ETS.tx(prev.eta) * prev
+                new = DHFactor.tx(prev.eta) * prev
 
             elif prev.axis == 'ty' and this.axis == 'Rx':  # TY.RX -> RX.TZ
-                new = this * ETS.tz(-this.eta)
+                new = this * DHFactor.tz(-this.eta)
             elif prev.axis == 'tx' and this.axis == 'Rz':  # TX.RZ -> RZ.TY
-                new = this * ETS.tz(this.eta)
+                new = this * DHFactor.tz(this.eta)
             elif prev.axis == 'Ry' and this.axis == 'Rx':  # RY(Q).RX -> RX.RZ(-Q)
-                new = this * ETS.Rz(-prev.eta)
+                new = this * DHFactor.Rz(-prev.eta)
             elif prev.axis == 'Rx' and this.axis == 'Ry':  # RX.RY -> RZ.RX
-                new = ETS.Rz(this.eta) * prev
+                new = DHFactor.Rz(this.eta) * prev
             elif prev.axis == 'Rz' and this.axis == 'Rx':  # RZ.RX -> RX.RY
-                new = this * ETS.Ry(this.eta)
+                new = this * DHFactor.Ry(this.eta)
             return new
 
         for i in range(len(self)):
             this = self[i]
             jointyet = this.isjoint
-            if i == 0 or not jointyet:
+            if i == 0 or not jointyet:  # leave initial const xform
                 continue
 
             prev = self[i-1]
+            try:
+                next = self[i+1]  # TODO actually we don't use next
 
-            new = eliminate(prev, this)
-            if new is not None:
-                self[i-1:i] = new
-                nchanges += 1
+                new = eliminate(prev, this)
+                if new is not None:
+                    self[i-1:i] = new
+                    nchanges += 1
+            except:
+                pass
 
         return nchanges
+
+    # ---------------------------------------------------------------------- #
 
     def __str__(self, q=None):
         """
@@ -253,7 +424,7 @@ class DHFactor(ETS):
                 q = "q{0}"
             else:
                 q = "q"
-
+        q = "q{0}"
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self:
@@ -303,9 +474,17 @@ class DHFactor(ETS):
 if __name__ == "__main__":  # pragram: no cover
     s = 'Rz(45) Tz(L1) Rz(q1) Ry(q2) Ty(L2) Tz(L3) Ry(q3) Tx(L4) Ty(L5) Tz(L6) Rz(q4) Ry(q5) Rz(q6)'
 
-    ets = DHFactor(s)
+    ets = DHFactor.parse(s)
     print(ets)
-    ets.substitute_to_z()
+    # ets.substitute_to_z()
+    # print(ets)
+    # ets.merge()
+    # print(ets)
+
+    ets.swap()
+    # ets.simplify()
     print(ets)
     ets.merge()
     print(ets)
+
+    print(str(ets[0]), ets[0].jindex)
