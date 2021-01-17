@@ -18,29 +18,33 @@ class SuperETS(UserList, ABC):
     # ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
     def __init__(
-            self, axis_func=None, axis=None, eta=None,
+            self, axis=None, eta=None, axis_func=None, 
             unit='rad', j=None, flip=False):
 
         super().__init__()  # init UserList superclass
 
-        if axis_func is None and axis is None and eta is None:
+        if axis is None and eta is None and axis_func is None:
             # ET()
             # create instance with no values
             self.data = []
             return
 
-        elif isinstance(axis_func, ETS):
+        elif isinstance(axis, ETS):
             # copy constructor
-            e = axis_func
-            axis_func = e.axis_func
-            axis = e.axis
-            # et = e.eta
-            j = e.jindex
-            flip = e.isflip
-            joint = e.isjoint
-            T = e.T
+            # e = axis_func
+            # axis_func = e.axis_func
+            # axis = e.axis
+            # # et = e.eta
+            # j = e.jindex
+            # flip = e.isflip
+            # joint = e.isjoint
+            # T = e.T
+            self.data = [copy.copy(axis.data[0])]
+            return
 
-        elif callable(axis_func):
+        if axis in ('Rx', 'Ry', 'Rz', 'tx', 'ty', 'tz'):
+            # it's a regular axis
+
             if eta is None:
                 # no value, it's a variable joint
                 if unit != 'rad':
@@ -51,6 +55,8 @@ class SuperETS(UserList, ABC):
 
             else:
                 # constant value specified
+                if not callable(axis_func):
+                    raise ValueError('axis func must be callable')
                 joint = False
                 eta = getunit(eta, unit)
                 T = axis_func(eta)
@@ -83,7 +89,7 @@ class SuperETS(UserList, ABC):
             joint = False
             axis_func = None
         else:
-            raise ValueError('axis_func must be callable or ndarray')
+            raise ValueError('bad axis specified')
 
         # Save all the params in a named tuple
         e = SimpleNamespace(eta=eta, axis_func=axis_func, axis=axis, joint=joint, T=T, jindex=j, flip=flip)
@@ -94,10 +100,10 @@ class SuperETS(UserList, ABC):
     @property
     def eta(self):
         """
-        The transform constant
+        Get the transform constant
 
         :return: The constant η if set
-        :rtype: float or None
+        :rtype: float, symbolic or None
 
         Example:
 
@@ -115,6 +121,19 @@ class SuperETS(UserList, ABC):
             stored internally in radians
         """
         return self.data[0].eta
+
+    @eta.setter
+    def eta(self, value):
+        """
+        Set the transform constant
+
+        :param value: The transform constant η
+        :type value: float, symbolic or None
+
+        .. note:: No unit conversions are applied, it is assumed to be in
+            radians.
+        """
+        self.data[0].eta = value
 
     @property
     def axis_func(self):
@@ -895,7 +914,7 @@ class ETS(SuperETS):
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
         """
-        return cls(trotx, axis='Rx', eta=eta, unit=unit, **kwargs)
+        return cls(axis='Rx', eta=eta, axis_func=trotx, unit=unit, **kwargs)
 
     @classmethod
     def ry(cls, eta=None, unit='rad', **kwargs):
@@ -922,7 +941,7 @@ class ETS(SuperETS):
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
         """
-        return cls(troty, axis='Ry', eta=eta, unit=unit, **kwargs)
+        return cls(axis='Ry', eta=eta, axis_func=troty, unit=unit, **kwargs)
 
     @classmethod
     def rz(cls, eta=None, unit='rad', **kwargs):
@@ -949,7 +968,7 @@ class ETS(SuperETS):
         :seealso: :func:`ETS`, :func:`isrevolute`
         :SymPy: supported
         """
-        return cls(trotz, axis='Rz', eta=eta, unit=unit, **kwargs)
+        return cls(axis='Rz', eta=eta, axis_func=trotz, unit=unit, **kwargs)
 
     @classmethod
     def tx(cls, eta=None, **kwargs):
@@ -984,7 +1003,7 @@ class ETS(SuperETS):
                 [0, 0, 0, 1]
             ])
 
-        return cls(axis_func, axis='tx', eta=eta, **kwargs)
+        return cls(axis='tx', axis_func=axis_func, eta=eta, **kwargs)
 
     @classmethod
     def ty(cls, eta=None, **kwargs):
@@ -1017,7 +1036,7 @@ class ETS(SuperETS):
                 [0, 0, 0, 1]
             ])
 
-        return cls(axis_func, axis='ty', eta=eta, **kwargs)
+        return cls(axis='ty', eta=eta, axis_func=axis_func, **kwargs)
 
         # return cls(SE3.Ty, axis='ty', eta=eta)
 
@@ -1052,7 +1071,7 @@ class ETS(SuperETS):
                 [0, 0, 0, 1]
             ])
 
-        return cls(axis_func, axis='tz', eta=eta, **kwargs)
+        return cls(axis='tz', axis_func=axis_func, eta=eta, **kwargs)
 
     def jacob0(self, q=None, T=None):
         r"""
@@ -1351,8 +1370,8 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         """
-        return cls(
-            lambda theta: trot2(theta), axis='R', eta=eta, unit=unit, **kwargs)
+        return cls(axis='R', eta=eta, 
+            axis_func=lambda theta: trot2(theta), unit=unit, **kwargs)
 
     @classmethod
     def tx(cls, eta=None, **kwargs):
@@ -1376,7 +1395,8 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         """
-        return cls(lambda x: transl2(x, 0), axis='tx', eta=eta, **kwargs)
+        return cls(axis='tx', eta=eta, 
+            axis_func=lambda x: transl2(x, 0), **kwargs)
 
     @classmethod
     def ty(cls, eta=None, **kwargs):
@@ -1400,72 +1420,78 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`
         """
-        return cls(lambda y: transl2(0, y), axis='ty', eta=eta, **kwargs)
+        return cls(axis='ty', eta=eta, 
+            axis_func=lambda y: transl2(0, y), **kwargs)
 
 
 if __name__ == "__main__":
 
-    print(ETS.rx(0.2))
-    print(ETS.rx(45, 'deg'))
-    print(ETS.tz(0.75))
-    e = ETS.rx(45, 'deg') * ETS.tz(0.75)
+    # print(ETS.rx(0.2))
+    # print(ETS.rx(45, 'deg'))
+    # print(ETS.tz(0.75))
+    # e = ETS.rx(45, 'deg') * ETS.tz(0.75)
+    # print(e)
+    # print(e.eval())
+
+    # from roboticstoolbox import ETS
+    # e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
+    # print(e.eval([0, 0]))
+    # print(e.eval([90, -90], 'deg'))
+    # a = e.pop()
+    # print(a)
+
+    # from spatialmath.base import symbol
+
+    # theta, d = symbol('theta, d')
+
+    # e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
+    # print(e)
+
+    # e = ETS()
+    # e *= ETS.rx()
+    # e *= ETS.tz()
+    # print(e)
+
+    # print(e.__str__("θ{0}"))
+    # print(e.__str__("θ{1}"))
+
+    # e = ETS.rx() * ETS._CONST(SE3()) * ETS.tx(0.3)
+    # print(e)
+
+    # l1 = 0.672
+    # l2 = -0.2337
+    # l3 = 0.4318
+    # l4 = 0.0203
+    # l5 = 0.0837
+    # l6 = 0.4318
+
+    # e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2) * ETS.tz(l3) * ETS.ry() \
+    #     * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz() * ETS.ry() * ETS.rz()
+    # print(e.joints())
+    # print(e.config)
+    # print(e.eval(np.zeros(6)))
+    # ec = e.compile()
+    # print(ec)
+    # print(ec.eval(np.zeros(6)))
+
+    # print(ETS.SE3(SE3.Rz(200, 'deg')))
+
+    # a = ETS.rx()
+    # b = ETS(a)
+    # print(b)
+    # a = ETS.tz()
+    # print(b)
+    # e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7, flip=True) * ETS.tx(1)
+    # print(e)
+
+    # print(e.inv())
+
+    # q = [1, 2, 3, 4, 5, 6, 7, 8]
+    # print(e.eval(q))
+    # print(e.inv().eval(q))
+    # print(e.eval(q) * e.inv().eval(q))
+
+
+    e = ETS.rz() * ETS.tx(-1) * ETS.tx(1) * ETS.rz()
     print(e)
-    print(e.eval())
-
-    from roboticstoolbox import ETS
-    e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
-    print(e.eval([0, 0]))
-    print(e.eval([90, -90], 'deg'))
-    a = e.pop()
-    print(a)
-
-    from spatialmath.base import symbol
-
-    theta, d = symbol('theta, d')
-
-    e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
-    print(e)
-
-    e = ETS()
-    e *= ETS.rx()
-    e *= ETS.tz()
-    print(e)
-
-    print(e.__str__("θ{0}"))
-    print(e.__str__("θ{1}"))
-
-    e = ETS.rx() * ETS._CONST(SE3()) * ETS.tx(0.3)
-    print(e)
-
-    l1 = 0.672
-    l2 = -0.2337
-    l3 = 0.4318
-    l4 = 0.0203
-    l5 = 0.0837
-    l6 = 0.4318
-
-    e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2) * ETS.tz(l3) * ETS.ry() \
-        * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz() * ETS.ry() * ETS.rz()
-    print(e.joints())
-    print(e.config)
-    print(e.eval(np.zeros(6)))
-    ec = e.compile()
-    print(ec)
-    print(ec.eval(np.zeros(6)))
-
-    print(ETS.SE3(SE3.Rz(200, 'deg')))
-
-    a = ETS.rx()
-    b = ETS(a)
-    print(b)
-    a = ETS.tz()
-    print(b)
-    e = ETS.rz(j=5) * ETS.tx(1) * ETS.rx(j=7, flip=True) * ETS.tx(1)
-    print(e)
-
-    print(e.inv())
-
-    q = [1, 2, 3, 4, 5, 6, 7, 8]
-    print(e.eval(q))
-    print(e.inv().eval(q))
-    print(e.eval(q) * e.inv().eval(q))
+    print(e.compile())
