@@ -6,6 +6,7 @@ from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import RangeBearingSensor
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.animations import *
+from roboticstoolbox.mobile.PoseGraph import *
 
 __all__ = [
     'Vehicle',
@@ -22,6 +23,7 @@ __all__ = [
     'PurePursuit',
     'LandmarkMap',
     'RangeBearingSensor',
+    'PoseGraph',
 ]
 
 # __doc__ = """
