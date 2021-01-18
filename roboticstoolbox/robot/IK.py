@@ -129,11 +129,11 @@ class IKMixin:
             and rotation about X, Y and Z respectively.
         :type mask: ndarray(6)
         :param ilimit: maximum number of iterations (default 500)
-        :type ilimit: int 
+        :type ilimit: int
         :param rlimit: maximum number of consecutive step rejections (default 100)
-        :type rlimit: int 
+        :type rlimit: int
         :param tol: final error tolerance (default 1e-10)
-        :type tol: float 
+        :type tol: float
         :param L: initial value of lambda
         :type L: float (default 0.1)
         :param Lmin: minimum allowable value of lambda

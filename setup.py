@@ -4,8 +4,8 @@ import os
 here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
-    'numpy',
-    'spatialmath-python>=0.8.4',
+    'numpy>=1.18.0',
+    'spatialmath-python>=0.8.7',
     'pgraph-python',
     'scipy',
     'matplotlib',
