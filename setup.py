@@ -51,12 +51,14 @@ data_folders = [
     'roboticstoolbox/data',
 ]
 
+
 def package_files(directory):
     paths = []
     for (pathhere, _, filenames) in os.walk(directory):
         for filename in filenames:
             paths.append(os.path.join('..', pathhere, filename))
     return paths
+
 
 extra_files = []
 for data_folder in data_folders:
@@ -72,7 +74,7 @@ frne = Extension(
 setup(
     name='roboticstoolbox-python',
 
-    version='0.6.2',
+    version='0.7.0',
 
     description='A Python library for robotic education and research',
 
