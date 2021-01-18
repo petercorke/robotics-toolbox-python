@@ -171,12 +171,100 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">Twist3</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Bounds</span><span class="p">,</span> <span class="n">LinearConstraint</span>
 <span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">qpsolvers</span> <span class="k">as</span> <span class="nn">qp</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.p_servo</span> <span class="kn">import</span> <span class="n">p_servo</span>
 <span class="c1"># iksol = namedtuple(&quot;IKsolution&quot;, &quot;q, success, reason, iterations, residual&quot;,</span>
 <span class="c1">#     defaults=(None, False, None, None, None)) # Py &gt;= 3.7 only</span>
 <span class="n">iksol</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;IKsolution&quot;</span><span class="p">,</span> <span class="s2">&quot;q, success, reason, iterations, residual&quot;</span><span class="p">)</span>
 
 <span class="c1"># ===================================================================== #</span>
+
+
 <span class="k">class</span> <span class="nc">IKMixin</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">ikine_mmc</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span>
+                <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">arrived</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+        <span class="n">e_prev</span> <span class="o">=</span> <span class="mi">100000</span>
+        <span class="n">q_last</span> <span class="o">=</span> <span class="n">q</span>
+        <span class="n">gain</span> <span class="o">=</span> <span class="mf">1000.0</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">arrived</span><span class="p">:</span>
+
+            <span class="n">Te</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">eTep</span> <span class="o">=</span> <span class="n">Te</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">T</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">eTep</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">eTep</span><span class="o">.</span><span class="n">rpy</span><span class="p">()</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">e_prev</span><span class="p">:</span>
+                <span class="c1"># good update</span>
+                <span class="c1"># gain = gain * 2</span>
+                <span class="c1"># dt = dt * 2</span>
+                <span class="c1"># print(&#39;Up&#39;)</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># bad update</span>
+                <span class="c1"># gain = gain / 2</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="c1"># q = q_last</span>
+                <span class="c1"># print(&#39;Down&#39;)</span>
+
+            <span class="n">e_prev</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="n">q_last</span> <span class="o">=</span> <span class="n">q</span>
+            <span class="c1"># print(gain)</span>
+            <span class="c1"># print(self.manipulability(q))</span>
+            <span class="c1"># print(e)</span>
+
+            <span class="n">v</span><span class="p">,</span> <span class="n">arrived</span> <span class="o">=</span> <span class="n">p_servo</span><span class="p">(</span><span class="n">Te</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="n">gain</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">)</span>
+
+            <span class="c1"># Gain term (lambda) for control minimisation</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+            <span class="c1"># Quadratic component of objective function</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># Joint velocity component of Q</span>
+            <span class="n">Q</span><span class="p">[:</span><span class="n">n</span><span class="p">,</span> <span class="p">:</span><span class="n">n</span><span class="p">]</span> <span class="o">*=</span> <span class="n">Y</span>
+
+            <span class="c1"># Slack component of Q</span>
+            <span class="n">Q</span><span class="p">[</span><span class="n">n</span><span class="p">:,</span> <span class="n">n</span><span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># The equality contraints</span>
+            <span class="n">Aeq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
+            <span class="n">beq</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">6</span><span class="p">,))</span>
+
+            <span class="c1"># The inequality constraints for joint limit avoidance</span>
+            <span class="n">Ain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="nb">bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># The minimum angle (in radians) in which the joint is allowed to</span>
+            <span class="c1"># approach to its limit</span>
+            <span class="n">ps</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+            <span class="c1"># The influence angle (in radians) in which the velocity damper</span>
+            <span class="c1"># becomes active</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="mf">0.9</span>
+
+            <span class="n">Ain</span><span class="p">[:</span><span class="n">n</span><span class="p">,</span> <span class="p">:</span><span class="n">n</span><span class="p">],</span> <span class="nb">bin</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_velocity_damper</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">jacobm</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n</span><span class="p">,)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
+            <span class="c1"># lb = -np.r_[self.qdlim[:n], 10 * np.ones(6)]</span>
+            <span class="c1"># ub = np.r_[self.qdlim[:n], 10 * np.ones(6)]</span>
+
+            <span class="c1"># Solve for the joint velocities dq</span>
+            <span class="n">qd</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">solve_qp</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">Aeq</span><span class="p">,</span> <span class="n">beq</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">q</span>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="k">def</span> <span class="nf">ikine_LM</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span>
@@ -202,11 +290,11 @@
 <span class="sd">            and rotation about X, Y and Z respectively.</span>
 <span class="sd">        :type mask: ndarray(6)</span>
 <span class="sd">        :param ilimit: maximum number of iterations (default 500)</span>
-<span class="sd">        :type ilimit: int </span>
+<span class="sd">        :type ilimit: int</span>
 <span class="sd">        :param rlimit: maximum number of consecutive step rejections (default 100)</span>
-<span class="sd">        :type rlimit: int </span>
+<span class="sd">        :type rlimit: int</span>
 <span class="sd">        :param tol: final error tolerance (default 1e-10)</span>
-<span class="sd">        :type tol: float </span>
+<span class="sd">        :type tol: float</span>
 <span class="sd">        :param L: initial value of lambda</span>
 <span class="sd">        :type L: float (default 0.1)</span>
 <span class="sd">        :param Lmin: minimum allowable value of lambda</span>
@@ -301,7 +389,7 @@
             <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
 
         <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
-   
+
         <span class="k">if</span> <span class="n">search</span><span class="p">:</span>
             <span class="c1"># Randomised search for a starting point</span>
             <span class="c1"># quiet = True</span>
@@ -377,7 +465,7 @@
                 <span class="n">e</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">tr2delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">Tk</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
 
                 <span class="c1"># Are we there yet?</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">W</span> <span class="o">@</span> <span class="n">e</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
                     <span class="k">break</span>
 
                 <span class="c1"># Compute the Jacobian</span>
@@ -565,7 +653,7 @@
         <span class="n">tcount</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Total iteration count</span>
 
         <span class="c1"># bool vector indicating revolute joints</span>
-        <span class="n">revolutes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">()</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+        <span class="n">revolutes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">q0</span>
         <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
@@ -1192,7 +1280,8 @@
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
     <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
@@ -1227,7 +1316,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 05-Jan-2021.
+        Last updated on 18-Jan-2021.
       </span>
 
     </p>

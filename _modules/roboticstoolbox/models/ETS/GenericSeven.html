@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>roboticstoolbox.models.ETS.Planar_Y &mdash; Robotics Toolbox for Python  documentation</title>
+  <title>roboticstoolbox.models.ETS.GenericSeven &mdash; Robotics Toolbox for Python  documentation</title>
   
 
   
@@ -143,7 +143,7 @@
         
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
         
-      <li>roboticstoolbox.models.ETS.Planar_Y</li>
+      <li>roboticstoolbox.models.ETS.GenericSeven</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,7 +158,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for roboticstoolbox.models.ETS.Planar_Y</h1><div class="highlight"><pre>
+  <h1>Source code for roboticstoolbox.models.ETS.GenericSeven</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -167,104 +167,82 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ELink</span> <span class="kn">import</span> <span class="n">ELink</span>
 
 
-<div class="viewcode-block" id="Planar_Y"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.Planar_Y">[docs]</a><span class="k">class</span> <span class="nc">Planar_Y</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
+<div class="viewcode-block" id="GenericSeven"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.GenericSeven">[docs]</a><span class="k">class</span> <span class="nc">GenericSeven</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create model of a branched planar manipulator::</span>
+<span class="sd">    Create model of a generic seven degree-of-freedom robot</span>
 
-<span class="sd">        L0 -- L1 -+- L2a -- L3a -- EEa</span>
-<span class="sd">                |</span>
-<span class="sd">                +- L2b -- L3b -- EEb</span>
-
-<span class="sd">    ``Planar_Y()`` creates a planar branched manipulator model.</span>
-
-
-<span class="sd">    :references:</span>
-<span class="sd">        - Kinematic Derivatives using the Elementary Transform</span>
-<span class="sd">          Sequence, J. Haviland and P. Corke</span>
+<span class="sd">    robot = GenericSeven() creates a robot object. This robot is represented</span>
+<span class="sd">    using the elementary transform sequence (ETS).</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
         <span class="n">mm</span> <span class="o">=</span> <span class="mf">1e-3</span>
-        <span class="n">tool_offset</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">tool_offset</span> <span class="o">=</span> <span class="p">(</span><span class="mi">103</span><span class="p">)</span><span class="o">*</span><span class="n">mm</span>
 
-        <span class="c1"># trunk of the tree</span>
+        <span class="n">link_length</span> <span class="o">=</span> <span class="mf">0.5</span>
+
         <span class="n">l0</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">link_length</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
             <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link0&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span>
 
         <span class="n">l1</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">ry</span><span class="p">(),</span>
             <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link1&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="n">l0</span>
         <span class="p">)</span>
 
-        <span class="c1"># branch 1</span>
         <span class="n">l2</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2a&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">link_length</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2&#39;</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="n">l1</span>
         <span class="p">)</span>
 
         <span class="n">l3</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3a&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">ry</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3&#39;</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="n">l2</span>
         <span class="p">)</span>
 
-        <span class="n">eea</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eea&#39;</span><span class="p">,</span>
+        <span class="n">l4</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">link_length</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link4&#39;</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="n">l3</span>
         <span class="p">)</span>
 
-        <span class="c1"># branch 2</span>
-        <span class="n">l4</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2b&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l1</span>
-        <span class="p">)</span>
-
         <span class="n">l5</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3b&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">ry</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link5&#39;</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="n">l4</span>
         <span class="p">)</span>
 
-        <span class="n">eeb</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eeb&#39;</span><span class="p">,</span>
+        <span class="n">l6</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">link_length</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link6&#39;</span><span class="p">,</span>
             <span class="n">parent</span><span class="o">=</span><span class="n">l5</span>
         <span class="p">)</span>
 
-        <span class="n">elinks</span> <span class="o">=</span> <span class="p">[</span><span class="n">l0</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">l3</span><span class="p">,</span> <span class="n">l4</span><span class="p">,</span> <span class="n">l5</span><span class="p">,</span> <span class="n">eea</span><span class="p">,</span> <span class="n">eeb</span><span class="p">]</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
+            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="o">-</span><span class="n">link_length</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ee&#39;</span><span class="p">,</span>
+            <span class="n">parent</span><span class="o">=</span><span class="n">l6</span>
+        <span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">elinks</span> <span class="o">=</span> <span class="p">[</span><span class="n">l0</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">l3</span><span class="p">,</span> <span class="n">l4</span><span class="p">,</span> <span class="n">l5</span><span class="p">,</span> <span class="n">l6</span><span class="p">,</span> <span class="n">ee</span><span class="p">]</span>
+        <span class="c1"># elinks = [l0, l1, l2, l3, l4, l5, ee]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">GenericSeven</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">elinks</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Planar-Y&#39;</span>
-            <span class="p">)</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Generic Seven&#39;</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Jesse&#39;s Imagination&quot;</span><span class="p">)</span></div>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qy&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
-
-    <span class="n">robot</span> <span class="o">=</span> <span class="n">Planar_Y</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-
-
+        <span class="c1"># self.addconfiguration(</span>
+        <span class="c1">#     &quot;qz&quot;, np.array([0, 0, 0, 0, 0, 0, 0]))</span>
+        <span class="c1"># self.addconfiguration(</span>
+        <span class="c1">#     &quot;qr&quot;, np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))</span>
 </pre></div>
 
            </div>

@@ -961,14 +961,14 @@
                     <span class="s1">&#39;Plotting in Swift is not implemented for DHRobots yet&#39;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pyplot&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="s1">&#39;Plotting in PyPlot is not implemented for ERobots yet&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
-                <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_pyplot</span><span class="p">(</span>
-                    <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="n">vellipse</span><span class="p">,</span>
-                    <span class="n">fellipse</span><span class="o">=</span><span class="n">fellipse</span><span class="p">,</span> <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
-                    <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="n">movie</span><span class="p">)</span>
+            <span class="c1"># if isinstance(self, rtb.ERobot):  # pragma nocover</span>
+            <span class="c1">#     raise NotImplementedError(</span>
+            <span class="c1">#         &#39;Plotting in PyPlot is not implemented for ERobots yet&#39;)</span>
+            <span class="c1"># elif isinstance(self, rtb.DHRobot):</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_pyplot</span><span class="p">(</span>
+                <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="n">vellipse</span><span class="p">,</span>
+                <span class="n">fellipse</span><span class="o">=</span><span class="n">fellipse</span><span class="p">,</span> <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
+                <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="n">movie</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">env</span></div>
 
@@ -1655,7 +1655,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 05-Jan-2021.
+        Last updated on 18-Jan-2021.
       </span>
 
     </p>

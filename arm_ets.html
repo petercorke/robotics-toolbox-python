@@ -294,7 +294,7 @@ Peter I. Corke, IEEE Transactions on Robotics, 23(3), pp 590-594, June 2007.</p>
 <h2>ETS - 3D<a class="headerlink" href="#ets-3d" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.ETS.ETS">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ETS.</code><code class="sig-name descname">ETS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em>, <em class="sig-param"><span class="n">j</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ETS.</code><code class="sig-name descname">ETS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em>, <em class="sig-param"><span class="n">j</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.SuperETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 3D</p>
 <dl class="field-list simple">
@@ -676,13 +676,13 @@ frame.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS.eta">
 <em class="property">property </em><code class="sig-name descname">eta</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.eta" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transform constant</p>
+<dd><p>Get the transform constant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The constant η if set</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float or None</p>
+<dd class="field-even"><p>float, symbolic or None</p>
 </dd>
 </dl>
 <p>Example:</p>
@@ -1247,7 +1247,7 @@ amounts of x- and z-axis rotation.</p>
 <h2>ETS - 2D<a class="headerlink" href="#ets-2d" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.ETS.ETS2">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ETS.</code><code class="sig-name descname">ETS2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em>, <em class="sig-param"><span class="n">j</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.robot.ETS.</code><code class="sig-name descname">ETS2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axis_func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'rad'</span></em>, <em class="sig-param"><span class="n">j</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">flip</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.SuperETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 2D</p>
 <dl class="field-list simple">
@@ -1279,15 +1279,23 @@ might correspond to the joint number of a multi-joint robot.</p></li>
 <p>where <code class="docutils literal notranslate"><span class="pre">XY</span></code> is one of <code class="docutils literal notranslate"><span class="pre">r</span></code>, <code class="docutils literal notranslate"><span class="pre">tx</span></code>, <code class="docutils literal notranslate"><span class="pre">ty</span></code>.</p>
 <p>Example:</p>
 <blockquote>
-<div><div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS2</span> <span class="k">as</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># a single ET, rotation about z</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># an ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>                      <span class="c1"># of length 2</span>
-<span class="go">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                        <span class="c1"># an ET sliced from the ETS</span>
-<span class="go">tx(2)</span>
+<div><div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad axis specified</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">1374</span>, in <span class="n">r</span>
+    <span class="n">axis_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">theta</span><span class="p">:</span> <span class="n">trot2</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">92</span>, in <span class="n">__init__</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad axis specified&#39;</span><span class="p">)</span>
+<span class="gr">ValueError</span>: <span class="n">bad axis specified</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -1341,81 +1349,15 @@ xy-plane.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS2.tx">
-<em class="property">classmethod </em><code class="sig-name descname">tx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.tx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.tx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pure translation along the x-axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>η</strong> (<em>float</em>) – translation distance along the z-axis</p></li>
-<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – Explicit joint number within the robot</p></li>
-<li><p><strong>flip</strong> (<em>bool</em>) – Joint moves in opposite direction</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An elementary transform</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ETS instance</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx(η)</span></code> is an elementary translation along the x-axis by a
-distance constant η</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx()</span></code> is an elementary translation along the x-axis by a
-variable distance, i.e. a prismatic robot joint. <code class="docutils literal notranslate"><span class="pre">j</span></code> or <code class="docutils literal notranslate"><span class="pre">flip</span></code>
-can be set in this case.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.isprismatic" title="roboticstoolbox.robot.ETS.ETS2.isprismatic"><code class="xref py py-func docutils literal notranslate"><span class="pre">isprismatic()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS2.ty">
-<em class="property">classmethod </em><code class="sig-name descname">ty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.ty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.ty" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pure translation along the y-axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>η</strong> (<em>float</em>) – translation distance along the y-axis</p></li>
-<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – Explicit joint number within the robot</p></li>
-<li><p><strong>flip</strong> (<em>bool</em>) – Joint moves in opposite direction</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An elementary transform</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ETS instance</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx(η)</span></code> is an elementary translation along the y-axis by a
-distance constant η</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx()</span></code> is an elementary translation along the y-axis by a
-variable distance, i.e. a prismatic robot joint. <code class="docutils literal notranslate"><span class="pre">j</span></code> or <code class="docutils literal notranslate"><span class="pre">flip</span></code>
-can be set in this case.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS2.eta">
 <em class="property">property </em><code class="sig-name descname">eta</code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.eta" title="Permalink to this definition">¶</a></dt>
-<dd><p>The transform constant</p>
+<dd><p>Get the transform constant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The constant η if set</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float or None</p>
+<dd class="field-even"><p>float, symbolic or None</p>
 </dd>
 </dl>
 <p>Example:</p>
@@ -1924,6 +1866,72 @@ ETs are compounded, leading to a constant ET which is denoted by
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS2.tx">
+<em class="property">classmethod </em><code class="sig-name descname">tx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.tx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.tx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pure translation along the x-axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>η</strong> (<em>float</em>) – translation distance along the z-axis</p></li>
+<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – Explicit joint number within the robot</p></li>
+<li><p><strong>flip</strong> (<em>bool</em>) – Joint moves in opposite direction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An elementary transform</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ETS instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx(η)</span></code> is an elementary translation along the x-axis by a
+distance constant η</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx()</span></code> is an elementary translation along the x-axis by a
+variable distance, i.e. a prismatic robot joint. <code class="docutils literal notranslate"><span class="pre">j</span></code> or <code class="docutils literal notranslate"><span class="pre">flip</span></code>
+can be set in this case.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.isprismatic" title="roboticstoolbox.robot.ETS.ETS2.isprismatic"><code class="xref py py-func docutils literal notranslate"><span class="pre">isprismatic()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS2.ty">
+<em class="property">classmethod </em><code class="sig-name descname">ty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">eta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.ty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.ty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pure translation along the y-axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>η</strong> (<em>float</em>) – translation distance along the y-axis</p></li>
+<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – Explicit joint number within the robot</p></li>
+<li><p><strong>flip</strong> (<em>bool</em>) – Joint moves in opposite direction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An elementary transform</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ETS instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx(η)</span></code> is an elementary translation along the y-axis by a
+distance constant η</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx()</span></code> is an elementary translation along the y-axis by a
+variable distance, i.e. a prismatic robot joint. <code class="docutils literal notranslate"><span class="pre">j</span></code> or <code class="docutils literal notranslate"><span class="pre">flip</span></code>
+can be set in this case.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1945,7 +1953,7 @@ ETs are compounded, leading to a constant ET which is denoted by
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 05-Jan-2021.
+        Last updated on 18-Jan-2021.
       </span>
 
     </p>

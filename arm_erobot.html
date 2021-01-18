@@ -893,6 +893,11 @@ with <code class="docutils literal notranslate"><span class="pre">startlink</spa
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.partial_fkine0">
+<code class="sig-name descname">partial_fkine0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">J0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.partial_fkine0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.partial_fkine0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.hessian0">
 <code class="sig-name descname">hessian0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">J0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.hessian0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.hessian0" title="Permalink to this definition">¶</a></dt>
 <dd><p>The manipulator Hessian tensor maps joint acceleration to end-effector
@@ -1878,6 +1883,11 @@ uses a scalar cost-function and does not provide a Jacobian.</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ikine_mmc">
+<code class="sig-name descname">ikine_mmc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_mmc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.inertia">
@@ -3181,6 +3191,32 @@ at zero.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.A">
+<code class="sig-name descname">A</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fast</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.A"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.A" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link transform matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float</em>) – Joint coordinate (radians or metres). Not required for links
+with no variable</p></li>
+<li><p><strong>fast</strong> – return NumPy array instead of <code class="docutils literal notranslate"><span class="pre">SE3</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return T</dt>
+<dd class="field-even"><p>link frame transformation matrix</p>
+</dd>
+<dt class="field-odd">Rtype T</dt>
+<dd class="field-odd"><p>SE3 or ndarray(4,4)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">LINK.A(q)</span></code> is an SE(3) matrix that describes the rigid-body </dt><dd><p>transformation from the previous to the current link frame to
+the next, which depends on the joint coordinate <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.B">
 <em class="property">property </em><code class="sig-name descname">B</code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.B" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get/set motor viscous friction</p>
@@ -3668,32 +3704,6 @@ frame.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ELink.ELink.A">
-<code class="sig-name descname">A</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fast</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.A"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.A" title="Permalink to this definition">¶</a></dt>
-<dd><p>Link transform matrix</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>float</em>) – Joint coordinate (radians or metres). Not required for links
-with no variable</p></li>
-<li><p><strong>fast</strong> – return NumPy array instead of <code class="docutils literal notranslate"><span class="pre">SE3</span></code></p></li>
-</ul>
-</dd>
-<dt class="field-even">Return T</dt>
-<dd class="field-even"><p>link frame transformation matrix</p>
-</dd>
-<dt class="field-odd">Rtype T</dt>
-<dd class="field-odd"><p>SE3 or ndarray(4,4)</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">LINK.A(q)</span></code> is an SE(3) matrix that describes the rigid-body </dt><dd><p>transformation from the previous to the current link frame to
-the next, which depends on the joint coordinate <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.ets">
 <code class="sig-name descname">ets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.ets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.ets" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3744,14 +3754,15 @@ the next, which depends on the joint coordinate <code class="docutils literal no
 They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;ETS&quot;</span><span class="p">)</span>
-<span class="go">┌─────────┬──────────┬─────────────────────┬────────────┬─────┬───────────┬──────────┐</span>
-<span class="go">│ class   │  model   │    manufacturer     │ model type │ DoF │    config │ keywords │</span>
-<span class="go">├─────────┼──────────┼─────────────────────┼────────────┼─────┼───────────┼──────────┤</span>
-<span class="go">│Panda    │ Panda    │ Franka Emika        │ ETS        │ 7   │ RRRRRRR   │          │</span>
-<span class="go">│Frankie  │ Frankie  │ Franka Emika, Omron │ ETS        │ 9   │ RPRRRRRRR │ mobile   │</span>
-<span class="go">│Puma560  │ Puma560  │ Unimation           │ ETS        │ 6   │ RRRRRR    │          │</span>
-<span class="go">│Planar_Y │ Planar-Y │                     │ ETS        │ 6   │ RRRRRR    │          │</span>
-<span class="go">└─────────┴──────────┴─────────────────────┴────────────┴─────┴───────────┴──────────┘</span>
+<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">?   class     ?     model     ?    manufacturer     ? model type ? DoF ?    config ? keywords ?</span>
+<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">?Panda        ? Panda         ? Franka Emika        ? ETS        ? 7   ? RRRRRRR   ?          ?</span>
+<span class="go">?Frankie      ? Frankie       ? Franka Emika, Omron ? ETS        ? 9   ? RPRRRRRRR ? mobile   ?</span>
+<span class="go">?Puma560      ? Puma560       ? Unimation           ? ETS        ? 6   ? RRRRRR    ?          ?</span>
+<span class="go">?Planar_Y     ? Planar-Y      ?                     ? ETS        ? 6   ? RRRRRR    ?          ?</span>
+<span class="go">?GenericSeven ? Generic Seven ? Jesse&#39;s Imagination ? ETS        ? 7   ? RRRRRRR   ?          ?</span>
+<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????</span>
 
 </pre></div>
 </div>
@@ -3860,6 +3871,15 @@ Sequence, J. Haviland and P. Corke</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt id="roboticstoolbox.models.ETS.GenericSeven">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.ETS.</code><code class="sig-name descname">GenericSeven</code><a class="reference internal" href="_modules/roboticstoolbox/models/ETS/GenericSeven.html#GenericSeven"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.ETS.GenericSeven" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Create model of a generic seven degree-of-freedom robot</p>
+<p>robot = GenericSeven() creates a robot object. This robot is represented
+using the elementary transform sequence (ETS).</p>
+</dd></dl>
+
 </div>
 <div class="section" id="defined-from-urdf">
 <h3>Defined from URDF<a class="headerlink" href="#defined-from-urdf" title="Permalink to this headline">¶</a></h3>
@@ -3883,26 +3903,26 @@ standard or modified.  They can be listed by:</p>
 <span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250s.py</span>
 <span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Mico.py</span>
 <span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/PR2.py</span>
-<span class="go">┌────────┬──────────┬────────────────────┬────────────┬─────┬───────────────────────────────────────────────┬──────────┐</span>
-<span class="go">│ class  │  model   │    manufacturer    │ model type │ DoF │                                        config │ keywords │</span>
-<span class="go">├────────┼──────────┼────────────────────┼────────────┼─────┼───────────────────────────────────────────────┼──────────┤</span>
-<span class="go">│Panda   │ panda    │ Franka Emika       │ URDF       │ 7   │ RRRRRRR                                       │          │</span>
-<span class="go">│UR3     │ ur3      │ Universal Robotics │ URDF       │ 6   │ RRRRRR                                        │          │</span>
-<span class="go">│UR5     │ ur5      │ Universal Robotics │ URDF       │ 6   │ RRRRRR                                        │          │</span>
-<span class="go">│UR10    │ ur10     │ Universal Robotics │ URDF       │ 6   │ RRRRRR                                        │          │</span>
-<span class="go">│Puma560 │ Puma560  │ Unimation          │ URDF       │ 6   │ RRRRRR                                        │          │</span>
-<span class="go">│px100   │ px100    │ Interbotix         │ URDF       │ 7   │ RRRRRPP                                       │          │</span>
-<span class="go">│px150   │ px150    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
-<span class="go">│rx150   │ rx150    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
-<span class="go">│rx200   │ rx200    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
-<span class="go">│vx300   │ vx300    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
-<span class="go">│vx300s  │ vx300s   │ Interbotix         │ URDF       │ 9   │ RRRRRRRPP                                     │          │</span>
-<span class="go">│wx200   │ wx200    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
-<span class="go">│wx250   │ wx250    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
-<span class="go">│wx250s  │ wx250s   │ Interbotix         │ URDF       │ 9   │ RRRRRRRPP                                     │          │</span>
-<span class="go">│Mico    │ j2n4s300 │ Kinova             │ URDF       │ 10  │ RRRRRRRRRR                                    │          │</span>
-<span class="go">│PR2     │ pr2      │ Willow Garage      │ URDF       │ 45  │ RRRRRRRRRRRRPRRRRRRRRRRPRRRRRPRRRRRRRPRRRRRPR │          │</span>
-<span class="go">└────────┴──────────┴────────────────────┴────────────┴─────┴───────────────────────────────────────────────┴──────────┘</span>
+<span class="go">????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">? class  ?  model   ?    manufacturer    ? model type ? DoF ?                                        config ? keywords ?</span>
+<span class="go">????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">?Panda   ? panda    ? Franka Emika       ? URDF       ? 7   ? RRRRRRR                                       ?          ?</span>
+<span class="go">?UR3     ? ur3      ? Universal Robotics ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
+<span class="go">?UR5     ? ur5      ? Universal Robotics ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
+<span class="go">?UR10    ? ur10     ? Universal Robotics ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
+<span class="go">?Puma560 ? Puma560  ? Unimation          ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
+<span class="go">?px100   ? px100    ? Interbotix         ? URDF       ? 7   ? RRRRRPP                                       ?          ?</span>
+<span class="go">?px150   ? px150    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
+<span class="go">?rx150   ? rx150    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
+<span class="go">?rx200   ? rx200    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
+<span class="go">?vx300   ? vx300    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
+<span class="go">?vx300s  ? vx300s   ? Interbotix         ? URDF       ? 9   ? RRRRRRRPP                                     ?          ?</span>
+<span class="go">?wx200   ? wx200    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
+<span class="go">?wx250   ? wx250    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
+<span class="go">?wx250s  ? wx250s   ? Interbotix         ? URDF       ? 9   ? RRRRRRRPP                                     ?          ?</span>
+<span class="go">?Mico    ? j2n4s300 ? Kinova             ? URDF       ? 10  ? RRRRRRRRRR                                    ?          ?</span>
+<span class="go">?PR2     ? pr2      ? Willow Garage      ? URDF       ? 45  ? RRRRRRRRRRRRPRRRRRRRRRRPRRRRRPRRRRRRRPRRRRRPR ?          ?</span>
+<span class="go">????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
 
 </pre></div>
 </div>
@@ -4707,7 +4727,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 05-Jan-2021.
+        Last updated on 18-Jan-2021.
       </span>
 
     </p>

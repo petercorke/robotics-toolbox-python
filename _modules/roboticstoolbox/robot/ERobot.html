@@ -1299,7 +1299,7 @@
 
             <span class="c1"># if we have a gripper, use it</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elinks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># if more than one gripper, user must choose</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must specify which gripper&#39;</span><span class="p">)</span>
@@ -1525,6 +1525,144 @@
         <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobev</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="n">J0</span>
         <span class="k">return</span> <span class="n">Je</span></div>
 
+<div class="viewcode-block" id="ERobot.partial_fkine0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.partial_fkine0">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fkine0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">nl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+
+        <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">J</span><span class="p">,</span> <span class="n">H</span><span class="p">]</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="n">nl</span><span class="p">,</span> <span class="n">nl</span><span class="p">]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="k">def</span> <span class="nf">add_indices</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">new_indices</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total</span><span class="p">):</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">2</span>
+                <span class="n">new_indices</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+                <span class="n">new_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                <span class="n">new_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+                <span class="c1"># if even number</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">new_indices</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+                <span class="c1"># if odd number</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_indices</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">new_indices</span>
+
+        <span class="k">def</span> <span class="nf">add_pdi</span><span class="p">(</span><span class="n">pdi</span><span class="p">):</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">new_pdi</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total</span><span class="p">):</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">2</span>
+                <span class="n">new_pdi</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+                <span class="n">new_pdi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdi</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">new_pdi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pdi</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="c1"># if even number</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">new_pdi</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># if odd number</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_pdi</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">return</span> <span class="n">new_pdi</span>
+
+        <span class="c1"># these are the indices used for the hessian</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[[[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+
+        <span class="c1"># the are the pd indices used in the corss prods</span>
+        <span class="n">pdi</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">size</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nl</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">count</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="n">add_indices</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+            <span class="n">pdi</span> <span class="o">=</span> <span class="n">add_pdi</span><span class="p">(</span><span class="n">pdi</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">pd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nl</span> <span class="o">**</span> <span class="n">c</span><span class="p">):</span>
+
+                <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">trn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)):</span>
+                    <span class="n">pdr0</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">pdi</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">pdr1</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">pdi</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+
+                    <span class="n">idx0</span> <span class="o">=</span> <span class="n">count</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">idx1</span> <span class="o">=</span> <span class="n">count</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+
+                    <span class="n">rot</span> <span class="o">+=</span> <span class="n">cross</span><span class="p">(</span>
+                        <span class="n">pdr0</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx0</span><span class="p">)],</span>
+                        <span class="n">pdr1</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx1</span><span class="p">)])</span>
+
+                    <span class="n">trn</span> <span class="o">+=</span> <span class="n">cross</span><span class="p">(</span>
+                        <span class="n">pdr0</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx0</span><span class="p">)],</span>
+                        <span class="n">pdr1</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">*</span><span class="n">idx1</span><span class="p">)])</span>
+
+                <span class="n">pd</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">*</span><span class="n">count</span><span class="p">)]</span> <span class="o">=</span> <span class="n">trn</span>
+                <span class="n">pd</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">count</span><span class="p">)]</span> <span class="o">=</span> <span class="n">rot</span>
+
+                <span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">nl</span><span class="p">:</span>
+                        <span class="n">count</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">count</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+    <span class="c1"># def third(self, q=None, J0=None, endlink=None, startlink=None):</span>
+    <span class="c1">#     endlink, startlink = self._get_limit_links(endlink, startlink)</span>
+    <span class="c1">#     path, n = self.get_path(endlink, startlink)</span>
+
+    <span class="c1">#     def cross(a, b):</span>
+    <span class="c1">#         x = a[1] * b[2] - a[2] * b[1]</span>
+    <span class="c1">#         y = a[2] * b[0] - a[0] * b[2]</span>
+    <span class="c1">#         z = a[0] * b[1] - a[1] * b[0]</span>
+    <span class="c1">#         return np.array([x, y, z])</span>
+
+    <span class="c1">#     if J0 is None:</span>
+    <span class="c1">#         q = getvector(q, n)</span>
+    <span class="c1">#         J0 = self.jacob0(q, endlink=endlink)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         verifymatrix(J0, (6, n))</span>
+
+    <span class="c1">#     H0 = self.hessian0(q, J0, endlink, startlink)</span>
+
+    <span class="c1">#     L = np.zeros((6, n, n, n))</span>
+
+    <span class="c1">#     for l in range(n):</span>
+    <span class="c1">#         for k in range(n):</span>
+    <span class="c1">#             for j in range(n):</span>
+
+    <span class="c1">#                 L[:3, j, k, l] = cross(H0[3:, k, l], J0[:3, j]) + \</span>
+    <span class="c1">#                     cross(J0[3:, k], H0[:3, j, l])</span>
+
+    <span class="c1">#                 L[3:, j, k, l] = cross(H0[3:, k, l], J0[3:, j]) + \</span>
+    <span class="c1">#                     cross(J0[3:, k], H0[3:, j, l])</span>
+
+    <span class="c1">#     return L</span>
+
 <div class="viewcode-block" id="ERobot.hessian0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1567,6 +1705,12 @@
         <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
         <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
 
+        <span class="k">def</span> <span class="nf">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
         <span class="k">if</span> <span class="n">J0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
             <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
@@ -1578,8 +1722,8 @@
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 
-                <span class="n">H</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">J0</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
-                <span class="n">H</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="n">H</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">J0</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="n">H</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">i</span><span class="p">])</span>
 
                 <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
                     <span class="n">H</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
@@ -2017,7 +2161,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 05-Jan-2021.
+        Last updated on 18-Jan-2021.
       </span>
 
     </p>
