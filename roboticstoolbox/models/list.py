@@ -77,7 +77,7 @@ def list(keywords=None, dof=None, mtype=None):
                     config,
                     ', '.join(robot.keywords)
                 )
-    print(str(table).encode('cp1252', errors='replace').decode('cp1252'))
+    print(str(table).encode('utf8', errors='replace').decode('utf8'))
 
 
 if __name__ == "__main__":   # pragma nocover
