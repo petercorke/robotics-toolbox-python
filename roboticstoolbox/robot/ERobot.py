@@ -97,7 +97,7 @@ class ERobot(Robot):
             if len(tool) > 0:
                 elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
         elif isinstance(elinks, list):
-            # were passed a list of ELinks
+            # we're passed a list of ELinks
 
             # check all the incoming ELink objects
             n = 0
@@ -1183,14 +1183,26 @@ graph [rankdir=LR];
         if link is None:
             link = default
 
+        # print(link)
+
+        # for link in self.links:
+        #     print(link)
+
         if isinstance(link, str):
-            if link not in self.link_dict:
-                raise ValueError(f'no link named {link}')
-            return self.link_dict[link]
+            if link in self.link_dict:
+                return self.link_dict[link]
+
+            raise ValueError(f'no link named {link}')
+
         elif isinstance(link, ELink):
-            if link not in self.links:
+            if link in self.links:
+                return link
+            else:
+                for gripper in self.grippers:
+                    if link in gripper.links:
+                        return link
+
                 raise ValueError('link not in robot links')
-            return link
         else:
             raise TypeError('unknown argument')
 
@@ -1613,6 +1625,8 @@ graph [rankdir=LR];
             H = self.hessian0(J0=J, startlink=startlink, endlink=endlink)
         else:
             verifymatrix(H, (6, n, n))
+
+        print(q)
 
         manipulability = self.manipulability(
             q, J=J, startlink=startlink, endlink=endlink)
