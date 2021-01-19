@@ -1183,11 +1183,6 @@ graph [rankdir=LR];
         if link is None:
             link = default
 
-        # print(link)
-
-        # for link in self.links:
-        #     print(link)
-
         if isinstance(link, str):
             if link in self.link_dict:
                 return self.link_dict[link]
@@ -1625,8 +1620,6 @@ graph [rankdir=LR];
             H = self.hessian0(J0=J, startlink=startlink, endlink=endlink)
         else:
             verifymatrix(H, (6, n, n))
-
-        print(q)
 
         manipulability = self.manipulability(
             q, J=J, startlink=startlink, endlink=endlink)
