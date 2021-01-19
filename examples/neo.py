@@ -49,7 +49,7 @@ env.add(s1)
 env.add(target)
 
 # Set the desired end-effector pose to the location of target
-Tep = panda.fkine()
+Tep = panda.fkine(panda.q)
 Tep.A[:3, 3] = target.base.t
 Tep.A[2, 3] += 0.1
 
@@ -58,7 +58,7 @@ arrived = False
 while not arrived:
 
     # The pose of the Panda's end-effector
-    Te = panda.fkine()
+    Te = panda.fkine(panda.q)
 
     # Transform from the end-effector to desired pose
     eTep = Te.inv() * Tep
@@ -83,7 +83,7 @@ while not arrived:
     Q[n:, n:] = (1 / e) * np.eye(6)
 
     # The equality contraints
-    Aeq = np.c_[panda.jacobe(), np.eye(6)]
+    Aeq = np.c_[panda.jacobe(panda.q), np.eye(6)]
     beq = v.reshape((6,))
 
     # The inequality constraints for joint limit avoidance
@@ -108,7 +108,8 @@ while not arrived:
         # object on the robot to the collision in the scene
         c_Ain, c_bin = panda.link_collision_damper(
             collision, panda.q[:n], 0.3, 0.05, 1.0,
-            panda.link_dict['panda_link1'], panda.link_dict['panda_hand'])
+            startlink=panda.link_dict['panda_link1'],
+            endlink=panda.link_dict['panda_hand'])
 
         # If there are any parts of the robot within the influence distance
         # to the collision in the scene
@@ -120,7 +121,7 @@ while not arrived:
             bin = np.r_[bin, c_bin]
 
     # Linear component of objective function: the manipulability Jacobian
-    c = np.r_[-panda.jacobm().reshape((n,)), np.zeros(6)]
+    c = np.r_[-panda.jacobm(panda.q).reshape((n,)), np.zeros(6)]
 
     # The lower and upper bounds on the joint velocity and slack variable
     lb = -np.r_[panda.qdlim[:n], 10 * np.ones(6)]
