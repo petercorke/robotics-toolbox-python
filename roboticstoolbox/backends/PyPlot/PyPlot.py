@@ -125,7 +125,7 @@ class PyPlot(Connector):
             plt.ion()
             plt.show()
 
-        self.t = 0
+        self.sim_time = 0
 
         # # Set the signal handler and a 0.1 second plot updater
         # signal.signal(signal.SIGALRM, self._plot_handler)
@@ -165,9 +165,9 @@ class PyPlot(Connector):
         self._set_axes_equal()
 
         # update time and display it on plot
-        if self.t > 0:
-            self.timer.set_text(f"t = {self.t:.2f}")
-        self.t += dt
+        if self.sim_time > 0:
+            self.timer.set_text(f"t = {self.sim_time:.2f}")
+        self.sim_time += dt
 
         # plt.ion()
 
