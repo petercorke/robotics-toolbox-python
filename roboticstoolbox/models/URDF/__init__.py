@@ -1,4 +1,5 @@
 from roboticstoolbox.models.URDF.Panda import Panda
+from roboticstoolbox.models.URDF.Frankie import Frankie
 from roboticstoolbox.models.URDF.UR3 import UR3
 from roboticstoolbox.models.URDF.UR5 import UR5
 from roboticstoolbox.models.URDF.UR10 import UR10
@@ -17,6 +18,7 @@ from roboticstoolbox.models.URDF.PR2 import PR2
 
 __all__ = [
     'Panda',
+    'Frankie',
     'UR3',
     'UR5',
     'UR10',

@@ -14,13 +14,15 @@ env = rtb.backends.Swift()
 env.launch()
 
 # Create a Panda robot object
-puma = rtb.models.Puma560()
+r = rtb.models.Frankie()
 
 # Set joint angles to ready configuration
-puma.q = puma.qr
+r.q = r.qr
 
 # Add the puma to the simulator
-env.add(puma)
+env.add(r)
+
+env.hold()
 
 # Tep = puma.fkine() * sm.SE3.Tz(0.1)
 
