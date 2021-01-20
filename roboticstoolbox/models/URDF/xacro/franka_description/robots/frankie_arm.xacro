@@ -12,17 +12,6 @@
     </xacro:unless>
 
     <link name="${arm_id}_base0">
-      <visual>
-        <origin xyz="0 0 0.15" rpy="0 0 0"/>
-        <geometry>
-          <box size="0.6 0.4 0.3" />
-        </geometry>
-      </visual>
-      <collision>
-        <geometry>
-          <box size="0.4 0.6 0.5" />
-        </geometry>
-      </collision>
     </link>
     <link name="${arm_id}_base1">
     </link>
@@ -41,6 +30,18 @@
       <limit effort="87" lower="-999999" upper="999999" velocity="4.0"/>
     </joint>
     <link name="${arm_id}_link0">
+      <visual>
+        <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.6 0.4 0.3" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.6 0.4 0.3" />
+        </geometry>
+      </collision>
       <visual>
         <geometry>
           <mesh filename="package://${description_pkg}/meshes/visual/link0.dae"/>

@@ -40,8 +40,6 @@ class Frankie(ERobot):
             gripper_links=elinks[11]
         )
 
-        print(self)
-
         self.qdlim = np.array([
             4.0, 4.0,
             2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100,
