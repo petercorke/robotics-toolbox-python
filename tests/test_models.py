@@ -166,6 +166,12 @@ class TestModels(unittest.TestCase):
         nt.assert_array_almost_equal(sol0.q, qr0, decimal=4)
         nt.assert_array_almost_equal(sol1.q, qr1, decimal=4)
 
+    def test_fkine_urdf(self):
+      for model_name in rp.models.URDF.__all__:
+        m = getattr(rp.models.URDF, model_name)
+        r = m()
+        r.fkine(r.q)
+
 if __name__ == '__main__':  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
