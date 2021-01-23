@@ -209,11 +209,16 @@ def rand_v():
 
 x = []
 y = []
+rands = 100
+v = np.zeros((rands, 6))
+
+for i in range(rands):
+    v[i, :] = rand_v()
 
 for i in range(10000000):
 
     q = rand_q()
-    v = rand_v()
+    # v = rand_v()
 
     J = r.jacob0(q)
     Jt = J[:3, :]
@@ -222,6 +227,7 @@ for i in range(10000000):
 
     q_n = [10000, 0]
     q_m = [10000, 0]
+    q_mn = 0
 
     # cond = np.linalg.cond(J[:3, :])
     m = r.manipulability(J=J, axes='trans')
@@ -229,8 +235,8 @@ for i in range(10000000):
     psi = (np.cbrt(np.linalg.det(Jt @ np.transpose(Jt)))) / \
         (np.trace(Jt @ np.transpose(Jt)) / 3)
 
-    for j in range(1000):
-        qd = np.linalg.pinv(J) @ v
+    for j in range(rands):
+        qd = np.linalg.pinv(J) @ v[j, :]
 
         if np.max(qd) > q_m[1]:
             q_m[1] = np.max(qd)
@@ -243,12 +249,16 @@ for i in range(10000000):
         elif np.linalg.norm(qd) < q_n[0]:
             q_n[0] = np.linalg.norm(qd)
 
+        q_mn += np.linalg.norm(qd)
+
+    q_mn /= rands
+
     # # ax.plot(m, np.log10(cond), 'o', color='black')
     # ax.plot(m, infn, 'o', color='black')
     # # ax.plot(1, 0.002, 'o', color='black')
 
-    x.append(psi)
-    y.append(np.log10(q_m[1]))
+    x.append(m)
+    y.append(np.log10(q_n[0]))
     # y.append(psi)
 
     # ax.plot(m, np.log10(q_m[1]), 'o', color='black')

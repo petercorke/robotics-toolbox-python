@@ -97,7 +97,7 @@ class ERobot(Robot):
             if len(tool) > 0:
                 elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
         elif isinstance(elinks, list):
-            # were passed a list of ELinks
+            # we're passed a list of ELinks
 
             # check all the incoming ELink objects
             n = 0
@@ -392,7 +392,7 @@ class ERobot(Robot):
 
         # get the path to the class that defines the robot
         classpath = sys.modules[self.__module__].__file__
-        print("*** urdf_to_ets_args: ", classpath)
+        # print("*** urdf_to_ets_args: ", classpath)
         # add on relative path to get to the URDF or xacro file
         base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
         file_path = base_path / PurePosixPath(file_path)
@@ -1184,13 +1184,20 @@ graph [rankdir=LR];
             link = default
 
         if isinstance(link, str):
-            if link not in self.link_dict:
-                raise ValueError(f'no link named {link}')
-            return self.link_dict[link]
+            if link in self.link_dict:
+                return self.link_dict[link]
+
+            raise ValueError(f'no link named {link}')
+
         elif isinstance(link, ELink):
-            if link not in self.links:
+            if link in self.links:
+                return link
+            else:
+                for gripper in self.grippers:
+                    if link in gripper.links:
+                        return link
+
                 raise ValueError('link not in robot links')
-            return link
         else:
             raise TypeError('unknown argument')
 
@@ -1814,7 +1821,7 @@ graph [rankdir=LR];
 
     def link_collision_damper(
             self, shape, q=None, di=0.3, ds=0.05, xi=1.0,
-            from_link=None, to_link=None):
+            endlink=None, startlink=None):
         '''
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
@@ -1840,13 +1847,13 @@ graph [rankdir=LR];
         :rtype: ndarray(6), ndarray(6)
         '''
 
-        if from_link is None:
-            from_link = self.base_link
+        if startlink is None:
+            startlink = self.base_link
 
-        if to_link is None:
-            to_link = self.ee_link
+        if endlink is None:
+            endlink = self.ee_link
 
-        links, n = self.get_path(from_link, to_link)
+        links, n = self.get_path(startlink=startlink, endlink=endlink)
 
         if q is None:
             q = np.copy(self.q)
@@ -1866,7 +1873,7 @@ graph [rankdir=LR];
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
                 Je = self.jacobe(
-                    q, from_link=self.base_link, to_link=link,
+                    q, startlink=self.base_link, endlink=link,
                     offset=link_col.base)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
@@ -1885,7 +1892,7 @@ graph [rankdir=LR];
 
             for link_col in link.collision:
                 l_Ain, l_bin, d, wTcp = indiv_calculation(
-                                                link, link_col, q[:j])
+                                                link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:
