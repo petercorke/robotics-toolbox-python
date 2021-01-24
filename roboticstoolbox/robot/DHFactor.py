@@ -7,6 +7,8 @@ from spatialmath import base
 pi2 = base.pi() / 2
 deg = base.pi() / sympy.Integer('180')
 
+# PROGRESS
+# subs2z does a bad thing in first phase, 2 subs it shouldnt make
 class DHFactor(ETS):
 
     def __init__(self, axis=None, eta=None, **kwargs):
@@ -67,9 +69,9 @@ class DHFactor(ETS):
         self.merge()
         self.float_right()
         self.merge()
-        self.substitute_to_z()
+        # self.substitute_to_z()
         self.merge()
-        print(self)
+        print('inital merge and swap\n  ', self)
         print('main loop')
         for i in range(10):
             nchanges = 0
@@ -99,14 +101,12 @@ class DHFactor(ETS):
 	 * possible and across joint boundaries.
         """
         
-        out = DHFactor()
         nchanges = 0
 
         for i in range(len(self)):
 
             this = self[i]
-            if this.isjoint or this.isprismatic:
-                out *= this
+            if this.isjoint or this.isrevolute:
                 continue
             
             crossed = False
@@ -115,7 +115,7 @@ class DHFactor(ETS):
 
                 if next.isprismatic:
                     continue
-                if next.isrevolute and next.axis == this.axis:
+                if next.isrevolute and next.axis[1] == this.axis[1]:
                     crossed = True
                     continue
                 break
@@ -123,6 +123,7 @@ class DHFactor(ETS):
             if crossed:
                 del self[i]
                 self.insert(j-1, this)
+                nchanges += 1
                 print('floated')
 
         return nchanges
@@ -193,23 +194,31 @@ class DHFactor(ETS):
     # ---------------------------------------------------------------------- #
 
 
-    @staticmethod
-    def subs_z(e):
-        if e.axis == 'Rx':
-            return DHFactor.ry(pi2) * DHFactor.rz(e.eta) * DHFactor.ry(-pi2)
-        elif e.axis == 'Ry':
-            return DHFactor.rx(-pi2) * DHFactor.rz(e.eta) * DHFactor.rx(pi2)
-        elif e.axis == 'tx':
-            return DHFactor.ry(pi2) * DHFactor.tz(e.eta) * DHFactor.ry(-pi2)
-        elif e.axis == 'ty':
-            return DHFactor.rx(-pi2) * DHFactor.tz(e.eta) * DHFactor.rx(pi2)
-
     def substitute_to_z(self):
         # substitute all non Z joint transforms according to rules
         nchanges = 0
         out = DHFactor()
+
+        def subs_z(this):
+            if this.axis == 'Rx':
+                return DHFactor.ry(pi2) \
+                     * DHFactor.rz(this.eta) \
+                     * DHFactor.ry(-pi2)
+            elif this.axis == 'Ry':
+                return DHFactor.rx(-pi2) \
+                    * DHFactor.rz(this.eta) \
+                    * DHFactor.rx(pi2)
+            elif this.axis == 'tx':
+                return DHFactor.ry(pi2) \
+                     * DHFactor.tz(this.eta) \
+                     * DHFactor.ry(-pi2)
+            elif this.axis == 'ty':
+                return DHFactor.rx(-pi2) \
+                     * DHFactor.tz(this.eta) \
+                     * DHFactor.rx(pi2)
+
         for e in self:
-            if e.isjoint:
+            if not e.isjoint:
                 out *= e
             else:
                 # do a substitution
@@ -220,6 +229,7 @@ class DHFactor(ETS):
                 else:
                     out *= new
                     nchanges += 1
+                    print(f"subs2z: {e} := {new}")
 
         self.data = out.data
         return nchanges
@@ -229,6 +239,22 @@ class DHFactor(ETS):
         nchanges = 0
         out = DHFactor()
         jointyet = False
+
+        def subs_z(prev, this):
+            if this.axis == 'Ry':
+                return DHFactor.rz(pi2) \
+                     * DHFactor.rx(this.eta) \
+                     * DHFactor.rz(-pi2)
+            elif this.axis == 'ty':
+                if prev.axis == 'Rz':
+                    return DHFactor.rz(pi2) \
+                         * DHFactor.ty(this.eta) \
+                         * DHFactor.r(-pi2)
+                else:
+                    return DHFactor.rx(-pi2) \
+                         * DHFactor.ty(this.eta) \
+                         * DHFactor.rx(pi2)
+
         for i in range(len(self)):
             this = self[i]
             if this.isjoint:
@@ -240,7 +266,7 @@ class DHFactor(ETS):
 
             prev = self[i-1]
 
-            new = DHFactor.subs_z(prev)
+            new = subs_z(prev, this)
 
             if new is None:
                 out *= this
@@ -248,6 +274,7 @@ class DHFactor(ETS):
             else:
                 out *= new
                 nchanges += 1
+                print(f"subs2z2: {this} := {new}")
 
         self.data = out.data
         return nchanges
@@ -312,7 +339,7 @@ class DHFactor(ETS):
         out = DHFactor()
         jointyet = False
 
-        def eliminate(prev, this):
+        def subs_y(prev, this):
             if this.isjoint or prev.isjoint:
                 return None
 
@@ -345,15 +372,13 @@ class DHFactor(ETS):
                 continue
 
             prev = self[i-1]
-            try:
-                next = self[i+1]  # TODO actually we don't use next
 
-                new = eliminate(prev, this)
-                if new is not None:
-                    self[i-1:i] = new
-                    nchanges += 1
-            except:
-                pass
+            new = subs_y(prev, this)
+            if new is not None:
+                self[i-1:i+1] = new
+                nchanges += 1
+                print(f"eliminate Y: {this} := {new}")
+
 
         return nchanges
 
@@ -472,7 +497,7 @@ class DHFactor(ETS):
         return " * ".join(es)
             
 if __name__ == "__main__":  # pragram: no cover
-    s = 'Rz(45) Tz(L1) Rz(q1) Ry(q2) Ty(L2) Tz(L3) Ry(q3) Tx(L4) Ty(L5) Tz(L6) Rz(q4) Ry(q5) Rz(q6)'
+    s = 'Tz(L1) Rz(q1) Ry(q2) Ty(L2) Tz(L3) Ry(q3) Tx(L4) Ty(L5) Tz(L6) Rz(q4) Ry(q5) Rz(q6)'
 
     ets = DHFactor.parse(s)
     print(ets)
@@ -482,9 +507,8 @@ if __name__ == "__main__":  # pragram: no cover
     # print(ets)
 
     ets.swap()
-    # ets.simplify()
+    ets.simplify()
     print(ets)
-    ets.merge()
+    # ets.merge()
     print(ets)
 
-    print(str(ets[0]), ets[0].jindex)
