@@ -8,7 +8,7 @@ from collections import namedtuple
 from roboticstoolbox.tools.null import null
 from spatialmath import base
 from spatialmath import SE3, Twist3
-from scipy.optimize import minimize, Bounds, LinearConstraint
+import scipy.optimize as opt
 import math
 import qpsolvers as qp
 from roboticstoolbox.tools.p_servo import p_servo
@@ -732,7 +732,8 @@ class IKMixin:
 
         By default this method uses:
 
-        - the Scipy ``SLSQP`` minimizer for the case of no joint limits
+        - the Scipy ``SLSQP`` (Sequential Least Squares Programming) minimizer
+          for the case of no joint limits
         - the Scipy ``trust-constr`` minimizer for the case with joint limits.
           This gives good results but is very slow.  An alternative is
           ``L-BFGS-B`` (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
@@ -812,7 +813,7 @@ class IKMixin:
 
         if qlim:
             # dealing with joint limits
-            bounds = Bounds(self.qlim[0, :], self.qlim[1, :])
+            bounds = opt.Bounds(self.qlim[0, :], self.qlim[1, :])
 
             if method is None:
                 method='trust-constr'
@@ -837,7 +838,7 @@ class IKMixin:
             return E
 
         for Tk in T:
-            res = minimize(
+            res = opt.minimize(
                 cost,
                 q0, 
                 args=(Tk.A, weight, costfun, stiffness),
@@ -865,103 +866,18 @@ class IKMixin:
 
     def ikine_global(self, T, q0=None, qlim=False, ilimit=1000, tol=1e-16, method=None, options={}):
         r"""
-        Inverse kinematics by optimization with joint limits (Robot superclass)
+        .. warning:: Experimental code for using SciPy global optimizers.
 
-        :param T: The desired end-effector pose or pose trajectory
-        :type T: SE3
-        :param q0: initial joint configuration (default all zeros)
-        :type q0: ndarray(n)
-        :param qlim: enforce joint limits
-        :type qlim: bool
-        :param ilimit: Iteration limit (default 1000)
-        :type ilimit: int
-        :param tol: Tolerance (default 1e-16)
-        :type tol: tol
-        :param method: minimization method to use
-        :type method: str
-        :param stiffness: Stiffness used to impose a smoothness contraint on
-            joint angles, useful when n is large (default 0)
-        :type stiffness: float
-        :param costfun: User supplied cost term, optional
-        :type costfun: callable
-        :return: inverse kinematic solution
-        :rtype: named tuple
-
-        ``sol = robot.ikine_min(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose T which is an SE3 object.  The
-        return value ``sol`` is a named tuple with elements:
-
-        ============    ==========  ============================================================
-        Element         Type        Description
-        ============    ==========  ============================================================
-        ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``
-        ``success``     bool        whether a solution was found
-        ``reason``      str         reason for the failure
-        ``iterations``  int         number of iterations
-        ``residual``    float       final value of cost function
-        ============    ==========  ============================================================
-
-        **Minimization method**:
-
-        By default this method uses:
-
-        - the Scipy ``SLSQP`` minimizer for the case of no joint limits
-        - the Scipy ``trust-constr`` minimizer for the case with joint limits.
-          This gives good results but is very slow.  An alternative is
-          ``L-BFGS-B`` (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
-          robots can sometimes give poor results, pushing against the joint
-          limits when there is no need to.
-          
-        In both case the function to be minimized is the squared norm of a 
-        vector :math:`[d,a]` with components respectively the
-        translation error and rotation error in Euler vector form, between the
-        desired pose and the current estimate obtained by inverse kinematics.
-
-        **Additional cost terms**:
-
-        This method supports two additional costs:
-
-        - ``stiffness`` imposes a penalty on joint variation 
-          :math:`\sum_{j=1}^N (q_j - q_{j-1})^2` which tends to keep the 
-          arm straight
-        - ``costfun`` add a cost given by a user-specified function ``costfun(q)``
-
-        **Trajectory operation**:
-
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
-
-        .. note::
-
-            - Uses ``SciPy.minimize`` with bounds.
-            - Joint limits are considered in this solution.
-            - Can be used for robots with arbitrary degrees of freedom.
-            - The inverse kinematic solution is generally not unique, and
-              depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
-              most manipulators since it often corresponds to a
-              kinematic singularity.
-            - Such a solution is completely general, though much less
-              efficient than analytic inverse kinematic solutions derived
-              symbolically.
-            - The objective function (error) is 
-              :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`
-              where :math:`\mat{\Omega}` is a diagonal matrix.
-            - Joint offsets, if defined, are accounted for in the solution.
-
-        .. warning:: 
-        
-            - The objective function is rather uncommon.
-            - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
-              uses a scalar cost-function and does not provide a Jacobian.
-
-        :author: Bryan Moutrie, for RTB-MATLAB
-
-        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_min`
+        Each global optimizer has quite a different call signature, so final
+        design will need a bit of thought.
 
         """
+
+        # basinhopping:
+        # brute: ranges, finish=None
+        # differential_evolution:  bounds, tol
+        # shgo: bounds, options:f_tol
+        # dual_annealing: bounds
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -976,29 +892,23 @@ class IKMixin:
         wr = 1 / self.reach
         weight = np.r_[wr, wr, wr, 1, 1, 1]
 
-        optdict = {'maxiter': ilimit}
-        if options is not None and isinstance(options, dict):
-            optdict.update(options)
+        optdict = {}
+
+        if method is None:
+            method='differential-evolution'
+
+        if method == 'brute':
+            # requires a tuple of tuples
+            optdict['ranges'] = tuple([tuple(l.qlim) for l in self])
         else:
-            raise ValueError('options must be a dict')
-
-        if qlim:
-            # dealing with joint limits
+            optdict['bounds'] = tuple([tuple(l.qlim) for l in self])
 
 
-            if method is None:
-                method='differential-evolution'
+        if method not in ['basinhopping', 'brute', 'differential_evolution',
+                          'shgo', 'dual_annealing']:
+            raise ValueError('unknown global optimizer requested')
 
-            if method == 'brute':
-                # requires a tuple of tuples
-                opt['ranges'] = tuple([tuple(l.qlim) for l in self])
-            else:
-                opt['bounds'] = Bounds(self.qlim[0, :], self.qlim[1, :])
-        else:
-            # no joint limits
-            if method is None:
-                method = 'basinhopping'
-            bounds = None
+        global_minimizer = opt.__dict__[method]
 
         def cost(q, T, weight):
             # T, weight, costfun, stiffness = args
@@ -1006,19 +916,10 @@ class IKMixin:
             return (e**2).sum()
 
         for Tk in T:
-            res = minimize(
+            res = global_minimizer(
                 cost,
-                q0, 
-                args=(Tk.A,),
-                method=method,
-                tol=tol,
-                options=options
-            )
-
-            # trust-constr seems to work better than L-BFGS-B which often
-            # runs a joint up against its limit and terminates with position 
-            # error.
-            # but 'truts-constr' is 5x slower
+                **optdict)
+            
 
             solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
             solutions.append(solution)
@@ -1302,14 +1203,16 @@ if __name__ == "__main__":  # pragma nocover
     robot = rtb.models.DH.Panda()
 
     T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-    sol = robot.ikine_LMS(T)         # solve IK
-    print(sol)                    # display joint angles
+    # sol = robot.ikine_LMS(T)         # solve IK
+    # print(sol)                    # display joint angles
 
-    print(T)
-    print(robot.fkine(sol.q))
-    robot.plot(sol.q)
+    # print(T)
+    # print(robot.fkine(sol.q))
+    # robot.plot(sol.q)
 
-    sol = robot.ikine_unc(T, costfun=lambda q: q[1] * 1e-6 if q[1] > 0 else -q[1])
-    print(sol)
-    print(robot.fkine(sol.q))
-    robot.plot(sol.q)
+    # sol = robot.ikine_unc(T, costfun=lambda q: q[1] * 1e-6 if q[1] > 0 else -q[1])
+    # print(sol)
+    # print(robot.fkine(sol.q))
+    # robot.plot(sol.q)
+
+    sol = robot.ikine_global(T, method='brute')
