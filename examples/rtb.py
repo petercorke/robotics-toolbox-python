@@ -103,7 +103,7 @@ c.InteractiveShellEmbed.colors = args.color
 c.InteractiveShell.confirm_exit = args.confirmexit
 # c.InteractiveShell.prompts_class = ClassicPrompts
 c.InteractiveShell.prompts_class = MyPrompt
-if showassign:
+if args.showassign:
     c.InteractiveShell.ast_node_interactivity = 'last_expr_or_assign'
 
 IPython.embed(config=c)
