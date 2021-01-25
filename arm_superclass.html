@@ -763,12 +763,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925, -0.    ],</span>
 <span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    , -0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [-0.    , -0.2119, -0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1130,6 +1130,7 @@ chosen.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Implements a Levenberg-Marquadt variable-step-size solver.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
@@ -1212,6 +1213,7 @@ be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Implements a modified Levenberg-Marquadt variable-step-size solver
 which is quite robust in practice.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
@@ -1247,6 +1249,17 @@ October 2011, pp. 984-991.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.ikine_global">
+<code class="sig-name descname">ikine_global</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Experimental code for using SciPy global optimizers.</p>
+</div>
+<p>Each global optimizer has quite a different call signature, so final
+design will need a bit of thought.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.ikine_min">
 <code class="sig-name descname">ikine_min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">costfun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
@@ -1271,13 +1284,14 @@ joint angles, useful when n is large (default 0)</p></li>
 <dd class="field-odd"><p>named tuple</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_unc(T)</span></code> are the joint coordinates (n) corresponding
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_min(T)</span></code> are the joint coordinates (n) corresponding
 to the robot end-effector pose T which is an SE3 object.  The
 return value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
 <p><strong>Minimization method</strong>:</p>
 <p>By default this method uses:</p>
 <ul class="simple">
-<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> minimizer for the case of no joint limits</p></li>
+<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> (Sequential Least Squares Programming) minimizer
+for the case of no joint limits</p></li>
 <li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">trust-constr</span></code> minimizer for the case with joint limits.
 This gives good results but is very slow.  An alternative is
 <code class="docutils literal notranslate"><span class="pre">L-BFGS-B</span></code> (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
@@ -1304,6 +1318,7 @@ the previous time step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Uses <code class="docutils literal notranslate"><span class="pre">SciPy.minimize</span></code> with bounds.</p></li>
 <li><p>Joint limits are considered in this solution.</p></li>
 <li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
@@ -2226,6 +2241,33 @@ shapes</p>
 :rtype: bool</p>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.Robot.Robot.joint_velocity_damper">
+<code class="sig-name descname">joint_velocity_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ps</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">pi</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gain</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot.joint_velocity_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.joint_velocity_damper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formulates an inequality contraint which, when optimised for will
+make it impossible for the robot to run into joint limits. Requires
+the joint limits of the robot to be specified. See examples/mmc.py
+for use case</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ps</strong> (<em>float</em>) – The minimum angle (in radians) in which the joint is
+allowed to approach to its limit</p></li>
+<li><p><strong>pi</strong> (<em>float</em>) – The influence angle (in radians) in which the velocity
+damper becomes active</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – The number of joints to consider. Defaults to all joints</p></li>
+<li><p><strong>gain</strong> (<em>float</em>) – The gain for the velocity damper</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Ain, Bin as the inequality contraints for an optisator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6), ndarray(6)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -2788,7 +2830,7 @@ shapes</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 18-Jan-2021.
+        Last updated on 25-Jan-2021.
       </span>
 
     </p>

@@ -1216,12 +1216,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925, -0.    ],</span>
 <span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    , -0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [-0.    , -0.2119, -0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1733,6 +1733,7 @@ chosen.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Implements a Levenberg-Marquadt variable-step-size solver.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
@@ -1815,6 +1816,7 @@ be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Implements a modified Levenberg-Marquadt variable-step-size solver
 which is quite robust in practice.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
@@ -1850,6 +1852,17 @@ October 2011, pp. 984-991.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_global">
+<code class="sig-name descname">ikine_global</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Experimental code for using SciPy global optimizers.</p>
+</div>
+<p>Each global optimizer has quite a different call signature, so final
+design will need a bit of thought.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_min">
 <code class="sig-name descname">ikine_min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">costfun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
@@ -1874,13 +1887,14 @@ joint angles, useful when n is large (default 0)</p></li>
 <dd class="field-odd"><p>named tuple</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_unc(T)</span></code> are the joint coordinates (n) corresponding
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_min(T)</span></code> are the joint coordinates (n) corresponding
 to the robot end-effector pose T which is an SE3 object.  The
 return value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
 <p><strong>Minimization method</strong>:</p>
 <p>By default this method uses:</p>
 <ul class="simple">
-<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> minimizer for the case of no joint limits</p></li>
+<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> (Sequential Least Squares Programming) minimizer
+for the case of no joint limits</p></li>
 <li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">trust-constr</span></code> minimizer for the case with joint limits.
 This gives good results but is very slow.  An alternative is
 <code class="docutils literal notranslate"><span class="pre">L-BFGS-B</span></code> (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
@@ -1907,6 +1921,7 @@ the previous time step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Uses <code class="docutils literal notranslate"><span class="pre">SciPy.minimize</span></code> with bounds.</p></li>
 <li><p>Joint limits are considered in this solution.</p></li>
 <li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
@@ -2046,6 +2061,33 @@ will be included in the result.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.joint_velocity_damper">
+<code class="sig-name descname">joint_velocity_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ps</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">pi</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gain</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.joint_velocity_damper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formulates an inequality contraint which, when optimised for will
+make it impossible for the robot to run into joint limits. Requires
+the joint limits of the robot to be specified. See examples/mmc.py
+for use case</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ps</strong> (<em>float</em>) – The minimum angle (in radians) in which the joint is
+allowed to approach to its limit</p></li>
+<li><p><strong>pi</strong> (<em>float</em>) – The influence angle (in radians) in which the velocity
+damper becomes active</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – The number of joints to consider. Defaults to all joints</p></li>
+<li><p><strong>gain</strong> (<em>float</em>) – The gain for the velocity damper</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Ain, Bin as the inequality contraints for an optisator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6), ndarray(6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.jointdynamics">
 <code class="sig-name descname">jointdynamics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jointdynamics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transfer function of joint actuator</p>
@@ -2130,7 +2172,7 @@ tuples or hexstrings.</p></li>
 matplotlib documentation.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a href="#id7"><span class="problematic" id="id8">`</span></a>Specifying colors</p></li>
+<li><p><a href="#id9"><span class="problematic" id="id10">`</span></a>Specifying colors</p></li>
 </ul>
 <p>&lt;<a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py</a>&gt;`_
 - <a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p>
@@ -2206,21 +2248,21 @@ zero if the robot is at a singularity.</p></li>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;yoshikawa&quot;</span></code></p></td>
 <td><p>Volume of the velocity ellipsoid, <em>distance</em>
-from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id9"><span>[Yoshikawa85]</span></a></p></td>
+from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id11"><span>[Yoshikawa85]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;invcondition&quot;</span></code></p></td>
 <td><p>Inverse condition number of Jacobian, isotropy
-of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id10"><span>[Klein87]</span></a></p></td>
+of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id12"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;minsingular&quot;</span></code></p></td>
 <td><p>Minimum singular value of the Jacobian,
-<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id11"><span>[Klein87]</span></a></p></td>
+<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id13"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;asada&quot;</span></code></p></td>
 <td><p>Isotropy of the task-space acceleration
 ellipsoid which is a function of the Cartesian
 inertia matrix which depends on the inertial
-parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id12"><span>[Asada83]</span></a></p></td>
+parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id14"><span>[Asada83]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -2247,18 +2289,18 @@ parameters.</p></li>
 <dd class="field-odd"><p></p></dd>
 </dl>
 <dl class="citation">
-<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id9">Yoshikawa85</a></span></dt>
+<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id11">Yoshikawa85</a></span></dt>
 <dd><p>Manipulability of Robotic Mechanisms. Yoshikawa T.,
 The International Journal of Robotics Research.
 1985;4(2):3-9. doi:10.1177/027836498500400201</p>
 </dd>
-<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id12">Asada83</a></span></dt>
+<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id14">Asada83</a></span></dt>
 <dd><p>A geometrical representation of manipulator dynamics and
 its application to arm design, H. Asada,
 Journal of Dynamic Systems, Measurement, and Control,
 vol. 105, p. 131, 1983.</p>
 </dd>
-<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id10">1</a>,<a href="#id11">2</a>)</span></dt>
+<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id12">1</a>,<a href="#id13">2</a>)</span></dt>
 <dd><p>Dexterity Measures for the Design and Control of
 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
 The International Journal of Robotics Research.
@@ -4053,29 +4095,29 @@ rigid-body inertial parameters, motor and transmission parameters.</p>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;DH&quot;</span><span class="p">)</span>
-<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
-<span class="go">? class   ?     model     ?    manufacturer    ? model type ? DoF ?     config ?         keywords         ?</span>
-<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
-<span class="go">?Panda    ? Panda         ? Franka Emika       ? DH         ? 7   ? RRRRRRR    ?                          ?</span>
-<span class="go">?Puma560  ? Puma 560      ? Unimation          ? DH         ? 6   ? RRRRRR     ? dynamics, symbolic, mesh ?</span>
-<span class="go">?Stanford ? Stanford arm  ? Victor Scheinman   ? DH         ? 6   ? RRPRRR     ? dynamics                 ?</span>
-<span class="go">?Ball     ? ball          ?                    ? DH         ? 10  ? RRRRRRRRRR ?                          ?</span>
-<span class="go">?Hyper    ? Hyper10       ?                    ? DH         ? 10  ? RRRRRRRRRR ? symbolic                 ?</span>
-<span class="go">?Coil     ? Hyper10       ?                    ? DH         ? 10  ? RRRRRRRRRR ? symbolic                 ?</span>
-<span class="go">?Cobra600 ? Cobra600      ? Adept              ? DH         ? 4   ? RRPR       ?                          ?</span>
-<span class="go">?IRB140   ? IRB 140       ? ABB                ? DH         ? 6   ? RRRRRR     ?                          ?</span>
-<span class="go">?KR5      ? KR5           ? KUKA               ? DH         ? 6   ? RRRRRR     ?                          ?</span>
-<span class="go">?Orion5   ? Orion 5       ? RAWR Robotics      ? DH         ? 4   ? RRRR       ?                          ?</span>
-<span class="go">?Planar3  ? Planar 3 link ?                    ? DH         ? 3   ? RRR        ? planar                   ?</span>
-<span class="go">?Planar2  ? Planar 2 link ?                    ? DH         ? 2   ? RR         ? planar                   ?</span>
-<span class="go">?LWR4     ? LWR-IV        ? Kuka               ? DH         ? 7   ? RRRRRRR    ?                          ?</span>
-<span class="go">?Sawyer   ? Sawyer        ? Rethink Robotics   ? DH         ? 6   ? RRRRRR     ? redundant, symbolic      ?</span>
-<span class="go">?UR3      ? UR3           ? Universal Robotics ? DH         ? 6   ? RRRRRR     ? dynamics, symbolic       ?</span>
-<span class="go">?UR5      ? UR5           ? Universal Robotics ? DH         ? 6   ? RRRRRR     ? dynamics, symbolic       ?</span>
-<span class="go">?UR10     ? UR10          ? Universal Robotics ? DH         ? 6   ? RRRRRR     ? dynamics, symbolic       ?</span>
-<span class="go">?Mico     ? Mico          ? Kinova             ? DH         ? 6   ? RRRRRR     ? symbolic                 ?</span>
-<span class="go">?Jaco     ? Jaco          ? Kinova             ? DH         ? 6   ? RRRRRR     ? symbolic                 ?</span>
-<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">┌─────────┬───────────────┬────────────────────┬────────────┬─────┬────────────┬──────────────────────────┐</span>
+<span class="go">│ class   │     model     │    manufacturer    │ model type │ DoF │     config │         keywords         │</span>
+<span class="go">├─────────┼───────────────┼────────────────────┼────────────┼─────┼────────────┼──────────────────────────┤</span>
+<span class="go">│Panda    │ Panda         │ Franka Emika       │ DH         │ 7   │ RRRRRRR    │                          │</span>
+<span class="go">│Puma560  │ Puma 560      │ Unimation          │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic, mesh │</span>
+<span class="go">│Stanford │ Stanford arm  │ Victor Scheinman   │ DH         │ 6   │ RRPRRR     │ dynamics                 │</span>
+<span class="go">│Ball     │ ball          │                    │ DH         │ 10  │ RRRRRRRRRR │                          │</span>
+<span class="go">│Hyper    │ Hyper10       │                    │ DH         │ 10  │ RRRRRRRRRR │ symbolic                 │</span>
+<span class="go">│Coil     │ Hyper10       │                    │ DH         │ 10  │ RRRRRRRRRR │ symbolic                 │</span>
+<span class="go">│Cobra600 │ Cobra600      │ Adept              │ DH         │ 4   │ RRPR       │                          │</span>
+<span class="go">│IRB140   │ IRB 140       │ ABB                │ DH         │ 6   │ RRRRRR     │                          │</span>
+<span class="go">│KR5      │ KR5           │ KUKA               │ DH         │ 6   │ RRRRRR     │                          │</span>
+<span class="go">│Orion5   │ Orion 5       │ RAWR Robotics      │ DH         │ 4   │ RRRR       │                          │</span>
+<span class="go">│Planar3  │ Planar 3 link │                    │ DH         │ 3   │ RRR        │ planar                   │</span>
+<span class="go">│Planar2  │ Planar 2 link │                    │ DH         │ 2   │ RR         │ planar                   │</span>
+<span class="go">│LWR4     │ LWR-IV        │ Kuka               │ DH         │ 7   │ RRRRRRR    │                          │</span>
+<span class="go">│Sawyer   │ Sawyer        │ Rethink Robotics   │ DH         │ 6   │ RRRRRR     │ redundant, symbolic      │</span>
+<span class="go">│UR3      │ UR3           │ Universal Robotics │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic       │</span>
+<span class="go">│UR5      │ UR5           │ Universal Robotics │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic       │</span>
+<span class="go">│UR10     │ UR10          │ Universal Robotics │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic       │</span>
+<span class="go">│Mico     │ Mico          │ Kinova             │ DH         │ 6   │ RRRRRR     │ symbolic                 │</span>
+<span class="go">│Jaco     │ Jaco          │ Kinova             │ DH         │ 6   │ RRRRRR     │ symbolic                 │</span>
+<span class="go">└─────────┴───────────────┴────────────────────┴────────────┴─────┴────────────┴──────────────────────────┘</span>
 
 </pre></div>
 </div>
@@ -4758,7 +4800,7 @@ conventions.</p>
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference external" href="https://rawrobotics.com.au/orion5">https://rawrobotics.com.au/orion5</a></p></li>
-<li><p><a class="reference external" href="https://drive.google.com/file/d/">https://drive.google.com/file/d/</a><a href="#id15"><span class="problematic" id="id16">0B6_9_</span></a>-ZgiRdTNkVqMEkxN2RSc2c/view</p></li>
+<li><p><a class="reference external" href="https://drive.google.com/file/d/">https://drive.google.com/file/d/</a><a href="#id17"><span class="problematic" id="id18">0B6_9_</span></a>-ZgiRdTNkVqMEkxN2RSc2c/view</p></li>
 </ul>
 </dd>
 </dl>
@@ -5284,7 +5326,7 @@ conventions.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 18-Jan-2021.
+        Last updated on 25-Jan-2021.
       </span>
 
     </p>

@@ -258,7 +258,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">elinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ELink</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">elinks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ee&quot;</span><span class="p">))</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elinks</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="c1"># were passed a list of ELinks</span>
+            <span class="c1"># we&#39;re passed a list of ELinks</span>
 
             <span class="c1"># check all the incoming ELink objects</span>
             <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
@@ -553,7 +553,7 @@
 
         <span class="c1"># get the path to the class that defines the robot</span>
         <span class="n">classpath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*** urdf_to_ets_args: &quot;</span><span class="p">,</span> <span class="n">classpath</span><span class="p">)</span>
+        <span class="c1"># print(&quot;*** urdf_to_ets_args: &quot;, classpath)</span>
         <span class="c1"># add on relative path to get to the URDF or xacro file</span>
         <span class="n">base_path</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="n">classpath</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;URDF&#39;</span> <span class="o">/</span> <span class="s1">&#39;xacro&#39;</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">/</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
@@ -1345,13 +1345,20 @@
             <span class="n">link</span> <span class="o">=</span> <span class="n">default</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">link</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;no link named </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">[</span><span class="n">link</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">[</span><span class="n">link</span><span class="p">]</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;no link named </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">ELink</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">link</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">link</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">link</span>
+
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;link not in robot links&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">link</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unknown argument&#39;</span><span class="p">)</span>
 
@@ -1933,49 +1940,9 @@
 
         <span class="k">return</span> <span class="n">Jv</span></div>
 
-<div class="viewcode-block" id="ERobot.joint_velocity_damper"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.joint_velocity_damper">[docs]</a>    <span class="k">def</span> <span class="nf">joint_velocity_damper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
-<span class="sd">        make it impossible for the robot to run into joint limits. Requires</span>
-<span class="sd">        the joint limits of the robot to be specified. See examples/mmc.py</span>
-<span class="sd">        for use case</span>
-
-<span class="sd">        :param ps: The minimum angle (in radians) in which the joint is</span>
-<span class="sd">            allowed to approach to its limit</span>
-<span class="sd">        :type ps: float</span>
-<span class="sd">        :param pi: The influence angle (in radians) in which the velocity</span>
-<span class="sd">            damper becomes active</span>
-<span class="sd">        :type pi: float</span>
-<span class="sd">        :param n: The number of joints to consider. Defaults to all joints</span>
-<span class="sd">        :type n: int</span>
-<span class="sd">        :param gain: The gain for the velocity damper</span>
-<span class="sd">        :type gain: float</span>
-
-<span class="sd">        :returns: Ain, Bin as the inequality contraints for an optisator</span>
-<span class="sd">        :rtype: ndarray(6), ndarray(6)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
-
-        <span class="n">Ain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
-        <span class="n">Bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pi</span><span class="p">:</span>
-                <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">gain</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">))</span>
-                <span class="n">Ain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pi</span><span class="p">:</span>
-                <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span>
-                <span class="n">Ain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-
-        <span class="k">return</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">Bin</span></div>
-
 <div class="viewcode-block" id="ERobot.link_collision_damper"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">[docs]</a>    <span class="k">def</span> <span class="nf">link_collision_damper</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">di</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">from_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_link</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into a collision. Requires</span>
@@ -2001,13 +1968,13 @@
 <span class="sd">        :rtype: ndarray(6), ndarray(6)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="k">if</span> <span class="n">from_link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">from_link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
+        <span class="k">if</span> <span class="n">startlink</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
 
-        <span class="k">if</span> <span class="n">to_link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">to_link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_link</span>
+        <span class="k">if</span> <span class="n">endlink</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_link</span>
 
-        <span class="n">links</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">from_link</span><span class="p">,</span> <span class="n">to_link</span><span class="p">)</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
@@ -2027,7 +1994,7 @@
                 <span class="n">norm_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">norm</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span>
-                    <span class="n">q</span><span class="p">,</span> <span class="n">from_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="n">to_link</span><span class="o">=</span><span class="n">link</span><span class="p">,</span>
+                    <span class="n">q</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">link</span><span class="p">,</span>
                     <span class="n">offset</span><span class="o">=</span><span class="n">link_col</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
                 <span class="n">n_dim</span> <span class="o">=</span> <span class="n">Je</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">dp</span> <span class="o">=</span> <span class="n">norm_h</span> <span class="o">@</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span>
@@ -2046,7 +2013,7 @@
 
             <span class="k">for</span> <span class="n">link_col</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
                 <span class="n">l_Ain</span><span class="p">,</span> <span class="n">l_bin</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">wTcp</span> <span class="o">=</span> <span class="n">indiv_calculation</span><span class="p">(</span>
-                                                <span class="n">link</span><span class="p">,</span> <span class="n">link_col</span><span class="p">,</span> <span class="n">q</span><span class="p">[:</span><span class="n">j</span><span class="p">])</span>
+                                                <span class="n">link</span><span class="p">,</span> <span class="n">link_col</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">l_Ain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">l_bin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">Ain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2161,7 +2128,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 18-Jan-2021.
+        Last updated on 25-Jan-2021.
       </span>
 
     </p>

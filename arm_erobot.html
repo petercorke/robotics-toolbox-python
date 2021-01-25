@@ -1022,35 +1022,6 @@ to None</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0v">
-<code class="sig-name descname">jacob0v</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0v"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0v" title="Permalink to this definition">¶</a></dt>
-<dd><p>Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
-configuration q, which relates the velocity in the end-effector frame
-to velocity in the base frame</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p></li>
-<li><p><strong>endlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the final link which the Jacobian represents</p></li>
-<li><p><strong>startlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the first link which the Jacobian represents</p></li>
-<li><p><strong>offset</strong> (<em>SE3</em><em>, </em><em>optional</em>) – a static offset transformation matrix to apply to the
-end of endlink, defaults to None</p></li>
-<li><p><strong>T</strong> (<em>SE3</em><em>, </em><em>optional</em>) – The transformation matrix of the reference point which the
-Jacobian represents with respect to the base frame. Use this to
-avoid caluclating forward kinematics to save time, defaults
-to None</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns J</dt>
-<dd class="field-even"><p>The velocity Jacobian in 0 frame</p>
-</dd>
-<dt class="field-odd">Rtype J</dt>
-<dd class="field-odd"><p>float ndarray(6,6)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.accel">
 <code class="sig-name descname">accel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">qd</span></em>, <em class="sig-param"><span class="n">torque</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.accel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute acceleration due to applied torque</p>
@@ -1182,12 +1153,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925, -0.    ],</span>
 <span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    , -0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [-0.    , -0.2119, -0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1675,6 +1646,7 @@ chosen.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Implements a Levenberg-Marquadt variable-step-size solver.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
@@ -1757,6 +1729,7 @@ be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Implements a modified Levenberg-Marquadt variable-step-size solver
 which is quite robust in practice.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
@@ -1792,6 +1765,17 @@ October 2011, pp. 984-991.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.ikine_global">
+<code class="sig-name descname">ikine_global</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Experimental code for using SciPy global optimizers.</p>
+</div>
+<p>Each global optimizer has quite a different call signature, so final
+design will need a bit of thought.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.ikine_min">
 <code class="sig-name descname">ikine_min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">q0</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qlim</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ilimit</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-16</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stiffness</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">costfun</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
@@ -1816,13 +1800,14 @@ joint angles, useful when n is large (default 0)</p></li>
 <dd class="field-odd"><p>named tuple</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_unc(T)</span></code> are the joint coordinates (n) corresponding
+<p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_min(T)</span></code> are the joint coordinates (n) corresponding
 to the robot end-effector pose T which is an SE3 object.  The
 return value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
 <p><strong>Minimization method</strong>:</p>
 <p>By default this method uses:</p>
 <ul class="simple">
-<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> minimizer for the case of no joint limits</p></li>
+<li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">SLSQP</span></code> (Sequential Least Squares Programming) minimizer
+for the case of no joint limits</p></li>
 <li><p>the Scipy <code class="docutils literal notranslate"><span class="pre">trust-constr</span></code> minimizer for the case with joint limits.
 This gives good results but is very slow.  An alternative is
 <code class="docutils literal notranslate"><span class="pre">L-BFGS-B</span></code> (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
@@ -1849,6 +1834,7 @@ the previous time step.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
+<li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
 <li><p>Uses <code class="docutils literal notranslate"><span class="pre">SciPy.minimize</span></code> with bounds.</p></li>
 <li><p>Joint limits are considered in this solution.</p></li>
 <li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
@@ -1988,8 +1974,37 @@ will be included in the result.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0v">
+<code class="sig-name descname">jacob0v</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0v"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
+configuration q, which relates the velocity in the end-effector frame
+to velocity in the base frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p></li>
+<li><p><strong>endlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the final link which the Jacobian represents</p></li>
+<li><p><strong>startlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the first link which the Jacobian represents</p></li>
+<li><p><strong>offset</strong> (<em>SE3</em><em>, </em><em>optional</em>) – a static offset transformation matrix to apply to the
+end of endlink, defaults to None</p></li>
+<li><p><strong>T</strong> (<em>SE3</em><em>, </em><em>optional</em>) – The transformation matrix of the reference point which the
+Jacobian represents with respect to the base frame. Use this to
+avoid caluclating forward kinematics to save time, defaults
+to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns J</dt>
+<dd class="field-even"><p>The velocity Jacobian in 0 frame</p>
+</dd>
+<dt class="field-odd">Rtype J</dt>
+<dd class="field-odd"><p>float ndarray(6,6)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.joint_velocity_damper">
-<code class="sig-name descname">joint_velocity_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ps</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">pi</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gain</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.joint_velocity_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.joint_velocity_damper" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">joint_velocity_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ps</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">pi</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">gain</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.joint_velocity_damper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Formulates an inequality contraint which, when optimised for will
 make it impossible for the robot to run into joint limits. Requires
 the joint limits of the robot to be specified. See examples/mmc.py
@@ -2099,7 +2114,7 @@ tuples or hexstrings.</p></li>
 matplotlib documentation.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a href="#id11"><span class="problematic" id="id12">`</span></a>Specifying colors</p></li>
+<li><p><a href="#id13"><span class="problematic" id="id14">`</span></a>Specifying colors</p></li>
 </ul>
 <p>&lt;<a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py</a>&gt;`_
 - <a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p>
@@ -2175,21 +2190,21 @@ zero if the robot is at a singularity.</p></li>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;yoshikawa&quot;</span></code></p></td>
 <td><p>Volume of the velocity ellipsoid, <em>distance</em>
-from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id13"><span>[Yoshikawa85]</span></a></p></td>
+from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id15"><span>[Yoshikawa85]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;invcondition&quot;</span></code></p></td>
 <td><p>Inverse condition number of Jacobian, isotropy
-of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id14"><span>[Klein87]</span></a></p></td>
+of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id16"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;minsingular&quot;</span></code></p></td>
 <td><p>Minimum singular value of the Jacobian,
-<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id15"><span>[Klein87]</span></a></p></td>
+<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id17"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;asada&quot;</span></code></p></td>
 <td><p>Isotropy of the task-space acceleration
 ellipsoid which is a function of the Cartesian
 inertia matrix which depends on the inertial
-parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id16"><span>[Asada83]</span></a></p></td>
+parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id18"><span>[Asada83]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -2216,18 +2231,18 @@ parameters.</p></li>
 <dd class="field-odd"><p></p></dd>
 </dl>
 <dl class="citation">
-<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id13">Yoshikawa85</a></span></dt>
+<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id15">Yoshikawa85</a></span></dt>
 <dd><p>Manipulability of Robotic Mechanisms. Yoshikawa T.,
 The International Journal of Robotics Research.
 1985;4(2):3-9. doi:10.1177/027836498500400201</p>
 </dd>
-<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id16">Asada83</a></span></dt>
+<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id18">Asada83</a></span></dt>
 <dd><p>A geometrical representation of manipulator dynamics and
 its application to arm design, H. Asada,
 Journal of Dynamic Systems, Measurement, and Control,
 vol. 105, p. 131, 1983.</p>
 </dd>
-<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id14">1</a>,<a href="#id15">2</a>)</span></dt>
+<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id16">1</a>,<a href="#id17">2</a>)</span></dt>
 <dd><p>Dexterity Measures for the Design and Control of
 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
 The International Journal of Robotics Research.
@@ -2936,7 +2951,7 @@ end-effector position.</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">
-<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">from_link</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">to_link</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">link_collision_damper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">di</span><span class="o">=</span><span class="default_value">0.3</span></em>, <em class="sig-param"><span class="n">ds</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">xi</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.link_collision_damper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Formulates an inequality contraint which, when optimised for will
 make it impossible for the robot to run into a collision. Requires
 See examples/neo.py for use case</p>
@@ -3089,7 +3104,6 @@ identity) followed by an optional joint variable transform.
 This property returns the whether the</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># link with joint</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span>  <span class="c1"># static link</span>
@@ -3172,7 +3186,6 @@ at zero.</p>
 <p>This is a reference to</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">models</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># base link has no parent</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># second link&#39;s parent</span>
 <span class="go">ELink(panda_link0, ets=)</span>
@@ -3747,22 +3760,22 @@ frame.</p>
 
 </div>
 <div class="section" id="e-models">
-<span id="id17"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
+<span id="id19"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="defined-using-ets">
 <h3>Defined using ETS<a class="headerlink" href="#defined-using-ets" title="Permalink to this headline">¶</a></h3>
 <p>A number of models are defined in terms of elementary transform sequences.
 They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;ETS&quot;</span><span class="p">)</span>
-<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????</span>
-<span class="go">?   class     ?     model     ?    manufacturer     ? model type ? DoF ?    config ? keywords ?</span>
-<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????</span>
-<span class="go">?Panda        ? Panda         ? Franka Emika        ? ETS        ? 7   ? RRRRRRR   ?          ?</span>
-<span class="go">?Frankie      ? Frankie       ? Franka Emika, Omron ? ETS        ? 9   ? RPRRRRRRR ? mobile   ?</span>
-<span class="go">?Puma560      ? Puma560       ? Unimation           ? ETS        ? 6   ? RRRRRR    ?          ?</span>
-<span class="go">?Planar_Y     ? Planar-Y      ?                     ? ETS        ? 6   ? RRRRRR    ?          ?</span>
-<span class="go">?GenericSeven ? Generic Seven ? Jesse&#39;s Imagination ? ETS        ? 7   ? RRRRRRR   ?          ?</span>
-<span class="go">???????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">┌─────────────┬───────────────┬─────────────────────┬────────────┬─────┬───────────┬──────────┐</span>
+<span class="go">│   class     │     model     │    manufacturer     │ model type │ DoF │    config │ keywords │</span>
+<span class="go">├─────────────┼───────────────┼─────────────────────┼────────────┼─────┼───────────┼──────────┤</span>
+<span class="go">│Panda        │ Panda         │ Franka Emika        │ ETS        │ 7   │ RRRRRRR   │          │</span>
+<span class="go">│Frankie      │ Frankie       │ Franka Emika, Omron │ ETS        │ 9   │ RPRRRRRRR │ mobile   │</span>
+<span class="go">│Puma560      │ Puma560       │ Unimation           │ ETS        │ 6   │ RRRRRR    │          │</span>
+<span class="go">│Planar_Y     │ Planar-Y      │                     │ ETS        │ 6   │ RRRRRR    │          │</span>
+<span class="go">│GenericSeven │ Generic Seven │ Jesse&#39;s Imagination │ ETS        │ 7   │ RRRRRRR   │          │</span>
+<span class="go">└─────────────┴───────────────┴─────────────────────┴────────────┴─────┴───────────┴──────────┘</span>
 
 </pre></div>
 </div>
@@ -3887,42 +3900,27 @@ using the elementary transform sequence (ETS).</p>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR3.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR5.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR10.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Puma560.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px100.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px150.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx150.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx200.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300s.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx200.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250s.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Mico.py</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/PR2.py</span>
-<span class="go">????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
-<span class="go">? class  ?  model   ?    manufacturer    ? model type ? DoF ?                                        config ? keywords ?</span>
-<span class="go">????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
-<span class="go">?Panda   ? panda    ? Franka Emika       ? URDF       ? 7   ? RRRRRRR                                       ?          ?</span>
-<span class="go">?UR3     ? ur3      ? Universal Robotics ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
-<span class="go">?UR5     ? ur5      ? Universal Robotics ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
-<span class="go">?UR10    ? ur10     ? Universal Robotics ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
-<span class="go">?Puma560 ? Puma560  ? Unimation          ? URDF       ? 6   ? RRRRRR                                        ?          ?</span>
-<span class="go">?px100   ? px100    ? Interbotix         ? URDF       ? 7   ? RRRRRPP                                       ?          ?</span>
-<span class="go">?px150   ? px150    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
-<span class="go">?rx150   ? rx150    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
-<span class="go">?rx200   ? rx200    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
-<span class="go">?vx300   ? vx300    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
-<span class="go">?vx300s  ? vx300s   ? Interbotix         ? URDF       ? 9   ? RRRRRRRPP                                     ?          ?</span>
-<span class="go">?wx200   ? wx200    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
-<span class="go">?wx250   ? wx250    ? Interbotix         ? URDF       ? 8   ? RRRRRRPP                                      ?          ?</span>
-<span class="go">?wx250s  ? wx250s   ? Interbotix         ? URDF       ? 9   ? RRRRRRRPP                                     ?          ?</span>
-<span class="go">?Mico    ? j2n4s300 ? Kinova             ? URDF       ? 10  ? RRRRRRRRRR                                    ?          ?</span>
-<span class="go">?PR2     ? pr2      ? Willow Garage      ? URDF       ? 45  ? RRRRRRRRRRRRPRRRRRRRRRRPRRRRRPRRRRRRRPRRRRRPR ?          ?</span>
-<span class="go">????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span>
+<span class="go">┌────────┬──────────┬────────────────────┬────────────┬─────┬───────────────────────────────────────────────┬──────────┐</span>
+<span class="go">│ class  │  model   │    manufacturer    │ model type │ DoF │                                        config │ keywords │</span>
+<span class="go">├────────┼──────────┼────────────────────┼────────────┼─────┼───────────────────────────────────────────────┼──────────┤</span>
+<span class="go">│Panda   │ panda    │ Franka Emika       │ URDF       │ 7   │ RRRRRRR                                       │          │</span>
+<span class="go">│Frankie │ frankie  │ Franka Emika       │ URDF       │ 9   │ RPRRRRRRR                                     │          │</span>
+<span class="go">│UR3     │ ur3      │ Universal Robotics │ URDF       │ 6   │ RRRRRR                                        │          │</span>
+<span class="go">│UR5     │ ur5      │ Universal Robotics │ URDF       │ 6   │ RRRRRR                                        │          │</span>
+<span class="go">│UR10    │ ur10     │ Universal Robotics │ URDF       │ 6   │ RRRRRR                                        │          │</span>
+<span class="go">│Puma560 │ Puma560  │ Unimation          │ URDF       │ 6   │ RRRRRR                                        │          │</span>
+<span class="go">│px100   │ px100    │ Interbotix         │ URDF       │ 7   │ RRRRRPP                                       │          │</span>
+<span class="go">│px150   │ px150    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
+<span class="go">│rx150   │ rx150    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
+<span class="go">│rx200   │ rx200    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
+<span class="go">│vx300   │ vx300    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
+<span class="go">│vx300s  │ vx300s   │ Interbotix         │ URDF       │ 9   │ RRRRRRRPP                                     │          │</span>
+<span class="go">│wx200   │ wx200    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
+<span class="go">│wx250   │ wx250    │ Interbotix         │ URDF       │ 8   │ RRRRRRPP                                      │          │</span>
+<span class="go">│wx250s  │ wx250s   │ Interbotix         │ URDF       │ 9   │ RRRRRRRPP                                     │          │</span>
+<span class="go">│Mico    │ j2n4s300 │ Kinova             │ URDF       │ 10  │ RRRRRRRRRR                                    │          │</span>
+<span class="go">│PR2     │ pr2      │ Willow Garage      │ URDF       │ 45  │ RRRRRRRRRRRRPRRRRRRRRRRPRRRRRPRRRRRRRPRRRRRPR │          │</span>
+<span class="go">└────────┴──────────┴────────────────────┴────────────┴─────┴───────────────────────────────────────────────┴──────────┘</span>
 
 </pre></div>
 </div>
@@ -3936,7 +3934,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Panda.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐</span>
 <span class="go">│id │     link     │   parent    │    joint     │                     ETS                     │</span>
@@ -3973,6 +3970,53 @@ characteristics.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="roboticstoolbox.models.URDF.Frankie">
+<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">Frankie</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/Frankie.html#Frankie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.Frankie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>Class that imports a Frankie URDF model</p>
+<p><code class="docutils literal notranslate"><span class="pre">Frankie()</span></code> is a class which imports a Frankie robot definition
+from a URDF file.  The model describes its kinematic and graphical
+characteristics.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Frankie</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">┌───┬──────────────┬─────────────┬───────────────────┬─────────────────────────────────────────────┐</span>
+<span class="go">│id │     link     │   parent    │       joint       │                     ETS                     │</span>
+<span class="go">├───┼──────────────┼─────────────┼───────────────────┼─────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │  panda_base0 │           - │                   │                                             │</span>
+<span class="go">│ 1 │  panda_base1 │ panda_base0 │ panda_base_joint1 │ Rz(q0)                                      │</span>
+<span class="go">│ 2 │  panda_link0 │ panda_base1 │ panda_base_joint2 │ tz(0.3) * tx(q1)                            │</span>
+<span class="go">│ 3 │  panda_link1 │ panda_link0 │      panda_joint1 │ tz(0.333) * Rz(q2)                          │</span>
+<span class="go">│ 4 │  panda_link2 │ panda_link1 │      panda_joint2 │ Rx(-90°) * Rz(q3)                           │</span>
+<span class="go">│ 5 │  panda_link3 │ panda_link2 │      panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q4)               │</span>
+<span class="go">│ 6 │  panda_link4 │ panda_link3 │      panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q5)               │</span>
+<span class="go">│ 7 │  panda_link5 │ panda_link4 │      panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q6) │</span>
+<span class="go">│ 8 │  panda_link6 │ panda_link5 │      panda_joint6 │ Rx(90°) * Rz(q7)                            │</span>
+<span class="go">│ 9 │  panda_link7 │ panda_link6 │      panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q8)                │</span>
+<span class="go">│10 │ @panda_link8 │ panda_link7 │      panda_joint8 │ tz(0.107)                                   │</span>
+<span class="go">└───┴──────────────┴─────────────┴───────────────────┴─────────────────────────────────────────────┘</span>
+
+<span class="go">┌─────┬─────┬────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
+<span class="go">│name │ q0  │ q1 │ q2  │ q3     │ q4  │ q5    │ q6  │ q7    │ q8   │</span>
+<span class="go">├─────┼─────┼────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
+<span class="go">│  qz │  0° │  0 │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
+<span class="go">│  qr │  0° │  0 │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">└─────┴─────┴────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+<li><p>qs, arm is stretched out in the x-direction</p></li>
+<li><p>qn, arm is at a nominal non-singular configuration</p></li>
+</ul>
+<p><em>Code author: Jesse Haviland</em></p>
+<p><em>Section author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
 <dt id="roboticstoolbox.models.URDF.UR3">
 <em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.models.URDF.</code><code class="sig-name descname">UR3</code><a class="reference internal" href="_modules/roboticstoolbox/models/URDF/UR3.html#UR3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.models.URDF.UR3" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
@@ -3982,7 +4026,6 @@ definition from a URDF file.  The model describes its kinematic and
 graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR3</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR3.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬────────────────────────────────────┐</span>
 <span class="go">│id │      link      │     parent     │             joint              │                ETS                 │</span>
@@ -4028,7 +4071,6 @@ definition from a URDF file.  The model describes its kinematic and
 graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR5</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR5.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
 <span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
@@ -4074,7 +4116,6 @@ definition from a URDF file.  The model describes its kinematic and
 graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR10</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/UR10.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
 <span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
@@ -4120,7 +4161,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Puma560.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬────────┬────────┬───────┬───────────────────────────────────────────────────────────┐</span>
 <span class="go">│id │  link  │ parent │ joint │                            ETS                            │</span>
@@ -4166,7 +4206,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px100</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px100.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
@@ -4220,7 +4259,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px150</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/px150.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
@@ -4275,7 +4313,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx150</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx150.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
@@ -4330,7 +4367,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx200</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/rx200.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
@@ -4385,7 +4421,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                    ETS                    │</span>
@@ -4440,7 +4475,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300s</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/vx300s.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬───────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │       parent        │    joint     │                    ETS                    │</span>
@@ -4496,7 +4530,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx200</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx200.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
@@ -4551,7 +4584,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │      parent       │    joint     │                    ETS                     │</span>
@@ -4606,7 +4638,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250s</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/wx250s.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬────────────────────────────────────────────┐</span>
 <span class="go">│id │        link         │       parent        │    joint     │                    ETS                     │</span>
@@ -4662,7 +4693,6 @@ from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Mico</span><span class="p">()</span>
-<span class="go">*** urdf_to_ets_args:  /opt/hostedtoolcache/Python/3.7.9/x64/lib/python3.7/site-packages/roboticstoolbox/models/URDF/Mico.py</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">┌───┬─────────────────────────────┬────────────────────────┬─────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────┐</span>
 <span class="go">│id │            link             │         parent         │            joint            │                                           ETS                                            │</span>
@@ -4727,7 +4757,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 18-Jan-2021.
+        Last updated on 25-Jan-2021.
       </span>
 
     </p>

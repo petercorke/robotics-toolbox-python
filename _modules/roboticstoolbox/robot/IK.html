@@ -169,7 +169,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.tools.null</span> <span class="kn">import</span> <span class="n">null</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">Twist3</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Bounds</span><span class="p">,</span> <span class="n">LinearConstraint</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="k">as</span> <span class="nn">opt</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">qpsolvers</span> <span class="k">as</span> <span class="nn">qp</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.tools.p_servo</span> <span class="kn">import</span> <span class="n">p_servo</span>
@@ -358,6 +358,7 @@
 
 <span class="sd">        .. note::</span>
 
+<span class="sd">            - See `Toolbox kinematics wiki page &lt;https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics&gt;`_</span>
 <span class="sd">            - Implements a Levenberg-Marquadt variable-step-size solver.</span>
 <span class="sd">            - The tolerance is computed on the norm of the error between</span>
 <span class="sd">              current and desired tool pose.  This norm is computed from</span>
@@ -604,6 +605,7 @@
 
 <span class="sd">        .. note::</span>
 
+<span class="sd">            - See `Toolbox kinematics wiki page &lt;https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics&gt;`_</span>
 <span class="sd">            - Implements a modified Levenberg-Marquadt variable-step-size solver</span>
 <span class="sd">              which is quite robust in practice.</span>
 <span class="sd">            - The tolerance is computed on the norm of the error between</span>
@@ -873,7 +875,7 @@
 <span class="sd">        :return: inverse kinematic solution</span>
 <span class="sd">        :rtype: named tuple</span>
 
-<span class="sd">        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding</span>
+<span class="sd">        ``sol = robot.ikine_min(T)`` are the joint coordinates (n) corresponding</span>
 <span class="sd">        to the robot end-effector pose T which is an SE3 object.  The</span>
 <span class="sd">        return value ``sol`` is a named tuple with elements:</span>
 
@@ -891,7 +893,8 @@
 
 <span class="sd">        By default this method uses:</span>
 
-<span class="sd">        - the Scipy ``SLSQP`` minimizer for the case of no joint limits</span>
+<span class="sd">        - the Scipy ``SLSQP`` (Sequential Least Squares Programming) minimizer</span>
+<span class="sd">          for the case of no joint limits</span>
 <span class="sd">        - the Scipy ``trust-constr`` minimizer for the case with joint limits.</span>
 <span class="sd">          This gives good results but is very slow.  An alternative is</span>
 <span class="sd">          ``L-BFGS-B`` (Broyden–Fletcher–Goldfarb–Shanno) but for redundant</span>
@@ -921,6 +924,7 @@
 
 <span class="sd">        .. note::</span>
 
+<span class="sd">            - See `Toolbox kinematics wiki page &lt;https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics&gt;`_</span>
 <span class="sd">            - Uses ``SciPy.minimize`` with bounds.</span>
 <span class="sd">            - Joint limits are considered in this solution.</span>
 <span class="sd">            - Can be used for robots with arbitrary degrees of freedom.</span>
@@ -970,7 +974,7 @@
 
         <span class="k">if</span> <span class="n">qlim</span><span class="p">:</span>
             <span class="c1"># dealing with joint limits</span>
-            <span class="n">bounds</span> <span class="o">=</span> <span class="n">Bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">Bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
 
             <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;trust-constr&#39;</span>
@@ -995,7 +999,7 @@
             <span class="k">return</span> <span class="n">E</span>
 
         <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span>
                 <span class="n">cost</span><span class="p">,</span>
                 <span class="n">q0</span><span class="p">,</span> 
                 <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">Tk</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">costfun</span><span class="p">,</span> <span class="n">stiffness</span><span class="p">),</span>
@@ -1019,6 +1023,74 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">solutions</span>
 
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="k">def</span> <span class="nf">ikine_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ilimit</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        .. warning:: Experimental code for using SciPy global optimizers.</span>
+
+<span class="sd">        Each global optimizer has quite a different call signature, so final</span>
+<span class="sd">        design will need a bit of thought.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># basinhopping:</span>
+        <span class="c1"># brute: ranges, finish=None</span>
+        <span class="c1"># differential_evolution:  bounds, tol</span>
+        <span class="c1"># shgo: bounds, options:f_tol</span>
+        <span class="c1"># dual_annealing: bounds</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">q0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">solutions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">wr</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reach</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">wr</span><span class="p">,</span> <span class="n">wr</span><span class="p">,</span> <span class="n">wr</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">optdict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;differential-evolution&#39;</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;brute&#39;</span><span class="p">:</span>
+            <span class="c1"># requires a tuple of tuples</span>
+            <span class="n">optdict</span><span class="p">[</span><span class="s1">&#39;ranges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">qlim</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optdict</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">qlim</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;basinhopping&#39;</span><span class="p">,</span> <span class="s1">&#39;brute&#39;</span><span class="p">,</span> <span class="s1">&#39;differential_evolution&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;shgo&#39;</span><span class="p">,</span> <span class="s1">&#39;dual_annealing&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown global optimizer requested&#39;</span><span class="p">)</span>
+
+        <span class="n">global_minimizer</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">method</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
+            <span class="c1"># T, weight, costfun, stiffness = args</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">_angle_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">weight</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">global_minimizer</span><span class="p">(</span>
+                <span class="n">cost</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">optdict</span><span class="p">)</span>
+            
+
+            <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">nit</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>  <span class="c1"># use this solution as initial estimate for next time</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">solutions</span>
+            
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="c1"># def ikine_min(self, T, q0=None, pweight=1.0, stiffness=0.0,</span>
@@ -1292,17 +1364,19 @@
     <span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 
     <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">OA</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">sol</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ikine_LMS</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>         <span class="c1"># solve IK</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>                    <span class="c1"># display joint angles</span>
+    <span class="c1"># sol = robot.ikine_LMS(T)         # solve IK</span>
+    <span class="c1"># print(sol)                    # display joint angles</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
-    <span class="n">robot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+    <span class="c1"># print(T)</span>
+    <span class="c1"># print(robot.fkine(sol.q))</span>
+    <span class="c1"># robot.plot(sol.q)</span>
 
-    <span class="n">sol</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ikine_unc</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">costfun</span><span class="o">=</span><span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e-6</span> <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">))</span>
-    <span class="n">robot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+    <span class="c1"># sol = robot.ikine_unc(T, costfun=lambda q: q[1] * 1e-6 if q[1] &gt; 0 else -q[1])</span>
+    <span class="c1"># print(sol)</span>
+    <span class="c1"># print(robot.fkine(sol.q))</span>
+    <span class="c1"># robot.plot(sol.q)</span>
+
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">ikine_global</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;brute&#39;</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -1316,7 +1390,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 18-Jan-2021.
+        Last updated on 25-Jan-2021.
       </span>
 
     </p>
