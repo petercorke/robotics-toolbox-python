@@ -43,7 +43,7 @@ def list(keywords=None, dof=None, mtype=None):
             Column("DoF", colalign="<"),
             Column("config", colalign="<"),
             Column("keywords", headalign="^", colalign="<"),
-            border="thin"
+            border=border
         )
 
         if mtype is not None:
@@ -83,7 +83,7 @@ def list(keywords=None, dof=None, mtype=None):
 
     try:
         make_table('thin')
-    except:
+    except UnicodeEncodeError:
         make_table('ascii')
 
 
