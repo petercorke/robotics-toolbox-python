@@ -83,7 +83,7 @@ def list(keywords=None, dof=None, mtype=None):
 
     try:
         make_table('thin')
-    except UnicodeEncodeError:
+    except:
         make_table('ascii')
 
 
