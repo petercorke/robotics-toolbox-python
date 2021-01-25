@@ -87,7 +87,6 @@ class ROS(Connector):  # pragma nocover
     def add(
             self, ob):
         """
-
         """
 
         super().add()
