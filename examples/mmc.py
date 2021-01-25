@@ -31,14 +31,14 @@ env.add(panda)
 n = 7
 
 # Set the desired end-effector pose
-Tep = panda.fkine() * sm.SE3(0.3, 0.2, 0.3)
+Tep = panda.fkine(panda.q) * sm.SE3(0.3, 0.2, 0.3)
 
 arrived = False
 
 while not arrived:
 
     # The pose of the Panda's end-effector
-    Te = panda.fkine()
+    Te = panda.fkine(panda.q)
 
     # Transform from the end-effector to desired pose
     eTep = Te.inv() * Tep
@@ -63,7 +63,7 @@ while not arrived:
     Q[n:, n:] = (1 / e) * np.eye(6)
 
     # The equality contraints
-    Aeq = np.c_[panda.jacobe(), np.eye(6)]
+    Aeq = np.c_[panda.jacobe(panda.q), np.eye(6)]
     beq = v.reshape((6,))
 
     # The inequality constraints for joint limit avoidance

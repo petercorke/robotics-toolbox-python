@@ -11,8 +11,22 @@ import spatialmath as sm
 import time
 import subprocess
 import os
-import rospy
-from std_msgs.msg import Float32MultiArray
+# import rospy
+# from std_msgs.msg import Float32MultiArray
+
+_ros = None
+rospy = None
+
+
+def _import_ros():     # pragma nocover
+    import importlib
+    global rospy
+    try:
+        ros = importlib.import_module('rospy')
+    except ImportError:
+        print(
+            '\nYou must have ROS installed')
+        raise
 
 
 class ROS(Connector):  # pragma nocover
@@ -112,14 +126,14 @@ class VelPub:
         self.robot = robot
         self.v = np.zeros(robot.n)
 
-        self.velocity_publisher = rospy.Publisher(
-            '/joint_velocity',
-            Float32MultiArray, queue_size=1)
+        # self.velocity_publisher = rospy.Publisher(
+        #     '/joint_velocity',
+        #     Float32MultiArray, queue_size=1)
 
         self.relay()
 
-    def relay(self):
+    # def relay(self):
 
-        while True:
-            data = Float32MultiArray(data=self.robot.q)
-            self.velocity_publisher.publish(data)
+    #     while True:
+    #         data = Float32MultiArray(data=self.robot.q)
+    #         self.velocity_publisher.publish(data)

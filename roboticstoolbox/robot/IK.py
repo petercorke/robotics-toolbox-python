@@ -8,7 +8,7 @@ from collections import namedtuple
 from roboticstoolbox.tools.null import null
 from spatialmath import base
 from spatialmath import SE3, Twist3
-from scipy.optimize import minimize, Bounds, LinearConstraint
+import scipy.optimize as opt
 import math
 import qpsolvers as qp
 from roboticstoolbox.tools.p_servo import p_servo
@@ -197,6 +197,7 @@ class IKMixin:
 
         .. note::
 
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-step-size solver.
             - The tolerance is computed on the norm of the error between
               current and desired tool pose.  This norm is computed from
@@ -443,6 +444,7 @@ class IKMixin:
 
         .. note::
 
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a modified Levenberg-Marquadt variable-step-size solver
               which is quite robust in practice.
             - The tolerance is computed on the norm of the error between
@@ -712,7 +714,7 @@ class IKMixin:
         :return: inverse kinematic solution
         :rtype: named tuple
 
-        ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding
+        ``sol = robot.ikine_min(T)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose T which is an SE3 object.  The
         return value ``sol`` is a named tuple with elements:
 
@@ -730,7 +732,8 @@ class IKMixin:
 
         By default this method uses:
 
-        - the Scipy ``SLSQP`` minimizer for the case of no joint limits
+        - the Scipy ``SLSQP`` (Sequential Least Squares Programming) minimizer
+          for the case of no joint limits
         - the Scipy ``trust-constr`` minimizer for the case with joint limits.
           This gives good results but is very slow.  An alternative is
           ``L-BFGS-B`` (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
@@ -760,6 +763,7 @@ class IKMixin:
 
         .. note::
 
+            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Uses ``SciPy.minimize`` with bounds.
             - Joint limits are considered in this solution.
             - Can be used for robots with arbitrary degrees of freedom.
@@ -809,7 +813,7 @@ class IKMixin:
 
         if qlim:
             # dealing with joint limits
-            bounds = Bounds(self.qlim[0, :], self.qlim[1, :])
+            bounds = opt.Bounds(self.qlim[0, :], self.qlim[1, :])
 
             if method is None:
                 method='trust-constr'
@@ -834,7 +838,7 @@ class IKMixin:
             return E
 
         for Tk in T:
-            res = minimize(
+            res = opt.minimize(
                 cost,
                 q0, 
                 args=(Tk.A, weight, costfun, stiffness),
@@ -858,6 +862,74 @@ class IKMixin:
         else:
             return solutions
 
+# --------------------------------------------------------------------- #
+
+    def ikine_global(self, T, q0=None, qlim=False, ilimit=1000, tol=1e-16, method=None, options={}):
+        r"""
+        .. warning:: Experimental code for using SciPy global optimizers.
+
+        Each global optimizer has quite a different call signature, so final
+        design will need a bit of thought.
+
+        """
+
+        # basinhopping:
+        # brute: ranges, finish=None
+        # differential_evolution:  bounds, tol
+        # shgo: bounds, options:f_tol
+        # dual_annealing: bounds
+
+        if not isinstance(T, SE3):
+            T = SE3(T)
+
+        if q0 is None:
+            q0 = np.zeros((self.n))
+        else:
+            q0 = base.getvector(q0, self.n)
+
+        solutions = []
+
+        wr = 1 / self.reach
+        weight = np.r_[wr, wr, wr, 1, 1, 1]
+
+        optdict = {}
+
+        if method is None:
+            method='differential-evolution'
+
+        if method == 'brute':
+            # requires a tuple of tuples
+            optdict['ranges'] = tuple([tuple(l.qlim) for l in self])
+        else:
+            optdict['bounds'] = tuple([tuple(l.qlim) for l in self])
+
+
+        if method not in ['basinhopping', 'brute', 'differential_evolution',
+                          'shgo', 'dual_annealing']:
+            raise ValueError('unknown global optimizer requested')
+
+        global_minimizer = opt.__dict__[method]
+
+        def cost(q, T, weight):
+            # T, weight, costfun, stiffness = args
+            e = _angle_axis(self.fkine(q).A, T) * weight
+            return (e**2).sum()
+
+        for Tk in T:
+            res = global_minimizer(
+                cost,
+                **optdict)
+            
+
+            solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
+            solutions.append(solution)
+            q0 = res.x  # use this solution as initial estimate for next time
+
+        if len(T) == 1:
+            return solutions[0]
+        else:
+            return solutions
+            
 # --------------------------------------------------------------------- #
 
     # def ikine_min(self, T, q0=None, pweight=1.0, stiffness=0.0,
@@ -1131,14 +1203,16 @@ if __name__ == "__main__":  # pragma nocover
     robot = rtb.models.DH.Panda()
 
     T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-    sol = robot.ikine_LMS(T)         # solve IK
-    print(sol)                    # display joint angles
+    # sol = robot.ikine_LMS(T)         # solve IK
+    # print(sol)                    # display joint angles
 
-    print(T)
-    print(robot.fkine(sol.q))
-    robot.plot(sol.q)
+    # print(T)
+    # print(robot.fkine(sol.q))
+    # robot.plot(sol.q)
 
-    sol = robot.ikine_unc(T, costfun=lambda q: q[1] * 1e-6 if q[1] > 0 else -q[1])
-    print(sol)
-    print(robot.fkine(sol.q))
-    robot.plot(sol.q)
+    # sol = robot.ikine_unc(T, costfun=lambda q: q[1] * 1e-6 if q[1] > 0 else -q[1])
+    # print(sol)
+    # print(robot.fkine(sol.q))
+    # robot.plot(sol.q)
+
+    sol = robot.ikine_global(T, method='brute')

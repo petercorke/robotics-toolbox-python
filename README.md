@@ -110,8 +110,8 @@ orientation parallel to y-axis (O=+Y)).
 from spatialmath import SE3
 
 T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ikine_unc(T)         # solve IK
-print(sol.q)                    # display joint angles
+sol = robot.ikine_min(T)         # solve IK
+print(sol.q)                     # display joint angles
 
 	[-0.01044    7.876    1.557    -6.81    1.571    4.686   0.5169]
 

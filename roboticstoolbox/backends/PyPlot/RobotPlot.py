@@ -144,8 +144,12 @@ class RobotPlot(object):
         # Remove oldjoint z coordinates
         if self.jointaxes:
             j = 0
-            # for joint in self.joints:
-            #     joint.remove()
+
+            for joint in self.joints:
+                self.ax.collections.remove(joint)
+
+            del self.joints
+            self.joints = []
 
             # Plot joint z coordinates
             for i in range(len(self.robot.links)):

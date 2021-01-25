@@ -89,7 +89,7 @@ def list(keywords=None, dof=None, mtype=None):
                     config,
                     ', '.join(robot.keywords)
                 )
-    table.print()
+    print(str(table).encode('utf8', errors='replace').decode('utf8'))
 
 
 if __name__ == "__main__":   # pragma nocover

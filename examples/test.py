@@ -14,27 +14,22 @@ env = rtb.backends.Swift()
 env.launch()
 
 # Create a Panda robot object
-puma = rtb.models.Puma560()
+r = rtb.models.Frankie()
 
 # Set joint angles to ready configuration
-puma.q = puma.qr
+r.q = r.qr
 
 # Add the puma to the simulator
-env.add(puma)
+env.add(r)
+time.sleep(1)
 
-# Tep = puma.fkine() * sm.SE3.Tz(0.1)
+Tep = r.fkine(r.q) * sm.SE3.Tx(1.0) * sm.SE3.Ty(1.0)
 
-# arrived = False
+arrived = False
 
-# dt = 0.05
+dt = 0.05
 
-# while not arrived:
-
-#     start = time.time()
-#     v, arrived = rtb.p_servo(puma.fkine(), Tep, 0.1)
-#     puma.qd = np.linalg.pinv(puma.jacobe()) @ v
-#     env.step(50)
-#     stop = time.time()
-
-#     if stop - start < dt:
-#         time.sleep(dt - (stop - start))
+while not arrived:
+    v, arrived = rtb.p_servo(r.fkine(r.q), Tep, 0.1)
+    r.qd = np.linalg.pinv(r.jacobe(r.q)) @ v
+    env.step(dt)
