@@ -79,7 +79,7 @@ def list(keywords=None, dof=None, mtype=None):
                         ', '.join(robot.keywords)
                     )
 
-        print(str(table).encode('utf8', errors='replace').decode('utf8'))
+        print(str(table))
 
     try:
         make_table('thin')
