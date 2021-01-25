@@ -34,7 +34,7 @@ def list(keywords=None, dof=None, mtype=None):
     # module = importlib.import_module(
     #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
 
-    try:
+    def make_table(border):
         table = ANSITable(
             Column("class", headalign="^", colalign="<"),
             Column("model", headalign="^", colalign="<"),
@@ -45,51 +45,46 @@ def list(keywords=None, dof=None, mtype=None):
             Column("keywords", headalign="^", colalign="<"),
             border="thin"
         )
+
+        if mtype is not None:
+            categories = [mtype]
+        else:
+            categories = ['DH', 'URDF', 'ETS']
+        for category in categories:
+            group = m.__dict__[category]
+            for cls in group.__dict__.values():
+                if isinstance(cls, type) and issubclass(cls, Robot):
+                    # we found a Robot subclass, instantiate it
+                    robot = cls()
+                    try:
+                        config = robot.config()
+                    except Exception:   # pragma nocover
+                        config = ""
+
+                    # apply filters
+                    if keywords is not None:
+                        if len(set(keywords) & set(robot.keywords)) == 0:
+                            continue
+                    if dof is not None and robot.n != dof:
+                        continue     # pragma nocover
+
+                    # add the row
+                    table.row(
+                        cls.__name__,
+                        robot.name,
+                        robot.manufacturer,
+                        category,
+                        robot.n,
+                        config,
+                        ', '.join(robot.keywords)
+                    )
+
+        print(str(table).encode('utf8', errors='replace').decode('utf8'))
+
+    try:
+        make_table('thin')
     except UnicodeEncodeError:
-        table = ANSITable(
-            Column("class", headalign="^", colalign="<"),
-            Column("model", headalign="^", colalign="<"),
-            Column("manufacturer", headalign="^", colalign="<"),
-            Column("model type", headalign="^", colalign="<"),
-            Column("DoF", colalign="<"),
-            Column("config", colalign="<"),
-            Column("keywords", headalign="^", colalign="<"),
-            border="ascii"
-        )
-
-    if mtype is not None:
-        categories = [mtype]
-    else:
-        categories = ['DH', 'URDF', 'ETS']
-    for category in categories:
-        group = m.__dict__[category]
-        for cls in group.__dict__.values():
-            if isinstance(cls, type) and issubclass(cls, Robot):
-                # we found a Robot subclass, instantiate it
-                robot = cls()
-                try:
-                    config = robot.config()
-                except Exception:   # pragma nocover
-                    config = ""
-
-                # apply filters
-                if keywords is not None:
-                    if len(set(keywords) & set(robot.keywords)) == 0:
-                        continue
-                if dof is not None and robot.n != dof:
-                    continue     # pragma nocover
-
-                # add the row
-                table.row(
-                    cls.__name__,
-                    robot.name,
-                    robot.manufacturer,
-                    category,
-                    robot.n,
-                    config,
-                    ', '.join(robot.keywords)
-                )
-    print(str(table).encode('utf8', errors='replace').decode('utf8'))
+        make_table('ascii')
 
 
 if __name__ == "__main__":   # pragma nocover
