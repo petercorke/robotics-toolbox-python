@@ -34,16 +34,28 @@ def list(keywords=None, dof=None, mtype=None):
     # module = importlib.import_module(
     #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
 
-    table = ANSITable(
-        Column("class", headalign="^", colalign="<"),
-        Column("model", headalign="^", colalign="<"),
-        Column("manufacturer", headalign="^", colalign="<"),
-        Column("model type", headalign="^", colalign="<"),
-        Column("DoF", colalign="<"),
-        Column("config", colalign="<"),
-        Column("keywords", headalign="^", colalign="<"),
-        border="thin"
-    )
+    try:
+        table = ANSITable(
+            Column("class", headalign="^", colalign="<"),
+            Column("model", headalign="^", colalign="<"),
+            Column("manufacturer", headalign="^", colalign="<"),
+            Column("model type", headalign="^", colalign="<"),
+            Column("DoF", colalign="<"),
+            Column("config", colalign="<"),
+            Column("keywords", headalign="^", colalign="<"),
+            border="thin"
+        )
+    except UnicodeEncodeError:
+        table = ANSITable(
+            Column("class", headalign="^", colalign="<"),
+            Column("model", headalign="^", colalign="<"),
+            Column("manufacturer", headalign="^", colalign="<"),
+            Column("model type", headalign="^", colalign="<"),
+            Column("DoF", colalign="<"),
+            Column("config", colalign="<"),
+            Column("keywords", headalign="^", colalign="<"),
+            border="ascii"
+        )
 
     if mtype is not None:
         categories = [mtype]
