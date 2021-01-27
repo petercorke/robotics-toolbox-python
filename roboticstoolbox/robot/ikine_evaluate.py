@@ -23,6 +23,7 @@ elif example == 'panda':
     T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
     q0 = robot.qz
 
+
 # build the list of IK methods to test
 # it's a tuple:
 #  - the method to execute
@@ -44,7 +45,11 @@ ikfuncs = [
     (lambda T, q0: robot.ikine_min(T, q0, qlim=True), #numerical solution with constraints
         "ikine_min(qlim=True)",
         "sol = robot.ikine_min(T, q0, qlim=True)"
-    )
+    ),
+    # (robot.ikine_mmc, #numerical solution with no constraints
+    #     "ikine_min(qlim=False)",
+    #     "sol = robot.ikine_min(T, q0)"
+    # ),
 ]
 if hasattr(robot, "ikine_a"):
     a =  (robot.ikine_a, # analytic solution
@@ -61,8 +66,8 @@ N = 10
 
 # setup results table
 table = ANSITable(
-    Column("Operation", headalign="^"),
-    Column("Time (μs)", headalign="^", fmt="{:.2f}"),
+    Column("Operation", headalign="^", colalign='<'),
+    Column("Time (ms)", headalign="^", fmt="{:.2g}"),
     Column("Error", headalign="^", fmt="{:.3g}"),
     border="thick")
 
@@ -91,7 +96,8 @@ for ik in ikfuncs:
         t = 0
 
     # add it to the output table
-    table.row(ik[1], t/N*1e6, err)
+    table.row(f"`{ik[1]}`", t/N*1e3, err)
 
 # pretty print the results     
 table.print()
+print(table.markdown())

@@ -40,7 +40,7 @@ class SuperETS(UserList, ABC):
             # flip = e.isflip
             # joint = e.isjoint
             # T = e.T
-            self.data = [copy.copy(axis.data[0])]
+            self.data = copy.copy(axis.data)
             return
 
         if axis in ('Rx', 'Ry', 'Rz', 'tx', 'ty', 'tz'):
@@ -673,7 +673,7 @@ class SuperETS(UserList, ABC):
             >>> e[1:3]
 
         """
-        item = ETS()
+        item = self.__class__()
         data = self.data[i]  # can be [2] or slice, eg. [3:5]
         # ensure that data is always a list
         if isinstance(data, list):
@@ -705,9 +705,33 @@ class SuperETS(UserList, ABC):
             >>> tail
             >>> e
         """
-        item = ETS()
+        item = self.__class__()
         item.data = [super().pop(i)]
         return item
+
+    def insert(self, i=-1, et=None):
+        """
+        Insert value
+
+        :param i: insert an ET into the ET sequence, default is at the end
+        :type i: int
+        :param et: the elementary transform to insert
+        :type et: ETS
+
+        Inserts an ET into the ET sequence.  The inserted value is at position
+        ``i``.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
+            >>> f = ETS.ry()
+            >>> e.insert(2, f)
+            >>> e
+        """
+        self.data.insert(i, et.data[0])
 
     def __repr__(self):
         return str(self)
