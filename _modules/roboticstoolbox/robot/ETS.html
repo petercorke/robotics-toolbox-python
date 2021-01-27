@@ -172,14 +172,15 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">getunit</span><span class="p">,</span> <span class="n">trotx</span><span class="p">,</span> <span class="n">troty</span><span class="p">,</span> <span class="n">trotz</span><span class="p">,</span> \
     <span class="n">issymbol</span><span class="p">,</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">transl2</span><span class="p">,</span> <span class="n">trot2</span><span class="p">,</span> <span class="n">removesmall</span><span class="p">,</span> <span class="n">trinv</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">iseye</span>
-    
+
+
 <span class="k">class</span> <span class="nc">SuperETS</span><span class="p">(</span><span class="n">UserList</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 
     <span class="c1"># T is a NumPy array (4,4) or None</span>
     <span class="c1"># ets_tuple = namedtuple(&#39;ETS3&#39;, &#39;eta axis_func axis joint T jindex flip&#39;)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># init UserList superclass</span>
@@ -253,7 +254,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad axis specified&#39;</span><span class="p">)</span>
 
         <span class="c1"># Save all the params in a named tuple</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> <span class="n">axis_func</span><span class="o">=</span><span class="n">axis_func</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="n">joint</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span>
+            <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> <span class="n">axis_func</span><span class="o">=</span><span class="n">axis_func</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="n">joint</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="n">j</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
 
         <span class="c1"># And make it the only value of this instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span>
@@ -1555,7 +1558,8 @@
 
 <span class="sd">        :seealso: :func:`ETS`, :func:`isrevolute`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> 
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span>
             <span class="n">axis_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">theta</span><span class="p">:</span> <span class="n">trot2</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ETS2.tx"><a class="viewcode-back" href="../../../arm_ets.html#roboticstoolbox.robot.ETS.ETS2.tx">[docs]</a>    <span class="nd">@classmethod</span>
@@ -1580,7 +1584,8 @@
 
 <span class="sd">        :seealso: :func:`ETS`, :func:`isprismatic`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;tx&#39;</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> 
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;tx&#39;</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span>
             <span class="n">axis_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">transl2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ETS2.ty"><a class="viewcode-back" href="../../../arm_ets.html#roboticstoolbox.robot.ETS.ETS2.ty">[docs]</a>    <span class="nd">@classmethod</span>
@@ -1605,7 +1610,8 @@
 
 <span class="sd">        :seealso: :func:`ETS`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;ty&#39;</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span> 
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;ty&#39;</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">eta</span><span class="p">,</span>
             <span class="n">axis_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">transl2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
@@ -1676,7 +1682,6 @@
     <span class="c1"># print(e.inv().eval(q))</span>
     <span class="c1"># print(e.eval(q) * e.inv().eval(q))</span>
 
-
     <span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">compile</span><span class="p">())</span>
@@ -1693,7 +1698,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 25-Jan-2021.
+        Last updated on 27-Jan-2021.
       </span>
 
     </p>
