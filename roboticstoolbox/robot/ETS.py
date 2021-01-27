@@ -11,14 +11,15 @@ import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix, iseye
-    
+
+
 class SuperETS(UserList, ABC):
 
     # T is a NumPy array (4,4) or None
     # ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
 
     def __init__(
-            self, axis=None, eta=None, axis_func=None, 
+            self, axis=None, eta=None, axis_func=None,
             unit='rad', j=None, flip=False):
 
         super().__init__()  # init UserList superclass
@@ -92,7 +93,9 @@ class SuperETS(UserList, ABC):
             raise ValueError('bad axis specified')
 
         # Save all the params in a named tuple
-        e = SimpleNamespace(eta=eta, axis_func=axis_func, axis=axis, joint=joint, T=T, jindex=j, flip=flip)
+        e = SimpleNamespace(
+            eta=eta, axis_func=axis_func,
+            axis=axis, joint=joint, T=T, jindex=j, flip=flip)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -1370,7 +1373,8 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isrevolute`
         """
-        return cls(axis='R', eta=eta, 
+        return cls(
+            axis='R', eta=eta,
             axis_func=lambda theta: trot2(theta), unit=unit, **kwargs)
 
     @classmethod
@@ -1395,7 +1399,8 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`, :func:`isprismatic`
         """
-        return cls(axis='tx', eta=eta, 
+        return cls(
+            axis='tx', eta=eta,
             axis_func=lambda x: transl2(x, 0), **kwargs)
 
     @classmethod
@@ -1420,7 +1425,8 @@ class ETS2(SuperETS):
 
         :seealso: :func:`ETS`
         """
-        return cls(axis='ty', eta=eta, 
+        return cls(
+            axis='ty', eta=eta,
             axis_func=lambda y: transl2(0, y), **kwargs)
 
 
@@ -1490,7 +1496,6 @@ if __name__ == "__main__":
     # print(e.eval(q))
     # print(e.inv().eval(q))
     # print(e.eval(q) * e.inv().eval(q))
-
 
     e = ETS.rz() * ETS.tx(-1) * ETS.tx(1) * ETS.rz()
     print(e)
