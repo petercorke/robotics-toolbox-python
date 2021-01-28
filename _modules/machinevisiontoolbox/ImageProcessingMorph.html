@@ -1,0 +1,1131 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>machinevisiontoolbox.ImageProcessingMorph &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="../../_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../image.html">Image processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>machinevisiontoolbox.ImageProcessingMorph</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for machinevisiontoolbox.ImageProcessingMorph</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="k">as</span> <span class="nn">cv</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+
+
+<span class="k">class</span> <span class="nc">ImageProcessingMorphMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Image processing morphological operations on the Image class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_getse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get structuring element</span>
+
+<span class="sd">        :param se: structuring element</span>
+<span class="sd">        :type se: array (N,H)</span>
+<span class="sd">        :return se: structuring element</span>
+<span class="sd">        :rtype: Image instance (N,H) as uint8</span>
+
+<span class="sd">        - ``IM.getse(se)`` converts matrix ``se`` into a uint8 numpy array for</span>
+<span class="sd">          opencv, which only accepts kernels of type CV_8U</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">se</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot convert array with negative values to a structuring element&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">se</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">erode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;replicate&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Morphological erosion</span>
+
+<span class="sd">        :param se: structuring element</span>
+<span class="sd">        :type se: numpy array (S,T), where S &lt; N and T &lt; H</span>
+<span class="sd">        :param n: number of times to apply the erosion</span>
+<span class="sd">        :type n: integer</span>
+<span class="sd">        :param opt: option specifying the type of erosion</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :return out: Image with eroded binary image pixel values</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.erode(se, opt)`` is the image after morphological erosion with</span>
+<span class="sd">          structuring element ``se``.</span>
+
+<span class="sd">        - ``IM.erode(se, n, opt)`` as above, but the structruring element</span>
+<span class="sd">          ``se`` is applied ``n`` times, that is ``n`` erosions.</span>
+
+<span class="sd">        :options:</span>
+
+<span class="sd">            - &#39;replicate&#39;     the border value is replicated (default)</span>
+<span class="sd">            - &#39;none&#39;          pixels beyond the border are not included in the</span>
+<span class="sd">              window</span>
+<span class="sd">            - &#39;trim&#39;          output is not computed for pixels where the</span>
+<span class="sd">              structuring element crosses the image border, hence output image</span>
+<span class="sd">              has reduced dimensions TODO</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Cheaper to apply a smaller structuring element multiple times</span>
+<span class="sd">              than one large one, the effective structuing element is the</span>
+<span class="sd">              Minkowski sum of the structuring element with itself N times.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check if valid input:</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getse</span><span class="p">(</span><span class="n">se</span><span class="p">)</span>
+        <span class="c1"># TODO check if se is valid (odd number and less than im.shape)</span>
+        <span class="c1"># consider cv.getStructuringElement?</span>
+        <span class="c1"># eg, se = cv.getStructuringElement(cv.MORPH_RECT, (3,3))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;n must be greater than 0&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt must be a string&#39;</span><span class="p">)</span>
+
+        <span class="n">cvopt</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;replicate&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">BORDER_REPLICATE</span><span class="p">,</span>
+            <span class="s1">&#39;none&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">BORDER_ISOLATED</span><span class="p">,</span>
+            <span class="c1"># &#39;wrap&#39;: cv.BORDER_WRAP # BORDER_WRAP is not supported in OpenCV</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cvopt</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt is not a valid option&#39;</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">erode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span>
+                                <span class="n">iterations</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                                <span class="n">borderType</span><span class="o">=</span><span class="n">cvopt</span><span class="p">[</span><span class="n">opt</span><span class="p">],</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">dilate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;replicate&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Morphological dilation</span>
+
+<span class="sd">        :param se: structuring element</span>
+<span class="sd">        :type se: numpy array (S,T), where S &lt; N and T &lt; H</span>
+<span class="sd">        :param n: number of times to apply the dilation</span>
+<span class="sd">        :type n: integer</span>
+<span class="sd">        :param opt: option specifying the type of dilation</span>
+<span class="sd">        :type opt: string :return</span>
+<span class="sd">        out: Image with dilated binary image values</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.dilate(se, opt)`` is the image after morphological dilation with</span>
+<span class="sd">          structuring element ``se``.</span>
+
+<span class="sd">        - ``IM.dilate(se, n, opt)`` as above, but the structruring element</span>
+<span class="sd">          ``se`` is applied ``n`` times, that is ``n`` dilations.</span>
+
+<span class="sd">        :options::</span>
+
+<span class="sd">            - &#39;replicate&#39;     the border value is replicated (default)</span>
+<span class="sd">            - &#39;none&#39;          pixels beyond the border are not included in the</span>
+<span class="sd">              window</span>
+<span class="sd">            - &#39;trim&#39;          output is not computed for pixels where the</span>
+<span class="sd">              structuring element crosses the image border, hence output image</span>
+<span class="sd">              has reduced dimensions TODO</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Cheaper to apply a smaller structuring element multiple times</span>
+<span class="sd">            than one large one, the effective structuing element is the</span>
+<span class="sd">            Minkowski sum of the structuring element with itself N times.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check if valid input:</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getse</span><span class="p">(</span><span class="n">se</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;n must be greater than 0&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt must be a string&#39;</span><span class="p">)</span>
+
+        <span class="c1"># convert options TODO trim?</span>
+        <span class="n">cvopt</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;replicate&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">BORDER_REPLICATE</span><span class="p">,</span>
+            <span class="s1">&#39;none&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">BORDER_ISOLATED</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cvopt</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt is not a valid option&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># for im in [img.image in self]: # then can use cv.dilate(im)</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span>
+                       <span class="n">iterations</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                       <span class="n">borderType</span><span class="o">=</span><span class="n">cvopt</span><span class="p">[</span><span class="n">opt</span><span class="p">],</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">morph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">oper</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;replicate&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Morphological neighbourhood processing</span>
+
+<span class="sd">        :param se: structuring element :type se: numpy array (S,T), where S &lt; N</span>
+<span class="sd">        and T &lt; H :param oper: option specifying the type of morphological</span>
+<span class="sd">        operation :type oper: string :param n: number of times to apply the</span>
+<span class="sd">        operation :type n: integer :param opt: option specifying the border</span>
+<span class="sd">        options :type opt: string :return out: Image with morphed pixel values</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.morph(se, opt)`` is the image after morphological operation with</span>
+<span class="sd">          structuring element ``se``.</span>
+
+<span class="sd">        - ``IM.morph(se, n, opt)`` as above, but the structruring element</span>
+<span class="sd">          ``se`` is applied ``n`` times, that is ``n`` morphological</span>
+<span class="sd">          operations.</span>
+
+<span class="sd">        :operation options:</span>
+
+<span class="sd">            - &#39;min&#39;       minimum value over the structuring element</span>
+<span class="sd">            - &#39;max&#39;       maximum value over the structuring element</span>
+<span class="sd">            - &#39;diff&#39;      maximum - minimum value over the structuring element</span>
+<span class="sd">            - &#39;plusmin&#39;   the minimum of the pixel value and the pixelwise sum</span>
+<span class="sd">            of the () structuring element and source neighbourhood. :TODO:</span>
+
+<span class="sd">        :border options:</span>
+
+<span class="sd">            - &#39;replicate&#39;    the border value is replicated (default)</span>
+<span class="sd">            - &#39;none&#39;      pixels beyond the border not included in window</span>
+<span class="sd">            - &#39;trim&#39;      output is not computed for pixels where the se</span>
+<span class="sd">            crosses the image border, hence output image has reduced dimensions</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Cheaper to apply a smaller structuring element multiple times</span>
+<span class="sd">              than one large one, the effective structuing element is the</span>
+<span class="sd">              Minkowski sum of the structuring element with itself N times.</span>
+<span class="sd">            - Performs greyscale morphology</span>
+<span class="sd">            - The structuring element shoul dhave an odd side length.</span>
+<span class="sd">            - For binary image, min = erosion, max = dilation.</span>
+<span class="sd">            - The ``plusmin`` operation can be used to compute the distance</span>
+<span class="sd">              transform.</span>
+<span class="sd">            - The input can be logical, uint8, uint16, float or double.</span>
+<span class="sd">            - The output is always double</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check if valid input:</span>
+        <span class="c1"># se = cv.getStructuringElement(cv.MORPH_RECT, (3,3))</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getse</span><span class="p">(</span><span class="n">se</span><span class="p">)</span>
+
+        <span class="c1"># TODO check if se is valid (odd number and less than im.shape),</span>
+        <span class="c1"># can also be a scalar</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">oper</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">oper</span><span class="p">,</span> <span class="s1">&#39;oper must be a string&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s1">&#39;n must be greater than 0&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt must be a string&#39;</span><span class="p">)</span>
+
+        <span class="c1"># convert options TODO trim?</span>
+        <span class="n">cvopt</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;replicate&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">BORDER_REPLICATE</span><span class="p">,</span>
+            <span class="s1">&#39;none&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">BORDER_ISOLATED</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cvopt</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt is not a valid option&#39;</span><span class="p">)</span>
+        <span class="c1"># note: since we are calling erode/dilate, we stick with opt. we use</span>
+        <span class="c1"># cvopt[opt] only when calling the cv.erode/cv.dilate functions</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">oper</span> <span class="o">==</span> <span class="s1">&#39;min&#39;</span><span class="p">:</span>
+                <span class="n">imo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">erode</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">oper</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span>
+                <span class="n">imo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">oper</span> <span class="o">==</span> <span class="s1">&#39;diff&#39;</span><span class="p">:</span>
+                <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getse</span><span class="p">(</span><span class="n">se</span><span class="p">)</span>
+                <span class="n">imo</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">morphologyEx</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                      <span class="n">cv</span><span class="o">.</span><span class="n">MORPH_GRADIENT</span><span class="p">,</span>
+                                      <span class="n">se</span><span class="p">,</span>
+                                      <span class="n">iterations</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                                      <span class="n">borderType</span><span class="o">=</span><span class="n">cvopt</span><span class="p">[</span><span class="n">opt</span><span class="p">],</span>
+                                      <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">oper</span> <span class="o">==</span> <span class="s1">&#39;plusmin&#39;</span><span class="p">:</span>
+                <span class="c1"># out = None  # TODO</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">oper</span><span class="p">,</span> <span class="s1">&#39;plusmin not supported yet&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">oper</span><span class="p">,</span> <span class="s1">&#39;morph does not support oper&#39;</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imo</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">hitormiss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hit or miss transform</span>
+
+<span class="sd">        :param s1: structuring element 1</span>
+<span class="sd">        :type s1: numpy array (S,T), where S &lt; N and T &lt; H</span>
+<span class="sd">        :param s2: structuring element 2</span>
+<span class="sd">        :type s2: numpy array (S,T), where S &lt; N and T &lt; H</span>
+<span class="sd">        :return out: Image</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.hitormiss(s1, s2)`` is the image with the hit-or-miss transform</span>
+<span class="sd">          of the binary image with the structuring element ``s1``. Unlike</span>
+<span class="sd">          standard morphological operations, ``s1`` has three possible values:</span>
+<span class="sd">          0, 1 and don&#39;t care (represented by nans).</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check valid input</span>
+        <span class="c1"># TODO also check if binary image?</span>
+
+        <span class="k">if</span> <span class="n">s2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">s1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">s1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">imv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">imhm</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">image</span> <span class="o">*</span> <span class="n">imv</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">image</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imhm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find end points on a binary skeleton image</span>
+
+<span class="sd">        :return out: Image with endpoints</span>
+<span class="sd">        :rtype: Image instance (N,H,3) or (N,H)</span>
+
+<span class="sd">        - ``IM.endpoint()`` is the binary image where pixels are set if the</span>
+<span class="sd">          corresponding pixel in the binary image ``im`` is the end point of a</span>
+<span class="sd">          single-pixel wide line such as found in an image skeleton.  Computed</span>
+<span class="sd">          using the hit-or-miss morphological operator.</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5.3, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">se</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">hitormiss</span><span class="p">(</span><span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">triplepoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find triple points</span>
+
+<span class="sd">        :return out: Image with triplepoints</span>
+<span class="sd">        :rtype: Image instance (N,H,3) or (N,H)</span>
+
+<span class="sd">        - ``IM.triplepoint()`` is the binary image where pixels are set if the</span>
+<span class="sd">          corresponding pixel in the binary image  is a triple point, that is</span>
+<span class="sd">          where three single-pixel wide line intersect. These are the Voronoi</span>
+<span class="sd">          points in an image skeleton.  Computed using the hit-or-miss</span>
+<span class="sd">          morphological operator.</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5.3, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">se</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">13</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">14</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">se</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">hitormiss</span><span class="p">(</span><span class="n">se</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Morphological opening</span>
+
+<span class="sd">        :param se: structuring element</span>
+<span class="sd">        :type se: numpy array (S,T), where S &lt; N and T &lt; H</span>
+<span class="sd">        :param n: number of times to apply the dilation</span>
+<span class="sd">        :type n: integer</span>
+<span class="sd">        :param opt: option specifying the type of dilation</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :return out: Image</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.iopen(se, opt)`` is the image after morphological opening with</span>
+<span class="sd">          structuring element ``se``. This is a morphological erosion followed</span>
+<span class="sd">          by dilation.</span>
+
+<span class="sd">        - ``IM.iopen(se, n, opt)`` as above, but the structruring element</span>
+<span class="sd">          ``se`` is applied ``n`` times, that is ``n`` erosions followed by</span>
+<span class="sd">          ``n`` dilations.</span>
+
+<span class="sd">        :options:</span>
+
+<span class="sd">            - &#39;border&#39;    the border value is replicated (default)</span>
+<span class="sd">            - &#39;none&#39;      pixels beyond the border not included in the window</span>
+<span class="sd">            - &#39;trim&#39;      output is not computed for pixels where the</span>
+<span class="sd">            structuring element crosses the image border, hence output</span>
+<span class="sd">            image has reduced dimensions TODO</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - For binary image an opening operation can be used to eliminate</span>
+<span class="sd">              small white noise regions.</span>
+<span class="sd">            - Cheaper to apply a smaller structuring element multiple times</span>
+<span class="sd">              than one large one, the effective structuing element is the</span>
+<span class="sd">              Minkowski sum of the structuring element with itself N times.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># probably cleanest approach:</span>
+        <span class="c1"># out = [self.erode(se, **kwargs).dilate(se, **kwargs) for im in self]</span>
+        <span class="c1"># return self.__class__(out)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">erode</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Morphological closing</span>
+
+<span class="sd">        :param se: structuring element</span>
+<span class="sd">        :type se: numpy array (S,T), where S &lt; N and T &lt; H</span>
+<span class="sd">        :param n: number of times to apply the operation</span>
+<span class="sd">        :type n: integer</span>
+<span class="sd">        :param opt: option specifying the type of border behaviour</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :return out: Image</span>
+<span class="sd">        :rtype: Image instance (N,H,3) or (N,H)</span>
+
+<span class="sd">        - ``IM.iclose(se, opt)`` is the image after morphological closing with</span>
+<span class="sd">          structuring element ``se``. This is a morphological dilation followed</span>
+<span class="sd">          by erosion.</span>
+
+<span class="sd">        - ``IM.iclose(se, n, opt)`` as above, but the structuring element</span>
+<span class="sd">          ``se`` is applied ``n`` times, that is ``n`` dilations followed by</span>
+<span class="sd">          ``n`` erosions.</span>
+
+<span class="sd">        :options:</span>
+
+<span class="sd">            - &#39;border&#39;    the border value is replicated (default)</span>
+<span class="sd">            - &#39;none&#39;      pixels beyond the border not included in the window</span>
+<span class="sd">            - &#39;trim&#39;      output is not computed for pixels where the</span>
+<span class="sd">            structuring element crosses the image border, hence output</span>
+<span class="sd">            image has reduced dimensions TODO</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - For binary image an opening operation can be used to eliminate</span>
+<span class="sd">              small white noise regions.</span>
+<span class="sd">            - Cheaper to apply a smaller structuring element multiple times</span>
+<span class="sd">              than one large one, the effective structuing element is the</span>
+<span class="sd">              Minkowski sum of the structuring element with itself N times.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">dilate</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">erode</span><span class="p">(</span><span class="n">se</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">thin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Morphological skeletonization</span>
+
+<span class="sd">        :param delay: seconds between each iteration of display</span>
+<span class="sd">        :type delay: float</span>
+<span class="sd">        :return out: Image</span>
+<span class="sd">        :rtype: Image instance (N,H,3) or (N,H)</span>
+
+<span class="sd">        - ``IM.thin()`` is the image as a binary skeleton of the binary image</span>
+<span class="sd">          IM. Any non-zero region is replaced by a network of single-pixel wide</span>
+<span class="sd">          lines.</span>
+
+<span class="sd">        - ``IM.thin(delay)`` as above but graphically displays each iteration</span>
+<span class="sd">          of the skeletonization algorithm with a pause of ``delay`` seconds</span>
+<span class="sd">          between each iteration. TODO</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 12.5, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># create a binary image (True/False)</span>
+        <span class="c1"># im = im &gt; 0</span>
+
+        <span class="c1"># create structuring elements</span>
+        <span class="n">sa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">sb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]])</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">im</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">hitormiss</span><span class="p">(</span><span class="n">sa</span><span class="p">)</span><span class="o">.</span><span class="n">image</span>
+                    <span class="c1"># might also use the bitwise operator ^</span>
+                    <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">hitormiss</span><span class="p">(</span><span class="n">sb</span><span class="p">)</span><span class="o">.</span><span class="n">image</span>
+                    <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
+                    <span class="n">sa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">sa</span><span class="p">)</span>
+                    <span class="n">sb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">sb</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">delay</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="n">im</span><span class="o">.</span><span class="n">disp</span><span class="p">()</span>
+                    <span class="c1"># TODO add in delay timer for idisp</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">image</span> <span class="o">==</span> <span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="n">o</span> <span class="o">=</span> <span class="n">im</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">rank</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;replicate&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rank filter</span>
+
+<span class="sd">        :param se: structuring element</span>
+<span class="sd">        :type se: numpy array</span>
+<span class="sd">        :param rank: rank of filter</span>
+<span class="sd">        :type rank: integer</span>
+<span class="sd">        :param opt: border option</span>
+<span class="sd">        :type opt: string</span>
+<span class="sd">        :return out: Image  after rank filter applied to every pixel</span>
+<span class="sd">        :rtype out: Image instance</span>
+
+<span class="sd">        - ``IM.rank(se, rank)`` is a rank filtered version of image.  Only</span>
+<span class="sd">          pixels corresponding to non-zero elements of the structuring element</span>
+<span class="sd">          ``se`` are ranked and the ``rank``&#39;ed value in rank becomes the</span>
+<span class="sd">          corresponding output pixel value.  The highest rank, the maximum, is</span>
+<span class="sd">          ``rank=-1``.</span>
+
+<span class="sd">        - ``IM.rank(se, rank, opt)`` as above but the processing of edge pixels</span>
+<span class="sd">          can be controlled.</span>
+
+<span class="sd">        :options:</span>
+
+<span class="sd">            - &#39;replicate&#39;     the border value is replicated (default)</span>
+<span class="sd">            - &#39;none&#39;          pixels beyond the border are not included in</span>
+<span class="sd">              the window</span>
+<span class="sd">            - &#39;trim&#39;          output is not computed for pixels where the</span>
+<span class="sd">              structuring element crosses the image border, hence output image</span>
+<span class="sd">              has reduced dimensions TODO</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - The structuring element should have an odd side length.</span>
+<span class="sd">            - The input can be logical, uint8, uint16, float or double, the</span>
+<span class="sd">              output is always double</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;rank is not an int&#39;</span><span class="p">)</span>
+
+        <span class="c1"># border options for rank_filter that are compatible with rank.m</span>
+        <span class="n">borderopt</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;replicate&#39;</span><span class="p">:</span> <span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;wrap&#39;</span><span class="p">:</span> <span class="s1">&#39;wrap&#39;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">opt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">borderopt</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="s1">&#39;opt is not a valid option&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">rank_filter</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                              <span class="n">rank</span><span class="p">,</span>
+                                              <span class="n">footprint</span><span class="o">=</span><span class="n">se</span><span class="p">,</span>
+                                              <span class="n">mode</span><span class="o">=</span><span class="n">borderopt</span><span class="p">[</span><span class="n">opt</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">outtype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Label an image</span>
+
+<span class="sd">        :param conn: connectivity, 4 or 8</span>
+<span class="sd">        :type conn: integer</span>
+<span class="sd">        :param ltype: output image type</span>
+<span class="sd">        :type ltype: string</span>
+<span class="sd">        :return out_c: n_components</span>
+<span class="sd">        :rtype out_c: int</span>
+<span class="sd">        :return labels: labelled image</span>
+<span class="sd">        :rtype labels: Image instance</span>
+
+<span class="sd">        - ``IM.label()`` is a label image that indicates connected components</span>
+<span class="sd">          within the image. Each pixel is an integer label that indicates which</span>
+<span class="sd">          connected region the corresponding pixel in image belongs to.  Region</span>
+<span class="sd">          labels are in the range 1 to ``n_components``.</span>
+
+<span class="sd">        - ``IM.label(conn)`` as above, with the connectivity specified. 4 or 8.</span>
+
+<span class="sd">        - ``IM.label(outtype)`` as above, with the output type specified as</span>
+<span class="sd">          either int32 or uint16.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Converts a color image to greyscale.</span>
+<span class="sd">            - This algorithm is variously known as region labelling,</span>
+<span class="sd">              connectivity analysis, connected component analysis,</span>
+<span class="sd">              blob labelling.</span>
+<span class="sd">            - All pixels within a region have the same value (or class).</span>
+<span class="sd">            - The image can be binary or greyscale.</span>
+<span class="sd">            - Connectivity is only performed in 2 dimensions.</span>
+<span class="sd">            - Connectivity is performed using 8 nearest neighbours by default.</span>
+<span class="sd">            - 8-way connectivity introduces ambiguities, a chequerboard is</span>
+<span class="sd">              two blobs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE cv.connectedComponents sees 0 background as one component</span>
+        <span class="c1"># differs from ilabel.m, which sees the separated background as</span>
+        <span class="c1"># different components</span>
+
+        <span class="c1"># NOTE additionally, opencv&#39;s connected components does not give a</span>
+        <span class="c1"># hierarchy! Only opencv&#39;s findcontours does.</span>
+
+        <span class="c1"># NOTE possible solution: edge detection (eg Canny/findCOntours) on the</span>
+        <span class="c1"># binary imaage then invert (bitwise negation) the edge image (or do</span>
+        <span class="c1"># find contours and invert the countour image) limited to connectivity</span>
+        <span class="c1"># of 4, since Canny is 8-connected though! Could dilate edge image to</span>
+        <span class="c1"># accommodate 8-connectivity, but feels like a hack</span>
+
+        <span class="c1"># TODO or, could just follow ilabel.m</span>
+
+        <span class="c1"># NOTE consider scipy.ndimage.label</span>
+        <span class="c1"># from scipy.ndimage import label, generate_binary_structure</span>
+        <span class="c1"># s = generate_binary_structure(2,2) # 8-way connectivity</span>
+        <span class="c1"># labels, n_components = label(im, structure=s), however, this has the</span>
+        <span class="c1"># same behaviour as cv.connectedComponents</span>
+
+        <span class="c1"># check valid input:</span>
+        <span class="c1"># image must be uint8 - input image should actually be binary</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mono</span><span class="p">()</span>
+
+        <span class="c1"># TODO input image must be 8-bit single-channel image</span>
+        <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="s1">&#39;image must be single channel&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">conn</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="s1">&#39;connectivity must be 4 or 8&#39;</span><span class="p">)</span>
+
+        <span class="c1"># make labels uint32s, unique and never recycled?</span>
+        <span class="c1"># set ltype to default to cv.CV_32S</span>
+        <span class="k">if</span> <span class="n">outtype</span> <span class="o">==</span> <span class="s1">&#39;int32&#39;</span><span class="p">:</span>
+            <span class="n">ltype</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">CV_32S</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+        <span class="k">elif</span> <span class="n">outtype</span> <span class="o">==</span> <span class="s1">&#39;uint16&#39;</span><span class="p">:</span>
+            <span class="n">ltype</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">CV_16U</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">ltype</span><span class="p">,</span> <span class="s1">&#39;ltype must be either int32 or uint16&#39;</span><span class="p">)</span>
+
+        <span class="n">out_l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">out_c</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">img</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+            <span class="c1"># NOTE there is connectedComponentsWithAlgorithm, which grants</span>
+            <span class="c1"># 1 other connected component algorithm</span>
+            <span class="c1"># https://docs.opencv.org/4.5.0/d3/dc0/group__imgproc__shape.html</span>
+            <span class="c1"># #gaedef8c7340499ca391d459122e51bef5</span>
+
+            <span class="n">n_components</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">connectedComponents</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                                          <span class="n">labels</span><span class="p">,</span>
+                                                          <span class="n">connectivity</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span>
+                                                          <span class="n">ltype</span><span class="o">=</span><span class="n">ltype</span><span class="p">)</span>
+            <span class="n">out_l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">out_c</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_components</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out_c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out_l</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mpq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Image moments</span>
+
+<span class="sd">        :param p: p&#39;th exponent</span>
+<span class="sd">        :type p: integer</span>
+<span class="sd">        :param q: q&#39;th exponent</span>
+<span class="sd">        :type q: integer</span>
+<span class="sd">        :return: moment</span>
+<span class="sd">        :type: list of scalars (same as image type)</span>
+
+<span class="sd">        -``IM.mpq(p, q)`` is the pq&#39;th moment of the image. That is, the sum of</span>
+<span class="sd">        ``im(x,y) . x^p . y^q``</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;p must be an int&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="s1">&#39;q must be an int&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imeshgrid</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">**</span> <span class="n">q</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">upq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Central image moments</span>
+
+<span class="sd">        :param p: p&#39;th exponent</span>
+<span class="sd">        :type p: integer</span>
+<span class="sd">        :param q: q&#39;th exponent</span>
+<span class="sd">        :type q: integer</span>
+<span class="sd">        :return: moment</span>
+<span class="sd">        :type: list of scalar (same as image type)</span>
+
+<span class="sd">        - ``IM.upq(p, q)`` is the pq&#39;th central moment of the image. That is,</span>
+<span class="sd">          the sum of ``im(x,y) . (x - x0)^p . (y - y0)^q`` where (x0, y0) is</span>
+<span class="sd">          the centroid</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        .. notes::</span>
+
+<span class="sd">            - The central moments are invariant to translation</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;p must be an int&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="s1">&#39;q must be an int&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imeshgrid</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">m00</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">mpq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">xc</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">mpq</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">m00</span>
+            <span class="n">yc</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">mpq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">m00</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">xc</span><span class="p">)</span> <span class="o">**</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">yc</span><span class="p">)</span> <span class="o">**</span> <span class="n">q</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">npq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalized central image moments</span>
+
+<span class="sd">        :param p: p&#39;th exponent</span>
+<span class="sd">        :type p: integer</span>
+<span class="sd">        :param q: q&#39;th exponent</span>
+<span class="sd">        :type q: integer</span>
+<span class="sd">        :return: moment</span>
+<span class="sd">        :type: list of scalar (same as image type)</span>
+
+<span class="sd">        - ``IM.npq(p, q)`` is the pq&#39;th normalized central moment of the image.</span>
+<span class="sd">          That is, the sum of upq(im,p,q) / mpq(im,0,0)</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        .. notes::</span>
+
+<span class="sd">            - The normalized central moments are invariant to translation and</span>
+<span class="sd">              scale.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s1">&#39;p must be an int&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="s1">&#39;q must be an int&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="n">q</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">p</span><span class="o">+</span><span class="n">q</span><span class="p">,</span> <span class="s1">&#39;normalized moments only valid for p+q &gt;= 2&#39;</span><span class="p">)</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">q</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">upq</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="o">/</span> <span class="n">im</span><span class="o">.</span><span class="n">mpq</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="n">g</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">moments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Image moments</span>
+
+<span class="sd">        :param im: binary image</span>
+<span class="sd">        :type im: numpy array</span>
+<span class="sd">        :param binary: if True, all non-zero pixels are treated as 1&#39;s</span>
+<span class="sd">        :type binary: bool</span>
+<span class="sd">        :return: image moments</span>
+<span class="sd">        :type: dictionary</span>
+
+<span class="sd">        - ``IM.moments()`` are the image moments of the image, supplied as a</span>
+<span class="sd">          dictionary.</span>
+
+<span class="sd">        - ``IM.moments(binary)`` as above, but if True, all non-zero pixels are</span>
+<span class="sd">          treated as 1&#39;s in the image.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Converts a color image to greyscale.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mono</span><span class="p">()</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">moments</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">binary</span><span class="p">))</span>
+        <span class="c1"># TODO check binary is True/False, but also consider 1/0</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">humoments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hu image moments</span>
+<span class="sd">        :param im: binary image</span>
+<span class="sd">        :type im: numpy array</span>
+<span class="sd">        :return: hu image moments</span>
+<span class="sd">        :type: dictionary</span>
+
+<span class="sd">        - ``IM.humoments()`` are the Hu image moments of the imag as a</span>
+<span class="sd">          dictionary.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - image is assumed to be a binary image of a single connected</span>
+<span class="sd">              region</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - M-K. Hu, Visual pattern recognition by moment invariants. IRE</span>
+<span class="sd">              Trans. on Information Theory, IT-8:pp. 179-187, 1962.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO check for binary image</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">moments</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cv</span><span class="o">.</span><span class="n">HuMoments</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------#</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c1"># test run ImageProcessingColor.py</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ImageProcessingMorph.py&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

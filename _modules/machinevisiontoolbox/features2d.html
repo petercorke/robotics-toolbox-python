@@ -1,0 +1,661 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>machinevisiontoolbox.features2d &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="../../_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../image.html">Image processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>machinevisiontoolbox.features2d</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for machinevisiontoolbox.features2d</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">SIFT feature class</span>
+<span class="sd">@author: Dorian Tsai</span>
+<span class="sd">@author: Peter Corke</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># https://docs.opencv.org/4.4.0/d7/d60/classcv_1_1SIFT.html</span>
+
+<span class="c1"># from abc import ABC</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="k">as</span> <span class="nn">cv</span>
+<span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
+
+<span class="c1"># from machinevisiontoolbox.Image import *</span>
+<span class="c1"># from machinevisiontoolbox.Image import Image</span>
+
+
+<div class="viewcode-block" id="SuperFeature2D"><a class="viewcode-back" href="../../features2d.html#machinevisiontoolbox.SuperFeature2D">[docs]</a><span class="k">class</span> <span class="nc">SuperFeature2D</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SIFT feature class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># list of attributes</span>
+    <span class="n">_u</span> <span class="o">=</span> <span class="p">[]</span>             <span class="c1"># horizontal image coordinate</span>
+    <span class="n">_v</span> <span class="o">=</span> <span class="p">[]</span>             <span class="c1"># vertical image coordinate</span>
+    <span class="n">_strength</span> <span class="o">=</span> <span class="p">[]</span>      <span class="c1"># feature strength</span>
+    <span class="n">_orientation</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># feature orientation [rad]</span>
+    <span class="n">_scale</span> <span class="o">=</span> <span class="p">[]</span>         <span class="c1"># feature scale</span>
+    <span class="n">_octave</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># octave pyramid octave in which keypoint was detected</span>
+    <span class="c1"># TODO not sure if this is entirely useful for the user</span>
+    <span class="n">_descriptor</span> <span class="o">=</span> <span class="p">[]</span>    <span class="c1"># feature desciptor vector</span>
+    <span class="c1"># length of feature descriptor vector (might be useful</span>
+    <span class="n">_descriptorlength</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># when dealing with other feature descriptors) _image_id = []      # index</span>
+    <span class="c1"># of image containing feature (? or image name?)</span>
+
+    <span class="n">_siftparameters</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># dictionary for parameters and values used for sift</span>
+    <span class="c1"># feature extraction</span>
+
+    <span class="n">_kp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># keypoints of sift (for interfacing with opencv functions)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sortby</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># TODO flesh out sortby option, it can be by strength or scale</span>
+        <span class="c1"># TODO what does nfeatures option to SIFT do? seemingly nothing</span>
+
+        <span class="k">if</span> <span class="n">image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># initialise empty Sift</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">detectors</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;sift&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">SIFT_create</span><span class="p">,</span>
+                <span class="s1">&#39;orb&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">ORB_create</span><span class="p">,</span>
+                <span class="s1">&#39;mser&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">MSER_create</span>
+            <span class="p">}</span>
+            <span class="c1"># check if image is valid</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">mono</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image_id</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">filename</span>
+
+            <span class="c1"># TODO for each image in imagesequence, (input could be image</span>
+            <span class="c1"># sequence)</span>
+            <span class="c1"># do SIFT on each image channel</span>
+
+            <span class="c1"># get a reference to the appropriate detector</span>
+            <span class="c1"># make it case insensitive</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># keyword args not being passed yet</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_detector</span> <span class="o">=</span> <span class="n">detectors</span><span class="p">[</span><span class="n">detector</span><span class="o">.</span><span class="n">lower</span><span class="p">()]()</span>
+
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad detector specified&#39;</span><span class="p">)</span>
+
+            <span class="n">kp</span><span class="p">,</span> <span class="n">des</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detector</span><span class="o">.</span><span class="n">detectAndCompute</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kp</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span> <span class="o">=</span> <span class="n">kp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span> <span class="o">=</span> <span class="n">des</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">()</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_image_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_id</span>  <span class="c1"># TODO should be list of all imageids</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_kp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">[</span><span class="n">ind</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_kp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_descriptor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_descriptor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">return</span> <span class="n">new</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;centroid&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;strength&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.3g}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;scale&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.3g}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">u</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">v</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                      <span class="n">f</span><span class="o">.</span><span class="n">strength</span><span class="p">,</span>
+                      <span class="n">f</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="n">kp</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">u</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">kp</span><span class="o">.</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="p">[</span><span class="n">kp</span><span class="o">.</span><span class="n">angle</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="n">kp</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">scale</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">strength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">strength</span> <span class="o">=</span> <span class="p">[</span><span class="n">kp</span><span class="o">.</span><span class="n">response</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strength</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">strength</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">strength</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">octave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">octave</span> <span class="o">=</span> <span class="p">[</span><span class="n">kp</span><span class="o">.</span><span class="n">octave</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octave</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">octave</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">octave</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Feature centroids</span>
+
+<span class="sd">        :return: Feature centroids as matrix columns</span>
+<span class="sd">        :rtype: ndarray(2,N)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">kp</span><span class="o">.</span><span class="n">pt</span> <span class="k">for</span> <span class="n">kp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">def</span> <span class="nf">drawKeypoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">image</span><span class="p">,</span>
+                      <span class="n">kp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">drawing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">isift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">flags</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># draw sift features on image using cv.drawKeypoints</span>
+
+        <span class="c1"># check valid imagesource</span>
+        <span class="c1"># TODO if max(self._u) or max(self._v) are greater than image width,</span>
+        <span class="c1"># height, respectively, then raise ValueError</span>
+
+        <span class="c1"># TODO check flags, setup dictionary or string for plot options</span>
+
+        <span class="k">if</span> <span class="n">drawing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">drawing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kp</span>
+
+        <span class="k">if</span> <span class="n">isift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">isift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kp</span><span class="p">))</span>  <span class="c1"># might need a +1 here</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">isift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">isift</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># TODO should check that isift is consistent with kp (min value is 0,</span>
+        <span class="c1"># max value is &lt;= len(kp))</span>
+        <span class="n">cv</span><span class="o">.</span><span class="n">drawKeypoints</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                         <span class="n">kp</span><span class="p">[</span><span class="n">isift</span><span class="p">],</span>
+                         <span class="n">drawing</span><span class="p">,</span>
+                         <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">drawing</span><span class="p">)</span>
+
+    <span class="c1"># TODO def draw descriptors? (eg vl_feat, though mvt-mat doesn&#39;t have this)</span>
+    <span class="c1"># TODO descriptor distance</span>
+    <span class="c1"># TODO descriptor similarity</span>
+    <span class="c1"># TODO display/print/char function?</span>
+
+<div class="viewcode-block" id="SuperFeature2D.match"><a class="viewcode-back" href="../../features2d.html#machinevisiontoolbox.SuperFeature2D.match">[docs]</a>    <span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Match SIFT point features</span>
+
+<span class="sd">        :param d1: descriptor matrix for feature set 1</span>
+<span class="sd">        :type d1: numpy array</span>
+<span class="sd">        :param d2: descriptor matrix for feature set 2</span>
+<span class="sd">        :type d2: numpy array</span>
+<span class="sd">        :return: matches m</span>
+<span class="sd">        :rtype: numpy array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># m = []</span>
+
+        <span class="n">ratio</span> <span class="o">=</span> <span class="mf">0.75</span>  <span class="c1"># TODO set as input parameter</span>
+
+        <span class="c1"># TODO check valid input</span>
+        <span class="c1"># d1 and d2 must be numpy arrays</span>
+        <span class="c1"># d1 and d2 must have equal (128 for SIFT) rows</span>
+        <span class="c1"># d1 and d2 must have greater than 1 columns</span>
+
+        <span class="c1"># do matching</span>
+        <span class="c1"># sorting</span>
+        <span class="c1"># return</span>
+
+        <span class="c1"># create BFMatcher object</span>
+        <span class="c1"># bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)</span>
+        <span class="n">bf</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">BFMatcher</span><span class="p">()</span>
+
+        <span class="c1"># Match descriptors.</span>
+        <span class="c1"># matches0 = bf.match(d1, d2)</span>
+        <span class="c1"># there is also:</span>
+        <span class="n">matches0</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">knnMatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Apply ratio test</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">matches0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">distance</span> <span class="o">&lt;</span> <span class="n">ratio</span><span class="o">*</span><span class="n">n</span><span class="o">.</span><span class="n">distance</span><span class="p">:</span>
+                <span class="n">good</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">m</span><span class="p">])</span>
+
+        <span class="c1"># Sort them in the order of their distance.</span>
+        <span class="c1"># matches = sorted(good, key=lambda x: x.distance)</span>
+
+        <span class="c1"># cv2.drawMatchesKnn expects list of lists as matches.</span>
+        <span class="c1"># img3 = cv2.drawMatchesKnn(img1,kp1,img2,kp2,good,flags=2)</span>
+
+        <span class="c1"># Draw first 10 matches.</span>
+        <span class="c1"># img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:10], flags=2)</span>
+
+        <span class="c1"># opencv documentation for the descriptor matches</span>
+        <span class="c1"># https://docs.opencv.org/4.4.0/d4/de0/classcv_1_1DMatch.html</span>
+        <span class="c1"># i - likely the index for the matches</span>
+        <span class="c1"># a - likely the index for the match pairs?</span>
+        <span class="c1"># matches[i][a].distance</span>
+        <span class="c1"># matches[i][a].imgIdx - which image it refers to</span>
+        <span class="c1"># matches[i][a].queryIdx - which feature it is looking at I assume</span>
+        <span class="c1"># matches[i][a].trainIdx?</span>
+
+        <span class="k">return</span> <span class="n">good</span></div>
+
+    <span class="k">def</span> <span class="nf">drawMatches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="n">im1</span><span class="p">,</span>
+                    <span class="n">sift1</span><span class="p">,</span>
+                    <span class="n">im2</span><span class="p">,</span>
+                    <span class="n">sift2</span><span class="p">,</span>
+                    <span class="n">matches</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># TODO should I just have input two SIFT objects,</span>
+        <span class="c1"># or in this case just another SIFT object?</span>
+
+        <span class="c1"># draw_params = dict(matchColor=(0, 255, 0),</span>
+        <span class="c1">#                   singlePointColor=(255, 0, 0),</span>
+        <span class="c1">#                   matchesMask=matches,</span>
+        <span class="c1">#                   flags=0)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">drawMatchesKnn</span><span class="p">(</span><span class="n">im1</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                <span class="n">sift1</span><span class="o">.</span><span class="n">_kp</span><span class="p">,</span>
+                                <span class="n">im2</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                <span class="n">sift2</span><span class="o">.</span><span class="n">_kp</span><span class="p">,</span>
+                                <span class="n">matches</span><span class="p">,</span>
+                                <span class="kc">None</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">im1</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">Features2DMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class adding blob capability to Image</span>
+
+<span class="sd">    It&#39;s methods become methods of Image</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">SIFT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">nfeatures</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+             <span class="n">nOctaveLayers</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+             <span class="n">contrastThreshold</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span>
+             <span class="n">edgeThreshold</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+             <span class="n">sigma</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Detect SIFT features in image</span>
+
+<span class="sd">        :param nfeatures: [description], defaults to 0</span>
+<span class="sd">        :type nfeatures: int, optional</span>
+<span class="sd">        :param nOctaveLayers: [description], defaults to 3</span>
+<span class="sd">        :type nOctaveLayers: int, optional</span>
+<span class="sd">        :param contrastThreshold: [description], defaults to 0.04</span>
+<span class="sd">        :type contrastThreshold: float, optional</span>
+<span class="sd">        :param edgeThreshold: [description], defaults to 10</span>
+<span class="sd">        :type edgeThreshold: int, optional</span>
+<span class="sd">        :param sigma: [description], defaults to 1.6</span>
+<span class="sd">        :type sigma: float, optional</span>
+<span class="sd">        :param kwargs: [description], defaults to 1.6</span>
+<span class="sd">        :type kwargs: float, optional</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+
+<span class="sd">        ``IM.SIFT()`` is an iterable and sliceable object that contains 2D</span>
+<span class="sd">        features with properties:</span>
+
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. autorun:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from machinevisiontoolbox import Image</span>
+<span class="sd">            &gt;&gt;&gt; im = Image(&quot;eiffel2-1.png&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; sift = im.SIFT()</span>
+<span class="sd">            &gt;&gt;&gt; len(sift)  # number of </span>
+<span class="sd">            &gt;&gt;&gt; print(sift[0:5])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">SuperFeature2D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">detector</span><span class="o">=</span><span class="s2">&quot;sift&quot;</span><span class="p">,</span>
+                              <span class="n">nfeatures</span><span class="o">=</span><span class="n">nfeatures</span><span class="p">,</span>
+                              <span class="n">nOctaveLayers</span><span class="o">=</span><span class="n">nOctaveLayers</span><span class="p">,</span>
+                              <span class="n">contrastThreshold</span><span class="o">=</span><span class="n">contrastThreshold</span><span class="p">,</span>
+                              <span class="n">edgeThreshold</span><span class="o">=</span><span class="n">edgeThreshold</span><span class="p">,</span>
+                              <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ORB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">nfeatures</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">scaleFactor</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+            <span class="n">nlevels</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">edgeThreshold</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span>
+            <span class="n">firstLevel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">nPointsBriefDescriptor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">scoreType</span><span class="o">=</span><span class="s1">&#39;harris&#39;</span><span class="p">,</span>
+            <span class="n">patchSize</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span>
+            <span class="n">fastThreshold</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">scoreoptions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;harris&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">ORB_HARRIS_SCORE</span><span class="p">,</span>
+                        <span class="s1">&#39;fast&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">ORB_FAST_SCORE</span><span class="p">}</span>
+
+        <span class="n">score</span> <span class="o">=</span> <span class="n">scoreoptions</span><span class="p">[</span><span class="n">scoreType</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">SuperFeature2D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">detector</span><span class="o">=</span><span class="s2">&quot;orb&quot;</span><span class="p">,</span>
+                              <span class="n">nfeatures</span><span class="o">=</span><span class="n">nfeatures</span><span class="p">,</span>
+                              <span class="n">scaleFactor</span><span class="o">=</span><span class="n">scaleFactor</span><span class="p">,</span>
+                              <span class="n">nlevels</span><span class="o">=</span><span class="n">nlevels</span><span class="p">,</span>
+                              <span class="n">edgeThreshold</span><span class="o">=</span><span class="n">edgeThreshold</span><span class="p">,</span>
+                              <span class="n">firstLevel</span><span class="o">=</span><span class="n">firstLevel</span><span class="p">,</span>
+                              <span class="n">WTA_K</span><span class="o">=</span><span class="n">nPointsBriefDescriptor</span><span class="p">,</span>
+                              <span class="n">scoreType</span><span class="o">=</span><span class="n">score</span><span class="p">,</span>
+                              <span class="n">patchSize</span><span class="o">=</span><span class="n">patchSize</span><span class="p">,</span>
+                              <span class="n">fastThreshold</span><span class="o">=</span><span class="n">fastThreshold</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">MSER</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">delta</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+             <span class="n">minarea</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+             <span class="n">maxarea</span><span class="o">=</span><span class="mi">14400</span><span class="p">,</span>
+             <span class="n">maxvariation</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+             <span class="n">mindiversity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+             <span class="n">maxevolution</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+             <span class="n">areathreshold</span><span class="o">=</span><span class="mf">1.01</span><span class="p">,</span>
+             <span class="n">minmargin</span><span class="o">=</span><span class="mf">0.003</span><span class="p">,</span>
+             <span class="n">edgeblur</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">SuperFeature2D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">detector</span><span class="o">=</span><span class="s1">&#39;mser&#39;</span><span class="p">,</span>
+                              <span class="n">_delta</span><span class="o">=</span><span class="n">delta</span><span class="p">,</span>
+                              <span class="n">_min_area</span><span class="o">=</span><span class="n">minarea</span><span class="p">,</span>
+                              <span class="n">_max_area</span><span class="o">=</span><span class="n">maxarea</span><span class="p">,</span>
+                              <span class="n">_max_variation</span><span class="o">=</span><span class="n">maxvariation</span><span class="p">,</span>
+                              <span class="n">_max_evolution</span><span class="o">=</span><span class="n">maxevolution</span><span class="p">,</span>
+                              <span class="n">_area_threshold</span><span class="o">=</span><span class="n">areathreshold</span><span class="p">,</span>
+                              <span class="n">_min_margin</span><span class="o">=</span><span class="n">minmargin</span><span class="p">,</span>
+                              <span class="n">_edge_blur_size</span><span class="o">=</span><span class="n">edgeblur</span><span class="p">)</span>
+
+    <span class="c1"># each detector should explitly list (&amp;document) all its parameters</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------- #</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># step 1: familiarisation with open cv&#39;s sift</span>
+
+    <span class="c1"># im = cv.imread(&#39;images/test/longquechen-moon.png&#39;)</span>
+    <span class="c1"># im = cv.imread(&#39;images/monalisa.png&#39;)</span>
+    <span class="c1"># imgray = cv.cvtColor(im, cv.COLOR_BGR2GRAY)</span>
+    <span class="c1"># sift = cv.SIFT_create()</span>
+    <span class="c1"># kp = sift.detect(imgray, None)</span>
+    <span class="c1"># kp, des = sift.detectAndCompute(imgray, None)</span>
+    <span class="c1"># https://docs.opencv.org/3.4/d2/d29/classcv_1_1KeyPoint.html</span>
+    <span class="c1"># #aea339bc868102430087b659cd0709c11</span>
+    <span class="c1"># kp[i].pt = (u,v)</span>
+    <span class="c1"># kp[i].angle = orientation [deg?]</span>
+    <span class="c1"># kp[i].class_id? unclear</span>
+    <span class="c1"># kp[i].size = scale</span>
+    <span class="c1"># kp[i].response = strength of keypoint</span>
+    <span class="c1"># kp[i].octave - need to double check, but seems like a really large number</span>
+
+    <span class="c1"># img = cv.drawKeypoints(imgray, kp, im,</span>
+    <span class="c1">#                       flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)</span>
+    <span class="c1"># mvt.idisp(img, title=&#39;sift_keypoints&#39;)</span>
+
+    <span class="c1"># sf = Sift(imgray)</span>
+    <span class="c1"># sf.u</span>
+
+    <span class="c1"># sf0 = sf[0:3]</span>
+    <span class="c1"># sf0.u</span>
+
+    <span class="c1"># drawing = sf.drawSiftKeypoints(imgray)</span>
+
+    <span class="c1"># TODO would be nice to make a root-sift descriptor method, as it is a</span>
+    <span class="c1"># simple addition to the SIFT descriptor</span>
+
+    <span class="c1"># test matching</span>
+
+    <span class="c1"># import code</span>
+    <span class="c1"># code.interact(local=dict(globals(), **locals()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

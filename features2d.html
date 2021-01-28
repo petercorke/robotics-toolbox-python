@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2D image features &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Camera geometry" href="camera.html" />
+    <link rel="prev" title="Blob features" href="blobs.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="image.html">Image processing</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="image.html#function-reference">Function reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="imageproc.html">Image processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imagecolor.html">Color operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel.html">Spatial operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morph.html">Morphological operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="blobs.html">Blob features</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">2D image features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html">Camera geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageio.html">Image i/o</a></li>
+<li class="toctree-l3"><a class="reference internal" href="color.html">Color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shapes.html">Canonic 3D shapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphics.html">Graphics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="image.html">Image processing</a> &raquo;</li>
+        
+      <li>2D image features</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/features2d.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="camera.html" class="btn btn-neutral float-right" title="Camera geometry" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="blobs.html" class="btn btn-neutral float-left" title="Blob features" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="d-image-features">
+<h1>2D image features<a class="headerlink" href="#d-image-features" title="Permalink to this headline">¶</a></h1>
+<p>These functions perform image processing operations on grey-scale and color images.</p>
+<dl class="py class">
+<dt id="machinevisiontoolbox.Image">
+<em class="property">class </em><code class="sig-prename descclassname">machinevisiontoolbox.</code><code class="sig-name descname">Image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colororder</span><span class="o">=</span><span class="default_value">'BGR'</span></em>, <em class="sig-param"><span class="n">iscolor</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">checksize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">checktype</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="machinevisiontoolbox.Image.SIFT">
+<code class="sig-name descname">SIFT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nfeatures</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">nOctaveLayers</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">contrastThreshold</span><span class="o">=</span><span class="default_value">0.04</span></em>, <em class="sig-param"><span class="n">edgeThreshold</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">sigma</span><span class="o">=</span><span class="default_value">1.6</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#machinevisiontoolbox.Image.SIFT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detect SIFT features in image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nfeatures</strong> (<em>int</em><em>, </em><em>optional</em>) – [description], defaults to 0</p></li>
+<li><p><strong>nOctaveLayers</strong> (<em>int</em><em>, </em><em>optional</em>) – [description], defaults to 3</p></li>
+<li><p><strong>contrastThreshold</strong> (<em>float</em><em>, </em><em>optional</em>) – [description], defaults to 0.04</p></li>
+<li><p><strong>edgeThreshold</strong> (<em>int</em><em>, </em><em>optional</em>) – [description], defaults to 10</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – [description], defaults to 1.6</p></li>
+<li><p><strong>kwargs</strong> (<em>float</em><em>, </em><em>optional</em>) – [description], defaults to 1.6</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>[description]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[type]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">IM.SIFT()</span></code> is an iterable and sliceable object that contains 2D
+features with properties:</p>
+<p>Example:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="machinevisiontoolbox.SuperFeature2D">
+<em class="property">class </em><code class="sig-prename descclassname">machinevisiontoolbox.</code><code class="sig-name descname">SuperFeature2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">detector</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sortby</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/features2d.html#SuperFeature2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.SuperFeature2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>A SIFT feature class</p>
+<dl class="py method">
+<dt id="machinevisiontoolbox.SuperFeature2D.match">
+<code class="sig-name descname">match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/features2d.html#SuperFeature2D.match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.SuperFeature2D.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match SIFT point features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d1</strong> (<em>numpy array</em>) – descriptor matrix for feature set 1</p></li>
+<li><p><strong>d2</strong> (<em>numpy array</em>) – descriptor matrix for feature set 2</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>matches m</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.SuperFeature2D.pt">
+<em class="property">property </em><code class="sig-name descname">pt</code><a class="headerlink" href="#machinevisiontoolbox.SuperFeature2D.pt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Feature centroids</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Feature centroids as matrix columns</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,N)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="camera.html" class="btn btn-neutral float-right" title="Camera geometry" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="blobs.html" class="btn btn-neutral float-left" title="Blob features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

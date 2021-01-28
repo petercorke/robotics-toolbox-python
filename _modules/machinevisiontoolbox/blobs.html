@@ -1,0 +1,1099 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>machinevisiontoolbox.blobs &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="../../_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../image.html">Image processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>machinevisiontoolbox.blobs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for machinevisiontoolbox.blobs</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">2D Blob feature class</span>
+<span class="sd">@author: Dorian Tsai</span>
+<span class="sd">@author: Peter Corke</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="k">as</span> <span class="nn">cv</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">machinevisiontoolbox.IImage</span> <span class="kn">import</span> <span class="n">IImage</span>
+<span class="kn">from</span> <span class="nn">machinevisiontoolbox.base</span> <span class="kn">import</span> <span class="n">color_bgr</span><span class="p">,</span> <span class="n">plot_box</span><span class="p">,</span> <span class="n">plot_labelbox</span><span class="p">,</span> <span class="n">plot_point</span>
+
+<span class="c1"># NOTE, might be better to use a matplotlib color cycler</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="k">as</span> <span class="nn">rng</span>
+<span class="n">rng</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">13543</span><span class="p">)</span>  <span class="c1"># would this be called every time at Blobs init?</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<div class="viewcode-block" id="Blob"><a class="viewcode-back" href="../../blobs.html#machinevisiontoolbox.Blob">[docs]</a><span class="k">class</span> <span class="nc">Blob</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A 2D feature blob class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># list of attributes</span>
+    <span class="n">_area</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_uc</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># centroid (uc, vc)</span>
+    <span class="n">_vc</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">_umin</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># bounding box</span>
+    <span class="n">_umax</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_vmin</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_vmax</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">_class</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># TODO check what the class of pixel is?</span>
+    <span class="n">_label</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># TODO label assigned to this region (based on ilabel.m)</span>
+    <span class="n">_parent</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># -1 if no parent, else index points to i&#39;th parent contour</span>
+    <span class="n">_children</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of children, -1 if no children</span>
+    <span class="c1"># _edgepoint = []  # TODO (x,y) of a point on the perimeter</span>
+    <span class="c1"># _edge = []  # list of edge points # replaced with _contours</span>
+    <span class="n">_perimeter</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># length of edge</span>
+    <span class="n">_touch</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 0 if bbox doesn&#39;t touch the edge, 1 if it does</span>
+
+    <span class="n">_a</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># major axis length # equivalent ellipse parameters</span>
+    <span class="n">_b</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># minor axis length</span>
+    <span class="n">_orientation</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># angle of major axis wrt the horizontal</span>
+    <span class="n">_aspect</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># b/a &lt; 1.0</span>
+    <span class="n">_circularity</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">_moments</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># named tuple of m00, m01, m10, m02, m20, m11</span>
+
+    <span class="c1"># note that RegionFeature.m has edge, edgepoint - these are the contours</span>
+    <span class="n">_contours</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_image</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># keep image saved for each Blobs object</span>
+    <span class="c1"># probably not necessary in the long run, but for now is useful</span>
+    <span class="c1"># to retain for debugging purposes. Not practical if blob</span>
+    <span class="c1"># accepts a large/long sequence of images</span>
+    <span class="n">_hierarchy</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># initialise empty Blobs</span>
+            <span class="c1"># Blobs()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_area</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_uc</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Two element array, empty? Nones? []?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vc</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_perimeter</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_umin</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_umax</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vmin</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vmax</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_touch</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_aspect</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_circularity</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_moments</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="c1"># check if image is valid - it should be a binary image, or a</span>
+        <span class="c1"># thresholded image ()</span>
+        <span class="c1"># convert to grayscale/mono</span>
+        <span class="c1"># ImgProc = mvt.ImageProcessing()</span>
+        <span class="c1"># image = Image(image)</span>
+        <span class="c1"># image = ImgProc.mono(image)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">mono</span><span class="p">()</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span>
+        <span class="c1"># note: OpenCV doesn&#39;t have a binary image type, so it defaults to</span>
+        <span class="c1"># uint8 0 vs 255</span>
+        <span class="c1"># image = ImgProc.iint(image)</span>
+
+        <span class="c1"># we found cv.simpleblobdetector too simple.</span>
+        <span class="c1"># Cannot get pixel values/locations of blobs themselves</span>
+        <span class="c1"># therefore, use cv.findContours approach</span>
+        <span class="n">contours</span><span class="p">,</span> <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">findContours</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                              <span class="n">mode</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">RETR_TREE</span><span class="p">,</span>
+                                              <span class="n">method</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">CHAIN_APPROX_NONE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span> <span class="o">=</span> <span class="n">contours</span>
+
+        <span class="c1"># TODO contourpoint, or edgepoint: take first pixel of contours</span>
+
+        <span class="c1"># change hierarchy from a (1,M,4) to (M,4)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,:]</span>  <span class="c1"># drop the first singleton dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getchildren</span><span class="p">()</span>
+
+        <span class="c1"># get moments as a dictionary for each contour</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="p">[</span><span class="n">cv</span><span class="o">.</span><span class="n">moments</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))]</span>
+
+        <span class="c1"># recompute moments wrt hierarchy</span>
+        <span class="n">mf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchicalmoments</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_moments</span> <span class="o">=</span> <span class="n">mf</span>
+
+        <span class="c1"># get mass centers/centroids:</span>
+        <span class="n">mc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_computecentroids</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uc</span> <span class="o">=</span> <span class="n">mc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vc</span> <span class="o">=</span> <span class="n">mc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># get areas:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_computearea</span><span class="p">())</span>
+        <span class="c1"># TODO sort contours wrt area descreasing?</span>
+
+        <span class="c1"># get perimeter:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perimeter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_computeperimeter</span><span class="p">())</span>
+
+        <span class="c1"># get circularity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_circularity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_computecircularity</span><span class="p">())</span>
+
+        <span class="c1"># get bounding box:</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_computeboundingbox</span><span class="p">())</span>
+
+        <span class="c1"># bbox in [u0, v0, length, width]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_umax</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_umin</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vmax</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vmin</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_touch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_touchingborder</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)]</span>
+
+        <span class="c1"># equivalent ellipse from image moments</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_computeequivalentellipse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orientation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_area</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">Blob</span><span class="p">()</span>
+
+            <span class="n">new</span><span class="o">.</span><span class="n">_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_uc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_vc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_perimeter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perimeter</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+            <span class="n">new</span><span class="o">.</span><span class="n">_umin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_umin</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_umax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_umax</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_vmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmin</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_vmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmax</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+            <span class="n">new</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_aspect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aspect</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_circularity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circularity</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_touch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_touch</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">new</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ind</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span>
+
+            <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># s = &quot;&quot; for i, blob in enumerate(self): s += f&quot;{i}:</span>
+        <span class="c1"># area={blob.area:.1f} @ ({blob.uc:.1f}, {blob.vc:.1f}),</span>
+        <span class="c1"># touch={blob.touch}, orient={blob.orientation * 180 / np.pi:.1f}°,</span>
+        <span class="c1"># aspect={blob.aspect:.2f}, circularity={blob.circularity:.2f},</span>
+        <span class="c1"># parent={blob._parent}\n&quot;</span>
+
+        <span class="c1"># return s</span>
+
+        <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;centroid&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;area&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.3g}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;touch&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;perim&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.1f}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;circularity&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;orient&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.1f}</span><span class="s2">°&quot;</span><span class="p">),</span>
+                    <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;aspect&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.3g}</span><span class="s2">&quot;</span><span class="p">),</span>
+                    <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">u</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">b</span><span class="o">.</span><span class="n">v</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                      <span class="n">b</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+                      <span class="n">b</span><span class="o">.</span><span class="n">touch</span><span class="p">,</span>
+                      <span class="n">b</span><span class="o">.</span><span class="n">perimeter</span><span class="p">,</span>
+                      <span class="n">b</span><span class="o">.</span><span class="n">circularity</span><span class="p">,</span>
+                      <span class="n">b</span><span class="o">.</span><span class="n">orientation</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+                      <span class="n">b</span><span class="o">.</span><span class="n">aspect</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_computeboundingbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">cpoly</span> <span class="o">=</span> <span class="p">[</span><span class="n">cv</span><span class="o">.</span><span class="n">approxPolyDP</span><span class="p">(</span><span class="n">c</span><span class="p">,</span>
+                                 <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
+                                 <span class="n">closed</span><span class="o">=</span><span class="n">closed</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)]</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="p">[</span><span class="n">cv</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">(</span><span class="n">cpoly</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cpoly</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="n">bbox</span>
+
+    <span class="k">def</span> <span class="nf">_computeequivalentellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)</span>
+        <span class="n">mf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moments</span>
+        <span class="n">mc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vc</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># w = [None] * nc</span>
+        <span class="c1"># v = [None] * nc</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+            <span class="n">u20</span> <span class="o">=</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m20&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">mc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">u02</span> <span class="o">=</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m02&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">mc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">u11</span> <span class="o">=</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m11&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">mc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">mc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">u20</span><span class="p">,</span> <span class="n">u11</span><span class="p">],</span> <span class="p">[</span><span class="n">u02</span><span class="p">,</span> <span class="n">u11</span><span class="p">]])</span>
+            <span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>  <span class="c1"># w = eigenvalues, v = eigenvectors</span>
+
+            <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">/</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">])</span>
+            <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">/</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">])</span>
+
+            <span class="n">ev</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">orientation</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">ev</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ev</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">orientation</span>
+
+    <span class="k">def</span> <span class="nf">_computecentroids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moments</span>
+        <span class="n">mc</span> <span class="o">=</span> <span class="p">[(</span><span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m10&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">]),</span> <span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m01&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">mf</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">]))</span>
+              <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="n">mc</span>
+
+    <span class="k">def</span> <span class="nf">_computearea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_moments</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;m00&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))]</span>
+
+    <span class="k">def</span> <span class="nf">_computecircularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># apply Kulpa&#39;s correction factor when computing circularity</span>
+        <span class="c1"># should have max 1 circularity for circle, &lt; 1 for non-circles</span>
+        <span class="c1"># Peter&#39;s reference:</span>
+        <span class="c1"># Area and perimeter measurement of blobs in discrete binary pictures.</span>
+        <span class="c1"># Z.Kulpa. Comput. Graph. Image Process., 6:434-451, 1977.</span>
+        <span class="c1"># Another reference that Dorian found:</span>
+        <span class="c1"># Methods to Estimate Areas and Perimeters of Blob-like Objects: a</span>
+        <span class="c1"># Comparison. Proc. IAPR Workshop on Machine Vision Applications.,</span>
+        <span class="c1"># December 13-15, 1994, Kawasaki, Japan</span>
+        <span class="c1"># L. Yang, F. Albregtsen, T. Loennestad, P. Groettum</span>
+        <span class="n">kulpa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="p">))</span>
+        <span class="n">circularity</span> <span class="o">=</span> <span class="p">[((</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span>
+                        <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_perimeter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">kulpa</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+                       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="n">circularity</span>
+
+    <span class="k">def</span> <span class="nf">_computeperimeter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nc</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)</span>
+        <span class="n">edgelist</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="n">edgediff</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="n">edgenorm</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="n">perimeter</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">nc</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+            <span class="n">edgelist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:],</span>
+                                     <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+            <span class="n">edgediff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">edgelist</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">edgenorm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">edgediff</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">perimeter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">edgenorm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">perimeter</span>
+
+    <span class="k">def</span> <span class="nf">_touchingborder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imshape</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)</span>
+        <span class="c1"># TODO replace with list comprehension?</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_umin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_umax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">imshape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vmin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vmax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">imshape</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+                <span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">t</span>
+
+    <span class="k">def</span> <span class="nf">_hierarchicalmoments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mu</span><span class="p">):</span>
+        <span class="c1"># for moments in a hierarchy, for any pq moment of a blob ignoring its</span>
+        <span class="c1"># children you simply subtract the pq moment of each of its children.</span>
+        <span class="c1"># That gives you the “proper” pq moment for the blob, which you then</span>
+        <span class="c1"># use to compute area, centroid etc. for each contour</span>
+        <span class="c1">#   find all children (row i to hierarchy[0,i,0]-1, if same then no</span>
+        <span class="c1">#   children)</span>
+        <span class="c1">#   recompute all moments</span>
+
+        <span class="c1"># to deliver all the children of i&#39;th contour:</span>
+        <span class="c1"># first index identifies the row that the next contour at the same</span>
+        <span class="c1"># hierarchy level starts</span>
+        <span class="c1"># therefore, to grab all children for given contour, grab all rows</span>
+        <span class="c1"># up to i-1 of the first row value</span>
+        <span class="c1"># can only have one parent, so just take the last (4th) column</span>
+
+        <span class="c1"># hierarchy order: [Next, Previous, First_Child, Parent]</span>
+        <span class="c1"># for i in range(len(contours)):</span>
+        <span class="c1">#    print(i, hierarchy[0,i,:])</span>
+        <span class="c1">#    0 [ 5 -1  1 -1]</span>
+        <span class="c1">#    1 [ 4 -1  2  0]</span>
+        <span class="c1">#    2 [ 3 -1 -1  1]</span>
+        <span class="c1">#    3 [-1  2 -1  1]</span>
+        <span class="c1">#    4 [-1  1 -1  0]</span>
+        <span class="c1">#    5 [ 8  0  6 -1]</span>
+        <span class="c1">#    6 [ 7 -1 -1  5]</span>
+        <span class="c1">#    7 [-1  6 -1  5]</span>
+        <span class="c1">#    8 [-1  5  9 -1]</span>
+        <span class="c1">#    9 [-1 -1 -1  8]</span>
+
+        <span class="n">mh</span> <span class="o">=</span> <span class="n">mu</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)):</span>  <span class="c1"># for each contour</span>
+            <span class="n">inext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">ichild</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ichild</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># then children exist</span>
+                <span class="n">ichild</span> <span class="o">=</span> <span class="p">[</span><span class="n">ichild</span><span class="p">]</span>  <span class="c1"># make first child a list</span>
+                <span class="c1"># find other children who are less than NEXT in the hierarchy</span>
+                <span class="c1"># and greater than -1,</span>
+                <span class="n">otherkids</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))</span> <span class="k">if</span>
+                             <span class="p">((</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">inext</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">inext</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">otherkids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ichild</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">otherkids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ichild</span><span class="p">)))</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ichild</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ichild</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># for each child</span>
+                    <span class="c1"># all moments that need to be computed</span>
+                    <span class="c1"># subtract them from the parent moment</span>
+                    <span class="c1"># mh[i][&#39;m00&#39;] = mh[i][&#39;m00&#39;] - mu[j][&#39;m00&#39;] ...</span>
+
+                    <span class="c1"># do a dictionary comprehension:</span>
+                    <span class="n">mh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">mh</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">-</span>
+                             <span class="n">mu</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mh</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span>
+            <span class="c1"># else:</span>
+                <span class="c1"># no change to mh, because contour i has no children</span>
+
+        <span class="k">return</span> <span class="n">mh</span>
+
+    <span class="k">def</span> <span class="nf">_getchildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># gets list of children for each contour based on hierarchy</span>
+        <span class="c1"># follows similar for loop logic from _hierarchicalmoments, so</span>
+        <span class="c1"># TODO use _getchildren to cut redundant code in _hierarchicalmoments</span>
+
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)):</span>
+            <span class="n">inext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">ichild</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ichild</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># children exist</span>
+                <span class="n">ichild</span> <span class="o">=</span> <span class="p">[</span><span class="n">ichild</span><span class="p">]</span>
+                <span class="n">otherkids</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))</span>
+                             <span class="k">if</span> <span class="p">((</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">inext</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">inext</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">otherkids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ichild</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">otherkids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ichild</span><span class="p">)))</span>
+                <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ichild</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># else no children</span>
+                <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">children</span>
+
+<div class="viewcode-block" id="Blob.plot_box"><a class="viewcode-back" href="../../blobs.html#machinevisiontoolbox.Blob.plot_box">[docs]</a>    <span class="k">def</span> <span class="nf">plot_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a bounding box for the blob using matplotlib</span>
+
+<span class="sd">        :param kwargs: arguments passed to ``plot_box``</span>
+
+<span class="sd">        Plot a bounding box for every blob described by this object.</span>
+
+<span class="sd">        :seealso: :func:`~graphics.plot_box`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">blob</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">plot_box</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">blob</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Blob.plot_labelbox"><a class="viewcode-back" href="../../blobs.html#machinevisiontoolbox.Blob.plot_labelbox">[docs]</a>    <span class="k">def</span> <span class="nf">plot_labelbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a labelled bounding box for the blob using matplotlib</span>
+
+<span class="sd">        :param kwargs: arguments passed to ``plot_labelbox``</span>
+
+<span class="sd">        Plot a labelled bounding box for every blob described by this object.</span>
+<span class="sd">        The blobs are labeled by their blob index.</span>
+
+<span class="sd">        :seealso: :func:`~graphics.plot_labelbox`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">blob</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">plot_labelbox</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">blob</span><span class="o">.</span><span class="n">bbox</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Blob.plot_centroid"><a class="viewcode-back" href="../../blobs.html#machinevisiontoolbox.Blob.plot_centroid">[docs]</a>    <span class="k">def</span> <span class="nf">plot_centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw the centroid of the blob using matplotlib</span>
+
+<span class="sd">        :param label: add a sequential numeric label to each point, defaults to False</span>
+<span class="sd">        :type label: bool</span>
+<span class="sd">        :param kwargs: other arguments passed to ``plot_point``</span>
+
+<span class="sd">        If no marker style is given then it will be an overlaid &quot;o&quot; and &quot;x&quot;</span>
+<span class="sd">        in blue.</span>
+
+<span class="sd">        :seealso: :func:`plot_point`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">if</span> <span class="s1">&#39;marker&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bx&#39;</span><span class="p">,</span> <span class="s1">&#39;bo&#39;</span><span class="p">]</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fillstyle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">blob</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">plot_point</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">blob</span><span class="o">.</span><span class="n">centroid</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Blob.drawBlobs"><a class="viewcode-back" href="../../blobs.html#machinevisiontoolbox.Blob.drawBlobs">[docs]</a>    <span class="k">def</span> <span class="nf">drawBlobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">image</span><span class="p">,</span>
+                  <span class="n">drawing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">icont</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">contourthickness</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">FILLED</span><span class="p">,</span>
+                  <span class="n">textthickness</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw the blob contour</span>
+
+<span class="sd">        :param image: [description]</span>
+<span class="sd">        :type image: [type]</span>
+<span class="sd">        :param drawing: [description], defaults to None</span>
+<span class="sd">        :type drawing: [type], optional</span>
+<span class="sd">        :param icont: [description], defaults to None</span>
+<span class="sd">        :type icont: [type], optional</span>
+<span class="sd">        :param color: [description], defaults to None</span>
+<span class="sd">        :type color: [type], optional</span>
+<span class="sd">        :param contourthickness: [description], defaults to cv.FILLED</span>
+<span class="sd">        :type contourthickness: [type], optional</span>
+<span class="sd">        :param textthickness: [description], defaults to 2</span>
+<span class="sd">        :type textthickness: int, optional</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># draw contours of blobs</span>
+        <span class="c1"># contours - the contour list</span>
+        <span class="c1"># icont - the index of the contour(s) to plot</span>
+        <span class="c1"># drawing - the image to draw the contours on</span>
+        <span class="c1"># colors - the colors for the icont contours to be plotted (3-tuple)</span>
+        <span class="c1"># return - updated drawing</span>
+
+        <span class="c1"># TODO split this up into drawBlobs and drawCentroids methods</span>
+
+        <span class="c1"># image = Image(image)</span>
+        <span class="c1"># image = self.__class__(image)  # assuming self is Image class</span>
+        <span class="c1"># @# assume image is Image class</span>
+
+        <span class="k">if</span> <span class="n">drawing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">drawing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">icont</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">icont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">icont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">icont</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># make colors a list of 3-tuples of random colors</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">icont</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">icont</span><span class="p">)):</span>
+                <span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span>
+                            <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span>
+                            <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+                <span class="c1"># contourcolors[i] = np.round(colors[i]/2)</span>
+            <span class="c1"># TODO make a color option, specified through text,</span>
+            <span class="c1"># as all of a certain color (default white)</span>
+
+        <span class="c1"># make contour colours slightly different but similar to the text color</span>
+        <span class="c1"># (slightly dimmer)?</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">icont</span><span class="p">))]</span>
+        <span class="n">contourcolors</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">cc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">icont</span><span class="p">))]</span>
+
+        <span class="c1"># TODO check contours, icont, colors, etc are valid</span>
+        <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># done because we squeezed hierarchy from a (1,M,4) to an (M,4) earlier</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">icont</span><span class="p">:</span>
+            <span class="c1"># TODO figure out how to draw alpha/transparencies?</span>
+            <span class="n">cv</span><span class="o">.</span><span class="n">drawContours</span><span class="p">(</span><span class="n">drawing</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">,</span>
+                            <span class="n">icont</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                            <span class="n">contourcolors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                            <span class="n">thickness</span><span class="o">=</span><span class="n">contourthickness</span><span class="p">,</span>
+                            <span class="n">lineType</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">LINE_8</span><span class="p">,</span>
+                            <span class="n">hierarchy</span><span class="o">=</span><span class="n">hierarchy</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">icont</span><span class="p">:</span>
+            <span class="n">ic</span> <span class="o">=</span> <span class="n">icont</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">cv</span><span class="o">.</span><span class="n">putText</span><span class="p">(</span><span class="n">drawing</span><span class="p">,</span>
+                       <span class="nb">str</span><span class="p">(</span><span class="n">ic</span><span class="p">),</span>
+                       <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">[</span><span class="n">ic</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vc</span><span class="p">[</span><span class="n">ic</span><span class="p">])),</span>
+                       <span class="n">fontFace</span><span class="o">=</span><span class="n">cv</span><span class="o">.</span><span class="n">FONT_HERSHEY_SIMPLEX</span><span class="p">,</span>
+                       <span class="n">fontScale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                       <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                       <span class="n">thickness</span><span class="o">=</span><span class="n">textthickness</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">drawing</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">labelImage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">image</span><span class="p">,</span>
+                  <span class="n">drawing</span><span class="o">=</span><span class="kc">None</span>
+                  <span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">drawing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">drawing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+        <span class="c1"># TODO check contours, icont, colors, etc are valid</span>
+        <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hierarchy</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># done because we squeezed hierarchy from a (1,M,4) to an (M,4) earlier</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)):</span>
+            <span class="c1"># TODO figure out how to draw alpha/transparencies?</span>
+            <span class="n">cv</span><span class="o">.</span><span class="n">drawContours</span><span class="p">(</span><span class="n">drawing</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">,</span>
+                            <span class="n">i</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">),</span>
+                            <span class="n">thickness</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">hierarchy</span><span class="o">=</span><span class="n">hierarchy</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">drawing</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Area of the blob</span>
+
+<span class="sd">        :return: area in pixels</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        u-coordinate of the blob centroid</span>
+
+<span class="sd">        :return: u-coordinate (horizontal)</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        v-coordinate of the blob centroid</span>
+
+<span class="sd">        :return: v-coordinate (vertical)</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
+
+    <span class="c1"># TODO probably should stick with u,v properties to be consistent with</span>
+    <span class="c1">#  features2d</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">u</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Radius of equivalent ellipse</span>
+
+<span class="sd">        :return: largest ellipse radius</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: func:`b`, :func:`aspect`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Radius of equivalent ellipse</span>
+
+<span class="sd">        :return: smallest ellipse radius</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: func:`a`, :func:`aspect`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">aspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Blob aspect ratio</span>
+
+<span class="sd">        :return: ratio of equivalent ellipse axes, :math:`&lt;= 1`</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: func:`a`, :func:`b`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aspect</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Blob orientation</span>
+
+<span class="sd">        :return: Orientation of equivalent ellipse (in radians)</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bbox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Bounding box</span>
+
+<span class="sd">        :return: bounding</span>
+<span class="sd">        :rtype: ndarray(2,2)</span>
+
+<span class="sd">        The bounding box is a 2x2 matrix  [u1, u2; v1, v2].  The rows are the</span>
+<span class="sd">        u- and v-axis extent respectively.  The columns are the bottom-left</span>
+<span class="sd">        and top-right corners of the bounding box.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_umin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_umax</span><span class="p">],</span> 
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_vmin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmax</span><span class="p">],</span>
+        <span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">umin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Minimum u-axis extent</span>
+
+<span class="sd">        :return: maximum u-coordinate of the blob</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_umin</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">umax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Maximum u-axis extent</span>
+
+<span class="sd">        :return: maximum u-coordinate of the blob</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_umax</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Minimum b-axis extent</span>
+
+<span class="sd">        :return: maximum v-coordinate of the blob</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmax</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Maximum u-axis extent</span>
+
+<span class="sd">        :return: maximum v-coordinate of the blob</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmin</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bboxarea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Area of the bounding box</span>
+
+<span class="sd">        :return: area of the bounding box in pixels</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        .. note:: The bounding box has vertical and horizontal edges.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">b</span><span class="o">.</span><span class="n">_umax</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">_umin</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">_vmax</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">_vmin</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Centroid of blob</span>
+
+<span class="sd">        :return: centroid of the blob</span>
+<span class="sd">        :rtype: 2-tuple</span>
+
+<span class="sd">        :seealso:  :func:`uc`, :func:`vc`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vc</span><span class="p">)</span>
+        <span class="c1"># TODO maybe ind for centroid: b.centroid[0]?</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">perimeter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perimeter of the blob</span>
+
+<span class="sd">        :return: perimeter in pixels</span>
+<span class="sd">        :rtype: float</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perimeter</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Blob edge touch status</span>
+
+<span class="sd">        :return: blob touches the edge of the image</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_touch</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">circularity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Blob circularity</span>
+
+<span class="sd">        :return: circularity</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        Computed as :math:`\rho = \frac{A}{4 \pi p^2}`.  Is one for a circular</span>
+<span class="sd">        blob and &lt; 1 for all other shapes, approaching zero for a line.</span>
+
+<span class="sd">        .. note::  Apply Kulpa&#39;s correction factor to account for edge</span>
+<span class="sd">            discretization:</span>
+
+<span class="sd">            - Area and perimeter measurement of blobs in discrete binary pictures.</span>
+<span class="sd">              Z.Kulpa. Comput. Graph. Image Process., 6:434-451, 1977.</span>
+<span class="sd">    </span>
+<span class="sd">            - Methods to Estimate Areas and Perimeters of Blob-like Objects: a</span>
+<span class="sd">              Comparison. Proc. IAPR Workshop on Machine Vision Applications.,</span>
+<span class="sd">              December 13-15, 1994, Kawasaki, Japan</span>
+<span class="sd">              L. Yang, F. Albregtsen, T. Loennestad, P. Groettum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_circularity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parent blob</span>
+
+<span class="sd">        :return: index of this blob&#39;s parent</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        A parent of -1 is the image background.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Child blobs</span>
+
+<span class="sd">        :return: list of indices of this blob&#39;s children</span>
+<span class="sd">        :rtype: list of int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span>
+
+    <span class="k">def</span> <span class="nf">printBlobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO accept kwargs or args to show/filter relevant parameters</span>
+
+        <span class="c1"># convenience function to plot</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_contours</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(</span><span class="si">{0}</span><span class="s1">)  area=</span><span class="si">{1:.1f}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">                  cent=(</span><span class="si">{2:.1f}</span><span class="s1">, </span><span class="si">{3:.1f}</span><span class="s1">), </span><span class="se">\</span>
+<span class="s1">                  orientation=</span><span class="si">{4:.3f}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">                  b/a=</span><span class="si">{5:.3f}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">                  touch=</span><span class="si">{6:d}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">                  parent=</span><span class="si">{7}</span><span class="s1">, </span><span class="se">\</span>
+<span class="s1">                  children=</span><span class="si">{8}</span><span class="s1">&#39;</span><span class="p">,</span>
+                             <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aspect</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_touch</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span></div>
+
+
+<span class="k">class</span> <span class="nc">BlobFeaturesMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract class adding blob capability to Image</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">blobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute blobs in image</span>
+
+<span class="sd">        :return: blobs</span>
+<span class="sd">        :rtype: Blob</span>
+
+<span class="sd">        ``image.blobs()`` is a ``Blob`` object that contains information about</span>
+<span class="sd">        all the blobs in the image.  It behaves like a list object so it can</span>
+<span class="sd">        be indexed and sliced.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from machinevisiontoolbox import Image</span>
+<span class="sd">            &gt;&gt;&gt; im = Image(&#39;shark2.png&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; blobs = im.blobs()</span>
+<span class="sd">            &gt;&gt;&gt; print(blobs)</span>
+
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">machinevisiontoolbox</span> <span class="kn">import</span> <span class="n">Image</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+    <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="s1">&#39;shark2.png&#39;</span><span class="p">)</span>
+    <span class="n">blobs</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">blobs</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">blobs</span><span class="p">)</span>
+    <span class="n">im</span><span class="o">.</span><span class="n">disp</span><span class="p">()</span>
+    <span class="n">blobs</span><span class="o">.</span><span class="n">plot_labelbox</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="n">blobs</span><span class="o">.</span><span class="n">plot_centroid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+    <span class="c1"># # read image</span>
+    <span class="c1"># from machinevisiontoolbox import Image</span>
+    <span class="c1"># im = Image(cv.imread(&#39;images/multiblobs.png&#39;, cv.IMREAD_GRAYSCALE))</span>
+
+    <span class="c1"># # call Blobs class</span>
+    <span class="c1"># b = Blob(image=im)</span>
+
+    <span class="c1"># # plot image</span>
+    <span class="c1"># # plot centroids of blobs</span>
+    <span class="c1"># # label relevant centroids for the labelled blobs</span>
+    <span class="c1"># # import random as rng  # for random colors of blobs</span>
+    <span class="c1"># rng.seed(53467)</span>
+
+    <span class="c1"># drawing = np.zeros((im.shape[0], im.shape[1], 3), dtype=np.uint8)</span>
+    <span class="c1"># colors = [None]*len(b)</span>
+    <span class="c1"># icont = [None]*len(b)</span>
+    <span class="c1"># for i in range(len(b)):</span>
+    <span class="c1">#     icont[i] = i</span>
+    <span class="c1">#     colors[i] = (rng.randint(0, 256), rng.randint(</span>
+    <span class="c1">#         0, 256), rng.randint(0, 256))</span>
+
+    <span class="c1">#     cv.rectangle(drawing, (b[i].umin, b[i].vmin), (b[i].umax, b[i].vmax),</span>
+    <span class="c1">#                  colors[i], thickness=2)</span>
+    <span class="c1">#     # cv.putText(drawing, str(i), (int(b[i].uc), int(b[i].vc)),</span>
+    <span class="c1">#     #           fontFace=cv.FONT_HERSHEY_SIMPLEX, fontScale=1,</span>
+    <span class="c1">#     #           color=colors, thickness=2)</span>
+
+    <span class="c1"># drawing = b.drawBlobs(im, drawing, icont, colors,</span>
+    <span class="c1">#                       contourthickness=cv.FILLED)</span>
+    <span class="c1"># # mvt.idisp(drawing)</span>
+
+    <span class="c1"># # import matplotlib.pyplot as plt</span>
+    <span class="c1"># # plt.imshow(d2)</span>
+    <span class="c1"># # plt.show()</span>
+    <span class="c1"># # mvt.idisp(d2)</span>
+    <span class="c1"># im2 = Image(&#39;images/multiblobs_edgecase.png&#39;)</span>
+    <span class="c1"># im2.disp()</span>
+
+    <span class="c1"># press Ctrl+D to exit and close the image at the end</span>
+    <span class="c1"># import code</span>
+    <span class="c1"># code.interact(local=dict(globals(), **locals()))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

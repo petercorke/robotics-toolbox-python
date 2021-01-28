@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>machinevisiontoolbox.ImageProcessingColor &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="../../_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../image.html">Image processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>machinevisiontoolbox.ImageProcessingColor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for machinevisiontoolbox.ImageProcessingColor</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">spatialmath.base.argcheck</span> <span class="k">as</span> <span class="nn">argcheck</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="k">as</span> <span class="nn">cv</span>
+
+<span class="kn">import</span> <span class="nn">machinevisiontoolbox.base.color</span> <span class="k">as</span> <span class="nn">color</span>
+
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
+
+<span class="c1"># import scipy as sp</span>
+
+<span class="c1"># from scipy import signal</span>
+<span class="c1"># from scipy import interpolate</span>
+
+<span class="c1"># from collecitons import namedtuple</span>
+<span class="c1"># from pathlib import Path</span>
+
+
+<span class="k">class</span> <span class="nc">ImageProcessingColorMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Image processing color operations on the Image class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">red</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract the red plane of a color image</span>
+
+<span class="sd">        :raises ValueError: if image is not color</span>
+<span class="sd">        :return out: greyscale image representing the red image plane</span>
+<span class="sd">        :rtype: Image instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscolor</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot extract color plane from greyscale image&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">im</span><span class="o">.</span><span class="n">rgb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="c1"># out = []</span>
+        <span class="c1"># for im in self:</span>
+        <span class="c1">#     out.append(im.image[:, :, 0])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">green</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract the green plane of a color image</span>
+
+<span class="sd">        :raises ValueError: if image is not color</span>
+<span class="sd">        :return out: greyscale image representing the green image plane</span>
+<span class="sd">        :rtype: Image instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscolor</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot extract color plane from greyscale image&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">im</span><span class="o">.</span><span class="n">rgb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="c1"># out = []</span>
+        <span class="c1"># for im in self:</span>
+        <span class="c1">#     out.append(im.image[:, :, 1])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">blue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract the blue plane of a color image</span>
+
+<span class="sd">        :raises ValueError: if image is not color</span>
+<span class="sd">        :return out: greyscale image representing the blue image plane</span>
+<span class="sd">        :rtype: Image instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscolor</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot extract color plane from greyscale image&#39;</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">im</span><span class="o">.</span><span class="n">rgb</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="c1"># out = []</span>
+        <span class="c1"># for im in self:</span>
+        <span class="c1">#     out.append(im.image[:, :, 2])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">colorise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Colorise a greyscale image</span>
+
+<span class="sd">        :param c: color to color image :type c: string or rgb-tuple :return</span>
+<span class="sd">        out: Image  with float64 precision elements ranging from 0 to 1 :rtype:</span>
+<span class="sd">        Image instance</span>
+
+<span class="sd">        - ``IM.color()`` is a color image out, where each color plane is equal</span>
+<span class="sd">          to image.</span>
+
+<span class="sd">        - ``IM.imcolor(c)`` as above but each output pixel is ``c``(3,1) times</span>
+<span class="sd">          the corresponding element of image.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. autorun:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Can convert a monochrome sequence (h,W,N) to a color image</span>
+<span class="sd">              sequence (H,W,3,N).</span>
+
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Section 10.1, P. Corke,</span>
+<span class="sd">              Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">argcheck</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># reverse because of bgr</span>
+
+        <span class="c1"># make sure im are greyscale</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mono</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">iscolor</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># only one plane to convert</span>
+            <span class="c1"># recall opencv uses BGR</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                              <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                              <span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">))</span>
+                   <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">img</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="s1">&#39;Image must be greyscale&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+
+
+
+    <span class="k">def</span> <span class="nf">colorspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conv</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform a color image between color representations</span>
+
+<span class="sd">        :param conv: color code for color conversion (OpenCV codes for now)</span>
+<span class="sd">        :type conv: string (see below)</span>
+<span class="sd">        :param kwargs: keywords/options for OpenCV&#39;s cvtColor</span>
+<span class="sd">        :type kwargs: name/value pairs</span>
+<span class="sd">        :return: out</span>
+<span class="sd">        :rtype: numpy array, shape (N,M) or (N,3)</span>
+
+<span class="sd">        - ``IM.colorspace(conv)`` transforms the color representation of image</span>
+<span class="sd">          where ``conv`` is a string specifying the conversion. The image</span>
+<span class="sd">          should be a real full double array of size (M,3) or (M,N,3). The</span>
+<span class="sd">          output is the same size as ``IM``</span>
+
+<span class="sd">        ``conv`` tells the source and destination color spaces,</span>
+<span class="sd">        ``conv`` = &#39;dest&lt;-src&#39;, or alternatively, ``conv`` = &#39;src-&gt;dest&#39;.</span>
+<span class="sd">        Supported color spaces are</span>
+<span class="sd">        &#39;RGB&#39;              sRGB IEC 61966-2-1</span>
+<span class="sd">        &#39;YCbCr&#39;            Luma + Chroma (&quot;digitized&quot; version of Y&#39;PbPr)</span>
+<span class="sd">        &#39;JPEG-YCbCr&#39;       Luma + Chroma space used in JFIF JPEG</span>
+<span class="sd">        &#39;YDbDr&#39;            SECAM Y&#39;DbDr Luma + Chroma</span>
+<span class="sd">        &#39;YPbPr&#39;            Luma (ITU-R BT.601) + Chroma</span>
+<span class="sd">        &#39;YUV&#39;              NTSC PAL Y&#39;UV Luma + Chroma</span>
+<span class="sd">        &#39;YIQ&#39;              NTSC Y&#39;IQ Luma + Chroma</span>
+<span class="sd">        &#39;HSV&#39; or &#39;HSB&#39;     Hue Saturation Value/Brightness</span>
+<span class="sd">        &#39;HSL&#39; or &#39;HLS&#39;     Hue Saturation Luminance</span>
+<span class="sd">        &#39;HSI&#39;              Hue Saturation Intensity</span>
+<span class="sd">        &#39;XYZ&#39;              CIE 1931 XYZ</span>
+<span class="sd">        &#39;Lab&#39;              CIE 1976 L*a*b* (CIELAB)</span>
+<span class="sd">        &#39;Luv&#39;              CIE L*u*v* (CIELUV)</span>
+<span class="sd">        &#39;LCH&#39;              CIE L*C*H* (CIELCH)</span>
+<span class="sd">        &#39;CAT02 LMS&#39;        CIE CAT02 LMS</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - All conversions assume 2 degree observer and D65 illuminant.</span>
+<span class="sd">              Color space names are case insensitive and spaces are ignored.</span>
+<span class="sd">              When sRGB is the source or destination, it can be omitted. For</span>
+<span class="sd">              example &#39;yuv&lt;-&#39; is short for &#39;yuv&lt;-rgb&#39;. For sRGB, the values</span>
+<span class="sd">              should be scaled between 0 and 1.  Beware that transformations</span>
+<span class="sd">              generally do not constrain colors to be &quot;in gamut.&quot; Particularly,</span>
+<span class="sd">              transforming from another space to sRGB may obtain R&#39;G&#39;B&#39; values</span>
+<span class="sd">              outside of the [0,1] range.  So the result should be clamped to</span>
+<span class="sd">              [0,1] before displaying. image(min(max(B,0),1));  lamp B to [0,1]</span>
+<span class="sd">              and display sRGB (Red Green Blue) is the (ITU-R BT.709</span>
+<span class="sd">              gamma-corrected) standard red-green-blue representation of colors</span>
+<span class="sd">              used in digital imaging.  The components should be scaled between</span>
+<span class="sd">              0 and 1.  The space can be visualized geometrically as a cube.</span>
+<span class="sd">            - Y&#39;PbPr, Y&#39;CbCr, Y&#39;DbDr, Y&#39;UV, and Y&#39;IQ are related to sRGB by</span>
+<span class="sd">              linear transformations.  These spaces separate a color into a</span>
+<span class="sd">              grayscale luminance component Y and two chroma components.  The</span>
+<span class="sd">              valid ranges of the components depends on the space.</span>
+<span class="sd">            - HSV (Hue Saturation Value) is related to sRGB by</span>
+<span class="sd">              H = hexagonal hue angle   (0 &lt;= H &lt; 360),</span>
+<span class="sd">              S = C/V                   (0 &lt;= S &lt;= 1),</span>
+<span class="sd">              V = max(R&#39;,G&#39;,B&#39;)         (0 &lt;= V &lt;= 1),</span>
+<span class="sd">              where C = max(R&#39;,G&#39;,B&#39;) - min(R&#39;,G&#39;,B&#39;).</span>
+<span class="sd">            - The hue angle H is computed on a hexagon.  The space is</span>
+<span class="sd">              geometrically a hexagonal cone.</span>
+<span class="sd">            - HSL (Hue Saturation Lightness) is related to sRGB by</span>
+<span class="sd">              H = hexagonal hue angle                (0 &lt;= H &lt; 360),</span>
+<span class="sd">              S = C/(1 - abs(2L-1))                     (0 &lt;= S &lt;= 1),</span>
+<span class="sd">              L = (max(R&#39;,G&#39;,B&#39;) + min(R&#39;,G&#39;,B&#39;))/2  (0 &lt;= L &lt;= 1),</span>
+<span class="sd">              where H and C are the same as in HSV.  Geometrically, the space</span>
+<span class="sd">              is a double hexagonal cone.</span>
+<span class="sd">            - HSI (Hue Saturation Intensity) is related to sRGB by</span>
+<span class="sd">              H = polar hue angle        (0 &lt;= H &lt; 360),</span>
+<span class="sd">              S = 1 - min(R&#39;,G&#39;,B&#39;)/I    (0 &lt;= S &lt;= 1),</span>
+<span class="sd">              I = (R&#39;+G&#39;+B&#39;)/3           (0 &lt;= I &lt;= 1).</span>
+<span class="sd">              Unlike HSV and HSL, the hue angle H is computed on a circle</span>
+<span class="sd">              rather than a hexagon.</span>
+<span class="sd">            - CIE XYZ is related to sRGB by inverse gamma correction followed</span>
+<span class="sd">              by a linear transform.  Other CIE color spaces are defined</span>
+<span class="sd">              relative to XYZ.</span>
+<span class="sd">            - CIE L*a*b*, L*u*v*, and L*C*H* are nonlinear functions of XYZ.</span>
+<span class="sd">              The L* component is designed to match closely with human</span>
+<span class="sd">              perception of lightness.  The other two components describe the</span>
+<span class="sd">              chroma.</span>
+<span class="sd">            - CIE CAT02 LMS is the linear transformation of XYZ using the</span>
+<span class="sd">              MCAT02 chromatic adaptation matrix.  The space is designed to</span>
+<span class="sd">              model the response of the three types of cones in the human eye,</span>
+<span class="sd">              where L, M, S, correspond respectively to red (&quot;long&quot;), green</span>
+<span class="sd">              (&quot;medium&quot;), and blue (&quot;short&quot;).</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Chapter 10, P. Corke, Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO other color cases</span>
+        <span class="c1"># TODO check conv is valid</span>
+
+        <span class="c1"># TODO conv string parsing</span>
+
+        <span class="c1"># ensure floats? unsure if cv.cvtColor operates on ints</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="n">imf</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">conv</span> <span class="o">==</span> <span class="s1">&#39;xyz2bgr&#39;</span><span class="p">:</span>
+                <span class="c1"># note that using cv.COLOR_XYZ2RGB does not seem to work</span>
+                <span class="n">BGR_raw</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">bgr</span><span class="p">,</span> <span class="n">cv</span><span class="o">.</span><span class="n">COLOR_XYZ2BGR</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+                <span class="c1"># desaturate and rescale to constrain resulting RGB values</span>
+                <span class="c1"># to [0,1]</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">BGR_raw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">BGR_raw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">BGR_raw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">add_white</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">),</span> <span class="n">B</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">+=</span> <span class="n">add_white</span>
+                <span class="n">G</span> <span class="o">+=</span> <span class="n">add_white</span>
+                <span class="n">R</span> <span class="o">+=</span> <span class="n">add_white</span>
+
+                <span class="c1"># inverse gamma correction</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gammacorrection</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gammacorrection</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gammacorrection</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">B</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">R</span><span class="p">)))</span>  <span class="c1"># BGR</span>
+
+            <span class="k">elif</span> <span class="n">conv</span> <span class="o">==</span> <span class="s1">&#39;Lab2bgr&#39;</span><span class="p">:</span>
+                <span class="c1"># convert source from Lab to xyz</span>
+
+                <span class="c1"># in colorspace.m, image was parsed into a (251001,1,3)</span>
+                <span class="n">labim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span>
+                                   <span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+                <span class="n">fY</span> <span class="o">=</span> <span class="p">(</span><span class="n">labim</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">16</span><span class="p">)</span> <span class="o">/</span> <span class="mi">116</span>
+                <span class="n">fX</span> <span class="o">=</span> <span class="n">fY</span> <span class="o">+</span> <span class="n">labim</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">500</span>
+                <span class="n">fZ</span> <span class="o">=</span> <span class="n">fY</span> <span class="o">-</span> <span class="n">labim</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">200</span>
+                <span class="c1"># cie xyz whitepoint</span>
+                <span class="n">WhitePoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.950456</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.088754</span><span class="p">]</span>
+
+                <span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">labim</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">xyz</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">WhitePoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invf</span><span class="p">(</span><span class="n">fX</span><span class="p">)</span>
+                <span class="n">xyz</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">WhitePoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invf</span><span class="p">(</span><span class="n">fY</span><span class="p">)</span>
+                <span class="n">xyz</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">WhitePoint</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invf</span><span class="p">(</span><span class="n">fZ</span><span class="p">)</span>
+
+                <span class="c1"># then call function again with conv = xyz2bgr</span>
+                <span class="n">xyz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xyz</span><span class="o">.</span><span class="n">colorspace</span><span class="p">(</span><span class="s1">&#39;xyz2bgr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">image</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;other conv options not yet implemented&#39;</span><span class="p">)</span>
+                <span class="c1"># TODO other color conversion cases</span>
+                <span class="c1"># out.append(cv.cvtColor(np.float32(im), **kwargs))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_invf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fY</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inverse f from colorspace.m</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">fY</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="n">Y</span><span class="p">[</span><span class="n">Y</span> <span class="o">&lt;</span> <span class="mf">0.008856</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">fY</span><span class="p">[</span><span class="n">Y</span> <span class="o">&lt;</span> <span class="mf">0.008856</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">29</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">108</span> <span class="o">/</span> <span class="mi">841</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Y</span>
+
+    <span class="k">def</span> <span class="nf">gamma_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gamma encoding</span>
+
+<span class="sd">        :param gamma: gamma value</span>
+<span class="sd">        :type gam: string or float</span>
+<span class="sd">        :return: gamma encoded version of image</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.gamma_encode(gamma)`` is the image with an gamma correction based</span>
+<span class="sd">          applied.  This takes a linear luminance image and converts it to a </span>
+<span class="sd">          form suitable for display on a non-linear monitor.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. autorun:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Gamma encoding is typically performed in a camera with</span>
+<span class="sd">              GAMMA=0.45.</span>
+<span class="sd">            - For images with multiple planes the gamma correction is applied</span>
+<span class="sd">              to all planes.</span>
+<span class="sd">            - For images sequences the gamma correction is applied to all</span>
+<span class="sd">              elements.</span>
+<span class="sd">            - For images of type double the pixels are assumed to be in the</span>
+<span class="sd">              range 0 to 1.</span>
+<span class="sd">            - For images of type int the pixels are assumed in the range 0 to</span>
+<span class="sd">              the maximum value of their class.  Pixels are converted first to</span>
+<span class="sd">              double, processed, then converted back to the integer class.</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Chapter 10, P. Corke, Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">im</span><span class="o">.</span><span class="n">iscolor</span><span class="p">:</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">gamma_encode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">red</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">gamma_encode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">green</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">gamma_encode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">blue</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">gamma_encode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">gamma</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gamma_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gamma decoding</span>
+
+<span class="sd">        :param gamma: gamma value</span>
+<span class="sd">        :type gam: string or float</span>
+<span class="sd">        :return: gamma decoded version of image</span>
+<span class="sd">        :rtype: Image instance</span>
+
+<span class="sd">        - ``IM.gamma_decode(gamma)`` is the image with an gamma correction</span>
+<span class="sd">          applied.  This takes a gamma-corrected image and converts it to a</span>
+<span class="sd">          linear luminance image.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. autorun:: pycon</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Gamma decoding should be applied to any color image prior to</span>
+<span class="sd">              colometric operations.</span>
+<span class="sd">            - Gamma decoding is typically performed in the display with</span>
+<span class="sd">              GAMMA=2.2.</span>
+<span class="sd">            - For images with multiple planes the gamma correction is applied</span>
+<span class="sd">              to all planes.</span>
+<span class="sd">            - For images sequences the gamma correction is applied to all</span>
+<span class="sd">              elements.</span>
+<span class="sd">            - For images of type double the pixels are assumed to be in the</span>
+<span class="sd">              range 0 to 1.</span>
+<span class="sd">            - For images of type int the pixels are assumed in the range 0 to</span>
+<span class="sd">              the maximum value of their class.  Pixels are converted first to</span>
+<span class="sd">              double, processed, then converted back to the integer class.</span>
+
+<span class="sd">        :references:</span>
+
+<span class="sd">            - Robotics, Vision &amp; Control, Chapter 10, P. Corke, Springer 2011.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">im</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">im</span><span class="o">.</span><span class="n">iscolor</span><span class="p">:</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">gamma_decode</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">red</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">gamma_decode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">green</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">gamma_decode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">blue</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">((</span><span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gamma_decode</span><span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">image</span><span class="p">,</span> <span class="n">gamma</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+<span class="c1"># --------------------------------------------------------------------------#</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c1"># test run ImageProcessingColor.py</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ImageProcessingColor.py&#39;</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">machinevisiontoolbox.Image</span> <span class="kn">import</span> <span class="n">Image</span>
+
+    <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="s1">&#39;monalisa.png&#39;</span><span class="p">)</span>
+    <span class="n">im</span><span class="o">.</span><span class="n">disp</span><span class="p">()</span>
+
+    <span class="n">imcs</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">showcolorspace</span><span class="p">()</span>
+    <span class="n">imcs</span><span class="o">.</span><span class="n">disp</span><span class="p">()</span>
+
+    <span class="kn">import</span> <span class="nn">code</span>
+    <span class="n">code</span><span class="o">.</span><span class="n">interact</span><span class="p">(</span><span class="n">local</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">globals</span><span class="p">(),</span> <span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

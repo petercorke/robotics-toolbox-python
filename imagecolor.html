@@ -1,0 +1,444 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Color operations &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Spatial operators" href="kernel.html" />
+    <link rel="prev" title="Image processing" href="imageproc.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="image.html">Image processing</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="image.html#function-reference">Function reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="imageproc.html">Image processing</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Color operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel.html">Spatial operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morph.html">Morphological operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="blobs.html">Blob features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features2d.html">2D image features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html">Camera geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageio.html">Image i/o</a></li>
+<li class="toctree-l3"><a class="reference internal" href="color.html">Color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shapes.html">Canonic 3D shapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphics.html">Graphics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="image.html">Image processing</a> &raquo;</li>
+        
+      <li>Color operations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/imagecolor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="kernel.html" class="btn btn-neutral float-right" title="Spatial operators" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="imageproc.html" class="btn btn-neutral float-left" title="Image processing" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="color-operations">
+<h1>Color operations<a class="headerlink" href="#color-operations" title="Permalink to this headline">¶</a></h1>
+<p>These functions perform image processing operations on grey-scale and color images.</p>
+<dl class="py class">
+<dt id="machinevisiontoolbox.Image">
+<em class="property">class </em><code class="sig-prename descclassname">machinevisiontoolbox.</code><code class="sig-name descname">Image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colororder</span><span class="o">=</span><span class="default_value">'BGR'</span></em>, <em class="sig-param"><span class="n">iscolor</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">checksize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">checktype</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="machinevisiontoolbox.Image.blue">
+<code class="sig-name descname">blue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#machinevisiontoolbox.Image.blue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the blue plane of a color image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – if image is not color</p>
+</dd>
+<dt class="field-even">Return out</dt>
+<dd class="field-even"><p>greyscale image representing the blue image plane</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Image instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.colorise">
+<code class="sig-name descname">colorise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">[1, 1, 1]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#machinevisiontoolbox.Image.colorise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Colorise a greyscale image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>c</strong> – color to color image :type c: string or rgb-tuple :return</p>
+</dd>
+</dl>
+<p>out: Image  with float64 precision elements ranging from 0 to 1 :rtype:
+Image instance</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IM.color()</span></code> is a color image out, where each color plane is equal
+to image.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IM.imcolor(c)</span></code> as above but each output pixel is <a href="#id1"><span class="problematic" id="id2">``</span></a>c``(3,1) times
+the corresponding element of image.</p></li>
+</ul>
+<p>Example:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Can convert a monochrome sequence (h,W,N) to a color image
+sequence (H,W,3,N).</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control, Section 10.1, P. Corke,
+Springer 2011.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.colorspace">
+<code class="sig-name descname">colorspace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">conv</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#machinevisiontoolbox.Image.colorspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a color image between color representations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conv</strong> (<em>string</em><em> (</em><em>see below</em><em>)</em>) – color code for color conversion (OpenCV codes for now)</p></li>
+<li><p><strong>kwargs</strong> (<em>name/value pairs</em>) – keywords/options for OpenCV’s cvtColor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>out</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array, shape (N,M) or (N,3)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IM.colorspace(conv)</span></code> transforms the color representation of image
+where <code class="docutils literal notranslate"><span class="pre">conv</span></code> is a string specifying the conversion. The image
+should be a real full double array of size (M,3) or (M,N,3). The
+output is the same size as <code class="docutils literal notranslate"><span class="pre">IM</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">conv</span></code> tells the source and destination color spaces,
+<code class="docutils literal notranslate"><span class="pre">conv</span></code> = ‘dest&lt;-src’, or alternatively, <code class="docutils literal notranslate"><span class="pre">conv</span></code> = ‘src-&gt;dest’.
+Supported color spaces are
+‘RGB’              sRGB IEC 61966-2-1
+‘YCbCr’            Luma + Chroma (“digitized” version of Y’PbPr)
+‘JPEG-YCbCr’       Luma + Chroma space used in JFIF JPEG
+‘YDbDr’            SECAM Y’DbDr Luma + Chroma
+‘YPbPr’            Luma (ITU-R BT.601) + Chroma
+‘YUV’              NTSC PAL Y’UV Luma + Chroma
+‘YIQ’              NTSC Y’IQ Luma + Chroma
+‘HSV’ or ‘HSB’     Hue Saturation Value/Brightness
+‘HSL’ or ‘HLS’     Hue Saturation Luminance
+‘HSI’              Hue Saturation Intensity
+‘XYZ’              CIE 1931 XYZ
+‘Lab’              CIE 1976 L*a*b* (CIELAB)
+‘Luv’              CIE L*u*v* (CIELUV)
+‘LCH’              CIE L*C*H* (CIELCH)
+‘CAT02 LMS’        CIE CAT02 LMS</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>All conversions assume 2 degree observer and D65 illuminant.
+Color space names are case insensitive and spaces are ignored.
+When sRGB is the source or destination, it can be omitted. For
+example ‘yuv&lt;-‘ is short for ‘yuv&lt;-rgb’. For sRGB, the values
+should be scaled between 0 and 1.  Beware that transformations
+generally do not constrain colors to be “in gamut.” Particularly,
+transforming from another space to sRGB may obtain R’G’B’ values
+outside of the [0,1] range.  So the result should be clamped to
+[0,1] before displaying. image(min(max(B,0),1));  lamp B to [0,1]
+and display sRGB (Red Green Blue) is the (ITU-R BT.709
+gamma-corrected) standard red-green-blue representation of colors
+used in digital imaging.  The components should be scaled between
+0 and 1.  The space can be visualized geometrically as a cube.</p></li>
+<li><p>Y’PbPr, Y’CbCr, Y’DbDr, Y’UV, and Y’IQ are related to sRGB by
+linear transformations.  These spaces separate a color into a
+grayscale luminance component Y and two chroma components.  The
+valid ranges of the components depends on the space.</p></li>
+<li><p>HSV (Hue Saturation Value) is related to sRGB by
+H = hexagonal hue angle   (0 &lt;= H &lt; 360),
+S = C/V                   (0 &lt;= S &lt;= 1),
+V = max(R’,G’,B’)         (0 &lt;= V &lt;= 1),
+where C = max(R’,G’,B’) - min(R’,G’,B’).</p></li>
+<li><p>The hue angle H is computed on a hexagon.  The space is
+geometrically a hexagonal cone.</p></li>
+<li><p>HSL (Hue Saturation Lightness) is related to sRGB by
+H = hexagonal hue angle                (0 &lt;= H &lt; 360),
+S = C/(1 - abs(2L-1))                     (0 &lt;= S &lt;= 1),
+L = (max(R’,G’,B’) + min(R’,G’,B’))/2  (0 &lt;= L &lt;= 1),
+where H and C are the same as in HSV.  Geometrically, the space
+is a double hexagonal cone.</p></li>
+<li><p>HSI (Hue Saturation Intensity) is related to sRGB by
+H = polar hue angle        (0 &lt;= H &lt; 360),
+S = 1 - min(R’,G’,B’)/I    (0 &lt;= S &lt;= 1),
+I = (R’+G’+B’)/3           (0 &lt;= I &lt;= 1).
+Unlike HSV and HSL, the hue angle H is computed on a circle
+rather than a hexagon.</p></li>
+<li><p>CIE XYZ is related to sRGB by inverse gamma correction followed
+by a linear transform.  Other CIE color spaces are defined
+relative to XYZ.</p></li>
+<li><p>CIE L*a*b*, L*u*v*, and L*C*H* are nonlinear functions of XYZ.
+The L* component is designed to match closely with human
+perception of lightness.  The other two components describe the
+chroma.</p></li>
+<li><p>CIE CAT02 LMS is the linear transformation of XYZ using the
+MCAT02 chromatic adaptation matrix.  The space is designed to
+model the response of the three types of cones in the human eye,
+where L, M, S, correspond respectively to red (“long”), green
+(“medium”), and blue (“short”).</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control, Chapter 10, P. Corke, Springer 2011.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.green">
+<code class="sig-name descname">green</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#machinevisiontoolbox.Image.green" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the green plane of a color image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – if image is not color</p>
+</dd>
+<dt class="field-even">Return out</dt>
+<dd class="field-even"><p>greyscale image representing the green image plane</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Image instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.red">
+<code class="sig-name descname">red</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#machinevisiontoolbox.Image.red" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the red plane of a color image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – if image is not color</p>
+</dd>
+<dt class="field-even">Return out</dt>
+<dd class="field-even"><p>greyscale image representing the red image plane</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Image instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="kernel.html" class="btn btn-neutral float-right" title="Spatial operators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="imageproc.html" class="btn btn-neutral float-left" title="Image processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

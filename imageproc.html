@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Image processing &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Color operations" href="imagecolor.html" />
+    <link rel="prev" title="Image processing" href="image.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="image.html">Image processing</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="image.html#function-reference">Function reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Image processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imagecolor.html">Color operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="kernel.html">Spatial operators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morph.html">Morphological operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="blobs.html">Blob features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features2d.html">2D image features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="camera.html">Camera geometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageio.html">Image i/o</a></li>
+<li class="toctree-l3"><a class="reference internal" href="color.html">Color</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shapes.html">Canonic 3D shapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="graphics.html">Graphics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="image.html">Image processing</a> &raquo;</li>
+        
+      <li>Image processing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/imageproc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="imagecolor.html" class="btn btn-neutral float-right" title="Color operations" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="image.html" class="btn btn-neutral float-left" title="Image processing" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="image-processing">
+<h1>Image processing<a class="headerlink" href="#image-processing" title="Permalink to this headline">¶</a></h1>
+<p>These functions perform image processing operations on grey-scale and color images.</p>
+<dl class="py class">
+<dt id="machinevisiontoolbox.Image">
+<em class="property">class </em><code class="sig-prename descclassname">machinevisiontoolbox.</code><code class="sig-name descname">Image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">colororder</span><span class="o">=</span><span class="default_value">'BGR'</span></em>, <em class="sig-param"><span class="n">iscolor</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">checksize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">checktype</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="machinevisiontoolbox.Image.disp">
+<code class="sig-name descname">disp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image.disp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image.disp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display first image in imlist</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.getimage">
+<em class="property">classmethod </em><code class="sig-name descname">getimage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image.getimage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image.getimage" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts <code class="docutils literal notranslate"><span class="pre">im</span></code> to image compatible with OpenCV</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>im</strong> (<em>numpy array</em><em> (</em><em>N</em><em>,</em><em>H</em><em>,</em><em>3</em><em>) or </em><em>(</em><em>N</em><em>,</em><em>H</em><em>) or </em><em>TODO Image object?</em>) – image</p>
+</dd>
+<dt class="field-even">Return out</dt>
+<dd class="field-even"><p>image of type np.(uint8, uint16, int16, float32, float64)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy array of the size of im</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">getimage(im)</span></code> converts <code class="docutils literal notranslate"><span class="pre">im</span></code> into a compatible datatype with
+OpenCV: CV_8U, CV_16U, CV_16S, CV_32F or CV_64F. By default, if int
+then CV_8U, and if float then CV_64F. Boolean images are converted to
+0’s and 1’s int</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.isimage">
+<em class="property">classmethod </em><code class="sig-name descname">isimage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image.isimage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image.isimage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if input is an image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>im</strong> (<em>numpy array</em><em>, </em><em>shape</em><em> (</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>(</em><em>N</em><em>,</em><em>M</em><em>,</em><em>3</em><em>) or </em><em>(</em><em>N</em><em>, </em><em>M</em><em>,</em><em>3</em><em>, </em><em>P</em><em>)</em>) – input image</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>out</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean True or False</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">isimage(im)</span></code> returns False if.</p></li>
+<li><p>(‘im is not of type int or float’).</p></li>
+<li><p>(‘im has ndims &lt; 2’).</p></li>
+<li><p>(‘im is (H,W), but does not have enough columns or rows to be an
+image’).</p></li>
+<li><p>(‘im (H,W,N), but does not have enough N to be either a color
+image (N=3).</p></li>
+<li><p>or a sequence of monochrome images (N &gt; 1)’).</p></li>
+<li><p>(‘im (H,W,M,N) should be a sequence of color images, but M is
+not equal to 3’).</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.pickpoints">
+<code class="sig-name descname">pickpoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">matplotlib</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image.pickpoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image.pickpoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pick points on image</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points to input, defaults to infinite number</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Picked points, one per column</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2,n)</p>
+</dd>
+</dl>
+<p>Allow the user to select points on the displayed image.  A marker is
+displayed at each point selected with a left-click.  Points can be removed
+by a right-click, like an undo function.  middle-click or Enter-key
+will terminate the entry process.  If <code class="docutils literal notranslate"><span class="pre">n</span></code> is
+given the entry process terminates after <code class="docutils literal notranslate"><span class="pre">n</span></code> points are entered, but
+can terminated prematurely as above.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Picked coordinates have floating point values.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#machinevisiontoolbox.Image.disp" title="machinevisiontoolbox.Image.disp"><code class="xref py py-func docutils literal notranslate"><span class="pre">disp()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="machinevisiontoolbox.Image.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/machinevisiontoolbox/Image.html#Image.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#machinevisiontoolbox.Image.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write first image in imlist to filename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – filename to write to</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="imagecolor.html" class="btn btn-neutral float-right" title="Color operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="image.html" class="btn btn-neutral float-left" title="Image processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

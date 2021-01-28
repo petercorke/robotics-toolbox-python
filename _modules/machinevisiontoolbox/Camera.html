@@ -1,0 +1,1261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>machinevisiontoolbox.Camera &mdash; Machine Vision Toolbox 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Machine Vision Toolbox
+          
+
+          
+            
+            <img src="../../_static/VisionToolboxLogo_CircBlack.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../image.html">Image processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../color.html">Color</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Machine Vision Toolbox</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>machinevisiontoolbox.Camera</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for machinevisiontoolbox.Camera</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Camera class</span>
+<span class="sd">@author: Dorian Tsai</span>
+<span class="sd">@author: Peter Corke</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span> <span class="k">as</span> <span class="nn">cv</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">import</span> <span class="nn">machinevisiontoolbox</span> <span class="k">as</span> <span class="nn">mvt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+
+<span class="kn">from</span> <span class="nn">machinevisiontoolbox.Image</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="c1"># import CameraVisualizer as CamVis</span>
+
+<span class="c1"># from mpl_toolkits.mplot3d import Axes3D, art3d</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d.art3d</span> <span class="kn">import</span> <span class="n">Poly3DCollection</span>
+
+<span class="c1"># from collections import namedtuple</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="c1"># import spatialmath.base as tr</span>
+
+<div class="viewcode-block" id="Camera"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera">[docs]</a><span class="k">class</span> <span class="nc">Camera</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">camtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rho</span><span class="o">=</span><span class="mf">10e-6</span><span class="p">,</span>
+                 <span class="n">imagesize</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span>
+                 <span class="n">pose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create instance of a Camera class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;MVTB camera&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;name must be a string&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">camtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_camtype</span> <span class="o">=</span> <span class="s1">&#39;perspective&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">camtype</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">camtype</span><span class="p">,</span> <span class="s1">&#39;camtype must be a string&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_camtype</span> <span class="o">=</span> <span class="n">camtype</span>
+
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rhou</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rhov</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rhou</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rhov</span> <span class="o">=</span> <span class="n">rho</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span> <span class="s1">&#39;rho must be a 1- or 2-element vector&#39;</span><span class="p">)</span>
+
+        <span class="n">imagesize</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">imagesize</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imagesize</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span> <span class="o">=</span> <span class="n">imagesize</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nv</span> <span class="o">=</span> <span class="n">imagesize</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">imagesize</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span> <span class="o">=</span> <span class="n">imagesize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nv</span> <span class="o">=</span> <span class="n">imagesize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">imagesize</span><span class="p">,</span> <span class="s1">&#39;imagesize must be a 1- or 2-element vector&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pose</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pose</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">pose</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_noise</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distortion</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:&gt;15s}</span><span class="s1">: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; [&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;pixel size&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="p">]))</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;image size&#39;</span><span class="p">,</span> <span class="s1">&#39; x &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">imagesize</span><span class="p">]))</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;pose&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">printline</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{:.3g}</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newname</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">newname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">newname</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">newname</span><span class="p">,</span> <span class="s1">&#39;name must be a string&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">camtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camtype</span>
+
+    <span class="nd">@camtype</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">camtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newcamtype</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">newcamtype</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_camtype</span> <span class="o">=</span> <span class="n">newcamtype</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">newcamtype</span><span class="p">,</span> <span class="s1">&#39;camtype must be a string&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">imagesize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nv</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rhou</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get pixel size: horizontal value</span>
+
+<span class="sd">        :return: horizontal pixel size</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: :func:`rhov`, :func:`rho`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhou</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rhov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get pixel size: horizontal value</span>
+
+<span class="sd">        :return: horizontal pixel size</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: :func:`rhov`, :func:`rho`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhov</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get pixel dimensions</span>
+
+<span class="sd">        :return: horizontal pixel size</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: :func:`rhou`, :func:`rhov`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rhou</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhov</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span>
+
+    <span class="nd">@image</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newimage</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">(</span><span class="n">newimage</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pose</span>
+
+    <span class="nd">@pose</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">pose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newpose</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pose</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">newpose</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Camera.plotcreate"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera.plotcreate">[docs]</a>    <span class="k">def</span> <span class="nf">plotcreate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create plot for camera image plane</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># create our own handle for the figure/plot</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;creating new figure and axes for camera&#39;</span><span class="p">)</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>  <span class="c1"># TODO *args, **kwargs?</span>
+        <span class="c1"># TODO elif ax is a plot handle, else raise ValueError</span>
+        <span class="c1"># else:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># if camera has an image, display said image</span>
+            <span class="n">mvt</span><span class="o">.</span><span class="n">idisp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="p">,</span>
+                      <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+                      <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                      <span class="n">title</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+                      <span class="n">drawonly</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nv</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;u (pixels)&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;v (pixels)&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;lightyellow&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;Machine Vision Toolbox for Python&#39;</span><span class="p">)</span>
+
+        <span class="c1"># TODO figure out axes ticks, etc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span> <span class="o">=</span> <span class="n">fig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span>  <span class="c1"># likely this return is not necessary</span></div>
+
+<div class="viewcode-block" id="Camera.plot"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;or&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot points on image plane</span>
+<span class="sd">        If 3D points, then 3D world points</span>
+<span class="sd">        If 2D points, then assumed image plane points</span>
+<span class="sd">        TODO plucker coordinates/lines?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotcreate</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># plot world points</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;p must have be (2,), (3,), (2,n), (3,n)&#39;</span><span class="p">)</span>
+
+        <span class="c1"># TODO plot ip on image plane given self._fig and self._ax</span>
+        <span class="c1"># TODO accept kwargs for the plotting</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">marker</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="n">markersize</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Camera.mesh"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera.mesh">[docs]</a>    <span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">objpose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot points on image plane</span>
+<span class="sd">        If 3D points, then 3D world points</span>
+<span class="sd">        If 2D points, then assumed image plane points</span>
+<span class="sd">        TODO plucker coordinates/lines?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.plotcreate()</span>
+        <span class="c1"># # TODO plot ip on image plane given self._fig and self._ax</span>
+        <span class="c1"># # TODO accept kwargs for the plotting</span>
+
+        <span class="c1"># self._ax.plot_surface(X, Y, Z)</span>
+        <span class="c1"># plt.show()</span>
+
+        <span class="c1">#Camera.mesh Plot mesh object on image plane</span>
+        <span class="c1">#</span>
+        <span class="c1"># C.mesh(X, Y, Z, OPTIONS) projects a 3D shape defined by the matrices X, Y, Z</span>
+        <span class="c1"># to the image plane and plots them.  The matrices X, Y, Z are of the same size</span>
+        <span class="c1"># and the corresponding elements of the matrices define 3D points.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Options::</span>
+        <span class="c1"># &#39;objpose&#39;,T   Transform all points by the homogeneous transformation T before</span>
+        <span class="c1">#               projecting them to the camera image plane.</span>
+        <span class="c1"># &#39;pose&#39;,T      Set the camera pose to the homogeneous transformation T before</span>
+        <span class="c1">#               projecting points to the camera image plane.  Temporarily overrides</span>
+        <span class="c1">#               the current camera pose C.T.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Additional arguments are passed to plot as line style parameters.</span>
+        <span class="c1">#</span>
+        <span class="c1"># See also MESH, CYLINDER, SPHERE, MKCUBE, Camera.plot, Camera.hold, Camera.clf.</span>
+        
+        <span class="c1"># check that mesh matrices conform</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;matrices must be the same size&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">pose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span>
+        
+        <span class="c1"># get handle for this camera image plane</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotcreate</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="c1"># draw 3D line segments</span>
+        <span class="n">nsteps</span> <span class="o">=</span> <span class="mi">21</span><span class="p">;</span>
+        
+        <span class="c1"># c.clf</span>
+        <span class="c1"># holdon = c.hold(1);</span>
+        <span class="c1"># s = linspace(0, 1, nsteps);</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>      <span class="c1">#i=1:numrows(X)-1</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># j=1:numcols(X)-1</span>
+                <span class="n">P0</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]]</span>
+                <span class="n">P1</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]]</span>
+                <span class="n">P2</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+                
+                <span class="c1"># if c.perspective</span>
+                    <span class="c1"># straight world lines are straight on the image plane</span>
+                <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">],</span> <span class="n">pose</span><span class="o">=</span><span class="n">pose</span><span class="p">);</span>
+                <span class="c1"># else</span>
+                <span class="c1">#     # straight world lines are not straight, plot them piecewise</span>
+                <span class="c1">#     P = bsxfun(@times, (1-s), P0) + bsxfun(@times, s, P1);</span>
+                <span class="c1">#     uv = c.project(P, &#39;setopt&#39;, opt);</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+                
+                <span class="c1"># if c.perspective</span>
+                    <span class="c1"># straight world lines are straight on the image plane</span>
+                <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">P0</span><span class="p">,</span> <span class="n">P2</span><span class="p">],</span> <span class="n">pose</span><span class="o">=</span><span class="n">pose</span><span class="p">);</span>
+                <span class="c1"># else</span>
+                <span class="c1">#     # straight world lines are not straight, plot them piecewise</span>
+                <span class="c1">#     P = bsxfun(@times, (1-s), P0) + bsxfun(@times, s, P2);</span>
+                <span class="c1">#     uv = c.project(P, &#39;setopt&#39;, opt);</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+
+        
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># j=1:numcols(X)-1</span>
+            <span class="n">P0</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">],</span>   <span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">],</span>   <span class="n">Z</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]]</span>
+            <span class="n">P1</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+            
+            <span class="c1"># if c.perspective</span>
+                <span class="c1"># straight world lines are straight on the image plane</span>
+            <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">P0</span><span class="p">,</span> <span class="n">P1</span><span class="p">],</span> <span class="n">pose</span><span class="o">=</span><span class="n">pose</span><span class="p">);</span>
+            <span class="c1"># else</span>
+            <span class="c1">#     # straight world lines are not straight, plot them piecewise</span>
+            <span class="c1">#     P = bsxfun(@times, (1-s), P0) + bsxfun(@times, s, P1);</span>
+            <span class="c1">#     uv = c.project(P, &#39;setopt&#39;, opt);</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">uv</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="c1"># c.hold(holdon); # turn hold off if it was initially off</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Camera.plot_camera"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera.plot_camera">[docs]</a>    <span class="k">def</span> <span class="nf">plot_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">frustum</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">cube</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">persist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display camera icon in world view</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># create our own handle for the figure/plot</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;creating new figure and axes for camera&#39;</span><span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+            <span class="c1"># ax.set_aspect(&#39;equal&#39;)</span>
+
+        <span class="c1"># draw camera-like object:</span>
+        <span class="k">if</span> <span class="n">cube</span><span class="p">:</span>
+            <span class="c1"># for now, just draw a cube</span>
+            <span class="c1"># TODO change those points based on pose</span>
+            <span class="c1"># self.T or input T</span>
+            <span class="n">pcube</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                              <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter3D</span><span class="p">(</span><span class="n">pcube</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pcube</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">pcube</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">frustum</span><span class="p">:</span>
+            <span class="c1"># TODO make this kwargs or optional inputs</span>
+            <span class="n">camfrustum</span> <span class="o">=</span> <span class="n">CameraVisualizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                          <span class="n">f_length</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                          <span class="n">fb_width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                                          <span class="n">ft_width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">camfrustumpoly</span> <span class="o">=</span> <span class="n">Poly3DCollection</span><span class="p">(</span><span class="n">camfrustum</span><span class="o">.</span><span class="n">gen_frustrum_poly</span><span class="p">(),</span>
+                                              <span class="n">facecolors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">add_collection3d</span><span class="p">(</span><span class="n">camfrustumpoly</span><span class="p">)</span>
+
+        <span class="c1">#  https://stackoverflow.com/questions/33540109/plot-surfaces-on-a-cube</span>
+        <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="Camera.plotfrustum"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera.plotfrustum">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">plotfrustum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                    <span class="n">f</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">fbwidth</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                    <span class="n">ftwidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot camera frustum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># create our own handle for the figure/plot</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;creating new figure and axes for camera&#39;</span><span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="Camera.printCameraAttributes"><a class="viewcode-back" href="../../camera.html#machinevisiontoolbox.Camera.printCameraAttributes">[docs]</a>    <span class="k">def</span> <span class="nf">printCameraAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print (internal) camera class attributes</span>
+<span class="sd">        TODO should change this to print relevant camera parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;: </span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">attributes</span><span class="p">[</span><span class="n">key</span><span class="p">])</span></div></div>
+
+<span class="k">class</span> <span class="nc">CentralCamera</span><span class="p">(</span><span class="n">Camera</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A (central projection) camera class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># list of attributes</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="p">[]</span>      <span class="c1"># camera  name (string)</span>
+    <span class="n">_camtype</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># camera type (string)</span>
+
+    <span class="n">_nu</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># number of pixels horizontal</span>
+    <span class="n">_nv</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># number of pixels vertical</span>
+    <span class="n">_u0</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># principal point horizontal</span>
+    <span class="n">_v0</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># principal point vertical</span>
+    <span class="n">_rhou</span> <span class="o">=</span> <span class="p">[]</span>      <span class="c1"># pixel imagesize (single pixel) horizontal</span>
+    <span class="n">_rhov</span> <span class="o">=</span> <span class="p">[]</span>      <span class="c1"># pixel imagesize (single pixel) vertical</span>
+    <span class="n">_fu</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># focal length horizontal [units]</span>
+    <span class="n">_fv</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># focal length vertical [units]</span>
+    <span class="n">_image</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># image (TODO image class?), for now, just numpy array</span>
+
+    <span class="n">_T</span> <span class="o">=</span> <span class="p">[]</span>         <span class="c1"># camera pose (homogeneous transform, SE3 class)</span>
+
+    <span class="n">_fig</span> <span class="o">=</span> <span class="p">[]</span>       <span class="c1"># for plotting, figure handle/object reference</span>
+    <span class="n">_ax</span> <span class="o">=</span> <span class="p">[]</span>        <span class="c1"># for plotting, axes handle</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">f</span><span class="o">=</span><span class="mi">8</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="n">pp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create instance of a Camera class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># TODO some of this logic to f and pp setters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+
+        <span class="k">if</span> <span class="n">pp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;principal point not specified, </span><span class="se">\</span>
+<span class="s1">                   setting it to centre of image plane&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pp</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nv</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pp</span> <span class="o">=</span> <span class="n">pp</span>
+
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;principal pt&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pp</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;focal length&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">s</span>
+
+
+    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">pose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">objpose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">visibility</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project world points to image plane</span>
+
+<span class="sd">        :param P: 3D points to project into camera image plane</span>
+<span class="sd">        :type P: array_like(3), array_like(3,n)</span>
+<span class="sd">        :param pose: camera pose with respect to the world frame, defaults to</span>
+<span class="sd">            camera&#39;s ``pose`` attribute</span>
+<span class="sd">        :type pose: SE3, optional</span>
+<span class="sd">        :param objpose:  3D point reference frame, defaults to world frame</span>
+<span class="sd">        :type objpose: SE3, optional</span>
+<span class="sd">        :param visibility: test if points are visible, default False</span>
+<span class="sd">        :type visibility: bool</span>
+<span class="sd">        :raises ValueError: [description]</span>
+<span class="sd">        :return: image plane points</span>
+<span class="sd">        :rtype: ndarray(2,n)</span>
+
+<span class="sd">        If ``pose`` is specified it is used for the camera pose instead of the</span>
+<span class="sd">        attribute ``pose``.  The objects attribute is not updated.</span>
+
+<span class="sd">        The points ``P`` are by default with respect to the world frame, but </span>
+<span class="sd">        they can be transformed </span>
+<span class="sd">        </span>
+<span class="sd">        If points are behind the camera, the image plane points are set to</span>
+<span class="sd">        NaN.</span>
+<span class="sd">        </span>
+<span class="sd">        if ``visibility`` is True then check whether the projected point lies in</span>
+<span class="sd">        the bounds of the image plane.  Return two values: the image plane</span>
+<span class="sd">        coordinates and an array of booleans indicating if the corresponding</span>
+<span class="sd">        point is visible.</span>
+
+<span class="sd">        If ``P`` is a Plucker object, then each value is projected into a </span>
+<span class="sd">        2D line in homogeneous form :math:`p[0] u + p[1] v + p[2] = 0`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">P</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getmatrix</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="kc">None</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">pose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span>
+
+        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getC</span><span class="p">(</span><span class="n">pose</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c1"># project 3D points</span>
+
+            <span class="k">if</span> <span class="n">objpose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">P</span> <span class="o">=</span> <span class="n">objpose</span> <span class="o">*</span> <span class="n">P</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">C</span> <span class="o">@</span> <span class="n">base</span><span class="o">.</span><span class="n">e2h</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+            <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># points behind the camera are set to NaN</span>
+
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">h2e</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="c1"># if self._distortion is not None:</span>
+            <span class="c1">#     x = self.distort(x)</span>
+            
+            <span class="c1"># if self._noise is not None:</span>
+            <span class="c1">#     # add Gaussian noise with specified standard deviation</span>
+            <span class="c1">#     x += np.diag(self._noise) * np.random.randn(x.shape)</span>
+
+            <span class="c1">#  do visibility check if required</span>
+            <span class="k">if</span> <span class="n">visibility</span><span class="p">:</span>
+                <span class="n">visible</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span> \
+                    <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> \
+                    <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> \
+                    <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span> \
+                    <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nv</span><span class="p">)</span>
+                
+                <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">visibility</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">x</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Plucker</span><span class="p">):</span>
+            <span class="c1"># project Plucker lines</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">P</span><span class="p">:</span>
+                <span class="n">l</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">vex</span><span class="p">(</span> <span class="n">C</span> <span class="o">*</span> <span class="n">p</span><span class="o">.</span><span class="n">skew</span> <span class="o">*</span> <span class="n">C</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">l</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">l</span><span class="p">))]</span> <span class="c1"># normalize by largest element</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">u0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get principal point: horizontal coordinate</span>
+
+<span class="sd">        :return: horizontal component of principal point</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: :func:`v0`, :func:`pp`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">v0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get principal point: vertical coordinate</span>
+
+<span class="sd">        :return: vertical component of principal point</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        :seealso: :func:`u0`, :func:`pp`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get principal point coordinate</span>
+
+<span class="sd">        :return: principal point</span>
+<span class="sd">        :rtype: 2-tuple</span>
+
+<span class="sd">        :seealso: :func:`u0`, :func:`v0`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_u0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">)</span>
+
+    <span class="nd">@pp</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">pp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set principal point coordinate</span>
+
+<span class="sd">        :param pp: principal point</span>
+<span class="sd">        :type pp: array_like(2)</span>
+
+<span class="sd">        :seealso: :func:`u0`, :func:`v0`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pp</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_u0</span> <span class="o">=</span> <span class="n">pp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span> <span class="o">=</span> <span class="n">pp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_u0</span> <span class="o">=</span> <span class="n">pp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span> <span class="o">=</span> <span class="n">pp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="s1">&#39;pp must be a 1- or 2-element vector&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get focal length in horizontal direction</span>
+
+<span class="sd">        :return: focal length in horizontal direction</span>
+<span class="sd">        :rtype: 2-tuple</span>
+
+<span class="sd">        :seealso: :func:`fv`, :func:`f`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fu</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get focal length in vertical direction</span>
+
+<span class="sd">        :return: focal length in horizontal direction</span>
+<span class="sd">        :rtype: 2-tuple</span>
+
+<span class="sd">        :seealso: :func:`fu`, :func:`f`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get focal length</span>
+
+<span class="sd">        :return: focal length</span>
+<span class="sd">        :rtype: 2-tuple</span>
+
+<span class="sd">        :seealso: :func:`fu`, :func:`fv`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fv</span><span class="p">)</span>
+
+    <span class="nd">@f</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">        :param f: focal length</span>
+<span class="sd">        :type f: scalar or array_like(2)</span>
+<span class="sd">        :raises ValueError: incorrect length of ``f``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fu</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fv</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fu</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fv</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;f must be a 1- or 2-element vector&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Intrinsic matrix of camera</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">_fu</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhou</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_u0</span><span class="p">],</span>
+                      <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fv</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rhov</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v0</span><span class="p">],</span>
+                      <span class="p">[</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">K</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Camera matrix, camera calibration or projection matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">P0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">@</span> <span class="n">P0</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">A</span>
+
+    <span class="k">def</span> <span class="nf">getC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get Camera matrix, camera calibration or projection matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">P0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">@</span> <span class="n">P0</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">A</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">@</span> <span class="n">P0</span> <span class="o">@</span> <span class="n">T</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span><span class="o">.</span><span class="n">A</span>
+        <span class="k">return</span> <span class="n">C</span>
+
+    <span class="k">def</span> <span class="nf">H</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Homography matrix</span>
+
+<span class="sd">        ``H(T, N, d)`` is the (3, 3) homography matrix for the camera observing</span>
+<span class="sd">        the plane with normal ``N`` and at distance ``d`` from two viewpoints.</span>
+<span class="sd">        The first view is from the current camera pose (self.T), and the second</span>
+<span class="sd">        is after a relative motion represented by the homogeneous</span>
+<span class="sd">        transformation ``T``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;plane distance d must be &gt; 0&#39;</span><span class="p">)</span>
+
+        <span class="n">N</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">N</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="s1">&#39;normal must be away from camera (N[2] &gt;= 0)&#39;</span><span class="p">)</span>
+
+        <span class="c1"># T transform view 1 to view 2</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span>
+
+        <span class="n">HH</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">R</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">d</span> <span class="o">*</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span> <span class="o">@</span> <span class="n">N</span>  <span class="c1"># need to ensure column then row = 3x3</span>
+
+        <span class="c1"># apply camera intrinsics</span>
+        <span class="n">HH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">@</span> <span class="n">HH</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">HH</span> <span class="o">/</span> <span class="n">HH</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># normalised</span>
+
+    <span class="k">def</span> <span class="nf">invH</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decompose homography matrix</span>
+
+<span class="sd">        ``self.invH(H)`` decomposes the homography ``H`` (3,3) into the camerea</span>
+<span class="sd">        motion and the normal to the plane. In practice, there are multiple</span>
+<span class="sd">        solutions and the return ``S``  is a named tuple with elements</span>
+<span class="sd">        ``S.T``, the camera motion as a homogeneous transform matrix (4,4), and</span>
+<span class="sd">        translation not to scale, and ``S.N`` the normal vector to the plawne</span>
+<span class="sd">        (3,3).  # TODO why is the normal vector a 3x3?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="c1"># also have K = self.K</span>
+
+        <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">K</span><span class="p">)</span> <span class="o">@</span> <span class="n">H</span> <span class="o">@</span> <span class="n">K</span>
+
+        <span class="c1"># normalise so that the second singular value is one</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">compute_uv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">H</span> <span class="o">/</span> <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># compute the SVD of the symmetric matrix H&#39;*H = VSV&#39;</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">H</span><span class="p">)</span> <span class="o">@</span> <span class="n">H</span><span class="p">)</span>
+
+        <span class="c1"># ensure V is right-handed</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;det(V) was &lt; 0&#39;</span><span class="p">)</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="o">-</span><span class="n">V</span>
+
+        <span class="c1"># get squared singular values</span>
+        <span class="n">s0</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># v0 = V[0:, 0]</span>
+        <span class="c1"># v1 = V[0:, 1]</span>
+        <span class="c1"># v2 = V[0:, 2]</span>
+
+        <span class="c1"># pure rotation - where all singular values == 1</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s0</span> <span class="o">-</span> <span class="n">s2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">spacing</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Warning: Homography due to pure rotation&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">H</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">H</span> <span class="o">=</span> <span class="o">-</span><span class="n">H</span>
+            <span class="c1"># sol = namedtuple(&#39;T&#39;, T, &#39;&#39;</span>
+        <span class="c1"># TODO finish from invhomog.m</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unfinished&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">FfromPoints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                    <span class="n">P1</span><span class="p">,</span>
+                    <span class="n">P2</span><span class="p">,</span>
+                    <span class="n">method</span><span class="p">,</span>
+                    <span class="n">ransacThresh</span><span class="p">,</span>
+                    <span class="n">confidence</span><span class="p">,</span>
+                    <span class="n">maxiters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute fundamental matrix from two sets of corresponding image points</span>
+<span class="sd">        see https://docs.opencv.org/master/d9/d0c/</span>
+<span class="sd">        group__calib3d.html#gae850fad056e407befb9e2db04dd9e509</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO check valid input</span>
+        <span class="c1"># need at least 7 pairs of points</span>
+        <span class="c1"># TODO sort options in a user-friendly manner</span>
+        <span class="n">fopt</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;7p&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">FM_7POINT</span><span class="p">,</span>
+                <span class="s1">&#39;8p&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">FM_8POINT</span><span class="p">,</span>
+                <span class="s1">&#39;ransac&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">FM_RANSAC</span><span class="p">,</span>
+                <span class="s1">&#39;lmeds&#39;</span><span class="p">:</span> <span class="n">cv</span><span class="o">.</span><span class="n">FM_LMEDS</span><span class="p">}</span>
+
+        <span class="n">F</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">findFundamentalMat</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">,</span>
+                                        <span class="n">method</span><span class="o">=</span><span class="n">fopt</span><span class="p">[</span><span class="n">method</span><span class="p">],</span>
+                                        <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="n">ransacThresh</span><span class="p">,</span>
+                                        <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
+                                        <span class="n">maxIters</span><span class="o">=</span><span class="n">maxiters</span><span class="p">)</span>
+        <span class="c1"># print(&#39;Fund mat = &#39;, F)</span>
+
+        <span class="k">return</span> <span class="n">F</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">EfromPoints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                    <span class="n">P1</span><span class="p">,</span>
+                    <span class="n">P2</span><span class="p">,</span>
+                    <span class="n">camMat</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute essential matrix from two sets of corresponding image points</span>
+<span class="sd">        TODO there are many more ways of computing E, but can tackle those</span>
+<span class="sd">        later</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO check valid input</span>
+        <span class="c1"># need at least 5 pairs of points</span>
+        <span class="c1"># TODO sort options</span>
+        <span class="c1"># if camMat is None:</span>
+        <span class="c1">#    camMat = cls.C</span>
+        <span class="c1"># TODO set default options, but user-configurable for method, prob,</span>
+        <span class="c1"># threshold, etc</span>
+
+        <span class="c1"># in the MVT we define C as a 3x4, but opencV just wants 3x3 fx, fy,</span>
+        <span class="c1"># cx, cy, so simply cut off the 4th column</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">camMat</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+            <span class="n">camMat</span> <span class="o">=</span> <span class="n">camMat</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">E</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">cv</span><span class="o">.</span><span class="n">findEssentialMat</span><span class="p">(</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">,</span> <span class="n">cameraMatrix</span><span class="o">=</span><span class="n">camMat</span><span class="p">)</span>
+        <span class="c1"># method=cv.RANSAC,</span>
+        <span class="c1">#                               prob=0.999,</span>
+        <span class="c1">#                               threshold=1.0</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Ess mat =&#39;</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">E</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">invcamcal</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">rq</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+            <span class="c1"># [R,Q] = vgg_rq(S)  Just like qr but the other way around.</span>
+            <span class="c1"># If [R,Q] = vgg_rq(X), then R is upper-triangular, Q is orthogonal, and X==R*Q.</span>
+            <span class="c1"># Moreover, if S is a real matrix, then det(Q)&gt;0.</span>
+            <span class="c1"># By awf</span>
+
+            <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">Q</span><span class="p">,</span> <span class="n">U</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">S</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">U</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">U</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">U</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>
+
+            <span class="k">return</span> <span class="n">U</span><span class="p">,</span> <span class="n">Q</span>
+
+
+        <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;argument is not a 3x4 matrix&#39;</span><span class="p">)</span>
+
+        <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">,:]</span>  <span class="c1"># not svd returns v transpose</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        
+        <span class="c1"># M = K * R</span>
+        <span class="n">K</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">rq</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+
+        <span class="c1"># deal with K having negative elements on the diagonal</span>
+        
+        <span class="c1"># make a matrix to fix this, K*C has positive diagonal</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">K</span><span class="p">)));</span>
+        
+        <span class="c1"># now  K*R = (K*C) * (inv(C)*R), so we need to check C is a proper rotation</span>
+        <span class="c1"># matrix.  If isn&#39;t then the situation is unfixable</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot correct signs in the intrinsic matrix&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># all good, let&#39;s fix it</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">@</span> <span class="n">C</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">R</span>
+        
+        <span class="c1"># normalize K so that lower left is 1</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">/</span> <span class="n">K</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+        
+        <span class="c1"># pull out focal length and scale factors</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">SE3</span><span class="o">.</span><span class="n">SO3</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">rho</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">pose</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">camcal</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="n">z4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,))</span>
+
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">))</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,))</span>
+        <span class="k">for</span> <span class="n">uv</span><span class="p">,</span> <span class="n">X</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">uv</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span> <span class="n">X</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">z4</span><span class="p">,</span> <span class="o">-</span><span class="n">u</span> <span class="o">*</span> <span class="n">X</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">z4</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="n">v</span> <span class="o">*</span> <span class="n">X</span><span class="p">]</span>
+                <span class="p">])</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">A</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="n">uv</span><span class="p">]</span>
+
+        <span class="c1"># solve Ax = b where c is 11 elements of camera matrix</span>
+        <span class="n">c</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+        <span class="c1"># compute and print the residual</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">A</span> <span class="o">@</span> <span class="n">c</span> <span class="o">-</span> <span class="n">b</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;residual is </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> px&quot;</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>   <span class="c1"># append a 1</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>  <span class="c1"># make a 3x4 matrix</span>
+
+
+
+        <span class="k">return</span> <span class="n">C</span>
+
+
+<span class="c1"># ----------------------------------------------------------------------------#</span>
+<span class="k">class</span> <span class="nc">CameraVisualizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for visualizer of a camera object. Used to generate frustrums in</span>
+<span class="sd">    Matplotlib</span>
+
+<span class="sd">        Constructor:</span>
+<span class="sd">        `CamVisualizer(parameters)</span>
+<span class="sd">            camera Camera object being visualized</span>
+<span class="sd">            f_length  length of the frustrum</span>
+<span class="sd">            fb_width  width of base of frustrum (camera centre end)</span>
+<span class="sd">            ft_width  width of top of frustrum (lens end)</span>
+<span class="sd">        Methods:</span>
+<span class="sd">          gen_frustrum_poly()  return 4x4x3 matrix of points to create</span>
+<span class="sd">          Poly3DCollection with Matplotlib</span>
+<span class="sd">                           Order of sides created [top, right, bottom, left]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="n">f_length</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">fb_width</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">ft_width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create instance of CamVisualizer class</span>
+
+<span class="sd">        Required parameters: camera  Camera object being visualized (see</span>
+<span class="sd">            common.py for Camera class)</span>
+
+<span class="sd">        Optional parameters: f_length length of the displayed frustrum (0.1</span>
+<span class="sd">            default) fb_width width of the base of displayed frustrum (camera</span>
+<span class="sd">            centre end) (0.05 default) ft_width width of the top of displayed</span>
+<span class="sd">            frustrum (lens end) (0.1 default)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera</span> <span class="o">=</span> <span class="n">camera</span>
+
+        <span class="c1"># Define corners of polygon in cameras frame (cf) in homogenous</span>
+        <span class="c1"># coordinates b is base t is top rectangle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_b0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_b2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_b3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">fb_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_t0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">f_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_t1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">f_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_t2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">f_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cf_t3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">ft_width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">f_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gen_frustrum_poly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Transform frustrum points to world coordinate frame using the camera</span>
+        <span class="c1"># extrinsics</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">A</span>
+
+        <span class="n">b0</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_b1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">b1</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_b2</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">b2</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_b3</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">b3</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_b0</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_t1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_t2</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_t3</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">t3</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cf_t0</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="c1"># Each set of four points is a single side of the Frustrum</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">b0</span><span class="p">,</span> <span class="n">b1</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t0</span><span class="p">],</span> <span class="p">[</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="p">],</span> <span class="p">[</span>
+                          <span class="n">b2</span><span class="p">,</span> <span class="n">b3</span><span class="p">,</span> <span class="n">t3</span><span class="p">,</span> <span class="n">t2</span><span class="p">],</span> <span class="p">[</span><span class="n">b3</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t3</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">points</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">cam</span> <span class="o">=</span> <span class="n">CentralCamera</span><span class="p">(</span><span class="n">imagesize</span><span class="o">=</span><span class="p">(</span><span class="mi">1280</span><span class="p">,</span><span class="mi">1024</span><span class="p">),</span> <span class="n">f</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cam</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="c1"># fig, ax = c.plot_camera(frustum=True)</span>
+    <span class="c1"># plt.show()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">project</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+    <span class="c1"># # fundamental matrix</span>
+    <span class="c1"># # create +8 world points (20 in this case)</span>
+    <span class="c1"># nx, ny = (4, 5)</span>
+    <span class="c1"># depth = 3</span>
+    <span class="c1"># x = np.linspace(-1, 1, nx)</span>
+    <span class="c1"># y = np.linspace(-1, 1, ny)</span>
+    <span class="c1"># X, Y = np.meshgrid(x, y)</span>
+    <span class="c1"># Z = depth * np.ones(X.shape)</span>
+    <span class="c1"># P = np.dstack((X, Y, Z))</span>
+    <span class="c1"># PC = np.ravel(P, order=&#39;C&#39;)</span>
+    <span class="c1"># PW = np.reshape(PC, (3, nx * ny), order=&#39;F&#39;)</span>
+
+    <span class="c1"># # create projections from pose 1:</span>
+    <span class="c1"># print(c.T)</span>
+    <span class="c1"># p1 = c.project(PW)  # p1 wrt c&#39;s T</span>
+    <span class="c1"># print(p1)</span>
+    <span class="c1"># c.plot(PW)</span>
+
+    <span class="c1"># # define pose 2:</span>
+    <span class="c1"># T2 = SE3([0.4, 0.2, 0.3])  # just pure x-translation</span>
+    <span class="c1"># p2 = c.project(PW, T2)</span>
+    <span class="c1"># print(p2)</span>
+    <span class="c1"># c.plot(p2)</span>
+
+    <span class="c1"># # convert p1, p2 into lists of points?</span>
+    <span class="c1"># p1 = np.float32(np.transpose(p1))</span>
+    <span class="c1"># p2 = np.float32(np.transpose(p2))</span>
+    <span class="c1"># F = c.FfromPoints(p1,</span>
+    <span class="c1">#                   p2,</span>
+    <span class="c1">#                   method=&#39;8p&#39;,</span>
+    <span class="c1">#                   ransacThresh=3,</span>
+    <span class="c1">#                   confidence=0.99,</span>
+    <span class="c1">#                   maxiters=10)</span>
+
+    <span class="c1"># # to check F:</span>
+    <span class="c1"># p1h = e2h(p1.T)</span>
+    <span class="c1"># p2h = e2h(p2.T)</span>
+    <span class="c1"># pfp = [p2h[:, i].T @ F @ p1h[:, i] for i in range(p1h.shape[1])]</span>
+    <span class="c1"># # [print(pfpi) for pfpi in pfp]</span>
+    <span class="c1"># for pfpi in pfp:</span>
+    <span class="c1">#     print(pfpi)</span>
+    <span class="c1"># # should be all close to zero, which they are!</span>
+
+    <span class="c1"># # essential matrix from points:</span>
+    <span class="c1"># E = c.EfromPoints(p1, p2, c.C)</span>
+
+    <span class="c1"># # TODO verify E</span>
+
+    <span class="c1"># import code</span>
+    <span class="c1"># code.interact(local=dict(globals(), **locals()))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on 28-Jan-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
