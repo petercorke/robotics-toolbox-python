@@ -1361,7 +1361,7 @@ graph [rankdir=LR];
 
         endlink, startlink = self._get_limit_links(endlink, startlink)
 
-        path, n = self.get_path(endlink, startlink)
+        # path, n = self.get_path(endlink, startlink)
 
         if T is None:
             T = self.base.inv() * \

@@ -99,11 +99,8 @@ plt.rc('grid', linestyle="-", color='#dbdbdb')
 # import cProfile
 # cProfile.run('qp = r.ikine_mmc(Tep)')
 
-
-
 # print(r.fkine(q2))
 # print(r.fkine(qp))
-
 
 # q1 = r.qr
 # q2 = q1 + 0.1
@@ -140,7 +137,6 @@ plt.rc('grid', linestyle="-", color='#dbdbdb')
 #     else:
 #         raise ValueError("Method must be 'central', 'forward' or 'backward'.")
 
-
 # # Numerical hessian wrt q[0]
 # # d = derivative(lambda x: r.jacob0(np.r_[x, q1[1:]]), q1[0], h=0.1)
 # # print(np.round(h1[:, :, 0], 3))
@@ -161,8 +157,6 @@ plt.rc('grid', linestyle="-", color='#dbdbdb')
 
 # # l = r.partial_fkine0(q1, 4)
 # # print(np.round(l[:, :, 0, 0, 0], 3))
-
-
 
 # j = r.jacob0(r.q)
 # def runner():

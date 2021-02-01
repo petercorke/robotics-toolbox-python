@@ -11,7 +11,7 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
-from spatialmath import base
+# from spatialmath import base
 from spatialmath.base.transforms3d import tr2jac, trinv
 from spatialmath.base.transformsNd import t2r
 from spatialmath import SE3, Twist3
@@ -739,9 +739,9 @@ class DHRobot(Robot):
                 if link.d != 0:
                     table.row(f"d{j}", link.d)
             if link.a != 0:
-                    table.row(f"a{j}", link.a)
+                table.row(f"a{j}", link.a)
             if link.alpha != 0:
-                    table.row(f"⍺{j}", link.alpha)
+                table.row(f"⍺{j}", link.alpha)
         table.print()
 
     def twists(self, q=None):
@@ -1643,7 +1643,8 @@ class DHRobot(Robot):
                 theta = theta - self.offset
 
                 solution = iksol(theta, True, "")
-                solutions.append(solution)
+
+            solutions.append(solution)
 
         if len(solutions) == 1:
             return solutions[0]
