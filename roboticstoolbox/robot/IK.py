@@ -51,7 +51,7 @@ class IKMixin:
                 # bad update
                 # gain = gain / 2
                 dt = dt / 2
-                # q = q_last
+                q = q_last
                 # print('Down')
 
             e_prev = e
@@ -204,7 +204,7 @@ class IKMixin:
               distances and angles without any kind of weighting.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
@@ -395,9 +395,9 @@ class IKMixin:
             and rotation about X, Y and Z respectively.
         :type mask: ndarray(6)
         :param ilimit: maximum number of iterations (default 500)
-        :type ilimit: int 
+        :type ilimit: int
         :param tol: final error tolerance (default 1e-10)
-        :type tol: float 
+        :type tol: float
         :param ωN: damping coefficient
         :type ωN: float (default 1e-3)
         :return: inverse kinematic solution
@@ -452,7 +452,7 @@ class IKMixin:
               distances and angles without any kind of weighting.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
@@ -466,7 +466,7 @@ class IKMixin:
 
         :references:
             - "Solvability-Unconcerned Inverse Kinematics by the
-              Levenberg–Marquardt Method", T. Sugihara, IEEE T-RO, 27(5), 
+              Levenberg–Marquardt Method", T. Sugihara, IEEE T-RO, 27(5),
               October 2011, pp. 984-991.
 
         :seealso: :func:`ikine_LM`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`
@@ -551,7 +551,6 @@ class IKMixin:
         else:
             return solutions
 
-
 # --------------------------------------------------------------------- #
 
     # def ikine_unc(self, T, q0=None, ilimit=1000, tol=1e-16, stiffness=0, costfun=None):
@@ -617,19 +616,19 @@ class IKMixin:
     #         - Can be used for robots with arbitrary degrees of freedom.
     #         - The inverse kinematic solution is generally not unique, and
     #           depends on the initial guess ``q0``.
-    #         - The default value of ``q0`` is zero which is a poor choice for 
+    #         - The default value of ``q0`` is zero which is a poor choice for
     #           most manipulators since it often corresponds to a
     #           kinematic singularity.
     #         - Such a solution is completely general, though much less
     #           efficient than analytic inverse kinematic solutions derived
     #           symbolically.
-    #         - The objective function (error) is 
+    #         - The objective function (error) is
     #           :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`
     #           where :math:`\mat{\Omega}` is a diagonal matrix.
     #         - Joint offsets, if defined, are accounted for in the solution.
 
-    #     .. warning:: 
-        
+    #     .. warning::
+
     #         - The objective function is rather uncommon.
     #         - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
     #           uses a scalar cost-function and does not provide a Jacobian.
@@ -690,7 +689,9 @@ class IKMixin:
 
 # --------------------------------------------------------------------- #
 
-    def ikine_min(self, T, q0=None, qlim=False, ilimit=1000, tol=1e-16, method=None, stiffness=0, costfun=None, options={}):
+    def ikine_min(
+            self, T, q0=None, qlim=False, ilimit=1000,
+            tol=1e-16, method=None, stiffness=0, costfun=None, options={}):
         r"""
         Inverse kinematics by optimization with joint limits (Robot superclass)
 
@@ -739,8 +740,8 @@ class IKMixin:
           ``L-BFGS-B`` (Broyden–Fletcher–Goldfarb–Shanno) but for redundant
           robots can sometimes give poor results, pushing against the joint
           limits when there is no need to.
-          
-        In both case the function to be minimized is the squared norm of a 
+
+        In both case the function to be minimized is the squared norm of a
         vector :math:`[d,a]` with components respectively the
         translation error and rotation error in Euler vector form, between the
         desired pose and the current estimate obtained by inverse kinematics.
@@ -749,8 +750,8 @@ class IKMixin:
 
         This method supports two additional costs:
 
-        - ``stiffness`` imposes a penalty on joint variation 
-          :math:`\sum_{j=1}^N (q_j - q_{j-1})^2` which tends to keep the 
+        - ``stiffness`` imposes a penalty on joint variation
+          :math:`\sum_{j=1}^N (q_j - q_{j-1})^2` which tends to keep the
           arm straight
         - ``costfun`` add a cost given by a user-specified function ``costfun(q)``
 
@@ -769,19 +770,19 @@ class IKMixin:
             - Can be used for robots with arbitrary degrees of freedom.
             - The inverse kinematic solution is generally not unique, and
               depends on the initial guess ``q0``.
-            - The default value of ``q0`` is zero which is a poor choice for 
+            - The default value of ``q0`` is zero which is a poor choice for
               most manipulators since it often corresponds to a
               kinematic singularity.
             - Such a solution is completely general, though much less
               efficient than analytic inverse kinematic solutions derived
               symbolically.
-            - The objective function (error) is 
+            - The objective function (error) is
               :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`
               where :math:`\mat{\Omega}` is a diagonal matrix.
             - Joint offsets, if defined, are accounted for in the solution.
 
-        .. warning:: 
-        
+        .. warning::
+
             - The objective function is rather uncommon.
             - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
               uses a scalar cost-function and does not provide a Jacobian.
@@ -816,7 +817,7 @@ class IKMixin:
             bounds = opt.Bounds(self.qlim[0, :], self.qlim[1, :])
 
             if method is None:
-                method='trust-constr'
+                method = 'trust-constr'
         else:
             # no joint limits
             if method is None:
@@ -840,7 +841,7 @@ class IKMixin:
         for Tk in T:
             res = opt.minimize(
                 cost,
-                q0, 
+                q0,
                 args=(Tk.A, weight, costfun, stiffness),
                 bounds=bounds,
                 method=method,
@@ -849,7 +850,7 @@ class IKMixin:
             )
 
             # trust-constr seems to work better than L-BFGS-B which often
-            # runs a joint up against its limit and terminates with position 
+            # runs a joint up against its limit and terminates with position
             # error.
             # but 'truts-constr' is 5x slower
 
@@ -864,7 +865,9 @@ class IKMixin:
 
 # --------------------------------------------------------------------- #
 
-    def ikine_global(self, T, q0=None, qlim=False, ilimit=1000, tol=1e-16, method=None, options={}):
+    def ikine_global(
+            self, T, q0=None, qlim=False, ilimit=1000,
+            tol=1e-16, method=None, options={}):
         r"""
         .. warning:: Experimental code for using SciPy global optimizers.
 
@@ -889,20 +892,19 @@ class IKMixin:
 
         solutions = []
 
-        wr = 1 / self.reach
-        weight = np.r_[wr, wr, wr, 1, 1, 1]
+        # wr = 1 / self.reach
+        # weight = np.r_[wr, wr, wr, 1, 1, 1]
 
         optdict = {}
 
         if method is None:
-            method='differential-evolution'
+            method = 'differential-evolution'
 
         if method == 'brute':
             # requires a tuple of tuples
-            optdict['ranges'] = tuple([tuple(l.qlim) for l in self])
+            optdict['ranges'] = tuple([tuple(li.qlim) for li in self])
         else:
-            optdict['bounds'] = tuple([tuple(l.qlim) for l in self])
-
+            optdict['bounds'] = tuple([tuple(li.qlim) for li in self])
 
         if method not in ['basinhopping', 'brute', 'differential_evolution',
                           'shgo', 'dual_annealing']:
@@ -915,11 +917,10 @@ class IKMixin:
             e = _angle_axis(self.fkine(q).A, T) * weight
             return (e**2).sum()
 
-        for Tk in T:
+        for _ in T:
             res = global_minimizer(
                 cost,
                 **optdict)
-            
 
             solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
             solutions.append(solution)
@@ -929,7 +930,7 @@ class IKMixin:
             return solutions[0]
         else:
             return solutions
-            
+
 # --------------------------------------------------------------------- #
 
     # def ikine_min(self, T, q0=None, pweight=1.0, stiffness=0.0,
@@ -983,12 +984,12 @@ class IKMixin:
     #         - The inverse kinematic solution is generally not unique, and
     #           depends on the initial guess ``q0``.
     #         - This norm is computed from distances and angles and ``pweight``
-    #           can be used to scale the position error norm to be congruent 
+    #           can be used to scale the position error norm to be congruent
     #           with rotation error norm.
     #         - For a highly redundant robot ``stiffness`` can be used to impose 
     #           a smoothness contraint on joint angles, tending toward solutions
     #           with are smooth curves.
-    #         - The default value of ``q0`` is zero which is a poor choice for 
+    #         - The default value of ``q0`` is zero which is a poor choice for
     #           most manipulators since it often corresponds to a
     #           kinematic singularity.
     #         - Such a solution is completely general, though much less
@@ -1000,8 +1001,8 @@ class IKMixin:
     #         - Joint offsets, if defined, are accounted for in the solution.
     #         - Joint limits become explicit bounds if 'qlimits' is set.
 
-    #     .. warning:: 
-        
+    #     .. warning::
+
     #         - The objective function is rather uncommon.
     #         - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
     #           uses a scalar cost-function and does not provide a Jacobian.
@@ -1069,7 +1070,6 @@ class IKMixin:
     #         return solutions[0]
     #     else:
     #         return solutions
-
 
     # def qmincon(self, q=None):
     #     """
@@ -1145,11 +1145,13 @@ class IKMixin:
     #     else:
     #         return qstar, success, error
 
+
 def _angle_axis(T, Td):
     d = base.transl(Td) - base.transl(T)
     R = base.t2r(Td) @ base.t2r(T).T
-    l = np.r_[R[2,1]-R[1,2], R[0,2]-R[2,0], R[1,0]-R[0,1]]
-    if base.iszerovec(l):
+    li = np.r_[R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]
+
+    if base.iszerovec(li):
         # diagonal matrix case
         if np.trace(R) > 0:
             # (1,1,1) case
@@ -1158,16 +1160,18 @@ def _angle_axis(T, Td):
             a = np.pi / 2 * (np.diag(R) + 1)
     else:
         # non-diagonal matrix case
-        ln = base.norm(l)
-        a = math.atan2(ln, np.trace(R) - 1) * l / ln
-        
+        ln = base.norm(li)
+        a = math.atan2(ln, np.trace(R) - 1) * li / ln
+
     return np.r_[d, a]
+
 
 def _angle_axis_sekiguchi(T, Td):
     d = base.transl(Td) - base.transl(T)
     R = base.t2r(Td) @ base.t2r(T).T
-    l = np.r_[R[2,1]-R[1,2], R[0,2]-R[2,0], R[1,0]-R[0,1]]
-    if base.iszerovec(l):
+    li = np.r_[R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]
+
+    if base.iszerovec(li):
         # diagonal matrix case
         if np.trace(R) > 0:
             # (1,1,1) case
@@ -1176,18 +1180,21 @@ def _angle_axis_sekiguchi(T, Td):
             # (1, -1, -1), (-1, 1, -1) or (-1, -1, 1) case
             a = np.pi / 2 * (np.diag(R) + 1)
             # as per Sekiguchi paper
-            if R[1,0] > 0 and R[2,1] > 0 and R[0,2] > 0:
-                a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) + 1)
-            elif R[1,0] > 0: # (2)
-                a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) @ np.r_[1,1,-1] + 1)
-            elif R[0,2] > 0: # (3)
-                a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) @ np.r_[1,-1,1] + 1)
-            elif R[2,1] > 0: # (4)
-                a = np.pi / np.sqrt(2) * np.sqrt(n.diag(R) @ np.r_[-1,1,1] + 1)
+            if R[1, 0] > 0 and R[2, 1] > 0 and R[0, 2] > 0:
+                a = np.pi / np.sqrt(2) * np.sqrt(np.diag(R) + 1)
+            elif R[1, 0] > 0:  # (2)
+                a = np.pi / np.sqrt(2) * np.sqrt(
+                    np.diag(R) @ np.r_[1, 1, -1] + 1)
+            elif R[0, 2] > 0:  # (3)
+                a = np.pi / np.sqrt(2) * np.sqrt(
+                    np.diag(R) @ np.r_[1, -1, 1] + 1)
+            elif R[2, 1] > 0:  # (4)
+                a = np.pi / np.sqrt(2) * np.sqrt(
+                    np.diag(R) @ np.r_[-1, 1, 1] + 1)
     else:
         # non-diagonal matrix case
-        ln = base.norm(l)
-        a = math.atan2(ln, np.trace(R) - 1) * l / ln
+        ln = base.norm(li)
+        a = math.atan2(ln, np.trace(R) - 1) * li / ln
 
     return np.r_[d, a]
 
@@ -1195,10 +1202,11 @@ def _angle_axis_sekiguchi(T, Td):
 if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
-    from spatialmath import SE3
+    # from spatialmath import SE3
 
-    # np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:9.5g}" if abs(x) > 1e-10 else f"{0:9.5g}"})
-
+    # np.set_printoptions(
+    # linewidth=120, formatter={'float': lambda x: f"{x:9.5g}"
+    # if abs(x) > 1e-10 else f"{0:9.5g}"})
 
     robot = rtb.models.DH.Panda()
 
@@ -1210,7 +1218,8 @@ if __name__ == "__main__":  # pragma nocover
     # print(robot.fkine(sol.q))
     # robot.plot(sol.q)
 
-    # sol = robot.ikine_unc(T, costfun=lambda q: q[1] * 1e-6 if q[1] > 0 else -q[1])
+    # sol = robot.ikine_unc(
+    # T, costfun=lambda q: q[1] * 1e-6 if q[1] > 0 else -q[1])
     # print(sol)
     # print(robot.fkine(sol.q))
     # robot.plot(sol.q)
