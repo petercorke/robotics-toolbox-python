@@ -50,7 +50,7 @@ env.start_recording('panda_swift_recording', 1 / dt)
 n = 7
 
 # Set the desired end-effector pose
-Tep = panda.fkine() * sm.SE3(0.3, 0.2, 0.3)
+Tep = panda.fkine(panda.q) * sm.SE3(0.3, 0.2, 0.3)
 
 arrived = False
 
@@ -82,7 +82,7 @@ while not arrived:
     Q[n:, n:] = (1 / e) * np.eye(6)
 
     # The equality contraints
-    Aeq = np.c_[panda.jacobe(), np.eye(6)]
+    Aeq = np.c_[panda.jacobe(panda.q), np.eye(6)]
     beq = v.reshape((6,))
 
     # The inequality constraints for joint limit avoidance
