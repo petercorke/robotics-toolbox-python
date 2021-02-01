@@ -32,17 +32,17 @@ env.add(panda)
 n = 7
 
 # Set the desired end-effector pose
-Tep = panda.fkine() * sm.SE3(0.3, 0.2, 0.3)
+Tep = panda.fkine(panda.q) * sm.SE3(0.3, 0.2, 0.3)
 
 arrived = False
 
 while not arrived:
 
     # The pose of the Panda's end-effector
-    Te = panda.fkine()
+    Te = panda.fkine(panda.q)
 
     # The manipulator Jacobian in the end-effecotr frame
-    Je = panda.jacobe()
+    Je = panda.jacobe(panda.q)
 
     # Calulate the required end-effector spatial velocity for the robot
     # to approach the goal. Gain is set to 1.0
@@ -52,7 +52,7 @@ while not arrived:
     Y = 0.01
 
     # The manipulability Jacobian
-    Jm = panda.jacobm()
+    Jm = panda.jacobm(panda.q)
 
     # Project the gradient of manipulability into the null-space of the
     # differential kinematics

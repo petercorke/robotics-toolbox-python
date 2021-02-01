@@ -8,11 +8,18 @@ import spatialmath as sm
 import numpy as np
 import os
 
-# Launch the simulator Swift
-env = rtb.backends.ROS()
-env.launch(ros_master_uri='http://localhost:11311')
+env = rtb.backends.Swift()
+env.launch()
 
-os.system('rostopic list')
+r = rtb.models.UR5()
+env.add(r)
+env.hold()
+
+# # Launch the simulator Swift
+# env = rtb.backends.ROS()
+# env.launch(ros_master_uri='http://localhost:11311')
+
+# os.system('rostopic list')
 
 # # Create a Panda robot object
 # panda = rtb.models.Panda()
