@@ -231,7 +231,7 @@ The toolbox is incredibly useful for developing and prototyping algorithms for r
 
 J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2021.3056060. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
 
-[[Arxiv Paper](https://arxiv.org/abs/2010.08686)] [[IEEE Xplore(https://ieeexplore.ieee.org/document/9343718)]] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/neo.py)]
+[[Arxiv Paper](https://arxiv.org/abs/2010.08686)] [[IEEE Xplore](https://ieeexplore.ieee.org/document/9343718)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/neo.py)]
 
 <p>
   <a href="https://youtu.be/jSLPJBr8QTY">
