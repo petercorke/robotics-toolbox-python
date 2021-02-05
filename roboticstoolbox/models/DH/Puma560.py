@@ -228,7 +228,7 @@ class Puma560(DHRobot):
             GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95
  
         """
-        def ik3(robot, T, config):
+        def ik3(robot, T, config='lun'):
 
             # solve for the first three joints
 
@@ -253,8 +253,10 @@ class Puma560(DHRobot):
             r = np.sqrt(Px**2 + Py**2)
             if 'r' in config:
                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-            else:
+            elif 'l' in config:
                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
+            else:
+                raise ValueError('bad configuration string')
 
             # Solve for theta[1]
             # V114 is defined in equation 43, p.39.
@@ -264,10 +266,12 @@ class Puma560(DHRobot):
             # configuration parameter n2
             if 'u' in config:
                 n2 = 1
-            else:
+            elif 'd' in config:
                 n2 = -1
+            else:
+                raise ValueError('bad configuration string')
 
-            if 'r' in config:
+            if 'l' in config:
                 n2 = -n2
 
             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
@@ -300,3 +304,8 @@ if __name__ == '__main__':    # pragma nocover
     puma = Puma560(symbolic=False)
     print(puma)
     print(puma.dyntable())
+    T = puma.fkine(puma.qn)
+    print(puma.ikine_a(T, 'ru').q)
+    print(puma.ikine_a(T, 'rd').q)
+    qi = puma.ikine_a(T, 'rd').q
+    puma.plot(qi)
