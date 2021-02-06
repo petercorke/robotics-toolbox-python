@@ -68,8 +68,10 @@ frne = Extension(
         'frne',
         sources=[
             './roboticstoolbox/core/vmath.c',
+            './roboticstoolbox/core/vmath.h',
             './roboticstoolbox/core/ne.c',
-            './roboticstoolbox/core/frne.c'])
+            './roboticstoolbox/core/frne.c',
+            './roboticstoolbox/core/frne.h'])
 
 setup(
     name='roboticstoolbox-python',
