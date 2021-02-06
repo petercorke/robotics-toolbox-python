@@ -75,7 +75,7 @@ for solver in solvers:
     err = np.linalg.norm(T - robot.fkine(sol.q))
     print('  error', err)
 
-    if N > 0:
+    if N > 0: # noqa
         # evaluate the execution time
         t = timeit.timeit(stmt=f"robot.ikine_min(T, q0=q0, qlim=True, method='{solver}')", setup=setup, number=N)
     else:
