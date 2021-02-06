@@ -230,6 +230,8 @@ class Puma560(DHRobot):
         """
         def ik3(robot, T, config='lun'):
 
+            config = self.config_validate(config, ('lr', 'ud', 'nf'))
+
             # solve for the first three joints
 
             a2 = robot.links[1].a

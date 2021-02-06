@@ -1651,7 +1651,49 @@ class DHRobot(Robot):
         else:
             return solutions
 
+    def config_validate(self, config, allowables):
+        """
+        Validate a configuration string
 
+        :param config: a configuration string
+        :type config: str
+        :param allowable: [description]
+        :type allowable: tuple of str
+        :raises ValueError: bad character in configuration string
+        :return: configuration string
+        :rtype: str
+
+        For analytic inverse kinematics the Toolbox uses a string whose
+        letters indicate particular solutions, eg. for the Puma 560
+
+            =========  ===================
+            Character  Meaning
+            =========  ===================
+            'l'        lefty
+            'r'        righty
+            'u'        elbow up
+            'd'        elbow down
+            'n'        wrist not flipped
+            'f'        wrist flipped
+            =========  ===================
+
+        This method checks that the configuration string is valid and adds
+        default values for missing characters.  For example:
+
+            config = self.config_validate(config, ('lr', 'ud', 'nf'))
+
+        indicates the valid characters, and the first character in each
+        string is the default, ie. if neither 'l' or 'r' is given then
+        'l' will be added to the string.
+
+        """
+        for c in config:
+            if not any([c in allowable for allowable in allowables]):
+                raise ValueError(f"bad config specifier <{c}>")
+        for allowable in allowables:
+            if all([a not in config for a in allowable]):
+                config += allowable[0]
+        return config
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         print('SerialLink is deprecated, use DHRobot instead')

@@ -867,6 +867,15 @@ class TestDHRobot(unittest.TestCase):
 
         T = puma.fkine(puma.qn)
 
+        # test configuration validation
+        config = puma.config_validate('l', ('lr', 'ud', 'nf'))
+        self.assertEqual(len(config), 3)
+        self.assertTrue('l' in config)
+        self.assertTrue('u' in config)
+        self.assertTrue('n' in config)
+        with self.assertRaises(ValueError):
+            config = puma.config_validate('lux', ('lr', 'ud', 'nf'))
+
         # analytic solution
         sol = puma.ikine_a(T)
         self.assertTrue(sol.success)
