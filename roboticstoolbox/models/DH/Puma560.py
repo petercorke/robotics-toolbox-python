@@ -19,6 +19,7 @@
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
+from spatialmath import base
 
 
 class Puma560(DHRobot):
@@ -260,6 +261,7 @@ class Puma560(DHRobot):
             else:
                 raise ValueError('bad configuration string')
 
+
             # Solve for theta[1]
             # V114 is defined in equation 43, p.39.
             # r is defined in equation 47, p.39.
@@ -295,8 +297,9 @@ class Puma560(DHRobot):
                 den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
                 theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
 
-            return theta
+            theta = base.angdiff(theta)
 
+            return theta
 
         return self.ikine_6s(T, config, ik3)
 
@@ -307,7 +310,9 @@ if __name__ == '__main__':    # pragma nocover
     print(puma)
     print(puma.dyntable())
     T = puma.fkine(puma.qn)
+    print(puma.ikine_a(T, 'lu').q)
     print(puma.ikine_a(T, 'ru').q)
+    print(puma.ikine_a(T, 'ld').q)
     print(puma.ikine_a(T, 'rd').q)
-    qi = puma.ikine_a(T, 'rd').q
-    puma.plot(qi)
+
+    puma.plot(puma.qz)
