@@ -264,9 +264,9 @@ class IKMixin:
                         # more to do on the trajectory
                         solutions.append(solution)
                         del T[0]
-                else:
-                    # no solution found, stop now
-                    return iksol(None, False, None, None, None)
+            else:
+                # no solution found, stop now
+                return iksol(None, False, None, None, None)
 
         if q0 is None:
             q0 = np.zeros((self.n,))
