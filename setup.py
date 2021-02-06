@@ -130,6 +130,8 @@ setup(
 
     include_package_data=True,
 
+    scripts = ['examples/rtbtool'],
+
     install_requires=req,
 
     extras_require={

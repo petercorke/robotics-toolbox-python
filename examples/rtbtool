@@ -39,7 +39,7 @@ parser.add_argument('--prompt', '-p', default='>>> ',
     help='input prompt')
 parser.add_argument('--resultprefix', '-r', default=None,
     help='execution result prefix, include {} for execution count number')
-parser.add_argument('--showassign', '-a', default=False,
+parser.add_argument('--showassign', '-a', default=False, action='store_true',
     help='display the result of assignments')
 args = parser.parse_args()
 
