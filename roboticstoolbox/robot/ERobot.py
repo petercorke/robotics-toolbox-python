@@ -1202,7 +1202,7 @@ graph [rankdir=LR];
             raise TypeError('unknown argument')
 
     def jacob0(self, q, endlink=None, startlink=None, offset=None, T=None):
-        """
+        r"""
         Manipulator geometric Jacobian in the base frame
 
         :param q: Joint coordinate vector
@@ -1309,7 +1309,7 @@ graph [rankdir=LR];
         return J
 
     def jacobe(self, q, endlink=None, startlink=None, offset=None, T=None):
-        """
+        r"""
         Manipulator geometric Jacobian in the end-effector frame
 
         :param q: Joint coordinate vector

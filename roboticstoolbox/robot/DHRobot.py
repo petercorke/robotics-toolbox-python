@@ -1041,7 +1041,7 @@ class DHRobot(Robot):
         return tr2jac(trinv(T.A)) @ self.jacobe(q)
 
     def jacob_dot(self, q=None, qd=None):
-        """
+        r"""
         Derivative of Jacobian
 
         :param q: The joint configuration of the robot (Optional,
