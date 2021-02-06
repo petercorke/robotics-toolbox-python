@@ -449,8 +449,8 @@ class DHFactor(ETS):
                 q = "q{0}"
             else:
                 q = "q"
-        q = "q{0}"
-        # For et in the object, display it, data comes from properties
+                
+        # For each ET in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self:
 

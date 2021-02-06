@@ -240,6 +240,7 @@ class IKMixin:
             for k in range(slimit):
                 # choose a random joint coordinate
                 q0_k = np.random.rand(self.n) * qspan + qlim[0, :]
+                print('search starts at ', q0_k)
 
                 # recurse into the solver
                 solution = self.ikine_LM(

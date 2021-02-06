@@ -127,7 +127,7 @@ class Bug2(Navigation):
             % Options::
             %  'animate'   show a simulation of the robot moving along the path
             %  'movie',M   create a movie
-            %  'current'   show the current position position as a black circle
+            %  'current'   show the current position as a black circle
             %
             % Notes::
             % - START and GOAL are given as X,Y coordinates in the grid map, not as
@@ -172,7 +172,7 @@ class Bug2(Navigation):
                 plt.plot(robot[0], robot[1], 'y.')
                 plt.pause(0.1)
                 if current:
-                    h = self.plot(robot[0], robot[1])
+                    h = self.plot(robot)
                 plt.draw()
                 if movie is not None:
                     anim.plot(h)

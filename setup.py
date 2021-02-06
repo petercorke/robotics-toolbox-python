@@ -68,8 +68,10 @@ frne = Extension(
         'frne',
         sources=[
             './roboticstoolbox/core/vmath.c',
+            './roboticstoolbox/core/vmath.h',
             './roboticstoolbox/core/ne.c',
-            './roboticstoolbox/core/frne.c'])
+            './roboticstoolbox/core/frne.c',
+            './roboticstoolbox/core/frne.h'])
 
 setup(
     name='roboticstoolbox-python',
@@ -127,6 +129,8 @@ setup(
     package_data={'roboticstoolbox': extra_files},
 
     include_package_data=True,
+
+    scripts = ['examples/rtbtool'],
 
     install_requires=req,
 
