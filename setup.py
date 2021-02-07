@@ -48,7 +48,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 data_folders = [
     'roboticstoolbox/models/URDF/xacro',
     'roboticstoolbox/models/DH/meshes',
-    'roboticstoolbox/data',
+    'roboticstoolbox/data'
 ]
 
 
@@ -68,10 +68,11 @@ frne = Extension(
         'frne',
         sources=[
             './roboticstoolbox/core/vmath.c',
-            './roboticstoolbox/core/vmath.h',
             './roboticstoolbox/core/ne.c',
-            './roboticstoolbox/core/frne.c',
-            './roboticstoolbox/core/frne.h'])
+            './roboticstoolbox/core/frne.c'],
+        include_dirs=[
+            './roboticstoolbox/core/'
+        ])
 
 setup(
     name='roboticstoolbox-python',
