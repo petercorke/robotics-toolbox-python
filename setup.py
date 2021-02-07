@@ -78,7 +78,7 @@ frne = Extension(
 setup(
     name='roboticstoolbox-python',
 
-    version='0.7.0',
+    version='0.7.1',
 
     description='A Python library for robotic education and research',
 
@@ -132,7 +132,9 @@ setup(
 
     include_package_data=True,
 
-    scripts = ['examples/rtbtool'],
+    scripts=['examples/rtbtool'],
+
+    zip_safe=False,
 
     install_requires=req,
 
