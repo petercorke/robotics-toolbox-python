@@ -48,7 +48,8 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 data_folders = [
     'roboticstoolbox/models/URDF/xacro',
     'roboticstoolbox/models/DH/meshes',
-    'roboticstoolbox/data'
+    'roboticstoolbox/data',
+    'roboticstoolbox/core'
 ]
 
 
@@ -95,7 +96,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
