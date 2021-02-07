@@ -1363,7 +1363,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unknown argument&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ERobot.jacob0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the base frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1470,7 +1470,7 @@
         <span class="k">return</span> <span class="n">J</span></div>
 
 <div class="viewcode-block" id="ERobot.jacobe"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the end-effector frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1522,7 +1522,7 @@
 
         <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
 
-        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="c1"># path, n = self.get_path(endlink, startlink)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
@@ -2128,7 +2128,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

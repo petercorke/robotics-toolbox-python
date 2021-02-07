@@ -526,11 +526,11 @@
         <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">:</span>
 
             <span class="n">T</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">base</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
 
-            <span class="n">t</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
-            <span class="n">r</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">dt</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">*</span> <span class="n">dt</span>
 
             <span class="n">shape</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="o">.</span><span class="n">RPY</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
@@ -562,7 +562,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

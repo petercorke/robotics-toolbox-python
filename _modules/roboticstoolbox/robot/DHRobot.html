@@ -172,7 +172,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.DHLink</span> <span class="kn">import</span> <span class="n">DHLink</span>  <span class="c1"># HACK</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> \
     <span class="n">getvector</span><span class="p">,</span> <span class="n">isscalar</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">getmatrix</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="c1"># from spatialmath import base</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.transforms3d</span> <span class="kn">import</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">trinv</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.transformsNd</span> <span class="kn">import</span> <span class="n">t2r</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">Twist3</span>
@@ -900,9 +900,9 @@
                 <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;d</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⍺</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⍺</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
         <span class="n">table</span><span class="o">.</span><span class="n">print</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DHRobot.twists"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.twists">[docs]</a>    <span class="k">def</span> <span class="nf">twists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1202,7 +1202,7 @@
         <span class="k">return</span> <span class="n">tr2jac</span><span class="p">(</span><span class="n">trinv</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">A</span><span class="p">))</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DHRobot.jacob_dot"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob_dot">[docs]</a>    <span class="k">def</span> <span class="nf">jacob_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Derivative of Jacobian</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
@@ -1804,14 +1804,57 @@
                 <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
 
                 <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-                <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+
+            <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">solutions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">solutions</span></div></div>
+            <span class="k">return</span> <span class="n">solutions</span></div>
 
+<div class="viewcode-block" id="DHRobot.config_validate"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.config_validate">[docs]</a>    <span class="k">def</span> <span class="nf">config_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">allowables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate a configuration string</span>
 
+<span class="sd">        :param config: a configuration string</span>
+<span class="sd">        :type config: str</span>
+<span class="sd">        :param allowable: [description]</span>
+<span class="sd">        :type allowable: tuple of str</span>
+<span class="sd">        :raises ValueError: bad character in configuration string</span>
+<span class="sd">        :return: configuration string</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        For analytic inverse kinematics the Toolbox uses a string whose</span>
+<span class="sd">        letters indicate particular solutions, eg. for the Puma 560</span>
+
+<span class="sd">            =========  ===================</span>
+<span class="sd">            Character  Meaning</span>
+<span class="sd">            =========  ===================</span>
+<span class="sd">            &#39;l&#39;        lefty</span>
+<span class="sd">            &#39;r&#39;        righty</span>
+<span class="sd">            &#39;u&#39;        elbow up</span>
+<span class="sd">            &#39;d&#39;        elbow down</span>
+<span class="sd">            &#39;n&#39;        wrist not flipped</span>
+<span class="sd">            &#39;f&#39;        wrist flipped</span>
+<span class="sd">            =========  ===================</span>
+
+<span class="sd">        This method checks that the configuration string is valid and adds</span>
+<span class="sd">        default values for missing characters.  For example:</span>
+
+<span class="sd">            config = self.config_validate(config, (&#39;lr&#39;, &#39;ud&#39;, &#39;nf&#39;))</span>
+
+<span class="sd">        indicates the valid characters, and the first character in each</span>
+<span class="sd">        string is the default, ie. if neither &#39;l&#39; or &#39;r&#39; is given then</span>
+<span class="sd">        &#39;l&#39; will be added to the string.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">c</span> <span class="ow">in</span> <span class="n">allowable</span> <span class="k">for</span> <span class="n">allowable</span> <span class="ow">in</span> <span class="n">allowables</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bad config specifier &lt;</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&gt;&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">allowable</span> <span class="ow">in</span> <span class="n">allowables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">allowable</span><span class="p">]):</span>
+                <span class="n">config</span> <span class="o">+=</span> <span class="n">allowable</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">config</span></div></div>
 <span class="k">class</span> <span class="nc">SerialLink</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SerialLink is deprecated, use DHRobot instead&#39;</span><span class="p">)</span>
@@ -1867,7 +1910,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

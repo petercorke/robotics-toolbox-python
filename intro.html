@@ -617,7 +617,7 @@ Some provided robot models have an analytical solution coded, for example:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>       <span class="c1"># instantiate robot model</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;lun&quot;</span><span class="p">)</span>        <span class="c1"># analytic inverse kinematics</span>
-<span class="go">IKsolution(q=array([ 2.1012,  2.9416,  2.9355,  1.6526, -0.953 , -2.809 ]), success=True, reason=&#39;&#39;)</span>
+<span class="go">IKsolution(q=array([ 2.1012,  1.1163,  0.3   ,  0.9528, -1.6505, -0.986 ]), success=True, reason=&#39;&#39;)</span>
 </pre></div>
 </div>
 <p>where we have specified a left-handed, elbow up and wrist no-flip configuration.</p>
@@ -1142,7 +1142,7 @@ and a minimalist block-diagram simulation tool <a class="reference internal" hre
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

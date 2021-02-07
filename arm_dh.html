@@ -925,37 +925,27 @@ velocity twist as per the text by Lynch &amp; Park.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.jacob_dot">
 <code class="sig-name descname">jacob_dot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">qd</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacob_dot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacob_dot" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Derivative of Jacobian</p>
+<dd><p>Derivative of Jacobian</p>
 <dl class="field-list simple">
-<dt class="field-odd">param q</dt>
-<dd class="field-odd"><p>The joint configuration of the robot (Optional,
-if not supplied will use the stored q values).</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values).</p></li>
+<li><p><strong>qd</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored qd values).</p></li>
+</ul>
 </dd>
-<dt class="field-even">type q</dt>
-<dd class="field-even"><p>float ndarray(n)</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The derivative of the manipulator Jacobian</p>
 </dd>
-<dt class="field-odd">param qd</dt>
-<dd class="field-odd"><p>The joint configuration of the robot (Optional,
-if not supplied will use the stored qd values).</p>
-</dd>
-<dt class="field-even">type qd</dt>
-<dd class="field-even"><p>ndarray(n)</p>
-</dd>
-<dt class="field-odd">return</dt>
-<dd class="field-odd"><p>The derivative of the manipulator Jacobian</p>
-</dd>
-<dt class="field-even">rtype</dt>
-<dd class="field-even"><p>ndarray(n)</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">robot.jacob_dot(q,</span> <span class="pre">qd)</span></code> computes the product (6) of the temporal
 derivative of the manipulator Jacobian (in the world frame) and the
-joint rates :math:<a href="#id3"><span class="problematic" id="id4">`</span></a></p>
-</div></blockquote>
-<p>rac{d}{dt} dot{mathbf{J}}(q) dot{q}`.</p>
-<blockquote>
-<div><div class="admonition note">
+joint rates <span class="math notranslate nohighlight">\(\frac{d}{dt} \dot{\mathbf{J}}(q) \dot{q}\)</span>.</p>
+<div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>This term appears in the formulation for operational space
@@ -964,7 +954,7 @@ control <span class="math notranslate nohighlight">\(\ddot{x} = \mathbf{J}(q) \d
 </ul>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">references</dt>
+<dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p>Fundamentals of Robotics Mechanical Systems (2nd ed)
 J. Angleles, Springer 2003.</p></li>
@@ -974,7 +964,6 @@ O Khatib, IEEE Journal on Robotics and Automation, 1987.</p></li>
 </ul>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -1083,6 +1072,72 @@ shape (m,3n) and the result has shape (m,n).</p></li>
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s">
 <code class="sig-name descname">ikine_6s</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">ikfunc</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ikine_6s"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.config_validate">
+<code class="sig-name descname">config_validate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">allowables</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.config_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.config_validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a configuration string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>str</em>) – a configuration string</p></li>
+<li><p><strong>allowable</strong> (<em>tuple of str</em>) – [description]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – bad character in configuration string</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>configuration string</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>For analytic inverse kinematics the Toolbox uses a string whose
+letters indicate particular solutions, eg. for the Puma 560</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Character</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘l’</p></td>
+<td><p>lefty</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘r’</p></td>
+<td><p>righty</p></td>
+</tr>
+<tr class="row-even"><td><p>‘u’</p></td>
+<td><p>elbow up</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘d’</p></td>
+<td><p>elbow down</p></td>
+</tr>
+<tr class="row-even"><td><p>‘n’</p></td>
+<td><p>wrist not flipped</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘f’</p></td>
+<td><p>wrist flipped</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>This method checks that the configuration string is valid and adds
+default values for missing characters.  For example:</p>
+<blockquote>
+<div><p>config = self.config_validate(config, (‘lr’, ‘ud’, ‘nf’))</p>
+</div></blockquote>
+<p>indicates the valid characters, and the first character in each
+string is the default, ie. if neither ‘l’ or ‘r’ is given then
+‘l’ will be added to the string.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.accel">
@@ -1211,7 +1266,7 @@ is an identity matrix.</p>
 <p><code class="docutils literal notranslate"><span class="pre">robot.cinertia(q)</span></code> is the Cartesian (operational space) inertia
 matrix which relates Cartesian force/torque to Cartesian
 acceleration at the joint configuration q.</p>
-<p>:math:<a href="#id5"><span class="problematic" id="id6">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
+<p>:math:<a href="#id3"><span class="problematic" id="id4">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -1740,7 +1795,7 @@ current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
@@ -1824,7 +1879,7 @@ current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
@@ -1841,7 +1896,7 @@ assigned.</p></li>
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p>“Solvability-Unconcerned Inverse Kinematics by the
-Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5), 
+Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5),
 October 2011, pp. 984-991.</p></li>
 </ul>
 </dd>
@@ -1901,15 +1956,15 @@ This gives good results but is very slow.  An alternative is
 robots can sometimes give poor results, pushing against the joint
 limits when there is no need to.</p></li>
 </ul>
-<p>In both case the function to be minimized is the squared norm of a 
+<p>In both case the function to be minimized is the squared norm of a
 vector <span class="math notranslate nohighlight">\([d,a]\)</span> with components respectively the
 translation error and rotation error in Euler vector form, between the
 desired pose and the current estimate obtained by inverse kinematics.</p>
 <p><strong>Additional cost terms</strong>:</p>
 <p>This method supports two additional costs:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation 
-<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the 
+<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation
+<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the
 arm straight</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">costfun</span></code> add a cost given by a user-specified function <code class="docutils literal notranslate"><span class="pre">costfun(q)</span></code></p></li>
 </ul>
@@ -1927,13 +1982,13 @@ the previous time step.</p>
 <li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
 efficient than analytic inverse kinematic solutions derived
 symbolically.</p></li>
-<li><p>The objective function (error) is 
+<li><p>The objective function (error) is
 <span class="math notranslate nohighlight">\(\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2\)</span>
 where <span class="math notranslate nohighlight">\(\mat{\Omega}\)</span> is a diagonal matrix.</p></li>
 <li><p>Joint offsets, if defined, are accounted for in the solution.</p></li>
@@ -2172,7 +2227,7 @@ tuples or hexstrings.</p></li>
 matplotlib documentation.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a href="#id9"><span class="problematic" id="id10">`</span></a>Specifying colors</p></li>
+<li><p><a href="#id7"><span class="problematic" id="id8">`</span></a>Specifying colors</p></li>
 </ul>
 <p>&lt;<a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py</a>&gt;`_
 - <a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p>
@@ -2248,21 +2303,21 @@ zero if the robot is at a singularity.</p></li>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;yoshikawa&quot;</span></code></p></td>
 <td><p>Volume of the velocity ellipsoid, <em>distance</em>
-from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id11"><span>[Yoshikawa85]</span></a></p></td>
+from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id9"><span>[Yoshikawa85]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;invcondition&quot;</span></code></p></td>
 <td><p>Inverse condition number of Jacobian, isotropy
-of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id12"><span>[Klein87]</span></a></p></td>
+of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id10"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;minsingular&quot;</span></code></p></td>
 <td><p>Minimum singular value of the Jacobian,
-<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id13"><span>[Klein87]</span></a></p></td>
+<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id11"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;asada&quot;</span></code></p></td>
 <td><p>Isotropy of the task-space acceleration
 ellipsoid which is a function of the Cartesian
 inertia matrix which depends on the inertial
-parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id14"><span>[Asada83]</span></a></p></td>
+parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id12"><span>[Asada83]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -2289,18 +2344,18 @@ parameters.</p></li>
 <dd class="field-odd"><p></p></dd>
 </dl>
 <dl class="citation">
-<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id11">Yoshikawa85</a></span></dt>
+<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id9">Yoshikawa85</a></span></dt>
 <dd><p>Manipulability of Robotic Mechanisms. Yoshikawa T.,
 The International Journal of Robotics Research.
 1985;4(2):3-9. doi:10.1177/027836498500400201</p>
 </dd>
-<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id14">Asada83</a></span></dt>
+<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id12">Asada83</a></span></dt>
 <dd><p>A geometrical representation of manipulator dynamics and
 its application to arm design, H. Asada,
 Journal of Dynamic Systems, Measurement, and Control,
 vol. 105, p. 131, 1983.</p>
 </dd>
-<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id12">1</a>,<a href="#id13">2</a>)</span></dt>
+<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id10">1</a>,<a href="#id11">2</a>)</span></dt>
 <dd><p>Dexterity Measures for the Design and Control of
 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
 The International Journal of Robotics Research.
@@ -4800,7 +4855,7 @@ conventions.</p>
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference external" href="https://rawrobotics.com.au/orion5">https://rawrobotics.com.au/orion5</a></p></li>
-<li><p><a class="reference external" href="https://drive.google.com/file/d/">https://drive.google.com/file/d/</a><a href="#id17"><span class="problematic" id="id18">0B6_9_</span></a>-ZgiRdTNkVqMEkxN2RSc2c/view</p></li>
+<li><p><a class="reference external" href="https://drive.google.com/file/d/">https://drive.google.com/file/d/</a><a href="#id15"><span class="problematic" id="id16">0B6_9_</span></a>-ZgiRdTNkVqMEkxN2RSc2c/view</p></li>
 </ul>
 </dd>
 </dl>
@@ -5326,7 +5381,7 @@ conventions.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

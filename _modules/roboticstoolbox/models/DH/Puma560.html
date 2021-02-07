@@ -180,6 +180,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
 
 
 <div class="viewcode-block" id="Puma560"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Puma560">[docs]</a><span class="k">class</span> <span class="nc">Puma560</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -389,7 +390,9 @@
 <span class="sd">            GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95</span>
 <span class="sd"> </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">ik3</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">ik3</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s1">&#39;lun&#39;</span><span class="p">):</span>
+
+            <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_validate</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="s1">&#39;ud&#39;</span><span class="p">,</span> <span class="s1">&#39;nf&#39;</span><span class="p">))</span>
 
             <span class="c1"># solve for the first three joints</span>
 
@@ -414,8 +417,11 @@
             <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Px</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Py</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
             <span class="k">if</span> <span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Py</span><span class="p">,</span> <span class="n">Px</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">d3</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="s1">&#39;l&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Py</span><span class="p">,</span> <span class="n">Px</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">d3</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad configuration string&#39;</span><span class="p">)</span>
+
 
             <span class="c1"># Solve for theta[1]</span>
             <span class="c1"># V114 is defined in equation 43, p.39.</span>
@@ -425,10 +431,12 @@
             <span class="c1"># configuration parameter n2</span>
             <span class="k">if</span> <span class="s1">&#39;u&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">n2</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">n2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad configuration string&#39;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;l&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">n2</span> <span class="o">=</span> <span class="o">-</span><span class="n">n2</span>
 
             <span class="n">V114</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">Py</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -450,8 +458,9 @@
                 <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">Pz</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">V114</span>
                 <span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">a3</span><span class="p">,</span> <span class="n">d4</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">den</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">theta</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
 
+            <span class="k">return</span> <span class="n">theta</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ikine_6s</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">ik3</span><span class="p">)</span></div></div>
 
@@ -461,6 +470,13 @@
     <span class="n">puma</span> <span class="o">=</span> <span class="n">Puma560</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">dyntable</span><span class="p">())</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;lu&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ru&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ld&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;rd&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+
+    <span class="n">puma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -474,7 +490,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

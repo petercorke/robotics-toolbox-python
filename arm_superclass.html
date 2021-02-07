@@ -1137,7 +1137,7 @@ current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
@@ -1221,7 +1221,7 @@ current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
@@ -1238,7 +1238,7 @@ assigned.</p></li>
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p>“Solvability-Unconcerned Inverse Kinematics by the
-Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5), 
+Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5),
 October 2011, pp. 984-991.</p></li>
 </ul>
 </dd>
@@ -1298,15 +1298,15 @@ This gives good results but is very slow.  An alternative is
 robots can sometimes give poor results, pushing against the joint
 limits when there is no need to.</p></li>
 </ul>
-<p>In both case the function to be minimized is the squared norm of a 
+<p>In both case the function to be minimized is the squared norm of a
 vector <span class="math notranslate nohighlight">\([d,a]\)</span> with components respectively the
 translation error and rotation error in Euler vector form, between the
 desired pose and the current estimate obtained by inverse kinematics.</p>
 <p><strong>Additional cost terms</strong>:</p>
 <p>This method supports two additional costs:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation 
-<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the 
+<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation
+<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the
 arm straight</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">costfun</span></code> add a cost given by a user-specified function <code class="docutils literal notranslate"><span class="pre">costfun(q)</span></code></p></li>
 </ul>
@@ -1324,13 +1324,13 @@ the previous time step.</p>
 <li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
 efficient than analytic inverse kinematic solutions derived
 symbolically.</p></li>
-<li><p>The objective function (error) is 
+<li><p>The objective function (error) is
 <span class="math notranslate nohighlight">\(\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2\)</span>
 where <span class="math notranslate nohighlight">\(\mat{\Omega}\)</span> is a diagonal matrix.</p></li>
 <li><p>Joint offsets, if defined, are accounted for in the solution.</p></li>
@@ -2830,7 +2830,7 @@ shapes</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>

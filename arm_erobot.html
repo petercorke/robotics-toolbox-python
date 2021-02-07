@@ -719,49 +719,27 @@ to all applications is designed.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0">
 <code class="sig-name descname">jacob0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Manipulator geometric Jacobian in the base frame</p>
+<dd><p>Manipulator geometric Jacobian in the base frame</p>
 <dl class="field-list simple">
-<dt class="field-odd">param q</dt>
-<dd class="field-odd"><p>Joint coordinate vector</p>
-</dd>
-<dt class="field-even">type q</dt>
-<dd class="field-even"><p>ndarray(n)</p>
-</dd>
-<dt class="field-odd">param endlink</dt>
-<dd class="field-odd"><p>the particular link whose velocity the Jacobian describes, defaults
-to the end-effector if only one is present</p>
-</dd>
-<dt class="field-even">type endlink</dt>
-<dd class="field-even"><p>str or ELink</p>
-</dd>
-<dt class="field-odd">param startlink</dt>
-<dd class="field-odd"><p>the link considered as the base frame, defaults to the robots’s base frame</p>
-</dd>
-<dt class="field-even">type startlink</dt>
-<dd class="field-even"><p>str or ELink</p>
-</dd>
-<dt class="field-odd">param offset</dt>
-<dd class="field-odd"><p>a static offset transformation matrix to apply to the
-end of endlink, defaults to None</p>
-</dd>
-<dt class="field-even">type offset</dt>
-<dd class="field-even"><p>SE3, optional</p>
-</dd>
-<dt class="field-odd">param T</dt>
-<dd class="field-odd"><p>The transformation matrix of the reference point which the
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p></li>
+<li><p><strong>endlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the particular link whose velocity the Jacobian describes, defaults
+to the end-effector if only one is present</p></li>
+<li><p><strong>startlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the link considered as the base frame, defaults to the robots’s base frame</p></li>
+<li><p><strong>offset</strong> (<em>SE3</em><em>, </em><em>optional</em>) – a static offset transformation matrix to apply to the
+end of endlink, defaults to None</p></li>
+<li><p><strong>T</strong> (<em>SE3</em><em>, </em><em>optional</em>) – The transformation matrix of the reference point which the
 Jacobian represents with respect to the base frame. Use this to
 avoid caluclating forward kinematics to save time, defaults
-to None</p>
+to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type T</dt>
-<dd class="field-even"><p>SE3, optional</p>
+<dt class="field-even">Return J</dt>
+<dd class="field-even"><p>Manipulator Jacobian in the base frame</p>
 </dd>
-<dt class="field-odd">return J</dt>
-<dd class="field-odd"><p>Manipulator Jacobian in the base frame</p>
-</dd>
-<dt class="field-even">rtype</dt>
-<dd class="field-even"><p>ndarray(6,n)</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6,n)</p>
 </dd>
 </dl>
 <ul class="simple">
@@ -769,15 +747,9 @@ to None</p>
 joint  velocity to end-effector spatial velocity expressed in the
 end-effector frame.</p></li>
 </ul>
-<p>End-effector spatial velocity :math:<a href="#id1"><span class="problematic" id="id2">`</span></a></p>
-</div></blockquote>
-<dl class="simple">
-<dt>u = (v_x, v_y, v_z, omega_x, omega_y, omega_z)^T`</dt><dd><p>is related to joint velocity by :math:<a href="#id3"><span class="problematic" id="id4">`</span></a>{}^{E}!</p>
-</dd>
-</dl>
-<p>u = mathbf{J}_m(q) dot{q}`.</p>
-<blockquote>
-<div><p>Example:</p>
+<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
+is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
+<p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -801,55 +773,32 @@ velocity twist as per the text by Lynch &amp; Park.</p>
 <p><code class="docutils literal notranslate"><span class="pre">startlink</span></code> and <code class="docutils literal notranslate"><span class="pre">endlink</span></code> must be on the same branch,
 with <code class="docutils literal notranslate"><span class="pre">startlink</span></code> closest to the base.</p>
 </div>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.jacobe">
 <code class="sig-name descname">jacobe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">q</span></em>, <em class="sig-param"><span class="n">endlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">startlink</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">T</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacobe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacobe" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Manipulator geometric Jacobian in the end-effector frame</p>
+<dd><p>Manipulator geometric Jacobian in the end-effector frame</p>
 <dl class="field-list simple">
-<dt class="field-odd">param q</dt>
-<dd class="field-odd"><p>Joint coordinate vector</p>
-</dd>
-<dt class="field-even">type q</dt>
-<dd class="field-even"><p>ndarray(n)</p>
-</dd>
-<dt class="field-odd">param endlink</dt>
-<dd class="field-odd"><p>the particular link whose velocity the Jacobian describes, defaults
-to the end-effector if only one is present</p>
-</dd>
-<dt class="field-even">type endlink</dt>
-<dd class="field-even"><p>str or ELink</p>
-</dd>
-<dt class="field-odd">param startlink</dt>
-<dd class="field-odd"><p>the link considered as the base frame, defaults to the robots’s base frame</p>
-</dd>
-<dt class="field-even">type startlink</dt>
-<dd class="field-even"><p>str or ELink</p>
-</dd>
-<dt class="field-odd">param offset</dt>
-<dd class="field-odd"><p>a static offset transformation matrix to apply to the
-end of endlink, defaults to None</p>
-</dd>
-<dt class="field-even">type offset</dt>
-<dd class="field-even"><p>SE3, optional</p>
-</dd>
-<dt class="field-odd">param T</dt>
-<dd class="field-odd"><p>The transformation matrix of the reference point which the
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p></li>
+<li><p><strong>endlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the particular link whose velocity the Jacobian describes, defaults
+to the end-effector if only one is present</p></li>
+<li><p><strong>startlink</strong> (<em>str</em><em> or </em><a class="reference internal" href="#roboticstoolbox.robot.ELink.ELink" title="roboticstoolbox.robot.ELink.ELink"><em>ELink</em></a>) – the link considered as the base frame, defaults to the robots’s base frame</p></li>
+<li><p><strong>offset</strong> (<em>SE3</em><em>, </em><em>optional</em>) – a static offset transformation matrix to apply to the
+end of endlink, defaults to None</p></li>
+<li><p><strong>T</strong> (<em>SE3</em><em>, </em><em>optional</em>) – The transformation matrix of the reference point which the
 Jacobian represents with respect to the base frame. Use this to
 avoid caluclating forward kinematics to save time, defaults
-to None</p>
+to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type T</dt>
-<dd class="field-even"><p>SE3, optional</p>
+<dt class="field-even">Return J</dt>
+<dd class="field-even"><p>Manipulator Jacobian in the end-effector frame</p>
 </dd>
-<dt class="field-odd">return J</dt>
-<dd class="field-odd"><p>Manipulator Jacobian in the end-effector frame</p>
-</dd>
-<dt class="field-even">rtype</dt>
-<dd class="field-even"><p>ndarray(6,n)</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6,n)</p>
 </dd>
 </dl>
 <ul class="simple">
@@ -857,15 +806,9 @@ to None</p>
 joint  velocity to end-effector spatial velocity expressed in the
 end-effector frame.</p></li>
 </ul>
-<p>End-effector spatial velocity :math:<a href="#id5"><span class="problematic" id="id6">`</span></a></p>
-</div></blockquote>
-<dl class="simple">
-<dt>u = (v_x, v_y, v_z, omega_x, omega_y, omega_z)^T`</dt><dd><p>is related to joint velocity by :math:<a href="#id7"><span class="problematic" id="id8">`</span></a>{}^{E}!</p>
-</dd>
-</dl>
-<p>u = mathbf{J}_m(q) dot{q}`.</p>
-<blockquote>
-<div><p>Example:</p>
+<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
+is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
+<p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -889,7 +832,6 @@ velocity twist as per the text by Lynch &amp; Park.</p>
 <p><code class="docutils literal notranslate"><span class="pre">startlink</span></code> and <code class="docutils literal notranslate"><span class="pre">endlink</span></code> must be on the same branch,
 with <code class="docutils literal notranslate"><span class="pre">startlink</span></code> closest to the base.</p>
 </div>
-</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -1148,7 +1090,7 @@ is an identity matrix.</p>
 <p><code class="docutils literal notranslate"><span class="pre">robot.cinertia(q)</span></code> is the Cartesian (operational space) inertia
 matrix which relates Cartesian force/torque to Cartesian
 acceleration at the joint configuration q.</p>
-<p>:math:<a href="#id9"><span class="problematic" id="id10">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
+<p>:math:<a href="#id1"><span class="problematic" id="id2">`</span></a>mathbf{M} = {mathbf{J}(q)^+}^T mathbf{I}(q) mathbf{J}(q)^+</p>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -1653,7 +1595,7 @@ current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
@@ -1737,7 +1679,7 @@ current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
@@ -1754,7 +1696,7 @@ assigned.</p></li>
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p>“Solvability-Unconcerned Inverse Kinematics by the
-Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5), 
+Levenberg–Marquardt Method”, T. Sugihara, IEEE T-RO, 27(5),
 October 2011, pp. 984-991.</p></li>
 </ul>
 </dd>
@@ -1814,15 +1756,15 @@ This gives good results but is very slow.  An alternative is
 robots can sometimes give poor results, pushing against the joint
 limits when there is no need to.</p></li>
 </ul>
-<p>In both case the function to be minimized is the squared norm of a 
+<p>In both case the function to be minimized is the squared norm of a
 vector <span class="math notranslate nohighlight">\([d,a]\)</span> with components respectively the
 translation error and rotation error in Euler vector form, between the
 desired pose and the current estimate obtained by inverse kinematics.</p>
 <p><strong>Additional cost terms</strong>:</p>
 <p>This method supports two additional costs:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation 
-<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the 
+<li><p><code class="docutils literal notranslate"><span class="pre">stiffness</span></code> imposes a penalty on joint variation
+<span class="math notranslate nohighlight">\(\sum_{j=1}^N (q_j - q_{j-1})^2\)</span> which tends to keep the
 arm straight</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">costfun</span></code> add a cost given by a user-specified function <code class="docutils literal notranslate"><span class="pre">costfun(q)</span></code></p></li>
 </ul>
@@ -1840,13 +1782,13 @@ the previous time step.</p>
 <li><p>Can be used for robots with arbitrary degrees of freedom.</p></li>
 <li><p>The inverse kinematic solution is generally not unique, and
 depends on the initial guess <code class="docutils literal notranslate"><span class="pre">q0</span></code>.</p></li>
-<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for 
+<li><p>The default value of <code class="docutils literal notranslate"><span class="pre">q0</span></code> is zero which is a poor choice for
 most manipulators since it often corresponds to a
 kinematic singularity.</p></li>
 <li><p>Such a solution is completely general, though much less
 efficient than analytic inverse kinematic solutions derived
 symbolically.</p></li>
-<li><p>The objective function (error) is 
+<li><p>The objective function (error) is
 <span class="math notranslate nohighlight">\(\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2\)</span>
 where <span class="math notranslate nohighlight">\(\mat{\Omega}\)</span> is a diagonal matrix.</p></li>
 <li><p>Joint offsets, if defined, are accounted for in the solution.</p></li>
@@ -2114,7 +2056,7 @@ tuples or hexstrings.</p></li>
 matplotlib documentation.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a href="#id13"><span class="problematic" id="id14">`</span></a>Specifying colors</p></li>
+<li><p><a href="#id5"><span class="problematic" id="id6">`</span></a>Specifying colors</p></li>
 </ul>
 <p>&lt;<a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py">https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py</a>&gt;`_
 - <a class="reference external" href="https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py">Colormaps</a></p>
@@ -2190,21 +2132,21 @@ zero if the robot is at a singularity.</p></li>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;yoshikawa&quot;</span></code></p></td>
 <td><p>Volume of the velocity ellipsoid, <em>distance</em>
-from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id15"><span>[Yoshikawa85]</span></a></p></td>
+from singularity <a class="reference internal" href="arm_superclass.html#yoshikawa85" id="id7"><span>[Yoshikawa85]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;invcondition&quot;</span></code></p></td>
 <td><p>Inverse condition number of Jacobian, isotropy
-of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id16"><span>[Klein87]</span></a></p></td>
+of the velocity ellipsoid <a class="reference internal" href="arm_superclass.html#klein87" id="id8"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;minsingular&quot;</span></code></p></td>
 <td><p>Minimum singular value of the Jacobian,
-<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id17"><span>[Klein87]</span></a></p></td>
+<em>distance</em>  from singularity <a class="reference internal" href="arm_superclass.html#klein87" id="id9"><span>[Klein87]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;asada&quot;</span></code></p></td>
 <td><p>Isotropy of the task-space acceleration
 ellipsoid which is a function of the Cartesian
 inertia matrix which depends on the inertial
-parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id18"><span>[Asada83]</span></a></p></td>
+parameters <a class="reference internal" href="arm_superclass.html#asada83" id="id10"><span>[Asada83]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -2231,18 +2173,18 @@ parameters.</p></li>
 <dd class="field-odd"><p></p></dd>
 </dl>
 <dl class="citation">
-<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id15">Yoshikawa85</a></span></dt>
+<dt class="label" id="yoshikawa85"><span class="brackets"><a class="fn-backref" href="#id7">Yoshikawa85</a></span></dt>
 <dd><p>Manipulability of Robotic Mechanisms. Yoshikawa T.,
 The International Journal of Robotics Research.
 1985;4(2):3-9. doi:10.1177/027836498500400201</p>
 </dd>
-<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id18">Asada83</a></span></dt>
+<dt class="label" id="asada83"><span class="brackets"><a class="fn-backref" href="#id10">Asada83</a></span></dt>
 <dd><p>A geometrical representation of manipulator dynamics and
 its application to arm design, H. Asada,
 Journal of Dynamic Systems, Measurement, and Control,
 vol. 105, p. 131, 1983.</p>
 </dd>
-<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id16">1</a>,<a href="#id17">2</a>)</span></dt>
+<dt class="label" id="klein87"><span class="brackets">Klein87</span><span class="fn-backref">(<a href="#id8">1</a>,<a href="#id9">2</a>)</span></dt>
 <dd><p>Dexterity Measures for the Design and Control of
 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
 The International Journal of Robotics Research.
@@ -3760,7 +3702,7 @@ frame.</p>
 
 </div>
 <div class="section" id="e-models">
-<span id="id19"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
+<span id="id11"></span><h2>ERobot models<a class="headerlink" href="#e-models" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="defined-using-ets">
 <h3>Defined using ETS<a class="headerlink" href="#defined-using-ets" title="Permalink to this headline">¶</a></h3>
 <p>A number of models are defined in terms of elementary transform sequences.
@@ -4757,7 +4699,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Jan-2021.
+        Last updated on 07-Feb-2021.
       </span>
 
     </p>
