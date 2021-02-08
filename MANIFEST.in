@@ -1,4 +1,0 @@
-recursive-include roboticstoolbox/data *
-recursive-include roboticstoolbox/core *
-recursive-include roboticstoolbox/models/URDF/xacro *
-recursive-include roboticstoolbox/models/DH/meshes *
