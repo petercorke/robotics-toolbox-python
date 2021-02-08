@@ -718,37 +718,7 @@ as discussed above.
 For branched robots, with multiple end-effectors,  the name of the frame of interest must be provided.</p>
 <p>Some URDF models have multiple end-effectors, in which case the particular
 end-effector must be specified.</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
-<span class="go">┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐</span>
-<span class="go">│id │     link     │   parent    │    joint     │                     ETS                     │</span>
-<span class="go">├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │  panda_link0 │           - │              │                                             │</span>
-<span class="go">│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
-<span class="go">│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
-<span class="go">│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
-<span class="go">│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
-<span class="go">│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
-<span class="go">│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
-<span class="go">│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
-<span class="go">│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ tz(0.107)                                   │</span>
-<span class="go">└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘</span>
-
-<span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
-<span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
-<span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
-<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
-<span class="go">│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
-<span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="s1">&#39;panda_hand&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-<span class="go">   0.707107    0.707107    0           0.088        </span>
-<span class="go">   0.707107   -0.707107    0           0            </span>
-<span class="go">   0           0          -1           0.926        </span>
-<span class="go">   0           0           0           1            </span>
-
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 <p>In the table above we see the end-effectors indicated by &#64; (determined automatically

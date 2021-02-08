@@ -1018,16 +1018,16 @@
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="ERobot.fkine"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.fkine"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Forward kinematics</span>
 
 <span class="sd">        :param q: Joint coordinates</span>
 <span class="sd">        :type q: ndarray(n) or ndarray(m,n)</span>
-<span class="sd">        :param endlink: end-effector to compute forward kinematics to</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the link to compute forward kinematics from</span>
-<span class="sd">        :type startlink: str or ELink</span>
+<span class="sd">        :param end: end-effector or gripper to compute forward kinematics to</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the link to compute forward kinematics from</span>
+<span class="sd">        :type start: str or ELink</span>
 <span class="sd">        :param tool: tool transform, optional</span>
 <span class="sd">        :type tool: SE3</span>
 <span class="sd">        :return: The transformation matrix representing the pose of the</span>
@@ -1045,8 +1045,8 @@
 <span class="sd">        .. note::</span>
 
 <span class="sd">            - For a robot with a single end-effector there is no need to</span>
-<span class="sd">              specify ``endlink``</span>
-<span class="sd">            - For a robot with multiple end-effectors, the ``endlink`` must</span>
+<span class="sd">              specify ``end``</span>
+<span class="sd">            - For a robot with multiple end-effectors, the ``end`` must</span>
 <span class="sd">              be specified.</span>
 <span class="sd">            - The robot&#39;s base tool transform, if set, is incorporated</span>
 <span class="sd">              into the result.</span>
@@ -1061,21 +1061,25 @@
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getmatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">Ttool</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">A</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">etool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">etool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tool</span> <span class="o">=</span> <span class="p">(</span><span class="n">etool</span> <span class="o">@</span> <span class="n">tool</span><span class="p">)</span><span class="o">.</span><span class="n">A</span>
+        <span class="k">elif</span> <span class="n">etool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tool</span> <span class="o">=</span> <span class="n">etool</span><span class="o">.</span><span class="n">A</span>
+        <span class="k">elif</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tool</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">A</span>
 
         <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Empty</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">qk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
 
-            <span class="n">link</span> <span class="o">=</span> <span class="n">endlink</span>  <span class="c1"># start with last link</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="n">end</span>  <span class="c1"># start with last link</span>
 
             <span class="c1"># add tool if provided</span>
             <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">Tk</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">qk</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">],</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">Tk</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">qk</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">],</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">@</span> <span class="n">Ttool</span>
+                <span class="n">Tk</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">qk</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">],</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">@</span> <span class="n">tool</span>
 
             <span class="c1"># add remaining links, back toward the base</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -1086,11 +1090,11 @@
 
                 <span class="n">Tk</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">qk</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">],</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">@</span> <span class="n">Tk</span>
 
-                <span class="k">if</span> <span class="n">link</span> <span class="ow">is</span> <span class="n">startlink</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span> <span class="ow">is</span> <span class="n">start</span><span class="p">:</span>
                     <span class="k">break</span>
 
             <span class="c1"># add base transform if it is set</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">startlink</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">start</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">:</span>
                 <span class="n">Tk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="n">Tk</span>
 
             <span class="n">T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SE3</span><span class="p">(</span><span class="n">Tk</span><span class="p">))</span>
@@ -1237,40 +1241,40 @@
 
     <span class="c1">#     return J</span>
 
-<div class="viewcode-block" id="ERobot.get_path"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.get_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.get_path"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.get_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find a path from startlink to endlink. The endlink must come after</span>
-<span class="sd">        the startlink (ie endlink must be further away from the base link</span>
-<span class="sd">        of the robot than startlink) in the kinematic chain and both links</span>
+<span class="sd">        Find a path from start to end. The end must come after</span>
+<span class="sd">        the start (ie end must be further away from the base link</span>
+<span class="sd">        of the robot than start) in the kinematic chain and both links</span>
 <span class="sd">        must be a part of the same branch within the robot structure. This</span>
 <span class="sd">        method is a work in progress while an approach which generalises</span>
 <span class="sd">        to all applications is designed.</span>
 
-<span class="sd">        :param endlink: name or reference to end-effector, defaults to None</span>
-<span class="sd">        :type endlink: str or ELink, optional</span>
-<span class="sd">        :param startlink: name or reference to a base link, defaults to None</span>
-<span class="sd">        :type startlink: str or ELink, optional</span>
+<span class="sd">        :param end: end-effector or gripper to compute forward kinematics to</span>
+<span class="sd">        :type end: str or ELink or Gripper, optional</span>
+<span class="sd">        :param start: name or reference to a base link, defaults to None</span>
+<span class="sd">        :type start: str or ELink, optional</span>
 <span class="sd">        :raises ValueError: link not known or ambiguous</span>
-<span class="sd">        :return: the path from startlink to endlink</span>
+<span class="sd">        :return: the path from start to end</span>
 <span class="sd">        :rtype: list of Link</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
-        <span class="n">link</span> <span class="o">=</span> <span class="n">endlink</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="n">end</span>
 
         <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">while</span> <span class="n">link</span> <span class="o">!=</span> <span class="n">startlink</span><span class="p">:</span>
+        <span class="k">while</span> <span class="n">link</span> <span class="o">!=</span> <span class="n">start</span><span class="p">:</span>
             <span class="n">link</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span>
             <span class="k">if</span> <span class="n">link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;cannot find path from </span><span class="si">{</span><span class="n">startlink</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> to&#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">endlink</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s1">&#39;cannot find path from </span><span class="si">{</span><span class="n">start</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> to&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">end</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
                 <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1279,48 +1283,59 @@
 
         <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">n</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_limit_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_limit_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get and validate an end-effector, and a base link</span>
 
-<span class="sd">        :param endlink: name or reference to end-effector, defaults to None</span>
-<span class="sd">        :type endlink: str or ELink, optional</span>
-<span class="sd">        :param startlink: name or reference to a base link, defaults to None</span>
-<span class="sd">        :type startlink: str or ELink, optional</span>
+<span class="sd">        :param end: end-effector or gripper to compute forward kinematics to</span>
+<span class="sd">        :type end: str or ELink or Gripper, optional</span>
+<span class="sd">        :param start: name or reference to a base link, defaults to None</span>
+<span class="sd">        :type start: str or ELink, optional</span>
 <span class="sd">        :raises ValueError: link not known or ambiguous</span>
 <span class="sd">        :raises ValueError: [description]</span>
 <span class="sd">        :raises TypeError: unknown type provided</span>
-<span class="sd">        :return: end-effector link, base link</span>
-<span class="sd">        :rtype: ELink, Elink</span>
+<span class="sd">        :return: end-effector link, base link, and tool transform of gripper</span>
+<span class="sd">            if applicable</span>
+<span class="sd">        :rtype: ELink, Elink, SE3 or None</span>
 
 <span class="sd">        Helper method to find or validate an end-effector and base link.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">endlink</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">tool</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
             <span class="c1"># if we have a gripper, use it</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># if more than one gripper, user must choose</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must specify which gripper&#39;</span><span class="p">)</span>
 
             <span class="c1"># no grippers, use ee link if just one</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># if more than one EE, user must choose</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must specify which end-effector&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># end effector is specified</span>
-            <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">endlink</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">startlink</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
+            <span class="c1"># Check if end corresponds to gripper</span>
+            <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">end</span> <span class="o">==</span> <span class="n">gripper</span> <span class="ow">or</span> <span class="n">end</span> <span class="o">==</span> <span class="n">gripper</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">tool</span> <span class="o">=</span> <span class="n">gripper</span><span class="o">.</span><span class="n">tool</span>
+                    <span class="n">end</span> <span class="o">=</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># otherwise check for end in the links</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># start effector is specified</span>
-            <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">startlink</span><span class="p">)</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span>
+        <span class="k">return</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">tool</span>
 
     <span class="k">def</span> <span class="nf">_getlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1362,20 +1377,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unknown argument&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ERobot.jacob0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacob0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the base frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
 <span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :param endlink: the particular link whose velocity the Jacobian describes, defaults</span>
-<span class="sd">            to the end-effector if only one is present</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the link considered as the base frame, defaults to the robots&#39;s base frame</span>
-<span class="sd">        :type startlink: str or ELink</span>
-<span class="sd">        :param offset: a static offset transformation matrix to apply to the</span>
-<span class="sd">            end of endlink, defaults to None</span>
-<span class="sd">        :type offset: SE3, optional</span>
+<span class="sd">        :param end: the particular link or gripper whose velocity the Jacobian</span>
+<span class="sd">            describes, defaults to the end-effector if only one is present</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the link considered as the base frame, defaults to the robots&#39;s base frame</span>
+<span class="sd">        :type start: str or ELink</span>
+<span class="sd">        :param tool: a static tool transformation matrix to apply to the</span>
+<span class="sd">            end of end, defaults to None</span>
+<span class="sd">        :type tool: SE3, optional</span>
 <span class="sd">        :param T: The transformation matrix of the reference point which the</span>
 <span class="sd">            Jacobian represents with respect to the base frame. Use this to</span>
 <span class="sd">            avoid caluclating forward kinematics to save time, defaults</span>
@@ -1404,20 +1419,20 @@
 <span class="sd">            described in terms of translational and angular velocity, not a </span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
 
-<span class="sd">        .. warning:: ``startlink`` and ``endlink`` must be on the same branch,</span>
-<span class="sd">            with ``startlink`` closest to the base.</span>
+<span class="sd">        .. warning:: ``start`` and ``end`` must be on the same branch,</span>
+<span class="sd">            with ``start`` closest to the base.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
-        <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">offset</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
 
-        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">)</span> <span class="o">*</span> <span class="n">offset</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="n">tool</span>
         <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">A</span>
         <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1428,8 +1443,8 @@
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
                 <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">],</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">link</span> <span class="o">==</span> <span class="n">endlink</span><span class="p">:</span>
-                    <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">offset</span><span class="o">.</span><span class="n">A</span>
+                <span class="k">if</span> <span class="n">link</span> <span class="o">==</span> <span class="n">end</span><span class="p">:</span>
+                    <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">tool</span><span class="o">.</span><span class="n">A</span>
 
                 <span class="n">Tu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">@</span> <span class="n">T</span>
                 <span class="n">n</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
@@ -1469,20 +1484,20 @@
 
         <span class="k">return</span> <span class="n">J</span></div>
 
-<div class="viewcode-block" id="ERobot.jacobe"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacobe"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the end-effector frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
 <span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :param endlink: the particular link whose velocity the Jacobian describes, defaults</span>
-<span class="sd">            to the end-effector if only one is present</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the link considered as the base frame, defaults to the robots&#39;s base frame</span>
-<span class="sd">        :type startlink: str or ELink</span>
-<span class="sd">        :param offset: a static offset transformation matrix to apply to the</span>
-<span class="sd">            end of endlink, defaults to None</span>
-<span class="sd">        :type offset: SE3, optional</span>
+<span class="sd">        :param end: the particular link or Gripper whose velocity the Jacobian</span>
+<span class="sd">            describes, defaults to the end-effector if only one is present</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the link considered as the base frame, defaults to the robots&#39;s base frame</span>
+<span class="sd">        :type start: str or ELink</span>
+<span class="sd">        :param tool: a static tool transformation matrix to apply to the</span>
+<span class="sd">            end of end, defaults to None</span>
+<span class="sd">        :type tool: SE3, optional</span>
 <span class="sd">        :param T: The transformation matrix of the reference point which the</span>
 <span class="sd">            Jacobian represents with respect to the base frame. Use this to</span>
 <span class="sd">            avoid caluclating forward kinematics to save time, defaults</span>
@@ -1511,29 +1526,27 @@
 <span class="sd">            described in terms of translational and angular velocity, not a </span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
 
-<span class="sd">        .. warning:: ``startlink`` and ``endlink`` must be on the same branch,</span>
-<span class="sd">            with ``startlink`` closest to the base.</span>
+<span class="sd">        .. warning:: ``start`` and ``end`` must be on the same branch,</span>
+<span class="sd">            with ``start`` closest to the base.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">offset</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
-
-        <span class="c1"># path, n = self.get_path(endlink, startlink)</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">)</span> <span class="o">*</span> <span class="n">offset</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="n">tool</span>
 
-        <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
-        <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobev</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="n">J0</span>
+        <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+        <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobev</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="n">J0</span>
         <span class="k">return</span> <span class="n">Je</span></div>
 
-<div class="viewcode-block" id="ERobot.partial_fkine0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.partial_fkine0">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fkine0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+<div class="viewcode-block" id="ERobot.partial_fkine0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.partial_fkine0">[docs]</a>    <span class="k">def</span> <span class="nf">partial_fkine0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -1541,10 +1554,10 @@
             <span class="n">z</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
 
-        <span class="n">_</span><span class="p">,</span> <span class="n">nl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">nl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
-        <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">)</span>
-        <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">J</span><span class="p">,</span> <span class="n">H</span><span class="p">]</span>
         <span class="n">size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="n">nl</span><span class="p">,</span> <span class="n">nl</span><span class="p">]</span>
@@ -1638,9 +1651,9 @@
 
         <span class="k">return</span> <span class="n">d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
-    <span class="c1"># def third(self, q=None, J0=None, endlink=None, startlink=None):</span>
-    <span class="c1">#     endlink, startlink = self._get_limit_links(endlink, startlink)</span>
-    <span class="c1">#     path, n = self.get_path(endlink, startlink)</span>
+    <span class="c1"># def third(self, q=None, J0=None, end=None, start=None):</span>
+    <span class="c1">#     end, start = self._get_limit_links(end, start)</span>
+    <span class="c1">#     path, n = self.get_path(end, start)</span>
 
     <span class="c1">#     def cross(a, b):</span>
     <span class="c1">#         x = a[1] * b[2] - a[2] * b[1]</span>
@@ -1650,11 +1663,11 @@
 
     <span class="c1">#     if J0 is None:</span>
     <span class="c1">#         q = getvector(q, n)</span>
-    <span class="c1">#         J0 = self.jacob0(q, endlink=endlink)</span>
+    <span class="c1">#         J0 = self.jacob0(q, end=end)</span>
     <span class="c1">#     else:</span>
     <span class="c1">#         verifymatrix(J0, (6, n))</span>
 
-    <span class="c1">#     H0 = self.hessian0(q, J0, endlink, startlink)</span>
+    <span class="c1">#     H0 = self.hessian0(q, J0, end, start)</span>
 
     <span class="c1">#     L = np.zeros((6, n, n, n))</span>
 
@@ -1670,7 +1683,7 @@
 
     <span class="c1">#     return L</span>
 
-<div class="viewcode-block" id="ERobot.hessian0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.hessian0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
 <span class="sd">        spatial acceleration, expressed in the world-coordinate frame. This</span>
@@ -1682,10 +1695,10 @@
 <span class="sd">        :type q: float ndarray(n)</span>
 <span class="sd">        :param J0: The manipulator Jacobian in the 0 frame</span>
 <span class="sd">        :type J0: float ndarray(6,n)</span>
-<span class="sd">        :param endlink: the final link which the Hessian represents</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the first link which the Hessian represents</span>
-<span class="sd">        :type startlink: str or ELink</span>
+<span class="sd">        :param end: the final link/Gripper which the Hessian represents</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the first link which the Hessian represents</span>
+<span class="sd">        :type start: str or ELink</span>
 
 <span class="sd">        :return: The manipulator Hessian in 0 frame</span>
 <span class="sd">        :rtype: float ndarray(6,n,n)</span>
@@ -1709,8 +1722,8 @@
 <span class="sd">              Sequence, J. Haviland and P. Corke</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -1720,7 +1733,7 @@
 
         <span class="k">if</span> <span class="n">J0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-            <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
+            <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verifymatrix</span><span class="p">(</span><span class="n">J0</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
 
@@ -1737,7 +1750,7 @@
 
         <span class="k">return</span> <span class="n">H</span></div>
 
-<div class="viewcode-block" id="ERobot.jacobm"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacobm"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the manipulability Jacobian. This measure relates the rate</span>
 <span class="sd">        of change of the manipulability to the joint velocities of the robot.</span>
@@ -1751,10 +1764,10 @@
 <span class="sd">        :type J: float ndarray(6,n)</span>
 <span class="sd">        :param H: The manipulator Hessian in any frame</span>
 <span class="sd">        :type H: float ndarray(6,n,n)</span>
-<span class="sd">        :param endlink: the final link which the Hessian represents</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the first link which the Hessian represents</span>
-<span class="sd">        :type startlink: str or ELink</span>
+<span class="sd">        :param end: the final link or Gripper which the Hessian represents</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the first link which the Hessian represents</span>
+<span class="sd">        :type start: str or ELink</span>
 
 <span class="sd">        :return: The manipulability Jacobian</span>
 <span class="sd">        :rtype: float ndarray(n)</span>
@@ -1764,8 +1777,8 @@
 <span class="sd">              Sequence, J. Haviland and P. Corke</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">J</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1773,17 +1786,17 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
-            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verifymatrix</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">H</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">J0</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
+            <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">J0</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verifymatrix</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
 
         <span class="n">manipulability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span>
-            <span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">J</span><span class="p">))</span>
         <span class="n">Jm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
@@ -1855,8 +1868,8 @@
         <span class="n">recurse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ERobot.jacobev"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobev">[docs]</a>    <span class="k">def</span> <span class="nf">jacobev</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jv = jacobev(q) is the spatial velocity Jacobian, at joint</span>
 <span class="sd">        configuration q, which relates the velocity in the base frame to the</span>
@@ -1864,13 +1877,13 @@
 
 <span class="sd">        :param q: Joint coordinate vector</span>
 <span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :param endlink: the final link which the Jacobian represents</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the first link which the Jacobian represents</span>
-<span class="sd">        :type startlink: str or ELink</span>
-<span class="sd">        :param offset: a static offset transformation matrix to apply to the</span>
-<span class="sd">            end of endlink, defaults to None</span>
-<span class="sd">        :type offset: SE3, optional</span>
+<span class="sd">        :param end: the final link or Gripper which the Jacobian represents</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the first link which the Jacobian represents</span>
+<span class="sd">        :type start: str or ELink</span>
+<span class="sd">        :param tool: a static tool transformation matrix to apply to the</span>
+<span class="sd">            end of end, defaults to None</span>
+<span class="sd">        :type tool: SE3, optional</span>
 <span class="sd">        :param T: The transformation matrix of the reference point which the</span>
 <span class="sd">            Jacobian represents with respect to the base frame. Use this to</span>
 <span class="sd">            avoid caluclating forward kinematics to save time, defaults</span>
@@ -1882,13 +1895,13 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">T</span> <span class="o">*=</span> <span class="n">offset</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">*=</span> <span class="n">tool</span>
         <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">R</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
         <span class="n">Jv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
@@ -1898,8 +1911,8 @@
         <span class="k">return</span> <span class="n">Jv</span></div>
 
 <div class="viewcode-block" id="ERobot.jacob0v"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0v">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0v</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jv = jacob0v(q) is the spatial velocity Jacobian, at joint</span>
 <span class="sd">        configuration q, which relates the velocity in the end-effector frame</span>
@@ -1907,13 +1920,13 @@
 
 <span class="sd">        :param q: Joint coordinate vector</span>
 <span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :param endlink: the final link which the Jacobian represents</span>
-<span class="sd">        :type endlink: str or ELink</span>
-<span class="sd">        :param startlink: the first link which the Jacobian represents</span>
-<span class="sd">        :type startlink: str or ELink</span>
-<span class="sd">        :param offset: a static offset transformation matrix to apply to the</span>
-<span class="sd">            end of endlink, defaults to None</span>
-<span class="sd">        :type offset: SE3, optional</span>
+<span class="sd">        :param end: the final link or Gripper which the Jacobian represents</span>
+<span class="sd">        :type end: str or ELink or Gripper</span>
+<span class="sd">        :param start: the first link which the Jacobian represents</span>
+<span class="sd">        :type start: str or ELink</span>
+<span class="sd">        :param tool: a static tool transformation matrix to apply to the</span>
+<span class="sd">            end of end, defaults to None</span>
+<span class="sd">        :type tool: SE3, optional</span>
 <span class="sd">        :param T: The transformation matrix of the reference point which the</span>
 <span class="sd">            Jacobian represents with respect to the base frame. Use this to</span>
 <span class="sd">            avoid caluclating forward kinematics to save time, defaults</span>
@@ -1925,13 +1938,13 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="p">)</span>
+        <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">T</span> <span class="o">*=</span> <span class="n">offset</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">*=</span> <span class="n">tool</span>
         <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
 
         <span class="n">Jv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
@@ -1942,7 +1955,7 @@
 
 <div class="viewcode-block" id="ERobot.link_collision_damper"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">[docs]</a>    <span class="k">def</span> <span class="nf">link_collision_damper</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">di</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">endlink</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into a collision. Requires</span>
@@ -1968,13 +1981,13 @@
 <span class="sd">        :rtype: ndarray(6), ndarray(6)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="k">if</span> <span class="n">startlink</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">startlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
 
-        <span class="k">if</span> <span class="n">endlink</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">endlink</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_link</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_link</span>
 
-        <span class="n">links</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">startlink</span><span class="o">=</span><span class="n">startlink</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">endlink</span><span class="p">)</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
@@ -1994,8 +2007,8 @@
                 <span class="n">norm_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">norm</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span>
-                    <span class="n">q</span><span class="p">,</span> <span class="n">startlink</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="n">endlink</span><span class="o">=</span><span class="n">link</span><span class="p">,</span>
-                    <span class="n">offset</span><span class="o">=</span><span class="n">link_col</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+                    <span class="n">q</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">link</span><span class="p">,</span>
+                    <span class="n">tool</span><span class="o">=</span><span class="n">link_col</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
                 <span class="n">n_dim</span> <span class="o">=</span> <span class="n">Je</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">dp</span> <span class="o">=</span> <span class="n">norm_h</span> <span class="o">@</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span>
                 <span class="n">l_Ain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
