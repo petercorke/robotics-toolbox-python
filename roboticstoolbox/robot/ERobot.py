@@ -1847,7 +1847,7 @@ graph [rankdir=LR];
 
                 Je = self.jacobe(
                     q, start=self.base_link, end=link,
-                    offset=link_col.base)
+                    tool=link_col.base)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, n))
