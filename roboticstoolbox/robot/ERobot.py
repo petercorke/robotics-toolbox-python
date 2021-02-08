@@ -1216,7 +1216,7 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def jacob0(self, q, end=None, start=None, offset=None, T=None):
+    def jacob0(self, q, end=None, start=None, tool=None, T=None):
         r"""
         Manipulator geometric Jacobian in the base frame
 
@@ -1227,9 +1227,9 @@ graph [rankdir=LR];
         :type end: str or ELink or Gripper
         :param start: the link considered as the base frame, defaults to the robots's base frame
         :type start: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
+        :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :type offset: SE3, optional
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1262,8 +1262,8 @@ graph [rankdir=LR];
             with ``start`` closest to the base.
         """  # noqa
 
-        if offset is None:
-            offset = SE3()
+        if tool is None:
+            tool = SE3()
 
         path, n = self.get_path(end, start)
 
@@ -1271,7 +1271,7 @@ graph [rankdir=LR];
 
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, end=end, start=start) * offset
+                self.fkine(q, end=end, start=start) * tool
         T = T.A
         U = np.eye(4)
         j = 0
@@ -1283,7 +1283,7 @@ graph [rankdir=LR];
                 U = U @ link.A(q[link.jindex], fast=True)
 
                 if link == end:
-                    U = U @ offset.A
+                    U = U @ tool.A
 
                 Tu = np.linalg.inv(U) @ T
                 n = U[:3, 0]
@@ -1323,7 +1323,7 @@ graph [rankdir=LR];
 
         return J
 
-    def jacobe(self, q, end=None, start=None, offset=None, T=None):
+    def jacobe(self, q, end=None, start=None, tool=None, T=None):
         r"""
         Manipulator geometric Jacobian in the end-effector frame
 
@@ -1334,9 +1334,9 @@ graph [rankdir=LR];
         :type end: str or ELink or Gripper
         :param start: the link considered as the base frame, defaults to the robots's base frame
         :type start: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
+        :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :type offset: SE3, optional
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1371,19 +1371,17 @@ graph [rankdir=LR];
 
         q = getvector(q, self.n)
 
-        if offset is None:
-            offset = SE3()
+        if tool is None:
+            tool = SE3()
 
         end, start, _ = self._get_limit_links(end, start)
 
-        # path, n = self.get_path(end, start)
-
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, end=end, start=start) * offset
+                self.fkine(q, end=end, start=start) * tool
 
-        J0 = self.jacob0(q, end, start, offset, T)
-        Je = self.jacobev(q, end, start, offset, T) @ J0
+        J0 = self.jacob0(q, end, start, tool, T)
+        Je = self.jacobev(q, end, start, tool, T) @ J0
         return Je
 
     def partial_fkine0(self, q, n, J0=None, end=None, start=None):
@@ -1574,7 +1572,7 @@ graph [rankdir=LR];
 
         if J0 is None:
             q = getvector(q, n)
-            J0 = self.jacob0(q, end=end)
+            J0 = self.jacob0(q, end=end, start=start)
         else:
             verifymatrix(J0, (6, n))
 
@@ -1710,7 +1708,7 @@ graph [rankdir=LR];
 
     def jacobev(
             self, q, end=None, start=None,
-            offset=None, T=None):
+            tool=None, T=None):
         """
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the base frame to the
@@ -1722,9 +1720,9 @@ graph [rankdir=LR];
         :type end: str or ELink or Gripper
         :param start: the first link which the Jacobian represents
         :type start: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
+        :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :type offset: SE3, optional
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1741,8 +1739,8 @@ graph [rankdir=LR];
         if T is None:
             T = self.base.inv() * \
                 self.fkine(q, end=end, start=start)
-            if offset is not None:
-                T *= offset
+            if tool is not None:
+                T *= tool
         R = (T.R).T
 
         Jv = np.zeros((6, 6))
@@ -1753,7 +1751,7 @@ graph [rankdir=LR];
 
     def jacob0v(
             self, q, end=None, start=None,
-            offset=None, T=None):
+            tool=None, T=None):
         """
         Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the end-effector frame
@@ -1765,9 +1763,9 @@ graph [rankdir=LR];
         :type end: str or ELink or Gripper
         :param start: the first link which the Jacobian represents
         :type start: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
+        :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :type offset: SE3, optional
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1784,8 +1782,8 @@ graph [rankdir=LR];
         if T is None:
             T = self.base.inv() * \
                 self.fkine(q, end=end, start=start)
-            if offset is not None:
-                T *= offset
+            if tool is not None:
+                T *= tool
         R = (T.R)
 
         Jv = np.zeros((6, 6))
