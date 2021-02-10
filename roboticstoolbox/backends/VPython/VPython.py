@@ -14,7 +14,10 @@ import imageio
 from roboticstoolbox.backends.Connector import Connector
 # from roboticstoolbox.robot.DHLink import DHLink
 # from roboticstoolbox.robot.Robot import Robot as r
-from roboticstoolbox import DHLink, DHRobot
+# from roboticstoolbox.robot import DHLink, DHRobot
+
+# from roboticstoolbox.robot.DHRobot import DHRobot
+# from roboticstoolbox.robot.DHLink import DHLink
 
 GraphicsCanvas3D = None
 GraphicsCanvas2D = None
@@ -79,7 +82,7 @@ class VPython(Connector):  # pragma nocover
     # TODO be able to add ellipsoids (vellipse, fellipse)
     # TODO be able add lines (for end-effector paths)
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """
         Open a localhost session with no canvases
 
@@ -98,12 +101,12 @@ class VPython(Connector):  # pragma nocover
         self._recording_fps = None
         self._thread_lock = threading.Lock()
 
+        self.launch_options = kwargs  # save launch options
+
         self._create_empty_session()
 
     def launch(
-            self, is_3d=True, height=500, width=888,
-            title='', caption='', grid=True,
-            g_col=None):
+            self, **kwargs):
         """
         Launch a graphical backend in a browser tab
 
@@ -111,6 +114,16 @@ class VPython(Connector):  # pragma nocover
         defined by args, and returns a reference to the backend.
 
         """
+
+        # merge instantiation & launch options
+        args = {**self.launch_options, **kwargs}  
+        is_3d = args.get('is_3d', True)
+        height = args.get('height', 500)
+        width = args.get('width', 888)
+        title = args.get('title', 'Robotics Toolbox for Python: VPython display')
+        caption = args.get('caption', '')
+        grid = args.get('grid', False)
+        g_col = args.get('g_col', None)
 
         super().launch()
 
@@ -127,11 +140,11 @@ class VPython(Connector):  # pragma nocover
                 GraphicsCanvas2D(height, width, title, caption,
                                  grid, g_col))
 
-    def step(self, id, q=None, fig_num=0):
+    def step(self, dt=None, id=None, q=None, fig_num=0):
         """
         Update the graphical scene
 
-        :param id: The Identification of the robot to remove. Can be either the
+        :param id: The Identification of the robot to move. Can be either the
             DHRobot or GraphicalRobot
         :type id: :class:`~roboticstoolbox.robot.DHRobot.DHRobot`,
             :class:`roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot`
@@ -166,16 +179,24 @@ class VPython(Connector):  # pragma nocover
             raise ValueError(
                 "Figure number must be between 0 and total number of canvases")
 
-        # If DHRobot given
-        if isinstance(id, DHRobot):
-            robot = None
-            # Find first occurrence of it that is in the correct canvas
-            for i in range(len(self.robots)):
-                if self.robots[i].robot is id and \
-                        self.canvases[fig_num].is_robot_in_canvas(
-                                                        self.robots[i]):
-                    robot = self.robots[i]
-                    break
+        # If GraphicalRobot given
+        if isinstance(id, GraphicalRobot):
+            if self.canvases[fig_num].is_robot_in(id):
+                poses = id.fkine(q)
+                id.set_joint_poses(poses)
+
+        #if isinstance(id, DHRobot):  # HACK avoid circular import
+        else:
+            # robot = None
+            # # Find first occurrence of it that is in the correct canvas
+            # for i in range(len(self.robots)):
+            #     if self.robots[i].robot is id and \
+            #             self.canvases[fig_num].is_robot_in_canvas(
+            #                                             self.robots[i]):
+            #         robot = self.robots[i]
+            #         break
+            if id is None:
+                robot = self.robots[0]
             if robot is None:
                 print("No robot")
                 return
@@ -183,15 +204,15 @@ class VPython(Connector):  # pragma nocover
                 poses = robot.fkine(q)
                 robot.set_joint_poses(poses)
         # ElseIf GraphicalRobot given
-        elif isinstance(id, GraphicalRobot):
-            if self.canvases[fig_num].is_robot_in(id):
-                poses = id.fkine(q)
-                id.set_joint_poses(poses)
-        # Else
-        else:
-            raise TypeError(
-                "Input must be a Robot (or subclass) or "
-                "GraphicalRobot, given {0}".format(type(id)))
+
+        # # Else
+        # else:
+        #     raise TypeError(
+        #         "Input must be a Robot (or subclass) or "
+        #         "GraphicalRobot, given {0}".format(type(id)))
+
+        if dt is not None:
+            sleep(dt)
 
     def reset(self):
         """
@@ -265,16 +286,16 @@ class VPython(Connector):  # pragma nocover
 
         self.canvases = []
 
-    def add(self, fig_num, name, dhrobot):
+    def add(self, dhrobot, fig_num=0, name=None):
         """
         Add a robot to the graphical scene
 
+        :param dhrobot: The ``DHRobot`` object (if applicable)
+        :type dhrobot: class:`~roboticstoolbox.robot.DHRobot.DHRobot`, None
         :param fig_num: The canvas number to place the robot in
         :type fig_num: int
         :param name: The name of the robot
         :type name: `str`
-        :param dhrobot: The ``DHRobot`` object (if applicable)
-        :type dhrobot: class:`~roboticstoolbox.robot.DHRobot.DHRobot`, None
         :raises ValueError: Figure number must be between 0 and number of
             figures created
         :return: object id within visualizer
@@ -305,6 +326,9 @@ class VPython(Connector):  # pragma nocover
         # TODO - what about adding ellipsoids?
 
         super().add()
+
+        if name is None:
+            name = dhrobot.name
 
         # Sanity check input
         if fig_num < 0 or fig_num > len(self.canvases) - 1:

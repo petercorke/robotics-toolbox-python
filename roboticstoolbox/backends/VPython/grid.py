@@ -127,7 +127,7 @@ class GraphicsGrid:  # pragma nocover
 
         # As curve objects cannot be compounded, so must be a single entity
 
-        line_thickness = min(max(self.__scale / 25, 0.01), 5)  # 0.01 -> 5
+        line_thickness = min(max(self.__scale / 25, 0.01), 2)  # 0.01 -> 5
 
         # Update curve objects
         self.grid_object.get('xy_plane').radius = line_thickness
