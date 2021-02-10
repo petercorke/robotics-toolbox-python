@@ -6,7 +6,7 @@
 from collections import namedtuple
 
 import numpy as np
-from roboticstoolbox.robot import Robot  # DHLink
+from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
