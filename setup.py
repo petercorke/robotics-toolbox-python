@@ -49,6 +49,7 @@ data_folders = [
     'roboticstoolbox/models/URDF/xacro',
     'roboticstoolbox/models/DH/meshes',
     'roboticstoolbox/data',
+    'roboticstoolbox/core'
 ]
 
 
@@ -68,15 +69,16 @@ frne = Extension(
         'frne',
         sources=[
             './roboticstoolbox/core/vmath.c',
-            './roboticstoolbox/core/vmath.h',
             './roboticstoolbox/core/ne.c',
-            './roboticstoolbox/core/frne.c',
-            './roboticstoolbox/core/frne.h'])
+            './roboticstoolbox/core/frne.c'],
+        include_dirs=[
+            './roboticstoolbox/core/'
+        ])
 
 setup(
     name='roboticstoolbox-python',
 
-    version='0.7.0',
+    version='0.8.0',
 
     description='A Python library for robotic education and research',
 
@@ -94,7 +96,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -128,9 +130,7 @@ setup(
 
     package_data={'roboticstoolbox': extra_files},
 
-    include_package_data=True,
-
-    scripts = ['examples/rtbtool'],
+    scripts=['examples/rtbtool'],
 
     install_requires=req,
 

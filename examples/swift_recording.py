@@ -57,7 +57,7 @@ arrived = False
 while not arrived:
 
     # The pose of the Panda's end-effector
-    Te = panda.fkine()
+    Te = panda.fkine(panda.q)
 
     # Transform from the end-effector to desired pose
     eTep = Te.inv() * Tep

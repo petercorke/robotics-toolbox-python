@@ -67,4 +67,4 @@ while not arrived:
     panda.qd[:n] = qd[:n]
 
     # Step the simulator by 50 ms
-    env.step(50)
+    env.step(0.05)
