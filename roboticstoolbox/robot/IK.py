@@ -495,7 +495,14 @@ class IKMixin:
         tcount = 0  # Total iteration count
 
         # bool vector indicating revolute joints
-        revolutes = np.array([link.isrevolute for link in self])
+        # joints = np.array([link.isjoint for link in self])
+        # revolutes = np.array([link.isrevolute for link in self])
+        revolutes = []
+
+        for link in self:
+            if link.isjoint:
+                revolutes.append(link.isrevolute)
+        revolutes = np.array(revolutes)
 
         q = q0
         for Tk in T:
@@ -531,6 +538,8 @@ class IKMixin:
                 # print(J)
 
                 # Wrap angles for revolute joints
+                print(revolutes)
+                print(q)
                 k = np.logical_and(q > np.pi, revolutes)
                 q[k] -= 2 * np.pi
 

@@ -903,7 +903,7 @@ graph [rankdir=LR];
         end, start, etool = self._get_limit_links(end, start)
 
         if etool is not None and tool is not None:
-            tool = (etool @ tool).A
+            tool = (etool * tool).A
         elif etool is not None:
             tool = etool.A
         elif tool is not None:
