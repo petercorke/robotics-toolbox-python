@@ -250,11 +250,15 @@ defined by args, and returns a reference to the backend.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">render</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in seconds, defaults to 0.05</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dt</strong> (<em>bool</em><em>, </em><em>optional</em>) – time step in seconds, defaults to 0.05</p></li>
+<li><p><strong>render</strong> – render the change in Swift. If True, this updates the
+pose of the simulated robots and objects in Swift.</p></li>
+</ul>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">env.step(args)</span></code> triggers an update of the 3D scene in the Swift
@@ -407,7 +411,7 @@ as the video will be automatically saved when the python script exits</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 10-Feb-2021.
+        Last updated on 11-Feb-2021.
       </span>
 
     </p>

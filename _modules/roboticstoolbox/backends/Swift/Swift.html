@@ -266,12 +266,15 @@
             <span class="n">sw</span><span class="o">.</span><span class="n">start_servers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="n">browser</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Swift.step"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+<div class="viewcode-block" id="Swift.step"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the graphical scene</span>
 
 <span class="sd">        :param dt: time step in seconds, defaults to 0.05</span>
 <span class="sd">        :type dt: int, optional</span>
+<span class="sd">        :param render: render the change in Swift. If True, this updates the</span>
+<span class="sd">            pose of the simulated robots and objects in Swift.</span>
+<span class="sd">        :type dt: bool, optional</span>
 
 <span class="sd">        ``env.step(args)`` triggers an update of the 3D scene in the Swift</span>
 <span class="sd">        window referenced by ``env``.</span>
@@ -311,7 +314,12 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_draw_all</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">render</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_draw_all</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ob&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ob&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span><span class="s1">&#39;sim_time&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_time</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Swift.reset"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -562,7 +570,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 10-Feb-2021.
+        Last updated on 11-Feb-2021.
       </span>
 
     </p>
