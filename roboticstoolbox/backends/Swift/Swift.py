@@ -105,12 +105,15 @@ class Swift(Connector):  # pragma nocover
             sw.start_servers(self.outq, self.inq, browser=browser)
             self.last_time = time.time()
 
-    def step(self, dt=0.05):
+    def step(self, dt=0.05, render=True):
         """
         Update the graphical scene
 
         :param dt: time step in seconds, defaults to 0.05
         :type dt: int, optional
+        :param render: render the change in Swift. If True, this updates the
+            pose of the simulated robots and objects in Swift.
+        :type dt: bool, optional
 
         ``env.step(args)`` triggers an update of the 3D scene in the Swift
         window referenced by ``env``.
@@ -150,7 +153,12 @@ class Swift(Connector):  # pragma nocover
 
                 self.last_time = time.time()
 
-            self._draw_all()
+            if render:
+                self._draw_all()
+            else:
+                for i in range(len(self.robots)):
+                    self.robots[i]['ob'].fkine_all(self.robots[i]['ob'].q)
+
             self._send_socket('sim_time', self.sim_time)
 
     def reset(self):
