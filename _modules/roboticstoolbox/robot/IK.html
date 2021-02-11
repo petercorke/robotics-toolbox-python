@@ -656,7 +656,14 @@
         <span class="n">tcount</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Total iteration count</span>
 
         <span class="c1"># bool vector indicating revolute joints</span>
-        <span class="n">revolutes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+        <span class="c1"># joints = np.array([link.isjoint for link in self])</span>
+        <span class="c1"># revolutes = np.array([link.isrevolute for link in self])</span>
+        <span class="n">revolutes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+                <span class="n">revolutes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">)</span>
+        <span class="n">revolutes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">revolutes</span><span class="p">)</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">q0</span>
         <span class="k">for</span> <span class="n">Tk</span> <span class="ow">in</span> <span class="n">T</span><span class="p">:</span>
@@ -692,6 +699,8 @@
                 <span class="c1"># print(J)</span>
 
                 <span class="c1"># Wrap angles for revolute joints</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">revolutes</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
                 <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">q</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">revolutes</span><span class="p">)</span>
                 <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 
