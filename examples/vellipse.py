@@ -30,8 +30,8 @@ dt = 0.05
 while not arrived:
     start = time.time()
 
-    v, arrived = rp.p_servo(panda.fkine(), Tep, 0.5)
-    panda.qd = np.linalg.pinv(panda.jacobe()) @ v
+    v, arrived = rp.p_servo(panda.fkine(panda.q), Tep, 0.5)
+    panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v
     env.step(50)
     stop = time.time()
 

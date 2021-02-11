@@ -12,7 +12,7 @@ env.launch()
 
 #  PUMA560
 puma = rtb.models.DH.Puma560()
-env.add(0, 'Puma', puma)
+env.add(puma)
 
 for i in range(1000):
     env.step(puma)

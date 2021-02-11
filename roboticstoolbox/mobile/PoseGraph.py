@@ -161,6 +161,7 @@ class PoseGraph:
                         lasermeta = tokens[2:6]
                         firstlaser = False
 
+                    v = self.graph.add_vertex()
                     v.theta = np.arange(0, nbeams) * float(tokens[4]) + float(tokens[2])
                     v.range = np.array([float(x) for x in tokens[9:nbeams+9]])
                     v.time = float(tokens[21+nbeams])
@@ -189,7 +190,6 @@ class PoseGraph:
         return v.range, v.theta
     
     def scanxy(self, i):
-        v = self.vindex[i]
         
         range, theta = self.scan(i)
         x = range * np.cos(theta)
@@ -328,10 +328,6 @@ def bresenham(p1, p2):
     
     return x, y
 
-
-
-
-    
     
 #   This source code is part of the graph optimization package
 #   deveoped for the lectures of robotics2 at the University of Freiburg.
@@ -367,43 +363,43 @@ def bresenham(p1, p2):
 #   PURPOSE.
     
     
-    # %ls-slam.m
-    # %this file is released under the creative common license
-    
-    # solves a graph-based slam problem via least squares
-    # vmeans: matrix containing the column vectors of the poses of the vertices
-    # 	 the vertices are odrered such that vmeans[i] corresponds to the ith id
-    # eids:	 matrix containing the column vectors [idFrom, idTo]' of the ids of the vertices
-    # 	 eids[k] corresponds to emeans[k] and einfs[k].
-    # emeans: matrix containing the column vectors of the poses of the edges
-    # einfs:  3d matrix containing the information matrices of the edges
-    # 	 einfs(:,:,k) refers to the information matrix of the k-th edge.
-    # n:	 number of iterations
-    # newmeans: matrix containing the column vectors of the updated vertices positions
-    
-    def optimize(self, iterations = 10, animate = False, retain = False):
-        
-        
-        g2  =  PGraph(self.graph)  # deep copy
-        
-        eprev  =  math.inf
-        for i in range(iterations):
-            if animate:
-                if not retain:
-                    plt.clf()
-                g2.plot()
-                plt.pause(0.5)
-            
-            vmeans, energy = linearize_and_solve(g2)
-            g2.setcoord(vmeans)
-            
-            if energy >= eprev:
-                break
-            eprev = energy
-        
-        self.graph = g2
+# %ls-slam.m
+# %this file is released under the creative common license
 
-        return g2
+# solves a graph-based slam problem via least squares
+# vmeans: matrix containing the column vectors of the poses of the vertices
+# 	 the vertices are odrered such that vmeans[i] corresponds to the ith id
+# eids:	 matrix containing the column vectors [idFrom, idTo]' of the ids of the vertices
+# 	 eids[k] corresponds to emeans[k] and einfs[k].
+# emeans: matrix containing the column vectors of the poses of the edges
+# einfs:  3d matrix containing the information matrices of the edges
+# 	 einfs(:,:,k) refers to the information matrix of the k-th edge.
+# n:	 number of iterations
+# newmeans: matrix containing the column vectors of the updated vertices positions
+    
+def optimize(self, iterations = 10, animate = False, retain = False):
+    
+    
+    g2  =  PGraph(self.graph)  # deep copy
+    
+    eprev  =  math.inf
+    for i in range(iterations):
+        if animate:
+            if not retain:
+                plt.clf()
+            g2.plot()
+            plt.pause(0.5)
+        
+        vmeans, energy = linearize_and_solve(g2)
+        g2.setcoord(vmeans)
+        
+        if energy >= eprev:
+            break
+        eprev = energy
+    
+    self.graph = g2
+
+    return g2
 
 
 #computes the taylor expansion of the error function of the k_th edge
@@ -460,7 +456,7 @@ def linear_factors(self, edge):
 
     ztinv = base.trinv2(zt_ij)
     T = ztinv @ f_ij
-    e = np.r_[base.transl2(T), base.angle(T)]
+    e = tr2xyt(T)
     ztinv[0:2,2] =  0
     A = ztinv @ A
     B = ztinv @ B

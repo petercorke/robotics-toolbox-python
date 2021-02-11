@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+import spatialmath as sm
 from spatialmath.base.argcheck import getvector
 
 
@@ -12,12 +13,18 @@ class Gripper():
     def __init__(
             self,
             elinks,
-            name=''
+            name='',
+            tool=None
             ):
 
         self._n = 0
 
         self.name = name
+
+        if tool is None:
+            self.tool = sm.SE3()
+        else:
+            self.tool = tool
 
         for link in elinks:
             if link.isjoint:

@@ -867,6 +867,15 @@ class TestDHRobot(unittest.TestCase):
 
         T = puma.fkine(puma.qn)
 
+        # test configuration validation
+        config = puma.config_validate('l', ('lr', 'ud', 'nf'))
+        self.assertEqual(len(config), 3)
+        self.assertTrue('l' in config)
+        self.assertTrue('u' in config)
+        self.assertTrue('n' in config)
+        with self.assertRaises(ValueError):
+            config = puma.config_validate('lux', ('lr', 'ud', 'nf'))
+
         # analytic solution
         sol = puma.ikine_a(T)
         self.assertTrue(sol.success)
@@ -885,12 +894,12 @@ class TestDHRobot(unittest.TestCase):
         sol = puma.ikine_a(T, "u")
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
-        self.assertTrue(sol.q[1] > -3)
+        self.assertTrue(sol.q[1] > 0)
 
         sol = puma.ikine_a(T, "d")
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
-        self.assertTrue(sol.q[1] < -3)
+        self.assertTrue(sol.q[1] < 0)
 
         sol = puma.ikine_a(T, "n")
         self.assertTrue(sol.success)

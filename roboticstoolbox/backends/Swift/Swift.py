@@ -373,11 +373,11 @@ class Swift(Connector):  # pragma nocover
         for shape in self.shapes:
 
             T = shape.base
-            t = T.t
-            r = T.rpy('rad')
+            t = T.t.astype('float64')
+            r = T.rpy('rad').astype('float64')
 
-            t += shape.v[:3] * (dt)
-            r += shape.v[3:] * (dt)
+            t += shape.v[:3] * dt
+            r += shape.v[3:] * dt
 
             shape.base = sm.SE3(t) * sm.SE3.RPY(r)
 

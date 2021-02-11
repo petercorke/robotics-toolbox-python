@@ -19,6 +19,7 @@
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
+from spatialmath import base
 
 
 class Puma560(DHRobot):
@@ -228,7 +229,9 @@ class Puma560(DHRobot):
             GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95
  
         """
-        def ik3(robot, T, config):
+        def ik3(robot, T, config='lun'):
+
+            config = self.config_validate(config, ('lr', 'ud', 'nf'))
 
             # solve for the first three joints
 
@@ -253,8 +256,11 @@ class Puma560(DHRobot):
             r = np.sqrt(Px**2 + Py**2)
             if 'r' in config:
                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-            else:
+            elif 'l' in config:
                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
+            else:
+                raise ValueError('bad configuration string')
+
 
             # Solve for theta[1]
             # V114 is defined in equation 43, p.39.
@@ -264,10 +270,12 @@ class Puma560(DHRobot):
             # configuration parameter n2
             if 'u' in config:
                 n2 = 1
-            else:
+            elif 'd' in config:
                 n2 = -1
+            else:
+                raise ValueError('bad configuration string')
 
-            if 'r' in config:
+            if 'l' in config:
                 n2 = -n2
 
             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
@@ -289,8 +297,9 @@ class Puma560(DHRobot):
                 den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
                 theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
 
-            return theta
+            theta = base.angdiff(theta)
 
+            return theta
 
         return self.ikine_6s(T, config, ik3)
 
@@ -300,3 +309,10 @@ if __name__ == '__main__':    # pragma nocover
     puma = Puma560(symbolic=False)
     print(puma)
     print(puma.dyntable())
+    T = puma.fkine(puma.qn)
+    print(puma.ikine_a(T, 'lu').q)
+    print(puma.ikine_a(T, 'ru').q)
+    print(puma.ikine_a(T, 'ld').q)
+    print(puma.ikine_a(T, 'rd').q)
+
+    puma.plot(puma.qz)

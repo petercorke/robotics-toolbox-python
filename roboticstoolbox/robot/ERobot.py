@@ -857,16 +857,16 @@ graph [rankdir=LR];
 
 # --------------------------------------------------------------------- #
 
-    def fkine(self, q, endlink=None, startlink=None, tool=None):
+    def fkine(self, q, end=None, start=None, tool=None):
         '''
         Forward kinematics
 
         :param q: Joint coordinates
         :type q: ndarray(n) or ndarray(m,n)
-        :param endlink: end-effector to compute forward kinematics to
-        :type endlink: str or ELink
-        :param startlink: the link to compute forward kinematics from
-        :type startlink: str or ELink
+        :param end: end-effector or gripper to compute forward kinematics to
+        :type end: str or ELink or Gripper
+        :param start: the link to compute forward kinematics from
+        :type start: str or ELink
         :param tool: tool transform, optional
         :type tool: SE3
         :return: The transformation matrix representing the pose of the
@@ -884,8 +884,8 @@ graph [rankdir=LR];
         .. note::
 
             - For a robot with a single end-effector there is no need to
-              specify ``endlink``
-            - For a robot with multiple end-effectors, the ``endlink`` must
+              specify ``end``
+            - For a robot with multiple end-effectors, the ``end`` must
               be specified.
             - The robot's base tool transform, if set, is incorporated
               into the result.
@@ -900,21 +900,25 @@ graph [rankdir=LR];
 
         q = getmatrix(q, (None, self.n))
 
-        if tool is not None:
-            Ttool = tool.A
+        end, start, etool = self._get_limit_links(end, start)
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
+        if etool is not None and tool is not None:
+            tool = (etool @ tool).A
+        elif etool is not None:
+            tool = etool.A
+        elif tool is not None:
+            tool = tool.A
 
         T = SE3.Empty()
         for k, qk in enumerate(q):
 
-            link = endlink  # start with last link
+            link = end  # start with last link
 
             # add tool if provided
             if tool is None:
                 Tk = link.A(qk[link.jindex], fast=True)
             else:
-                Tk = link.A(qk[link.jindex], fast=True) @ Ttool
+                Tk = link.A(qk[link.jindex], fast=True) @ tool
 
             # add remaining links, back toward the base
             while True:
@@ -925,11 +929,11 @@ graph [rankdir=LR];
 
                 Tk = link.A(qk[link.jindex], fast=True) @ Tk
 
-                if link is startlink:
+                if link is start:
                     break
 
             # add base transform if it is set
-            if self.base is not None and startlink == self.base_link:
+            if self.base is not None and start == self.base_link:
                 Tk = self.base.A @ Tk
 
             T.append(SE3(Tk))
@@ -1076,40 +1080,40 @@ graph [rankdir=LR];
 
     #     return J
 
-    def get_path(self, endlink=None, startlink=None):
+    def get_path(self, end=None, start=None):
         """
-        Find a path from startlink to endlink. The endlink must come after
-        the startlink (ie endlink must be further away from the base link
-        of the robot than startlink) in the kinematic chain and both links
+        Find a path from start to end. The end must come after
+        the start (ie end must be further away from the base link
+        of the robot than start) in the kinematic chain and both links
         must be a part of the same branch within the robot structure. This
         method is a work in progress while an approach which generalises
         to all applications is designed.
 
-        :param endlink: name or reference to end-effector, defaults to None
-        :type endlink: str or ELink, optional
-        :param startlink: name or reference to a base link, defaults to None
-        :type startlink: str or ELink, optional
+        :param end: end-effector or gripper to compute forward kinematics to
+        :type end: str or ELink or Gripper, optional
+        :param start: name or reference to a base link, defaults to None
+        :type start: str or ELink, optional
         :raises ValueError: link not known or ambiguous
-        :return: the path from startlink to endlink
+        :return: the path from start to end
         :rtype: list of Link
         """
         path = []
         n = 0
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
+        end, start, _ = self._get_limit_links(end, start)
 
-        link = endlink
+        link = end
 
         path.append(link)
         if link.isjoint:
             n += 1
 
-        while link != startlink:
+        while link != start:
             link = link.parent
             if link is None:
                 raise ValueError(
-                    f'cannot find path from {startlink.name} to'
-                    f' {endlink.name}')
+                    f'cannot find path from {start.name} to'
+                    f' {end.name}')
             path.append(link)
             if link.isjoint:
                 n += 1
@@ -1118,48 +1122,59 @@ graph [rankdir=LR];
 
         return path, n
 
-    def _get_limit_links(self, endlink=None, startlink=None):
+    def _get_limit_links(self, end=None, start=None):
         """
         Get and validate an end-effector, and a base link
 
-        :param endlink: name or reference to end-effector, defaults to None
-        :type endlink: str or ELink, optional
-        :param startlink: name or reference to a base link, defaults to None
-        :type startlink: str or ELink, optional
+        :param end: end-effector or gripper to compute forward kinematics to
+        :type end: str or ELink or Gripper, optional
+        :param start: name or reference to a base link, defaults to None
+        :type start: str or ELink, optional
         :raises ValueError: link not known or ambiguous
         :raises ValueError: [description]
         :raises TypeError: unknown type provided
-        :return: end-effector link, base link
-        :rtype: ELink, Elink
+        :return: end-effector link, base link, and tool transform of gripper
+            if applicable
+        :rtype: ELink, Elink, SE3 or None
 
         Helper method to find or validate an end-effector and base link.
         """
-        if endlink is None:
+
+        tool = None
+        if end is None:
 
             # if we have a gripper, use it
             if len(self.grippers) == 1:
-                endlink = self.grippers[0].links[0]
+                end = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
             elif len(self.grippers) > 1:
                 # if more than one gripper, user must choose
                 raise ValueError('Must specify which gripper')
 
             # no grippers, use ee link if just one
             elif len(self.ee_links) == 1:
-                endlink = self.ee_links[0]
+                end = self.ee_links[0]
             else:
                 # if more than one EE, user must choose
                 raise ValueError('Must specify which end-effector')
         else:
-            # end effector is specified
-            endlink = self._getlink(endlink)
 
-        if startlink is None:
-            startlink = self.base_link
+            # Check if end corresponds to gripper
+            for gripper in self.grippers:
+                if end == gripper or end == gripper.name:
+                    tool = gripper.tool
+                    end = gripper.links[0]
+
+            # otherwise check for end in the links
+            end = self._getlink(end)
+
+        if start is None:
+            start = self.base_link
         else:
             # start effector is specified
-            startlink = self._getlink(startlink)
+            start = self._getlink(start)
 
-        return endlink, startlink
+        return end, start, tool
 
     def _getlink(self, link, default=None):
         """
@@ -1201,20 +1216,20 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def jacob0(self, q, endlink=None, startlink=None, offset=None, T=None):
-        """
+    def jacob0(self, q, end=None, start=None, tool=None, T=None):
+        r"""
         Manipulator geometric Jacobian in the base frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param endlink: the particular link whose velocity the Jacobian describes, defaults
-            to the end-effector if only one is present
-        :type endlink: str or ELink
-        :param startlink: the link considered as the base frame, defaults to the robots's base frame
-        :type startlink: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
-            end of endlink, defaults to None
-        :type offset: SE3, optional
+        :param end: the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        :type end: str or ELink or Gripper
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :type start: str or ELink
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1243,20 +1258,20 @@ graph [rankdir=LR];
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
 
-        .. warning:: ``startlink`` and ``endlink`` must be on the same branch,
-            with ``startlink`` closest to the base.
+        .. warning:: ``start`` and ``end`` must be on the same branch,
+            with ``start`` closest to the base.
         """  # noqa
 
-        if offset is None:
-            offset = SE3()
+        if tool is None:
+            tool = SE3()
 
-        path, n = self.get_path(endlink, startlink)
+        path, n = self.get_path(end, start)
 
         q = getvector(q, self.n)
 
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, endlink=endlink, startlink=startlink) * offset
+                self.fkine(q, end=end, start=start) * tool
         T = T.A
         U = np.eye(4)
         j = 0
@@ -1267,8 +1282,8 @@ graph [rankdir=LR];
             if link.isjoint:
                 U = U @ link.A(q[link.jindex], fast=True)
 
-                if link == endlink:
-                    U = U @ offset.A
+                if link == end:
+                    U = U @ tool.A
 
                 Tu = np.linalg.inv(U) @ T
                 n = U[:3, 0]
@@ -1308,20 +1323,20 @@ graph [rankdir=LR];
 
         return J
 
-    def jacobe(self, q, endlink=None, startlink=None, offset=None, T=None):
-        """
+    def jacobe(self, q, end=None, start=None, tool=None, T=None):
+        r"""
         Manipulator geometric Jacobian in the end-effector frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param endlink: the particular link whose velocity the Jacobian describes, defaults
-            to the end-effector if only one is present
-        :type endlink: str or ELink
-        :param startlink: the link considered as the base frame, defaults to the robots's base frame
-        :type startlink: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
-            end of endlink, defaults to None
-        :type offset: SE3, optional
+        :param end: the particular link or Gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        :type end: str or ELink or Gripper
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :type start: str or ELink
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1350,29 +1365,27 @@ graph [rankdir=LR];
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
 
-        .. warning:: ``startlink`` and ``endlink`` must be on the same branch,
-            with ``startlink`` closest to the base.
+        .. warning:: ``start`` and ``end`` must be on the same branch,
+            with ``start`` closest to the base.
         """  # noqa
 
         q = getvector(q, self.n)
 
-        if offset is None:
-            offset = SE3()
+        if tool is None:
+            tool = SE3()
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
-
-        # path, n = self.get_path(endlink, startlink)
+        end, start, _ = self._get_limit_links(end, start)
 
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, endlink=endlink, startlink=startlink) * offset
+                self.fkine(q, end=end, start=start) * tool
 
-        J0 = self.jacob0(q, endlink, startlink, offset, T)
-        Je = self.jacobev(q, endlink, startlink, offset, T) @ J0
+        J0 = self.jacob0(q, end, start, tool, T)
+        Je = self.jacobev(q, end, start, tool, T) @ J0
         return Je
 
-    def partial_fkine0(self, q, n, J0=None, endlink=None, startlink=None):
-        endlink, startlink = self._get_limit_links(endlink, startlink)
+    def partial_fkine0(self, q, n, J0=None, end=None, start=None):
+        end, start, _ = self._get_limit_links(end, start)
 
         def cross(a, b):
             x = a[1] * b[2] - a[2] * b[1]
@@ -1380,10 +1393,10 @@ graph [rankdir=LR];
             z = a[0] * b[1] - a[1] * b[0]
             return np.array([x, y, z])
 
-        _, nl = self.get_path(endlink, startlink)
+        _, nl = self.get_path(end, start)
 
-        J = self.jacob0(q, endlink=endlink, startlink=startlink)
-        H = self.hessian0(q, J, endlink, startlink)
+        J = self.jacob0(q, end=end, start=start)
+        H = self.hessian0(q, J, end, start)
 
         d = [J, H]
         size = [6, nl, nl]
@@ -1477,9 +1490,9 @@ graph [rankdir=LR];
 
         return d[-1]
 
-    # def third(self, q=None, J0=None, endlink=None, startlink=None):
-    #     endlink, startlink = self._get_limit_links(endlink, startlink)
-    #     path, n = self.get_path(endlink, startlink)
+    # def third(self, q=None, J0=None, end=None, start=None):
+    #     end, start = self._get_limit_links(end, start)
+    #     path, n = self.get_path(end, start)
 
     #     def cross(a, b):
     #         x = a[1] * b[2] - a[2] * b[1]
@@ -1489,11 +1502,11 @@ graph [rankdir=LR];
 
     #     if J0 is None:
     #         q = getvector(q, n)
-    #         J0 = self.jacob0(q, endlink=endlink)
+    #         J0 = self.jacob0(q, end=end)
     #     else:
     #         verifymatrix(J0, (6, n))
 
-    #     H0 = self.hessian0(q, J0, endlink, startlink)
+    #     H0 = self.hessian0(q, J0, end, start)
 
     #     L = np.zeros((6, n, n, n))
 
@@ -1509,7 +1522,7 @@ graph [rankdir=LR];
 
     #     return L
 
-    def hessian0(self, q=None, J0=None, endlink=None, startlink=None):
+    def hessian0(self, q=None, J0=None, end=None, start=None):
         """
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
@@ -1521,10 +1534,10 @@ graph [rankdir=LR];
         :type q: float ndarray(n)
         :param J0: The manipulator Jacobian in the 0 frame
         :type J0: float ndarray(6,n)
-        :param endlink: the final link which the Hessian represents
-        :type endlink: str or ELink
-        :param startlink: the first link which the Hessian represents
-        :type startlink: str or ELink
+        :param end: the final link/Gripper which the Hessian represents
+        :type end: str or ELink or Gripper
+        :param start: the first link which the Hessian represents
+        :type start: str or ELink
 
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
@@ -1548,8 +1561,8 @@ graph [rankdir=LR];
               Sequence, J. Haviland and P. Corke
         """
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
-        path, n = self.get_path(endlink, startlink)
+        end, start, _ = self._get_limit_links(end, start)
+        path, n = self.get_path(end, start)
 
         def cross(a, b):
             x = a[1] * b[2] - a[2] * b[1]
@@ -1559,7 +1572,7 @@ graph [rankdir=LR];
 
         if J0 is None:
             q = getvector(q, n)
-            J0 = self.jacob0(q, endlink=endlink)
+            J0 = self.jacob0(q, end=end, start=start)
         else:
             verifymatrix(J0, (6, n))
 
@@ -1576,7 +1589,7 @@ graph [rankdir=LR];
 
         return H
 
-    def jacobm(self, q=None, J=None, H=None, endlink=None, startlink=None):
+    def jacobm(self, q=None, J=None, H=None, end=None, start=None):
         """
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
@@ -1590,10 +1603,10 @@ graph [rankdir=LR];
         :type J: float ndarray(6,n)
         :param H: The manipulator Hessian in any frame
         :type H: float ndarray(6,n,n)
-        :param endlink: the final link which the Hessian represents
-        :type endlink: str or ELink
-        :param startlink: the first link which the Hessian represents
-        :type startlink: str or ELink
+        :param end: the final link or Gripper which the Hessian represents
+        :type end: str or ELink or Gripper
+        :param start: the first link which the Hessian represents
+        :type start: str or ELink
 
         :return: The manipulability Jacobian
         :rtype: float ndarray(n)
@@ -1603,8 +1616,8 @@ graph [rankdir=LR];
               Sequence, J. Haviland and P. Corke
         """
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
-        path, n = self.get_path(endlink, startlink)
+        end, start, _ = self._get_limit_links(end, start)
+        path, n = self.get_path(end, start)
 
         if J is None:
             if q is None:
@@ -1612,17 +1625,17 @@ graph [rankdir=LR];
             else:
                 q = getvector(q, self.n)
 
-            J = self.jacob0(q, startlink=startlink, endlink=endlink)
+            J = self.jacob0(q, start=start, end=end)
         else:
             verifymatrix(J, (6, n))
 
         if H is None:
-            H = self.hessian0(J0=J, startlink=startlink, endlink=endlink)
+            H = self.hessian0(J0=J, start=start, end=end)
         else:
             verifymatrix(H, (6, n, n))
 
         manipulability = self.manipulability(
-            q, J=J, startlink=startlink, endlink=endlink)
+            q, J=J, start=start, end=end)
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((n, 1))
 
@@ -1694,8 +1707,8 @@ graph [rankdir=LR];
         recurse(self.base_link)
 
     def jacobev(
-            self, q, endlink=None, startlink=None,
-            offset=None, T=None):
+            self, q, end=None, start=None,
+            tool=None, T=None):
         """
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the base frame to the
@@ -1703,13 +1716,13 @@ graph [rankdir=LR];
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param endlink: the final link which the Jacobian represents
-        :type endlink: str or ELink
-        :param startlink: the first link which the Jacobian represents
-        :type startlink: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
-            end of endlink, defaults to None
-        :type offset: SE3, optional
+        :param end: the final link or Gripper which the Jacobian represents
+        :type end: str or ELink or Gripper
+        :param start: the first link which the Jacobian represents
+        :type start: str or ELink
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1721,13 +1734,13 @@ graph [rankdir=LR];
 
         """
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
+        end, start, _ = self._get_limit_links(end, start)
 
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, endlink=endlink, startlink=startlink)
-            if offset is not None:
-                T *= offset
+                self.fkine(q, end=end, start=start)
+            if tool is not None:
+                T *= tool
         R = (T.R).T
 
         Jv = np.zeros((6, 6))
@@ -1737,8 +1750,8 @@ graph [rankdir=LR];
         return Jv
 
     def jacob0v(
-            self, q, endlink=None, startlink=None,
-            offset=None, T=None):
+            self, q, end=None, start=None,
+            tool=None, T=None):
         """
         Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the end-effector frame
@@ -1746,13 +1759,13 @@ graph [rankdir=LR];
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param endlink: the final link which the Jacobian represents
-        :type endlink: str or ELink
-        :param startlink: the first link which the Jacobian represents
-        :type startlink: str or ELink
-        :param offset: a static offset transformation matrix to apply to the
-            end of endlink, defaults to None
-        :type offset: SE3, optional
+        :param end: the final link or Gripper which the Jacobian represents
+        :type end: str or ELink or Gripper
+        :param start: the first link which the Jacobian represents
+        :type start: str or ELink
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
             Jacobian represents with respect to the base frame. Use this to
             avoid caluclating forward kinematics to save time, defaults
@@ -1764,13 +1777,13 @@ graph [rankdir=LR];
 
         """
 
-        endlink, startlink = self._get_limit_links(endlink, startlink)
+        end, start, _ = self._get_limit_links(end, start)
 
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, endlink=endlink, startlink=startlink)
-            if offset is not None:
-                T *= offset
+                self.fkine(q, end=end, start=start)
+            if tool is not None:
+                T *= tool
         R = (T.R)
 
         Jv = np.zeros((6, 6))
@@ -1781,7 +1794,7 @@ graph [rankdir=LR];
 
     def link_collision_damper(
             self, shape, q=None, di=0.3, ds=0.05, xi=1.0,
-            endlink=None, startlink=None):
+            end=None, start=None):
         '''
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
@@ -1807,13 +1820,13 @@ graph [rankdir=LR];
         :rtype: ndarray(6), ndarray(6)
         '''
 
-        if startlink is None:
-            startlink = self.base_link
+        if start is None:
+            start = self.base_link
 
-        if endlink is None:
-            endlink = self.ee_link
+        if end is None:
+            end = self.ee_link
 
-        links, n = self.get_path(startlink=startlink, endlink=endlink)
+        links, n = self.get_path(start=start, end=end)
 
         if q is None:
             q = np.copy(self.q)
@@ -1833,8 +1846,8 @@ graph [rankdir=LR];
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
                 Je = self.jacobe(
-                    q, startlink=self.base_link, endlink=link,
-                    offset=link_col.base)
+                    q, start=self.base_link, end=link,
+                    tool=link_col.base)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, n))
