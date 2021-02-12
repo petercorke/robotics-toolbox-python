@@ -13,6 +13,7 @@ from queue import Queue
 _sw = None
 sw = None
 
+SHAPE_ADD = 10000
 
 def _import_swift():     # pragma nocover
     import importlib
@@ -258,28 +259,69 @@ class Swift(Connector):  # pragma nocover
                 id = len(self.robots)
 
             self.robots.append(robot_object)
-            return id
+            return int(id)
         elif isinstance(ob, rp.Shape):
             shape = ob.to_dict()
             if self.display:
                 id = self._send_socket('shape', shape)
             else:
-                id = len(self.shapes)
+                id = len(self.shapes) + SHAPE_ADD
             self.shapes.append(ob)
-            return id
+            return int(id)
 
-    def remove(self):
+    def remove(self, id):
         """
-        Remove a robot to the graphical scene
+        Remove a robot/shape from the graphical scene
 
         ``env.remove(robot)`` removes the ``robot`` from the graphical
             environment.
+
+        :param id: the id of the object as returned by the ``add`` method,
+            or the instance of the object
+        :type id: Int, Robot or Shape
         """
 
-        # TODO - shouldn't this have an id argument? which robot does it remove
-        # TODO - it can remove any entity?
-
         super().remove()
+
+        # ob to remove
+        idd = None
+        code = None
+
+        if isinstance(id, rp.ERobot):
+
+            for i in range(len(self.robots)):
+                if self.robots[i] is not None and id == self.robots[i]['ob']:
+                    idd = i
+                    code = 'remove_robot'
+                    self.robots[idd] = None
+                    break
+
+        elif isinstance(id, rp.Shape):
+
+            for i in range(len(self.shapes)):
+                if self.shapes[i] is not None and id == self.shapes[i]:
+                    idd = i
+                    code = 'remove_shape'
+                    self.shapes[idd] = None
+                    break
+
+        elif id >= SHAPE_ADD:
+            # Number corresponding to shape ID
+            idd = id - SHAPE_ADD
+            code = 'remove_shape'
+            self.shapes[idd] = None
+        else:
+            # Number corresponding to robot ID
+            idd = id
+            code = 'remove_robot'
+            self.robots[idd] = None
+
+        if idd is None:
+            raise ValueError(
+                'the id argument does not correspond with '
+                'a robot or shape in Swift')
+
+        self._send_socket(code, idd)
 
     def hold(self):           # pragma: no cover
         '''
@@ -344,52 +386,56 @@ class Swift(Connector):  # pragma nocover
     def _step_robots(self, dt):
 
         for robot_object in self.robots:
-            robot = robot_object['ob']
+            if robot_object is not None:
+                robot = robot_object['ob']
 
-            if robot_object['readonly'] or robot.control_type == 'p':
-                pass            # pragma: no cover
+                if robot_object['readonly'] or robot.control_type == 'p':
+                    pass            # pragma: no cover
 
-            elif robot.control_type == 'v':
+                elif robot.control_type == 'v':
 
-                for i in range(robot.n):
-                    robot.q[i] += robot.qd[i] * (dt)
+                    for i in range(robot.n):
+                        robot.q[i] += robot.qd[i] * (dt)
 
-                    if np.any(robot.qlim[:, i] != 0) and \
-                            not np.any(np.isnan(robot.qlim[:, i])):
-                        robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
-                        robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
+                        if np.any(robot.qlim[:, i] != 0) and \
+                                not np.any(np.isnan(robot.qlim[:, i])):
+                            robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
+                            robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
 
-            elif robot.control_type == 'a':
-                pass
+                elif robot.control_type == 'a':
+                    pass
 
-            else:            # pragma: no cover
-                # Should be impossible to reach
-                raise ValueError(
-                    'Invalid robot.control_type. '
-                    'Must be one of \'p\', \'v\', or \'a\'')
+                else:            # pragma: no cover
+                    # Should be impossible to reach
+                    raise ValueError(
+                        'Invalid robot.control_type. '
+                        'Must be one of \'p\', \'v\', or \'a\'')
 
     def _step_shapes(self, dt):
 
         for shape in self.shapes:
+            if shape is not None:
 
-            T = shape.base
-            t = T.t.astype('float64')
-            r = T.rpy('rad').astype('float64')
+                T = shape.base
+                t = T.t.astype('float64')
+                r = T.rpy('rad').astype('float64')
 
-            t += shape.v[:3] * dt
-            r += shape.v[3:] * dt
+                t += shape.v[:3] * dt
+                r += shape.v[3:] * dt
 
-            shape.base = sm.SE3(t) * sm.SE3.RPY(r)
+                shape.base = sm.SE3(t) * sm.SE3.RPY(r)
 
     def _draw_all(self):
 
         for i in range(len(self.robots)):
-            self._send_socket(
-                'robot_poses', [i, self.robots[i]['ob'].fk_dict()])
+            if self.robots[i] is not None:
+                self._send_socket(
+                    'robot_poses', [i, self.robots[i]['ob'].fk_dict()])
 
         for i in range(len(self.shapes)):
-            self._send_socket(
-                'shape_poses', [i, self.shapes[i].fk_dict()])
+            if self.shapes[i] is not None:
+                self._send_socket(
+                    'shape_poses', [i, self.shapes[i].fk_dict()])
 
     def _send_socket(self, code, data=None):
         msg = [code, data]
