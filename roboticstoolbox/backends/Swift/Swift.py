@@ -263,7 +263,7 @@ class Swift(Connector):  # pragma nocover
         elif isinstance(ob, rp.Shape):
             shape = ob.to_dict()
             if self.display:
-                id = self._send_socket('shape', shape)
+                id = int(self._send_socket('shape', shape)) + SHAPE_ADD
             else:
                 id = len(self.shapes) + SHAPE_ADD
             self.shapes.append(ob)
