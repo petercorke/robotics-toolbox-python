@@ -16,11 +16,22 @@
 import argparse
 from math import pi              # lgtm [py/unused-import]
 import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt  # lgtm [py/unused-import]
 from roboticstoolbox import *    # lgtm [py/unused-import]
 from spatialmath import *        # lgtm [py/polluting-import]
 from spatialmath.base import *   # lgtm [py/polluting-import]
+import matplotlib as mpl
+from pathlib import Path
+import sys
 
+try:
+    from colored import fg, bg, attr
+    _colored = True
+    # print('using colored output')
+except ImportError:
+    # print('colored not found')
+    _colored = False
 
 # setup defaults
 np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"})
@@ -30,7 +41,7 @@ parser = argparse.ArgumentParser('Robotics Toolbox shell')
 parser.add_argument('script', default=None, nargs='?',
     help='specify script to run')
 parser.add_argument('--backend', '-b', default=None,
-    help='specify graphics frontend')
+    help='specify graphics backend')
 parser.add_argument('--color', '-c', default='neutral',
     help='specify terminal color scheme (neutral, lightbg, nocolor, linux), linux is for dark mode')
 parser.add_argument('--confirmexit', '-x', default=False,
@@ -39,13 +50,16 @@ parser.add_argument('--prompt', '-p', default='>>> ',
     help='input prompt')
 parser.add_argument('--resultprefix', '-r', default=None,
     help='execution result prefix, include {} for execution count number')
-parser.add_argument('--showassign', '-a', default=False, action='store_true',
-    help='display the result of assignments')
+parser.add_argument('--noshowassign', '-a', default=False, action='store_false',
+    help='do not display the result of assignments')
 args = parser.parse_args()
 
+sys.argv = [sys.argv[0]]
+
 if args.backend is not None:
-    print(f"Using matplotlub backend {args.backend}")
-    plt.use(args.backend)
+    print(f"Using matplotlb backend {args.backend}")
+    mpl.use(args.backend)
+
 
 # load some robot models
 puma = models.DH.Puma560()
@@ -53,7 +67,7 @@ panda = models.DH.Panda()
 
 # print the banner
 # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
-print(r"""____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _  _
+print(fg('yellow') + r"""____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _  _
 |__/ |  | |__] |  |  |  | |    [__      |  |  | |  | |    |__] |  |  \/
 |  \ |__| |__] |__|  |  | |___ ___]     |  |__| |__| |___ |__] |__| _/\_
 
@@ -61,18 +75,25 @@ for Python
 
 from roboticstoolbox import *
 from spatialmath import *
+import numpy as np
+import scipy as sp
 
 func/object?       - show brief help
 help(func/object)  - show detailed help
 func/object??      - show source code
 
-""")
+""", attr(0))
 
-if args.script is not None:
-    path = Path(args.script)
-    if not path.exists():
-        raise ValueError(f"script does not exist: {args.script}")
-    exec(path.read_text())
+if args.noshowassign == False:
+    print(fg('red') + """Results of assignments will be displayed, use trailing ; to suppress
+    
+""", attr(0))
+
+# if args.script is not None:
+#     path = Path(args.script)
+#     if not path.exists():
+#         raise ValueError(f"script does not exist: {args.script}")
+#     exec(path.read_text())
 
 
 ## drop into IPython
@@ -103,7 +124,19 @@ c.InteractiveShellEmbed.colors = args.color
 c.InteractiveShell.confirm_exit = args.confirmexit
 # c.InteractiveShell.prompts_class = ClassicPrompts
 c.InteractiveShell.prompts_class = MyPrompt
-if args.showassign:
+if args.noshowassign == False:
     c.InteractiveShell.ast_node_interactivity = 'last_expr_or_assign'
 
-IPython.embed(config=c)
+code = None
+if args.script is not None:
+    path = Path(args.script)
+    if not path.exists():
+        raise ValueError(f"script does not exist: {args.script}")
+    code = path.open('r').readlines()
+if code is None:
+    code = ["plt.ion()"]
+else:
+    code.append("plt.ion()")
+
+c.InteractiveShellApp.exec_lines = code
+IPython.start_ipython(config=c, user_ns=globals())
