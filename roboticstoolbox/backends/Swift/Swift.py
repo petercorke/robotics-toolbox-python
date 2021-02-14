@@ -418,12 +418,14 @@ class Swift(Connector):  # pragma nocover
 
                 T = shape.base
                 t = T.t.astype('float64')
-                r = T.rpy('rad').astype('float64')
-
                 t += shape.v[:3] * dt
-                r += shape.v[3:] * dt
 
-                shape.base = sm.SE3(t) * sm.SE3.RPY(r)
+                R = sm.SO3(T.R)
+                Rdelta = sm.SO3.EulerVec(shape.v[3:] * dt)
+                R = Rdelta * R
+                R = R.norm()  # renormalize to avoid numerical issues
+
+                shape.base = sm.SE3.SO3(R, t=t)
 
     def _draw_all(self):
 
