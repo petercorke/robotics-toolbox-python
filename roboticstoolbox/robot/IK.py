@@ -876,7 +876,7 @@ class IKMixin:
 # --------------------------------------------------------------------- #
 
     def ikine_global(
-            self, T, q0=None, qlim=False, ilimit=1000,
+            self, T, qlim=False, ilimit=1000,
             tol=1e-16, method=None, options={}):
         r"""
         .. warning:: Experimental code for using SciPy global optimizers.
@@ -894,11 +894,6 @@ class IKMixin:
 
         if not isinstance(T, SE3):
             T = SE3(T)
-
-        if q0 is None:
-            q0 = np.zeros((self.n))
-        else:
-            q0 = base.getvector(q0, self.n)
 
         solutions = []
 
