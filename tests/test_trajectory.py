@@ -149,16 +149,13 @@ class TestTrajectory(unittest.TestCase):
         s2 = 2
 
         tg = tr.tpoly(s1, s2, 11)
-        tr.t1plot(tg, block=False)
+        tg.plot(block=False)
 
         tg = tr.lspb(s1, s2, 11)
-        tr.t1plot(tg, block=False)
+        tg.plot(block=False)
 
         tg = tr.tpoly(s1, s2, [1, 2])
-        tr.t1plot(tg, block=False)
-
-        with self.assertRaises(TypeError):
-            tr.t1plot('abcdefg', block=False)
+        tg.plot(block=False)
 
     def test_qplot(self):
 
@@ -166,13 +163,13 @@ class TestTrajectory(unittest.TestCase):
         q1 = np.r_[1, 2, 3, 4, 5, 6]
         q2 = -q1
         q = tr.jtraj(q1, q2, 50)
-        tr.qplot(q.q, block=False)
+        tr.qplot(q.y, block=False)
 
         # 4 joints
         q1 = np.r_[1, 2, 3, 4]
         q2 = -q1
         q = tr.jtraj(q1, q2, 50)
-        tr.qplot(q.q, block=False)
+        tr.qplot(q.y, block=False)
 
     def test_ctraj(self):
         # unit testing ctraj with T0 and T1 and N
@@ -208,15 +205,100 @@ class TestTrajectory(unittest.TestCase):
     def test_cmstraj(self):
         tr.cmstraj()
 
+    def test_mtraj(self):
+        # unit testing jtraj with tpoly
+        q1 = np.r_[1, 2, 3, 4, 5, 6]
+        q2 = -q1
+
+        tg = tr.mtraj(tr.tpoly, q1, q2, 11)
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
+
+        self.assertAlmostEqual(q.shape, (11, 6))
+        self.assertTrue(np.allclose(q[0, :], q1))
+        self.assertTrue(np.allclose(q[-1, :], q2))
+        self.assertTrue(np.allclose(q[5, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qd.shape, (11, 6))
+        self.assertTrue(np.allclose(qd[0, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qd[-1, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qdd.shape, (11, 6))
+        self.assertTrue(np.allclose(qdd[0, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qdd[-1, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qdd[5, :], np.zeros(6,)))
+
+        # with a time vector
+        t = np.linspace(0, 2, 11)
+
+        tg = tr.mtraj(tr.tpoly, q1, q2, 11)
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
+
+        self.assertAlmostEqual(q.shape, (11, 6))
+        self.assertTrue(np.allclose(q[0, :], q1))
+        self.assertTrue(np.allclose(q[-1, :], q2))
+        self.assertTrue(np.allclose(q[5, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qd.shape, (11, 6))
+        self.assertTrue(np.allclose(qd[0, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qd[-1, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qdd.shape, (11, 6))
+        self.assertTrue(np.allclose(qdd[0, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qdd[-1, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qdd[5, :], np.zeros(6,)))
+
+        # unit testing jtraj with lspb
+        q1 = np.r_[1, 2, 3, 4, 5, 6]
+        q2 = -q1
+
+        tg = tr.mtraj(tr.lspb, q1, q2, 11)
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
+
+        self.assertAlmostEqual(q.shape, (11, 6))
+        self.assertTrue(np.allclose(q[0, :], q1))
+        self.assertTrue(np.allclose(q[-1, :], q2))
+        self.assertTrue(np.allclose(q[5, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qd.shape, (11, 6))
+        self.assertTrue(np.allclose(qd[0, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qd[-1, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qdd.shape, (11, 6))
+
+        # with a time vector
+        t = np.linspace(0, 2, 11)
+
+        tg = tr.mtraj(tr.lspb, q1, q2, 11)
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
+
+        self.assertAlmostEqual(q.shape, (11, 6))
+        self.assertTrue(np.allclose(q[0, :], q1))
+        self.assertTrue(np.allclose(q[-1, :], q2))
+        self.assertTrue(np.allclose(q[5, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qd.shape, (11, 6))
+        self.assertTrue(np.allclose(qd[0, :], np.zeros(6,)))
+        self.assertTrue(np.allclose(qd[-1, :], np.zeros(6,)))
+
+        self.assertAlmostEqual(qdd.shape, (11, 6))
+
     def test_jtraj(self):
         # unit testing jtraj with
         q1 = np.r_[1, 2, 3, 4, 5, 6]
         q2 = -q1
 
         tg = tr.jtraj(q1, q2, 11)
-        q = tg.q
-        qd = tg.qd
-        qdd = tg.qdd
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -236,9 +318,9 @@ class TestTrajectory(unittest.TestCase):
         t = np.linspace(0, 2, 11)
 
         tg = tr.jtraj(q1, q2, t)
-        q = tg.q
-        qd = tg.qd
-        qdd = tg.qdd
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -257,9 +339,9 @@ class TestTrajectory(unittest.TestCase):
         # test with boundary conditions
         qone = np.ones((6,))
         tg = tr.jtraj(q1, q2, 11, -qone, qone)
-        q = tg.q
-        qd = tg.qd
-        qdd = tg.qdd
+        q = tg.y
+        qd = tg.yd
+        qdd = tg.ydd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
