@@ -59,21 +59,19 @@ env.add_slider(
     set_one,
     min=-180, max=180,
     step=1, value=0,
-    desc='Ring One')
+    desc='Ring One', unit='&#176;')
 
 env.add_slider(
     set_two,
     min=-180, max=180,
     step=1, value=0,
-    desc='Ring Two')
+    desc='Ring Two', unit='&#176;')
 
 env.add_slider(
     set_three,
     min=-180, max=180,
     step=1, value=0,
-    desc='Ring Three')
-
-
+    desc='Ring Three', unit='&#176;')
 
 while(True):
     env.process_events()
