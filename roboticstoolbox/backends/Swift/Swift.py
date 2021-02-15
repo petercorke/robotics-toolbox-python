@@ -9,6 +9,7 @@ import numpy as np
 import spatialmath as sm
 import time
 from queue import Queue
+import json
 
 _sw = None
 sw = None
@@ -71,6 +72,12 @@ class Swift(Connector):  # pragma nocover
         self.shapes = []
         self.outq = Queue()
         self.inq = Queue()
+
+        # Number of custom html elements added to page for id purposes
+        self.elementid = 0
+
+        # Element dict which holds the callback functions for form updates
+        self.elements = {}
 
         self.realtime = realtime
         self.display = display
@@ -382,6 +389,46 @@ class Swift(Connector):  # pragma nocover
             raise ValueError(
                 "You must call swift.start_recording(file_name) before trying"
                 " to stop the recording")
+
+    def add_slider(
+            self, cb, min=0, max=100, step=1, value=0, desc='', unit=''):
+        """
+        Add a range-slider to the page
+
+        :param cb: A callback function which is executed when the value of the
+            slider changes. The callback should accept one argument which
+            represents the new value of the slider
+        :type cb: function
+        :param min: the minimum value of the slider, optional
+        :type min: float
+        :param max: the maximum value of the slider, optional
+        :type max: float
+        :param step: the step size of the slider, optional
+        :type step: float
+        :param desc: add a description of the slider, optional
+        :type desc: str
+        :param unit: add a unit to the slider value, optional
+        :type unit: str
+
+        ``env.add_slider()`` adds a slider to the graphical
+            environment.
+
+        """
+
+        id = 'customelement' + str(self.elementid)
+        self.elementid += 1
+        self.elements[id] = cb
+
+        self._send_socket(
+            'add_element',
+            ['slider', id, min, max, step, value, desc, unit])
+
+    def process_events(self):
+        events = self._send_socket('check_elements')
+        events = json.loads(events)
+
+        for event in events:
+            self.elements[event](events[event])
 
     def _step_robots(self, dt):
 
