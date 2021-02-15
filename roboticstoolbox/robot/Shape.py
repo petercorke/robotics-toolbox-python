@@ -162,14 +162,7 @@ class Shape(object):
 
         default_color = (0.95, 0.5, 0.25, 1.0)
 
-        if isinstance(value, tuple):
-            value = list(value)
-
-        if isinstance(value, list):
-            if len(value) == 3:
-                value.append(1.0)
-                value = tuple(value)
-        elif isinstance(value, str):
+        if isinstance(value, str):
             if _mpl:
                 try:
                     value = mpc.to_rgba(value)
@@ -183,6 +176,17 @@ class Shape(object):
                     'Install using: pip install matplotlib')
         elif value is None:
             value = default_color
+        else:
+
+            value = np.array(value)
+
+            if np.any(value > 1.0):
+                value = value / 255.0
+
+            if value.shape[0] == 3:
+                value = np.r_[value, 1.0]
+
+            value = tuple(value)
 
         self._color = value
 
@@ -324,10 +328,10 @@ class Mesh(Shape):
 
     """
 
-    def __init__(self, filename=None, scale=[1, 1, 1], base=None):
+    def __init__(self, filename=None, scale=[1, 1, 1], base=None, color=None):
         super(Mesh, self).__init__(
             filename=filename, base=base,
-            scale=scale, stype='mesh')
+            scale=scale, stype='mesh', color=color)
 
     def _init_pob(self):
         name, file_extension = os.path.splitext(self.filename)
@@ -359,10 +363,10 @@ class Cylinder(Shape):
 
     """
 
-    def __init__(self, radius, length, base=None):
+    def __init__(self, radius, length, base=None, color=None):
         super(Cylinder, self).__init__(
             base=base, radius=radius, length=length,
-            stype='cylinder')
+            stype='cylinder', color=color)
 
     def _init_pob(self):
         col = p.createCollisionShape(
@@ -388,9 +392,9 @@ class Sphere(Shape):
 
     """
 
-    def __init__(self, radius, base=None):
+    def __init__(self, radius, base=None, color=None):
         super(Sphere, self).__init__(
-            base=base, radius=radius, stype='sphere')
+            base=base, radius=radius, stype='sphere', color=color)
 
     def _init_pob(self):
         col = p.createCollisionShape(
@@ -415,8 +419,9 @@ class Box(Shape):
 
     """
 
-    def __init__(self, scale, base=None):
-        super(Box, self).__init__(base=base, scale=scale, stype='box')
+    def __init__(self, scale, base=None, color=None):
+        super(Box, self).__init__(
+            base=base, scale=scale, stype='box', color=color)
 
     def _init_pob(self):
 
