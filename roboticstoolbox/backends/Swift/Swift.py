@@ -424,6 +424,12 @@ class Swift(Connector):  # pragma nocover
             ['slider', id, min, max, step, value, desc, unit])
 
     def process_events(self):
+        """
+        Process the event queue from Swift, this invokes the callback functions
+        from custom elements added to the page. If using custom elements
+        (for example `add_slider`), use this function in your event loop to
+        process updates from Swift.
+        """
         events = self._send_socket('check_elements')
         events = json.loads(events)
 
