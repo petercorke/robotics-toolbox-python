@@ -416,7 +416,7 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
     if qd1 is None:
         qd1 = np.zeros(q0.shape)
     else:
-        qd0 = getvector(qd0)
+        qd1 = getvector(qd1)
         if not len(qd1) == len(q0):
             raise ValueError('qd1 has wrong size')
 
@@ -742,16 +742,19 @@ def mstraj(
     if isinstance(Tacc, (int, float)):
         Tacc = np.tile(Tacc, (ns,))
     else:
+        Tacc = getvector(Tacc)
         if not len(Tacc) == ns:
             raise ValueError('Tacc is wrong size')
     if qd0 is None:
         qd0 = np.zeros((nj,))
     else:
+        qd0 = getvector(qd0)
         if not len(qd0) == len(q0):
             raise ValueError('qd0 is wrong size')
     if qdf is None:
         qdf = np.zeros((nj,))
     else:
+        qdf = getvector(qdf)
         if not len(qdf) == len(q0):
             raise ValueError('qdf is wrong size')
 
