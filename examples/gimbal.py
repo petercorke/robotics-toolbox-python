@@ -21,29 +21,28 @@ path = pathlib.Path(path) / 'roboticstoolbox' / 'data'
 
 g1 = rtb.Mesh(
     filename=str(path / 'gimbal-ring1.stl'),
-    base=SE3(0, 0, 1.3),
-    color=[34, 143, 201]
+    color=[34, 143, 201],
+    scale=(1./3,) * 3
 )
 # g1.v = [0, 0, 0, 0.4, 0, 0]
 
 g2 = rtb.Mesh(
     filename=str(path / 'gimbal-ring2.stl'),
-    base=SE3(0, 0, 1.3),
-    color=[31, 184, 72]
+    color=[31, 184, 72],
+    scale=(1./3,) * 3
 )
 # g2.v = [0, 0, 0, 0.4, 0.0, 0]
 
 g3 = rtb.Mesh(
     filename=str(path / 'gimbal-ring3.stl'),
-    base=SE3(0, 0, 1.3),
-    color=[240, 103, 103]
+    color=[240, 103, 103],
+    scale=(1./3,) * 3
 )
 # g3.v = [0, 0, 0, 0.4, 0, 0]
 
 plane = rtb.Mesh(
     filename=str(path / 'spitfire_assy-gear_up.stl'),
-    base=SE3(0, 0, 1.3),
-    scale=(1./180,) * 3,
+    scale=(1./(180*3),) * 3,
     color=[240, 103, 103]
 )
 
@@ -57,12 +56,14 @@ print('Gimbal models by Peter Corke using OpenSCAD')
 
 # compute the three rotation matrices
 
+BASE = SE3(0, 0, 0.5)
 R1 = SO3()
 R2 = SO3()
 R3 = SO3()
 
 # rotation angle sequence
 sequence = "zyx"
+
 
 def update_gimbals(theta, ring):
     global R1, R2, R3
@@ -89,7 +90,7 @@ def update_gimbals(theta, ring):
     # pose
 
     def convert(R):
-        return SE3.SO3(R)
+        return BASE * SE3.SO3(R)
 
     g3.base = convert(R1 * SO3.Ry(pi/2))
     g2.base = convert(R1 * R2 * SO3.Rz(pi/2))
