@@ -29,14 +29,15 @@ g1 = rtb.Mesh(
 g2 = rtb.Mesh(
     filename=str(path / 'gimbal-ring2.stl'),
     color=[31, 184, 72],
-    scale=(1./3,) * 3
+    scale=(1.1/3,) * 3
+
 )
 # g2.v = [0, 0, 0, 0.4, 0.0, 0]
 
 g3 = rtb.Mesh(
     filename=str(path / 'gimbal-ring3.stl'),
     color=[240, 103, 103],
-    scale=(1./3,) * 3
+    scale=(1.1**2/3,) * 3
 )
 # g3.v = [0, 0, 0, 0.4, 0, 0]
 
@@ -45,7 +46,7 @@ plane = rtb.Mesh(
     scale=(1./(180*3),) * 3,
     color=[240, 103, 103]
 )
-
+print(path / 'spitfire_assy-gear_up.stl')
 env.add(g1)
 env.add(g2)
 env.add(g3)
