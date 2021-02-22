@@ -396,9 +396,21 @@ as the video will be automatically saved when the python script exits</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.backends.Swift.Swift.add_slider">
-<code class="sig-name descname"><span class="pre">add_slider</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.add_slider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.add_slider" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a range-slider to the page</p>
+<dt id="roboticstoolbox.backends.Swift.Swift.process_events">
+<code class="sig-name descname"><span class="pre">process_events</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.process_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.process_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the event queue from Swift, this invokes the callback functions
+from custom elements added to the page. If using custom elements
+(for example <cite>add_slider</cite>), use this function in your event loop to
+process updates from Swift.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.Slider">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Slider</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Slider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Swift.Swift.SwiftElement</span></code></p>
+<p>Create a range-slider html element</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -413,19 +425,250 @@ represents the new value of the slider</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">env.add_slider()</span></code> adds a slider to the graphical</dt><dd><p>environment.</p>
-</dd>
-</dl>
-</dd></dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.cb">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cb</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.cb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.backends.Swift.Swift.process_events">
-<code class="sig-name descname"><span class="pre">process_events</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.process_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.process_events" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the event queue from Swift, this invokes the callback functions
-from custom elements added to the page. If using custom elements
-(for example <cite>add_slider</cite>), use this function in your event loop to
-process updates from Swift.</p>
+<dt id="roboticstoolbox.backends.Swift.Slider.min">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">min</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.max">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">max</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.step">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">step</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.step" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.value">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">value</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.desc">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">desc</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.unit">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">unit</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Slider.to_dict">
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Slider.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Slider.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.SwiftElement">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">SwiftElement</span></code><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#SwiftElement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.SwiftElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>A basic super class for HTML elements which can be added to Swift</p>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.SwiftElement.to_dict">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#SwiftElement.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.SwiftElement.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.Label">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Label</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Swift.Swift.SwiftElement</span></code></p>
+<p>Create a Label html element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>desc</strong> (<em>str</em>) – the value of the label, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Label.desc">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">desc</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Label.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Label.to_dict">
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Label.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Label.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.Select">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Select</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Swift.Swift.SwiftElement</span></code></p>
+<p>Create a Select element, used to create a drop-down list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>function</em>) – A callback function which is executed when the value select
+box changes. The callback should accept one argument which
+represents the index of the new value</p></li>
+<li><p><strong>desc</strong> (<em>str</em>) – add a description of the select box, optional</p></li>
+<li><p><strong>options</strong> (<em>List of str</em>) – represent the options inside the select box, optional</p></li>
+<li><p><strong>value</strong> (<em>int</em>) – the index of the initial selection of the select
+box, optional</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Select.cb">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cb</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Select.cb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Select.desc">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">desc</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Select.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Select.options">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">options</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Select.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Select.value">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">value</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Select.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Select.to_dict">
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Select.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Select.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.Button">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Button</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Button"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Button" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Swift.Swift.SwiftElement</span></code></p>
+<p>Create a Button html element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>function</em>) – A callback function which is executed when the button is
+clicked. The callback should accept one argument which
+can be disregarded</p></li>
+<li><p><strong>desc</strong> (<em>str</em>) – text written on the button, optional</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Button.cb">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cb</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Button.cb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Button.desc">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">desc</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Button.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Button.to_dict">
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Button.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Button.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.Checkbox">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Checkbox</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Checkbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Checkbox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Swift.Swift.SwiftElement</span></code></p>
+<p>Create a checkbox element, used to create multi-selection list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>function</em>) – A callback function which is executed when a box is checked.
+The callback should accept one argument which represents a List of
+bool representing the checked state of each box</p></li>
+<li><p><strong>desc</strong> (<em>str</em>) – add a description of the checkboxes, optional</p></li>
+<li><p><strong>options</strong> (<em>List of str</em>) – represents the checkboxes, optional</p></li>
+<li><p><strong>checked</strong> (<em>List of bool</em>) – a List represented boxes initially checked</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Checkbox.cb">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cb</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Checkbox.cb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Checkbox.desc">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">desc</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Checkbox.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Checkbox.options">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">options</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Checkbox.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Checkbox.checked">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">checked</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Checkbox.checked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Checkbox.to_dict">
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Checkbox.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Checkbox.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.backends.Swift.Radio">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Radio</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Radio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Radio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Swift.Swift.SwiftElement</span></code></p>
+<p>Create a radio element, used to create single-selection list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>function</em>) – A callback function which is executed when a radio is checked.
+The callback should accept one argument which represents a index
+corresponding to the checked radio button</p></li>
+<li><p><strong>desc</strong> (<em>str</em>) – add a description of the radio buttons, optional</p></li>
+<li><p><strong>options</strong> (<em>List of str</em>) – represents the radio buttons, optional</p></li>
+<li><p><strong>checked</strong> (<em>int</em>) – the initial radio button checked, optional</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Radio.cb">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cb</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Radio.cb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Radio.desc">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">desc</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Radio.desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Radio.options">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">options</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Radio.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Radio.checked">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">checked</span></code><a class="headerlink" href="#roboticstoolbox.backends.Swift.Radio.checked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Radio.to_dict">
+<code class="sig-name descname"><span class="pre">to_dict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Radio.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Radio.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the element in dictionary form</p>
 </dd></dl>
 
 </dd></dl>

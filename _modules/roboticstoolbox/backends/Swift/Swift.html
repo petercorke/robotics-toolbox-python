@@ -169,6 +169,8 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 
 <span class="n">_sw</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">sw</span> <span class="o">=</span> <span class="kc">None</span>
@@ -310,6 +312,13 @@
         <span class="c1"># Send updated sim time to Swift</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">:</span>
 
+            <span class="c1"># Only need to do GUI stuff if self.display is True</span>
+            <span class="c1"># Process GUI events</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_events</span><span class="p">()</span>
+
+            <span class="c1"># Step through user GUI changes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_step_elements</span><span class="p">()</span>
+
             <span class="c1"># If realtime is set, delay progress if we are running too quickly</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">realtime</span><span class="p">:</span>
                 <span class="n">time_taken</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">)</span>
@@ -400,8 +409,6 @@
         <span class="c1"># must be of an appropriate class. This adds a robot object to a</span>
         <span class="c1"># list of robots which will act upon the step() method being called.</span>
 
-        <span class="c1"># TODO can add more than a robot right?</span>
-
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
@@ -433,7 +440,23 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">)</span> <span class="o">+</span> <span class="n">SHAPE_ADD</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">SwiftElement</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">ob</span><span class="o">.</span><span class="n">_added_to_swift</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;This element has already been added to Swift&quot;</span><span class="p">)</span>
+
+            <span class="n">ob</span><span class="o">.</span><span class="n">_added_to_swift</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;customelement&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elementid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elementid</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">ob</span>
+            <span class="n">ob</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">id</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span>
+                <span class="s1">&#39;add_element&#39;</span><span class="p">,</span>
+                <span class="n">ob</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="Swift.remove"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -549,39 +572,6 @@
                 <span class="s2">&quot;You must call swift.start_recording(file_name) before trying&quot;</span>
                 <span class="s2">&quot; to stop the recording&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Swift.add_slider"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.add_slider">[docs]</a>    <span class="k">def</span> <span class="nf">add_slider</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a range-slider to the page</span>
-
-<span class="sd">        :param cb: A callback function which is executed when the value of the</span>
-<span class="sd">            slider changes. The callback should accept one argument which</span>
-<span class="sd">            represents the new value of the slider</span>
-<span class="sd">        :type cb: function</span>
-<span class="sd">        :param min: the minimum value of the slider, optional</span>
-<span class="sd">        :type min: float</span>
-<span class="sd">        :param max: the maximum value of the slider, optional</span>
-<span class="sd">        :type max: float</span>
-<span class="sd">        :param step: the step size of the slider, optional</span>
-<span class="sd">        :type step: float</span>
-<span class="sd">        :param desc: add a description of the slider, optional</span>
-<span class="sd">        :type desc: str</span>
-<span class="sd">        :param unit: add a unit to the slider value, optional</span>
-<span class="sd">        :type unit: str</span>
-
-<span class="sd">        ``env.add_slider()`` adds a slider to the graphical</span>
-<span class="sd">            environment.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;customelement&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elementid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">elementid</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">cb</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span>
-            <span class="s1">&#39;add_element&#39;</span><span class="p">,</span>
-            <span class="p">[</span><span class="s1">&#39;slider&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">unit</span><span class="p">])</span></div>
-
 <div class="viewcode-block" id="Swift.process_events"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.process_events">[docs]</a>    <span class="k">def</span> <span class="nf">process_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process the event queue from Swift, this invokes the callback functions</span>
@@ -593,7 +583,7 @@
         <span class="n">events</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">event</span><span class="p">](</span><span class="n">events</span><span class="p">[</span><span class="n">event</span><span class="p">])</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">event</span><span class="p">]</span><span class="o">.</span><span class="n">cb</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">event</span><span class="p">])</span></div>
 
     <span class="k">def</span> <span class="nf">_step_robots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 
@@ -639,6 +629,19 @@
 
                 <span class="n">shape</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="o">.</span><span class="n">SO3</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_step_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check custom HTML elements to see if any have been updated, if there</span>
+<span class="sd">        are any updates, send them through to Swift.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">_changed</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_send_socket</span><span class="p">(</span>
+                    <span class="s1">&#39;update_element&#39;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
     <span class="k">def</span> <span class="nf">_draw_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)):</span>
@@ -656,6 +659,439 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">outq</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inq</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SwiftElement"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.SwiftElement">[docs]</a><span class="k">class</span> <span class="nc">SwiftElement</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A basic super class for HTML elements which can be added to Swift</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_added_to_swift</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>   <span class="c1"># pragma nocover</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper_update</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_added_to_swift</span><span class="p">:</span>
+                <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_changed</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper_update</span>
+
+<div class="viewcode-block" id="SwiftElement.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.SwiftElement.to_dict">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Outputs the element in dictionary form</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Slider"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Slider">[docs]</a><span class="k">class</span> <span class="nc">Slider</span><span class="p">(</span><span class="n">SwiftElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a range-slider html element</span>
+
+<span class="sd">    :param cb: A callback function which is executed when the value of the</span>
+<span class="sd">        slider changes. The callback should accept one argument which</span>
+<span class="sd">        represents the new value of the slider</span>
+<span class="sd">    :type cb: function</span>
+<span class="sd">    :param min: the minimum value of the slider, optional</span>
+<span class="sd">    :type min: float</span>
+<span class="sd">    :param max: the maximum value of the slider, optional</span>
+<span class="sd">    :type max: float</span>
+<span class="sd">    :param step: the step size of the slider, optional</span>
+<span class="sd">    :type step: float</span>
+<span class="sd">    :param desc: add a description of the slider, optional</span>
+<span class="sd">    :type desc: str</span>
+<span class="sd">    :param unit: add a unit to the slider value, optional</span>
+<span class="sd">    :type unit: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Slider</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_element</span> <span class="o">=</span> <span class="s1">&#39;slider&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span>
+
+    <span class="nd">@cb</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min</span>
+
+    <span class="nd">@min</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max</span>
+
+    <span class="nd">@max</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span>
+
+    <span class="nd">@step</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span>
+
+    <span class="nd">@desc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span>
+
+    <span class="nd">@unit</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Slider.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Slider.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;element&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+            <span class="s1">&#39;max&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span>
+            <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Label"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Label">[docs]</a><span class="k">class</span> <span class="nc">Label</span><span class="p">(</span><span class="n">SwiftElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Label html element</span>
+
+<span class="sd">    :param desc: the value of the label, optional</span>
+<span class="sd">    :type desc: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Label</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_element</span> <span class="o">=</span> <span class="s1">&#39;label&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span>
+
+    <span class="nd">@desc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Label.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Label.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;element&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Button"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Button">[docs]</a><span class="k">class</span> <span class="nc">Button</span><span class="p">(</span><span class="n">SwiftElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Button html element</span>
+
+<span class="sd">    :param cb: A callback function which is executed when the button is</span>
+<span class="sd">        clicked. The callback should accept one argument which</span>
+<span class="sd">        can be disregarded</span>
+<span class="sd">    :type cb: function</span>
+<span class="sd">    :param desc: text written on the button, optional</span>
+<span class="sd">    :type desc: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Button</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_element</span> <span class="o">=</span> <span class="s1">&#39;button&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span>
+
+    <span class="nd">@cb</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span>
+
+    <span class="nd">@desc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Button.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Button.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;element&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Select"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Select">[docs]</a><span class="k">class</span> <span class="nc">Select</span><span class="p">(</span><span class="n">SwiftElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Select element, used to create a drop-down list.</span>
+
+<span class="sd">    :param cb: A callback function which is executed when the value select</span>
+<span class="sd">        box changes. The callback should accept one argument which</span>
+<span class="sd">        represents the index of the new value</span>
+<span class="sd">    :type cb: function</span>
+<span class="sd">    :param desc: add a description of the select box, optional</span>
+<span class="sd">    :type desc: str</span>
+<span class="sd">    :param options: represent the options inside the select box, optional</span>
+<span class="sd">    :type options: List of str</span>
+<span class="sd">    :param value: the index of the initial selection of the select</span>
+<span class="sd">        box, optional</span>
+<span class="sd">    :type value: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[],</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Select</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_element</span> <span class="o">=</span> <span class="s1">&#39;select&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span>
+
+    <span class="nd">@cb</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span>
+
+    <span class="nd">@desc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span>
+
+    <span class="nd">@options</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nvalue</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">nvalue</span>
+
+<div class="viewcode-block" id="Select.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Select.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;element&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span>
+            <span class="s1">&#39;options&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Checkbox"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Checkbox">[docs]</a><span class="k">class</span> <span class="nc">Checkbox</span><span class="p">(</span><span class="n">SwiftElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a checkbox element, used to create multi-selection list.</span>
+
+<span class="sd">    :param cb: A callback function which is executed when a box is checked.</span>
+<span class="sd">        The callback should accept one argument which represents a List of</span>
+<span class="sd">        bool representing the checked state of each box</span>
+<span class="sd">    :type cb: function</span>
+<span class="sd">    :param desc: add a description of the checkboxes, optional</span>
+<span class="sd">    :type desc: str</span>
+<span class="sd">    :param options: represents the checkboxes, optional</span>
+<span class="sd">    :type options: List of str</span>
+<span class="sd">    :param checked: a List represented boxes initially checked</span>
+<span class="sd">    :type checked: List of bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[],</span> <span class="n">checked</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Checkbox</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_element</span> <span class="o">=</span> <span class="s1">&#39;checkbox&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checked</span> <span class="o">=</span> <span class="n">checked</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span>
+
+    <span class="nd">@cb</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span>
+
+    <span class="nd">@desc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span>
+
+    <span class="nd">@options</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">checked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span>
+
+    <span class="nd">@checked</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">checked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Checkbox.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Checkbox.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;element&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span>
+            <span class="s1">&#39;options&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="s1">&#39;checked&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">checked</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Radio"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Radio">[docs]</a><span class="k">class</span> <span class="nc">Radio</span><span class="p">(</span><span class="n">SwiftElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a radio element, used to create single-selection list.</span>
+
+<span class="sd">    :param cb: A callback function which is executed when a radio is checked.</span>
+<span class="sd">        The callback should accept one argument which represents a index</span>
+<span class="sd">        corresponding to the checked radio button</span>
+<span class="sd">    :type cb: function</span>
+<span class="sd">    :param desc: add a description of the radio buttons, optional</span>
+<span class="sd">    :type desc: str</span>
+<span class="sd">    :param options: represents the radio buttons, optional</span>
+<span class="sd">    :type options: List of str</span>
+<span class="sd">    :param checked: the initial radio button checked, optional</span>
+<span class="sd">    :type checked: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[],</span> <span class="n">checked</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Radio</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_element</span> <span class="o">=</span> <span class="s1">&#39;radio&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">cb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checked</span> <span class="o">=</span> <span class="n">checked</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span>
+
+    <span class="nd">@cb</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cb</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span>
+
+    <span class="nd">@desc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_desc</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span>
+
+    <span class="nd">@options</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">checked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span>
+
+    <span class="nd">@checked</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@SwiftElement</span><span class="o">.</span><span class="n">_update</span>
+    <span class="k">def</span> <span class="nf">checked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checked</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Radio.to_dict"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Radio.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;element&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s1">&#39;desc&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span>
+            <span class="s1">&#39;options&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">,</span>
+            <span class="s1">&#39;checked&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">checked</span>
+        <span class="p">}</span></div></div>
 </pre></div>
 
            </div>
