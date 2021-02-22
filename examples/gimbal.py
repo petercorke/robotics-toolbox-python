@@ -108,28 +108,107 @@ def set_three(x):
     update_gimbals(float(x), 3)
 
 
-env.add_slider(
+r_one = rtb.backends.Slider(
     set_one,
     min=-180, max=180,
     step=1, value=0,
     desc='Ring One', unit='&#176;')
 
-env.add_slider(
+
+r_two = rtb.backends.Slider(
     set_two,
     min=-180, max=180,
     step=1, value=0,
     desc='Ring Two', unit='&#176;')
 
-env.add_slider(
+
+r_three = rtb.backends.Slider(
     set_three,
     min=-180, max=180,
     step=1, value=0,
     desc='Ring Three', unit='&#176;')
+
+
+def reset(e):
+    r_one.value = 0
+    r_two.value = 0
+    r_three.value = 0
+
+button = rtb.backends.Button(
+    reset,
+    desc='Set to Zero'
+)
+
+
+def angle(index):
+    print('Selection Box Index selected: ' + str(index))
+
+rot_seq = rtb.backends.Select(
+    angle,
+    desc='Rotation Sequence',
+    options=[
+        'zyx',
+        'zyz',
+        'I dont know'
+    ],
+    value=0
+)
+
+
+def check_fn(indices):
+    if indices[1]:
+        print("YOU ARE WRONG")
+    elif indices[0] and indices[2]:
+        print("You are correct :)")
+    else:
+        print('Half marks')
+
+check = rtb.backends.Checkbox(
+    check_fn,
+    desc='Describe Jesse',
+    options=[
+        'Amazing',
+        'Bad',
+        'The Greatest'
+    ],
+    checked=[True, False, True]
+)
+
+
+def radio_fn(idx):
+    if idx == 0:
+        print("YOU ARE WRONG")
+    else:
+        print("You are correct :)")
+
+radio = rtb.backends.Radio(
+    radio_fn,
+    desc='Jesse is:',
+    options=[
+        'Bad',
+        'Good',
+    ],
+    checked=1
+)
+
+label = rtb.backends.Label(
+    desc='Teach Panel'
+)
+
+env.add(label)
+env.add(r_one)
+env.add(r_two)
+env.add(r_three)
+env.add(button)
+env.add(rot_seq)
+env.add(check)
+env.add(radio)
 
 update_gimbals(0, 1)
 update_gimbals(0, 2)
 update_gimbals(0, 3)
 
 while(True):
-    env.process_events()
+    # env.process_events()
     env.step(0)
+
