@@ -5,9 +5,10 @@
 
 import numpy as np
 from collections import namedtuple
-from roboticstoolbox.tools.null import null
+# from roboticstoolbox.tools.null import null
+import roboticstoolbox as rtb
 from spatialmath import base
-from spatialmath import SE3, Twist3
+from spatialmath import SE3
 import scipy.optimize as opt
 import math
 import qpsolvers as qp
@@ -288,7 +289,14 @@ class IKMixin:
         nm = 0
 
         # bool vector indicating revolute joints
-        revolutes = np.array([link.isrevolute for link in self])
+        # revolutes = np.array([link.isrevolute for link in self])
+
+        revolutes = []
+
+        for link in self:
+            if isinstance(self, rtb.DHRobot) or link.isjoint:
+                revolutes.append(link.isrevolute)
+        revolutes = np.array(revolutes)
 
         q = q0
         for Tk in T:
@@ -500,7 +508,7 @@ class IKMixin:
         revolutes = []
 
         for link in self:
-            if link.isjoint:
+            if isinstance(self, rtb.DHRobot) or link.isjoint:
                 revolutes.append(link.isrevolute)
         revolutes = np.array(revolutes)
 
