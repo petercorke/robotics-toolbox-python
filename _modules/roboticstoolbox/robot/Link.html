@@ -34,8 +34,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -193,7 +191,7 @@
     <span class="k">return</span> <span class="n">wrapper_listen_dyn</span>
 
 
-<div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Link superclass</span>
 
@@ -288,7 +286,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actuator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reference to more advanced actuator model</span>
 
-<div class="viewcode-block" id="Link.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copy of link object</span>
 
@@ -307,7 +305,7 @@
     <span class="k">def</span> <span class="nf">_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;Use copy method of Link class&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Link.dyn"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.dyn">[docs]</a>    <span class="k">def</span> <span class="nf">dyn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.dyn"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.dyn">[docs]</a>    <span class="k">def</span> <span class="nf">dyn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inertial properties of link as a string</span>
 
@@ -433,7 +431,7 @@
 
         <span class="k">return</span> <span class="n">l</span>
 
-<div class="viewcode-block" id="Link.islimit"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.islimit">[docs]</a>    <span class="k">def</span> <span class="nf">islimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.islimit"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.islimit">[docs]</a>    <span class="k">def</span> <span class="nf">islimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if joint exceeds limit</span>
 
@@ -454,7 +452,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Link.nofriction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.nofriction">[docs]</a>    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.nofriction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.nofriction">[docs]</a>    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clone link without friction</span>
 
@@ -483,7 +481,7 @@
 
         <span class="k">return</span> <span class="n">link</span></div>
 
-<div class="viewcode-block" id="Link.friction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.friction">[docs]</a>    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.friction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.friction">[docs]</a>    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute joint friction</span>
 
@@ -864,7 +862,7 @@
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="Link.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
 <span class="sd">        distance between this link and shape, provided it is less than</span>
@@ -901,7 +899,7 @@
 
         <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
 
-<div class="viewcode-block" id="Link.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+<div class="viewcode-block" id="Link.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        collided(shape) checks if this link and shape have collided</span>
 
@@ -944,7 +942,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 14-Feb-2021.
+        Last updated on 22-Feb-2021.
       </span>
 
     </p>

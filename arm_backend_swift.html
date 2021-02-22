@@ -34,8 +34,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -189,7 +187,7 @@
 <span id="swift"></span><h1>Swift<a class="headerlink" href="#module-roboticstoolbox.backends.Swift" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="roboticstoolbox.backends.Swift.Swift">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.backends.Swift.</code><code class="sig-name descname">Swift</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">realtime</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.Swift.</span></code><code class="sig-name descname"><span class="pre">Swift</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">realtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Connector.Connector</span></code></p>
 <p>Graphical backend using Swift</p>
 <p>Swift is a web app built on three.js. It supports many 3D graphical
@@ -207,14 +205,14 @@ display anything.</p></li>
 </dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 
 <span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>  <span class="c1"># create a robot</span>
 
@@ -233,7 +231,7 @@ display anything.</p></li>
 </dl>
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.launch">
-<code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">browser</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.launch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">launch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">browser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.launch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Launch a graphical backend in Swift by default in the default browser
 or in the specified browser</p>
 <dl class="field-list simple">
@@ -250,7 +248,7 @@ defined by args, and returns a reference to the backend.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em>, <em class="sig-param"><span class="n">render</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">step</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -279,7 +277,7 @@ robot objects support all control types.</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.reset">
-<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.reset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset the graphical scene</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.reset()</span></code> triggers a reset of the 3D scene in the Swift window
 referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is restored to the original state defined by
@@ -288,7 +286,7 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.restart">
-<code class="sig-name descname">restart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.restart" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">restart</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.restart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restart the graphics display</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.restart()</span></code> triggers a restart of the Swift view referenced by
 <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is closed and relaunched to the original state defined by
@@ -297,7 +295,7 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.close" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close the graphics display</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.close()</span></code> gracefully disconnectes from the Swift visualizer
 referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>.</p>
@@ -305,7 +303,7 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ob</span></em>, <em class="sig-param"><span class="n">show_robot</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_collision</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">readonly</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_robot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_collision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a robot to the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -342,7 +340,7 @@ when the <code class="docutils literal notranslate"><span class="pre">step()</sp
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.remove">
-<code class="sig-name descname">remove</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.remove" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">remove</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a robot/shape from the graphical scene</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">env.remove(robot)</span></code> removes the <code class="docutils literal notranslate"><span class="pre">robot</span></code> from the graphical</dt><dd><p>environment.</p>
@@ -358,14 +356,14 @@ or the instance of the object</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.hold">
-<code class="sig-name descname">hold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.hold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.hold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">hold</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.hold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.hold" title="Permalink to this definition">¶</a></dt>
 <dd><p>hold() keeps the browser tab open i.e. stops the browser tab from
 closing once the main script has finished.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.start_recording">
-<code class="sig-name descname">start_recording</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">framerate</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">'webm'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.start_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.start_recording" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">start_recording</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'webm'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.start_recording"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.start_recording" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start recording the canvas in the Swift simulator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -388,13 +386,46 @@ step function</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.Swift.Swift.stop_recording">
-<code class="sig-name descname">stop_recording</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.stop_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.stop_recording" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">stop_recording</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.stop_recording"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.stop_recording" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start recording the canvas in the Swift simulator. This is optional
 as the video will be automatically saved when the python script exits</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">env.stop_recording()</span></code> stops the recording of the simulation, can</dt><dd><p>only be called after <code class="docutils literal notranslate"><span class="pre">env.start_recording(file_name)</span></code></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Swift.add_slider">
+<code class="sig-name descname"><span class="pre">add_slider</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.add_slider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.add_slider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a range-slider to the page</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cb</strong> (<em>function</em>) – A callback function which is executed when the value of the
+slider changes. The callback should accept one argument which
+represents the new value of the slider</p></li>
+<li><p><strong>min</strong> (<em>float</em>) – the minimum value of the slider, optional</p></li>
+<li><p><strong>max</strong> (<em>float</em>) – the maximum value of the slider, optional</p></li>
+<li><p><strong>step</strong> (<em>float</em>) – the step size of the slider, optional</p></li>
+<li><p><strong>desc</strong> (<em>str</em>) – add a description of the slider, optional</p></li>
+<li><p><strong>unit</strong> (<em>str</em>) – add a unit to the slider value, optional</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">env.add_slider()</span></code> adds a slider to the graphical</dt><dd><p>environment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.backends.Swift.Swift.process_events">
+<code class="sig-name descname"><span class="pre">process_events</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/Swift/Swift.html#Swift.process_events"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.Swift.Swift.process_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the event queue from Swift, this invokes the callback functions
+from custom elements added to the page. If using custom elements
+(for example <cite>add_slider</cite>), use this function in your event loop to
+process updates from Swift.</p>
 </dd></dl>
 
 </dd></dl>
@@ -417,7 +448,7 @@ as the video will be automatically saved when the python script exits</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 14-Feb-2021.
+        Last updated on 22-Feb-2021.
       </span>
 
     </p>

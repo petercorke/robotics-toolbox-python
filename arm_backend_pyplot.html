@@ -34,8 +34,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -189,20 +187,20 @@
 <span id="pyplot-matplotlib"></span><h1>PyPlot (matplotlib)<a class="headerlink" href="#module-roboticstoolbox.backends.PyPlot" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.backends.PyPlot.</code><code class="sig-name descname">PyPlot</code><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.PyPlot.</span></code><code class="sig-name descname"><span class="pre">PyPlot</span></code><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Connector.Connector</span></code></p>
 <p>Graphical backend using matplotlib</p>
 <p>matplotlib is a common and highly portable graphics library for Python,
 but has relatively limited 3D capability.</p>
 <p>Example:</p>
-<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<div class="highlight-python notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 
 <span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>  <span class="c1"># create a robot</span>
 
@@ -219,7 +217,7 @@ performs lines 7-8 above.</p>
 </div>
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.launch">
-<code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.launch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">launch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.launch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Launch a graphical interface</p>
 <p><code class="docutils literal notranslate"><span class="pre">`env</span> <span class="pre">=</span> <span class="pre">launch()`</span></code> creates a blank 3D matplotlib figure and returns
 a reference to the backend.</p>
@@ -227,7 +225,7 @@ a reference to the backend.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.05</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">step</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -252,7 +250,7 @@ robot objects support all control types.</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.reset">
-<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.reset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset the graphical scene</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.reset()</span></code> triggers a reset of the 3D scene in the matplotlib
 window referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is restored to the original state
@@ -261,7 +259,7 @@ defined by <code class="docutils literal notranslate"><span class="pre">launch()
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.restart">
-<code class="sig-name descname">restart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.restart" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">restart</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.restart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restart the graphics display</p>
 <p><code class="docutils literal notranslate"><span class="pre">env.restart()</span></code> triggers a restart of the matplotlib view referenced
 by <code class="docutils literal notranslate"><span class="pre">env</span></code>. It is closed and relaunched to the original state defined
@@ -270,14 +268,14 @@ by <code class="docutils literal notranslate"><span class="pre">launch()</span><
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.close" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.close" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">env.close()</span></code> gracefully closes the matplotlib window
 referenced by <code class="docutils literal notranslate"><span class="pre">env</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ob</span></em>, <em class="sig-param"><span class="n">readonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">jointaxes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">shadow</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a robot to the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -312,7 +310,7 @@ when the <code class="docutils literal notranslate"><span class="pre">step()</sp
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.remove">
-<code class="sig-name descname">remove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.remove" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a robot to the graphical scene</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -340,7 +338,7 @@ of canvases</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot.hold">
-<code class="sig-name descname">hold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.hold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.hold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">hold</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.hold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.hold" title="Permalink to this definition">¶</a></dt>
 <dd><p>hold() keeps the plot open i.e. stops the plot from closing once
 the main script has finished.</p>
 </dd></dl>
@@ -349,17 +347,17 @@ the main script has finished.</p>
 
 <dl class="py class">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.backends.PyPlot.</code><code class="sig-name descname">PyPlot2</code><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.backends.PyPlot.</span></code><code class="sig-name descname"><span class="pre">PyPlot2</span></code><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.backends.Connector.Connector</span></code></p>
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.launch">
-<code class="sig-name descname">launch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.launch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.launch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">launch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.launch" title="Permalink to this definition">¶</a></dt>
 <dd><p>env = launch() launchs a blank 2D matplotlib figure</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.step">
-<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">50</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.step" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">step</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>state = step(args) triggers the external program to make a time step
 of defined time updating the state of the environment as defined by
 the robot’s actions.</p>
@@ -373,27 +371,27 @@ types.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.reset">
-<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.reset" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>state = reset() triggers the external program to reset to the
 original state defined by launch</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.restart">
-<code class="sig-name descname">restart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.restart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.restart" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">restart</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.restart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.restart" title="Permalink to this definition">¶</a></dt>
 <dd><p>state = restart() triggers the external program to close and relaunch
 to thestate defined by launch</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.close" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>close() closes the plot</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ob</span></em>, <em class="sig-param"><span class="n">readonly</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">eeframe</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>id = add(robot) adds the robot to the external environment. robot must
 be of an appropriate class. This adds a robot object to a list of
 robots which will act upon the step() method being called.</p>
@@ -401,13 +399,13 @@ robots which will act upon the step() method being called.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.remove">
-<code class="sig-name descname">remove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.remove" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">remove</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.remove" title="Permalink to this definition">¶</a></dt>
 <dd><p>id = remove(robot) removes the robot to the external environment.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.backends.PyPlot.PyPlot2.hold">
-<code class="sig-name descname">hold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.hold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.hold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">hold</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot2.html#PyPlot2.hold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot2.hold" title="Permalink to this definition">¶</a></dt>
 <dd><p>hold() keeps the backend open i.e. stops the program from closing once
 the main script has finished. This method may need keep an even loop
 running for the backend to keep it responsive.</p>
@@ -433,7 +431,7 @@ running for the backend to keep it responsive.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 14-Feb-2021.
+        Last updated on 22-Feb-2021.
       </span>
 
     </p>

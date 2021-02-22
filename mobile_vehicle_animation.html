@@ -34,8 +34,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -191,11 +189,11 @@ position or pose.  They are all subclasses of <code class="docutils literal notr
 <h2>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.mobile.VehicleMarker">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.mobile.</code><code class="sig-name descname">VehicleMarker</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleMarker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></code><code class="sig-name descname"><span class="pre">VehicleMarker</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleMarker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.animations.VehicleAnimation</span></code></p>
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehicleMarker.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleMarker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleMarker.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create graphical animation of vehicle as a marker</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -228,7 +226,7 @@ the moving robot as a simple matplotlib marker during simulation:</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehicleMarker.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add vehicle animation to the current plot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -241,7 +239,7 @@ from the plot when the <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehicleMarker.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">update</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the vehicle animation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -258,11 +256,11 @@ from the plot when the <code class="docutils literal notranslate"><span class="p
 <h2>Polygon shape<a class="headerlink" href="#polygon-shape" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.mobile.VehiclePolygon">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.mobile.</code><code class="sig-name descname">VehiclePolygon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">'car'</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehiclePolygon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></code><code class="sig-name descname"><span class="pre">VehiclePolygon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'car'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehiclePolygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.animations.VehicleAnimation</span></code></p>
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehiclePolygon.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shape</span><span class="o">=</span><span class="default_value">'car'</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehiclePolygon.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'car'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehiclePolygon.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create graphical animation of vehicle as a polygon</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -311,7 +309,7 @@ depict the moving robot as a polygon during simulation:</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehiclePolygon.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add vehicle animation to the current plot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -324,7 +322,7 @@ from the plot when the <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehiclePolygon.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">update</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the vehicle animation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -341,11 +339,11 @@ from the plot when the <code class="docutils literal notranslate"><span class="p
 <h2>Image icon<a class="headerlink" href="#image-icon" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.mobile.VehicleIcon">
-<em class="property">class </em><code class="sig-prename descclassname">roboticstoolbox.mobile.</code><code class="sig-name descname">VehicleIcon</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleIcon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></code><code class="sig-name descname"><span class="pre">VehicleIcon</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleIcon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.animations.VehicleAnimation</span></code></p>
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehicleIcon.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleIcon.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/animations.html#VehicleIcon.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create graphical animation of vehicle as an icon</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -407,7 +405,7 @@ set <code class="docutils literal notranslate"><span class="pre">rotation</span>
 
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehicleIcon.add">
-<code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.add" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add vehicle animation to the current plot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -420,7 +418,7 @@ from the plot when the <code class="docutils literal notranslate"><span class="p
 
 <dl class="py method">
 <dt id="roboticstoolbox.mobile.VehicleIcon.update">
-<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">update</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the vehicle animation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -451,7 +449,7 @@ from the plot when the <code class="docutils literal notranslate"><span class="p
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 14-Feb-2021.
+        Last updated on 22-Feb-2021.
       </span>
 
     </p>
