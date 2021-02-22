@@ -20,33 +20,33 @@ class TestShape(unittest.TestCase):
     def test_color(self):
         shape = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
 
-        shape.color = [1, 2, 3]
+        shape.color = [0.1, 0.2, 0.3]
 
-        self.assertEqual(shape.color[0], 1)
-        self.assertEqual(shape.color[1], 2)
-        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[0], 0.1)
+        self.assertEqual(shape.color[1], 0.2)
+        self.assertEqual(shape.color[2], 0.3)
         self.assertEqual(shape.color[3], 1)
 
-        shape.color = [1, 2, 3, 0.5]
+        shape.color = [0.1, 0.2, 0.3, 0.5]
 
-        self.assertEqual(shape.color[0], 1)
-        self.assertEqual(shape.color[1], 2)
-        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[0], 0.1)
+        self.assertEqual(shape.color[1], 0.2)
+        self.assertEqual(shape.color[2], 0.3)
         self.assertEqual(shape.color[3], 0.5)
 
-        shape.color = (1, 2, 3)
+        shape.color = (0.1, 0.2, 0.3)
 
-        self.assertEqual(shape.color[0], 1)
-        self.assertEqual(shape.color[1], 2)
-        self.assertEqual(shape.color[2], 3)
+        self.assertEqual(shape.color[0], 0.1)
+        self.assertEqual(shape.color[1], 0.2)
+        self.assertEqual(shape.color[2], 0.3)
         self.assertEqual(shape.color[3], 1)
 
-        shape.color = (1, 2, 3, 0.5)
+        shape.color = (100, 200, 250, 100)
 
-        self.assertEqual(shape.color[0], 1)
-        self.assertEqual(shape.color[1], 2)
-        self.assertEqual(shape.color[2], 3)
-        self.assertEqual(shape.color[3], 0.5)
+        self.assertAlmostEqual(shape.color[0], 100/255)
+        self.assertAlmostEqual(shape.color[1], 200/255)
+        self.assertAlmostEqual(shape.color[2], 250/255)
+        self.assertEqual(shape.color[3], 100/255)
 
     def test_closest(self):
         s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
