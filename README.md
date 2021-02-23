@@ -235,7 +235,7 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 <p>
   <a href="https://youtu.be/jSLPJBr8QTY">
-    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/neo_youtube.png" width="560">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/neo_youtube.png" width="560">
   </a>
 </p>
 
@@ -245,7 +245,7 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 <p>
   <a href="https://youtu.be/Vu_rcPlaADI">
-    <img src="https://github.com/petercorke/robotics-toolbox-python/blob/master/docs/figs/mmc_youtube.png" width="560">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/mmc_youtube.png" width="560">
   </a>
 </p>
 
