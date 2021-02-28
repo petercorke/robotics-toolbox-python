@@ -51,7 +51,6 @@ class Robot(DynamicsMixin, IKMixin):
             base=None,
             tool=None,
             gravity=None,
-            meshdir=None,
             keywords=(),
             symbolic=False):
 
@@ -61,7 +60,6 @@ class Robot(DynamicsMixin, IKMixin):
         self.symbolic = symbolic
         self.base = base
         self.tool = tool
-        self.basemesh = None
         self._reach = None
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
@@ -93,14 +91,6 @@ class Robot(DynamicsMixin, IKMixin):
         self._configdict = {}
 
         self._dynchanged = True
-
-        # this probably should go down to DHRobot
-        if meshdir is not None:
-            classpath = sys.modules[self.__module__].__file__
-            self.meshdir = PurePath(classpath).parent / PurePosixPath(meshdir)
-            self.basemesh = self.meshdir / "link0.stl"
-            for j, link in enumerate(self._links, start=1):
-                link.mesh = self.meshdir / "link{:d}.stl".format(j)
 
         # URDF Parser Attempt
         # # Search mesh dir for meshes

@@ -4,6 +4,7 @@
 """
 
 from collections import namedtuple
+from roboticstoolbox.tools.data import path_to_datafile
 
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
@@ -62,6 +63,7 @@ class DHRobot(Robot):
     def __init__(
             self,
             L,
+            meshdir=None,
             **kwargs):
 
         # Verify L
@@ -96,6 +98,16 @@ class DHRobot(Robot):
         self._mdh = self.links[0].mdh
         if not all([link.mdh == self.mdh for link in self.links]):
             raise ValueError('Robot has mixed D&H link conventions')
+
+        # load meshes if required
+        if meshdir is not None:
+            self.meshdir = path_to_datafile(meshdir)
+            self.basemesh = self.meshdir / "link0.stl"
+            for j, link in enumerate(self._links, start=1):
+                link.mesh = self.meshdir / "link{:d}.stl".format(j)
+        else:
+            self.basemesh = None
+
 
         # rne parameters
         self._rne_ob = None

@@ -1,5 +1,8 @@
 from pathlib import Path
 import sys
+import importlib
+
+
 
 def loadmat(filename):
     """
@@ -50,7 +53,7 @@ def loaddata(filename, handler, **kwargs):
     path = path_to_datafile(filename)
     return handler(path, **kwargs)
 
-def path_to_datafile(filename):
+def path_to_datafile(filename, local=False):
     """
     Get absolute path to datafile
 
@@ -58,7 +61,7 @@ def path_to_datafile(filename):
     :type filename: str
     :raises FileNotFoundError: File does not exist
     :return: Absolute path
-    :rtype: str
+    :rtype: Path
 
     If ``filename`` contains no path specification eg. ``map1.mat`` it will
     first attempt to locate the file within the ``roboticstoolbox/data``
@@ -76,26 +79,29 @@ def path_to_datafile(filename):
 
     filename = Path(filename)
 
-    if filename.parent == Path():
-        # just a filename, no path, assume it is in roboticstoolbox/data
+    if local:
+        # check if file is in user's local filesystem
 
-        p = Path(__file__).resolve().parent.parent / 'data' / filename
+        p = filename.expanduser()
+        p = p.resolve()
         if p.exists():
-            return str(p.resolve())
+            return str(p)
 
-    p = filename.expanduser()
-    p = p.resolve()
-    if not p.exists():
-        raise FileNotFoundError(f"File '{p}' does not exist")
-    return str(p)
+    # assume it is in rtbdata
+
+    rtbdata = importlib.import_module("rtbdata")
+    root = Path(rtbdata.__path__[0])
+    
+    path = root / filename
+    if path.exists():
+        return path.resolve()
+    else:
+        raise ValueError(f"file {filename} not found locally or in rtbdata")
 
 if __name__ == "__main__":
 
     a = loadmat("map1.mat")
     print(a)
-    a = loadmat("roboticstoolbox/data/map1.mat")
+    a = loadmat("data/map1.mat")
     print(a)
-    a = loadmat("roboticstoolbox/data/../data/map1.mat")
-    print(a)
-    a = loadmat("~/code/robotics-toolbox-python/roboticstoolbox/data/map1.mat")
-    print(a)
+

@@ -22,6 +22,8 @@ from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.tools.data import path_to_datafile
+
 from pathlib import PurePath, PurePosixPath
 from ansitable import ANSITable, Column
 from spatialmath import SpatialAcceleration, SpatialVelocity, \
@@ -391,10 +393,10 @@ class ERobot(Robot):
         """
 
         # get the path to the class that defines the robot
-        classpath = sys.modules[self.__module__].__file__
+        base_path = path_to_datafile('xacro')
         # print("*** urdf_to_ets_args: ", classpath)
         # add on relative path to get to the URDF or xacro file
-        base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
+        # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
         file_path = base_path / PurePosixPath(file_path)
         name, ext = splitext(file_path)
 
