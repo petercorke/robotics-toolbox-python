@@ -1480,6 +1480,12 @@ class Robot(DynamicsMixin, IKMixin):
             if link.collided(shape):
                 return True
 
+        if isinstance(self, rtb.ERobot):
+            for gripper in self.grippers:
+                for link in gripper.links:
+                    if link.collided(shape):
+                        return True
+
         return False
 
     def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):

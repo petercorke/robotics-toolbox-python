@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from spatialmath import SE3
+from spatialmath import SE3, base
+import math
 
 
 def p_servo(wTe, wTep, gain=2, threshold=0.1):
@@ -57,3 +58,23 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
         arrived = False
 
     return v, arrived
+
+
+# def _angle_axis(T, Td):
+#     d = base.transl(Td) - base.transl(T)
+#     R = base.t2r(Td) @ base.t2r(T).T
+#     li = np.r_[R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]
+
+#     if base.iszerovec(li):
+#         # diagonal matrix case
+#         if np.trace(R) > 0:
+#             # (1,1,1) case
+#             a = np.zeros((3,))
+#         else:
+#             a = np.pi / 2 * (np.diag(R) + 1)
+#     else:
+#         # non-diagonal matrix case
+#         ln = base.norm(li)
+#         a = math.atan2(ln, np.trace(R) - 1) * li / ln
+
+#     return np.r_[d, a]
