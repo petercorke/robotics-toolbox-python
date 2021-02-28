@@ -181,6 +181,8 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.tools</span> <span class="kn">import</span> <span class="n">URDF</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Robot</span> <span class="kn">import</span> <span class="n">Robot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Gripper</span> <span class="kn">import</span> <span class="n">Gripper</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.data</span> <span class="kn">import</span> <span class="n">path_to_datafile</span>
+
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span><span class="p">,</span> <span class="n">PurePosixPath</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SpatialAcceleration</span><span class="p">,</span> <span class="n">SpatialVelocity</span><span class="p">,</span> \
@@ -550,10 +552,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># get the path to the class that defines the robot</span>
-        <span class="n">classpath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span>
+        <span class="n">base_path</span> <span class="o">=</span> <span class="n">path_to_datafile</span><span class="p">(</span><span class="s1">&#39;xacro&#39;</span><span class="p">)</span>
         <span class="c1"># print(&quot;*** urdf_to_ets_args: &quot;, classpath)</span>
         <span class="c1"># add on relative path to get to the URDF or xacro file</span>
-        <span class="n">base_path</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="n">classpath</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;URDF&#39;</span> <span class="o">/</span> <span class="s1">&#39;xacro&#39;</span>
+        <span class="c1"># base_path = PurePath(classpath).parent.parent / &#39;URDF&#39; / &#39;xacro&#39;</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">/</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 

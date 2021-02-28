@@ -163,6 +163,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.data</span> <span class="kn">import</span> <span class="n">path_to_datafile</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Robot</span> <span class="kn">import</span> <span class="n">Robot</span>  <span class="c1"># DHLink</span>
@@ -221,6 +222,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">L</span><span class="p">,</span>
+            <span class="n">meshdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># Verify L</span>
@@ -255,6 +257,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mdh</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">mdh</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">]):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Robot has mixed D&amp;H link conventions&#39;</span><span class="p">)</span>
+
+        <span class="c1"># load meshes if required</span>
+        <span class="k">if</span> <span class="n">meshdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">=</span> <span class="n">path_to_datafile</span><span class="p">(</span><span class="n">meshdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">/</span> <span class="s2">&quot;link0.stl&quot;</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">link</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">/</span> <span class="s2">&quot;link</span><span class="si">{:d}</span><span class="s2">.stl&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="kc">None</span>
+
 
         <span class="c1"># rne parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="kc">None</span>
