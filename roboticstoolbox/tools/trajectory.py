@@ -609,7 +609,7 @@ def ctraj(T0, T1, s):
     else:
         raise TypeError('bad argument for time, must be int or vector')
 
-    return T1.interp(s, start=T0)
+    return T0.interp(T1, s)
 
 
 def cmstraj():

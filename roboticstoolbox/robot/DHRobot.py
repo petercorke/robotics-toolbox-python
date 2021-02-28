@@ -12,7 +12,7 @@ from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
 # from spatialmath import base
-from spatialmath.base.transforms3d import tr2jac, trinv
+from spatialmath.base.transforms3d import tr2jac
 from spatialmath.base.transformsNd import t2r
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
@@ -1038,7 +1038,7 @@ class DHRobot(Robot):
         if T is None:
             T = self.fkine(q)
 
-        return tr2jac(trinv(T.A)) @ self.jacobe(q)
+        return tr2jac(T.A) @ self.jacobe(q)
 
     def jacob_dot(self, q=None, qd=None):
         r"""
