@@ -416,7 +416,7 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
     if qd1 is None:
         qd1 = np.zeros(q0.shape)
     else:
-        qd0 = getvector(qd0)
+        qd1 = getvector(qd1)
         if not len(qd1) == len(q0):
             raise ValueError('qd1 has wrong size')
 
