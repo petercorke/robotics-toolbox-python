@@ -11,7 +11,8 @@ req = [
     'matplotlib',
     'ansitable',
     'swift-sim>=0.6.1',
-    'qpsolvers'
+    'qpsolvers',
+    'rtb-data'
 ]
 
 collision_req = [
@@ -46,9 +47,9 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 # list all data folders here, to ensure they get packaged
 
 data_folders = [
-    'roboticstoolbox/models/URDF/xacro',
-    'roboticstoolbox/models/DH/meshes',
-    'roboticstoolbox/data',
+    # 'roboticstoolbox/models/URDF/xacro',
+    # 'roboticstoolbox/models/DH/meshes',
+    # 'roboticstoolbox/data',
     'roboticstoolbox/core'
 ]
 
