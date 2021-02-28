@@ -575,7 +575,7 @@
     <span class="k">if</span> <span class="n">qd1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qd1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">qd0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd0</span><span class="p">)</span>
+        <span class="n">qd1</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd1</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qd1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qd1 has wrong size&#39;</span><span class="p">)</span>
 
@@ -768,7 +768,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bad argument for time, must be int or vector&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">T1</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">T0</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">T0</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="cmstraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.cmstraj">[docs]</a><span class="k">def</span> <span class="nf">cmstraj</span><span class="p">():</span>
