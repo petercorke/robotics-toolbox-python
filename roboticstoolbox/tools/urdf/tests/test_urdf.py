@@ -10,16 +10,18 @@ from roboticstoolbox.tools import URDF, xacro
 import numpy as np
 import numpy.testing as nt
 
+from roboticstoolbox.tools.data import path_to_datafile
+
 
 class TestURDF(unittest.TestCase):
 
     def test_urdf_visuals(self):
 
         urdf_string = xacro.main(
-            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")  # noqa
+            path_to_datafile("xacro/franka_description/robots/panda_arm_hand.urdf.xacro"))  # noqa
         urdf = URDF.loadstr(
             urdf_string,
-            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")  # noqa
+            path_to_datafile("xacro/franka_description/robots/panda_arm_hand.urdf.xacro"))  # noqa
 
         urdf.links[0].visuals[0].name = "Lonk"
         self.assertTrue(urdf.links[0].visuals[0].name == "Lonk")
@@ -76,10 +78,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_collisions(self):
 
         urdf_string = xacro.main(
-            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")  # noqa
+            path_to_datafile("xacro/franka_description/robots/panda_arm_hand.urdf.xacro"))  # noqa
         urdf = URDF.loadstr(
             urdf_string,
-            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")  # noqa
+            path_to_datafile("xacro/franka_description/robots/panda_arm_hand.urdf.xacro"))  # noqa
 
         urdf.links[0].collisions[0].name = "Lonk"
         self.assertTrue(urdf.links[0].collisions[0].name == "Lonk")
@@ -97,10 +99,10 @@ class TestURDF(unittest.TestCase):
     def test_urdf_dynamics(self):
 
         urdf_string = xacro.main(
-            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")  # noqa
+            path_to_datafile("xacro/franka_description/robots/panda_arm_hand.urdf.xacro"))  # noqa
         urdf = URDF.loadstr(
             urdf_string,
-            "roboticstoolbox/models/URDF/xacro/franka_description/robots/panda_arm_hand.urdf.xacro")  # noqa
+            path_to_datafile("xacro/franka_description/robots/panda_arm_hand.urdf.xacro"))  # noqa
 
         self.assertEqual(urdf.joints[0].limit.effort, 87.0)
         self.assertEqual(urdf.joints[0].limit.velocity, 2.175)
