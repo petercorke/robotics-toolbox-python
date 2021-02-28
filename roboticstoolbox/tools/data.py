@@ -53,31 +53,34 @@ def loaddata(filename, handler, **kwargs):
     path = path_to_datafile(filename)
     return handler(path, **kwargs)
 
-def path_to_datafile(filename, local=False):
+def path_to_datafile(*filename, local=True):
     """
     Get absolute path to datafile
 
     :param filename: pathname of datafile
     :type filename: str
+    :param local: search for file locally first, default True
+    :type local: bool
     :raises FileNotFoundError: File does not exist
     :return: Absolute path
     :rtype: Path
 
-    If ``filename`` contains no path specification eg. ``map1.mat`` it will
-    first attempt to locate the file within the ``roboticstoolbox/data``
-    folder and if found, return that absolute path.
+    The positional arguments are joined, like ``os.path.join``.
 
-    Otherwise, ``~`` is expanded, the path made absolute, resolving symlinks
-    and the file's existence is tested.
+    If ``local`` is True then ``~`` is expanded and if the file exists, the
+    path is made absolute, and symlinks resolved.
+
+    Otherwise, the file is sought within the ``rtbdata`` package and if found,
+    return that absolute path.
 
     Example::
 
-        loadmat('map1.mat')        # read ...roboticstoolbox/data/map1.mat
+        loadmat('data/map1.mat')   # read rtbdata/data/map1.mat
         loadmat('foo.dat')         # read ./foo.dat
-        loadmat('~/data/foo.dat')  # read ~/data/foo.dat
+        loadmat('~/foo.dat')       # read $HOME/foo.dat
     """
 
-    filename = Path(filename)
+    filename = Path(*filename)
 
     if local:
         # check if file is in user's local filesystem
@@ -85,9 +88,9 @@ def path_to_datafile(filename, local=False):
         p = filename.expanduser()
         p = p.resolve()
         if p.exists():
-            return str(p)
+            return p
 
-    # assume it is in rtbdata
+    # otherwise, look for it in rtbdata
 
     rtbdata = importlib.import_module("rtbdata")
     root = Path(rtbdata.__path__[0])
