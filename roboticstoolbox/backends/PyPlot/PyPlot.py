@@ -312,10 +312,11 @@ class PyPlot(Connector):
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
 
-        try:
-            plt.show()
-        except AttributeError:
-            pass
+        # keep stepping the environment while figure is open
+        while True:
+            if not plt.fignum_exists(self.fig.number):
+                break
+            self.step()
 
     #
     #  Private methods
@@ -420,9 +421,6 @@ class PyPlot(Connector):
                 robot.q[i] = self.sjoint[i].val * np.pi/180
 
             text_trans(text)
-
-            # Step the environment
-            self.step(0)
 
         fig.subplots_adjust(left=0.25)
         text = []
