@@ -901,16 +901,19 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Tacc</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
         <span class="n">Tacc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">Tacc</span><span class="p">,</span> <span class="p">(</span><span class="n">ns</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">Tacc</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">Tacc</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">Tacc</span><span class="p">)</span> <span class="o">==</span> <span class="n">ns</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tacc is wrong size&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">qd0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qd0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nj</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">qd0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd0</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qd0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qd0 is wrong size&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">qdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nj</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">qdf</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qdf</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qdf</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qdf is wrong size&#39;</span><span class="p">)</span>
 
