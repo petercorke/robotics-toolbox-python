@@ -10,7 +10,7 @@ class Trajectory:
     A container class for trajectory data.
     """
 
-    def __init__(self, name, x, y, yd, ydd, istime=False, xblend=None):
+    def __init__(self, name, x, y, yd=None, ydd=None, istime=False):
         """
         Construct a new trajectory instance
 
@@ -48,7 +48,6 @@ class Trajectory:
         self.yd = yd
         self.ydd = ydd
         self.istime = istime
-        self.xblend = xblend
 
     def __str__(self):
         s = f"Trajectory created by {self.name}: {len(self)} time steps x {self.naxes} axes"
@@ -62,6 +61,45 @@ class Trajectory:
         :rtype: int
         """
         return len(self.x)
+
+    @property
+    def q(self):
+        """
+        Position trajectory
+
+        :return: trajectory with one row per timestep, one column per axis
+        :rtype: ndarray(n,m)
+
+        .. note:: This is a synonym for ``.y``, for compatibility with other
+            applications.
+        """
+        return self.y
+
+    @property
+    def qd(self):
+        """
+        Velocity trajectory
+
+        :return: trajectory velocity with one row per timestep, one column per axis
+        :rtype: ndarray(n,m)
+
+        .. note:: This is a synonym for ``.yd``, for compatibility with other
+            applications.
+        """
+        return self.y
+
+    @property
+    def t(self):
+        """
+        Trajectory time
+
+        :return: trajectory time vector
+        :rtype: ndarray(n)
+
+        .. note:: This is a synonym for ``.t``, for compatibility with other
+            applications.
+        """
+        return self.x
 
     @property
     def naxes(self):
@@ -94,74 +132,90 @@ class Trajectory:
         :seealso: :func:`~tpoly`, :func:`~lspb`
         """
 
-        _plotargs = {'marker': 'o', 'markersize': 3}
+        plotopts = {'marker': 'o', 'markersize': 3}
         if plotargs is not None:
-            _plotargs = {**_plotargs, **plotargs}
-        _textargs = {'fontsize': 12}
+            plotopts = {**plotopts, **plotargs}
+        textopts = {'fontsize': 12}
         if textargs is not None:
-            _textargs = {**_textargs, **textargs}
+            textopts = {**textopts, **textargs}
 
         plt.figure()
         ax = plt.subplot(3, 1, 1)
 
         # plot position
         if self.name == 'tpoly':
-            ax.plot(self.x, self.y, **_plotargs)
+            ax.plot(self.x, self.y, **plotopts)
 
         elif self.name == 'lspb':
             # accel phase
             tf = self.x[-1]
             k = self.x <= self.xblend
-            ax.plot(self.x[k], self.y[k], color='red', **_plotargs)
+            ax.plot(self.x[k], self.y[k], color='red', **plotopts)
 
             # coast phase
             k = (self.x > self.xblend) & (self.x <= (tf-self.xblend))
-            ax.plot(self.x[k], self.y[k], color='green', **_plotargs)
+            ax.plot(self.x[k], self.y[k], color='green', **plotopts)
             k = np.where(k)[0][0]
-            ax.plot(self.x[k-1:k+1], self.y[k-1:k+1], color='green', **_plotargs)
+            ax.plot(self.x[k-1:k+1], self.y[k-1:k+1], color='green', **plotopts)
 
             # decel phase
             k = self.x > (tf - self.xblend)
-            ax.plot(self.x[k], self.y[k], color='blue', **_plotargs)
+            ax.plot(self.x[k], self.y[k], color='blue', **plotopts)
             k = np.where(k)[0][0]
-            ax.plot(self.x[k-1:k+1], self.y[k-1:k+1], color='blue', **_plotargs)
+            ax.plot(self.x[k-1:k+1], self.y[k-1:k+1], color='blue', **plotopts)
 
             ax.grid(True)
         else:
-            ax.plot(self.x, self.y, **_plotargs)
+            ax.plot(self.x, self.y, **plotopts)
 
         if self.y.ndim > 1:
                 ax.legend([f"y{i+1}" for i in range(self.naxes)])
 
         ax.grid(True)
+        ax.set_xlim(0, max(self.x))
 
         if self.istime:
-            ax.set_ylabel('$s(t)$', **_textargs)
+            ax.set_ylabel('$s(t)$', **textopts)
         else:
-            ax.set_ylabel('$s(k)$', **_textargs)
+            ax.set_ylabel('$s(k)$', **textopts)
 
         # plot velocity
         ax = plt.subplot(3, 1, 2)
-        ax.plot(self.x, self.yd, '-o', **_plotargs)
+        ax.plot(self.x, self.yd, '-o', **plotopts)
         ax.grid(True)
+        ax.set_xlim(0, max(self.x))
 
         if self.istime:
-            ax.set_ylabel('$ds/dt$', **_textargs)
+            ax.set_ylabel('$ds/dt$', **textopts)
         else:
-            ax.set_ylabel('$ds/dk$', **_textargs)
+            ax.set_ylabel('$ds/dk$', **textopts)
 
         # plot acceleration
         ax = plt.subplot(3, 1, 3)
-        ax.plot(self.x, self.ydd, '-o', **_plotargs)
+        ax.plot(self.x, self.ydd, '-o', **plotopts)
         ax.grid(True)
+        ax.set_xlim(0, max(self.x))
+
         if self.istime:
-            ax.set_ylabel('$ds^2/dt^2$', **_textargs)
+            ax.set_ylabel('$ds^2/dt^2$', **textopts)
             ax.set_xlabel('t (seconds)')
         else:
-            ax.set_ylabel('$ds^2/dk^2$', **_textargs)
+            ax.set_ylabel('$d^2s/dk^2$', **textopts)
             ax.set_xlabel('k (step)')
 
         plt.show(block=block)
+
+    def qplot(self, **kwargs):
+        """
+        Plot multi-axis trajectory
+
+        :param **kwargs: optional arguments passed to ``qplot`` 
+
+        Plots a multi-axis trajectory, held within the object, as position against time.
+
+        :seealso: :func:`qplot`
+        """
+        qplot(self.t, self.q, **kwargs)
 
 def tpoly(q0, qf, t, qd0=0, qdf=0):
     """
@@ -290,6 +344,7 @@ def lspb(q0, qf, t, V=None):
         - For some values of V no solution is possible and an error is flagged.
         - The time vector, if given, is assumed to be monotonically increasing,
           and time scaling is based on the first and last element.
+        - ``tg`` has an extra attribute ``xblend`` which is the blend duration.
 
     :References:
 
@@ -352,7 +407,9 @@ def lspb(q0, qf, t, V=None):
             pd[k] = a * tf - a * tk
             pdd[k] = -a
 
-    return Trajectory('lspb', t, p, pd, pdd, istime, tb)
+    traj = Trajectory('lspb', t, p, pd, pdd, istime)
+    traj.xblend = tb
+    return traj
 
 
 # -------------------------------------------------------------------------- #
@@ -512,7 +569,7 @@ def mtraj(tfunc, q0, qf, t):
     return Trajectory('mtraj', x, y, yd, ydd, istime)
 
 
-def qplot(q, t=None, block=True):
+def qplot(x, y=None, arm=False, block=False, labels=None):
     """
     Plot robot joint angles
 
@@ -520,6 +577,8 @@ def qplot(q, t=None, block=True):
     :type q: numpy ndarray, shape=(M,N)
     :param t: time vector, optional
     :type t: numpy ndarray, shape=(M,)
+    :param arm: distinguish arm and wrist joints with line styles, default False
+    :type arm: bool
 
     This is a convenience function to plot joint angle trajectories (MxN) for
     an N-axis robot, where each row represents one time step.
@@ -534,20 +593,30 @@ def qplot(q, t=None, block=True):
 
     :seealso: :func:`jtraj`
     """
-    assertmatrix(q)
-
-    if t is None:
+    if y is None:
+        q = x
         t = np.arange(0, q.shape[0])
+    else:
+        t = x
+        q = y
+
+    if t.ndim != 1 or q.shape[0] != t.shape[0]:
+        raise ValueError('dimensions of arguments are not consistent')
 
     n = q.shape[1]
     fig, ax = plt.subplots()
-    if n == 6:
+    if n == 6 and arm:
         plt.plot(t, q[:, 0:3])
         plt.plot(t, q[:, 3:6], '--')
     else:
         plt.plot(t, q)
 
-    ax.legend([f"q{i+1}" for i in range(n)])
+    if labels is None:
+        ax.legend([f"q{i+1}" for i in range(n)])
+    elif isinstance(labels, str):
+        ax.legend(labels.split(' '))
+    elif isinstance(labels, (tuple, list)):
+        ax.legend(labels)
 
     plt.grid(True)
     ax.set_xlabel('Time (s)')
@@ -643,8 +712,8 @@ def mstraj(
     :type qdf: array_like(n), optional
     :param verbose: print debug information, defaults to False
     :type verbose: bool, optional
-    :return: trajectory plus extra info
-    :rtype: namedtuple
+    :return: trajectory
+    :rtype: Trajectory instance
 
     Computes a trajectory for N axes moving smoothly through a set of
     viapoints.
@@ -697,6 +766,8 @@ def mstraj(
        correspond to translation and orientation in RPY or Euler angle form.
      - If ``qdmax`` is a scalar then all axes are assumed to have the same
        maximum speed.
+    - ``tg`` has extra attributes ``arrive``, ``info`` and ``via``
+
 
     :seealso: `lspb`, `ctraj`, `mtraj`
     """
@@ -742,19 +813,16 @@ def mstraj(
     if isinstance(Tacc, (int, float)):
         Tacc = np.tile(Tacc, (ns,))
     else:
-        Tacc = getvector(Tacc)
         if not len(Tacc) == ns:
             raise ValueError('Tacc is wrong size')
     if qd0 is None:
         qd0 = np.zeros((nj,))
     else:
-        qd0 = getvector(qd0)
         if not len(qd0) == len(q0):
             raise ValueError('qd0 is wrong size')
     if qdf is None:
         qdf = np.zeros((nj,))
     else:
-        qdf = getvector(qdf)
         if not len(qdf) == len(q0):
             raise ValueError('qdf is wrong size')
 
@@ -879,6 +947,12 @@ def mstraj(
 
     infolist.append(info(None, tseg, clock))
 
-    return namedtuple(
-        'mstraj', 't q arrive info via')(
-            dt * np.arange(0, tg.shape[0]), tg, arrive, infolist, viapoints)
+    traj = Trajectory('mstraj', dt * np.arange(0, tg.shape[0]), tg)
+    traj.arrive = arrive
+    traj.info = infolist
+    traj.via = viapoints
+
+    return traj
+    # return namedtuple(
+    #     'mstraj', 't q arrive info via')(
+    #         dt * np.arange(0, tg.shape[0]), tg, arrive, infolist, viapoints)
