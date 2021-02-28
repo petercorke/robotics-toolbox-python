@@ -115,3 +115,6 @@ class TestShape(unittest.TestCase):
     def test_wt(self):
         s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
         s0.wT = np.eye(4)
+
+if __name__ == '__main__':  # pragma nocover
+    unittest.main()
