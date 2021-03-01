@@ -314,7 +314,7 @@ class PyPlot(Connector):
 
         # keep stepping the environment while figure is open
         while True:
-            if not plt.fignum_exists(self.fig.number):
+            if _isnotebook() or not plt.fignum_exists(self.fig.number):
                 break
             self.step()
 
