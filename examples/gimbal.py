@@ -16,7 +16,7 @@ path = os.path.realpath('.')
 env = rtb.backends.Swift()
 env.launch()
 
-path = pathlib.Path(path) / 'roboticstoolbox' / 'data'
+path = pathlib.Path(path) / 'rtb-data' / 'rtbdata' / 'data'
 
 
 g1 = rtb.Mesh(
