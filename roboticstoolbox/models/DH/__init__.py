@@ -17,6 +17,8 @@ from roboticstoolbox.models.DH.UR5 import UR5
 from roboticstoolbox.models.DH.UR10 import UR10
 from roboticstoolbox.models.DH.Mico import Mico
 from roboticstoolbox.models.DH.Jaco import Jaco
+from roboticstoolbox.models.DH.Baxter import Baxter
+from roboticstoolbox.models.DH.TwoLink import TwoLink
 
 
 __all__ = [
@@ -39,4 +41,7 @@ __all__ = [
     'Sawyer',
     'Mico',
     'Jaco',
+    'Baxter',
+    'TwoLink',
+
 ]
