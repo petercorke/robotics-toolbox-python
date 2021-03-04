@@ -24,6 +24,7 @@ from spatialmath.base import *   # lgtm [py/polluting-import]
 import matplotlib as mpl
 from pathlib import Path
 import sys
+from importlib.metadata import version
 
 try:
     from colored import fg, bg, attr
@@ -35,7 +36,7 @@ except ImportError:
 
 # setup defaults
 np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"})
-SE3._ansimatrix = True
+
 
 parser = argparse.ArgumentParser('Robotics Toolbox shell')
 parser.add_argument('script', default=None, nargs='?',
@@ -46,15 +47,31 @@ parser.add_argument('--color', '-c', default='neutral',
     help='specify terminal color scheme (neutral, lightbg, nocolor, linux), linux is for dark mode')
 parser.add_argument('--confirmexit', '-x', default=False,
     help='confirm exit')
-parser.add_argument('--prompt', '-p', default='>>> ',
+parser.add_argument('--prompt', '-p', default='(rtb) >>> ',
     help='input prompt')
 parser.add_argument('--resultprefix', '-r', default=None,
     help='execution result prefix, include {} for execution count number')
-parser.add_argument('--noshowassign', '-a', default=False, action='store_false',
+parser.add_argument('--showassign', '-a', default=False, action='store_true',
     help='do not display the result of assignments')
+parser.add_argument('--book', default=False, action='store_true',
+    help='use defaults as per RVC book')
+parser.add_argument('--ansi', default=False, action='store_true',
+    help='use ANSImatrix to display matrices')
 args = parser.parse_args()
 
+# TODO more options
+# color scheme, light/dark
+# silent startup
+
 sys.argv = [sys.argv[0]]
+
+if args.book:
+    args.resultprefix = ''
+    args.prompt = '>>> '
+    args.showassign = True
+    args.ansi = False
+
+SE3._ansimatrix = args.ansi
 
 if args.backend is not None:
     print(f"Using matplotlb backend {args.backend}")
@@ -67,11 +84,14 @@ panda = models.DH.Panda()
 
 # print the banner
 # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
-print(fg('yellow') + r"""____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _  _
+
+banner = fg('yellow') + r"""____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _  _
 |__/ |  | |__] |  |  |  | |    [__      |  |  | |  | |    |__] |  |  \/
 |  \ |__| |__] |__|  |  | |___ ___]     |  |__| |__| |___ |__] |__| _/\_
 
-for Python
+for Python""" \
++ f" (RTB=={version('roboticstoolbox-python')}, SMTB=={version('spatialmath-python')})" \
++ r"""
 
 from roboticstoolbox import *
 from spatialmath import *
@@ -82,9 +102,11 @@ func/object?       - show brief help
 help(func/object)  - show detailed help
 func/object??      - show source code
 
-""", attr(0))
+""" + attr(0)
 
-if args.noshowassign == False:
+print(banner)
+
+if args.showassign:
     print(fg('red') + """Results of assignments will be displayed, use trailing ; to suppress
     
 """, attr(0))
@@ -124,7 +146,7 @@ c.InteractiveShellEmbed.colors = args.color
 c.InteractiveShell.confirm_exit = args.confirmexit
 # c.InteractiveShell.prompts_class = ClassicPrompts
 c.InteractiveShell.prompts_class = MyPrompt
-if args.noshowassign == False:
+if args.showassign:
     c.InteractiveShell.ast_node_interactivity = 'last_expr_or_assign'
 
 code = None
