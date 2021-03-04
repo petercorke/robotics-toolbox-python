@@ -10,7 +10,7 @@ req = [
     'scipy',
     'matplotlib',
     'ansitable',
-    'swift-sim>=0.8.0',
+    'swift-sim>=0.8.1',
     'qpsolvers',
     'rtb-data'
 ]
