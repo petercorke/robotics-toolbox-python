@@ -787,12 +787,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -2830,7 +2830,7 @@ shapes</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 01-Mar-2021.
+        Last updated on 04-Mar-2021.
       </span>
 
     </p>
