@@ -19,6 +19,8 @@ from roboticstoolbox.models.DH.Mico import Mico
 from roboticstoolbox.models.DH.Jaco import Jaco
 from roboticstoolbox.models.DH.Baxter import Baxter
 from roboticstoolbox.models.DH.TwoLink import TwoLink
+from roboticstoolbox.models.DH.Hyper3d import Hyper3d
+from roboticstoolbox.models.DH.P8 import P8
 
 
 __all__ = [
@@ -28,6 +30,7 @@ __all__ = [
     'Ball',
     'Coil',
     'Hyper',
+    'Hyper3d',
     'Cobra600',
     'IRB140',
     'KR5',
@@ -43,5 +46,5 @@ __all__ = [
     'Jaco',
     'Baxter',
     'TwoLink',
-
+    'P8',
 ]
