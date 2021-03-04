@@ -5,12 +5,12 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
     'numpy>=1.18.0',
-    'spatialmath-python>=0.8.7',
+    'spatialmath-python>=0.9.2',
     'pgraph-python',
     'scipy',
     'matplotlib',
     'ansitable',
-    'swift-sim>=0.6.1',
+    'swift-sim>=0.8.0',
     'qpsolvers',
     'rtb-data'
 ]
