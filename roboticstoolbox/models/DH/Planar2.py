@@ -35,11 +35,22 @@ class Planar2(DHRobot):
     .. codeauthor:: Peter Corke
     """
 
-    def __init__(self):
+    def __init__(self, symbolic=False):
+
+        if symbolic:
+            import spatialmath.base.symbolic as sym
+            zero = sym.zero()
+            pi = sym.pi()
+            a1, a2 = sym.symbol('a1 a2')
+        else:
+            from math import pi
+            zero = 0.0
+            a1 = 1
+            a2 = 1
 
         L = [
-                RevoluteDH(a=1),
-                RevoluteDH(a=1)
+                RevoluteDH(a=a1, alpha=zero),
+                RevoluteDH(a=a2, alpha=zero)
             ]
 
         super().__init__(L, name='Planar 2 link', keywords=('planar',))
