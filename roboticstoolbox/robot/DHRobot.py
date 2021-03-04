@@ -13,13 +13,12 @@ from roboticstoolbox.robot.DHLink import DHLink  # HACK
 from spatialmath.base.argcheck import \
     getvector, isscalar, verifymatrix, getmatrix
 # from spatialmath import base
-from spatialmath.base.transforms3d import tr2jac
-from spatialmath.base.transformsNd import t2r
+from spatialmath.base import tr2jac, tr2eul, tr2rpy, t2r, eul2jac, rpy2jac
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
-
+from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne
 from frne import init, frne, delete
 
@@ -952,12 +951,14 @@ class DHRobot(Robot):
                 Tall.append(Tj)
         return Tall
 
-    def jacobe(self, q=None):
+    def jacobe(self, q, half=None):
         r"""
         Manipulator Jacobian in end-effector frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
+        :param half: return half Jacobian: 'trans' or 'rot'
+        :type half: str
         :return J: The manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
 
@@ -1013,9 +1014,18 @@ class DHRobot(Robot):
                 # modified DH convention
                 U = L[j].A(q[j]).A @ U
 
+        # return top or bottom half if asked
+        if half is not None:
+            if half == 'trans':
+                return J[:3, :]
+            elif half == 'rot':
+                return J[3:, :]
+            else:
+                raise ValueError('bad half specified')
+
         return J
 
-    def jacob0(self, q=None, T=None):
+    def jacob0(self, q=None, T=None, half=None, analytical=None):
         r"""
         Manipulator Jacobian in world frame
 
@@ -1023,6 +1033,10 @@ class DHRobot(Robot):
         :type q: ndarray(n)
         :param T: Forward kinematics if known, SE(3 matrix)
         :type T: SE3 instance
+        :param half: return half Jacobian: 'trans' or 'rot'
+        :type half: str
+        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
+        :type param: str
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
@@ -1032,6 +1046,17 @@ class DHRobot(Robot):
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.
 
+        ``analytical`` can be one of:
+
+            =============  ==================================
+            Value          Rotational representation
+            =============  ==================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ==================================
+
         Example:
 
         .. runblock:: pycon
@@ -1040,17 +1065,57 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
+
+        .. note:: ``T`` can be passed in to save the cost of computing forward
+            kinematics.
+
         """  # noqa
         q = getvector(q, self.n)
 
         if T is None:
             T = self.fkine(q)
+        T = T.A
 
-        return tr2jac(T.A) @ self.jacobe(q)
+        # compute Jacobian in EE frame and transform to world frame
+        J0 = tr2jac(T) @ self.jacobe(q)
+
+        # compute rotational transform if analytical Jacobian required
+        if analytical is not None:
+
+            if analytical == 'rpy-xyz':
+                rpy = tr2rpy(T, 'xyz')
+                A = rpy2jac(rpy, 'xyz')
+            elif analytical == 'rpy-zyx':
+                rpy = tr2rpy(T, 'zyx')
+                A = rpy2jac(rpy, 'zyx')
+            elif analytical == 'eul':
+                eul = tr2eul(T)
+                A = eul2jac(eul)
+            elif analytical == 'exp':
+                # TODO: move to SMTB.base, Horner form with skew(v)
+                (theta, v) = trlog(t2r(T))
+                A = np.eye(3,3) - (1 - math.cos(theta)) / theta * skew(v) \
+                    + (theta - math.sin(theta)) / theta * skew(v)**2
+            else:
+                raise ValueError('bad order specified')
+        
+            J0 = block_diag(np.eye(3,3), np.linalg.inv(A)) @ J0
+
+        # TODO optimize computation above if half matrix is returned
+
+        # return top or bottom half if asked
+        if half is not None:
+            if half == 'trans':
+                J0 = J0[:3,:]
+            elif half == 'rot':
+                J0 = J0[3:,:]
+            else:
+                raise ValueError('bad half specified')
+        return J0
 
     def jacob_dot(self, q=None, qd=None):
         r"""
@@ -1724,27 +1789,27 @@ if __name__ == "__main__":   # pragma nocover
     import roboticstoolbox as rtb
     # import spatialmath.base.symbolic as sym
 
-    planar = rtb.models.DH.Planar2()
+    # planar = rtb.models.DH.Planar2()
     # J = puma.jacob0(puma.qn)
     # print(J)
     # print(puma.manipulability(puma.qn))
     # print(puma.manipulability(puma.qn, 'asada'))
     # tw, T0 = puma.twists(puma.qz)
-    print(planar)
+    # print(planar)
 
     puma = rtb.models.DH.Puma560()
-    print(puma)
-    puma.base = None
-    print('base', puma.base)
-    print('tool', puma.tool)
+    print(puma.jacob0(puma.qn, analytical='eul'))
+    # puma.base = None
+    # print('base', puma.base)
+    # print('tool', puma.tool)
 
-    print(puma.ets())
+    # print(puma.ets())
 
-    puma[2].flip = True
-    puma[3].offset = 1
-    puma[4].flip = True
-    puma[4].offset = -1
-    print(puma)
-    print(puma.ets())
+    # puma[2].flip = True
+    # puma[3].offset = 1
+    # puma[4].flip = True
+    # puma[4].offset = -1
+    # print(puma)
+    # print(puma.ets())
 
-    print(puma.dyntable())
+    # print(puma.dyntable())
