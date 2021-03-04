@@ -57,7 +57,7 @@ class PyPlot2(Connector):
         else:
             self.fig = plt.figure()
 
-        # Create a 3D axes
+        # Create a 2D axes
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_facecolor('white')
 
@@ -73,6 +73,7 @@ class PyPlot2(Connector):
         if limits is not None:
             self.ax.set_xlim([limits[0], limits[1]])
             self.ax.set_ylim([limits[2], limits[3]])
+        
 
         plt.ion()
         plt.show()
@@ -158,6 +159,7 @@ class PyPlot2(Connector):
                     ob, self.ax, readonly, display,
                     eeframe, name))
             self.robots[len(self.robots) - 1].draw2()
+
 
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
@@ -287,6 +289,6 @@ class PyPlot2(Connector):
             self.sjoint.append(
                 Slider(
                     self.axjoint[i], 'q' + str(i),
-                    qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
+                    qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi, "% .1f°"))
 
             self.sjoint[i].on_changed(lambda x: update(x, text, robot))
