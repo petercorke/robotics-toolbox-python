@@ -383,7 +383,9 @@ class Robot(DynamicsMixin, IKMixin):
         - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
 
         """
-        if axes == 'all':
+        if isinstance(axes, list) and len(axes) == 6:
+            pass
+        elif axes == 'all':
             axes = [True, True, True, True, True, True]
         elif axes.startswith('trans'):
             axes = [True, True, True, False, False, False]

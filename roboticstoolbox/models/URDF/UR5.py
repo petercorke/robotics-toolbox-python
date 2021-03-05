@@ -29,13 +29,14 @@ class UR5(ERobot):
 
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        elinks, name = super().urdf_to_ets_args(
             "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro")
 
         super().__init__(
-                args[0],
-                name=args[1],
-                manufacturer='Universal Robotics'
+                elinks,
+                name=name,
+                manufacturer='Universal Robotics',
+                gripper_links=elinks[7]
             )
 
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
