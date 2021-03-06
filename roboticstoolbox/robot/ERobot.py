@@ -1591,7 +1591,7 @@ graph [rankdir=LR];
 
         return H
 
-    def jacobm(self, q=None, J=None, H=None, end=None, start=None):
+    def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes='all'):
         """
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
@@ -1621,6 +1621,15 @@ graph [rankdir=LR];
         end, start, _ = self._get_limit_links(end, start)
         path, n = self.get_path(end, start)
 
+        if axes == 'all':
+            axes = [True, True, True, True, True, True]
+        elif axes.startswith('trans'):
+            axes = [True, True, True, False, False, False]
+        elif axes.startswith('rot'):
+            axes = [False, False, False, True, True, True]
+        else:
+            raise ValueError('axes must be all, trans or rot')
+
         if J is None:
             if q is None:
                 q = np.copy(self.q)
@@ -1637,7 +1646,11 @@ graph [rankdir=LR];
             verifymatrix(H, (6, n, n))
 
         manipulability = self.manipulability(
-            q, J=J, start=start, end=end)
+            q, J=J, start=start, end=end, axes=axes)
+
+        J = J[axes, :]
+        H = H[axes, :, :]
+
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((n, 1))
 

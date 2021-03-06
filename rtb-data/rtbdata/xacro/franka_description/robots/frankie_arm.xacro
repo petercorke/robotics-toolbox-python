@@ -23,7 +23,7 @@
       <limit effort="87" lower="-999999" upper="999999" velocity="4.0"/>
     </joint>
     <joint name="${arm_id}_base_joint2" type="prismatic">
-      <origin rpy="0 0 0" xyz="0 0 0.3"/>
+      <origin rpy="0 0 0" xyz="0 0 0.38"/>
       <parent link="${arm_id}_base1"/>
       <child link="${arm_id}_link0"/>
       <axis xyz="1 0 0"/>
@@ -31,15 +31,17 @@
     </joint>
     <link name="${arm_id}_link0">
       <visual>
-        <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+        <!-- <origin xyz="0 0 -0.15" rpy="0 0 0"/> -->
+        <origin xyz="0 0 -0.38" rpy="0 0 0"/>
         <geometry>
-          <box size="0.6 0.4 0.3" />
+          <!-- <box size="0.6 0.4 0.3" /> -->
+          <mesh filename="package://${description_pkg}/meshes/visual/omron.dae"/>
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 -0.15" rpy="0 0 0"/>
+        <origin xyz="0 0 -0.19" rpy="0 0 0"/>
         <geometry>
-          <box size="0.6 0.4 0.3" />
+          <box size="0.68 0.47 0.38" />
         </geometry>
       </collision>
       <visual>
