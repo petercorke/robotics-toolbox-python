@@ -1912,10 +1912,13 @@ graph [rankdir=LR];
         Q = np.zeros((n,))   # joint torque/force
 
         # initialize intermediate variables
+        jindex = 0
         for j, link in enumerate(robot):
-            I[j] = SpatialInertia(m=link.m, r=link.r)
-            Xtree[j] = link.Ts
-            s[j] = link.v.s
+            if link.isjoint:
+                I[jindex] = SpatialInertia(m=link.m, r=link.r)
+                Xtree[jindex] = link.Ts
+                s[jindex] = link.v.s
+                jindex += 1
 
         if gravity is None:
             a_grav = SpatialAcceleration(robot.gravity)
@@ -1923,31 +1926,41 @@ graph [rankdir=LR];
             a_grav = SpatialAcceleration(gravity)
 
         # forward recursion
-        for j in range(0, n):
+        j = 0
+        for link in robot:
+            if not link.isjoint:
+                continue
             vJ = SpatialVelocity(s[j] * qd[j])
 
             # transform from parent(j) to j
-            Xup[j] = robot[j].A(q[j]).inv()
+            Xup[j] = link.A(q[j]).inv()
 
-            if robot[j].parent is None:
+            if link.parent is None or link.parent.jindex is None:
                 v[j] = vJ
                 a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
             else:
-                jp = robot[j].parent.jindex
+                jp = link.parent.jindex
                 v[j] = Xup[j] * v[jp] + vJ
                 a[j] = Xup[j] * a[jp] \
                     + SpatialAcceleration(s[j] * qdd[j]) \
                     + v[j] @ vJ
 
             f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
+            j += 1
 
         # backward recursion
-        for j in reversed(range(0, n)):
-            Q[j] = f[j].dot(s[j])
+        n_elem = len(robot.elinks)
+        jindex = n - 1
+        for j in reversed(range(0, n_elem)):
+            if not robot[j].isjoint:
+                continue
 
-            if robot[j].parent is not None:
+            Q[jindex] = f[jindex].dot(s[jindex])
+
+            if robot[j].parent is not None and robot[j].parent.jindex is not None:
                 jp = robot[j].parent.jindex
-                f[jp] = f[jp] + Xup[j] * f[j]
+                f[jp] = f[jp] + Xup[jindex] * f[jindex]
+            jindex -= 1
 
         return Q
 
