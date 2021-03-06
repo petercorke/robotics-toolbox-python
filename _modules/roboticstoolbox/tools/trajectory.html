@@ -1025,7 +1025,8 @@
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">mrange</span><span class="p">(</span><span class="n">tacc2</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tseg</span> <span class="o">-</span> <span class="n">tacc2</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="n">tseg</span>
             <span class="n">q0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">q_prev</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">q_next</span>       <span class="c1"># linear step</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
             <span class="n">tg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tg</span><span class="p">,</span> <span class="n">q0</span><span class="p">])</span>
             <span class="n">clock</span> <span class="o">+=</span> <span class="n">dt</span>
 
@@ -1054,7 +1055,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 04-Mar-2021.
+        Last updated on 06-Mar-2021.
       </span>
 
     </p>

@@ -882,7 +882,7 @@ Sequence, J. Haviland and P. Corke</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.jacobm">
-<code class="sig-name descname"><span class="pre">jacobm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacobm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacobm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">jacobm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacobm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacobm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the manipulability Jacobian. This measure relates the rate
 of change of the manipulability to the joint velocities of the robot.
 One of J or q is required. Supply J and H if already calculated to
@@ -1095,12 +1095,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -4024,10 +4024,9 @@ graphical characteristics.</p>
 <span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ ty(-0.1197) * tz(0.425) * Ry(q2) │</span>
 <span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ tz(0.39225) * Ry(90°) * Ry(q3)   │</span>
 <span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ ty(0.093) * Rz(q4)               │</span>
-<span class="go">│ 7 │   wrist_3_link │   wrist_2_link │                  wrist_3_joint │ tz(0.09465) * Ry(q5)             │</span>
-<span class="go">│ 8 │       @ee_link │   wrist_3_link │                 ee_fixed_joint │ ty(0.0823) * Rz(90°)             │</span>
-<span class="go">│ 9 │         @tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ ty(0.0823) * Rx(-90°)            │</span>
-<span class="go">│10 │          @base │      base_link │     base_link-base_fixed_joint │ Rz(-180°)                        │</span>
+<span class="go">│ 7 │  @wrist_3_link │   wrist_2_link │                  wrist_3_joint │ tz(0.09465) * Ry(q5)             │</span>
+<span class="go">│ 8 │          tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ ty(0.0823) * Rx(-90°)            │</span>
+<span class="go">│ 9 │           base │      base_link │     base_link-base_fixed_joint │ Rz(-180°)                        │</span>
 <span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
 
 <span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
@@ -4699,7 +4698,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 04-Mar-2021.
+        Last updated on 06-Mar-2021.
       </span>
 
     </p>
