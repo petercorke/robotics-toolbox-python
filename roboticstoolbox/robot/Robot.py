@@ -702,7 +702,7 @@ class Robot(DynamicsMixin, IKMixin):
     def plot(
             self, q, backend=None, block=True, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, movie=None
+            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None, movie=None
             ):
         """
         Graphical display and animation
@@ -802,7 +802,7 @@ class Robot(DynamicsMixin, IKMixin):
         self.q = q[0, :]
 
         # Add the self to the figure in readonly mode
-        env.launch()
+        env.launch(fig=fig)
 
         env.add(
             self, readonly=True)
@@ -852,6 +852,10 @@ class Robot(DynamicsMixin, IKMixin):
         elif backend.lower() == 'pyplot':
             from roboticstoolbox.backends.PyPlot import PyPlot
             env = PyPlot()
+
+        elif backend.lower() == 'pyplot2':
+            from roboticstoolbox.backends.PyPlot import PyPlot2
+            env = PyPlot2()
 
         elif backend.lower() == 'vpython':
             from roboticstoolbox.backends.VPython import VPython
@@ -1391,7 +1395,7 @@ class Robot(DynamicsMixin, IKMixin):
             self.q = q
 
         # Make an empty 3D figure
-        env = PyPlot()
+        env =  self._get_graphical_backend(backend)
 
         # Add the self to the figure in readonly mode
         env.launch('Teach ' + self.name, limits=limits)
@@ -1465,7 +1469,7 @@ class Robot(DynamicsMixin, IKMixin):
             self.q = q
 
         # Make an empty 3D figure
-        env = PyPlot2()
+        env =  self._get_graphical_backend(backend)          
 
         # Add the robot to the figure in readonly mode
         env.launch('Teach ' + self.name, limits=limits)
