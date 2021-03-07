@@ -25,22 +25,15 @@ if args.backend.lower() == 'pyplot':
 	if args.model.lower() != 'dh':
 		print('PyPlot only supports DH models for now')
 		sys.exit(1)
-	backend = rtb.backends.PyPlot()
 elif args.backend.lower() == 'vpython':
 	if args.model.lower() != 'dh':
 		print('VPython only supports DH models for now')
 		sys.exit(1)
-	backend = rtb.backends.VPython()
 elif args.backend.lower() == 'swift':
 	if args.model.lower() != 'urdf':
 		print('Swift only supports URDF models for now')
 		sys.exit(1)
-	backend = rtb.backends.Swift()
 else:
 	raise ValueError('unknown backend')
 
-backend.launch()
-backend.add(robot)
-for q in qt.q:
-	robot.q = q
-	backend.step(0.1)
+robot.plot(qt.q, backend=args.backend)
