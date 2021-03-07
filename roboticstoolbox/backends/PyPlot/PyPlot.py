@@ -13,6 +13,7 @@ from spatialmath.base.argcheck import getvector
 # from roboticstoolbox.tools import Ticker
 
 _mpl = False
+_pil = None
 
 try:
     import matplotlib
@@ -317,6 +318,32 @@ class PyPlot(Connector):
             if not plt.fignum_exists(self.fig.number):
                 break
             self.step()
+
+    def getframe(self):
+        global _pil
+
+        if _pil is None:
+            try:
+                import PIL
+                _pil = PIL.Image.frombytes
+            except ImportError:    # pragma nocover
+                pass
+            
+            if _pil is None:
+                raise RuntimeError(
+                    'to save movies PIL must be installed:\npip3 install PIL')
+
+        # make the background white, looks better than grey stipple
+        self.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        plt.gcf().canvas.draw()
+
+        # render the frame and save as a PIL image in the list
+        canvas = self.fig.canvas
+        return _pil(
+            'RGB', canvas.get_width_height(),
+            canvas.tostring_rgb())
 
     #
     #  Private methods

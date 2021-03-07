@@ -28,11 +28,6 @@ try:
 except ImportError:    # pragma nocover
     pass
 
-try:
-    import PIL
-    _pil_exists = True
-except ImportError:    # pragma nocover
-    _pil_exists = False
 
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
@@ -823,26 +818,12 @@ class Robot(DynamicsMixin, IKMixin):
         # Stop lint error
         images = []  # list of images saved from each plot
 
-        if movie is not None:   # pragma nocover
-            if not _pil_exists:
-                raise RuntimeError(
-                    'to save movies PIL must be installed:\npip3 install PIL')
-            # make the background white, looks better than grey stipple
-            env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-            env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-            env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-
         for qk in q:
             self.q = qk
             env.step(dt)
 
             if movie is not None:  # pragma nocover
-                # render the frame and save as a PIL image in the list
-                canvas = env.fig.canvas
-                img = PIL.Image.frombytes(
-                    'RGB', canvas.get_width_height(),
-                    canvas.tostring_rgb())
-                images.append(img)
+                images.append(env.getframe())
 
         if movie is not None:  # pragma nocover
             # save it as an animated GIF
