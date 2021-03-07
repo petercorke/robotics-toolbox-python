@@ -14,9 +14,9 @@ from scipy.optimize import minimize, Bounds, LinearConstraint
 from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
 
-from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-from roboticstoolbox.backends.Swift import Swift
+# from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
+# from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+# from roboticstoolbox.backends.Swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
@@ -784,44 +784,33 @@ class Robot(DynamicsMixin, IKMixin):
             else:
                 backend = 'swift'
 
-        if backend.lower() == 'swift':  # pragma nocover
-            if isinstance(self, rtb.ERobot):
-                env = self._plot_swift(q=q, block=block)
-            elif isinstance(self, rtb.DHRobot):
-                raise NotImplementedError(
-                    'Plotting in Swift is not implemented for DHRobots yet')
+        env = self._get_graphical_backend(backend)
 
-        elif backend.lower() == 'pyplot':
-            # if isinstance(self, rtb.ERobot):  # pragma nocover
-            #     raise NotImplementedError(
-            #         'Plotting in PyPlot is not implemented for ERobots yet')
-            # elif isinstance(self, rtb.DHRobot):
-            env = self._plot_pyplot(
-                q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
-                fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
-                shadow=shadow, name=name, movie=movie)
+        # if backend.lower() == 'swift':  # pragma nocover
+        #     if isinstance(self, rtb.ERobot):
+        #         env = self._plot_swift(q=q, block=block)
+        #     elif isinstance(self, rtb.DHRobot):
+        #         raise NotImplementedError(
+        #             'Plotting in Swift is not implemented for DHRobots yet')
 
-        return env
-
-    def _plot_pyplot(
-            self, q, block, dt, limits,
-            vellipse, fellipse,
-            jointaxes, eeframe, shadow, name, movie):
-
-        # Make an empty 3D figure
-        env = PyPlot()
+        # elif backend.lower() == 'pyplot':
+        #     # if isinstance(self, rtb.ERobot):  # pragma nocover
+        #     #     raise NotImplementedError(
+        #     #         'Plotting in PyPlot is not implemented for ERobots yet')
+        #     # elif isinstance(self, rtb.DHRobot):
+        #     env = self._plot_pyplot(
+        #         q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
+        #         fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
+        #         shadow=shadow, name=name, movie=movie)
 
         q = getmatrix(q, (None, self.n))
+        self.q = q[0, :]
 
         # Add the self to the figure in readonly mode
-        if q.shape[0] == 1:
-            env.launch(self.name + ' Plot', limits)
-        else:
-            env.launch(self.name + ' Trajectory Plot', limits)
+        env.launch()
 
         env.add(
-            self, readonly=True,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+            self, readonly=True)
 
         if vellipse:
             vell = self.vellipse(centre='ee')
@@ -868,33 +857,122 @@ class Robot(DynamicsMixin, IKMixin):
 
         return env
 
-    def _plot_swift(self, q, block):   # pragma nocover
+    def _get_graphical_backend(self, backend):
+        #
+        # find the right backend, modules are imported here on an as needs basis
+        if backend.lower() == 'swift':  # pragma nocover
+            if isinstance(self, rtb.DHRobot):
+                raise NotImplementedError(
+                    'Plotting in Swift is not implemented for DHRobots yet')
 
-        # Make an empty 3D figure
-        env = Swift()
+            from roboticstoolbox.backends.Swift import Swift
+            env = Swift()
 
-        q = getmatrix(q, (None, self.n))
-        self.q = q[0, :]
+        elif backend.lower() == 'pyplot':
+            from roboticstoolbox.backends.PyPlot import PyPlot
+            env = PyPlot()
 
-        # Add the self to the figure in readonly mode
-        env.launch()
+        elif backend.lower() == 'vpython':
+            from roboticstoolbox.backends.VPython import VPython
+            env = VPython()
 
-        env.add(
-            self, readonly=True)
-
-        for qk in q:
-            self.q = qk
-            env.step()
-
-        # Keep the plot open
-        if block:           # pragma: no cover
-            env.hold()
+        else:
+            raise ValueError('unknown backend', backend)
 
         return env
 
+    # def _plot_pyplot(
+    #         self, q, block, dt, limits,
+    #         vellipse, fellipse,
+    #         jointaxes, eeframe, shadow, name, movie):
+
+    #     # Make an empty 3D figure
+    #     env = PyPlot()
+
+    #     q = getmatrix(q, (None, self.n))
+
+    #     # Add the self to the figure in readonly mode
+    #     if q.shape[0] == 1:
+    #         env.launch(self.name + ' Plot', limits)
+    #     else:
+    #         env.launch(self.name + ' Trajectory Plot', limits)
+
+    #     env.add(
+    #         self, readonly=True,
+    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+
+    #     if vellipse:
+    #         vell = self.vellipse(centre='ee')
+    #         env.add(vell)
+
+    #     if fellipse:
+    #         fell = self.fellipse(centre='ee')
+    #         env.add(fell)
+
+    #     # Stop lint error
+    #     images = []  # list of images saved from each plot
+
+    #     if movie is not None:   # pragma nocover
+    #         if not _pil_exists:
+    #             raise RuntimeError(
+    #                 'to save movies PIL must be installed:\npip3 install PIL')
+    #         # make the background white, looks better than grey stipple
+    #         env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    #         env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    #         env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+
+    #     for qk in q:
+    #         self.q = qk
+    #         env.step(dt)
+
+    #         if movie is not None:  # pragma nocover
+    #             # render the frame and save as a PIL image in the list
+    #             canvas = env.fig.canvas
+    #             img = PIL.Image.frombytes(
+    #                 'RGB', canvas.get_width_height(),
+    #                 canvas.tostring_rgb())
+    #             images.append(img)
+
+    #     if movie is not None:  # pragma nocover
+    #         # save it as an animated GIF
+    #         images[0].save(
+    #             movie,
+    #             save_all=True, append_images=images[1:], optimize=False,
+    #             duration=dt, loop=0)
+
+    #     # Keep the plot open
+    #     if block:           # pragma: no cover
+    #         env.hold()
+
+    #     return env
+
+    # def _plot_swift(self, q, block):   # pragma nocover
+
+    #     # Make an empty 3D figure
+    #     env = Swift()
+
+    #     q = getmatrix(q, (None, self.n))
+    #     self.q = q[0, :]
+
+    #     # Add the self to the figure in readonly mode
+    #     env.launch()
+
+    #     env.add(
+    #         self, readonly=True)
+
+    #     for qk in q:
+    #         self.q = qk
+    #         env.step()
+
+    #     # Keep the plot open
+    #     if block:           # pragma: no cover
+    #         env.hold()
+
+    #     return env
+
 # --------------------------------------------------------------------- #
 
-    def fellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+    def fellipse(self, q=None, opt='trans', unit='rad', centre=[0, 0, 0]):
         '''
         Create a force ellipsoid object for plotting with PyPlot
 
@@ -1274,7 +1352,7 @@ class Robot(DynamicsMixin, IKMixin):
 
     def teach(
             self, q=None, block=True, order='xyz', limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+            jointaxes=True, eeframe=True, shadow=True, name=True, backend='pyplot'):
         """
         Graphical teach pendant
 

@@ -12,45 +12,19 @@ import warnings
 from time import perf_counter, sleep
 import imageio
 from roboticstoolbox.backends.Connector import Connector
-# from roboticstoolbox.robot.DHLink import DHLink
-# from roboticstoolbox.robot.Robot import Robot as r
-# from roboticstoolbox.robot import DHLink, DHRobot
 
-# from roboticstoolbox.robot.DHRobot import DHRobot
-# from roboticstoolbox.robot.DHLink import DHLink
-
-GraphicsCanvas3D = None
-GraphicsCanvas2D = None
-GraphicalRobot = None
+_GraphicsCanvas3D = None
+_GraphicsCanvas2D = None
+_GraphicalRobot = None
 close_localhost_session = None
 
-
-def _imports():  # pragma nocover
-    global GraphicsCanvas3D
-    global GraphicsCanvas2D
-    global GraphicalRobot
-    global close_localhost_session
-
-    try:
-        canvas = importlib.import_module(
-            'roboticstoolbox.backends.VPython.canvas')
-        GraphicsCanvas3D = canvas.GraphicsCanvas3D
-        GraphicsCanvas2D = canvas.GraphicsCanvas2D
-
-        graphicalrobot = importlib.import_module(
-            'roboticstoolbox.backends.VPython.graphicalrobot')
-        GraphicalRobot = graphicalrobot.GraphicalRobot
-
-        common_functions = importlib.import_module(
-            'roboticstoolbox.backends.VPython.common_functions')
-        close_localhost_session = common_functions.close_localhost_session
-
-    except ImportError:
-        print(
-            '\nYou must install the VPython component of the toolbox, do: \n'
-            'pip install roboticstoolbox[vpython]\n\n')
-
-
+try:
+    from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D
+    from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot
+except ImportError:
+    print(
+        '\nYou must install the VPython component of the toolbox, do: \n'
+        'pip install roboticstoolbox[vpython]\n\n')
 class VPython(Connector):  # pragma nocover
     """
     Graphical backend using VPython
@@ -88,8 +62,6 @@ class VPython(Connector):  # pragma nocover
 
         """
         super(VPython, self).__init__()
-
-        _imports()
 
         # Init vars
         self.canvases = []
@@ -286,7 +258,7 @@ class VPython(Connector):  # pragma nocover
 
         self.canvases = []
 
-    def add(self, dhrobot, fig_num=0, name=None):
+    def add(self, dhrobot, fig_num=0, name=None, **kwargs):
         """
         Add a robot to the graphical scene
 
@@ -397,6 +369,10 @@ class VPython(Connector):  # pragma nocover
 
         while True:
             pass
+
+    def _add_teach_panel(self):
+        # just need to change the display mode
+        self.canvases[0].teach_mode(True)
 
     #
     # Public non-standard methods
