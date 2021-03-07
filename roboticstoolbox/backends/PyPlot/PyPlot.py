@@ -71,7 +71,7 @@ class PyPlot(Connector):
                 '\n\nYou do not have matplotlib installed, do:\n'
                 'pip install matplotlib\n\n')
 
-    def launch(self, name=None, limits=None):
+    def launch(self, name=None, fig=None, limits=None):
         """
         Launch a graphical interface
 
@@ -88,10 +88,14 @@ class PyPlot(Connector):
         projection = 'ortho'
         labels = ['X', 'Y', 'Z']
 
-        if name is not None:
+        if name is None:
+            name = 'Robotics Toolbox for Python'
+
+        if fig is None:
             self.fig = plt.figure(name)
         else:
-            self.fig = plt.figure('Robotics Toolbox for Python')
+            self.fig = fig
+            self.fig.canvas.set_window_title(name)
 
         self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
