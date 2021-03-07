@@ -13,6 +13,8 @@ import json
 from abc import ABC, abstractmethod
 from functools import wraps
 
+from roboticstoolbox.backends import Swift as swift
+
 _sw = None
 sw = None
 
@@ -282,7 +284,7 @@ class Swift(Connector):  # pragma nocover
                 id = len(self.shapes) + SHAPE_ADD
             self.shapes.append(ob)
             return int(id)
-        elif isinstance(ob, rp.backends.SwiftElement):
+        elif isinstance(ob, swift.SwiftElement):
 
             if ob._added_to_swift:
                 raise ValueError(
