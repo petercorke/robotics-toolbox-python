@@ -934,7 +934,8 @@ def mstraj(
         for t in mrange(tacc2 + dt, tseg - tacc2, dt):
             s = t / tseg
             q0 = (1 - s) * q_prev + s * q_next       # linear step
-            print(t, s, q0)
+            if verbose:    # pragma nocover
+                print(t, s, q0)
             tg = np.vstack([tg, q0])
             clock += dt
 
