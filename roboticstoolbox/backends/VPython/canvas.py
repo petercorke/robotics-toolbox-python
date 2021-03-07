@@ -619,6 +619,13 @@ class GraphicsCanvas3D:  # pragma nocover
             self.scene.append_to_caption('\n\n')
             i += 1
 
+    def teach_mode(self, teach=False):
+        if teach:
+            self.__ui_mode = UImode.CANVASCONTROL
+        else:
+            self.__ui_mode = UImode.TEACHPANEL
+        self.__toggle_mode()
+
     #######################################
     # UI CALLBACKS
     #######################################
