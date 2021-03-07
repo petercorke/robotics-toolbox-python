@@ -5,18 +5,22 @@
 
 import roboticstoolbox as rtb
 import time
-from roboticstoolbox.backends import VPython
 
-env = VPython.VPython()  # lgtm [py/call-to-non-callable]
+from roboticstoolbox.backends.VPython import VPython
+
+env = VPython()
+
 env.launch()
 
 #  PUMA560
 puma = rtb.models.DH.Puma560()
 env.add(puma)
 
-for i in range(1000):
-    env.step(puma)
-    time.sleep(0.1)
+qt = rtb.tools.trajectory.jtraj(puma.qz, puma.qr, 200)
+
+for q in qt.q:
+    env.step(0.1)
+    puma.q = q
 
 # Example 1
 # qt = rp.tools.trajectory.jtraj(puma.qz, puma.qr, 50)
