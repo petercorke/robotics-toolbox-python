@@ -12,8 +12,14 @@ import os
 
 path = os.path.realpath('.')
 
+
+# TODO
+#  rotate the rings according to the rotation axis, so that the axles 
+#  point the right way
+
 # Launch the simulator Swift
-env = rtb.backends.Swift()
+from roboticstoolbox.backends import Swift
+env = Swift.Swift()
 env.launch()
 
 path = pathlib.Path(path) / 'rtb-data' / 'rtbdata' / 'data'
@@ -63,7 +69,7 @@ R2 = SO3()
 R3 = SO3()
 
 # rotation angle sequence
-sequence = "zyx"
+sequence = "ZYX"
 
 
 def update_gimbals(theta, ring):
@@ -73,11 +79,11 @@ def update_gimbals(theta, ring):
 
     def Rxyz(theta, which):
         theta = np.radians(theta)
-        if which == 'x':
+        if which == 'X':
             return SO3.Rx(theta)
-        elif which == 'y':
+        elif which == 'Y':
             return SO3.Ry(theta)
-        elif which == 'z':
+        elif which == 'Z':
             return SO3.Rz(theta)
 
     if ring == 1:
@@ -109,50 +115,110 @@ def set_three(x):
     update_gimbals(float(x), 3)
 
 
-r_one = rtb.backends.Slider(
+r_one = Swift.Slider(
     set_one,
     min=-180, max=180,
     step=1, value=0,
-    desc='Ring One', unit='&#176;')
+    desc='Outer gimbal', unit='&#176;')
 
 
-r_two = rtb.backends.Slider(
+r_two = Swift.Slider(
     set_two,
     min=-180, max=180,
     step=1, value=0,
-    desc='Ring Two', unit='&#176;')
+    desc='Middle gimbal', unit='&#176;')
 
 
-r_three = rtb.backends.Slider(
+r_three = Swift.Slider(
     set_three,
     min=-180, max=180,
     step=1, value=0,
-    desc='Ring Three', unit='&#176;')
+    desc='Inner gimbal', unit='&#176;')
 
 
+# buttons to set a 3-angle sequence
+ZYX_button = Swift.Button(
+    lambda x: change_sequence('ZYX'),
+    desc='ZYX (roll-pitch-yaw angles)'
+)
+
+XYZ_button = Swift.Button(
+    lambda x: change_sequence('XYZ'),
+    desc='XYZ (roll-pitch-yaw angles)'
+)
+
+ZYZ_button = Swift.Button(
+    lambda x: change_sequence('ZYZ'),
+    desc='ZYZ (Euler angles)'
+)
+
+button = Swift.Button(
+    lambda x: set('ZYX'),
+    desc='Set to Zero'
+)
+
+# button to reset joint angles
 def reset(e):
     r_one.value = 0
     r_two.value = 0
     r_three.value = 0
 
-button = rtb.backends.Button(
+zero_button = Swift.Button(
     reset,
     desc='Set to Zero'
 )
 
+def change_sequence(new):
+    global sequence
 
-def angle(index):
-    print('Selection Box Index selected: ' + str(index))
+    xyz = 'XYZ'
 
-rot_seq = rtb.backends.Select(
-    angle,
-    desc='Rotation Sequence',
+    # update the state of the ring_axis dropdowns
+    ring1_axis.checked = xyz.find(new[0])
+    ring2_axis.checked = xyz.find(new[1])
+    ring3_axis.checked = xyz.find(new[2])
+
+    sequence = new
+    # print(sequence)
+
+# handle radio button on angle slider
+def angle(index, ring):
+    global sequence
+
+    # print('angle', index, ring)
+    xyz = 'XYZ'
+    s = list(sequence)
+    s[ring] = xyz[int(index)]
+    sequence = ''.join(s)
+
+ring1_axis = Swift.Radio(
+    lambda x: angle(x, 0),
     options=[
-        'zyx',
-        'zyz',
-        'I dont know'
+        'X',
+        'Y',
+        'Z'
     ],
-    value=0
+    checked=2
+)
+
+ring2_axis = Swift.Radio(
+    lambda x: angle(x, 1),
+    options=[
+        'X',
+        'Y',
+        'Z'
+    ],
+    checked=1
+)
+
+ring3_axis = Swift.Radio(
+    lambda x: angle(x, 2),
+    options=[
+        'X',
+        'Y',
+        'Z'
+    ],
+    checked=0
 )
 
 
@@ -164,7 +230,7 @@ def check_fn(indices):
     else:
         print('Half marks')
 
-check = rtb.backends.Checkbox(
+check = Swift.Checkbox(
     check_fn,
     desc='Describe Jesse',
     options=[
@@ -182,28 +248,39 @@ def radio_fn(idx):
     else:
         print("You are correct :)")
 
-radio = rtb.backends.Radio(
+radio = Swift.Radio(
     radio_fn,
-    desc='Jesse is:',
+    desc='Gimbal axis',
     options=[
-        'Bad',
-        'Good',
+        'X',
+        'Y',
+        'Z'
     ],
     checked=1
 )
 
-label = rtb.backends.Label(
+label = Swift.Label(
     desc='Teach Panel'
 )
 
 env.add(label)
 env.add(r_one)
+env.add(ring1_axis)
+
 env.add(r_two)
+env.add(ring2_axis)
+
 env.add(r_three)
-env.add(button)
-env.add(rot_seq)
-env.add(check)
-env.add(radio)
+env.add(ring3_axis)
+
+env.add(ZYX_button)
+env.add(XYZ_button)
+env.add(ZYZ_button)
+env.add(zero_button)
+
+
+# env.add(check)
+# env.add(radio)
 
 update_gimbals(0, 1)
 update_gimbals(0, 2)
@@ -213,3 +290,36 @@ while(True):
     # env.process_events()
     env.step(0)
 
+# ring1_axis = Swift.Select(
+#     lambda x: angle(x, 0),
+#     desc='Outer gimbal axis',
+#     options=[
+#         'X',
+#         'Y',
+#         'Z'
+#     ],
+#     value=2
+# )
+
+
+# ring2_axis = Swift.Select(
+#     lambda x: angle(x, 1),
+#     desc='Middle gimbal axis',
+#     options=[
+#         'X',
+#         'Y',
+#         'Z'
+#     ],
+#     value=1
+# )
+
+# ring3_axis = Swift.Select(
+#     lambda x: angle(x, 2),
+#     desc='Inner gimbal axis',
+#     options=[
+#         'X',
+#         'Y',
+#         'Z'
+#     ],
+#     value=0
+# )
