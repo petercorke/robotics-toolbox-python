@@ -2,6 +2,8 @@ import sys
 import copy
 import numpy as np
 import roboticstoolbox as rtb
+from roboticstoolbox.backends.PyPlot import PyPlot
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from spatialmath import SE3
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
     verifymatrix, getunit
@@ -1413,7 +1415,7 @@ class Robot(DynamicsMixin, IKMixin):
 
     def teach2(
             self, q=None, block=True, limits=None,
-            eeframe=True, name=False):
+            eeframe=True, name=False, backend="pyplot"):
         '''
         2D Graphical teach pendant
 
