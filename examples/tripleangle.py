@@ -22,7 +22,7 @@ from roboticstoolbox.backends import Swift
 env = Swift.Swift()
 env.launch()
 
-path = pathlib.Path(path) / 'rtb-data' / 'rtbdata' / 'data'
+path = rtb.path_to_datafile('data')
 
 
 g1 = rtb.Mesh(
@@ -260,7 +260,7 @@ radio = Swift.Radio(
 )
 
 label = Swift.Label(
-    desc='Teach Panel'
+    desc='Triple angle'
 )
 
 env.add(label)
