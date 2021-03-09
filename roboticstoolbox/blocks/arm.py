@@ -3,6 +3,7 @@ from math import sin, cos, atan2, tan, sqrt, pi
 
 import matplotlib.pyplot as plt
 import time
+from spatialmath import base
 
 from bdsim.components import TransferBlock, FunctionBlock, block
 from bdsim.graphics import GraphicsBlock
@@ -34,7 +35,7 @@ class FowardKinematics(FunctionBlock):
        +------------+---------+---------+
     """
 
-    def __init__(self, *inputs, robot=None, end=None, **kwargs):
+    def __init__(self, robot=None, end=None, *inputs, **kwargs):
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -88,7 +89,7 @@ class Jacobian(FunctionBlock):
        +------------+---------+---------+
     """
 
-    def __init__(self, *inputs, robot=None, frame='0', inverse=False, transpose=False, **kwargs):
+    def __init__(self, robot, *inputs, frame='0', inverse=False, transpose=False, **kwargs):
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -138,6 +139,87 @@ class Jacobian(FunctionBlock):
         return [J]
 
 # ------------------------------------------------------------------------ #
+@block
+class FowardDynamics(TransferBlock):
+    """
+    :blockname:`FORWARD_DYNAMICS`
+    
+    .. table::
+       :align: left
+    
+       +------------+---------+---------+
+       | inputs     | outputs |  states |
+       +------------+---------+---------+
+       | 1          | 3       | 0       |
+       +------------+---------+---------+
+       | ndarray    | ndarray |         | 
+       +------------+---------+---------+
+    """
+
+    def __init__(self, robot, *inputs, q0=None, **kwargs):
+        """
+        :param ``*inputs``: Optional incoming connections
+        :type ``*inputs``: Block or Plug
+        :param robot: Robot model
+        :type robot: Robot subclass
+        :param end: Link to compute pose of, defaults to end-effector
+        :type end: Link or str
+        :param ``**kwargs``: common Block options
+        :return: a FORWARD_KINEMATICS block
+        :rtype: FowardDynamics instance
+        
+        Robot arm forward dynamics model.
+        
+        The block has one input port:
+            
+            1. Joint configuration vector as an ndarray.
+            
+        and three output ports:
+            
+            1. joint configuration
+            2. joint velocity
+            3. joint acceleration
+
+
+        """
+        super().__init__(nin=1, nout=3, inputs=inputs, **kwargs)
+        self.type = 'forward-dynamics'
+
+        self.robot = robot
+        self.nstates = robot.n * 2
+
+        # state vector is [q qd]
+
+        self.inport_names(('$\tau$',))
+        self.outport_names(('q', 'qd', 'qdd'))
+
+        if q0 is None:
+            q0 = np.zeros((robot.n,))
+        else:
+            q0 = base.getvector(q0, robot.n)
+        self._x0 = np.r_[q0, np.zeros((robot.n,))]
+        self._qdd = None
+        
+    def output(self, t=None):
+        n = self.robot.n
+        q = self._x[:n]
+        qd = self._x[n:]
+        qdd = self._qdd  # from last deriv
+        return [q, qd, qdd]
+
+    def deriv(self):
+        # return [qd qdd]
+        Q = self.inputs[0]
+        n = self.robot.n
+        assert len(Q) == n, 'torque vector wrong size'
+
+        q = self._x[:n]
+        qd = self._x[n:]
+        qdd = self.robot.accel(q, qd, Q)
+        self._qdd = qdd
+        return np.r_[qd, qdd]
+        
+# ------------------------------------------------------------------------ #
 
 @block
 class ArmPlot(GraphicsBlock):
@@ -156,7 +238,7 @@ class ArmPlot(GraphicsBlock):
        +--------+---------+---------+
     """
         
-    def __init__(self, *inputs, robot=None, q0=None, backend=None, **kwargs):
+    def __init__(self, robot=None, *inputs, q0=None, backend=None, **kwargs):
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -206,7 +288,7 @@ class ArmPlot(GraphicsBlock):
             super().step()
         
     def done(self, block=False, **kwargs):
-        if self.bd.options['graphics']:
+        if self.bd.options.graphics:
             plt.show(block=block)
             
             super().done()
