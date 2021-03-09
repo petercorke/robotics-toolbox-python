@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt  # lgtm [py/unused-import]
 from roboticstoolbox import *    # lgtm [py/unused-import]
 from spatialmath import *        # lgtm [py/polluting-import]
 from spatialmath.base import *   # lgtm [py/polluting-import]
+from spatialmath.base import sym
 import matplotlib as mpl
 from pathlib import Path
 import sys
