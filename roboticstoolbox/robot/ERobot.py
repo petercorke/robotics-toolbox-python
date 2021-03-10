@@ -855,7 +855,7 @@ graph [rankdir=LR];
         file.write('}\n')
 
         if isinstance(filename, str):
-            close(file)  # noqa
+            file.close()  # noqa
 
 # --------------------------------------------------------------------- #
 
@@ -1957,7 +1957,7 @@ if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
-    p = rtb.models.ETS.Puma560()
+    p = rtb.models.URDF.Puma560()
     p.fkine(p.qz)
     p.jacob0(p.qz)
     p.jacobe(p.qz)
