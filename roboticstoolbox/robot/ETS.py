@@ -43,7 +43,7 @@ class SuperETS(UserList, ABC):
             self.data = copy.copy(axis.data)
             return
 
-        if axis in ('Rx', 'Ry', 'Rz', 'tx', 'ty', 'tz'):
+        if axis in ('R', 'Rx', 'Ry', 'Rz', 'tx', 'ty', 'tz'):
             # it's a regular axis
 
             if eta is None:
@@ -463,10 +463,10 @@ class SuperETS(UserList, ABC):
             else:
                 T = T @ Tk
 
-        if isinstance(self, ETS):
-            T = SE3(T, check=False)
-        elif isinstance(self, ETS2):
+        if isinstance(self, ETS2):
             T = SE2(T, check=False)
+        else:
+            T = SE3(T, check=False)
         T.simplify()
         return T
 
