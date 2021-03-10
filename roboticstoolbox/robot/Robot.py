@@ -1399,7 +1399,7 @@ class Robot(DynamicsMixin, IKMixin):
                 "2D Plotting of ERobot's not implemented yet")
 
         # Make an empty 2D figure
-        env = PyPlot2()
+        env = self._get_graphical_backend('pyplot2')
 
         q = getmatrix(q, (None, self.n))
 
@@ -1511,7 +1511,7 @@ class Robot(DynamicsMixin, IKMixin):
 
     def teach2(
             self, q=None, block=True, limits=None,
-            eeframe=True, name=False):
+            vellipse=False, fellipse=False, eeframe=True, name=False, backend='pyplot2'):
         '''
         2D Graphical teach pendant
 
@@ -1522,7 +1522,6 @@ class Robot(DynamicsMixin, IKMixin):
         :type q: float ndarray(n)
         :param limits: Custom view limits for the plot. If not supplied will
             autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame
             at the location of the end-effector. Uses three arrows, red,
             green and blue to indicate the x, y, and z-axes.
@@ -1576,6 +1575,19 @@ class Robot(DynamicsMixin, IKMixin):
             eeframe=eeframe, name=name)
 
         env._add_teach_panel(self)
+
+        if limits is None:
+            limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
+            env.ax.set_xlim([limits[0], limits[1]])
+            env.ax.set_ylim([limits[2], limits[3]])
+
+        if vellipse:
+            vell = self.vellipse(centre='ee', scale=0.5)
+            env.add(vell)
+
+        if fellipse:
+            fell = self.fellipse(centre='ee')
+            env.add(fell)
 
         # Keep the plot open
         if block:           # pragma: no cover
