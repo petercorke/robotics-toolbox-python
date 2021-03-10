@@ -1690,7 +1690,13 @@ graph [rankdir=LR];
                 link._joint_name if link.parent is not None else "",
                 ets.__str__(f"q{link._jindex}"))
 
-        s = str(table)
+        if self.manufacturer is None:
+            manuf = ""
+        else:
+            manuf = f" (by {self.manufacturer})"
+        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), ETS model\n"
+
+        s += str(table)
         s += self.configurations_str()
 
         return s

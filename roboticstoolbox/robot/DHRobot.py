@@ -118,7 +118,15 @@ class DHRobot(Robot):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        s = ""
+        if self.mdh:
+            dh = "modified"
+        else:
+            dh = "standard"
+        if self.manufacturer is None:
+            manuf = ""
+        else:
+            manuf = f" (by {self.manufacturer})"
+        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), {dh} DH parameters\n"
         deg = 180 / np.pi
 
         def qstr(j, link):
@@ -203,7 +211,7 @@ class DHRobot(Robot):
                 else:
                     table.row(qstr(j, L), L.d, L.a, angle(L.alpha), *ql)
 
-        s = str(table)
+        s += str(table)
 
         # show tool and base
         if self._tool is not None or self._tool is not None:
@@ -1707,6 +1715,7 @@ if __name__ == "__main__":   # pragma nocover
     # print(planar)
 
     puma = rtb.models.DH.Puma560()
+    print(puma)
     print(puma.jacob0(puma.qn, analytical='eul'))
     # puma.base = None
     # print('base', puma.base)
