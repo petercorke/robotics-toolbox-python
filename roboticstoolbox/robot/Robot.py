@@ -225,7 +225,6 @@ class Robot(DynamicsMixin, IKMixin):
             else:  # pragma nocover
                 return str(theta * deg) + "\u00b0"
 
-        config = self.config()
         # show named configurations
         if len(self._configdict) > 0:
             table = ANSITable(
@@ -237,11 +236,11 @@ class Robot(DynamicsMixin, IKMixin):
 
             for name, q in self._configdict.items():
                 qlist = []
-                for i, c in enumerate(config):
+                for j, c in enumerate(self.structure):
                     if c == 'P':
-                        qlist.append(f"{q[i]: .3g}")
+                        qlist.append(f"{q[j]: .3g}")
                     else:
-                        qlist.append(angle(q[i], "{: .3g}"))
+                        qlist.append(angle(q[j], "{: .3g}"))
                 table.row(name, *qlist)
 
             return "\n" + str(table)
