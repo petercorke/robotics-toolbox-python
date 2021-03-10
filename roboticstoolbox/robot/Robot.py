@@ -267,6 +267,9 @@ class Robot(DynamicsMixin, IKMixin):
             >>> puma.structure
             >>> stanford = rtb.models.DH.Stanford()
             >>> stanford.structure
+
+        .. note:: Fixed joints, that maintain a constant link relative pose,
+            are not included.  ``len(self.structure) == self.n``.
         """
         structure = []
         for link in self:
@@ -1091,10 +1094,11 @@ class Robot(DynamicsMixin, IKMixin):
             raise NotImplementedError(
                 "ERobot fellipse not implemented yet")
 
+        q = getunit(q, unit)
         ell = EllipsePlot(self, q, 'f', opt, centre=centre)
         return ell
 
-    def vellipse(self, q=None, opt='trans', centre=[0, 0, 0]):
+    def vellipse(self, q=None, opt='trans', unit='rad', centre=[0, 0, 0], scale=0.1):
         """
         Create a velocity ellipsoid object for plotting with PyPlot
 
@@ -1129,7 +1133,8 @@ class Robot(DynamicsMixin, IKMixin):
             raise NotImplementedError(
                 "ERobot vellipse not implemented yet")
 
-        ell = EllipsePlot(self, q, 'v', opt, centre=centre)
+        q = getunit(q, unit)
+        ell = EllipsePlot(self, q, 'v', opt, centre=centre, scale=scale)
         return ell
 
     def plot_ellipse(
@@ -1521,7 +1526,14 @@ class Robot(DynamicsMixin, IKMixin):
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
         :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
+            autoscale, [x1, x2, y1, y2]
+        :type limits: array_like(4)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
         :param eeframe: (Plot Option) Plot the end-effector coordinate frame
             at the location of the end-effector. Uses three arrows, red,
             green and blue to indicate the x, y, and z-axes.
