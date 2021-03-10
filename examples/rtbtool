@@ -38,7 +38,6 @@ except ImportError:
 # setup defaults
 np.set_printoptions(linewidth=120, formatter={'float': lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"})
 
-
 parser = argparse.ArgumentParser('Robotics Toolbox shell')
 parser.add_argument('script', default=None, nargs='?',
     help='specify script to run')
@@ -58,6 +57,8 @@ parser.add_argument('--book', default=False, action='store_true',
     help='use defaults as per RVC book')
 parser.add_argument('--ansi', default=False, action='store_true',
     help='use ANSImatrix to display matrices')
+parser.add_argument('--examples', '-e', default=False, action='store_true',
+    help='change working directory to shipped examples')
 args = parser.parse_args()
 
 # TODO more options
@@ -67,10 +68,12 @@ args = parser.parse_args()
 sys.argv = [sys.argv[0]]
 
 if args.book:
+    # set book options
     args.resultprefix = ''
     args.prompt = '>>> '
     args.showassign = True
     args.ansi = False
+    args.examples = True
 
 SE3._ansimatrix = args.ansi
 
