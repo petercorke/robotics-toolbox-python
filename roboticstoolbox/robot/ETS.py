@@ -322,9 +322,9 @@ class SuperETS(UserList, ABC):
         return self.axis[0] == 'C'
 
     @property
-    def config(self):
+    def structure(self):
         """
-        Joint configuration string
+        Joint structure string
 
         :return: A string indicating the joint types
         :rtype: str
@@ -338,7 +338,7 @@ class SuperETS(UserList, ABC):
 
             >>> from roboticstoolbox import ETS
             >>> e = ETS.tz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
-            >>> e.config
+            >>> e.structure
 
         """
         return ''.join(

@@ -248,6 +248,35 @@ class Robot(DynamicsMixin, IKMixin):
         else:  # pragma nocover
             return ""
 
+    @property
+    def structure(self):
+        """
+        Return the joint structure string
+
+        :return: joint configuration string
+        :rtype: str
+
+        A string with one letter per joint: ``R`` for a revolute
+        joint, and ``P`` for a prismatic joint.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.structure
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.structure
+        """
+        structure = []
+        for link in self:
+            if link.isrevolute:
+                structure.append('R')
+            elif link.isprismatic:
+                structure.append('P')
+
+        return ''.join(structure)
     def linkcolormap(self, linkcolors="viridis"):
         """
         Create a colormap for robot joints

@@ -638,27 +638,6 @@ class DHRobot(Robot):
 
         return p
 
-    def config(self):
-        """
-        Return the joint configuration string
-
-        :return: joint configuration string
-        :rtype: str
-
-        A string with one letter per joint: ``R`` for a revolute
-        joint, and ``P`` for a prismatic joint.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.config()
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.config()
-        """
-        return ''.join(['R' if L.isrevolute else 'P' for L in self])
 
     def todegrees(self, q=None):
         """
