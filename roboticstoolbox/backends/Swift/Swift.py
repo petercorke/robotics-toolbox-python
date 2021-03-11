@@ -95,7 +95,7 @@ class Swift(Connector):  # pragma nocover
     #  Basic methods to do with the state of the external program
     #
 
-    def launch(self, browser=None):
+    def launch(self, browser=None, **kwargs):
         """
         Launch a graphical backend in Swift by default in the default browser
         or in the specified browser
