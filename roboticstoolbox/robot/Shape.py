@@ -330,7 +330,7 @@ class Mesh(Shape):
 
     def __init__(self, filename=None, scale=[1, 1, 1], base=None, color=None):
         super(Mesh, self).__init__(
-            filename=filename, base=base,
+            filename=str(filename), base=base,
             scale=scale, stype='mesh', color=color)
 
     def _init_pob(self):
