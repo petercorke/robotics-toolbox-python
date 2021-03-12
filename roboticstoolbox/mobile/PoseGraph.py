@@ -294,9 +294,7 @@ def bresenham(p1, p2):
     
     if steep:
         # if slope > 1 swap the deltas
-        t = dx
-        dx = dy
-        dy = t
+        dx, dy = dy, dx
 
     # The main algorithm goes here.
     if dy == 0:
