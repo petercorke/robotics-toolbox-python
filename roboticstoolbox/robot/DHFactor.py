@@ -226,10 +226,9 @@ class DHFactor(ETS):
                 if new is None:
                     out *= e
                     continue
-                else:
-                    out *= new
-                    nchanges += 1
-                    print(f"subs2z: {e} := {new}")
+                out *= new
+                nchanges += 1
+                print(f"subs2z: {e} := {new}")
 
         self.data = out.data
         return nchanges
@@ -271,10 +270,9 @@ class DHFactor(ETS):
             if new is None:
                 out *= this
                 continue
-            else:
-                out *= new
-                nchanges += 1
-                print(f"subs2z2: {this} := {new}")
+            out *= new
+            nchanges += 1
+            print(f"subs2z2: {this} := {new}")
 
         self.data = out.data
         return nchanges
