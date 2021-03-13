@@ -921,6 +921,10 @@ class Robot(DynamicsMixin, IKMixin):
 
         for qk in q:
             self.q = qk
+            if vellipse:
+                vell.q =qk
+            if fellipse:
+                fell.q =qk
             env.step(dt)
 
             if movie is not None:  # pragma nocover
