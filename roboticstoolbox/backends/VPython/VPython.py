@@ -157,31 +157,33 @@ class VPython(Connector):  # pragma nocover
                 poses = id.fkine(q)
                 id.set_joint_poses(poses)
 
-        #if isinstance(id, DHRobot):  # HACK avoid circular import
+        # If DHRobot is given (or equivalent)
         else:
-            # robot = None
-            # # Find first occurrence of it that is in the correct canvas
-            # for i in range(len(self.robots)):
-            #     if self.robots[i].robot is id and \
-            #             self.canvases[fig_num].is_robot_in_canvas(
-            #                                             self.robots[i]):
-            #         robot = self.robots[i]
-            #         break
-            if id is None:
-                robot = self.robots[0]
-            if robot is None:
-                print("No robot")
+            grpahical_dh_robot = None
+            # If no ID given, and there are robots available
+            if id is None and len(self.robots) > 0:
+                # Obtain the first one
+                grpahical_dh_robot = self.robots[0]
+            # If no ID, and no robots available
+            elif id is None:
+                print("No robot found")
                 return
             else:
-                poses = robot.fkine(q)
-                robot.set_joint_poses(poses)
-        # ElseIf GraphicalRobot given
+                # Find first occurrence of it that is in the correct canvas
+                for i in range(len(self.robots)):
+                    if self.robots[i].robot is id and \
+                            self.canvases[fig_num].is_robot_in_canvas(
+                                                            self.robots[i]):
+                        grpahical_dh_robot = self.robots[i]
+                        break
 
-        # # Else
-        # else:
-        #     raise TypeError(
-        #         "Input must be a Robot (or subclass) or "
-        #         "GraphicalRobot, given {0}".format(type(id)))
+            # If no graphical equivalent found, return
+            if grpahical_dh_robot is None:
+                print("No robot found")
+                return
+            # Set poses of graphical robot
+            poses = grpahical_dh_robot.fkine(q)
+            grpahical_dh_robot.set_joint_poses(poses)
 
         if dt is not None:
             sleep(dt)
