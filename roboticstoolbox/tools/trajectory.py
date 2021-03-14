@@ -3,7 +3,7 @@ import math
 from collections import namedtuple
 import matplotlib.pyplot as plt
 from spatialmath.base.argcheck import isvector, \
-    getvector, assertmatrix, getvector
+    getvector, assertmatrix, getvector, isscalar
 
 class Trajectory:
     """
@@ -263,7 +263,6 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
 
     :seealso: :func:`lspb`, :func:`mtraj`.
     """
-
     if isinstance(t, int):
         t = np.arange(0, t)
         istime = False
@@ -272,16 +271,28 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         istime = True
     else:
         raise TypeError('bad argument for time, must be int or vector')
-
     tf = max(t)
+
+    polyfunc = tpoly_func(q0, qf, tf, qd0, qdf)
+
+    # evaluate the polynomials
+    traj = polyfunc(t)
+    p = traj[0]
+    pd = traj[1]
+    pdd = traj[2]
+
+    return Trajectory('tpoly', t, p, pd, pdd, istime)
+
+def tpoly_func(q0, qf, T, qd0=0, qdf=0):
+
     # solve for the polynomial coefficients using least squares
     X = [
-            [0,             0,           0,           0,       0,   1],
-            [tf ** 5,       tf ** 4,     tf ** 3,     tf ** 2, tf,  1],
-            [0,             0,           0,           0,       1,   0],
-            [5 * tf ** 4,   4 * tf ** 3, 3 * tf ** 2, 2 * tf,  1,   0],
-            [0,             0,           0,           2,       0,   0],
-            [20 * tf ** 3, 12 * tf ** 2, 6 * tf,      2,       0,   0]
+            [ 0,             0,           0,           0,       0,   1],
+            [ T ** 5,        T ** 4,      T ** 3,      T ** 2,  T,   1],
+            [ 0,             0,           0,           0,       1,   0],
+            [ 5 * T ** 4,    4 * T ** 3,  3 * T ** 2,  2 * T,   1,   0],
+            [ 0,             0,           0,           2,       0,   0],
+            [20 * T ** 3,   12 * T ** 2,  6 * T,       2,       0,   0]
     ]
     coeffs, resid, rank, s = np.linalg.lstsq(
         X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None)
@@ -290,12 +301,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     coeffs_d = coeffs[0:5] * np.arange(5, 0, -1)
     coeffs_dd = coeffs_d[0:4] * np.arange(4, 0, -1)
 
-    # evaluate the polynomials
-    p = np.polyval(coeffs, t)
-    pd = np.polyval(coeffs_d, t)
-    pdd = np.polyval(coeffs_dd, t)
-
-    return Trajectory('tpoly', t, p, pd, pdd, istime)
+    return lambda x: (np.polyval(coeffs, x), np.polyval(coeffs_d, x), np.polyval(coeffs_dd, x))
 
 
 # -------------------------------------------------------------------------- #
@@ -365,6 +371,20 @@ def lspb(q0, qf, t, V=None):
 
     tf = max(t)
 
+    lspbfunc = lspb_func(q0, qf, tf, V)
+
+    # evaluate the polynomials
+    traj = lspbfunc(t)
+    p = traj[0]
+    pd = traj[1]
+    pdd = traj[2]
+
+    traj = Trajectory('lspb', t, p, pd, pdd, istime)
+    traj.xblend = lspbfunc.tb
+    return traj
+
+def lspb_func(q0, qf, tf, V=None):
+
     if V is None:
         # if velocity not specified, compute it
         V = (qf - q0) / tf * 1.5
@@ -385,33 +405,42 @@ def lspb(q0, qf, t, V=None):
     tb = (q0 - qf + V * tf) / V
     a = V / tb
 
-    p = np.zeros((len(t),))
-    pd = np.zeros((len(t),))
-    pdd = np.zeros((len(t),))
+    def lspbfunc(t):
 
-    for k, tk in enumerate(t):
+        p = []
+        pd = []
+        pdd = []
 
-        if tk <= tb:
-            # initial blend
-            p[k] = q0 + a/2 * tk ** 2
-            pd[k] = a * tk
-            pdd[k] = a
-        elif tk <= (tf - tb):
-            # linear motion
-            p[k] = (qf + q0 - V * tf) / 2 + V * tk
-            pd[k] = V
-            pdd[k] = 0
-        else:
-            # final blend
-            p[k] = qf - a / 2 * tf ** 2 + a * tf * tk - a / 2 * tk ** 2
-            pd[k] = a * tf - a * tk
-            pdd[k] = -a
+        if isscalar(t):
+            t = [t]
+        for tk in t:
+            if tk <= tb:
+                # initial blend
+                pk = q0 + a/2 * tk ** 2
+                pdk = a * tk
+                pddk = a
+            elif tk <= (tf - tb):
+                # linear motion
+                pk = (qf + q0 - V * tf) / 2 + V * tk
+                pdk = V
+                pddk = 0
+            else:
+                # final blend
+                pk = qf - a / 2 * tf ** 2 + a * tf * tk - a / 2 * tk ** 2
+                pdk = a * tf - a * tk
+                pddk = -a
+            p.append(pk)
+            pd.append(pdk)
+            pdd.append(pddk)
+        return (np.array(p), np.array(pd), np.array(pdd))
 
-    traj = Trajectory('lspb', t, p, pd, pdd, istime)
-    traj.xblend = tb
-    return traj
+    # return the function, but add some computed parameters as attributes
+    # as a way of returning extra values without a tuple return
+    func = lspbfunc
+    func.tb = tb
+    func.V = V
 
-
+    return func
 # -------------------------------------------------------------------------- #
 
 def jtraj(q0, qf, tv, qd0=None, qd1=None):
