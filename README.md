@@ -109,21 +109,19 @@ orientation parallel to y-axis (O=+Y)).
 ```python
 from spatialmath import SE3
 
-T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ikine_min(T)         # solve IK
-print(sol.q)                     # display joint angles
+T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+sol = robot.ikine_LM(T)         # solve IK
+print(sol)
+	IKsolution(q=array([  0.2134,    1.867,  -0.2264,   0.4825,   0.2198,    1.396,   -2.037]), success=True, reason=None, iterations=12, residual=1.4517646473808178e-11)
 
-	[-0.01044    7.876    1.557    -6.81    1.571    4.686   0.5169]
-
-print(robot.fkine(sol.q))    # FK shows that desired end-effector pose was achieved
+q_pickup = sol.q
+print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
 
 	Out[35]: 
-	SE3:┏                                           ┓
-		┃-1         -4e-08      0.000521   0.615    ┃
-		┃ 2.79e-08   1          0.00013    0.154    ┃
-		┃-0.000521   0.00013   -1          0.105    ┃
-		┃ 0          0          0          1        ┃
-		┗                                           ┛
+		-1            9.43001e-14  2.43909e-12  0.7          
+		 9.43759e-14  1            7.2574e-13   0.2          
+		-2.43913e-12  7.2575e-13  -1            0.1          
+		 0            0            0            1 
 ```
 
 Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
@@ -131,7 +129,7 @@ Note that because this robot is redundant we don't have any control over the arm
 We can animate a path from the upright `qz` configuration to this pickup configuration
 
 ```python
-qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
+qt = rtb.jtraj(robot.qz, q_pickup, 50)
 robot.plot(qt.q, movie='panda1.gif')
 ```
 
