@@ -727,6 +727,15 @@ class ERobot(Robot):
         Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
 
+        Example::
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.URDF.Panda()
+            >>> panda.showgraph()
+
+        .. image:: ../figs/panda-graph.svg
+            :width: 600
+
         :seealso: :func:`dotfile`
         """
 
@@ -741,7 +750,8 @@ class ERobot(Robot):
 
         # open the PDF file in browser (hopefully portable), then cleanup
         webbrowser.open(f"file://{pdffile.name}")
-        os.remove(pdffile.name)
+        # time.sleep(1)
+        # os.remove(pdffile.name)
 
     def dotfile(self, filename, etsbox=False, jtype=False, static=True):
         """
