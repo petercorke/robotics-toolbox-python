@@ -3,11 +3,12 @@
 @author Jesse Haviland
 """
 
+from roboticstoolbox.backends.Swift import Swift
 import roboticstoolbox as rp
 import spatialmath as sm
 import numpy as np
 
-env = rp.backends.Swift()
+env = Swift()
 env.launch()
 
 panda = rp.models.Panda()

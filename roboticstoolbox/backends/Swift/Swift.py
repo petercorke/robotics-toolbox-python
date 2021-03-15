@@ -114,7 +114,7 @@ class Swift(Connector):  # pragma nocover
         super().launch()
 
         if self.display:
-            sw.start_servers(self.outq, self.inq, browser=browser)
+            sw.start_servers2(self.outq, self.inq, browser=browser)
             self.last_time = time.time()
 
     def step(self, dt=0.05, render=True):

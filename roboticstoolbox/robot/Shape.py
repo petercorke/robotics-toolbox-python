@@ -78,6 +78,10 @@ class Shape(object):
 
         self.pinit = False
 
+    def _to_hex(self, rgb):
+        rgb = (np.array(rgb) * 255).astype(int)
+        return int('0x%02x%02x%02x' % (rgb[0], rgb[1], rgb[2]), 16)
+
     def to_dict(self):
         '''
         to_dict() returns the shapes information in dictionary form
@@ -85,6 +89,7 @@ class Shape(object):
         :returns: All information about the shape
         :rtype: dict
         '''
+        self._to_hex(self.color[0:3])
 
         if self.stype == 'cylinder':
             fk = self.wT * SE3.Rx(np.pi/2)
@@ -100,7 +105,8 @@ class Shape(object):
             't': fk.t.tolist(),
             'q': r2q(fk.R).tolist(),
             'v': self.v.tolist(),
-            'color': list(self.color)
+            'color': self._to_hex(self.color[0:3]),
+            'opacity': self.color[3]
         }
 
         return shape
