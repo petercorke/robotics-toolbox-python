@@ -104,6 +104,9 @@ class Robot(DynamicsMixin, IKMixin):
     def copy(self):
         return copy.deepcopy(self)
 
+    def __repr__(self):
+        return str(self)
+
     def __getitem__(self, i):
         """
         Get link (Robot superclass)
