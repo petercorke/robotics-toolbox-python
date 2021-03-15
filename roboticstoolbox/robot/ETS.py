@@ -451,8 +451,7 @@ class SuperETS(UserList, ABC):
                     qj = q[et.jindex]
                 if et.isrevolute and unit == 'deg':
                     qj *= np.pi / 180.0
-                if et.isflip:
-                    qj = -qj
+
                 Tk = et.T(qj)
             else:
                 # for constants
@@ -467,8 +466,10 @@ class SuperETS(UserList, ABC):
             T = SE2(T, check=False)
         else:
             T = SE3(T, check=False)
-        T.simplify()
-        return T
+
+        # optionally do symbolic simplification
+        
+        return T.simplify()
 
     def compile(self):
         """
@@ -643,7 +644,7 @@ class SuperETS(UserList, ABC):
             the left and right operands in an internal list. In this example
             we see the length of the product is 2.
         """
-        prod = ETS()
+        prod = self.__class__()
         prod.data = self.data + rest.data
         return prod
 
