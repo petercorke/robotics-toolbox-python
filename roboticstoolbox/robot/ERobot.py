@@ -1235,7 +1235,7 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def jacob0(self, q, end=None, start=None, tool=None, T=None):
+    def jacob0(self, q, end=None, start=None, tool=None, T=None, half=None, analytical=None):
         r"""
         Manipulator geometric Jacobian in the base frame
 
@@ -1254,6 +1254,10 @@ graph [rankdir=LR];
             avoid caluclating forward kinematics to save time, defaults
             to None
         :type T: SE3, optional
+        :param half: return half Jacobian: 'trans' or 'rot'
+        :type half: str
+        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
+        :type analytical: str
         :return J: Manipulator Jacobian in the base frame
         :rtype: ndarray(6,n)
 
@@ -1263,6 +1267,17 @@ graph [rankdir=LR];
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        ``analytical`` can be one of:
+
+            =============  ==================================
+            Value          Rotational representation
+            =============  ==================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ==================================
 
         Example:
 
@@ -1295,6 +1310,7 @@ graph [rankdir=LR];
         U = np.eye(4)
         j = 0
         J = np.zeros((6, n))
+        zero = np.array([0, 0, 0])
 
         for link in path:
 
@@ -1326,19 +1342,52 @@ graph [rankdir=LR];
 
                 elif link.v.axis == 'tx':
                     J[:3, j] = n
-                    J[3:, j] = np.array([0, 0, 0])
+                    J[3:, j] = zero
 
                 elif link.v.axis == 'ty':
                     J[:3, j] = o
-                    J[3:, j] = np.array([0, 0, 0])
+                    J[3:, j] = zero
 
                 elif link.v.axis == 'tz':
                     J[:3, j] = a
-                    J[3:, j] = np.array([0, 0, 0])
+                    J[3:, j] = zero
 
                 j += 1
             else:
                 U = U @ link.A(fast=True)
+
+        # compute rotational transform if analytical Jacobian required
+        if analytical is not None and half != 'trans':
+
+            if analytical == 'rpy-xyz':
+                rpy = tr2rpy(T, 'xyz')
+                A = rpy2jac(rpy, 'xyz')
+            elif analytical == 'rpy-zyx':
+                rpy = tr2rpy(T, 'zyx')
+                A = rpy2jac(rpy, 'zyx')
+            elif analytical == 'eul':
+                eul = tr2eul(T)
+                A = eul2jac(eul)
+            elif analytical == 'exp':
+                # TODO: move to SMTB.base, Horner form with skew(v)
+                (theta, v) = trlog(t2r(T))
+                A = np.eye(3,3) - (1 - math.cos(theta)) / theta * skew(v) \
+                    + (theta - math.sin(theta)) / theta * skew(v)**2
+            else:
+                raise ValueError('bad order specified')
+        
+            J = block_diag(np.eye(3,3), np.linalg.inv(A)) @ J
+
+        # TODO optimize computation above if half matrix is returned
+
+        # return top or bottom half if asked
+        if half is not None:
+            if half == 'trans':
+                J = J[:3,:]
+            elif half == 'rot':
+                J = J[3:,:]
+            else:
+                raise ValueError('bad half specified')
 
         return J
 
