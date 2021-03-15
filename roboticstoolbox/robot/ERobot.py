@@ -1767,8 +1767,10 @@ graph [rankdir=LR];
         :return: Pretty print of the robot model
         :rtype: str
 
-        Constant links are shown in blue.
-        End-effector links are prefixed with an @
+        - Constant links are shown in blue.
+        - End-effector links are prefixed with an @
+        - The robot base frame is denoted as ``_O_`` and is equal to the robot's
+          ``base`` attribute.
         """
         table = ANSITable(
             Column("id", headalign="^"),
@@ -1781,12 +1783,17 @@ graph [rankdir=LR];
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
+            parent_name = link.parent.name if link.parent is not None else "_O_"
+            s = ets.__str__(f"q{link._jindex}")
+            if len(s) > 0:
+                s = " * " + s
             table.row(
                 k,
                 color + ee + link.name,
-                link.parent.name if link.parent is not None else "-",
+                parent_name,
                 link._joint_name if link.parent is not None else "",
-                ets.__str__(f"q{link._jindex}"))
+                f"{{{link.name}}} = {{{parent_name}}} {s}"
+                )
 
         if self.manufacturer is None:
             manuf = ""
