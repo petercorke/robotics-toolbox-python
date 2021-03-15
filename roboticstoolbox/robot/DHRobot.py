@@ -653,6 +653,14 @@ class DHRobot(Robot):
         Print a table showing all the non-zero DH parameters, and their
         values.  This is the minimum set of kinematic parameters required
         to describe the robot.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.dhunique()
         """
 
         table = ANSITable(
@@ -735,6 +743,20 @@ class DHRobot(Robot):
         return tw, T[-1]
 
     def ets(self):
+        """
+        Robot kinematics as an elemenary transform sequence
+
+        :return: elementary transform sequence
+        :rtype: ETS
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.ets()
+        """
 
         # optionally start with the base transform
         if self._base is None:
@@ -893,7 +915,7 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
@@ -953,7 +975,7 @@ class DHRobot(Robot):
         :param half: return half Jacobian: 'trans' or 'rot'
         :type half: str
         :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-        :type param: str
+        :type analytical: str
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
@@ -982,13 +1004,14 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        .. warning:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: The **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
 
         .. note:: ``T`` can be passed in to save the cost of computing forward
-            kinematics.
+            kinematics which is needed to transform velocity from end-effector
+            frame to world frame.
 
         """  # noqa
         q = getvector(q, self.n)

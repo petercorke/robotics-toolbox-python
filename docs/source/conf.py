@@ -141,6 +141,7 @@ mathjax_config = {
             "norm": [r"\Vert #1 \Vert", 1],
             # matrices
             "mat": [r"\mathbf{#1}", 1],
+            "dmat": [r"\dot{\mathbf{#1}}", 1],
             "fmat": [r"\presup{#1}\mathbf{#2}", 2],
             # skew matrices
             "sk": [r"\left[#1\right]", 1],

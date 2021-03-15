@@ -637,6 +637,13 @@ class ERobot(Robot):
           base to the link ``link`` specified as an ELink reference or a name.
         - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
           from link ``l1`` to link ``l2``.
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.ETS.Panda()
+            >>> panda.ets()
+
         """
         v = self._getlink(start, self.base_link)
         if end is None and len(self.ee_links) > 1:
@@ -1255,7 +1262,7 @@ graph [rankdir=LR];
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the geometric Jacobian as described in texts by
+        .. warning:: This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
@@ -1340,9 +1347,7 @@ graph [rankdir=LR];
             end of end, defaults to None
         :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
-            Jacobian represents with respect to the base frame. Use this to
-            avoid caluclating forward kinematics to save time, defaults
-            to None
+            Jacobian represents with respect to the base frame.
         :type T: SE3, optional
         :return J: Manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
@@ -1362,13 +1367,17 @@ graph [rankdir=LR];
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
 
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
+
+        .. note:: ``T`` can be passed in to save the cost of computing forward
+            kinematics which is needed to transform velocity from end-effector
+            frame to world frame.
         """  # noqa
 
         q = getvector(q, self.n)
@@ -1525,7 +1534,7 @@ graph [rankdir=LR];
     #     return L
 
     def hessian0(self, q=None, J0=None, end=None, start=None):
-        """
+        r"""
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
@@ -1544,19 +1553,37 @@ graph [rankdir=LR];
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
-        H[i,j,k] is d2 u_i / dq_j dq_k
+        This method computes the manipulator Hessian.  If we take the 
+        time derivative of the differential kinematic relationship
 
-        where u = {t_x, t_y, t_z, r_x, r_y, r_z}
+        .. math::
 
-        J[i,j] is d u_i / dq_j
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
 
-        where u = {t_x, t_y, t_z, ζ_x, ζ_y, ζ_z}
+        where
 
-        v = J qd
+        .. math::
 
-        a = Jd qd + J qdd
+            \dmat{J} = \mat{H} \dvec{q}
+        
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
 
-        Jd = H qd
+        The elements of the Hessian are
+
+        .. math::
+        
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+
+        Similarly, we can write
+
+        .. math::
+        
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -1592,7 +1619,7 @@ graph [rankdir=LR];
         return H
 
     def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes='all'):
-        """
+        r"""
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
         One of J or q is required. Supply J and H if already calculated to
@@ -1612,6 +1639,18 @@ graph [rankdir=LR];
 
         :return: The manipulability Jacobian
         :rtype: float ndarray(n)
+
+        Yoshikawa's manipulability measure
+
+        .. math::
+
+            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
+
+        This method returns its Jacobian with respect to configuration
+
+        .. math::
+
+            \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -1712,9 +1751,9 @@ graph [rankdir=LR];
 
         .. runblock:: pycon
 
-            import roboticstoolbox as rtb
-            robot = rtb.models.URDF.Panda()
-            robot.hierarchy()
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.URDF.Panda()
+            >>> robot.hierarchy()
 
         """
 
