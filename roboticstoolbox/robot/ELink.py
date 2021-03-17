@@ -10,6 +10,17 @@ import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 
+import numpy as np
+import numba
+
+
+# import numba
+
+# @numba.jit(numba.float64[:](numba.float64[:], numba.float64[:]), nopython=True)
+# @numba.jit(nopython=True)
+def _mult(l, r):
+    return l @ r
+
 
 class ELink(Link):
     """
@@ -349,6 +360,12 @@ class ELink(Link):
     #         T = SE3(T)
     #     self._r = T
 
+    # import numba
+
+# array(float64, 1d, C)
+
+    # @numba.jit(nopython=True)
+
     def A(self, q=None, fast=False):
         """
         Link transform matrix
@@ -371,7 +388,8 @@ class ELink(Link):
             # a variable joint
             if q is None:
                 raise ValueError("q is required for variable joints")
-            T = self.Ts.A @ self.v.T(q)
+            # T = self.Ts.A @ self.v.T(q)
+            T = _mult(self.Ts.A, self.v.T(q))
         else:
             # a fixed joint
             T = self.Ts.A

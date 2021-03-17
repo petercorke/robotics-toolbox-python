@@ -63,7 +63,7 @@ class ERobot(Robot):
             gripper_links=None,
             checkjindex=True,
             **kwargs
-            ):
+    ):
 
         self._ets = []
         self._linkdict = {}
@@ -266,104 +266,62 @@ class ERobot(Robot):
     #     return path
 
     def to_dict(self):
-        ob = {
-            'links': [],
-            'name': self.name,
-            'n': self.n
-        }
+        # ob = {
+        #     'links': [],
+        #     'name': self.name,
+        #     'n': self.n
+        # }
 
         self.fkine_all(self.q)
 
+        ob = []
+
         for link in self.links:
-            li = {
-                'axis': [],
-                'eta': [],
-                'geometry': [],
-                'collision': []
-            }
 
-            for et in link.ets():
-                li['axis'].append(et.axis)
-                li['eta'].append(et.eta)
-
-            if link.v is not None:
-                li['axis'].append(link.v.axis)
-                li['eta'].append(link.v.eta)
-
-            for gi in link.geometry:
-                li['geometry'].append(gi.to_dict())
-
-            for gi in link.collision:
-                li['collision'].append(gi.to_dict())
-
-            ob['links'].append(li)
+            if self._show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.to_dict())
+            if self._show_collision:
+                for gi in link.collision:
+                    ob.append(gi.to_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                li = {
-                    'axis': [],
-                    'eta': [],
-                    'geometry': [],
-                    'collision': []
-                }
 
-                for et in link.ets():
-                    li['axis'].append(et.axis)
-                    li['eta'].append(et.eta)
-
-                if link.v is not None:
-                    li['axis'].append(link.v.axis)
-                    li['eta'].append(link.v.eta)
-
-                for gi in link.geometry:
-                    li['geometry'].append(gi.to_dict())
-
-                for gi in link.collision:
-                    li['collision'].append(gi.to_dict())
-
-                ob['links'].append(li)
+                if self._show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.to_dict())
+                if self._show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.to_dict())
 
         return ob
 
     def fk_dict(self):
-        ob = {
-            'links': []
-        }
+        ob = []
 
         self.fkine_all(self.q)
 
         # Do the robot
         for link in self.links:
 
-            li = {
-                'geometry': [],
-                'collision': []
-            }
-
-            for gi in link.geometry:
-                li['geometry'].append(gi.fk_dict())
-
-            for gi in link.collision:
-                li['collision'].append(gi.fk_dict())
-
-            ob['links'].append(li)
+            if self._show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if self._show_collision:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                li = {
-                    'geometry': [],
-                    'collision': []
-                }
-
-                for gi in link.geometry:
-                    li['geometry'].append(gi.fk_dict())
-
-                for gi in link.collision:
-                    li['collision'].append(gi.fk_dict())
-
-                ob['links'].append(li)
+                if self._show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if self._show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
 
         return ob
 
@@ -1880,7 +1838,7 @@ graph [rankdir=LR];
 
             for link_col in link.collision:
                 l_Ain, l_bin, d, wTcp = indiv_calculation(
-                                                link, link_col, q)
+                    link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:

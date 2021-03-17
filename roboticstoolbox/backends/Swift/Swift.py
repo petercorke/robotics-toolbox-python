@@ -20,6 +20,7 @@ sw = None
 
 SHAPE_ADD = 10000
 
+
 def _import_swift():     # pragma nocover
     import importlib
     global sw
@@ -68,12 +69,17 @@ class Swift(Connector):  # pragma nocover
         - https://github.com/jhavl/swift
 
     """
+
     def __init__(self, realtime=True, display=True):
         super(Swift, self).__init__()
 
         self.sim_time = 0.0
-        self.robots = []
-        self.shapes = []
+
+        # self.robots = []
+        # self.shapes = []
+
+        self.swift_objects = []
+
         self.outq = Queue()
         self.inq = Queue()
 
@@ -146,8 +152,11 @@ class Swift(Connector):  # pragma nocover
 
         super().step
 
-        self._step_robots(dt)
-        self._step_shapes(dt)
+        for obj in self.swift_objects:
+            if isinstance(obj, rp.Shape):
+                self._step_shape(obj, dt)
+            elif isinstance(obj, rp.Robot):
+                self._step_robot(obj, dt)
 
         # Adjust sim time
         self.sim_time += dt
@@ -157,28 +166,29 @@ class Swift(Connector):  # pragma nocover
 
             # Only need to do GUI stuff if self.display is True
             # Process GUI events
-            self.process_events()
+            # self.process_events()
 
             # Step through user GUI changes
-            self._step_elements()
+            # self._step_elements()
 
             # If realtime is set, delay progress if we are running too quickly
-            if self.realtime:
-                time_taken = (time.time() - self.last_time)
-                diff = dt - time_taken
+            # if self.realtime:
+            #     time_taken = (time.time() - self.last_time)
+            #     diff = dt - time_taken
 
-                if diff > 0:
-                    time.sleep(diff)
+            #     if diff > 0:
+            #         time.sleep(diff)
 
-                self.last_time = time.time()
+            #     self.last_time = time.time()
 
-            if render:
-                self._draw_all()
-            else:
-                for i in range(len(self.robots)):
-                    self.robots[i]['ob'].fkine_all(self.robots[i]['ob'].q)
+            # if render:
 
-            self._send_socket('sim_time', self.sim_time)
+            self._draw_all()
+            # else:
+            #     for i in range(len(self.robots)):
+            #         self.robots[i]['ob'].fkine_all(self.robots[i]['ob'].q)
+
+            # self._send_socket('sim_time', self.sim_time)
 
     def reset(self):
         """
@@ -255,51 +265,51 @@ class Swift(Connector):  # pragma nocover
         super().add()
 
         if isinstance(ob, rp.ERobot):
-            robot = ob.to_dict()
-            robot['show_robot'] = show_robot
-            robot['show_collision'] = show_collision
-
-            robot_object = {
-                'ob': ob,
-                'readonly': readonly
-            }
+            ob._swift_readonly = readonly
+            ob._show_robot = show_robot
+            ob._show_collision = show_collision
 
             if self.display:
-                id = self._send_socket('robot', robot)
+                robob = ob.to_dict()
+                id = self._send_socket('shape', robob)
 
-                loaded = 0
-                while loaded == 0:
-                    loaded = int(self._send_socket('is_loaded', id))
+                while not int(self._send_socket(
+                        'shape_mounted', [id, len(robob)])):
                     time.sleep(0.1)
-            else:
-                id = len(self.robots)
 
-            self.robots.append(robot_object)
+            else:
+                id = len(self.swift_objects)
+
+            self.swift_objects.append(ob)
             return int(id)
         elif isinstance(ob, rp.Shape):
-            shape = ob.to_dict()
             if self.display:
-                id = int(self._send_socket('shape', shape)) + SHAPE_ADD
+                id = int(self._send_socket('shape', [ob.to_dict()]))
+
+                while not int(self._send_socket('shape_mounted', [id, 1])):
+                    time.sleep(0.1)
+
             else:
-                id = len(self.shapes) + SHAPE_ADD
-            self.shapes.append(ob)
+                id = len(self.swift_objects)
+
+            self.swift_objects.append(ob)
             return int(id)
-        elif isinstance(ob, swift.SwiftElement):
+        # elif isinstance(ob, swift.SwiftElement):
 
-            if ob._added_to_swift:
-                raise ValueError(
-                    "This element has already been added to Swift")
+        #     if ob._added_to_swift:
+        #         raise ValueError(
+        #             "This element has already been added to Swift")
 
-            ob._added_to_swift = True
+        #     ob._added_to_swift = True
 
-            id = 'customelement' + str(self.elementid)
-            self.elementid += 1
-            self.elements[id] = ob
-            ob._id = id
+        #     id = 'customelement' + str(self.elementid)
+        #     self.elementid += 1
+        #     self.elements[id] = ob
+        #     ob._id = id
 
-            self._send_socket(
-                'add_element',
-                ob.to_dict())
+        #     self._send_socket(
+        #         'add_element',
+        #         ob.to_dict())
 
     def remove(self, id):
         """
@@ -428,49 +438,47 @@ class Swift(Connector):  # pragma nocover
         for event in events:
             self.elements[event].cb(events[event])
 
-    def _step_robots(self, dt):
+    def _step_robot(self, robot, dt):
 
-        for robot_object in self.robots:
-            if robot_object is not None:
-                robot = robot_object['ob']
+        # robot = robot_object['ob']
 
-                if robot_object['readonly'] or robot.control_type == 'p':
-                    pass            # pragma: no cover
+        if robot._swift_readonly or robot.control_type == 'p':
+            pass            # pragma: no cover
 
-                elif robot.control_type == 'v':
+        elif robot.control_type == 'v':
 
-                    for i in range(robot.n):
-                        robot.q[i] += robot.qd[i] * (dt)
+            for i in range(robot.n):
+                robot.q[i] += robot.qd[i] * (dt)
 
-                        if np.any(robot.qlim[:, i] != 0) and \
-                                not np.any(np.isnan(robot.qlim[:, i])):
-                            robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
-                            robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
+                if np.any(robot.qlim[:, i] != 0) and \
+                        not np.any(np.isnan(robot.qlim[:, i])):
+                    robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
+                    robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
 
-                elif robot.control_type == 'a':
-                    pass
+        elif robot.control_type == 'a':
+            pass
 
-                else:            # pragma: no cover
-                    # Should be impossible to reach
-                    raise ValueError(
-                        'Invalid robot.control_type. '
-                        'Must be one of \'p\', \'v\', or \'a\'')
+        else:            # pragma: no cover
+            # Should be impossible to reach
+            raise ValueError(
+                'Invalid robot.control_type. '
+                'Must be one of \'p\', \'v\', or \'a\'')
 
-    def _step_shapes(self, dt):
+    def _step_shape(self, shape, dt):
 
-        for shape in self.shapes:
-            if shape is not None:
+        # for shape in self.shapes:
+        # if shape is not None:
 
-                T = shape.base
-                t = T.t.astype('float64')
-                t += shape.v[:3] * dt
+        T = shape.base
+        t = T.t.astype('float64')
+        t += shape.v[:3] * dt
 
-                R = sm.SO3(T.R)
-                Rdelta = sm.SO3.EulerVec(shape.v[3:] * dt)
-                R = Rdelta * R
-                R = R.norm()  # renormalize to avoid numerical issues
+        R = sm.SO3(T.R)
+        Rdelta = sm.SO3.EulerVec(shape.v[3:] * dt)
+        R = Rdelta * R
+        R = R.norm()  # renormalize to avoid numerical issues
 
-                shape.base = sm.SE3.SO3(R, t=t)
+        shape.base = sm.SE3.SO3(R, t=t)
 
     def _step_elements(self):
         """
@@ -487,15 +495,16 @@ class Swift(Connector):  # pragma nocover
 
     def _draw_all(self):
 
-        for i in range(len(self.robots)):
-            if self.robots[i] is not None:
-                self._send_socket(
-                    'robot_poses', [i, self.robots[i]['ob'].fk_dict()])
+        msg = []
 
-        for i in range(len(self.shapes)):
-            if self.shapes[i] is not None:
-                self._send_socket(
-                    'shape_poses', [i, self.shapes[i].fk_dict()])
+        for i in range(len(self.swift_objects)):
+            if self.swift_objects[i] is not None:
+                if isinstance(self.swift_objects[i], rp.Shape):
+                    msg.append([i, [self.swift_objects[i].fk_dict()]])
+                elif isinstance(self.swift_objects[i], rp.Robot):
+                    msg.append([i, self.swift_objects[i].fk_dict()])
+
+        # self._send_socket('shape_poses', msg)
 
     def _send_socket(self, code, data=None):
         msg = [code, data]
