@@ -29,6 +29,7 @@ from ansitable import ANSITable, Column
 from spatialmath import SpatialAcceleration, SpatialVelocity, \
     SpatialInertia, SpatialForce
 
+import numba
 
 class ERobot(Robot):
     """
@@ -216,6 +217,21 @@ class ERobot(Robot):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
+
+        # Set up qlim
+        qlim = np.zeros((2, self.n))
+        j = 0
+
+        for i in range(len(orlinks)):
+            if orlinks[i].isjoint:
+                qlim[:, j] = orlinks[i].qlim
+                j += 1
+        self._qlim = qlim
+
+        for i in range(self.n):
+            if np.any(qlim[:, i] != 0) and \
+                    not np.any(np.isnan(qlim[:, i])):
+                self._valid_qlim = True
 
         super().__init__(orlinks, **kwargs)
 
@@ -431,16 +447,22 @@ class ERobot(Robot):
     #         robot.tool)
 
     @property
+    # @numba.njit(numba.float64[:])
     def qlim(self):
-        v = np.zeros((2, self.n))
-        j = 0
+        # v = np.zeros((2, self.n))
+        # j = 0
 
-        for i in range(len(self.links)):
-            if self.links[i].isjoint:
-                v[:, j] = self.links[i].qlim
-                j += 1
+        # for i in range(len(self.links)):
+        #     if self.links[i].isjoint:
+        #         v[:, j] = self.links[i].qlim
+        #         j += 1
 
-        return v
+        return self._qlim
+
+    @property
+    def valid_qlim(self):
+
+        return self._valid_qlim
 
     # @property
     # def qdlim(self):

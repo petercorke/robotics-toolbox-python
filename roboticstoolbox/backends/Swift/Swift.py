@@ -15,6 +15,8 @@ from functools import wraps
 
 from roboticstoolbox.backends import Swift as swift
 
+import numba
+
 _sw = None
 sw = None
 
@@ -32,6 +34,23 @@ def _import_swift():     # pragma nocover
             '\nYou must install the python package swift, see '
             'https://github.com/jhavl/swift\n')
         raise
+
+
+'''
+Functional components
+'''
+@numba.njit
+def _v(q, qd, dt, qlim, valid):
+    # qn = np.copy(q)
+    # for i in range(n):
+    #     qn[i] += qd[i] * dt
+
+    q += qd * dt
+
+    if valid:
+        q = np.minimum(q, qlim[1, :])
+        q = np.maximum(q, qlim[0, :])
+
 
 
 class Swift(Connector):  # pragma nocover
@@ -442,18 +461,20 @@ class Swift(Connector):  # pragma nocover
 
         # robot = robot_object['ob']
 
-        if robot._swift_readonly or robot.control_type == 'p':
+        if robot._swift_readonly or robot._control_type == 'p':
             pass            # pragma: no cover
 
-        elif robot.control_type == 'v':
+        elif robot._control_type == 'v':
 
-            for i in range(robot.n):
-                robot.q[i] += robot.qd[i] * (dt)
+            _v(robot._q, robot._qd, dt, robot._qlim, robot._valid_qlim)
 
-                if np.any(robot.qlim[:, i] != 0) and \
-                        not np.any(np.isnan(robot.qlim[:, i])):
-                    robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
-                    robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
+            # for i in range(robot.n):
+            #     robot.q[i] += robot.qd[i] * (dt)
+
+            #     if np.any(robot.qlim[:, i] != 0) and \
+            #             not np.any(np.isnan(robot.qlim[:, i])):
+            #         robot.q[i] = np.min([robot.q[i], robot.qlim[1, i]])
+            #         robot.q[i] = np.max([robot.q[i], robot.qlim[0, i]])
 
         elif robot.control_type == 'a':
             pass
@@ -504,7 +525,7 @@ class Swift(Connector):  # pragma nocover
                 elif isinstance(self.swift_objects[i], rp.Robot):
                     msg.append([i, self.swift_objects[i].fk_dict()])
 
-        # self._send_socket('shape_poses', msg)
+        self._send_socket('shape_poses', msg)
 
     def _send_socket(self, code, data=None):
         msg = [code, data]
