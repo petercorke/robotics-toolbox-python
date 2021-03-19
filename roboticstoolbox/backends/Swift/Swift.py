@@ -39,6 +39,8 @@ def _import_swift():     # pragma nocover
 '''
 Functional components
 '''
+
+
 @numba.njit
 def _v(q, qd, dt, qlim, valid):
     # qn = np.copy(q)
@@ -50,7 +52,6 @@ def _v(q, qd, dt, qlim, valid):
     if valid:
         q = np.minimum(q, qlim[1, :])
         q = np.maximum(q, qlim[0, :])
-
 
 
 class Swift(Connector):  # pragma nocover
@@ -525,13 +526,17 @@ class Swift(Connector):  # pragma nocover
                 elif isinstance(self.swift_objects[i], rp.Robot):
                     msg.append([i, self.swift_objects[i].fk_dict()])
 
-        self._send_socket('shape_poses', msg)
+        self._send_socket('shape_poses', msg, True)
 
-    def _send_socket(self, code, data=None):
-        msg = [code, data]
+    def _send_socket(self, code, data=None, expected=True):
+        msg = [expected, [code, data]]
 
         self.outq.put(msg)
-        return self.inq.get()
+
+        if expected:
+            return self.inq.get()
+        else:
+            return '0'
 
 
 class SwiftElement(ABC):

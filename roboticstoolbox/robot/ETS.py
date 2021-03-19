@@ -592,7 +592,7 @@ class SuperETS(UserList, ABC):
                         _j = j
                     else:
                         _j = et.jindex
-                    qvar = q.format(_j, _j+1) # lgtm [py/str-format/surplus-argument]  # noqa
+                    qvar = q.format(_j, _j+1)  # lgtm [py/str-format/surplus-argument]  # noqa
                 else:
                     qvar = ""
                 if et.isflip:
@@ -1127,7 +1127,7 @@ class ETS(SuperETS):
         :math:`\mathbf{E}(q)`.
 
         .. math::
-        
+
             {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)
 
         The temporal derivative of this is the spatial

@@ -23,6 +23,9 @@ p = None
 _pyb = None
 
 
+CONST_RX = SE3.Rx(np.pi/2).A
+
+
 def _import_pyb():
     import importlib
     global _pyb
@@ -65,7 +68,8 @@ class Shape(object):
             filename=None,
             stype=None):
 
-        self._wT = SE3()
+        self._wT = np.eye(4)
+        self._sT = np.eye(4)
         self.co = None
         self.base = base
         self.scale = scale
@@ -92,9 +96,9 @@ class Shape(object):
         self._to_hex(self.color[0:3])
 
         if self.stype == 'cylinder':
-            fk = self.wT * SE3.Rx(np.pi/2)
+            fk = self._sT @ CONST_RX
         else:
-            fk = self.wT
+            fk = self._sT
 
         shape = {
             'stype': self.stype,
@@ -102,8 +106,8 @@ class Shape(object):
             'filename': self.filename,
             'radius': self.radius,
             'length': self.length,
-            't': fk.t.tolist(),
-            'q': r2q(fk.R).tolist(),
+            't': fk[:3, 3].tolist(),
+            'q': r2q(fk[:3, :3]).tolist(),
             'v': self.v.tolist(),
             'color': self._to_hex(self.color[0:3]),
             'opacity': self.color[3]
@@ -120,13 +124,13 @@ class Shape(object):
         '''
 
         if self.stype == 'cylinder':
-            fk = self.wT * SE3.Rx(np.pi/2)
+            fk = self._sT @ CONST_RX
         else:
-            fk = self.wT
+            fk = self._sT
 
         shape = {
-            't': fk.t.tolist(),
-            'q': r2q(fk.R).tolist()
+            't': fk[:3, 3].tolist(),
+            'q': r2q(fk[:3, :3]).tolist()
         }
 
         return shape
@@ -136,9 +140,10 @@ class Shape(object):
 
     def _update_pyb(self):
         if _pyb and self.co is not None:
-            q = r2q(self.wT.R)
+            q = r2q(self._sT[:3, :3])
             rot = [q[1], q[2], q[3], q[0]]
-            p.resetBasePositionAndOrientation(self.co, self.wT.t, rot)
+            p.resetBasePositionAndOrientation(
+                self.co, self._sT[:3, 3], rot)
 
     def _init_pob(self):   # pragma nocover
         pass
@@ -198,13 +203,12 @@ class Shape(object):
 
     @property
     def wT(self):
-        return self._wT * self.base
+        return self._wT @ self.base.A
 
     @wT.setter
     def wT(self, T):
-        if not isinstance(T, SE3):
-            T = SE3(T)
         self._wT = T
+        self._sT = self._wT @ self._base.A
         self._update_pyb()
 
     @property

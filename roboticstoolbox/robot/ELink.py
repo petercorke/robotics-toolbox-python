@@ -10,16 +10,89 @@ import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 
+from spatialmath import base
+
 import numpy as np
 import numba
 
 
-# import numba
+# func_type = numba.deferred_type()
+# func_type.define(rx.classtype.instace_type)
 
-# @numba.jit(numba.float64[:](numba.float64[:], numba.float64[:]), nopython=True)
-# @numba.jit(nopython=True)
-def _mult(l, r):
-    return l @ r
+# spec = [
+#     ('isjoint', numba.int8),
+#     ('jindex', numba.int64),
+#     ('Ts', numba.float64[:]),
+#     ('flip', numba.int8),
+#     ('axis', numba.types.unicode_type)
+#     # ('T', numba.types)
+# ]
+
+
+# @numba.experimental.jitclass(spec)
+# class _ELink:
+#     def __init__(self, isjoint, jindex, Ts, flip, axis):
+#         self.isjoint = isjoint
+#         self.jindex = jindex
+#         self.flip = flip
+#         self.axis = axis
+#         print(Ts)
+#         self.Ts = Ts.reshape((4, 4))
+
+#     def A(self, q=0):
+#         if self.isjoint:
+#             return self.Ts @ self.T(q)
+#         else:
+#             return self.Ts
+
+#     def T(self, q):
+#         if self.axis == 'Rx':
+#             return self.rx(q)
+#         elif self.axis == 'Ry':
+#             return self.ry(q)
+#         elif self.axis == 'Rz':
+#             return self.rz(q)
+#         elif self.axis == 'tx':
+#             return self.tx(q)
+#         elif self.axis == 'ty':
+#             return self.ty(q)
+#         elif self.axis == 'tz':
+#             return self.tz(q)
+#         else:
+#             return self.rz(q)
+
+#     def rx(self, q):
+#         base.r2t_fast(base.rotx_fast(q))
+
+#     def ry(self, q):
+#         base.r2t_fast(base.roty_fast(q))
+
+#     def rz(self, q):
+#         base.r2t_fast(base.rotz_fast(q))
+
+#     def tx(self, q):
+#         return np.array([
+#             [1.0, 0, 0, q],
+#             [0.0, 1, 0, 0],
+#             [0.0, 0, 1, 0],
+#             [0.0, 0, 0, 1]
+#         ])
+
+#     def ty(self, q):
+#         return np.array([
+#             [1.0, 0, 0, 0],
+#             [0.0, 1, 0, q],
+#             [0.0, 0, 1, 0],
+#             [0.0, 0, 0, 1]
+#         ])
+
+#     def tz(self, q):
+# return np.array([
+#     [1.0, 0, 0, 0],
+#     [0.0, 1, 0, 0],
+#     [0.0, 0, 1, q],
+#     [0.0, 0, 0, 1]
+# ])
 
 
 class ELink(Link):
@@ -117,6 +190,21 @@ class ELink(Link):
             self._joint = True
 
         self._v = v
+
+        # # Set up fast object
+        # if self.isjoint:
+        #     axis = self.v.axis
+        #     jin = self.jindex
+        # else:
+        #     axis = 'None'
+        #     jin = 0
+
+        # # print(self.Ts.A.flags)
+        # Ts = np.eye(4)
+
+        # self._elink = _ELink(
+        #     self.isjoint, jin,
+        #     Ts, self.flip, axis)
 
     def _init_Ts(self):
         # Number of transforms in the ETS excluding the joint variable
@@ -378,25 +466,29 @@ class ELink(Link):
         :return T: link frame transformation matrix
         :rtype T: SE3 or ndarray(4,4)
 
-        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body 
+        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body
           transformation from the previous to the current link frame to
           the next, which depends on the joint coordinate ``q``.
 
         """
 
-        if self.isjoint:
-            # a variable joint
-            if q is None:
-                raise ValueError("q is required for variable joints")
-            # T = self.Ts.A @ self.v.T(q)
-            T = _mult(self.Ts.A, self.v.T(q))
-        else:
-            # a fixed joint
-            T = self.Ts.A
-
         if fast:
+            if self.isjoint:
+                T = self._Ts.A @ self._v.T(q)
+            else:
+                # a fixed joint
+                T = self._Ts.A
             return T
         else:
+            if self.isjoint:
+                # a variable joint
+                if q is None:
+                    raise ValueError("q is required for variable joints")
+                T = self.Ts.A @ self.v.T(q)
+            else:
+                # a fixed joint
+                T = self.Ts.A
+
             return SE3(T, check=False)
 
     def ets(self):

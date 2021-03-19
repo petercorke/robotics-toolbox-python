@@ -31,6 +31,61 @@ from spatialmath import SpatialAcceleration, SpatialVelocity, \
 
 import numba
 
+
+@numba.njit
+def j_fast(base, fk, tool, links, lj, axis, n):
+
+    U = np.eye(4)
+    j = 0
+    J = np.empty((6, n))
+
+    for i in range(n):
+
+        if lj[i]:
+            U = U @ links[i, :, :]
+
+            if i == 6:
+                U = U @ tool
+
+            Tu = np.linalg.inv(U) @ fk
+            n = U[:3, 0]
+            o = U[:3, 1]
+            a = U[:3, 2]
+            x = Tu[0, 3]
+            y = Tu[1, 3]
+            z = Tu[2, 3]
+
+            if axis[i] == 'Rz':
+                J[:3, j] = (o * x) - (n * y)
+                J[3:, j] = a
+
+            elif axis[i] == 'Ry':
+                J[:3, j] = (n * z) - (a * x)
+                J[3:, j] = o
+
+            elif axis[i] == 'Rx':
+                J[:3, j] = (a * y) - (o * z)
+                J[3:, j] = n
+
+            elif axis[i] == 'tx':
+                J[:3, j] = n
+                J[3:, j] = np.array([0, 0, 0])
+
+            elif axis[i] == 'ty':
+                J[:3, j] = o
+                J[3:, j] = np.array([0, 0, 0])
+
+            elif axis[i] == 'tz':
+                J[:3, j] = a
+                J[3:, j] = np.array([0, 0, 0])
+
+            j += 1
+        else:
+            U = U @ links[i, :, :]
+
+    return J
+
+
 class ERobot(Robot):
     """
     The ERobot. A superclass which represents the
@@ -952,15 +1007,17 @@ graph [rankdir=LR];
 
         for link in self.elinks:
             if link.isjoint:
-                t = link.A(q[link.jindex])
+                t = link.A(q[link.jindex], fast=True)
+                # t = link._elink.A(q[link.jindex])
             else:
-                t = link.A()
+                t = link.A(fast=True)
+                # t = link._elink.A()
 
             # Update the links internal transform wrt the base frame
             if link.parent is None:
-                link._fk = self.base * t
+                link._fk = self.base.A @ t
             else:
-                link._fk = link.parent._fk * t
+                link._fk = link.parent._fk @ t
 
             # Update the link model transforms as well
             for col in link.collision:
@@ -973,11 +1030,11 @@ graph [rankdir=LR];
         for gripper in self.grippers:
             for link in gripper.links:
                 if link.isjoint:
-                    t = link.A(gripper.q[link.jindex])
+                    t = link.A(gripper.q[link.jindex], fast=True)
                 else:
-                    t = link.A()
+                    t = link.A(fast=True)
 
-                link._fk = link.parent._fk * t
+                link._fk = link.parent._fk @ t
 
                 # Update the link model transforms as well
                 for col in link.collision:
@@ -1243,6 +1300,31 @@ graph [rankdir=LR];
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
+
+        # path, n = self.get_path(end, start)
+
+        # if tool is None:
+        #     tool = np.eye(4)
+
+        # base = self.base.A
+
+        # fk = self.fkine(q, end=end, start=start).A
+
+        # links = np.empty((n, 4, 4))
+        # lj = np.empty(n)
+        # axis = []
+
+        # for i in range(n):
+        #     if path[i].isjoint:
+        #         links[i, :, :] = path[i].A(q[path[i].jindex], fast=True)
+        #         lj[i] = 1
+        #         axis.append(path[i].v.axis)
+        #     else:
+        #         links[i, :, :] = path[i].A(fast=True)
+        #         lj[i] = 0
+        #         axis.append('n')
+
+        # return j_fast(base, fk, tool, links, lj, axis, 7)
 
         if tool is None:
             tool = SE3()
