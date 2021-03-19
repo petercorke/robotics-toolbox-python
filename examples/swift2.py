@@ -44,8 +44,9 @@ env.launch()
 
 path = rtb.path_to_datafile('data')
 
-r = rtb.models.Panda()
-r.q = r.qr
+# r = rtb.models.Panda()
+r = rtb.models.PR2()
+# r.q = r.qr
 # r.qd = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
 
@@ -66,10 +67,11 @@ r.q = r.qr
 
 # # env.add(g1)
 # # env.add(g2)
-env.add(r, show_robot=False, show_collision=True)
+# env.add(r, show_robot=False, show_collision=True)
+env.add(r, show_robot=True)
 
 ev = [0.1, 0, 0, 0, 0, 0]
-r.jacob0(r.q)
+# r.jacob0(r.q)
 
 
 def stepper():
@@ -88,4 +90,4 @@ cProfile.run('stepper()')
 #     env.step(0.01)
 #     print(time.time() - start)
 
-# env.hold()
+env.hold()

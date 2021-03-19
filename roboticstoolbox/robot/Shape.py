@@ -100,6 +100,9 @@ class Shape(object):
         else:
             fk = self._sT
 
+        fk = self._wT
+        # print(self.base)
+
         shape = {
             'stype': self.stype,
             'scale': self.scale.tolist(),
