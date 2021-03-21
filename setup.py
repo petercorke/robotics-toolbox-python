@@ -46,11 +46,11 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 # list all data folders here, to ensure they get packaged
 
-data_folders = [
+extra_folders = [
     # 'roboticstoolbox/models/URDF/xacro',
     # 'roboticstoolbox/models/DH/meshes',
     # 'roboticstoolbox/data',
-    'roboticstoolbox/core'
+    'roboticstoolbox/core',
 ]
 
 
@@ -63,8 +63,8 @@ def package_files(directory):
 
 
 extra_files = []
-for data_folder in data_folders:
-    extra_files += package_files(data_folder)
+for extra_folder in extra_folders:
+    extra_files += package_files(extra_folder)
 
 frne = Extension(
         'frne',
@@ -127,7 +127,7 @@ setup(
              ' motion-planning trajectory-generation jacobian hessian' \
              ' control simulation robot-manipulator mobile-robot',
 
-    packages=find_packages(exclude=["tests", "examples", "notebooks"]),
+    packages=find_packages(exclude=["tests", "notebooks"]),
 
     package_data={'roboticstoolbox': extra_files},
 
