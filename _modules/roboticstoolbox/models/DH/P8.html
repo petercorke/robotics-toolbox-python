@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>roboticstoolbox.models.DH.Cobra600 &mdash; Robotics Toolbox for Python  documentation</title>
+  <title>roboticstoolbox.models.DH.P8 &mdash; Robotics Toolbox for Python  documentation</title>
   
 
   
@@ -141,7 +141,7 @@
         
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
         
-      <li>roboticstoolbox.models.DH.Cobra600</li>
+      <li>roboticstoolbox.models.DH.P8</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -156,61 +156,89 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for roboticstoolbox.models.DH.Cobra600</h1><div class="highlight"><pre>
+  <h1>Source code for roboticstoolbox.models.DH.P8</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">@author: Peter Corke</span>
-<span class="sd">@author: Samuel Drew</span>
+<span class="sd">@author: Jesse Haviland</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span><span class="p">,</span> <span class="n">PrismaticDH</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="c1"># 2/8/95  changed D3 to 150.05mm which is closer to data from Lee, AKB86 and</span>
+<span class="c1"># Tarn fixed errors in COG for links 2 and 3</span>
+<span class="c1"># 29/1/91 to agree with data from Armstrong etal.  Due to their use</span>
+<span class="c1">#  of modified D&amp;H params, some of the offsets Ai, Di are</span>
+<span class="c1">#  offset, and for links 3-5 swap Y and Z axes.</span>
+<span class="c1"># 14/2/91 to use Paul&#39;s value of link twist (alpha) to be consistant</span>
+<span class="c1">#  with ARCL.  This is the -ve of Lee&#39;s values, which means the</span>
+<span class="c1">#  zero angle position is a righty for Paul, and lefty for Lee.</span>
+
+<span class="c1"># all parameters are in SI units: m, radians, kg, kg.m2, N.m, N.m.s etc.</span>
+
+<span class="c1"># from math import pi</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">PrismaticDH</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
 
 
-<div class="viewcode-block" id="Cobra600"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Cobra600">[docs]</a><span class="k">class</span> <span class="nc">Cobra600</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
+<div class="viewcode-block" id="P8"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.P8">[docs]</a><span class="k">class</span> <span class="nc">P8</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class that models a Adept Cobra 600 SCARA manipulator</span>
+<span class="sd">    Class that models a Puma robot on an XY base</span>
 
-<span class="sd">    ``Cobra600()`` is a class which models an Adept Cobra 600 SCARA robot and</span>
-<span class="sd">    describes its kinematic characteristics using standard DH</span>
-<span class="sd">    conventions.</span>
+<span class="sd">    ``P8()`` is an object which models an 8-axis robot comprising a Puma 560</span>
+<span class="sd">    robot on an XY base.  Joints 0 and 1 are the base, joints 2-7 are the robot</span>
+<span class="sd">    arm.</span>
 
 <span class="sd">    .. runblock:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">        &gt;&gt;&gt; robot = rtb.models.DH.Cobra600()</span>
+<span class="sd">        &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
 <span class="sd">        &gt;&gt;&gt; print(robot)</span>
 
 <span class="sd">    Defined joint configurations are:</span>
 
 <span class="sd">    - qz, zero joint angle configuration, &#39;L&#39; shaped configuration</span>
 
+
 <span class="sd">    .. note::</span>
 <span class="sd">        - SI units are used.</span>
-<span class="sd">        - Robot has only 4 DoF.</span>
 
 <span class="sd">    .. codeauthor:: Peter Corke</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="sd">    :seealso: :func:`models.DH.Puma560`</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">deg</span> <span class="o">=</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
 
-        <span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.387</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.325</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">50</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">50</span><span class="o">*</span><span class="n">deg</span><span class="p">]),</span>
-             <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.275</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">88</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">88</span><span class="o">*</span><span class="n">deg</span><span class="p">]),</span>
-             <span class="n">PrismaticDH</span><span class="p">(</span><span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.210</span><span class="p">]),</span>
-             <span class="n">RevoluteDH</span><span class="p">()]</span>
+        <span class="c1"># create the base</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">PrismaticDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">PrismaticDH</span><span class="p">(</span><span class="n">theta</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="p">]</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Cobra600&#39;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;Adept&#39;</span><span class="p">)</span>
+        <span class="c1"># stick the Puma on top</span>
+        <span class="n">puma</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">links</span><span class="p">)</span>
 
-        <span class="c1"># zero angles, L shaped pose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">links</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;P8&quot;</span><span class="p">,</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;mobile&#39;</span><span class="p">,</span> <span class="s1">&#39;redundant&#39;</span><span class="p">),</span>
+            <span class="n">base</span><span class="o">=</span><span class="n">SE3</span><span class="o">.</span><span class="n">Ry</span><span class="p">(</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">8</span><span class="p">,)))</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">P8</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+    <span class="c1"># robot.plot([.5, -0.6, 0, 0, 0, 0, 0, 0], block=True)</span>
 
-    <span class="n">cobra</span> <span class="o">=</span> <span class="n">Cobra600</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">cobra</span><span class="p">)</span>
+
 </pre></div>
 
            </div>

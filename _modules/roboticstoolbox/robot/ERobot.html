@@ -796,6 +796,13 @@
 <span class="sd">          base to the link ``link`` specified as an ELink reference or a name.</span>
 <span class="sd">        - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics</span>
 <span class="sd">          from link ``l1`` to link ``l2``.</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; panda = rtb.models.ETS.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; panda.ets()</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -879,6 +886,15 @@
 <span class="sd">        Edge labels or nodes in blue have a fixed transformation to the</span>
 <span class="sd">        preceding link.</span>
 
+<span class="sd">        Example::</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; panda = rtb.models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; panda.showgraph()</span>
+
+<span class="sd">        .. image:: ../figs/panda-graph.svg</span>
+<span class="sd">            :width: 600</span>
+
 <span class="sd">        :seealso: :func:`dotfile`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -892,8 +908,9 @@
         <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;dot -Tpdf&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">dotfile</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">pdffile</span><span class="p">)</span>
 
         <span class="c1"># open the PDF file in browser (hopefully portable), then cleanup</span>
-        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file://</span><span class="si">{</span><span class="n">pdffile</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pdffile</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+        <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file://</span><span class="si">{</span><span class="n">pdffile</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="c1"># time.sleep(1)</span>
+        <span class="c1"># os.remove(pdffile.name)</span>
 
 <div class="viewcode-block" id="ERobot.dotfile"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.dotfile">[docs]</a>    <span class="k">def</span> <span class="nf">dotfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">etsbox</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">jtype</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1014,7 +1031,7 @@
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">close</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>  <span class="c1"># noqa</span></div>
+            <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># noqa</span></div>
 
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -1377,7 +1394,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unknown argument&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ERobot.jacob0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacob0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the base frame</span>
 
@@ -1396,6 +1413,10 @@
 <span class="sd">            avoid caluclating forward kinematics to save time, defaults</span>
 <span class="sd">            to None</span>
 <span class="sd">        :type T: SE3, optional</span>
+<span class="sd">        :param half: return half Jacobian: &#39;trans&#39; or &#39;rot&#39;</span>
+<span class="sd">        :type half: str</span>
+<span class="sd">        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)</span>
+<span class="sd">        :type analytical: str</span>
 <span class="sd">        :return J: Manipulator Jacobian in the base frame</span>
 <span class="sd">        :rtype: ndarray(6,n)</span>
 
@@ -1406,6 +1427,17 @@
 <span class="sd">        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`</span>
 <span class="sd">        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.</span>
 
+<span class="sd">        ``analytical`` can be one of:</span>
+
+<span class="sd">            =============  ==================================</span>
+<span class="sd">            Value          Rotational representation</span>
+<span class="sd">            =============  ==================================</span>
+<span class="sd">            ``&#39;rpy-xyz&#39;``  RPY angular rates in XYZ order</span>
+<span class="sd">            ``&#39;rpy-zyx&#39;``  RPY angular rates in XYZ order</span>
+<span class="sd">            ``&#39;eul&#39;``      Euler angular rates in ZYZ order</span>
+<span class="sd">            ``&#39;exp&#39;``      exponential coordinate rates</span>
+<span class="sd">            =============  ==================================</span>
+
 <span class="sd">        Example:</span>
 
 <span class="sd">        .. runblock:: pycon</span>
@@ -1414,7 +1446,7 @@
 <span class="sd">            &gt;&gt;&gt; puma = rtb.models.ETS.Puma560()</span>
 <span class="sd">            &gt;&gt;&gt; puma.jacobe([0, 0, 0, 0, 0, 0])</span>
 
-<span class="sd">        .. note:: This is the geometric Jacobian as described in texts by</span>
+<span class="sd">        .. warning:: This is the geometric Jacobian as described in texts by</span>
 <span class="sd">            Corke, Spong etal., Siciliano etal.  The end-effector velocity is</span>
 <span class="sd">            described in terms of translational and angular velocity, not a </span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
@@ -1437,6 +1469,7 @@
         <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
 
@@ -1468,19 +1501,52 @@
 
                 <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tx&#39;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
-                    <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
                 <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;ty&#39;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
-                    <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
                 <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
-                    <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># compute rotational transform if analytical Jacobian required</span>
+        <span class="k">if</span> <span class="n">analytical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">half</span> <span class="o">!=</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy-xyz&#39;</span><span class="p">:</span>
+                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy-zyx&#39;</span><span class="p">:</span>
+                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;eul&#39;</span><span class="p">:</span>
+                <span class="n">eul</span> <span class="o">=</span> <span class="n">tr2eul</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">eul2jac</span><span class="p">(</span><span class="n">eul</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
+                <span class="c1"># TODO: move to SMTB.base, Horner form with skew(v)</span>
+                <span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">=</span> <span class="n">trlog</span><span class="p">(</span><span class="n">t2r</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> \
+                    <span class="o">+</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad order specified&#39;</span><span class="p">)</span>
+        
+            <span class="n">J</span> <span class="o">=</span> <span class="n">block_diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="o">@</span> <span class="n">J</span>
+
+        <span class="c1"># TODO optimize computation above if half matrix is returned</span>
+
+        <span class="c1"># return top or bottom half if asked</span>
+        <span class="k">if</span> <span class="n">half</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
+                <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span>
+            <span class="k">elif</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;rot&#39;</span><span class="p">:</span>
+                <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad half specified&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">J</span></div>
 
@@ -1499,9 +1565,7 @@
 <span class="sd">            end of end, defaults to None</span>
 <span class="sd">        :type tool: SE3, optional</span>
 <span class="sd">        :param T: The transformation matrix of the reference point which the</span>
-<span class="sd">            Jacobian represents with respect to the base frame. Use this to</span>
-<span class="sd">            avoid caluclating forward kinematics to save time, defaults</span>
-<span class="sd">            to None</span>
+<span class="sd">            Jacobian represents with respect to the base frame.</span>
 <span class="sd">        :type T: SE3, optional</span>
 <span class="sd">        :return J: Manipulator Jacobian in the end-effector frame</span>
 <span class="sd">        :rtype: ndarray(6,n)</span>
@@ -1521,13 +1585,17 @@
 <span class="sd">            &gt;&gt;&gt; puma = rtb.models.ETS.Puma560()</span>
 <span class="sd">            &gt;&gt;&gt; puma.jacobe([0, 0, 0, 0, 0, 0])</span>
 
-<span class="sd">        .. note:: This is the **geometric Jacobian** as described in texts by</span>
+<span class="sd">        .. warning:: This is the **geometric Jacobian** as described in texts by</span>
 <span class="sd">            Corke, Spong etal., Siciliano etal.  The end-effector velocity is</span>
 <span class="sd">            described in terms of translational and angular velocity, not a </span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
 
 <span class="sd">        .. warning:: ``start`` and ``end`` must be on the same branch,</span>
 <span class="sd">            with ``start`` closest to the base.</span>
+
+<span class="sd">        .. note:: ``T`` can be passed in to save the cost of computing forward</span>
+<span class="sd">            kinematics which is needed to transform velocity from end-effector</span>
+<span class="sd">            frame to world frame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
@@ -1684,7 +1752,7 @@
     <span class="c1">#     return L</span>
 
 <div class="viewcode-block" id="ERobot.hessian0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
 <span class="sd">        spatial acceleration, expressed in the world-coordinate frame. This</span>
 <span class="sd">        function calulcates this based on the ETS of the robot. One of J0 or q</span>
@@ -1703,19 +1771,37 @@
 <span class="sd">        :return: The manipulator Hessian in 0 frame</span>
 <span class="sd">        :rtype: float ndarray(6,n,n)</span>
 
-<span class="sd">        H[i,j,k] is d2 u_i / dq_j dq_k</span>
+<span class="sd">        This method computes the manipulator Hessian.  If we take the </span>
+<span class="sd">        time derivative of the differential kinematic relationship</span>
 
-<span class="sd">        where u = {t_x, t_y, t_z, r_x, r_y, r_z}</span>
+<span class="sd">        .. math::</span>
 
-<span class="sd">        J[i,j] is d u_i / dq_j</span>
+<span class="sd">            \nu    &amp;= \mat{J}(\vec{q}) \dvec{q} \\</span>
+<span class="sd">            \alpha &amp;= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}</span>
 
-<span class="sd">        where u = {t_x, t_y, t_z, ζ_x, ζ_y, ζ_z}</span>
+<span class="sd">        where</span>
 
-<span class="sd">        v = J qd</span>
+<span class="sd">        .. math::</span>
 
-<span class="sd">        a = Jd qd + J qdd</span>
+<span class="sd">            \dmat{J} = \mat{H} \dvec{q}</span>
+<span class="sd">        </span>
+<span class="sd">        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the</span>
+<span class="sd">        Hessian tensor.</span>
 
-<span class="sd">        Jd = H qd</span>
+<span class="sd">        The elements of the Hessian are</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">        </span>
+<span class="sd">            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}</span>
+
+<span class="sd">        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements</span>
+<span class="sd">        of the spatial velocity vector.</span>
+
+<span class="sd">        Similarly, we can write</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">        </span>
+<span class="sd">            \mat{J}_{i,j} = \frac{d u_i}{d q_j}</span>
 
 <span class="sd">        :references:</span>
 <span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
@@ -1751,7 +1837,7 @@
         <span class="k">return</span> <span class="n">H</span></div>
 
 <div class="viewcode-block" id="ERobot.jacobm"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the manipulability Jacobian. This measure relates the rate</span>
 <span class="sd">        of change of the manipulability to the joint velocities of the robot.</span>
 <span class="sd">        One of J or q is required. Supply J and H if already calculated to</span>
@@ -1771,6 +1857,18 @@
 
 <span class="sd">        :return: The manipulability Jacobian</span>
 <span class="sd">        :rtype: float ndarray(n)</span>
+
+<span class="sd">        Yoshikawa&#39;s manipulability measure</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}</span>
+
+<span class="sd">        This method returns its Jacobian with respect to configuration</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \frac{\partial m(\vec{q})}{\partial \vec{q}}</span>
 
 <span class="sd">        :references:</span>
 <span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
@@ -1828,8 +1926,10 @@
 <span class="sd">        :return: Pretty print of the robot model</span>
 <span class="sd">        :rtype: str</span>
 
-<span class="sd">        Constant links are shown in blue.</span>
-<span class="sd">        End-effector links are prefixed with an @</span>
+<span class="sd">        - Constant links are shown in blue.</span>
+<span class="sd">        - End-effector links are prefixed with an @</span>
+<span class="sd">        - The robot base frame is denoted as ``_O_`` and is equal to the robot&#39;s</span>
+<span class="sd">          ``base`` attribute.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
             <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
@@ -1842,14 +1942,25 @@
             <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="k">else</span> <span class="s2">&quot;&lt;&lt;blue&gt;&gt;&quot;</span>
             <span class="n">ee</span> <span class="o">=</span> <span class="s2">&quot;@&quot;</span> <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
             <span class="n">ets</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+            <span class="n">parent_name</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;_O_&quot;</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">_jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot; * &quot;</span> <span class="o">+</span> <span class="n">s</span>
             <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
                 <span class="n">k</span><span class="p">,</span>
                 <span class="n">color</span> <span class="o">+</span> <span class="n">ee</span> <span class="o">+</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                <span class="n">parent_name</span><span class="p">,</span>
                 <span class="n">link</span><span class="o">.</span><span class="n">_joint_name</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="n">ets</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">_jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">))</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2"> = </span><span class="se">{{</span><span class="si">{</span><span class="n">parent_name</span><span class="si">}</span><span class="se">}}</span><span class="s2"> </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
 
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">manuf</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">manuf</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="n">manuf</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2"> axes (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="si">}</span><span class="s2">), ETS model</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurations_str</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">s</span>
@@ -1865,9 +1976,9 @@
 
 <span class="sd">        .. runblock:: pycon</span>
 
-<span class="sd">            import roboticstoolbox as rtb</span>
-<span class="sd">            robot = rtb.models.URDF.Panda()</span>
-<span class="sd">            robot.hierarchy()</span>
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; robot = rtb.models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot.hierarchy()</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2116,7 +2227,7 @@
     <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
     <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">p</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
     <span class="n">p</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
     <span class="n">p</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
     <span class="n">p</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
@@ -2154,7 +2265,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

@@ -189,21 +189,22 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Puma dimensions (m)</span>
         <span class="n">l1</span> <span class="o">=</span> <span class="mf">0.672</span>
-        <span class="n">l2</span> <span class="o">=</span> <span class="mf">0.2337</span>
+        <span class="n">l2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.2337</span>
         <span class="n">l3</span> <span class="o">=</span> <span class="mf">0.4318</span>
-        <span class="n">l4</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.0837</span>
-        <span class="n">l5</span> <span class="o">=</span> <span class="mf">0.4318</span>
-        <span class="n">l6</span> <span class="o">=</span> <span class="mf">0.0203</span>
+        <span class="n">l4</span> <span class="o">=</span> <span class="mf">0.0203</span>
+        <span class="n">l5</span> <span class="o">=</span> <span class="mf">0.0837</span>
+        <span class="n">l6</span> <span class="o">=</span> <span class="mf">0.4318</span>
 
         <span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> \
+            <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> \
             <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">e</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Puma560&#39;</span><span class="p">,</span>
             <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;Unimation&#39;</span><span class="p">,</span>
-            <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;ETS-based model&#39;</span><span class="p">)</span>
+            <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;ETS-based model&#39;</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
             <span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -228,7 +229,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

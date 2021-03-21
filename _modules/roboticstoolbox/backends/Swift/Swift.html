@@ -172,6 +172,8 @@
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 
+<span class="kn">from</span> <span class="nn">roboticstoolbox.backends</span> <span class="kn">import</span> <span class="n">Swift</span> <span class="k">as</span> <span class="n">swift</span>
+
 <span class="n">_sw</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">sw</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -252,7 +254,7 @@
     <span class="c1">#  Basic methods to do with the state of the external program</span>
     <span class="c1">#</span>
 
-<div class="viewcode-block" id="Swift.launch"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Swift.launch"><a class="viewcode-back" href="../../../../arm_backend_swift.html#roboticstoolbox.backends.Swift.Swift.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Launch a graphical backend in Swift by default in the default browser</span>
 <span class="sd">        or in the specified browser</span>
@@ -441,7 +443,7 @@
                 <span class="nb">id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="p">)</span> <span class="o">+</span> <span class="n">SHAPE_ADD</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ob</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">SwiftElement</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">swift</span><span class="o">.</span><span class="n">SwiftElement</span><span class="p">):</span>
 
             <span class="k">if</span> <span class="n">ob</span><span class="o">.</span><span class="n">_added_to_swift</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -1105,7 +1107,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

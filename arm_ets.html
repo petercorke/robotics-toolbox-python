@@ -35,7 +35,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -218,10 +218,10 @@ or a variable.  A variable amount corresponds to a joint.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="go">Rx(17.19°) * tz(0.75)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-<span class="go">SE3(array([[ 1.    ,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">           [ 0.    ,  0.9553, -0.2955, -0.2216],</span>
-<span class="go">           [ 0.    ,  0.2955,  0.9553,  0.7165],</span>
-<span class="go">           [ 0.    ,  0.    ,  0.    ,  1.    ]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 0],</span>
+<span class="go">           [0, 0.955336489125606, -0.295520206661340, -0.221640154996005],</span>
+<span class="go">           [0, 0.295520206661340, 0.955336489125606, 0.716502366844205],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 </pre></div>
 </td></tr></table></div>
 <p>In lines 2-5 we defined two elementary transforms.  Line 2 defines a rotation
@@ -259,15 +259,15 @@ as shown in this example where we define a simple two link planar manipulator.</
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 <span class="go">tx(1) * Rz(q)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">SE3(array([[1., 0., 0., 2.],</span>
-<span class="go">           [0., 1., 0., 0.],</span>
-<span class="go">           [0., 0., 1., 0.],</span>
-<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 2.00000000000000],</span>
+<span class="go">           [0, 1.00000000000000, 0, 0],</span>
+<span class="go">           [0, 0, 1.00000000000000, 0],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
-<span class="go">SE3(array([[1., 0., 0., 1.],</span>
-<span class="go">           [0., 1., 0., 1.],</span>
-<span class="go">           [0., 0., 1., 0.],</span>
-<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 1.00000000000000],</span>
+<span class="go">           [0, 1.00000000000000, 0, 1.00000000000000],</span>
+<span class="go">           [0, 0, 1.00000000000000, 0],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 </pre></div>
 </td></tr></table></div>
 <p>Line 2 succinctly describes the kinematics in terms of elementary transforms: a rotation around the z-axis by the
@@ -876,29 +876,6 @@ mix of rotations and translations.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS.config">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">config</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Joint configuration string</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A string indicating the joint types</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-<p>A string comprising the characters ‘R’ or ‘P’ which indicate the types
-of joints in order from left to right.</p>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">config</span>
-<span class="go">&#39;PP&#39;</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS.__getitem__">
 <code class="sig-name descname"><span class="pre">__getitem__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__getitem__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index or slice an ETS</p>
@@ -1141,21 +1118,21 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 <span class="go">tx(1) * Rz(q)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">SE3(array([[1., 0., 0., 2.],</span>
-<span class="go">           [0., 1., 0., 0.],</span>
-<span class="go">           [0., 0., 1., 0.],</span>
-<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 2.00000000000000],</span>
+<span class="go">           [0, 1.00000000000000, 0, 0],</span>
+<span class="go">           [0, 0, 1.00000000000000, 0],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
-<span class="go">SE3(array([[1., 0., 0., 1.],</span>
-<span class="go">           [0., 1., 0., 1.],</span>
-<span class="go">           [0., 0., 1., 0.],</span>
-<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 1.00000000000000],</span>
+<span class="go">           [0, 1.00000000000000, 0, 1.00000000000000],</span>
+<span class="go">           [0, 0, 1.00000000000000, 0],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
 <span class="go">SE3(array([[1, 0, 0, 4],</span>
 <span class="go">           [0, 1, 0, 3],</span>
 <span class="go">           [0, 0, 1, 0],</span>
-<span class="go">           [0, 0, 0, 1]]))</span>
+<span class="go">           [0, 0, 0, 1]], dtype=object))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1279,23 +1256,15 @@ might correspond to the joint number of a multi-joint robot.</p></li>
 <p>where <code class="docutils literal notranslate"><span class="pre">XY</span></code> is one of <code class="docutils literal notranslate"><span class="pre">r</span></code>, <code class="docutils literal notranslate"><span class="pre">tx</span></code>, <code class="docutils literal notranslate"><span class="pre">ty</span></code>.</p>
 <p>Example:</p>
 <blockquote>
-<div><div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad axis specified</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">1402</span>, in <span class="n">r</span>
-    <span class="n">axis_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">theta</span><span class="p">:</span> <span class="n">trot2</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/roboticstoolbox/robot/ETS.py&quot;</span>, line <span class="m">93</span>, in <span class="n">__init__</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad axis specified&#39;</span><span class="p">)</span>
-<span class="gr">ValueError</span>: <span class="n">bad axis specified</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
+<div><div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS2</span> <span class="k">as</span> <span class="n">ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># a single ET, rotation about z</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># an ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>                      <span class="c1"># of length 2</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                        <span class="c1"># an ET sliced from the ETS</span>
+<span class="go">tx(2)</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -1551,29 +1520,6 @@ mix of rotations and translations.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS2.config">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">config</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Joint configuration string</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A string indicating the joint types</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-<p>A string comprising the characters ‘R’ or ‘P’ which indicate the types
-of joints in order from left to right.</p>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">config</span>
-<span class="go">&#39;PP&#39;</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS2.__getitem__">
 <code class="sig-name descname"><span class="pre">__getitem__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__getitem__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index or slice an ETS</p>
@@ -1816,21 +1762,21 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 <span class="go">tx(1) * Rz(q)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">SE3(array([[1., 0., 0., 2.],</span>
-<span class="go">           [0., 1., 0., 0.],</span>
-<span class="go">           [0., 0., 1., 0.],</span>
-<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 2.00000000000000],</span>
+<span class="go">           [0, 1.00000000000000, 0, 0],</span>
+<span class="go">           [0, 0, 1.00000000000000, 0],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
-<span class="go">SE3(array([[1., 0., 0., 1.],</span>
-<span class="go">           [0., 1., 0., 1.],</span>
-<span class="go">           [0., 0., 1., 0.],</span>
-<span class="go">           [0., 0., 0., 1.]]))</span>
+<span class="go">SE3(array([[1.00000000000000, 0, 0, 1.00000000000000],</span>
+<span class="go">           [0, 1.00000000000000, 0, 1.00000000000000],</span>
+<span class="go">           [0, 0, 1.00000000000000, 0],</span>
+<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
 <span class="go">SE3(array([[1, 0, 0, 4],</span>
 <span class="go">           [0, 1, 0, 3],</span>
 <span class="go">           [0, 0, 1, 0],</span>
-<span class="go">           [0, 0, 0, 1]]))</span>
+<span class="go">           [0, 0, 0, 1]], dtype=object))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1953,7 +1899,7 @@ can be set in this case.</p></li>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

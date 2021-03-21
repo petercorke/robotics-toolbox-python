@@ -35,7 +35,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -205,8 +205,8 @@ Denavit-Hartenberg notation.</p>
 <h2>DHRobot<a class="headerlink" href="#dhrobot" title="Permalink to this headline">¶</a></h2>
 <div class="graphviz"><img src="_images/inheritance-06b7a31982176c3c01f1085ef7673d8508ba1955.png" alt="Inheritance diagram of roboticstoolbox.DHRobot" usemap="#inheritance48ba2c3a1a" class="inheritance graphviz" /></div>
 <map id="inheritance48ba2c3a1a" name="inheritance48ba2c3a1a">
-<area shape="rect" id="node1" href="#roboticstoolbox.robot.DHRobot.DHRobot" target="_top" title="Class for robots defined using Denavit&#45;Hartenberg notation" alt="" coords="392,31,532,56"/>
-<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="244,31,344,56"/>
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.DHRobot.DHRobot" target="_top" title="Class for robots defined using Denavit&#45;Hartenberg notation" alt="" coords="396,31,539,56"/>
+<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="245,31,348,56"/>
 </map><p>The various <a class="reference internal" href="#dh-models"><span class="std std-ref">Models</span></a> all subclass this class.</p>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot">
@@ -590,99 +590,32 @@ within the robot</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.config">
-<code class="sig-name descname"><span class="pre">config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the joint configuration string</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>joint configuration string</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-<p>A string with one letter per joint: <code class="docutils literal notranslate"><span class="pre">R</span></code> for a revolute
-joint, and <code class="docutils literal notranslate"><span class="pre">P</span></code> for a prismatic joint.</p>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
-<span class="go">&#39;RRRRRR&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
-<span class="go">&#39;RRPRRR&#39;</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.todegrees">
-<code class="sig-name descname"><span class="pre">todegrees</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.todegrees"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.todegrees" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert joint angles to degrees</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
-if not supplied will use the stored q values)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a vector of joint coordinates in degrees and metres</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray(n)</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">robot.todegrees(q)</span></code> converts joint coordinates <code class="docutils literal notranslate"><span class="pre">q</span></code> to degrees
-taking into account whether elements of <code class="docutils literal notranslate"><span class="pre">q</span></code> correspond to revolute
-or prismatic joints, ie. prismatic joint values are not converted.</p>
-<p><code class="docutils literal notranslate"><span class="pre">robot.todegrees()</span></code> as above except uses the stored q value of the
-robot object.</p>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">todegrees</span><span class="p">([</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">])</span>
-<span class="go">array([ 45. ,  22.5,   2. , -45. ,  30. ,  60. ])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.DHRobot.DHRobot.toradians">
-<code class="sig-name descname"><span class="pre">toradians</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.toradians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.toradians" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert joint angles to radians</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
-if not supplied will use the stored q values)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a vector of joint coordinates in radians and metres</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray(n)</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">robot.toradians(q)</span></code> converts joint coordinates <code class="docutils literal notranslate"><span class="pre">q</span></code> to radians
-taking into account whether elements of <code class="docutils literal notranslate"><span class="pre">q</span></code> correspond to revolute
-or prismatic joints, ie. prismatic joint values are not converted.</p>
-<p><code class="docutils literal notranslate"><span class="pre">robot.toradians()</span></code> as above except uses the stored q value of the
-robot object.</p>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">toradians</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
-<span class="go">array([0.1745, 0.3491, 2.    , 0.5236, 0.6981, 0.8727])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.dhunique">
 <code class="sig-name descname"><span class="pre">dhunique</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.dhunique"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.dhunique" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print the unique DH parameters</p>
 <p>Print a table showing all the non-zero DH parameters, and their
 values.  This is the minimum set of kinematic parameters required
 to describe the robot.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">dhunique</span><span class="p">()</span>
+<span class="go">┌──────┬────────┐</span>
+<span class="go">│param │ value  │</span>
+<span class="go">├──────┼────────┤</span>
+<span class="go">│   d0 │ 0.6718 │</span>
+<span class="go">│   ⍺0 │ 1.571  │</span>
+<span class="go">│   a1 │ 0.4318 │</span>
+<span class="go">│   d2 │ 0.15   │</span>
+<span class="go">│   a2 │ 0.0203 │</span>
+<span class="go">│   ⍺2 │ -1.571 │</span>
+<span class="go">│   d3 │ 0.4318 │</span>
+<span class="go">│   ⍺3 │ 1.571  │</span>
+<span class="go">│   ⍺4 │ -1.571 │</span>
+<span class="go">└──────┴────────┘</span>
+
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -739,7 +672,23 @@ to be zero.</p></li>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.ets">
 <code class="sig-name descname"><span class="pre">ets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.ets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ets" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Robot kinematics as an elemenary transform sequence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>elementary transform sequence</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS">ETS</a></p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="go">Rz(q0) * tz(0.6718299999999999) * Rx(90°) * Rz(q1) * tx(0.4318) * Rz(q2) * tz(0.15005) * tx(0.0203) * Rx(-90°) * Rz(q3) * tz(0.4318) * Rx(90°) * Rz(q4) * Rx(-90°) * Rz(q5)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.fkine">
@@ -837,11 +786,14 @@ kinematics are computed.</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.jacobe">
-<code class="sig-name descname"><span class="pre">jacobe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacobe" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">jacobe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacobe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manipulator Jacobian in end-effector frame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p></li>
+<li><p><strong>half</strong> (<em>str</em>) – return half Jacobian: ‘trans’ or ‘rot’</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return J</dt>
 <dd class="field-even"><p>The manipulator Jacobian in the end-effector frame</p>
@@ -868,8 +820,8 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <span class="go">       [ 1.    ,  0.    ,  0.    ,  1.    ,  0.    ,  1.    ]])</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
 <p>This is the <strong>geometric Jacobian</strong> as described in texts by
 Corke, Spong etal., Siciliano etal.  The end-effector velocity is
 described in terms of translational and angular velocity, not a 
@@ -879,13 +831,15 @@ velocity twist as per the text by Lynch &amp; Park.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.jacob0">
-<code class="sig-name descname"><span class="pre">jacob0</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacob0" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">jacob0</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacob0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manipulator Jacobian in world frame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint coordinate vector</p></li>
 <li><p><strong>T</strong> (<em>SE3 instance</em>) – Forward kinematics if known, SE(3 matrix)</p></li>
+<li><p><strong>half</strong> (<em>str</em>) – return half Jacobian: ‘trans’ or ‘rot’</p></li>
+<li><p><strong>analytical</strong> (<em>str</em>) – return analytical Jacobian instead of geometric Jacobian (default)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return J</dt>
@@ -901,6 +855,34 @@ joint velocity to end-effector spatial velocity.</p></li>
 </ul>
 <p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
 is related to joint velocity by <span class="math notranslate nohighlight">\({}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}\)</span>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">analytical</span></code> can be one of:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>Rotational representation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'rpy-xyz'</span></code></p></td>
+<td><p>RPY angular rates in XYZ order</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'rpy-zyx'</span></code></p></td>
+<td><p>RPY angular rates in XYZ order</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'eul'</span></code></p></td>
+<td><p>Euler angular rates in ZYZ order</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'exp'</span></code></p></td>
+<td><p>exponential coordinate rates</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
@@ -913,12 +895,18 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <span class="go">       [ 1.    ,  0.    ,  0.    ,  1.    ,  0.    ,  1.    ]])</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is the <strong>geometric Jacobian</strong> as described in texts by
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <strong>geometric Jacobian</strong> is as described in texts by
 Corke, Spong etal., Siciliano etal.  The end-effector velocity is
 described in terms of translational and angular velocity, not a 
 velocity twist as per the text by Lynch &amp; Park.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">T</span></code> can be passed in to save the cost of computing forward
+kinematics which is needed to transform velocity from end-effector
+frame to world frame.</p>
 </div>
 </dd></dl>
 
@@ -1271,12 +1259,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1569,7 +1557,7 @@ applied to the manipulator joints.
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.fellipse">
-<code class="sig-name descname"><span class="pre">fellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.fellipse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">fellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.fellipse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a force ellipsoid object for plotting with PyPlot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1758,14 +1746,17 @@ than Levenberg-Marquadt</p></li>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_LM(T)</span></code> are the joint coordinates (n) corresponding
-to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This method can
-be used for robots with any number of degrees of freedom. The return
-value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This
+method can be used for robots with any number of degrees of freedom. The
+return value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">success=False</span></code> the <code class="docutils literal notranslate"><span class="pre">q</span></code> values will be valid numbers, but the
+solution will be in error.  The amount of error is indicated by
+the <code class="docutils literal notranslate"><span class="pre">residual</span></code>.</p>
 <p><strong>Trajectory operation</strong>:</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
-a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
-initial estimate of q for each time step is taken as the solution from
-the previous time step.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">=</span> <span class="pre">m</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, then the
+result is a named tuple whose elements are</p>
+<p>The initial estimate of q for each time step is taken as the solution
+from the previous time step.</p>
 <p><strong>Underactuated robots:</strong></p>
 <p>For the case where the manipulator has fewer than 6 DOF the
 solution space has more dimensions than can be spanned by the
@@ -1789,7 +1780,7 @@ chosen.</p>
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
-<li><p>Implements a Levenberg-Marquadt variable-step-size solver.</p></li>
+<li><p>Implements a Levenberg-Marquadt variable-damping solver.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
@@ -1850,11 +1841,12 @@ and rotation about X, Y and Z respectively.</p></li>
 to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This method can
 be used for robots with any number of degrees of freedom. The return
 value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">success=False</span></code> the <code class="docutils literal notranslate"><span class="pre">q</span></code> values will be valid numbers, but the
+solution will be in error.  The amount of error is indicated by
+the <code class="docutils literal notranslate"><span class="pre">residual</span></code>.</p>
 <p><strong>Trajectory operation</strong>:</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
-a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
-initial estimate of q for each time step is taken as the solution from
-the previous time step.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">=</span> <span class="pre">m</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, then the
+result is a named tuple whose elements are</p>
 <p><strong>Underactuated robots:</strong></p>
 <p>For the case where the manipulator has fewer than 6 DOF the
 solution space has more dimensions than can be spanned by the
@@ -1872,8 +1864,9 @@ be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
-<li><p>Implements a modified Levenberg-Marquadt variable-step-size solver
+<li><p>Implements a modified Levenberg-Marquadt variable-damping solver
 which is quite robust in practice.</p></li>
+<li><p>Similar to <code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> but uses a different error metric</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
@@ -2165,7 +2158,7 @@ damper becomes active</p></li>
 continuous-time transfer functions that represent the transfer
 function 1/(Js+B) for each joint based on the dynamic parameters
 of the robot and the configuration q (n). n is the number of robot
-joints.</p></li>
+joints.  The result is a list of tuples (J, B) for each joint.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tf</span> <span class="pre">=</span> <span class="pre">jointdynamics(q,</span> <span class="pre">qd)</span></code> as above but include the linearized
 effects of Coulomb friction when operating at joint velocity QD
 (1xN).</p></li>
@@ -2597,7 +2590,7 @@ is: r2 = puma.perturb(0.1)</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.plot">
-<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Graphical display and animation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2985,8 +2978,39 @@ reable format</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.structure">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">structure</span></code><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the joint structure string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint configuration string</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>A string with one letter per joint: <code class="docutils literal notranslate"><span class="pre">R</span></code> for a revolute
+joint, and <code class="docutils literal notranslate"><span class="pre">P</span></code> for a prismatic joint.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">structure</span>
+<span class="go">&#39;RRRRRR&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">structure</span>
+<span class="go">&#39;RRPRRR&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Fixed joints, that maintain a constant link relative pose,
+are not included.  <code class="docutils literal notranslate"><span class="pre">len(self.structure)</span> <span class="pre">==</span> <span class="pre">self.n</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.teach">
-<code class="sig-name descname"><span class="pre">teach</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.teach" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">teach</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyplot'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.teach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Graphical teach pendant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3049,7 +3073,7 @@ occurs.</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.teach2">
-<code class="sig-name descname"><span class="pre">teach2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.teach2" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">teach2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyplot2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.teach2" title="Permalink to this definition">¶</a></dt>
 <dd><p>2D Graphical teach pendant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3057,8 +3081,12 @@ occurs.</p></li>
 <li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
 <li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
 if not supplied will use the stored q values).</p></li>
-<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
-autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>limits</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2]</p></li>
+<li><p><strong>vellipse</strong> (<em>bool</em>) – (Plot Option) Plot the velocity ellipse at the
+end-effector</p></li>
+<li><p><strong>vellipse</strong> – (Plot Option) Plot the force ellipse at the
+end-effector</p></li>
 <li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
 at the location of the end-effector. Uses three arrows, red,
 green and blue to indicate the x, y, and z-axes.</p></li>
@@ -3111,6 +3139,37 @@ occurs.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.todegrees">
+<code class="sig-name descname"><span class="pre">todegrees</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.todegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert joint angles to degrees</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vector of joint coordinates in degrees and metres</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.todegrees(q)</span></code> converts joint coordinates <code class="docutils literal notranslate"><span class="pre">q</span></code> to degrees
+taking into account whether elements of <code class="docutils literal notranslate"><span class="pre">q</span></code> correspond to revolute
+or prismatic joints, ie. prismatic joint values are not converted.</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.todegrees()</span></code> as above except uses the stored q value of the
+robot object.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">todegrees</span><span class="p">([</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">])</span>
+<span class="go">array([ 45. ,  22.5,   2. , -45. ,  30. ,  60. ])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.tool">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tool</span></code><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.tool" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get/set robot tool transform (Robot superclass)</p>
@@ -3137,8 +3196,38 @@ is an identity matrix.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.DHRobot.DHRobot.toradians">
+<code class="sig-name descname"><span class="pre">toradians</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.toradians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert joint angles to radians</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vector of joint coordinates in radians and metres</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.toradians(q)</span></code> converts joint coordinates <code class="docutils literal notranslate"><span class="pre">q</span></code> to radians
+taking into account whether elements of <code class="docutils literal notranslate"><span class="pre">q</span></code> correspond to revolute
+or prismatic joints, ie. prismatic joint values are not converted.</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.toradians()</span></code> as above except uses the stored q value of the
+robot object.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">toradians</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+<span class="go">array([0.1745, 0.3491, 2.    , 0.5236, 0.6981, 0.8727])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.DHRobot.DHRobot.vellipse">
-<code class="sig-name descname"><span class="pre">vellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.vellipse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">vellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.vellipse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a velocity ellipsoid object for plotting with PyPlot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3185,10 +3274,10 @@ end-effector position.</p></li>
 <p>The <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code> is defined by a list of <code class="docutils literal notranslate"><span class="pre">DHLink</span></code> subclass objects.</p>
 <div class="graphviz"><img src="_images/inheritance-a1d841119879d1a6068462ddddb4dc09a77423da.png" alt="Inheritance diagram of roboticstoolbox.RevoluteDH, roboticstoolbox.PrismaticDH, roboticstoolbox.RevoluteMDH, roboticstoolbox.PrismaticMDH" usemap="#inheritance3a5240bd69" class="inheritance graphviz" /></div>
 <map id="inheritance3a5240bd69" name="inheritance3a5240bd69">
-<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="431,5,585,31"/>
-<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="425,55,591,80"/>
-<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="433,104,583,129"/>
-<area shape="rect" id="node6" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="427,153,589,179"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="431,5,586,31"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="425,55,592,80"/>
+<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="433,104,584,129"/>
+<area shape="rect" id="node6" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="427,153,590,179"/>
 <area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,80,209,105"/>
 </map><dl class="py class">
 <dt id="roboticstoolbox.robot.DHLink">
@@ -3895,10 +3984,10 @@ previous link frame.</p>
 subclasses, click on the right side of the class boxes below.</p>
 <div class="graphviz"><img src="_images/inheritance-5a9c5fd74f014450e2b8398e8f2c0fc31100cad7.png" alt="Inheritance diagram of roboticstoolbox.RevoluteDH, roboticstoolbox.PrismaticDH, roboticstoolbox.RevoluteMDH, roboticstoolbox.PrismaticMDH" usemap="#inheritance3a5240bd69" class="inheritance graphviz" /></div>
 <map id="inheritance3a5240bd69" name="inheritance3a5240bd69">
-<area shape="rect" id="node2" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="179,5,333,31"/>
-<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="173,55,339,80"/>
-<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="181,104,331,129"/>
-<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="175,153,337,179"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="179,5,334,31"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="173,55,340,80"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="181,104,332,129"/>
+<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="175,153,338,179"/>
 </map><div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
@@ -4150,29 +4239,33 @@ rigid-body inertial parameters, motor and transmission parameters.</p>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;DH&quot;</span><span class="p">)</span>
-<span class="go">┌─────────┬───────────────┬────────────────────┬────────────┬─────┬────────────┬──────────────────────────┐</span>
-<span class="go">│ class   │     model     │    manufacturer    │ model type │ DoF │     config │         keywords         │</span>
-<span class="go">├─────────┼───────────────┼────────────────────┼────────────┼─────┼────────────┼──────────────────────────┤</span>
-<span class="go">│Panda    │ Panda         │ Franka Emika       │ DH         │ 7   │ RRRRRRR    │                          │</span>
-<span class="go">│Puma560  │ Puma 560      │ Unimation          │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic, mesh │</span>
-<span class="go">│Stanford │ Stanford arm  │ Victor Scheinman   │ DH         │ 6   │ RRPRRR     │ dynamics                 │</span>
-<span class="go">│Ball     │ ball          │                    │ DH         │ 10  │ RRRRRRRRRR │                          │</span>
-<span class="go">│Hyper    │ Hyper10       │                    │ DH         │ 10  │ RRRRRRRRRR │ symbolic                 │</span>
-<span class="go">│Coil     │ Hyper10       │                    │ DH         │ 10  │ RRRRRRRRRR │ symbolic                 │</span>
-<span class="go">│Cobra600 │ Cobra600      │ Adept              │ DH         │ 4   │ RRPR       │                          │</span>
-<span class="go">│IRB140   │ IRB 140       │ ABB                │ DH         │ 6   │ RRRRRR     │                          │</span>
-<span class="go">│KR5      │ KR5           │ KUKA               │ DH         │ 6   │ RRRRRR     │                          │</span>
-<span class="go">│Orion5   │ Orion 5       │ RAWR Robotics      │ DH         │ 4   │ RRRR       │                          │</span>
-<span class="go">│Planar3  │ Planar 3 link │                    │ DH         │ 3   │ RRR        │ planar                   │</span>
-<span class="go">│Planar2  │ Planar 2 link │                    │ DH         │ 2   │ RR         │ planar                   │</span>
-<span class="go">│LWR4     │ LWR-IV        │ Kuka               │ DH         │ 7   │ RRRRRRR    │                          │</span>
-<span class="go">│Sawyer   │ Sawyer        │ Rethink Robotics   │ DH         │ 6   │ RRRRRR     │ redundant, symbolic      │</span>
-<span class="go">│UR3      │ UR3           │ Universal Robotics │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic       │</span>
-<span class="go">│UR5      │ UR5           │ Universal Robotics │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic       │</span>
-<span class="go">│UR10     │ UR10          │ Universal Robotics │ DH         │ 6   │ RRRRRR     │ dynamics, symbolic       │</span>
-<span class="go">│Mico     │ Mico          │ Kinova             │ DH         │ 6   │ RRRRRR     │ symbolic                 │</span>
-<span class="go">│Jaco     │ Jaco          │ Kinova             │ DH         │ 6   │ RRRRRR     │ symbolic                 │</span>
-<span class="go">└─────────┴───────────────┴────────────────────┴────────────┴─────┴────────────┴──────────────────────────┘</span>
+<span class="go">┌─────────┬───────────────┬────────────────────┬────────────┬─────┬────────┬──────────────────────────┐</span>
+<span class="go">│ class   │     model     │    manufacturer    │ model type │ DoF │ config │         keywords         │</span>
+<span class="go">├─────────┼───────────────┼────────────────────┼────────────┼─────┼────────┼──────────────────────────┤</span>
+<span class="go">│Panda    │ Panda         │ Franka Emika       │ DH         │ 7   │        │                          │</span>
+<span class="go">│Puma560  │ Puma 560      │ Unimation          │ DH         │ 6   │        │ dynamics, symbolic, mesh │</span>
+<span class="go">│Stanford │ Stanford arm  │ Victor Scheinman   │ DH         │ 6   │        │ dynamics                 │</span>
+<span class="go">│Ball     │ ball          │                    │ DH         │ 10  │        │                          │</span>
+<span class="go">│Hyper    │ Hyper10       │                    │ DH         │ 10  │        │ symbolic                 │</span>
+<span class="go">│Coil     │ Hyper10       │                    │ DH         │ 10  │        │ symbolic                 │</span>
+<span class="go">│Cobra600 │ Cobra600      │ Adept              │ DH         │ 4   │        │                          │</span>
+<span class="go">│IRB140   │ IRB 140       │ ABB                │ DH         │ 6   │        │                          │</span>
+<span class="go">│KR5      │ KR5           │ KUKA               │ DH         │ 6   │        │                          │</span>
+<span class="go">│Orion5   │ Orion 5       │ RAWR Robotics      │ DH         │ 4   │        │                          │</span>
+<span class="go">│Planar3  │ Planar 3 link │                    │ DH         │ 3   │        │ planar                   │</span>
+<span class="go">│Planar2  │ Planar 2 link │                    │ DH         │ 2   │        │ planar                   │</span>
+<span class="go">│LWR4     │ LWR-IV        │ Kuka               │ DH         │ 7   │        │                          │</span>
+<span class="go">│Sawyer   │ Sawyer        │ Rethink Robotics   │ DH         │ 6   │        │ redundant, symbolic      │</span>
+<span class="go">│UR3      │ UR3           │ Universal Robotics │ DH         │ 6   │        │ dynamics, symbolic       │</span>
+<span class="go">│UR5      │ UR5           │ Universal Robotics │ DH         │ 6   │        │ dynamics, symbolic       │</span>
+<span class="go">│UR10     │ UR10          │ Universal Robotics │ DH         │ 6   │        │ dynamics, symbolic       │</span>
+<span class="go">│Mico     │ Mico          │ Kinova             │ DH         │ 6   │        │ symbolic                 │</span>
+<span class="go">│Jaco     │ Jaco          │ Kinova             │ DH         │ 6   │        │ symbolic                 │</span>
+<span class="go">│Baxter   │ Baxter-left   │ Rethink Robotics   │ DH         │ 7   │        │                          │</span>
+<span class="go">│TwoLink  │ 2 link        │                    │ DH         │ 2   │        │ planar, dynamics         │</span>
+<span class="go">│Hyper3d  │ Hyper3d10     │                    │ DH         │ 10  │        │ symbolic                 │</span>
+<span class="go">│P8       │ P8            │                    │ DH         │ 8   │        │ mobile, redundant        │</span>
+<span class="go">└─────────┴───────────────┴────────────────────┴────────────┴─────┴────────┴──────────────────────────┘</span>
 
 </pre></div>
 </div>
@@ -4187,6 +4280,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Panda (by Franka Emika): 7 axes (RRRRRRR), modified DH parameters</span>
 <span class="go">┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4246,6 +4340,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Puma 560 (by Unimation): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃         dⱼ         ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4389,6 +4484,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Stanford arm (by Victor Scheinman): 6 axes (RRPRRR), standard DH parameters</span>
 <span class="go">┏━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃  θⱼ   ┃  dⱼ   ┃   aⱼ   ┃   ⍺ⱼ   ┃         q⁻          ┃   q⁺   ┃</span>
 <span class="go">┣━━━━━━━╋━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4462,6 +4558,7 @@ a ball robot using standard DH conventions.</p></li>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Ball</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">ball (by ): 10 axes (RRRRRRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━━┳━━━━━┳━━━━━┳━━━━━━━┓</span>
 <span class="go">┃ θⱼ  ┃ dⱼ  ┃ aⱼ  ┃  ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━━╋━━━━━╋━━━━━╋━━━━━━━┫</span>
@@ -4533,6 +4630,7 @@ a coil robot using standard DH conventions.</p></li>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Coil</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Hyper10 (by ): 10 axes (RRRRRRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━━┳━━━━━┳━━━━━┳━━━━━━━┓</span>
 <span class="go">┃ θⱼ  ┃ dⱼ  ┃ aⱼ  ┃  ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━━╋━━━━━╋━━━━━╋━━━━━━━┫</span>
@@ -4599,6 +4697,7 @@ conventions. At zero angles it forms a straight line along the x-axis.</p></li>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Hyper</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Hyper10 (by ): 10 axes (RRRRRRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━━┳━━━━━┳━━━━━┳━━━━━━┓</span>
 <span class="go">┃ θⱼ  ┃ dⱼ  ┃ aⱼ  ┃  ⍺ⱼ  ┃</span>
 <span class="go">┣━━━━━╋━━━━━╋━━━━━╋━━━━━━┫</span>
@@ -4642,6 +4741,72 @@ Int. J. Robotics Research, 18(9), pp 876-892.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="roboticstoolbox.models.DH.Hyper3d">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">Hyper3d</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Hyper3d.html#Hyper3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Hyper3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
+<p>Create model of a hyper redundant manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – number of links, defaults to 10</p></li>
+<li><p><strong>a</strong> (<em>int</em><em> or </em><em>symbolic</em><em>, </em><em>optional</em>) – link length, defaults total <code class="docutils literal notranslate"><span class="pre">1/N</span></code> giving a reach of 1</p></li>
+<li><p><strong>symbolic</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Hyper3d()</span></code> is an object which describes the kinematics of a serial link
+manipulator with 10 joints which moves in the xy-plane, using standard DH
+conventions. At zero angles it forms a straight line along the x-axis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Hyper3d(N)</span></code> as above, but models a robot with <code class="docutils literal notranslate"><span class="pre">N</span></code> joints.</p></li>
+</ul>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Hyper3d</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Hyper3d10 (by ): 10 axes (RRRRRRRRRR), standard DH parameters</span>
+<span class="go">┏━━━━━┳━━━━━┳━━━━━┳━━━━━━━┓</span>
+<span class="go">┃ θⱼ  ┃ dⱼ  ┃ aⱼ  ┃  ⍺ⱼ   ┃</span>
+<span class="go">┣━━━━━╋━━━━━╋━━━━━╋━━━━━━━┫</span>
+<span class="go">┃ q1  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q2  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q3  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q4  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q5  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q6  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q7  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q8  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q9  ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┃ q10 ┃ 0.0 ┃ 0.1 ┃ 90.0° ┃</span>
+<span class="go">┗━━━━━┻━━━━━┻━━━━━┻━━━━━━━┛</span>
+
+<span class="go">┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐</span>
+<span class="go">│name │ q0  │ q1  │ q2  │ q3  │ q4  │ q5  │ q6  │ q7  │ q8  │ q9  │</span>
+<span class="go">├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤</span>
+<span class="go">│  qz │  0° │  0° │  0° │  0° │  0° │  0° │  0° │  0° │  0° │  0° │</span>
+<span class="go">└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration</p></li>
+</ul>
+<dl class="field-list">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>“A divide and conquer articulated-body algorithm for parallel O(log(n))</p></li>
+</ul>
+<p>calculation of rigid body dynamics, Part 2”,
+Int. J. Robotics Research, 18(9), pp 876-892.</p>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.models.DH.Coil" title="roboticstoolbox.models.DH.Coil"><code class="xref py py-func docutils literal notranslate"><span class="pre">Coil()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.models.DH.Ball" title="roboticstoolbox.models.DH.Ball"><code class="xref py py-func docutils literal notranslate"><span class="pre">Ball()</span></code></a></p>
+</dd>
+</dl>
+<p><em>Code author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
 <dt id="roboticstoolbox.models.DH.Cobra600">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">Cobra600</span></code><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Cobra600.html#Cobra600"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Cobra600" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
@@ -4652,6 +4817,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Cobra600</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Cobra600 (by Adept): 4 axes (RRPR), standard DH parameters</span>
 <span class="go">┏━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃ θⱼ  ┃  dⱼ   ┃  aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━━╋━━━━━━━╋━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4694,6 +4860,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">IRB140</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">IRB 140 (by ABB): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃  dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4752,6 +4919,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">KR5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">KR5 (by KUKA): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━┳━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃   dⱼ   ┃  aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━╋━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4812,6 +4980,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Orion5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Orion 5 (by RAWR Robotics): 4 axes (RRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃  dⱼ   ┃          aⱼ          ┃  ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -4874,6 +5043,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Planar3</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Planar 3 link (by ): 3 axes (RRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━┳━━━━┳━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃ dⱼ  ┃ aⱼ ┃  ⍺ⱼ  ┃</span>
 <span class="go">┣━━━━╋━━━━━╋━━━━╋━━━━━━┫</span>
@@ -4907,7 +5077,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt id="roboticstoolbox.models.DH.Planar2">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">Planar2</span></code><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Planar2.html#Planar2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Planar2" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">Planar2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Planar2.html#Planar2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Planar2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a planar 2-link robot</p>
 <p><code class="docutils literal notranslate"><span class="pre">Planar2()</span></code> is a class which models a 2-link planar robot and
@@ -4916,6 +5086,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Planar2</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Planar 2 link (by ): 2 axes (RR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━┳━━━━┳━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃ dⱼ  ┃ aⱼ ┃  ⍺ⱼ  ┃</span>
 <span class="go">┣━━━━╋━━━━━╋━━━━╋━━━━━━┫</span>
@@ -4961,6 +5132,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">LWR4</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">LWR-IV (by Kuka): 7 axes (RRRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━┳━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃  dⱼ  ┃ aⱼ  ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━╋━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -5022,6 +5194,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">UR3</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">UR3 (by Universal Robotics): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃   dⱼ    ┃    aⱼ    ┃   ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━┫</span>
@@ -5082,6 +5255,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">UR5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">UR5 (by Universal Robotics): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃    dⱼ    ┃    aⱼ    ┃   ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━━╋━━━━━━━━━━╋━━━━━━━━┫</span>
@@ -5142,6 +5316,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">UR10</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">UR10 (by Universal Robotics): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃    dⱼ    ┃   aⱼ    ┃   ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -5202,6 +5377,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Sawyer</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Sawyer (by Rethink Robotics): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃   dⱼ   ┃  aⱼ   ┃   ⍺ⱼ   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━╋━━━━━━━╋━━━━━━━━┫</span>
@@ -5252,6 +5428,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Puma 560 (by Unimation): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃         dⱼ         ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -5315,6 +5492,7 @@ conventions.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Puma 560 (by Unimation): 6 axes (RRRRRR), standard DH parameters</span>
 <span class="go">┏━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
 <span class="go">┃θⱼ  ┃         dⱼ         ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
 <span class="go">┣━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
@@ -5362,6 +5540,222 @@ conventions.</p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt id="roboticstoolbox.models.DH.Baxter">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">Baxter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Baxter.html#Baxter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Baxter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
+<p>Class that models a Baxter manipulator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>symbolic</strong> (<em>bool</em>) – use symbolic constants</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">Baxter()</span></code> is an object which models the left arm of the two 7-joint
+arms of a Rethink Robotics Baxter robot using standard DH conventions.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Baxter(which)</span></code> as above but models the specified arm and <code class="docutils literal notranslate"><span class="pre">which</span></code> is
+either ‘left’ or ‘right’.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Baxter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Baxter-left (by Rethink Robotics): 7 axes (RRRRRRR), standard DH parameters</span>
+<span class="go">┏━━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃   θⱼ     ┃  dⱼ   ┃  aⱼ   ┃   ⍺ⱼ   ┃</span>
+<span class="go">┣━━━━━━━━━━╋━━━━━━━╋━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1       ┃  0.27 ┃ 0.069 ┃ -90.0° ┃</span>
+<span class="go">┃ q2 + 90° ┃     0 ┃     0 ┃  90.0° ┃</span>
+<span class="go">┃ q3       ┃ 0.364 ┃ 0.069 ┃ -90.0° ┃</span>
+<span class="go">┃ q4       ┃     0 ┃     0 ┃  90.0° ┃</span>
+<span class="go">┃ q5       ┃ 0.374 ┃  0.01 ┃ -90.0° ┃</span>
+<span class="go">┃ q6       ┃     0 ┃     0 ┃  90.0° ┃</span>
+<span class="go">┃ q7       ┃  0.28 ┃     0 ┃   0.0° ┃</span>
+<span class="go">┗━━━━━━━━━━┻━━━━━━━┻━━━━━━━┻━━━━━━━━┛</span>
+
+<span class="go">┌─────┬─────┬──────┬──────┬─────┬──────┬─────┬─────┐</span>
+<span class="go">│name │ q0  │ q1   │ q2   │ q3  │ q4   │ q5  │ q6  │</span>
+<span class="go">├─────┼─────┼──────┼──────┼─────┼──────┼─────┼─────┤</span>
+<span class="go">│  qz │  0° │  0°  │  0°  │  0° │  0°  │  0° │  0° │</span>
+<span class="go">│  qr │  0° │ -90° │ -90° │  0° │  0°  │  0° │  0° │</span>
+<span class="go">│  qs │  0° │  0°  │ -90° │  0° │  0°  │  0° │  0° │</span>
+<span class="go">│  qn │  0° │  45° │  90° │  0° │  45° │  0° │  0° │</span>
+<span class="go">└─────┴─────┴──────┴──────┴─────┴──────┴─────┴─────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration</p></li>
+<li><p>qr, vertical ‘READY’ configuration</p></li>
+<li><p>qs, arm is stretched out in the X direction</p></li>
+<li><p>qd, lower arm horizontal as per data sheet</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SI units are used.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The base transform is set to reflect the pose of the arm’s
+shoulder with respect to the base.  Changing the base attribute of the
+arm will overwrite this, IT DOES NOT CHANGE THE POSE OF BAXTER’s base.
+Instead do <code class="docutils literal notranslate"><span class="pre">baxter.base</span> <span class="pre">=</span> <span class="pre">newbase</span> <span class="pre">*</span> <span class="pre">baxter.base</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>“Kinematics Modeling and Experimental Verification of Baxter Robot”
+Z. Ju, C. Yang, H. Ma, Chinese Control Conf, 2015.</p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Code author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.DH.TwoLink">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">TwoLink</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/TwoLink.html#TwoLink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.TwoLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
+<p>Class that models a 2-link robot moving in the vertical plane</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>symbolic</strong> (<em>bool</em>) – use symbolic constants</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">TwoLink()</span></code> is a class which models a 2-link planar robot and
+describes its kinematic and dynamic characteristics using standard DH
+conventions. of a simple planar 2-link mechanism moving in the xz-plane, it experiences gravity loading.
+All mass is concentrated at the joints.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">TwoLink</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">2 link (by ): 2 axes (RR), standard DH parameters</span>
+<span class="go">┏━━━━┳━━━━━┳━━━━┳━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃ dⱼ  ┃ aⱼ ┃  ⍺ⱼ  ┃</span>
+<span class="go">┣━━━━╋━━━━━╋━━━━╋━━━━━━┫</span>
+<span class="go">┃ q1 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
+<span class="go">┃ q2 ┃ 0.0 ┃  1 ┃ 0.0° ┃</span>
+<span class="go">┗━━━━┻━━━━━┻━━━━┻━━━━━━┛</span>
+
+<span class="go">┌─────┬──────┬──────┐</span>
+<span class="go">│name │ q0   │ q1   │</span>
+<span class="go">├─────┼──────┼──────┤</span>
+<span class="go">│  qz │  0°  │  0°  │</span>
+<span class="go">│  q1 │  0°  │  90° │</span>
+<span class="go">│  q2 │  90° │ -90° │</span>
+<span class="go">│  qn │  30° │ -30° │</span>
+<span class="go">└─────┴──────┴──────┘</span>
+
+</pre></div>
+</div>
+<p>The parameters values depend on the <code class="docutils literal notranslate"><span class="pre">symbolic</span></code> parameter</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 24%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameters</p></th>
+<th class="head"><p>Numeric values</p></th>
+<th class="head"><p>Symbolic values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>link lengths</p></td>
+<td><p>1, 1</p></td>
+<td><p>a1, a2</p></td>
+</tr>
+<tr class="row-odd"><td><p>link masses</p></td>
+<td><p>1, 1</p></td>
+<td><p>m1, m2</p></td>
+</tr>
+<tr class="row-even"><td><p>link CoMs in the link frame x-direction</p></td>
+<td><p>-0.5, -0.5</p></td>
+<td><p>c1, c2</p></td>
+</tr>
+<tr class="row-odd"><td><p>gravitational acceleration</p></td>
+<td><p>9.8</p></td>
+<td><p>g</p></td>
+</tr>
+</tbody>
+</table>
+<p>Defined joint configurations are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>qz, zero angles, all folded up</p></li>
+<li><p>q1, links are horizontal and vertical respectively</p></li>
+<li><p>q2, links are vertical and horizontal respectively</p></li>
+<li><p>qn, nominal working configuration</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Robot has only 2 DoF.</p></li>
+<li><p>Motor inertia is 0.</p></li>
+<li><p>Link inertias are 0.</p></li>
+<li><p>Viscous and Coulomb friction is 0.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><p>Based on Fig 3-6 (p73) of Spong and Vidyasagar (1st edition).</p>
+</dd>
+</dl>
+<p><em>Code author: Peter Corke</em></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="roboticstoolbox.models.DH.P8">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></code><code class="sig-name descname"><span class="pre">P8</span></code><a class="reference internal" href="_modules/roboticstoolbox/models/DH/P8.html#P8"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.P8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
+<p>Class that models a Puma robot on an XY base</p>
+<p><code class="docutils literal notranslate"><span class="pre">P8()</span></code> is an object which models an 8-axis robot comprising a Puma 560
+robot on an XY base.  Joints 0 and 1 are the base, joints 2-7 are the robot
+arm.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">Puma 560 (by Unimation): 6 axes (RRRRRR), standard DH parameters</span>
+<span class="go">┏━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
+<span class="go">┃θⱼ  ┃         dⱼ         ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
+<span class="go">┣━━━━╋━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
+<span class="go">┃ q1 ┃ 0.6718299999999999 ┃      0 ┃  90.0° ┃ -160.0° ┃ 160.0° ┃</span>
+<span class="go">┃ q2 ┃                  0 ┃ 0.4318 ┃   0.0° ┃ -110.0° ┃ 110.0° ┃</span>
+<span class="go">┃ q3 ┃            0.15005 ┃ 0.0203 ┃ -90.0° ┃ -135.0° ┃ 135.0° ┃</span>
+<span class="go">┃ q4 ┃             0.4318 ┃      0 ┃  90.0° ┃ -266.0° ┃ 266.0° ┃</span>
+<span class="go">┃ q5 ┃                  0 ┃      0 ┃ -90.0° ┃ -100.0° ┃ 100.0° ┃</span>
+<span class="go">┃ q6 ┃                  0 ┃      0 ┃   0.0° ┃ -266.0° ┃ 266.0° ┃</span>
+<span class="go">┗━━━━┻━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
+
+<span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
+<span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
+<span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
+<span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
+<span class="go">│  qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
+<span class="go">│  qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
+<span class="go">│  qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
+<span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
+
+</pre></div>
+</div>
+<p>Defined joint configurations are:</p>
+<ul class="simple">
+<li><p>qz, zero joint angle configuration, ‘L’ shaped configuration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>SI units are used.</p></li>
+</ul>
+</div>
+<p><em>Code author: Peter Corke</em></p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">models.DH.Puma560()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 
@@ -5381,7 +5775,7 @@ conventions.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

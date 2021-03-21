@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>roboticstoolbox.models.DH.Planar2 &mdash; Robotics Toolbox for Python  documentation</title>
+  <title>roboticstoolbox.models.DH.TwoLink &mdash; Robotics Toolbox for Python  documentation</title>
   
 
   
@@ -141,7 +141,7 @@
         
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
         
-      <li>roboticstoolbox.models.DH.Planar2</li>
+      <li>roboticstoolbox.models.DH.TwoLink</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -156,40 +156,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for roboticstoolbox.models.DH.Planar2</h1><div class="highlight"><pre>
+  <h1>Source code for roboticstoolbox.models.DH.TwoLink</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">@author: Luis Fernando Lara Tobar</span>
 <span class="sd">@author: Peter Corke</span>
-<span class="sd">@author: Samuel Drew</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
 
 
-<div class="viewcode-block" id="Planar2"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Planar2">[docs]</a><span class="k">class</span> <span class="nc">Planar2</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
+<div class="viewcode-block" id="TwoLink"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.TwoLink">[docs]</a><span class="k">class</span> <span class="nc">TwoLink</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class that models a planar 2-link robot</span>
+<span class="sd">    Class that models a 2-link robot moving in the vertical plane</span>
 
-<span class="sd">    ``Planar2()`` is a class which models a 2-link planar robot and</span>
-<span class="sd">    describes its kinematic characteristics using standard DH</span>
-<span class="sd">    conventions.</span>
+<span class="sd">    :param symbolic: use symbolic constants</span>
+<span class="sd">    :type symbolic: bool</span>
+
+<span class="sd">    ``TwoLink()`` is a class which models a 2-link planar robot and</span>
+<span class="sd">    describes its kinematic and dynamic characteristics using standard DH</span>
+<span class="sd">    conventions. of a simple planar 2-link mechanism moving in the xz-plane, it experiences gravity loading.</span>
+<span class="sd">    All mass is concentrated at the joints.</span>
 
 <span class="sd">    .. runblock:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">        &gt;&gt;&gt; robot = rtb.models.DH.Planar2()</span>
+<span class="sd">        &gt;&gt;&gt; robot = rtb.models.DH.TwoLink()</span>
 <span class="sd">        &gt;&gt;&gt; print(robot)</span>
+
+<span class="sd">    The parameters values depend on the ``symbolic`` parameter</span>
+
+<span class="sd">    =======================================  =================  ==============</span>
+<span class="sd">    Parameters                               Numeric values     Symbolic values</span>
+<span class="sd">    =======================================  =================  ==============</span>
+<span class="sd">    link lengths                             1, 1               a1, a2</span>
+<span class="sd">    link masses                              1, 1               m1, m2</span>
+<span class="sd">    link CoMs in the link frame x-direction  -0.5, -0.5         c1, c2</span>
+<span class="sd">    gravitational acceleration               9.8                g</span>
+<span class="sd">    =======================================  =================  ==============</span>
 
 <span class="sd">    Defined joint configurations are:</span>
 
 <span class="sd">        - qz, zero angles, all folded up</span>
 <span class="sd">        - q1, links are horizontal and vertical respectively</span>
 <span class="sd">        - q2, links are vertical and horizontal respectively</span>
+<span class="sd">        - qn, nominal working configuration</span>
 
 <span class="sd">    .. note::</span>
 
-<span class="sd">      - Robot has only 2 DoF.</span>
+<span class="sd">        - Robot has only 2 DoF.</span>
+<span class="sd">        - Motor inertia is 0.</span>
+<span class="sd">        - Link inertias are 0.</span>
+<span class="sd">        - Viscous and Coulomb friction is 0. </span>
+
+<span class="sd">    :Reference: Based on Fig 3-6 (p73) of Spong and Vidyasagar (1st edition).</span>
 
 <span class="sd">    .. codeauthor:: Peter Corke</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -201,27 +221,49 @@
             <span class="n">zero</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
             <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
             <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;a1 a2&#39;</span><span class="p">)</span>
+            <span class="n">m1</span><span class="p">,</span> <span class="n">m2</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;m1 m2&#39;</span><span class="p">)</span>
+            <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;c1 c2&#39;</span><span class="p">)</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
             <span class="n">zero</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">a1</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">a2</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">m1</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">m2</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">c1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+            <span class="n">c2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="mf">9.8</span>
 
-        <span class="n">L</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">),</span>
-                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">)</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m1</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m2</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="n">c2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
             <span class="p">]</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Planar 2 link&#39;</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;planar&#39;</span><span class="p">,))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">links</span><span class="p">,</span>
+            <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;2 link&#39;</span><span class="p">,</span> 
+            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;planar&#39;</span><span class="p">,</span> <span class="s1">&#39;dynamics&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qn&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">])</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gravity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">g</span><span class="p">]</span></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
 
-    <span class="n">robot</span> <span class="o">=</span> <span class="n">Planar2</span><span class="p">()</span>
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">TwoLink</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+
+
+
+
+
 </pre></div>
 
            </div>

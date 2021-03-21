@@ -1,7 +1,7 @@
 <map id="inheritance3a5240bd69" name="inheritance3a5240bd69">
 <area shape="rect" id="node1" title="A link superclass for all robots defined using Denavit&#45;Hartenberg notation." alt="" coords="5,80,125,105"/>
-<area shape="rect" id="node2" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="179,5,333,31"/>
-<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="173,55,339,80"/>
-<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="181,104,331,129"/>
-<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="175,153,337,179"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="179,5,334,31"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="173,55,340,80"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="181,104,332,129"/>
+<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="175,153,338,179"/>
 </map>

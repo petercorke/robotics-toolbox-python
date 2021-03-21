@@ -172,13 +172,12 @@
 <span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> \
     <span class="n">getvector</span><span class="p">,</span> <span class="n">isscalar</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">getmatrix</span>
 <span class="c1"># from spatialmath import base</span>
-<span class="kn">from</span> <span class="nn">spatialmath.base.transforms3d</span> <span class="kn">import</span> <span class="n">tr2jac</span>
-<span class="kn">from</span> <span class="nn">spatialmath.base.transformsNd</span> <span class="kn">import</span> <span class="n">t2r</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base</span> <span class="kn">import</span> <span class="n">tr2jac</span><span class="p">,</span> <span class="n">tr2eul</span><span class="p">,</span> <span class="n">tr2rpy</span><span class="p">,</span> <span class="n">t2r</span><span class="p">,</span> <span class="n">eul2jac</span><span class="p">,</span> <span class="n">rpy2jac</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">Twist3</span>
 <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
 <span class="c1"># from scipy.optimize import minimize, Bounds</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
-
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">block_diag</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.DHLink</span> <span class="kn">import</span> <span class="n">_check_rne</span>
 <span class="kn">from</span> <span class="nn">frne</span> <span class="kn">import</span> <span class="n">init</span><span class="p">,</span> <span class="n">frne</span><span class="p">,</span> <span class="n">delete</span>
 
@@ -278,7 +277,15 @@
 <span class="sd">        :return: Pretty print of the robot model</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">:</span>
+            <span class="n">dh</span> <span class="o">=</span> <span class="s2">&quot;modified&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dh</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">manuf</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">manuf</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="n">manuf</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2"> axes (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="si">}</span><span class="s2">), </span><span class="si">{</span><span class="n">dh</span><span class="si">}</span><span class="s2"> DH parameters</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">deg</span> <span class="o">=</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 
         <span class="k">def</span> <span class="nf">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">link</span><span class="p">):</span>
@@ -363,7 +370,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
 
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 
         <span class="c1"># show tool and base</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -798,97 +805,6 @@
 
         <span class="k">return</span> <span class="n">p</span></div>
 
-<div class="viewcode-block" id="DHRobot.config"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.config">[docs]</a>    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the joint configuration string</span>
-
-<span class="sd">        :return: joint configuration string</span>
-<span class="sd">        :rtype: str</span>
-
-<span class="sd">        A string with one letter per joint: ``R`` for a revolute</span>
-<span class="sd">        joint, and ``P`` for a prismatic joint.</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
-<span class="sd">            &gt;&gt;&gt; puma.config()</span>
-<span class="sd">            &gt;&gt;&gt; stanford = rtb.models.DH.Stanford()</span>
-<span class="sd">            &gt;&gt;&gt; stanford.config()</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;R&#39;</span> <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">isrevolute</span> <span class="k">else</span> <span class="s1">&#39;P&#39;</span> <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span></div>
-
-<div class="viewcode-block" id="DHRobot.todegrees"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.todegrees">[docs]</a>    <span class="k">def</span> <span class="nf">todegrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert joint angles to degrees</span>
-
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values)</span>
-<span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :return: a vector of joint coordinates in degrees and metres</span>
-<span class="sd">        :rtype: ndarray(n)</span>
-
-<span class="sd">        ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees</span>
-<span class="sd">        taking into account whether elements of ``q`` correspond to revolute</span>
-<span class="sd">        or prismatic joints, ie. prismatic joint values are not converted.</span>
-
-<span class="sd">        ``robot.todegrees()`` as above except uses the stored q value of the</span>
-<span class="sd">        robot object.</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; from math import pi</span>
-<span class="sd">            &gt;&gt;&gt; stanford = rtb.models.DH.Stanford()</span>
-<span class="sd">            &gt;&gt;&gt; stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="n">revolute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-            <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="k">if</span>
-            <span class="n">revolute</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">else</span> <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
-        <span class="p">])</span></div>
-
-<div class="viewcode-block" id="DHRobot.toradians"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.toradians">[docs]</a>    <span class="k">def</span> <span class="nf">toradians</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert joint angles to radians</span>
-
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values)</span>
-<span class="sd">        :type q: ndarray(n)</span>
-<span class="sd">        :return: a vector of joint coordinates in radians and metres</span>
-<span class="sd">        :rtype: ndarray(n)</span>
-
-<span class="sd">        ``robot.toradians(q)`` converts joint coordinates ``q`` to radians</span>
-<span class="sd">        taking into account whether elements of ``q`` correspond to revolute</span>
-<span class="sd">        or prismatic joints, ie. prismatic joint values are not converted.</span>
-
-<span class="sd">        ``robot.toradians()`` as above except uses the stored q value of the</span>
-<span class="sd">        robot object.</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; stanford = rtb.models.DH.Stanford()</span>
-<span class="sd">            &gt;&gt;&gt; stanford.toradians([10, 20, 2, 30, 40, 50])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="n">revolute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-            <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-            <span class="k">if</span> <span class="n">revolute</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">else</span> <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
-        <span class="p">])</span></div>
-
 <div class="viewcode-block" id="DHRobot.dhunique"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.dhunique">[docs]</a>    <span class="k">def</span> <span class="nf">dhunique</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print the unique DH parameters</span>
@@ -896,6 +812,14 @@
 <span class="sd">        Print a table showing all the non-zero DH parameters, and their</span>
 <span class="sd">        values.  This is the minimum set of kinematic parameters required</span>
 <span class="sd">        to describe the robot.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; puma.dhunique()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
@@ -978,6 +902,20 @@
         <span class="k">return</span> <span class="n">tw</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DHRobot.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Robot kinematics as an elemenary transform sequence</span>
+
+<span class="sd">        :return: elementary transform sequence</span>
+<span class="sd">        :rtype: ETS</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; puma.ets()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># optionally start with the base transform</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1111,12 +1049,14 @@
                 <span class="n">Tall</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Tall</span></div>
 
-<div class="viewcode-block" id="DHRobot.jacobe"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.jacobe"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in end-effector frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
 <span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param half: return half Jacobian: &#39;trans&#39; or &#39;rot&#39;</span>
+<span class="sd">        :type half: str</span>
 <span class="sd">        :return J: The manipulator Jacobian in the end-effector frame</span>
 <span class="sd">        :rtype: ndarray(6,n)</span>
 
@@ -1134,7 +1074,7 @@
 <span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
 <span class="sd">            &gt;&gt;&gt; puma.jacobe([0, 0, 0, 0, 0, 0])</span>
 
-<span class="sd">        .. note:: This is the **geometric Jacobian** as described in texts by</span>
+<span class="sd">        .. warning:: This is the **geometric Jacobian** as described in texts by</span>
 <span class="sd">            Corke, Spong etal., Siciliano etal.  The end-effector velocity is</span>
 <span class="sd">            described in terms of translational and angular velocity, not a </span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
@@ -1172,9 +1112,18 @@
                 <span class="c1"># modified DH convention</span>
                 <span class="n">U</span> <span class="o">=</span> <span class="n">L</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="n">U</span>
 
+        <span class="c1"># return top or bottom half if asked</span>
+        <span class="k">if</span> <span class="n">half</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">elif</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;rot&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad half specified&#39;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">J</span></div>
 
-<div class="viewcode-block" id="DHRobot.jacob0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.jacob0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in world frame</span>
 
@@ -1182,6 +1131,10 @@
 <span class="sd">        :type q: ndarray(n)</span>
 <span class="sd">        :param T: Forward kinematics if known, SE(3 matrix)</span>
 <span class="sd">        :type T: SE3 instance</span>
+<span class="sd">        :param half: return half Jacobian: &#39;trans&#39; or &#39;rot&#39;</span>
+<span class="sd">        :type half: str</span>
+<span class="sd">        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)</span>
+<span class="sd">        :type analytical: str</span>
 <span class="sd">        :return J: The manipulator Jacobian in the world frame</span>
 <span class="sd">        :rtype: ndarray(6,n)</span>
 
@@ -1191,6 +1144,17 @@
 <span class="sd">        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`</span>
 <span class="sd">        is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.</span>
 
+<span class="sd">        ``analytical`` can be one of:</span>
+
+<span class="sd">            =============  ==================================</span>
+<span class="sd">            Value          Rotational representation</span>
+<span class="sd">            =============  ==================================</span>
+<span class="sd">            ``&#39;rpy-xyz&#39;``  RPY angular rates in XYZ order</span>
+<span class="sd">            ``&#39;rpy-zyx&#39;``  RPY angular rates in XYZ order</span>
+<span class="sd">            ``&#39;eul&#39;``      Euler angular rates in ZYZ order</span>
+<span class="sd">            ``&#39;exp&#39;``      exponential coordinate rates</span>
+<span class="sd">            =============  ==================================</span>
+
 <span class="sd">        Example:</span>
 
 <span class="sd">        .. runblock:: pycon</span>
@@ -1199,17 +1163,58 @@
 <span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
 <span class="sd">            &gt;&gt;&gt; puma.jacob0([0, 0, 0, 0, 0, 0])</span>
 
-<span class="sd">        .. note:: This is the **geometric Jacobian** as described in texts by</span>
+<span class="sd">        .. warning:: The **geometric Jacobian** is as described in texts by</span>
 <span class="sd">            Corke, Spong etal., Siciliano etal.  The end-effector velocity is</span>
 <span class="sd">            described in terms of translational and angular velocity, not a </span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
+
+<span class="sd">        .. note:: ``T`` can be passed in to save the cost of computing forward</span>
+<span class="sd">            kinematics which is needed to transform velocity from end-effector</span>
+<span class="sd">            frame to world frame.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">A</span>
 
-        <span class="k">return</span> <span class="n">tr2jac</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span></div>
+        <span class="c1"># compute Jacobian in EE frame and transform to world frame</span>
+        <span class="n">J0</span> <span class="o">=</span> <span class="n">tr2jac</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="c1"># compute rotational transform if analytical Jacobian required</span>
+        <span class="k">if</span> <span class="n">analytical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy-xyz&#39;</span><span class="p">:</span>
+                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy-zyx&#39;</span><span class="p">:</span>
+                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;eul&#39;</span><span class="p">:</span>
+                <span class="n">eul</span> <span class="o">=</span> <span class="n">tr2eul</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">eul2jac</span><span class="p">(</span><span class="n">eul</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
+                <span class="c1"># TODO: move to SMTB.base, Horner form with skew(v)</span>
+                <span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">=</span> <span class="n">trlog</span><span class="p">(</span><span class="n">t2r</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> \
+                    <span class="o">+</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad order specified&#39;</span><span class="p">)</span>
+        
+            <span class="n">J0</span> <span class="o">=</span> <span class="n">block_diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="o">@</span> <span class="n">J0</span>
+
+        <span class="c1"># TODO optimize computation above if half matrix is returned</span>
+
+        <span class="c1"># return top or bottom half if asked</span>
+        <span class="k">if</span> <span class="n">half</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
+                <span class="n">J0</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span>
+            <span class="k">elif</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;rot&#39;</span><span class="p">:</span>
+                <span class="n">J0</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad half specified&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">J0</span></div>
 
 <div class="viewcode-block" id="DHRobot.jacob_dot"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob_dot">[docs]</a>    <span class="k">def</span> <span class="nf">jacob_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -1883,30 +1888,31 @@
     <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
     <span class="c1"># import spatialmath.base.symbolic as sym</span>
 
-    <span class="n">planar</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Planar2</span><span class="p">()</span>
+    <span class="c1"># planar = rtb.models.DH.Planar2()</span>
     <span class="c1"># J = puma.jacob0(puma.qn)</span>
     <span class="c1"># print(J)</span>
     <span class="c1"># print(puma.manipulability(puma.qn))</span>
     <span class="c1"># print(puma.manipulability(puma.qn, &#39;asada&#39;))</span>
     <span class="c1"># tw, T0 = puma.twists(puma.qz)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">planar</span><span class="p">)</span>
+    <span class="c1"># print(planar)</span>
 
     <span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
-    <span class="n">puma</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;base&#39;</span><span class="p">,</span> <span class="n">puma</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;tool&#39;</span><span class="p">,</span> <span class="n">puma</span><span class="o">.</span><span class="n">tool</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="s1">&#39;eul&#39;</span><span class="p">))</span>
+    <span class="c1"># puma.base = None</span>
+    <span class="c1"># print(&#39;base&#39;, puma.base)</span>
+    <span class="c1"># print(&#39;tool&#39;, puma.tool)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">ets</span><span class="p">())</span>
+    <span class="c1"># print(puma.ets())</span>
 
-    <span class="n">puma</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">puma</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">puma</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">puma</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">ets</span><span class="p">())</span>
+    <span class="c1"># puma[2].flip = True</span>
+    <span class="c1"># puma[3].offset = 1</span>
+    <span class="c1"># puma[4].flip = True</span>
+    <span class="c1"># puma[4].offset = -1</span>
+    <span class="c1"># print(puma)</span>
+    <span class="c1"># print(puma.ets())</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">dyntable</span><span class="p">())</span>
+    <span class="c1"># print(puma.dyntable())</span>
 </pre></div>
 
            </div>
@@ -1920,7 +1926,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

@@ -202,7 +202,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Rx&#39;</span><span class="p">,</span> <span class="s1">&#39;Ry&#39;</span><span class="p">,</span> <span class="s1">&#39;Rz&#39;</span><span class="p">,</span> <span class="s1">&#39;tx&#39;</span><span class="p">,</span> <span class="s1">&#39;ty&#39;</span><span class="p">,</span> <span class="s1">&#39;tz&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;Rx&#39;</span><span class="p">,</span> <span class="s1">&#39;Ry&#39;</span><span class="p">,</span> <span class="s1">&#39;Rz&#39;</span><span class="p">,</span> <span class="s1">&#39;tx&#39;</span><span class="p">,</span> <span class="s1">&#39;ty&#39;</span><span class="p">,</span> <span class="s1">&#39;tz&#39;</span><span class="p">):</span>
             <span class="c1"># it&#39;s a regular axis</span>
 
             <span class="k">if</span> <span class="n">eta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -481,9 +481,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Joint configuration string</span>
+<span class="sd">        Joint structure string</span>
 
 <span class="sd">        :return: A string indicating the joint types</span>
 <span class="sd">        :rtype: str</span>
@@ -497,7 +497,7 @@
 
 <span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ETS</span>
 <span class="sd">            &gt;&gt;&gt; e = ETS.tz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)</span>
-<span class="sd">            &gt;&gt;&gt; e.config</span>
+<span class="sd">            &gt;&gt;&gt; e.structure</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -610,8 +610,7 @@
                     <span class="n">qj</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">et</span><span class="o">.</span><span class="n">jindex</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isrevolute</span> <span class="ow">and</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;deg&#39;</span><span class="p">:</span>
                     <span class="n">qj</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
-                <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isflip</span><span class="p">:</span>
-                    <span class="n">qj</span> <span class="o">=</span> <span class="o">-</span><span class="n">qj</span>
+
                 <span class="n">Tk</span> <span class="o">=</span> <span class="n">et</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">qj</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># for constants</span>
@@ -622,12 +621,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">T</span> <span class="o">=</span> <span class="n">T</span> <span class="o">@</span> <span class="n">Tk</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
             <span class="n">T</span> <span class="o">=</span> <span class="n">SE2</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">T</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># optionally do symbolic simplification</span>
+        
+        <span class="k">return</span> <span class="n">T</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -802,7 +803,7 @@
 <span class="sd">            the left and right operands in an internal list. In this example</span>
 <span class="sd">            we see the length of the product is 2.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">prod</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
+        <span class="n">prod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">()</span>
         <span class="n">prod</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">rest</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="n">prod</span>
 
@@ -1696,7 +1697,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>

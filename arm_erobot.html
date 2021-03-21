@@ -35,7 +35,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -198,8 +198,8 @@
 <h2>ERobot<a class="headerlink" href="#erobot" title="Permalink to this headline">¶</a></h2>
 <div class="graphviz"><img src="_images/inheritance-2c76d12d33789700f930a1a9dc183615ceb39875.png" alt="Inheritance diagram of roboticstoolbox.ERobot" usemap="#inheritanced41b53372b" class="inheritance graphviz" /></div>
 <map id="inheritanced41b53372b" name="inheritanced41b53372b">
-<area shape="rect" id="node3" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="244,31,344,56"/>
-<area shape="rect" id="node2" href="#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="392,31,508,56"/>
+<area shape="rect" id="node3" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="245,31,348,56"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="The ERobot. A superclass which represents the" alt="" coords="396,31,515,56"/>
 </map><p>The various models <a class="reference internal" href="#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
 <span class="target" id="module-roboticstoolbox.robot.ERobot"></span><p>Created on Tue Apr 24 15:48:52 2020
 &#64;author: Jesse Haviland</p>
@@ -500,6 +500,12 @@ base to the link <code class="docutils literal notranslate"><span class="pre">li
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.ets(start=l1,</span> <span class="pre">end=l2)</span></code> is an ETS representing the kinematics
 from link <code class="docutils literal notranslate"><span class="pre">l1</span></code> to link <code class="docutils literal notranslate"><span class="pre">l2</span></code>.</p></li>
 </ul>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="go">tz(0.333) * Rz(q0) * Rx(-90°) * Rz(q1) * Rx(90°) * tz(0.316) * Rz(q2) * tx(0.0825) * Rx(90°) * Rz(q3) * tx(-0.0825) * Rx(-90°) * tz(0.384) * Rz(q4) * Rx(90°) * Rz(q5) * tx(0.088) * Rx(90°) * tz(0.107) * Rz(q6) * tz(0.10300000000000001) * Rz(-45°)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -543,6 +549,13 @@ prismatic</p></li>
 </div></blockquote>
 <p>Edge labels or nodes in blue have a fixed transformation to the
 preceding link.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">showgraph</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/panda-graph.svg"><img alt="_images/panda-graph.svg" src="_images/panda-graph.svg" width="600" /></a>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.dotfile" title="roboticstoolbox.robot.ERobot.ERobot.dotfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">dotfile()</span></code></a></p>
@@ -718,7 +731,7 @@ to all applications is designed.</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.jacob0">
-<code class="sig-name descname"><span class="pre">jacob0</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">jacob0</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.jacob0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manipulator geometric Jacobian in the base frame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -733,6 +746,8 @@ end of end, defaults to None</p></li>
 Jacobian represents with respect to the base frame. Use this to
 avoid caluclating forward kinematics to save time, defaults
 to None</p></li>
+<li><p><strong>half</strong> (<em>str</em>) – return half Jacobian: ‘trans’ or ‘rot’</p></li>
+<li><p><strong>analytical</strong> (<em>str</em>) – return analytical Jacobian instead of geometric Jacobian (default)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return J</dt>
@@ -749,11 +764,39 @@ end-effector frame.</p></li>
 </ul>
 <p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
 is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">analytical</span></code> can be one of:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Value</p></th>
+<th class="head"><p>Rotational representation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'rpy-xyz'</span></code></p></td>
+<td><p>RPY angular rates in XYZ order</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'rpy-zyx'</span></code></p></td>
+<td><p>RPY angular rates in XYZ order</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">'eul'</span></code></p></td>
+<td><p>Euler angular rates in ZYZ order</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">'exp'</span></code></p></td>
+<td><p>exponential coordinate rates</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">array([[-0.15  ,  0.8636,  0.4318,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">array([[ 0.15  ,  0.8636,  0.4318,  0.    ,  0.    ,  0.    ],</span>
 <span class="go">       [ 0.2203,  0.    ,  0.    ,  0.2   ,  0.    ,  0.2   ],</span>
 <span class="go">       [ 0.    , -0.2203, -0.2   ,  0.    , -0.2   ,  0.    ],</span>
 <span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
@@ -761,8 +804,8 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <span class="go">       [ 1.    ,  0.    ,  0.    ,  1.    ,  0.    ,  1.    ]])</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
 <p>This is the geometric Jacobian as described in texts by
 Corke, Spong etal., Siciliano etal.  The end-effector velocity is
 described in terms of translational and angular velocity, not a 
@@ -789,9 +832,7 @@ describes, defaults to the end-effector if only one is present</p></li>
 <li><p><strong>tool</strong> (<em>SE3</em><em>, </em><em>optional</em>) – a static tool transformation matrix to apply to the
 end of end, defaults to None</p></li>
 <li><p><strong>T</strong> (<em>SE3</em><em>, </em><em>optional</em>) – The transformation matrix of the reference point which the
-Jacobian represents with respect to the base frame. Use this to
-avoid caluclating forward kinematics to save time, defaults
-to None</p></li>
+Jacobian represents with respect to the base frame.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return J</dt>
@@ -812,7 +853,7 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">array([[-0.15  ,  0.8636,  0.4318,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">array([[ 0.15  ,  0.8636,  0.4318,  0.    ,  0.    ,  0.    ],</span>
 <span class="go">       [ 0.2203,  0.    ,  0.    ,  0.2   ,  0.    ,  0.2   ],</span>
 <span class="go">       [ 0.    , -0.2203, -0.2   ,  0.    , -0.2   ,  0.    ],</span>
 <span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    ,  0.    ,  0.    ],</span>
@@ -820,8 +861,8 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <span class="go">       [ 1.    ,  0.    ,  0.    ,  1.    ,  0.    ,  1.    ]])</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
 <p>This is the <strong>geometric Jacobian</strong> as described in texts by
 Corke, Spong etal., Siciliano etal.  The end-effector velocity is
 described in terms of translational and angular velocity, not a 
@@ -831,6 +872,12 @@ velocity twist as per the text by Lynch &amp; Park.</p>
 <p class="admonition-title">Warning</p>
 <p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> must be on the same branch,
 with <code class="docutils literal notranslate"><span class="pre">start</span></code> closest to the base.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">T</span></code> can be passed in to save the cost of computing forward
+kinematics which is needed to transform velocity from end-effector
+frame to world frame.</p>
 </div>
 </dd></dl>
 
@@ -863,13 +910,24 @@ if not supplied will use the stored q values).</p></li>
 <dd class="field-odd"><p>float ndarray(6,n,n)</p>
 </dd>
 </dl>
-<p>H[i,j,k] is d2 u_i / dq_j dq_k</p>
-<p>where u = {t_x, t_y, t_z, r_x, r_y, r_z}</p>
-<p>J[i,j] is d u_i / dq_j</p>
-<p>where u = {t_x, t_y, t_z, ζ_x, ζ_y, ζ_z}</p>
-<p>v = J qd</p>
-<p>a = Jd qd + J qdd</p>
-<p>Jd = H qd</p>
+<p>This method computes the manipulator Hessian.  If we take the 
+time derivative of the differential kinematic relationship</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\nu    &amp;= \mat{J}(\vec{q}) \dvec{q} \\
+\alpha &amp;= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}\end{split}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[\dmat{J} = \mat{H} \dvec{q}\]</div>
+<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
+Hessian tensor.</p>
+<p>The elements of the Hessian are</p>
+<div class="math notranslate nohighlight">
+\[\mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}\]</div>
+<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
+of the spatial velocity vector.</p>
+<p>Similarly, we can write</p>
+<div class="math notranslate nohighlight">
+\[\mat{J}_{i,j} = \frac{d u_i}{d q_j}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">References</dt>
 <dd class="field-odd"><ul class="simple">
@@ -904,8 +962,16 @@ if not supplied will use the stored q values).</p></li>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float ndarray(n)</p>
 </dd>
-<dt class="field-even">References</dt>
-<dd class="field-even"><ul class="simple">
+</dl>
+<p>Yoshikawa’s manipulability measure</p>
+<div class="math notranslate nohighlight">
+\[m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}\]</div>
+<p>This method returns its Jacobian with respect to configuration</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial m(\vec{q})}{\partial \vec{q}}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
 <li><p>Kinematic Derivatives using the Elementary Transform
 Sequence, J. Haviland and P. Corke</p></li>
 </ul>
@@ -926,10 +992,21 @@ Sequence, J. Haviland and P. Corke</p></li>
 </dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">NameError: name &#39;rtb&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;t&#39; is not defined</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">hierarchy</span><span class="p">()</span>
+<span class="go"> panda_link0</span>
+<span class="go">   panda_link1</span>
+<span class="go">     panda_link2</span>
+<span class="go">       panda_link3</span>
+<span class="go">         panda_link4</span>
+<span class="go">           panda_link5</span>
+<span class="go">             panda_link6</span>
+<span class="go">               panda_link7</span>
+<span class="go">                 panda_link8</span>
+<span class="go">                   panda_hand</span>
+<span class="go">                     panda_leftfinger</span>
+<span class="go">                     panda_rightfinger</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1095,12 +1172,12 @@ acceleration at the joint configuration q.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">cinertia</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
-<span class="go">array([[ 6.2736, -1.3785,  4.2076,  0.    , -0.3925,  0.    ],</span>
-<span class="go">       [-1.3785, 20.0685, -1.5182,  0.    ,  0.1312, -0.2119],</span>
-<span class="go">       [ 4.2076, -1.5182, 24.9384,  0.    ,  0.    ,  0.    ],</span>
-<span class="go">       [ 0.    ,  0.    ,  0.    ,  0.    , -0.    , -0.    ],</span>
-<span class="go">       [-0.3925,  0.1312,  0.    , -0.    ,  0.1713, -0.    ],</span>
-<span class="go">       [ 0.    , -0.2119,  0.    , -0.    , -0.    ,  0.0967]])</span>
+<span class="go">array([[ 6.2736, -1.3785,  4.2076, -0.    , -0.3925,  0.    ],</span>
+<span class="go">       [-1.3785, 20.0685, -1.5182, -0.    ,  0.1312, -0.2119],</span>
+<span class="go">       [ 4.2076, -1.5182, 24.9384, -0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.    , -0.    , -0.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">       [-0.3925,  0.1312,  0.    ,  0.    ,  0.1713, -0.    ],</span>
+<span class="go">       [ 0.    , -0.2119,  0.    ,  0.    , -0.    ,  0.0967]])</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1369,7 +1446,7 @@ applied to the manipulator joints.
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.fellipse">
-<code class="sig-name descname"><span class="pre">fellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fellipse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">fellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.fellipse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a force ellipsoid object for plotting with PyPlot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1558,14 +1635,17 @@ than Levenberg-Marquadt</p></li>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">sol</span> <span class="pre">=</span> <span class="pre">robot.ikine_LM(T)</span></code> are the joint coordinates (n) corresponding
-to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This method can
-be used for robots with any number of degrees of freedom. The return
-value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This
+method can be used for robots with any number of degrees of freedom. The
+return value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">success=False</span></code> the <code class="docutils literal notranslate"><span class="pre">q</span></code> values will be valid numbers, but the
+solution will be in error.  The amount of error is indicated by
+the <code class="docutils literal notranslate"><span class="pre">residual</span></code>.</p>
 <p><strong>Trajectory operation</strong>:</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
-a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
-initial estimate of q for each time step is taken as the solution from
-the previous time step.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">=</span> <span class="pre">m</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, then the
+result is a named tuple whose elements are</p>
+<p>The initial estimate of q for each time step is taken as the solution
+from the previous time step.</p>
 <p><strong>Underactuated robots:</strong></p>
 <p>For the case where the manipulator has fewer than 6 DOF the
 solution space has more dimensions than can be spanned by the
@@ -1589,7 +1669,7 @@ chosen.</p>
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
-<li><p>Implements a Levenberg-Marquadt variable-step-size solver.</p></li>
+<li><p>Implements a Levenberg-Marquadt variable-damping solver.</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
@@ -1650,11 +1730,12 @@ and rotation about X, Y and Z respectively.</p></li>
 to the robot end-effector pose <code class="docutils literal notranslate"><span class="pre">T</span></code> which is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> object. This method can
 be used for robots with any number of degrees of freedom. The return
 value <code class="docutils literal notranslate"><span class="pre">sol</span></code> is a named tuple with elements:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">success=False</span></code> the <code class="docutils literal notranslate"><span class="pre">q</span></code> values will be valid numbers, but the
+solution will be in error.  The amount of error is indicated by
+the <code class="docutils literal notranslate"><span class="pre">residual</span></code>.</p>
 <p><strong>Trajectory operation</strong>:</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, and the result is
-a list of named tuples such that <code class="docutils literal notranslate"><span class="pre">sol[k]</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">T[k]</span></code>. The
-initial estimate of q for each time step is taken as the solution from
-the previous time step.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">len(T)</span> <span class="pre">=</span> <span class="pre">m</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> it is considered to be a trajectory, then the
+result is a named tuple whose elements are</p>
 <p><strong>Underactuated robots:</strong></p>
 <p>For the case where the manipulator has fewer than 6 DOF the
 solution space has more dimensions than can be spanned by the
@@ -1672,8 +1753,9 @@ be unimportant in which case use the option: mask = [1 1 1 0 0 0].</p>
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference external" href="https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics">Toolbox kinematics wiki page</a></p></li>
-<li><p>Implements a modified Levenberg-Marquadt variable-step-size solver
+<li><p>Implements a modified Levenberg-Marquadt variable-damping solver
 which is quite robust in practice.</p></li>
+<li><p>Similar to <code class="docutils literal notranslate"><span class="pre">ikine_LM</span></code> but uses a different error metric</p></li>
 <li><p>The tolerance is computed on the norm of the error between
 current and desired tool pose.  This norm is computed from
 distances and angles without any kind of weighting.</p></li>
@@ -1994,7 +2076,7 @@ damper becomes active</p></li>
 continuous-time transfer functions that represent the transfer
 function 1/(Js+B) for each joint based on the dynamic parameters
 of the robot and the configuration q (n). n is the number of robot
-joints.</p></li>
+joints.  The result is a list of tuples (J, B) for each joint.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tf</span> <span class="pre">=</span> <span class="pre">jointdynamics(q,</span> <span class="pre">qd)</span></code> as above but include the linearized
 effects of Coulomb friction when operating at joint velocity QD
 (1xN).</p></li>
@@ -2405,7 +2487,7 @@ is: r2 = puma.perturb(0.1)</p>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.plot">
-<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">plot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Graphical display and animation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2699,8 +2781,39 @@ reable format</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.structure">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">structure</span></code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the joint structure string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>joint configuration string</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>A string with one letter per joint: <code class="docutils literal notranslate"><span class="pre">R</span></code> for a revolute
+joint, and <code class="docutils literal notranslate"><span class="pre">P</span></code> for a prismatic joint.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">structure</span>
+<span class="go">&#39;RRRRRR&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">structure</span>
+<span class="go">&#39;RRPRRR&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Fixed joints, that maintain a constant link relative pose,
+are not included.  <code class="docutils literal notranslate"><span class="pre">len(self.structure)</span> <span class="pre">==</span> <span class="pre">self.n</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.teach">
-<code class="sig-name descname"><span class="pre">teach</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.teach" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">teach</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyplot'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.teach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Graphical teach pendant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2763,7 +2876,7 @@ occurs.</p></li>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.teach2">
-<code class="sig-name descname"><span class="pre">teach2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.teach2" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">teach2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyplot2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.teach2" title="Permalink to this definition">¶</a></dt>
 <dd><p>2D Graphical teach pendant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2771,8 +2884,12 @@ occurs.</p></li>
 <li><p><strong>block</strong> (<em>bool</em>) – Block operation of the code and keep the figure open</p></li>
 <li><p><strong>q</strong> (<em>float ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
 if not supplied will use the stored q values).</p></li>
-<li><p><strong>limits</strong> (<em>ndarray</em><em>(</em><em>6</em><em>)</em>) – Custom view limits for the plot. If not supplied will
-autoscale, [x1, x2, y1, y2, z1, z2]</p></li>
+<li><p><strong>limits</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – Custom view limits for the plot. If not supplied will
+autoscale, [x1, x2, y1, y2]</p></li>
+<li><p><strong>vellipse</strong> (<em>bool</em>) – (Plot Option) Plot the velocity ellipse at the
+end-effector</p></li>
+<li><p><strong>vellipse</strong> – (Plot Option) Plot the force ellipse at the
+end-effector</p></li>
 <li><p><strong>eeframe</strong> (<em>bool</em>) – (Plot Option) Plot the end-effector coordinate frame
 at the location of the end-effector. Uses three arrows, red,
 green and blue to indicate the x, y, and z-axes.</p></li>
@@ -2825,6 +2942,37 @@ occurs.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.todegrees">
+<code class="sig-name descname"><span class="pre">todegrees</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.todegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert joint angles to degrees</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vector of joint coordinates in degrees and metres</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.todegrees(q)</span></code> converts joint coordinates <code class="docutils literal notranslate"><span class="pre">q</span></code> to degrees
+taking into account whether elements of <code class="docutils literal notranslate"><span class="pre">q</span></code> correspond to revolute
+or prismatic joints, ie. prismatic joint values are not converted.</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.todegrees()</span></code> as above except uses the stored q value of the
+robot object.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">todegrees</span><span class="p">([</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">])</span>
+<span class="go">array([ 45. ,  22.5,   2. , -45. ,  30. ,  60. ])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.tool">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tool</span></code><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.tool" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get/set robot tool transform (Robot superclass)</p>
@@ -2851,8 +2999,38 @@ is an identity matrix.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="roboticstoolbox.robot.ERobot.ERobot.toradians">
+<code class="sig-name descname"><span class="pre">toradians</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.toradians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert joint angles to radians</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – The joint configuration of the robot (Optional,
+if not supplied will use the stored q values)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vector of joint coordinates in radians and metres</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">robot.toradians(q)</span></code> converts joint coordinates <code class="docutils literal notranslate"><span class="pre">q</span></code> to radians
+taking into account whether elements of <code class="docutils literal notranslate"><span class="pre">q</span></code> correspond to revolute
+or prismatic joints, ie. prismatic joint values are not converted.</p>
+<p><code class="docutils literal notranslate"><span class="pre">robot.toradians()</span></code> as above except uses the stored q value of the
+robot object.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Stanford</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stanford</span><span class="o">.</span><span class="n">toradians</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+<span class="go">array([0.1745, 0.3491, 2.    , 0.5236, 0.6981, 0.8727])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt id="roboticstoolbox.robot.ERobot.ERobot.vellipse">
-<code class="sig-name descname"><span class="pre">vellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.vellipse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">vellipse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trans'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centre</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.vellipse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a velocity ellipsoid object for plotting with PyPlot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3877,19 +4055,20 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐</span>
-<span class="go">│id │     link     │   parent    │    joint     │                     ETS                     │</span>
-<span class="go">├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │  panda_link0 │           - │              │                                             │</span>
-<span class="go">│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ tz(0.333) * Rz(q0)                          │</span>
-<span class="go">│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ Rx(-90°) * Rz(q1)                           │</span>
-<span class="go">│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
-<span class="go">│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
-<span class="go">│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
-<span class="go">│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ Rx(90°) * Rz(q5)                            │</span>
-<span class="go">│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q6)                │</span>
-<span class="go">│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ tz(0.107)                                   │</span>
-<span class="go">└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘</span>
+<span class="go">panda (by Franka Emika): 7 axes (RRRRRRR), ETS model</span>
+<span class="go">┌───┬──────────────┬─────────────┬──────────────┬──────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │     link     │   parent    │    joint     │                                     ETS                                      │</span>
+<span class="go">├───┼──────────────┼─────────────┼──────────────┼──────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │  panda_link0 │         _O_ │              │ {panda_link0} = {_O_}                                                        │</span>
+<span class="go">│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ {panda_link1} = {panda_link0}  * tz(0.333) * Rz(q0)                          │</span>
+<span class="go">│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ {panda_link2} = {panda_link1}  * Rx(-90°) * Rz(q1)                           │</span>
+<span class="go">│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ {panda_link3} = {panda_link2}  * ty(-0.316) * Rx(90°) * Rz(q2)               │</span>
+<span class="go">│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ {panda_link4} = {panda_link3}  * tx(0.0825) * Rx(90°) * Rz(q3)               │</span>
+<span class="go">│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ {panda_link5} = {panda_link4}  * tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │</span>
+<span class="go">│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ {panda_link6} = {panda_link5}  * Rx(90°) * Rz(q5)                            │</span>
+<span class="go">│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ {panda_link7} = {panda_link6}  * tx(0.088) * Rx(90°) * Rz(q6)                │</span>
+<span class="go">│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ {panda_link8} = {panda_link7}  * tz(0.107)                                   │</span>
+<span class="go">└───┴──────────────┴─────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
@@ -3922,21 +4101,22 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Frankie</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬──────────────┬─────────────┬───────────────────┬─────────────────────────────────────────────┐</span>
-<span class="go">│id │     link     │   parent    │       joint       │                     ETS                     │</span>
-<span class="go">├───┼──────────────┼─────────────┼───────────────────┼─────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │  panda_base0 │           - │                   │                                             │</span>
-<span class="go">│ 1 │  panda_base1 │ panda_base0 │ panda_base_joint1 │ Rz(q0)                                      │</span>
-<span class="go">│ 2 │  panda_link0 │ panda_base1 │ panda_base_joint2 │ tz(0.3) * tx(q1)                            │</span>
-<span class="go">│ 3 │  panda_link1 │ panda_link0 │      panda_joint1 │ tz(0.333) * Rz(q2)                          │</span>
-<span class="go">│ 4 │  panda_link2 │ panda_link1 │      panda_joint2 │ Rx(-90°) * Rz(q3)                           │</span>
-<span class="go">│ 5 │  panda_link3 │ panda_link2 │      panda_joint3 │ ty(-0.316) * Rx(90°) * Rz(q4)               │</span>
-<span class="go">│ 6 │  panda_link4 │ panda_link3 │      panda_joint4 │ tx(0.0825) * Rx(90°) * Rz(q5)               │</span>
-<span class="go">│ 7 │  panda_link5 │ panda_link4 │      panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q6) │</span>
-<span class="go">│ 8 │  panda_link6 │ panda_link5 │      panda_joint6 │ Rx(90°) * Rz(q7)                            │</span>
-<span class="go">│ 9 │  panda_link7 │ panda_link6 │      panda_joint7 │ tx(0.088) * Rx(90°) * Rz(q8)                │</span>
-<span class="go">│10 │ @panda_link8 │ panda_link7 │      panda_joint8 │ tz(0.107)                                   │</span>
-<span class="go">└───┴──────────────┴─────────────┴───────────────────┴─────────────────────────────────────────────┘</span>
+<span class="go">frankie (by Franka Emika): 9 axes (RPRRRRRRR), ETS model</span>
+<span class="go">┌───┬──────────────┬─────────────┬───────────────────┬──────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │     link     │   parent    │       joint       │                                     ETS                                      │</span>
+<span class="go">├───┼──────────────┼─────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │  panda_base0 │         _O_ │                   │ {panda_base0} = {_O_}                                                        │</span>
+<span class="go">│ 1 │  panda_base1 │ panda_base0 │ panda_base_joint1 │ {panda_base1} = {panda_base0}  * Rz(q0)                                      │</span>
+<span class="go">│ 2 │  panda_link0 │ panda_base1 │ panda_base_joint2 │ {panda_link0} = {panda_base1}  * tz(0.3) * tx(q1)                            │</span>
+<span class="go">│ 3 │  panda_link1 │ panda_link0 │      panda_joint1 │ {panda_link1} = {panda_link0}  * tz(0.333) * Rz(q2)                          │</span>
+<span class="go">│ 4 │  panda_link2 │ panda_link1 │      panda_joint2 │ {panda_link2} = {panda_link1}  * Rx(-90°) * Rz(q3)                           │</span>
+<span class="go">│ 5 │  panda_link3 │ panda_link2 │      panda_joint3 │ {panda_link3} = {panda_link2}  * ty(-0.316) * Rx(90°) * Rz(q4)               │</span>
+<span class="go">│ 6 │  panda_link4 │ panda_link3 │      panda_joint4 │ {panda_link4} = {panda_link3}  * tx(0.0825) * Rx(90°) * Rz(q5)               │</span>
+<span class="go">│ 7 │  panda_link5 │ panda_link4 │      panda_joint5 │ {panda_link5} = {panda_link4}  * tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q6) │</span>
+<span class="go">│ 8 │  panda_link6 │ panda_link5 │      panda_joint6 │ {panda_link6} = {panda_link5}  * Rx(90°) * Rz(q7)                            │</span>
+<span class="go">│ 9 │  panda_link7 │ panda_link6 │      panda_joint7 │ {panda_link7} = {panda_link6}  * tx(0.088) * Rx(90°) * Rz(q8)                │</span>
+<span class="go">│10 │ @panda_link8 │ panda_link7 │      panda_joint8 │ {panda_link8} = {panda_link7}  * tz(0.107)                                   │</span>
+<span class="go">└───┴──────────────┴─────────────┴───────────────────┴──────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1 │ q2  │ q3     │ q4  │ q5    │ q6  │ q7    │ q8   │</span>
@@ -3969,21 +4149,22 @@ graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR3</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬────────────────────────────────────┐</span>
-<span class="go">│id │      link      │     parent     │             joint              │                ETS                 │</span>
-<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼────────────────────────────────────┤</span>
-<span class="go">│ 0 │          world │              - │                                │                                    │</span>
-<span class="go">│ 1 │      base_link │          world │                    world_joint │                                    │</span>
-<span class="go">│ 2 │  shoulder_link │      base_link │             shoulder_pan_joint │ tz(0.1519) * Rz(q0)                │</span>
-<span class="go">│ 3 │ upper_arm_link │  shoulder_link │            shoulder_lift_joint │ ty(0.1198) * Ry(90°) * Ry(q1)      │</span>
-<span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ ty(-0.0925) * tz(0.24365) * Ry(q2) │</span>
-<span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ tz(0.21325) * Ry(90°) * Ry(q3)     │</span>
-<span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ ty(0.08505) * Rz(q4)               │</span>
-<span class="go">│ 7 │   wrist_3_link │   wrist_2_link │                  wrist_3_joint │ tz(0.08535) * Ry(q5)               │</span>
-<span class="go">│ 8 │       @ee_link │   wrist_3_link │                 ee_fixed_joint │ ty(0.0819) * Rz(90°)               │</span>
-<span class="go">│ 9 │         @tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ ty(0.0819) * Rx(-90°)              │</span>
-<span class="go">│10 │          @base │      base_link │     base_link-base_fixed_joint │ Rz(-180°)                          │</span>
-<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴────────────────────────────────────┘</span>
+<span class="go">ur3 (by Universal Robotics): 6 axes (RRRRRR), ETS model</span>
+<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬─────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │      link      │     parent     │             joint              │                                   ETS                                   │</span>
+<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼─────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          world │            _O_ │                                │ {world} = {_O_}                                                         │</span>
+<span class="go">│ 1 │      base_link │          world │                    world_joint │ {base_link} = {world}                                                   │</span>
+<span class="go">│ 2 │  shoulder_link │      base_link │             shoulder_pan_joint │ {shoulder_link} = {base_link}  * tz(0.1519) * Rz(q0)                    │</span>
+<span class="go">│ 3 │ upper_arm_link │  shoulder_link │            shoulder_lift_joint │ {upper_arm_link} = {shoulder_link}  * ty(0.1198) * Ry(90°) * Ry(q1)     │</span>
+<span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ {forearm_link} = {upper_arm_link}  * ty(-0.0925) * tz(0.24365) * Ry(q2) │</span>
+<span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ {wrist_1_link} = {forearm_link}  * tz(0.21325) * Ry(90°) * Ry(q3)       │</span>
+<span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ {wrist_2_link} = {wrist_1_link}  * ty(0.08505) * Rz(q4)                 │</span>
+<span class="go">│ 7 │   wrist_3_link │   wrist_2_link │                  wrist_3_joint │ {wrist_3_link} = {wrist_2_link}  * tz(0.08535) * Ry(q5)                 │</span>
+<span class="go">│ 8 │       @ee_link │   wrist_3_link │                 ee_fixed_joint │ {ee_link} = {wrist_3_link}  * ty(0.0819) * Rz(90°)                      │</span>
+<span class="go">│ 9 │         @tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ {tool0} = {wrist_3_link}  * ty(0.0819) * Rx(-90°)                       │</span>
+<span class="go">│10 │          @base │      base_link │     base_link-base_fixed_joint │ {base} = {base_link}  * Rz(-180°)                                       │</span>
+<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴─────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
 <span class="go">│name │ q0    │ q1  │ q2  │ q3  │ q4   │ q5  │</span>
@@ -4014,20 +4195,21 @@ graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR5</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
-<span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
-<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼──────────────────────────────────┤</span>
-<span class="go">│ 0 │          world │              - │                                │                                  │</span>
-<span class="go">│ 1 │      base_link │          world │                    world_joint │                                  │</span>
-<span class="go">│ 2 │  shoulder_link │      base_link │             shoulder_pan_joint │ tz(0.089159) * Rz(q0)            │</span>
-<span class="go">│ 3 │ upper_arm_link │  shoulder_link │            shoulder_lift_joint │ ty(0.13585) * Ry(90°) * Ry(q1)   │</span>
-<span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ ty(-0.1197) * tz(0.425) * Ry(q2) │</span>
-<span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ tz(0.39225) * Ry(90°) * Ry(q3)   │</span>
-<span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ ty(0.093) * Rz(q4)               │</span>
-<span class="go">│ 7 │  @wrist_3_link │   wrist_2_link │                  wrist_3_joint │ tz(0.09465) * Ry(q5)             │</span>
-<span class="go">│ 8 │          tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ ty(0.0823) * Rx(-90°)            │</span>
-<span class="go">│ 9 │           base │      base_link │     base_link-base_fixed_joint │ Rz(-180°)                        │</span>
-<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
+<span class="go">ur5 (by Universal Robotics): 6 axes (RRRRRR), ETS model</span>
+<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬───────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │      link      │     parent     │             joint              │                                  ETS                                  │</span>
+<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼───────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          world │            _O_ │                                │ {world} = {_O_}                                                       │</span>
+<span class="go">│ 1 │      base_link │          world │                    world_joint │ {base_link} = {world}                                                 │</span>
+<span class="go">│ 2 │  shoulder_link │      base_link │             shoulder_pan_joint │ {shoulder_link} = {base_link}  * tz(0.089159) * Rz(q0)                │</span>
+<span class="go">│ 3 │ upper_arm_link │  shoulder_link │            shoulder_lift_joint │ {upper_arm_link} = {shoulder_link}  * ty(0.13585) * Ry(90°) * Ry(q1)  │</span>
+<span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ {forearm_link} = {upper_arm_link}  * ty(-0.1197) * tz(0.425) * Ry(q2) │</span>
+<span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ {wrist_1_link} = {forearm_link}  * tz(0.39225) * Ry(90°) * Ry(q3)     │</span>
+<span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ {wrist_2_link} = {wrist_1_link}  * ty(0.093) * Rz(q4)                 │</span>
+<span class="go">│ 7 │  @wrist_3_link │   wrist_2_link │                  wrist_3_joint │ {wrist_3_link} = {wrist_2_link}  * tz(0.09465) * Ry(q5)               │</span>
+<span class="go">│ 8 │          tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ {tool0} = {wrist_3_link}  * ty(0.0823) * Rx(-90°)                     │</span>
+<span class="go">│ 9 │           base │      base_link │     base_link-base_fixed_joint │ {base} = {base_link}  * Rz(-180°)                                     │</span>
+<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴───────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
 <span class="go">│name │ q0    │ q1  │ q2  │ q3  │ q4   │ q5  │</span>
@@ -4058,21 +4240,22 @@ graphical characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">UR10</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬──────────────────────────────────┐</span>
-<span class="go">│id │      link      │     parent     │             joint              │               ETS                │</span>
-<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼──────────────────────────────────┤</span>
-<span class="go">│ 0 │          world │              - │                                │                                  │</span>
-<span class="go">│ 1 │      base_link │          world │                    world_joint │                                  │</span>
-<span class="go">│ 2 │  shoulder_link │      base_link │             shoulder_pan_joint │ tz(0.1273) * Rz(q0)              │</span>
-<span class="go">│ 3 │ upper_arm_link │  shoulder_link │            shoulder_lift_joint │ ty(0.220941) * Ry(90°) * Ry(q1)  │</span>
-<span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ ty(-0.1719) * tz(0.612) * Ry(q2) │</span>
-<span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ tz(0.5723) * Ry(90°) * Ry(q3)    │</span>
-<span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ ty(0.1149) * Rz(q4)              │</span>
-<span class="go">│ 7 │   wrist_3_link │   wrist_2_link │                  wrist_3_joint │ tz(0.1157) * Ry(q5)              │</span>
-<span class="go">│ 8 │       @ee_link │   wrist_3_link │                 ee_fixed_joint │ ty(0.0922) * Rz(90°)             │</span>
-<span class="go">│ 9 │         @tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ ty(0.0922) * Rx(-90°)            │</span>
-<span class="go">│10 │          @base │      base_link │     base_link-base_fixed_joint │ Rz(-180°)                        │</span>
-<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴──────────────────────────────────┘</span>
+<span class="go">ur10 (by Universal Robotics): 6 axes (RRRRRR), ETS model</span>
+<span class="go">┌───┬────────────────┬────────────────┬────────────────────────────────┬───────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │      link      │     parent     │             joint              │                                  ETS                                  │</span>
+<span class="go">├───┼────────────────┼────────────────┼────────────────────────────────┼───────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          world │            _O_ │                                │ {world} = {_O_}                                                       │</span>
+<span class="go">│ 1 │      base_link │          world │                    world_joint │ {base_link} = {world}                                                 │</span>
+<span class="go">│ 2 │  shoulder_link │      base_link │             shoulder_pan_joint │ {shoulder_link} = {base_link}  * tz(0.1273) * Rz(q0)                  │</span>
+<span class="go">│ 3 │ upper_arm_link │  shoulder_link │            shoulder_lift_joint │ {upper_arm_link} = {shoulder_link}  * ty(0.220941) * Ry(90°) * Ry(q1) │</span>
+<span class="go">│ 4 │   forearm_link │ upper_arm_link │                    elbow_joint │ {forearm_link} = {upper_arm_link}  * ty(-0.1719) * tz(0.612) * Ry(q2) │</span>
+<span class="go">│ 5 │   wrist_1_link │   forearm_link │                  wrist_1_joint │ {wrist_1_link} = {forearm_link}  * tz(0.5723) * Ry(90°) * Ry(q3)      │</span>
+<span class="go">│ 6 │   wrist_2_link │   wrist_1_link │                  wrist_2_joint │ {wrist_2_link} = {wrist_1_link}  * ty(0.1149) * Rz(q4)                │</span>
+<span class="go">│ 7 │   wrist_3_link │   wrist_2_link │                  wrist_3_joint │ {wrist_3_link} = {wrist_2_link}  * tz(0.1157) * Ry(q5)                │</span>
+<span class="go">│ 8 │       @ee_link │   wrist_3_link │                 ee_fixed_joint │ {ee_link} = {wrist_3_link}  * ty(0.0922) * Rz(90°)                    │</span>
+<span class="go">│ 9 │         @tool0 │   wrist_3_link │ wrist_3_link-tool0_fixed_joint │ {tool0} = {wrist_3_link}  * ty(0.0922) * Rx(-90°)                     │</span>
+<span class="go">│10 │          @base │      base_link │     base_link-base_fixed_joint │ {base} = {base_link}  * Rz(-180°)                                     │</span>
+<span class="go">└───┴────────────────┴────────────────┴────────────────────────────────┴───────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬───────┬─────┬─────┬─────┬──────┬─────┐</span>
 <span class="go">│name │ q0    │ q1  │ q2  │ q3  │ q4   │ q5  │</span>
@@ -4103,17 +4286,18 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬────────┬────────┬───────┬───────────────────────────────────────────────────────────┐</span>
-<span class="go">│id │  link  │ parent │ joint │                            ETS                            │</span>
-<span class="go">├───┼────────┼────────┼───────┼───────────────────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │  link1 │      - │       │                                                           │</span>
-<span class="go">│ 1 │  link2 │  link1 │    j1 │ tz(0.6718) * Rx(90°) * Ry(q0)                             │</span>
-<span class="go">│ 2 │  link3 │  link2 │    j2 │ Rz(q1)                                                    │</span>
-<span class="go">│ 3 │  link4 │  link3 │    j3 │ tx(0.4318) * ty(-0.0203) * tz(0.1501) * Rz(-90°) * Rz(q2) │</span>
-<span class="go">│ 4 │  link5 │  link4 │    j4 │ Rz(90°) * Rx(90°) * Rz(q3)                                │</span>
-<span class="go">│ 5 │  link6 │  link5 │    j5 │ tz(0.4331) * Rx(90°) * Rz(q4)                             │</span>
-<span class="go">│ 6 │ @link7 │  link6 │    j6 │ ty(0.0558) * Rx(-90°) * Rz(q5)                            │</span>
-<span class="go">└───┴────────┴────────┴───────┴───────────────────────────────────────────────────────────┘</span>
+<span class="go">Puma560 (by Unimation): 6 axes (RRRRRR), ETS model</span>
+<span class="go">┌───┬────────┬────────┬───────┬────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │  link  │ parent │ joint │                                      ETS                                       │</span>
+<span class="go">├───┼────────┼────────┼───────┼────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │  link1 │    _O_ │       │ {link1} = {_O_}                                                                │</span>
+<span class="go">│ 1 │  link2 │  link1 │    j1 │ {link2} = {link1}  * tz(0.6718) * Rx(90°) * Ry(q0)                             │</span>
+<span class="go">│ 2 │  link3 │  link2 │    j2 │ {link3} = {link2}  * Rz(q1)                                                    │</span>
+<span class="go">│ 3 │  link4 │  link3 │    j3 │ {link4} = {link3}  * tx(0.4318) * ty(-0.0203) * tz(0.1501) * Rz(-90°) * Rz(q2) │</span>
+<span class="go">│ 4 │  link5 │  link4 │    j4 │ {link5} = {link4}  * Rz(90°) * Rx(90°) * Rz(q3)                                │</span>
+<span class="go">│ 5 │  link6 │  link5 │    j5 │ {link6} = {link5}  * tz(0.4331) * Rx(90°) * Rz(q4)                             │</span>
+<span class="go">│ 6 │ @link7 │  link6 │    j6 │ {link7} = {link6}  * ty(0.0558) * Rx(-90°) * Rz(q5)                            │</span>
+<span class="go">└───┴────────┴────────┴───────┴────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
@@ -4148,22 +4332,23 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px100</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼─────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                         │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.0508) * Rz(q0)                     │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.04225) * Ry(q1)                    │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.035) * tz(0.1) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │       /gripper_link │     /forearm_link │  wrist_angle │ tx(0.1) * Ry(q3)                        │</span>
-<span class="go">│ 5 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.063) * Rx(-180°)                   │</span>
-<span class="go">│ 6 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.0055) * Rx(q4)                     │</span>
-<span class="go">│ 7 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                         │</span>
-<span class="go">│ 8 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.023)                               │</span>
-<span class="go">│ 9 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q5)                                  │</span>
-<span class="go">│10 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q6)                                  │</span>
-<span class="go">│11 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.027575)                            │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+<span class="go">px100 (by Interbotix): 7 axes (RRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                      ETS                                       │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                           │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.0508) * Rz(q0)                         │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.04225) * Ry(q1)                   │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.035) * tz(0.1) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │       /gripper_link │     /forearm_link │  wrist_angle │ {/gripper_link} = {/forearm_link}  * tx(0.1) * Ry(q3)                          │</span>
+<span class="go">│ 5 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.063) * Rx(-180°)                      │</span>
+<span class="go">│ 6 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q4)                   │</span>
+<span class="go">│ 7 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                           │</span>
+<span class="go">│ 8 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                             │</span>
+<span class="go">│ 9 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q5)                                │</span>
+<span class="go">│10 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q6)                               │</span>
+<span class="go">│11 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                           │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬────┬────────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5 │ q6     │</span>
@@ -4201,23 +4386,24 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">px150</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼─────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                         │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.065) * Rz(q0)                      │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.03891) * Ry(q1)                    │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.05) * tz(0.15) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ tx(0.15) * Ry(q3)                       │</span>
-<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ tx(0.065) * Rx(-180°) * Rx(q4)          │</span>
-<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.043)                               │</span>
-<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.0055) * Rx(q5)                     │</span>
-<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                         │</span>
-<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.023)                               │</span>
-<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q6)                                  │</span>
-<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q7)                                  │</span>
-<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.027575)                            │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+<span class="go">px150 (by Interbotix): 8 axes (RRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                      ETS                                       │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                           │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.065) * Rz(q0)                          │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.03891) * Ry(q1)                   │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.05) * tz(0.15) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ {/wrist_link} = {/forearm_link}  * tx(0.15) * Ry(q3)                           │</span>
+<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.065) * Rx(-180°) * Rx(q4)              │</span>
+<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.043)                                  │</span>
+<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q5)                   │</span>
+<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                           │</span>
+<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                             │</span>
+<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q6)                                │</span>
+<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q7)                               │</span>
+<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                           │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
@@ -4255,23 +4441,24 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx150</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬─────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                   ETS                   │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼─────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                         │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.065) * Rz(q0)                      │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.03891) * Ry(q1)                    │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.05) * tz(0.15) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ tx(0.15) * Ry(q3)                       │</span>
-<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ tx(0.065) * Rx(-180°) * Rx(q4)          │</span>
-<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.043)                               │</span>
-<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.0055) * Rx(q5)                     │</span>
-<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                         │</span>
-<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.023)                               │</span>
-<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q6)                                  │</span>
-<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q7)                                  │</span>
-<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.027575)                            │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴─────────────────────────────────────────┘</span>
+<span class="go">rx150 (by Interbotix): 8 axes (RRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                      ETS                                       │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                           │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.065) * Rz(q0)                          │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.03891) * Ry(q1)                   │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.05) * tz(0.15) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ {/wrist_link} = {/forearm_link}  * tx(0.15) * Ry(q3)                           │</span>
+<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.065) * Rx(-180°) * Rx(q4)              │</span>
+<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.043)                                  │</span>
+<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q5)                   │</span>
+<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                           │</span>
+<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                             │</span>
+<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q6)                                │</span>
+<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q7)                               │</span>
+<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                           │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
@@ -4309,23 +4496,24 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">rx200</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                        │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.065) * Rz(q0)                     │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.03891) * Ry(q1)                   │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.05) * tz(0.2) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ tx(0.2) * Ry(q3)                       │</span>
-<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ tx(0.065) * Rx(-180°) * Rx(q4)         │</span>
-<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.043)                              │</span>
-<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.0055) * Rx(q5)                    │</span>
-<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                        │</span>
-<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.023)                              │</span>
-<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q6)                                 │</span>
-<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q7)                                 │</span>
-<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.027575)                           │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────┘</span>
+<span class="go">rx200 (by Interbotix): 8 axes (RRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                      ETS                                      │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼───────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                          │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.065) * Rz(q0)                         │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.03891) * Ry(q1)                  │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.05) * tz(0.2) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ {/wrist_link} = {/forearm_link}  * tx(0.2) * Ry(q3)                           │</span>
+<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.065) * Rx(-180°) * Rx(q4)             │</span>
+<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.043)                                 │</span>
+<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q5)                  │</span>
+<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                          │</span>
+<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                            │</span>
+<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q6)                               │</span>
+<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q7)                              │</span>
+<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                          │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴───────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
@@ -4363,23 +4551,24 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                    ETS                    │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼───────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                           │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.0787) * Rz(q0)                       │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.04805) * Ry(q1)                      │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.05955) * tz(0.3) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ tx(0.3) * Ry(q3)                          │</span>
-<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ tx(0.069744) * Rx(-180°) * Rx(q4)         │</span>
-<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.042825)                              │</span>
-<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.005675) * Rx(q5)                     │</span>
-<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                           │</span>
-<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.025875)                              │</span>
-<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q6)                                    │</span>
-<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q7)                                    │</span>
-<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.0385)                                │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴───────────────────────────────────────────┘</span>
+<span class="go">vx300 (by Interbotix): 8 axes (RRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬──────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                       ETS                                        │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼──────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                             │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.0787) * Rz(q0)                           │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.04805) * Ry(q1)                     │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.05955) * tz(0.3) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ {/wrist_link} = {/forearm_link}  * tx(0.3) * Ry(q3)                              │</span>
+<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.069744) * Rx(-180°) * Rx(q4)             │</span>
+<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.042825)                                 │</span>
+<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.005675) * Rx(q5)                   │</span>
+<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                             │</span>
+<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.025875)                            │</span>
+<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q6)                                  │</span>
+<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q7)                                 │</span>
+<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.0385)                               │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
@@ -4417,24 +4606,25 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">vx300s</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬───────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │       parent        │    joint     │                    ETS                    │</span>
-<span class="go">├───┼─────────────────────┼─────────────────────┼──────────────┼───────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                   - │              │                                           │</span>
-<span class="go">│ 1 │      /shoulder_link │          /base_link │        waist │ tz(0.0787) * Rz(q0)                       │</span>
-<span class="go">│ 2 │     /upper_arm_link │      /shoulder_link │     shoulder │ tz(0.04805) * Ry(q1)                      │</span>
-<span class="go">│ 3 │ /upper_forearm_link │     /upper_arm_link │        elbow │ tx(0.05955) * tz(0.3) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │ /lower_forearm_link │ /upper_forearm_link │ forearm_roll │ tx(0.2) * Rx(q3)                          │</span>
-<span class="go">│ 5 │         /wrist_link │ /lower_forearm_link │  wrist_angle │ tx(0.1) * Ry(q4)                          │</span>
-<span class="go">│ 6 │       /gripper_link │         /wrist_link │ wrist_rotate │ tx(0.069744) * Rx(-180°) * Rx(q5)         │</span>
-<span class="go">│ 7 │        /ee_arm_link │       /gripper_link │       ee_arm │ tx(0.042825)                              │</span>
-<span class="go">│ 8 │ @/gripper_prop_link │        /ee_arm_link │      gripper │ tx(0.005675) * Rx(q6)                     │</span>
-<span class="go">│ 9 │   /gripper_bar_link │        /ee_arm_link │  gripper_bar │                                           │</span>
-<span class="go">│10 │       /fingers_link │   /gripper_bar_link │       ee_bar │ tx(0.025875)                              │</span>
-<span class="go">│11 │  @/left_finger_link │       /fingers_link │  left_finger │ ty(q7)                                    │</span>
-<span class="go">│12 │ @/right_finger_link │       /fingers_link │ right_finger │ ty(q8)                                    │</span>
-<span class="go">│13 │   @/ee_gripper_link │       /fingers_link │   ee_gripper │ tx(0.0385)                                │</span>
-<span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴───────────────────────────────────────────┘</span>
+<span class="go">vx300s (by Interbotix): 9 axes (RRRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬────────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │       parent        │    joint     │                                          ETS                                           │</span>
+<span class="go">├───┼─────────────────────┼─────────────────────┼──────────────┼────────────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │                 _O_ │              │ {/base_link} = {_O_}                                                                   │</span>
+<span class="go">│ 1 │      /shoulder_link │          /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.0787) * Rz(q0)                                 │</span>
+<span class="go">│ 2 │     /upper_arm_link │      /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.04805) * Ry(q1)                           │</span>
+<span class="go">│ 3 │ /upper_forearm_link │     /upper_arm_link │        elbow │ {/upper_forearm_link} = {/upper_arm_link}  * tx(0.05955) * tz(0.3) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │ /lower_forearm_link │ /upper_forearm_link │ forearm_roll │ {/lower_forearm_link} = {/upper_forearm_link}  * tx(0.2) * Rx(q3)                      │</span>
+<span class="go">│ 5 │         /wrist_link │ /lower_forearm_link │  wrist_angle │ {/wrist_link} = {/lower_forearm_link}  * tx(0.1) * Ry(q4)                              │</span>
+<span class="go">│ 6 │       /gripper_link │         /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.069744) * Rx(-180°) * Rx(q5)                   │</span>
+<span class="go">│ 7 │        /ee_arm_link │       /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.042825)                                       │</span>
+<span class="go">│ 8 │ @/gripper_prop_link │        /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.005675) * Rx(q6)                         │</span>
+<span class="go">│ 9 │   /gripper_bar_link │        /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                                   │</span>
+<span class="go">│10 │       /fingers_link │   /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.025875)                                  │</span>
+<span class="go">│11 │  @/left_finger_link │       /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q7)                                        │</span>
+<span class="go">│12 │ @/right_finger_link │       /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q8)                                       │</span>
+<span class="go">│13 │   @/ee_gripper_link │       /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.0385)                                     │</span>
+<span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴────────────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┬────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │ q7 │ q8 │</span>
@@ -4472,23 +4662,24 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx200</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                  ETS                   │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                        │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.0716) * Rz(q0)                    │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.03865) * Ry(q1)                   │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.05) * tz(0.2) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ tx(0.2) * Ry(q3)                       │</span>
-<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ tx(0.065) * Rx(-180°) * Rx(q4)         │</span>
-<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.043)                              │</span>
-<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.0055) * Rx(q5)                    │</span>
-<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                        │</span>
-<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.023)                              │</span>
-<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q6)                                 │</span>
-<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q7)                                 │</span>
-<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.027575)                           │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────┘</span>
+<span class="go">wx200 (by Interbotix): 8 axes (RRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                      ETS                                      │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼───────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                          │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.0716) * Rz(q0)                        │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.03865) * Ry(q1)                  │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.05) * tz(0.2) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ {/wrist_link} = {/forearm_link}  * tx(0.2) * Ry(q3)                           │</span>
+<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.065) * Rx(-180°) * Rx(q4)             │</span>
+<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.043)                                 │</span>
+<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q5)                  │</span>
+<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                          │</span>
+<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                            │</span>
+<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q6)                               │</span>
+<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q7)                              │</span>
+<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                          │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴───────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
@@ -4526,23 +4717,24 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬────────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │      parent       │    joint     │                    ETS                     │</span>
-<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                 - │              │                                            │</span>
-<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ tz(0.0716) * Rz(q0)                        │</span>
-<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ tz(0.03865) * Ry(q1)                       │</span>
-<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ tx(0.04975) * tz(0.25) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ tx(0.25) * Ry(q3)                          │</span>
-<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ tx(0.065) * Rx(-180°) * Rx(q4)             │</span>
-<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ tx(0.043)                                  │</span>
-<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ tx(0.0055) * Rx(q5)                        │</span>
-<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │                                            │</span>
-<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ tx(0.023)                                  │</span>
-<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ ty(q6)                                     │</span>
-<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ ty(q7)                                     │</span>
-<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ tx(0.027575)                               │</span>
-<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴────────────────────────────────────────────┘</span>
+<span class="go">wx250 (by Interbotix): 8 axes (RRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬───────────────────┬──────────────┬───────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │      parent       │    joint     │                                        ETS                                        │</span>
+<span class="go">├───┼─────────────────────┼───────────────────┼──────────────┼───────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │               _O_ │              │ {/base_link} = {_O_}                                                              │</span>
+<span class="go">│ 1 │      /shoulder_link │        /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.0716) * Rz(q0)                            │</span>
+<span class="go">│ 2 │     /upper_arm_link │    /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.03865) * Ry(q1)                      │</span>
+<span class="go">│ 3 │       /forearm_link │   /upper_arm_link │        elbow │ {/forearm_link} = {/upper_arm_link}  * tx(0.04975) * tz(0.25) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │         /wrist_link │     /forearm_link │  wrist_angle │ {/wrist_link} = {/forearm_link}  * tx(0.25) * Ry(q3)                              │</span>
+<span class="go">│ 5 │       /gripper_link │       /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.065) * Rx(-180°) * Rx(q4)                 │</span>
+<span class="go">│ 6 │        /ee_arm_link │     /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.043)                                     │</span>
+<span class="go">│ 7 │ @/gripper_prop_link │      /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q5)                      │</span>
+<span class="go">│ 8 │   /gripper_bar_link │      /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                              │</span>
+<span class="go">│ 9 │       /fingers_link │ /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                                │</span>
+<span class="go">│10 │  @/left_finger_link │     /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q6)                                   │</span>
+<span class="go">│11 │ @/right_finger_link │     /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q7)                                  │</span>
+<span class="go">│12 │   @/ee_gripper_link │     /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                              │</span>
+<span class="go">└───┴─────────────────────┴───────────────────┴──────────────┴───────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬────────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6     │ q7 │</span>
@@ -4580,24 +4772,25 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">wx250s</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬────────────────────────────────────────────┐</span>
-<span class="go">│id │        link         │       parent        │    joint     │                    ETS                     │</span>
-<span class="go">├───┼─────────────────────┼─────────────────────┼──────────────┼────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │          /base_link │                   - │              │                                            │</span>
-<span class="go">│ 1 │      /shoulder_link │          /base_link │        waist │ tz(0.0716) * Rz(q0)                        │</span>
-<span class="go">│ 2 │     /upper_arm_link │      /shoulder_link │     shoulder │ tz(0.03865) * Ry(q1)                       │</span>
-<span class="go">│ 3 │ /upper_forearm_link │     /upper_arm_link │        elbow │ tx(0.04975) * tz(0.25) * Rx(180°) * Ry(q2) │</span>
-<span class="go">│ 4 │ /lower_forearm_link │ /upper_forearm_link │ forearm_roll │ tx(0.175) * Rx(q3)                         │</span>
-<span class="go">│ 5 │         /wrist_link │ /lower_forearm_link │  wrist_angle │ tx(0.075) * Ry(q4)                         │</span>
-<span class="go">│ 6 │       /gripper_link │         /wrist_link │ wrist_rotate │ tx(0.065) * Rx(-180°) * Rx(q5)             │</span>
-<span class="go">│ 7 │        /ee_arm_link │       /gripper_link │       ee_arm │ tx(0.043)                                  │</span>
-<span class="go">│ 8 │ @/gripper_prop_link │        /ee_arm_link │      gripper │ tx(0.0055) * Rx(q6)                        │</span>
-<span class="go">│ 9 │   /gripper_bar_link │        /ee_arm_link │  gripper_bar │                                            │</span>
-<span class="go">│10 │       /fingers_link │   /gripper_bar_link │       ee_bar │ tx(0.023)                                  │</span>
-<span class="go">│11 │  @/left_finger_link │       /fingers_link │  left_finger │ ty(q7)                                     │</span>
-<span class="go">│12 │ @/right_finger_link │       /fingers_link │ right_finger │ ty(q8)                                     │</span>
-<span class="go">│13 │   @/ee_gripper_link │       /fingers_link │   ee_gripper │ tx(0.027575)                               │</span>
-<span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴────────────────────────────────────────────┘</span>
+<span class="go">wx250s (by Interbotix): 9 axes (RRRRRRRPP), ETS model</span>
+<span class="go">┌───┬─────────────────────┬─────────────────────┬──────────────┬─────────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │        link         │       parent        │    joint     │                                           ETS                                           │</span>
+<span class="go">├───┼─────────────────────┼─────────────────────┼──────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │          /base_link │                 _O_ │              │ {/base_link} = {_O_}                                                                    │</span>
+<span class="go">│ 1 │      /shoulder_link │          /base_link │        waist │ {/shoulder_link} = {/base_link}  * tz(0.0716) * Rz(q0)                                  │</span>
+<span class="go">│ 2 │     /upper_arm_link │      /shoulder_link │     shoulder │ {/upper_arm_link} = {/shoulder_link}  * tz(0.03865) * Ry(q1)                            │</span>
+<span class="go">│ 3 │ /upper_forearm_link │     /upper_arm_link │        elbow │ {/upper_forearm_link} = {/upper_arm_link}  * tx(0.04975) * tz(0.25) * Rx(180°) * Ry(q2) │</span>
+<span class="go">│ 4 │ /lower_forearm_link │ /upper_forearm_link │ forearm_roll │ {/lower_forearm_link} = {/upper_forearm_link}  * tx(0.175) * Rx(q3)                     │</span>
+<span class="go">│ 5 │         /wrist_link │ /lower_forearm_link │  wrist_angle │ {/wrist_link} = {/lower_forearm_link}  * tx(0.075) * Ry(q4)                             │</span>
+<span class="go">│ 6 │       /gripper_link │         /wrist_link │ wrist_rotate │ {/gripper_link} = {/wrist_link}  * tx(0.065) * Rx(-180°) * Rx(q5)                       │</span>
+<span class="go">│ 7 │        /ee_arm_link │       /gripper_link │       ee_arm │ {/ee_arm_link} = {/gripper_link}  * tx(0.043)                                           │</span>
+<span class="go">│ 8 │ @/gripper_prop_link │        /ee_arm_link │      gripper │ {/gripper_prop_link} = {/ee_arm_link}  * tx(0.0055) * Rx(q6)                            │</span>
+<span class="go">│ 9 │   /gripper_bar_link │        /ee_arm_link │  gripper_bar │ {/gripper_bar_link} = {/ee_arm_link}                                                    │</span>
+<span class="go">│10 │       /fingers_link │   /gripper_bar_link │       ee_bar │ {/fingers_link} = {/gripper_bar_link}  * tx(0.023)                                      │</span>
+<span class="go">│11 │  @/left_finger_link │       /fingers_link │  left_finger │ {/left_finger_link} = {/fingers_link}  * ty(q7)                                         │</span>
+<span class="go">│12 │ @/right_finger_link │       /fingers_link │ right_finger │ {/right_finger_link} = {/fingers_link}  * ty(q8)                                        │</span>
+<span class="go">│13 │   @/ee_gripper_link │       /fingers_link │   ee_gripper │ {/ee_gripper_link} = {/fingers_link}  * tx(0.027575)                                    │</span>
+<span class="go">└───┴─────────────────────┴─────────────────────┴──────────────┴─────────────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┬────┬────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │ q7 │ q8 │</span>
@@ -4635,24 +4828,25 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Mico</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">┌───┬─────────────────────────────┬────────────────────────┬─────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────┐</span>
-<span class="go">│id │            link             │         parent         │            joint            │                                           ETS                                            │</span>
-<span class="go">├───┼─────────────────────────────┼────────────────────────┼─────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤</span>
-<span class="go">│ 0 │                       world │                      - │                             │                                                                                          │</span>
-<span class="go">│ 1 │                        root │                  world │      connect_root_and_world │                                                                                          │</span>
-<span class="go">│ 2 │          j2n4s300_link_base │                   root │         j2n4s300_joint_base │                                                                                          │</span>
-<span class="go">│ 3 │             j2n4s300_link_1 │     j2n4s300_link_base │            j2n4s300_joint_1 │ tz(0.15675) * Ry(180°) * Rz(q0)                                                          │</span>
-<span class="go">│ 4 │             j2n4s300_link_2 │        j2n4s300_link_1 │            j2n4s300_joint_2 │ ty(0.0016) * tz(-0.11875) * Rz(180°) * Rx(-90°) * Rz(q1)                                 │</span>
-<span class="go">│ 5 │             j2n4s300_link_3 │        j2n4s300_link_2 │            j2n4s300_joint_3 │ ty(-0.41) * Ry(180°) * Rz(q2)                                                            │</span>
-<span class="go">│ 6 │             j2n4s300_link_4 │        j2n4s300_link_3 │            j2n4s300_joint_4 │ ty(0.2073) * tz(-0.0114) * Rz(180°) * Rx(-90°) * Rz(q3)                                  │</span>
-<span class="go">│ 7 │      @j2n4s300_end_effector │        j2n4s300_link_4 │ j2n4s300_joint_end_effector │ tz(-0.16) * Rz(90°) * Rx(180°)                                                           │</span>
-<span class="go">│ 8 │      j2n4s300_link_finger_1 │        j2n4s300_link_4 │     j2n4s300_joint_finger_1 │ tx(0.00279) * ty(0.03126) * tz(-0.11467) * Rz(77.9°) * Ry(37.2°) * Rx(-90°) * Rz(q4)     │</span>
-<span class="go">│ 9 │ @j2n4s300_link_finger_tip_1 │ j2n4s300_link_finger_1 │ j2n4s300_joint_finger_tip_1 │ tx(0.044) * ty(-0.003) * Rz(q5)                                                          │</span>
-<span class="go">│10 │      j2n4s300_link_finger_2 │        j2n4s300_link_4 │     j2n4s300_joint_finger_2 │ tx(0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-79.42°) * Ry(37.2°) * Rx(-90°) * Rz(q6)  │</span>
-<span class="go">│11 │ @j2n4s300_link_finger_tip_2 │ j2n4s300_link_finger_2 │ j2n4s300_joint_finger_tip_2 │ tx(0.044) * ty(-0.003) * Rz(q7)                                                          │</span>
-<span class="go">│12 │      j2n4s300_link_finger_3 │        j2n4s300_link_4 │     j2n4s300_joint_finger_3 │ tx(-0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-100.6°) * Ry(37.2°) * Rx(-90°) * Rz(q8) │</span>
-<span class="go">│13 │ @j2n4s300_link_finger_tip_3 │ j2n4s300_link_finger_3 │ j2n4s300_joint_finger_tip_3 │ tx(0.044) * ty(-0.003) * Rz(q9)                                                          │</span>
-<span class="go">└───┴─────────────────────────────┴────────────────────────┴─────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────┘</span>
+<span class="go">j2n4s300 (by Kinova): 10 axes (RRRRRRRRRR), ETS model</span>
+<span class="go">┌───┬─────────────────────────────┬────────────────────────┬─────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │            link             │         parent         │            joint            │                                                                   ETS                                                                    │</span>
+<span class="go">├───┼─────────────────────────────┼────────────────────────┼─────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 0 │                       world │                    _O_ │                             │ {world} = {_O_}                                                                                                                          │</span>
+<span class="go">│ 1 │                        root │                  world │      connect_root_and_world │ {root} = {world}                                                                                                                         │</span>
+<span class="go">│ 2 │          j2n4s300_link_base │                   root │         j2n4s300_joint_base │ {j2n4s300_link_base} = {root}                                                                                                            │</span>
+<span class="go">│ 3 │             j2n4s300_link_1 │     j2n4s300_link_base │            j2n4s300_joint_1 │ {j2n4s300_link_1} = {j2n4s300_link_base}  * tz(0.15675) * Ry(180°) * Rz(q0)                                                              │</span>
+<span class="go">│ 4 │             j2n4s300_link_2 │        j2n4s300_link_1 │            j2n4s300_joint_2 │ {j2n4s300_link_2} = {j2n4s300_link_1}  * ty(0.0016) * tz(-0.11875) * Rz(180°) * Rx(-90°) * Rz(q1)                                        │</span>
+<span class="go">│ 5 │             j2n4s300_link_3 │        j2n4s300_link_2 │            j2n4s300_joint_3 │ {j2n4s300_link_3} = {j2n4s300_link_2}  * ty(-0.41) * Ry(180°) * Rz(q2)                                                                   │</span>
+<span class="go">│ 6 │             j2n4s300_link_4 │        j2n4s300_link_3 │            j2n4s300_joint_4 │ {j2n4s300_link_4} = {j2n4s300_link_3}  * ty(0.2073) * tz(-0.0114) * Rz(180°) * Rx(-90°) * Rz(q3)                                         │</span>
+<span class="go">│ 7 │      @j2n4s300_end_effector │        j2n4s300_link_4 │ j2n4s300_joint_end_effector │ {j2n4s300_end_effector} = {j2n4s300_link_4}  * tz(-0.16) * Rz(90°) * Rx(180°)                                                            │</span>
+<span class="go">│ 8 │      j2n4s300_link_finger_1 │        j2n4s300_link_4 │     j2n4s300_joint_finger_1 │ {j2n4s300_link_finger_1} = {j2n4s300_link_4}  * tx(0.00279) * ty(0.03126) * tz(-0.11467) * Rz(77.9°) * Ry(37.2°) * Rx(-90°) * Rz(q4)     │</span>
+<span class="go">│ 9 │ @j2n4s300_link_finger_tip_1 │ j2n4s300_link_finger_1 │ j2n4s300_joint_finger_tip_1 │ {j2n4s300_link_finger_tip_1} = {j2n4s300_link_finger_1}  * tx(0.044) * ty(-0.003) * Rz(q5)                                               │</span>
+<span class="go">│10 │      j2n4s300_link_finger_2 │        j2n4s300_link_4 │     j2n4s300_joint_finger_2 │ {j2n4s300_link_finger_2} = {j2n4s300_link_4}  * tx(0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-79.42°) * Ry(37.2°) * Rx(-90°) * Rz(q6)  │</span>
+<span class="go">│11 │ @j2n4s300_link_finger_tip_2 │ j2n4s300_link_finger_2 │ j2n4s300_joint_finger_tip_2 │ {j2n4s300_link_finger_tip_2} = {j2n4s300_link_finger_2}  * tx(0.044) * ty(-0.003) * Rz(q7)                                               │</span>
+<span class="go">│12 │      j2n4s300_link_finger_3 │        j2n4s300_link_4 │     j2n4s300_joint_finger_3 │ {j2n4s300_link_finger_3} = {j2n4s300_link_4}  * tx(-0.02226) * ty(-0.02707) * tz(-0.11482) * Rz(-100.6°) * Ry(37.2°) * Rx(-90°) * Rz(q8) │</span>
+<span class="go">│13 │ @j2n4s300_link_finger_tip_3 │ j2n4s300_link_finger_3 │ j2n4s300_joint_finger_tip_3 │ {j2n4s300_link_finger_tip_3} = {j2n4s300_link_finger_3}  * tx(0.044) * ty(-0.003) * Rz(q9)                                               │</span>
+<span class="go">└───┴─────────────────────────────┴────────────────────────┴─────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬──────┬──────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2   │ q3  │ q4  │ q5  │ q6  │ q7  │ q8  │ q9  │</span>
@@ -4698,7 +4892,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 06-Mar-2021.
+        Last updated on 21-Mar-2021.
       </span>
 
     </p>
