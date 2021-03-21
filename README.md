@@ -1,6 +1,7 @@
 # Robotics Toolbox for Python
 
 [![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
+[![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
@@ -20,7 +21,7 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 <ul>
 <li><a href="https://github.com/petercorke/robotics-toolbox-python">GitHub repository </a></li>
 <li><a href="https://petercorke.github.io/robotics-toolbox-python">Documentation</a></li>
-<li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Examples and details</a></li>
+<li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Wiki (examples and details)</a></li>
 </ul>
 </td>
 </tr>
