@@ -79,7 +79,7 @@ class DynamicsMixin:
 
         for j, link in enumerate(self):
             table.row(link.name, *link._dyn2list())
-        return str(table)
+        print(table)
 
     def printdyn(self):
         """
