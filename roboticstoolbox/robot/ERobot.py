@@ -15,6 +15,7 @@ import numpy as np
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
 from roboticstoolbox.robot.ELink import ELink, ETS
+from roboticstoolbox.robot.DHRobot import DHRobot
 # from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
 #     _plot2, _teach2
@@ -58,7 +59,7 @@ class ERobot(Robot):
 
     def __init__(
             self,
-            elinks,
+            arg,
             base_link=None,
             gripper_links=None,
             checkjindex=True,
@@ -76,10 +77,10 @@ class ERobot(Robot):
         orlinks = []
 
         link_number = 0
-        if isinstance(elinks, ETS):
+        if isinstance(arg, ETS):
             # were passed an ETS string
-            ets = elinks
-            elinks = []
+            ets = arg
+            arg = []
 
             # chop it up into segments, a link frame after every joint
             start = 0
@@ -89,21 +90,21 @@ class ERobot(Robot):
                 if j == 0:
                     parent = None
                 else:
-                    parent = elinks[-1]
+                    parent = arg[-1]
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                elinks.append(elink)
+                arg.append(elink)
 
             n = len(ets.joints())
 
             tool = ets[start:]
             if len(tool) > 0:
-                elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
-        elif isinstance(elinks, list):
+                arg.append(ELink(tool, parent=arg[-1], name="ee"))
+        elif isinstance(arg, list):
             # we're passed a list of ELinks
 
             # check all the incoming ELink objects
             n = 0
-            for link in elinks:
+            for link in arg:
                 if isinstance(link, ELink):
                     # if link has no name, give it one
                     if link.name is None:
@@ -119,13 +120,46 @@ class ERobot(Robot):
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
+        elif isinstance(arg, DHRobot):
+            # we're passed a DHRobot object
+
+            self.__init__(
+                arg.ets(), 
+                name=arg.name, 
+                manufacturer=arg.manufacturer,
+                comment=arg.comment,
+                base=arg.base,
+                tool=arg.tool
+            )
+            return
+
+            # elinks = []
+            # for dhlink in arg:
+            #     e = dhlink.ets()
+            #     print(e)
+            #     elink = ELink(dhlink.ets())
+            #     elink.m = dhlink.m
+            #     elink.r = dhlink.r
+            #     elink.I = dhlink.I
+            #     elink.B = dhlink.B
+            #     elink.Tc = dhlink.Tc
+            #     elink.Jm = dhlink.Jm
+            #     elink.G = dhlink.G
+            #     elinks.append(elink)
+            # super().__init__(elinks, 
+            #     name=arg.name, 
+            #     manufacturer=arg.manufacturer,
+            #     comment=arg.comment,
+            #     base=arg.base,
+            #     tool=arg.tool
+            # )
         else:
             raise TypeError('elinks must be a list of ELinks or an ETS')
 
         self._n = n
 
         # scan for base
-        for link in elinks:
+        for link in arg:
             # is this a base link?
             if link._parent is None:
                 if self._base_link is not None:
@@ -152,7 +186,7 @@ class ERobot(Robot):
 
             # Remove gripper links from the robot
             for g_link in g_links:
-                elinks.remove(g_link)
+                arg.remove(g_link)
 
             # Save the gripper object
             self.grippers.append(Gripper(g_links))
@@ -164,7 +198,7 @@ class ERobot(Robot):
         # Set the ee links
         self.ee_links = []
         if len(gripper_links) == 0:
-            for link in elinks:
+            for link in arg:
                 # is this a leaf node? and do we not have any grippers
                 if len(link.child) == 0:
                     # no children, must be an end-effector
@@ -175,28 +209,28 @@ class ERobot(Robot):
                 self.ee_links.append(link.parent)
 
         # assign the joint indices
-        if all([link.jindex is None for link in elinks]):
+        if all([link.jindex is None for link in arg]):
 
             jindex = [0]  # "mutable integer" hack
 
             def visit_link(link, jindex):
                 # if it's a joint, assign it a jindex and increment it
-                if link.isjoint and link in elinks:
+                if link.isjoint and link in arg:
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
-                if link in elinks:
+                if link in arg:
                     orlinks.append(link)
 
             # visit all links in DFS order
             self.dfs_links(
                 self.base_link, lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in elinks if link.isjoint]):
+        elif all([link.jindex is not None for link in arg if link.isjoint]):
             # jindex set on all, check they are unique and sequential
             if checkjindex:
                 jset = set(range(self._n))
-                for link in elinks:
+                for link in arg:
                     if link.isjoint and link.jindex not in jset:
                         raise ValueError(
                             f'joint index {link.jindex} was '
@@ -204,7 +238,7 @@ class ERobot(Robot):
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
                     raise ValueError(f'joints {jset} were not assigned')
-            orlinks = elinks
+            orlinks = arg
         else:
             # must be a mixture of ELinks with/without jindex
             raise ValueError(
