@@ -14,9 +14,9 @@ from scipy.optimize import minimize, Bounds, LinearConstraint
 from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
 
-# from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
-# from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-# from roboticstoolbox.backends.Swift import Swift
+from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.Swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
@@ -924,6 +924,10 @@ class Robot(DynamicsMixin, IKMixin):
 
         for qk in q:
             self.q = qk
+            if vellipse:
+                vell.q =qk
+            if fellipse:
+                fell.q =qk
             env.step(dt)
 
             if movie is not None:  # pragma nocover
