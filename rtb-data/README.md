@@ -15,6 +15,19 @@ Since the data doesn't change very much, it's mostly robot models and a few data
 | meshes | STL mesh models for DH robots         |
 | xacro  | URDF/xacro models for URDF robots     |      
 
+## Accessing data within the package
+
+The Toolbox function `path_to_datafile(file)` will return an absolute
+`Path` to `file` which is relative to the root of the data package.  For example
+
+```
+loadmat('data/map1.mat')   # read rtbdata/data/map1.mat
+loadmat('foo.dat')         # read ./foo.dat
+loadmat('~/foo.dat')       # read $HOME/foo.dat
+```
+
+A matching local file takes precendence over a file in the data package.
+
 ## Installing the package
 
 You don't need to explicitly install this package, it happens automatically when you when you install RTB-P
