@@ -62,8 +62,10 @@ class Robot(DynamicsMixin, IKMixin):
         else:
             self.keywords = keywords
 
+        # gravity is in the negative-z direction.  This is the negative of the
+        # MATLAB Toolbox case (which was wrong).
         if gravity is None:
-            gravity = np.array([0, 0, 9.81])
+            gravity = np.array([0, 0, -9.81])
         self.gravity = gravity
 
         # validate the links, must be a list of Link subclass objects

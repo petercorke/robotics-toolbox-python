@@ -1204,7 +1204,8 @@ class DHRobot(Robot):
             L[j + 21] = self.links[i].B
             L[j + 22:j + 24] = self.links[i].Tc.flatten()
 
-        self._rne_ob = init(self.n, self.mdh, L, self.gravity)
+        # we negate gravity here, since the C code has the sign wrong
+        self._rne_ob = init(self.n, self.mdh, L, -self.gravity)
 
     def delete_rne(self):
         """
@@ -1281,7 +1282,8 @@ class DHRobot(Robot):
 
         for i in range(trajn):
             tau[i, :] = frne(
-                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], gravity, fext)
+                # we negate gravity here, since the C code has the sign wrong
+                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], -gravity, fext)
 
         if trajn == 1:
             return tau[0, :]
@@ -1406,7 +1408,7 @@ class DHRobot(Robot):
             w = Rb @ np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = Rb @ np.zeros((3,), dtype=dtype)
-            vd = Rb @ gravity
+            vd = -Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #
 
