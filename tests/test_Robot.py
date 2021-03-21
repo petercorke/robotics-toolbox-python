@@ -82,10 +82,10 @@ class TestRobot(unittest.TestCase):
         self.assertTrue(sol1.success)
         self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
 
-        self.assertTrue(sol2[0].success)
-        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol2[0].q)), 0, places=4)
-        self.assertTrue(sol2[0].success)
-        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol2[1].q)), 0, places=4)
+        self.assertTrue(sol2.success[0])
+        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol2.q[0,:])), 0, places=4)
+        self.assertTrue(sol2.success[0])
+        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol2.q[1,:])), 0, places=4)
 
         self.assertTrue(sol3.success)
         self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol3.q)), 0, places=4)
