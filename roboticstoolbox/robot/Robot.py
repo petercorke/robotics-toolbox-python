@@ -806,9 +806,9 @@ class Robot(DynamicsMixin, IKMixin):
 # --------------------------------------------------------------------- #
 
     def plot(
-            self, q, backend=None, block=True, dt=0.050,
+            self, q, backend=None, block=False, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None, movie=None
+            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None, movie=None, **bopts
             ):
         """
         Graphical display and animation
@@ -908,7 +908,7 @@ class Robot(DynamicsMixin, IKMixin):
         self.q = q[0, :]
 
         # Add the self to the figure in readonly mode
-        env.launch(fig=fig)
+        env.launch(fig=fig, **bopts)
 
         env.add(
             self, readonly=True)
