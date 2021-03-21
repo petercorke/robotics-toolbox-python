@@ -10,43 +10,43 @@ class Trajectory:
     A container class for trajectory data.
     """
 
-    def __init__(self, name, x, y, yd=None, ydd=None, istime=False):
+    def __init__(self, name, t, s, sd=None, sdd=None, istime=False):
         """
         Construct a new trajectory instance
 
         :param name: name of the function that created the trajectory
         :type name: str
-        :param x: independent variable, eg. time
-        :type x: ndarray(m)
-        :param y: position
-        :type y: ndarray(m) or ndarray(m,n)
-        :param yd: velocity
-        :type yd: ndarray(m) or ndarray(m,n)
-        :param ydd: acceleration
-        :type ydd: ndarray(m) or ndarray(m,n)
-        :param istime: ``x`` is time
+        :param t: independent variable, eg. time or step
+        :type t: ndarray(m)
+        :param s: position
+        :type s: ndarray(m) or ndarray(m,n)
+        :param sd: velocity
+        :type sd: ndarray(m) or ndarray(m,n)
+        :param sdd: acceleration
+        :type sdd: ndarray(m) or ndarray(m,n)
+        :param istime: ``t`` is time, otherwise step number
         :type istime: bool
-        :param xblend: blend duration (``lspb`` only)
+        :param tblend: blend duration (``lspb`` only)
         :type istime: float
 
         The object has attributes:
 
-        - ``x``  the independent variable
-        - ``y``  the position
-        - ``yd``  the velocity
-        - ``ydd``  the acceleration
+        - ``t``  the independent variable
+        - ``s``  the position
+        - ``sd``  the velocity
+        - ``sdd``  the acceleration
 
-        If ``x`` is time, ie. ``istime`` is True, then the units of ``yd`` and
-        ``ydd`` are :math:`s^{-1}` and :math:`s^{-2}` respectively, otherwise
-        with respect to ``x``.
+        If ``t`` is time, ie. ``istime`` is True, then the units of ``sd`` and
+        ``sdd`` are :math:`s^{-1}` and :math:`s^{-2}` respectively, otherwise
+        with respect to ``t``.
 
         .. note:: Data is stored with timesteps as rows and axes as columns.
         """
         self.name = name
-        self.x = x
-        self.y = y
-        self.yd = yd
-        self.ydd = ydd
+        self.t = t
+        self.s = s
+        self.sd = sd
+        self.sdd = sdd
         self.istime = istime
 
     def __str__(self):
@@ -60,7 +60,7 @@ class Trajectory:
         :return: number of steps in the trajectory
         :rtype: int
         """
-        return len(self.x)
+        return len(self.t)
 
     @property
     def q(self):
@@ -70,10 +70,10 @@ class Trajectory:
         :return: trajectory with one row per timestep, one column per axis
         :rtype: ndarray(n,m)
 
-        .. note:: This is a synonym for ``.y``, for compatibility with other
+        .. note:: This is a synonym for ``.s``, for compatibility with other
             applications.
         """
-        return self.y
+        return self.s
 
     @property
     def qd(self):
@@ -83,23 +83,36 @@ class Trajectory:
         :return: trajectory velocity with one row per timestep, one column per axis
         :rtype: ndarray(n,m)
 
-        .. note:: This is a synonym for ``.yd``, for compatibility with other
+        .. note:: This is a synonym for ``.sd``, for compatibility with other
             applications.
         """
-        return self.y
+        return self.sd
 
     @property
-    def t(self):
+    def qdd(self):
         """
-        Trajectory time
+        Velocity trajectory
 
-        :return: trajectory time vector
-        :rtype: ndarray(n)
+        :return: trajectory acceleration with one row per timestep, one column per axis
+        :rtype: ndarray(n,m)
 
-        .. note:: This is a synonym for ``.t``, for compatibility with other
+        .. note:: This is a synonym for ``.sdd``, for compatibility with other
             applications.
         """
-        return self.x
+        return self.sdd
+
+    # @property
+    # def t(self):
+    #     """
+    #     Trajectory time
+
+    #     :return: trajectory time vector
+    #     :rtype: ndarray(n)
+
+    #     .. note:: This is a synonym for ``.t``, for compatibility with other
+    #         applications.
+    #     """
+    #     return self.x
 
     @property
     def naxes(self):
@@ -109,10 +122,10 @@ class Trajectory:
         :return: number of axes or dimensions
         :rtype: int
         """
-        if self.y.ndim == 1:
+        if self.s.ndim == 1:
             return 1
         else:
-            return self.y.shape[1]
+            return self.s.shape[1]
 
     def plot(self, block=False, plotargs=None, textargs=None):
         """
@@ -144,35 +157,35 @@ class Trajectory:
 
         # plot position
         if self.name == 'tpoly':
-            ax.plot(self.x, self.y, **plotopts)
+            ax.plot(self.t, self.s, **plotopts)
 
         elif self.name == 'lspb':
             # accel phase
-            tf = self.x[-1]
-            k = self.x <= self.xblend
-            ax.plot(self.x[k], self.y[k], color='red', **plotopts)
+            tf = self.t[-1]
+            k = self.t <= self.tblend
+            ax.plot(self.t[k], self.s[k], color='red', **plotopts)
 
             # coast phase
-            k = (self.x > self.xblend) & (self.x <= (tf-self.xblend))
-            ax.plot(self.x[k], self.y[k], color='green', **plotopts)
+            k = (self.t > self.tblend) & (self.t <= (tf-self.tblend))
+            ax.plot(self.t[k], self.s[k], color='green', **plotopts)
             k = np.where(k)[0][0]
-            ax.plot(self.x[k-1:k+1], self.y[k-1:k+1], color='green', **plotopts)
+            ax.plot(self.t[k-1:k+1], self.s[k-1:k+1], color='green', **plotopts)
 
             # decel phase
-            k = self.x > (tf - self.xblend)
-            ax.plot(self.x[k], self.y[k], color='blue', **plotopts)
+            k = self.t > (tf - self.tblend)
+            ax.plot(self.t[k], self.s[k], color='blue', **plotopts)
             k = np.where(k)[0][0]
-            ax.plot(self.x[k-1:k+1], self.y[k-1:k+1], color='blue', **plotopts)
+            ax.plot(self.t[k-1:k+1], self.s[k-1:k+1], color='blue', **plotopts)
 
             ax.grid(True)
         else:
-            ax.plot(self.x, self.y, **plotopts)
+            ax.plot(self.t, self.s, **plotopts)
 
-        if self.y.ndim > 1:
-                ax.legend([f"y{i+1}" for i in range(self.naxes)])
+        if self.s.ndim > 1:
+                ax.legend([f"q{i+1}" for i in range(self.naxes)])
 
         ax.grid(True)
-        ax.set_xlim(0, max(self.x))
+        ax.set_xlim(0, max(self.t))
 
         if self.istime:
             ax.set_ylabel('$s(t)$', **textopts)
@@ -181,9 +194,9 @@ class Trajectory:
 
         # plot velocity
         ax = plt.subplot(3, 1, 2)
-        ax.plot(self.x, self.yd, '-o', **plotopts)
+        ax.plot(self.t, self.sd, '-o', **plotopts)
         ax.grid(True)
-        ax.set_xlim(0, max(self.x))
+        ax.set_xlim(0, max(self.t))
 
         if self.istime:
             ax.set_ylabel('$ds/dt$', **textopts)
@@ -192,9 +205,9 @@ class Trajectory:
 
         # plot acceleration
         ax = plt.subplot(3, 1, 3)
-        ax.plot(self.x, self.ydd, '-o', **plotopts)
+        ax.plot(self.t, self.sdd, '-o', **plotopts)
         ax.grid(True)
-        ax.set_xlim(0, max(self.x))
+        ax.set_xlim(0, max(self.t))
 
         if self.istime:
             ax.set_ylabel('$ds^2/dt^2$', **textopts)
@@ -380,7 +393,7 @@ def lspb(q0, qf, t, V=None):
     pdd = traj[2]
 
     traj = Trajectory('lspb', t, p, pd, pdd, istime)
-    traj.xblend = lspbfunc.tb
+    traj.tblend = lspbfunc.tb
     return traj
 
 def lspb_func(q0, qf, tf, V=None):
@@ -588,10 +601,10 @@ def mtraj(tfunc, q0, qf, t):
         # for each axis
         traj.append(tfunc(q0[i], qf[i], t))
 
-    x = traj[0].x
-    y = np.array([tg.y for tg in traj]).T
-    yd = np.array([tg.yd for tg in traj]).T
-    ydd = np.array([tg.ydd for tg in traj]).T
+    x = traj[0].t
+    y = np.array([tg.s for tg in traj]).T
+    yd = np.array([tg.sd for tg in traj]).T
+    ydd = np.array([tg.sdd for tg in traj]).T
     
     istime = traj[0].istime
 
@@ -701,7 +714,7 @@ def ctraj(T0, T1, s):
     """
 
     if isinstance(s, int):
-        s = lspb(0, 1, s).y
+        s = lspb(0, 1, s).s
     elif isvector(s):
         s = getvector(s)
     else:
@@ -952,7 +965,7 @@ def mstraj(
         # add the blend polynomial
         qb = jtraj(
             q0, q_prev + tacc2 * qd, mrange(0, taccx, dt),
-            qd0=qd_prev, qd1=qd).y
+            qd0=qd_prev, qd1=qd).s
         if verbose:    # pragma nocover
             print(qb)
         tg = np.vstack([tg, qb[1:, :]])
@@ -972,7 +985,7 @@ def mstraj(
         qd_prev = qd
 
     # add the final blend
-    qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).y
+    qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
     tg = np.vstack([tg, qb[1:, :]])
 
     infolist.append(info(None, tseg, clock))
@@ -986,3 +999,17 @@ def mstraj(
     # return namedtuple(
     #     'mstraj', 't q arrive info via')(
     #         dt * np.arange(0, tg.shape[0]), tg, arrive, infolist, viapoints)
+
+
+if __name__ == "__main__":
+
+    t = tpoly(0, 1, 50)
+    t.plot()
+
+    t = tpoly(0, 1, np.linspace(0,1,50))
+    t.plot()
+
+    t = lspb(0, 1, 50)
+    t.plot()
+    t = lspb(0, 1, np.linspace(0,1,50))
+    t.plot(block=True)
