@@ -70,6 +70,7 @@ import roboticstoolbox as rtb
 robot = rtb.models.DH.Panda()
 print(robot)
 
+	Panda (by Franka Emika): 7 axes (RRRRRRR), modified DH parameters
 	┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
 	┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
 	┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
@@ -81,11 +82,11 @@ print(robot)
 	┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃
 	┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃
 	┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛
-	
+
 	┌─────┬───────────────────────────────────────┐
 	│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │
 	└─────┴───────────────────────────────────────┘
-	
+
 	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
 	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
 	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
@@ -145,19 +146,27 @@ based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
 robot = rtb.models.URDF.Panda()  # load URDF version of the Panda
 print(robot)    # display the model
 
-	┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐
-	│id │     link     │   parent    │    joint     │                     ETS                     │
-	├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤
-	│ 0 │  panda_link0 │           - │              │                                             │
-	│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │                          tz(0.333) * Rz(q0) │
-	│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │                           Rx(-90°) * Rz(q1) │
-	│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │               ty(-0.316) * Rx(90°) * Rz(q2) │
-	│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │               tx(0.0825) * Rx(90°) * Rz(q3) │
-	│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
-	│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │                            Rx(90°) * Rz(q5) │
-	│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │                tx(0.088) * Rx(90°) * Rz(q6) │
-	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │                                   tz(0.107) │
-	└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
+	panda (by Franka Emika): 7 axes (RRRRRRR), ETS model
+	┌───┬──────────────┬─────────────┬──────────────┬──────────────────────────────────────────────────────────────────────────────┐
+	│id │     link     │   parent    │    joint     │                                     ETS                                      │
+	├───┼──────────────┼─────────────┼──────────────┼──────────────────────────────────────────────────────────────────────────────┤
+	│ 0 │  panda_link0 │         _O_ │              │ {panda_link0} = {_O_}                                                        │
+	│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ {panda_link1} = {panda_link0}  * tz(0.333) * Rz(q0)                          │
+	│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ {panda_link2} = {panda_link1}  * Rx(-90°) * Rz(q1)                           │
+	│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ {panda_link3} = {panda_link2}  * ty(-0.316) * Rx(90°) * Rz(q2)               │
+	│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ {panda_link4} = {panda_link3}  * tx(0.0825) * Rx(90°) * Rz(q3)               │
+	│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ {panda_link5} = {panda_link4}  * tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
+	│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ {panda_link6} = {panda_link5}  * Rx(90°) * Rz(q5)                            │
+	│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ {panda_link7} = {panda_link6}  * tx(0.088) * Rx(90°) * Rz(q6)                │
+	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ {panda_link8} = {panda_link7}  * tz(0.107)                                   │
+	└───┴──────────────┴─────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────┘
+
+	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
+	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
+	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
+	│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
+	│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
+	└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
 ```
 
 The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
@@ -166,12 +175,13 @@ tree.
 We can instantiate our robot inside a browser-based 3d-simulation environment.  
 
 ```python
-env = rtb.backends.Swift()  # instantiate 3D browser-based visualizer
-env.launch()                # activate it
-env.add(robot)              # add robot to the 3D scene
+from roboticstoolbox.backends.Swift import Swift  # instantiate 3D browser-based visualizer
+backend = Swift()
+backend.launch()            # activate it
+backend.add(robot)          # add robot to the 3D scene
 for qk in qt.q:             # for each joint configuration on trajectory
       robot.q = qk          # update the robot state
-      env.step()            # update visualization
+      backend.step()        # update visualization
 ```
 
 <p align="center">
