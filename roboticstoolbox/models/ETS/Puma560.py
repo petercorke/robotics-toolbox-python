@@ -30,21 +30,22 @@ class Puma560(ERobot):
     def __init__(self):
         # Puma dimensions (m)
         l1 = 0.672
-        l2 = 0.2337
+        l2 = -0.2337
         l3 = 0.4318
-        l4 = -0.0837
-        l5 = 0.4318
-        l6 = 0.0203
+        l4 = 0.0203
+        l5 = 0.0837
+        l6 = 0.4318
 
         e = ET.tz(l1) * ET.rz() * ET.ty(l2) * ET.ry() * ET.tz(l3) * \
-            ET.tx(l6) * ET.ty(l4) * ET.ry() * ET.tz(l5) * ET.rz() * \
+            ET.tx(l4) * ET.ty(l5) * ET.ry() * ET.tz(l6) * ET.rz() * \
             ET.ry() * ET.rz() * ET.tx(0.2)
 
         super().__init__(
             e,
             name='Puma560',
             manufacturer='Unimation',
-            comment='ETS-based model')
+            comment='ETS-based model'
+        )
 
         self.addconfiguration(
             "qz", [0, 0, 0, 0, 0, 0])
