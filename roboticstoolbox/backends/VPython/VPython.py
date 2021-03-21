@@ -77,6 +77,12 @@ class VPython(Connector):  # pragma nocover
 
         self._create_empty_session()
 
+    def __repr__(self):
+        s =  f"VPython backend, t = {self.sim_time}, scene:"
+        for robot in self.robots:
+            s += f"\n  {robot.name}"
+        return s
+
     def launch(
             self, **kwargs):
         """
@@ -111,6 +117,8 @@ class VPython(Connector):  # pragma nocover
             self.canvases.append(
                 GraphicsCanvas2D(height, width, title, caption,
                                  grid, g_col))
+        
+        self.sim_time = 0
 
     def step(self, dt=None, id=None, q=None, fig_num=0):
         """
@@ -146,6 +154,8 @@ class VPython(Connector):  # pragma nocover
         """
 
         super().step()
+
+        self.sim_time += dt
 
         if fig_num < 0 or fig_num >= len(self.canvases):
             raise ValueError(

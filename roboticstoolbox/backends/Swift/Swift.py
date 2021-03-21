@@ -91,6 +91,14 @@ class Swift(Connector):  # pragma nocover
         if self.display and sw is None:
             _import_swift()
 
+    def __repr__(self):
+        s =  f"Swift backend, t = {self.sim_time}, scene:"
+        for robot in self.robots:
+            s += f"\n  {robot['ob'].name}"
+        for shape in self.shapes:
+            s += f"\n  {shape['ob'].name}"
+        return s
+
     #
     #  Basic methods to do with the state of the external program
     #
