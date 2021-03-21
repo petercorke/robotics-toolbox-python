@@ -34,7 +34,7 @@ class UR5(ERobot):
 
         super().__init__(
                 elinks,
-                name=name,
+                name=name.upper(),
                 manufacturer='Universal Robotics',
                 gripper_links=elinks[7]
             )
