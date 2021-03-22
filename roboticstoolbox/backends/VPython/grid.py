@@ -44,6 +44,7 @@ class GraphicsGrid:  # pragma nocover
         # Save the scene the grid is placed in
         self.__scene = scene
         self.__is_3d = True
+        self.__xy_only = False
 
         self.__relative_cam = True
         self.__num_squares = 10
@@ -300,6 +301,7 @@ class GraphicsGrid:  # pragma nocover
             new_scale = round(distance_from_center / 30.0, 1)
         else:
             new_scale = round(distance_from_center / 15.0, 1)
+        new_scale = max(new_scale, 0.2)  # Limit scale to 0.2
         if not new_scale == self.__scale:
             self.set_scale(new_scale)
             if not self.__is_3d:
@@ -317,6 +319,9 @@ class GraphicsGrid:  # pragma nocover
                                 self.__scale,
                                 self.__is_3d,
                                 self.__scene)
+
+            if self.__xy_only:
+                self._turn_off_all_but_xy()
 
     def toggle_2d_3d(self):
         """
@@ -345,7 +350,7 @@ class GraphicsGrid:  # pragma nocover
 
         self.update_grid()
 
-    def set_visibility(self, is_visible):
+    def set_visibility(self, is_visible, xy_only_input=False):
         """
         Set the visibility of the grid
 
@@ -364,6 +369,10 @@ class GraphicsGrid:  # pragma nocover
         if self.__is_3d is False and is_visible is True:
             self.__is_3d = True
             self.toggle_2d_3d()
+
+        self.__xy_only = xy_only_input
+        if self.__xy_only:
+            self._turn_off_all_but_xy()
 
     def set_relative(self, is_relative):
         """
@@ -400,6 +409,22 @@ class GraphicsGrid:  # pragma nocover
         # Don't del the curve objects
         self.grid_object.labels = []
         self.__init_grid()
+
+    def _turn_off_all_but_xy(self):
+
+        # Toggle XZ, YZ planes
+        self.grid_object.get('xz_plane').visible = False
+        self.grid_object.get('yz_plane').visible = False
+
+        # Toggle Z plane numbers
+        # Index start = (num_squares + 1) (11 numbers shown for 10 squares) *
+        # 2 axes + 2 letters for axes
+        z_label_start = (self.__num_squares + 1) * 2 + 2
+        # Index end = end of labels array
+        z_label_end = len(self.grid_object.get('labels'))
+        # Toggle
+        for idx in range(z_label_start, z_label_end):
+            self.grid_object.get('labels')[idx].visible = False
 
 
 def create_line(pos1, pos2, scene,

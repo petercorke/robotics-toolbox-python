@@ -101,6 +101,7 @@ class VPython(Connector):  # pragma nocover
         title = args.get('title', 'Robotics Toolbox for Python: VPython display')
         caption = args.get('caption', '')
         grid = args.get('grid', False)
+        grid = True
         g_col = args.get('g_col', None)
 
         super().launch()
@@ -113,6 +114,7 @@ class VPython(Connector):  # pragma nocover
             self.canvases.append(
                 GraphicsCanvas3D(height, width, title, caption,
                                  grid, g_col))
+            self.canvases[-1].set_xy_plane_only()
         else:
             self.canvases.append(
                 GraphicsCanvas2D(height, width, title, caption,
