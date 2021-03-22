@@ -6,6 +6,13 @@
 
 from vpython import color, label, mag, vector
 from numpy import sign, arange
+from enum import Enum
+
+
+class GridType(Enum):  # pragma nocover
+    XYZ = 1
+    XY3D = 2
+    XY2D = 3
 
 
 def get_text_size(scene):  # pragma nocover
@@ -114,7 +121,7 @@ def draw_text(label_text, label_position, scene):  # pragma nocover
 
 def update_grid_numbers(
         focal_point, numbers_list, num_squares,
-        scale, is_3d, scene):  # pragma nocover
+        scale, grid_mode, scene):  # pragma nocover
     """
     Draw the grid numbers along the xyz axes.
 
@@ -126,8 +133,8 @@ def update_grid_numbers(
     :type num_squares: `int`
     :param scale: The scaled length of 1 square unit
     :type scale: `float`
-    :param is_3d: Whether the grid is 3D or not
-    :type is_3d: `bool`
+    :param grid_mode: Whether the grid is 3D or not
+    :type grid_mode: `backends.vpython.grid.GridType`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
     """
@@ -135,6 +142,8 @@ def update_grid_numbers(
     # Initial conditions
     padding = 0.25  # Padding to not draw numbers on top of lines.
     camera_axes = scene.camera.axis
+    z_visible = not (grid_mode == GridType.XY2D or grid_mode == GridType.XY3D)
+
     # Locate center of the axes
     x_origin, y_origin, z_origin = focal_point[0], focal_point[1], \
         focal_point[2]
@@ -202,7 +211,7 @@ def update_grid_numbers(
     for x_pos in x_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(x_pos)
-        if is_3d:
+        if z_visible:
             if (sign(camera_axes.y) * -1) > 0:
                 pos = vector(x_pos, max_y_coord + padding, z_origin)
             else:
@@ -240,7 +249,7 @@ def update_grid_numbers(
     for y_pos in y_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(y_pos)
-        if is_3d:
+        if z_visible:
             if (sign(camera_axes.x) * -1) > 0:
                 pos = vector(max_x_coord + padding, y_pos, z_origin)
             else:
@@ -275,7 +284,7 @@ def update_grid_numbers(
         numbers_list[index].height = get_text_size(scene)
         index += 1
 
-    if not is_3d:
+    if not z_visible:
         return
 
     # Z plane

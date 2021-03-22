@@ -276,11 +276,11 @@ class GraphicsCanvas3D:  # pragma nocover
         """
         self.scene.capture(filename)
 
-    def set_xy_plane_only(self, input=True):
+    def set_grid_mode(self, mode):
         """
-        Useful if the user just wants the XY plane visible under the robot
+
         """
-        self.__graphics_grid.set_visibility(self.__grid_visibility, xy_only_input=input)
+        self.__graphics_grid.set_mode(mode)
 
     #######################################
     #  UI Management
