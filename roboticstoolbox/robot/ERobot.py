@@ -12,9 +12,10 @@ import subprocess
 import webbrowser
 import numpy as np
 # import spatialmath as sp
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
-from roboticstoolbox.robot.ELink import ELink, ETS
+from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.ETS import ETS, ETS2, SuperETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 # from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
@@ -71,16 +72,19 @@ class ERobot(Robot):
         self._n = 0
         self._ee_links = []
         self._base_link = None
+        self._ndims = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
         orlinks = []
 
         link_number = 0
-        if isinstance(arg, ETS):
-            # were passed an ETS string
+        if isinstance(arg, SuperETS):
+            # we're passed an ETS string
             ets = arg
-            arg = []
+            links = []
+
+            self._ndims = arg._ndims
 
             # chop it up into segments, a link frame after every joint
             start = 0
@@ -90,21 +94,25 @@ class ERobot(Robot):
                 if j == 0:
                     parent = None
                 else:
-                    parent = arg[-1]
+                    parent = links[-1]
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                arg.append(elink)
+                links.append(elink)
 
             n = len(ets.joints())
 
             tool = ets[start:]
             if len(tool) > 0:
-                arg.append(ELink(tool, parent=arg[-1], name="ee"))
+                links.append(ELink(tool, parent=links[-1], name="ee"))
+
         elif isinstance(arg, list):
             # we're passed a list of ELinks
 
             # check all the incoming ELink objects
             n = 0
-            for link in arg:
+            ndims = None
+            links = arg
+            for link in links:
+                
                 if isinstance(link, ELink):
                     # if link has no name, give it one
                     if link.name is None:
@@ -116,10 +124,20 @@ class ERobot(Robot):
                         raise ValueError(
                             f'link name {link.name} is not unique')
                     self._linkdict[link.name] = link
+
+                    # check all the Elinks are all 2D or 3D
+                    if ndims is None:
+                        ndims = link._ndims
+                    else:
+                        if link._ndims != ndims:
+                            raise ValueError('links have inconsistent number of dimensions')
                 else:
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
+            self._ndims = ndims
+            
+
         elif isinstance(arg, DHRobot):
             # we're passed a DHRobot object
 
@@ -159,7 +177,7 @@ class ERobot(Robot):
         self._n = n
 
         # scan for base
-        for link in arg:
+        for link in links:
             # is this a base link?
             if link._parent is None:
                 if self._base_link is not None:
@@ -186,7 +204,7 @@ class ERobot(Robot):
 
             # Remove gripper links from the robot
             for g_link in g_links:
-                arg.remove(g_link)
+                links.remove(g_link)
 
             # Save the gripper object
             self.grippers.append(Gripper(g_links))
@@ -198,7 +216,7 @@ class ERobot(Robot):
         # Set the ee links
         self.ee_links = []
         if len(gripper_links) == 0:
-            for link in arg:
+            for link in links:
                 # is this a leaf node? and do we not have any grippers
                 if len(link.child) == 0:
                     # no children, must be an end-effector
@@ -209,28 +227,28 @@ class ERobot(Robot):
                 self.ee_links.append(link.parent)
 
         # assign the joint indices
-        if all([link.jindex is None for link in arg]):
+        if all([link.jindex is None for link in links]):
 
             jindex = [0]  # "mutable integer" hack
 
             def visit_link(link, jindex):
                 # if it's a joint, assign it a jindex and increment it
-                if link.isjoint and link in arg:
+                if link.isjoint and link in links:
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
-                if link in arg:
+                if link in links:
                     orlinks.append(link)
 
             # visit all links in DFS order
             self.dfs_links(
                 self.base_link, lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in arg if link.isjoint]):
+        elif all([link.jindex is not None for link in links if link.isjoint]):
             # jindex set on all, check they are unique and sequential
             if checkjindex:
                 jset = set(range(self._n))
-                for link in arg:
+                for link in links:
                     if link.isjoint and link.jindex not in jset:
                         raise ValueError(
                             f'joint index {link.jindex} was '
@@ -238,7 +256,7 @@ class ERobot(Robot):
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
                     raise ValueError(f'joints {jset} were not assigned')
-            orlinks = arg
+            orlinks = links
         else:
             # must be a mixture of ELinks with/without jindex
             raise ValueError(
@@ -1003,6 +1021,8 @@ graph [rankdir=LR];
 
         '''
 
+        # we work with NumPy arrays not SE2/3 classes for speed
+
         q = getmatrix(q, (None, self.n))
 
         end, start, etool = self._get_limit_links(end, start)
@@ -1014,16 +1034,29 @@ graph [rankdir=LR];
         elif tool is not None:
             tool = tool.A
 
-        T = SE3.Empty()
+        if tool is None and self._tool is not None:
+            tool = self._tool.A
+
+        if self._ndims == 3:
+            T = SE3.Empty()
+        elif self._ndims == 2:
+            T = SE2.Empty()
+        else:
+            raise ValueError('bad thing')
+
         for k, qk in enumerate(q):
 
             link = end  # start with last link
 
             # add tool if provided
-            if tool is None:
-                Tk = link.A(qk[link.jindex], fast=True)
+            A = link.A(qk[link.jindex], fast=True)
+            if A is None:
+                Tk = tool
             else:
-                Tk = link.A(qk[link.jindex], fast=True) @ tool
+                if tool is None:
+                    Tk = A
+                elif A is not None:
+                    Tk = A @ tool
 
             # add remaining links, back toward the base
             while True:
@@ -1032,16 +1065,20 @@ graph [rankdir=LR];
                 if link is None:
                     break
 
-                Tk = link.A(qk[link.jindex], fast=True) @ Tk
+                A = link.A(qk[link.jindex], fast=True)
+                
+                if A is not None:
+                    Tk =  A @ Tk
 
                 if link is start:
                     break
 
             # add base transform if it is set
-            if self.base is not None and start == self.base_link:
+            if self._base is not None and start == self.base_link:
                 Tk = self.base.A @ Tk
 
-            T.append(SE3(Tk))
+            # cast to pose class and append
+            T.append(T.__class__(Tk))
 
         return T
 
@@ -1075,15 +1112,16 @@ graph [rankdir=LR];
 
         for link in self.elinks:
             if link.isjoint:
-                t = link.A(q[link.jindex])
+                A = link.A(q[link.jindex])
             else:
-                t = link.A()
+                A = link.A()
 
             # Update the links internal transform wrt the base frame
-            if link.parent is None:
-                link._fk = self.base * t
-            else:
-                link._fk = link.parent._fk * t
+            if A is not None:
+                if link.parent is None:
+                    link._fk = self.base * A
+                else:
+                    link._fk = link.parent._fk * A
 
             # Update the link model transforms as well
             for col in link.collision:
@@ -1440,7 +1478,9 @@ graph [rankdir=LR];
 
                 j += 1
             else:
-                U = U @ link.A(fast=True)
+                A = link.A(fast=True)
+                if A is not None:
+                    U = U @ A
 
         # compute rotational transform if analytical Jacobian required
         if analytical is not None and half != 'trans':
@@ -1474,6 +1514,58 @@ graph [rankdir=LR];
                 J = J[3:,:]
             else:
                 raise ValueError('bad half specified')
+
+        return J
+
+    def jacob0_2d(self, q, end=None, start=None, tool=None, T=None, half=None, analytical=None):
+
+        if tool is None:
+            tool = SE3()
+
+        path, n = self.get_path(end, start)
+
+        q = getvector(q, self.n)
+
+        if T is None:
+            T = self.base.inv() * \
+                self.fkine(q, end=end, start=start) * tool
+        T = T.A
+        U = np.eye(3)
+        j = 0
+        J = np.zeros((3, n))
+        zero = np.array([0, 0, 0])
+
+        for link in path:
+
+            if link.isjoint:
+                U = U @ link.A(q[link.jindex], fast=True)
+
+                if link == end:
+                    U = U @ tool.A
+
+                Tu = np.linalg.inv(U) @ T
+                n = U[:2, 0]
+                o = U[:2, 1]
+                x = Tu[0, 2]
+                y = Tu[1, 2]
+
+                if link.v.axis == 'R':
+                    J[:2, j] = (o * x) - (n * y)
+                    J[2:, j] = a
+
+                elif link.v.axis == 'tx':
+                    J[:2, j] = n
+                    J[2:, j] = zero
+
+                elif link.v.axis == 'ty':
+                    J[:2, j] = o
+                    J[2:, j] = zero
+
+                j += 1
+            else:
+                A = link.A(fast=True)
+                if A is not None:
+                    U = U @ A
 
         return J
 
