@@ -21,10 +21,13 @@ close_localhost_session = None
 try:
     from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D
     from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot
+    from roboticstoolbox.backends.VPython.grid import GridType
 except ImportError:
     print(
         '\nYou must install the VPython component of the toolbox, do: \n'
         'pip install roboticstoolbox[vpython]\n\n')
+
+
 class VPython(Connector):  # pragma nocover
     """
     Graphical backend using VPython
@@ -101,24 +104,26 @@ class VPython(Connector):  # pragma nocover
         title = args.get('title', 'Robotics Toolbox for Python: VPython display')
         caption = args.get('caption', '')
         grid = args.get('grid', False)
-        grid = True
+        if is_3d:
+            g_type = args.get('g_type', GridType.XY3D)
+        else:
+            g_type = args.get('g_type', GridType.XY2D)
         g_col = args.get('g_col', None)
 
         super().launch()
 
         self.canvas_settings.append(
-            [is_3d, height, width, title, caption, grid, g_col])
+            [is_3d, height, width, title, caption, grid, g_type, g_col])
 
         # Create the canvas with the given information
         if is_3d:
             self.canvases.append(
                 GraphicsCanvas3D(height, width, title, caption,
-                                 grid, g_col))
-            self.canvases[-1].set_xy_plane_only()
+                                 grid, g_type, g_col))
         else:
             self.canvases.append(
                 GraphicsCanvas2D(height, width, title, caption,
-                                 grid, g_col))
+                                 grid, g_type, g_col))
         
         self.sim_time = 0
 
@@ -230,11 +235,11 @@ class VPython(Connector):  # pragma nocover
                 if settings[0]:
                     self.canvases.append(GraphicsCanvas3D(
                         settings[1], settings[2], settings[3],
-                        settings[4], settings[5]))
+                        settings[4], settings[5], settings[6], settings[7]))
                 else:
                     self.canvases.append(GraphicsCanvas2D(
                         settings[1], settings[2], settings[3],
-                        settings[4], settings[5]))
+                        settings[4], settings[5], settings[6], settings[7]))
 
     def restart(self):
         """

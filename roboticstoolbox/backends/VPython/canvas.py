@@ -11,6 +11,7 @@ from roboticstoolbox.backends.VPython.common_functions import \
     x_axis_vector, y_axis_vector, z_axis_vector
 from roboticstoolbox.backends.VPython.grid import GraphicsGrid, create_line, \
     create_segmented_line, create_marker
+from roboticstoolbox.backends.VPython.text import GridType
 from enum import Enum
 from collections.abc import MutableMapping
 
@@ -65,7 +66,8 @@ class GraphicsCanvas3D:  # pragma nocover
     :type g_col: `list`, optional
     """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None):
+    def __init__(self, height=500, width=888, title='', caption='',
+                 grid=True, g_type=GridType.XY3D, g_col=None):
 
         # Create a new independent scene
         self.scene = canvas()
@@ -140,6 +142,7 @@ class GraphicsCanvas3D:  # pragma nocover
 
         # Create the grid, and display if wanted
         self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col)
+        self.__graphics_grid.set_mode(g_type)
         if not self.__grid_visibility:
             self.__graphics_grid.set_visibility(False)
 
@@ -814,7 +817,7 @@ class GraphicsCanvas2D:  # pragma nocover
     :type g_col: `list`, optional
     """
 
-    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_col=None):
+    def __init__(self, height=500, width=888, title='', caption='', grid=True, g_type=GridType.XY2D, g_col=None):
 
         # Private lists
         self.__line_styles = [
@@ -895,6 +898,7 @@ class GraphicsCanvas2D:  # pragma nocover
 
         # Create the grid, and display if wanted
         self.__graphics_grid = GraphicsGrid(self.scene, colour=g_col)
+        self.__graphics_grid.set_mode(g_type)
         # Toggle grid to 2D
         # self.__graphics_grid.toggle_2d_3d()
         # Lock the grid
