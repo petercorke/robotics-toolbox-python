@@ -97,6 +97,8 @@ class GraphicsGrid:  # pragma nocover
             self.__focal_point, self.grid_object.get('labels'),
             self.__num_squares, self.__scale, self._mode, self.__scene)
 
+        self.__move_grid_objects()
+
         self._set_mode_plane_visibility()
 
     def __create_grid_objects(self):
@@ -206,13 +208,14 @@ class GraphicsGrid:  # pragma nocover
         camera_axes = self.camera_axes
         # Locate centre of axes
         if self.__relative_cam:
-            x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
-                                           round(self.__scene.center.y, 2), \
-                                           round(self.__scene.center.z, 2)
-            self.__focal_point = [x_origin, y_origin, z_origin]
+            if self._mode == GridType.XYZ:
+                x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
+                                               round(self.__scene.center.y, 2), \
+                                               round(self.__scene.center.z, 2)
+                self.__focal_point = [x_origin, y_origin, z_origin]
             # Convert focal point for 2D rendering.
             # Puts focus point in centre of the view
-            if self._mode == GridType.XY2D or self._mode == GridType.XY3D:
+            elif self._mode == GridType.XY2D:
                 self.__focal_point = [
                     val - int(self.__num_squares / 2)
                     for val in self.__focal_point
@@ -221,6 +224,11 @@ class GraphicsGrid:  # pragma nocover
                 y_origin = self.__focal_point[1]
                 z_origin = 0
                 self.__focal_point[2] = z_origin
+            elif self._mode == GridType.XY3D:
+                x_origin = round(self.__scene.center.x, 2)
+                y_origin = round(self.__scene.center.y, 2)
+                z_origin = 0
+                self.__focal_point = [x_origin, y_origin, z_origin]
         else:
             x_origin, y_origin, z_origin = self.__focal_point[0], \
                                            self.__focal_point[1], \
@@ -268,6 +276,10 @@ class GraphicsGrid:  # pragma nocover
             z_pos = z_origin
         else:
             z_pos = min_z_coord
+
+        if self._mode == GridType.XY3D:
+            x_pos = x_pos + sign(camera_axes.x) * (self.__scale * (self.__num_squares / 2))
+            y_pos = y_pos + sign(camera_axes.y) * (self.__scale * (self.__num_squares / 2))
 
         self.grid_object.get('xy_plane').origin = \
             vector(x_pos, y_pos, z_origin)
