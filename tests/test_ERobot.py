@@ -63,7 +63,7 @@ class TestERobot(unittest.TestCase):
         nt.assert_array_almost_equal(panda.qr, qr)
         nt.assert_array_almost_equal(panda.qz, qz)
         nt.assert_array_almost_equal(
-            panda.gravity, np.r_[0, 0, 9.81])
+            panda.gravity, np.r_[0, 0, -9.81])
 
     def test_q(self):
         panda = rtb.models.ETS.Panda()

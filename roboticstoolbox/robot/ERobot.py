@@ -2203,13 +2203,13 @@ graph [rankdir=LR];
         # initialize intermediate variables
         for j, link in enumerate(robot):
             I[j] = SpatialInertia(m=link.m, r=link.r)
-            Xtree[j] = link.Ts
+            Xtree[j] = SE3(link.Ts)
             s[j] = link.v.s
 
         if gravity is None:
-            a_grav = SpatialAcceleration(robot.gravity)
+            a_grav = -SpatialAcceleration(robot.gravity)
         else:
-            a_grav = SpatialAcceleration(gravity)
+            a_grav = -SpatialAcceleration(gravity)
 
         # forward recursion
         for j in range(0, n):
