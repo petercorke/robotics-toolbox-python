@@ -32,8 +32,8 @@ class UR3(ERobot):
             "ur_description/urdf/ur3_joint_limited_robot.urdf.xacro")
 
         super().__init__(
-                args[0].upper(),
-                name=args[1],
+                args[0],
+                name=args[1].upper(),
                 manufacturer='Universal Robotics'
             )
 
