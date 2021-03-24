@@ -303,7 +303,7 @@ class DynamixelString:
         groupSyncRead = GroupSyncRead(self.port, self.packetHandler, addrlen[0], addrlen[1])
         for id in self.active:
             dxl_addparam_result = groupSyncRead.addParam(id)
-            if dxl_addparam_result is True:
+            if dxl_addparam_result != True:
                 pass # bad thing
 
     def pulseleds(self, nblinks=4, dt=0.1):
