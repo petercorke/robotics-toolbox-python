@@ -10,6 +10,10 @@ import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 
+# from functools import wraps
+import numpy as np
+import fknm
+
 
 class ELink(Link):
     """
@@ -107,20 +111,61 @@ class ELink(Link):
 
         self._v = v
 
-        # # Set up fast object
-        # if self.isjoint:
-        #     axis = self.v.axis
-        #     jin = self.jindex
-        # else:
-        #     axis = 'None'
-        #     jin = 0
+        # print(self._Ts)
+        self._init_fknm()
 
-        # # print(self.Ts.A.flags)
-        # Ts = np.eye(4)
+    def _init_fknm(self):
+        isflip = False
+        axis = 0
 
-        # self._elink = _ELink(
-        #     self.isjoint, jin,
-        #     Ts, self.flip, axis)
+        if self.isjoint:
+            isflip = self._v.isflip
+
+            if self._v.axis == 'Rx':
+                axis = 0
+            elif self._v.axis == 'Ry':
+                axis = 1
+            elif self._v.axis == 'Rz':
+                axis = 2
+            elif self._v.axis == 'tx':
+                axis = 3
+            elif self._v.axis == 'ty':
+                axis = 4
+            elif self._v.axis == 'tz':
+                axis = 5
+
+        self._fknm = fknm.link_init(
+            self.isjoint,
+            isflip,
+            axis,
+            self._Ts.A)
+
+    def _update_fknm(self):
+        isflip = False
+        axis = 0
+
+        if self.isjoint:
+            isflip = self._v.isflip
+
+            if self._v.axis == 'Rx':
+                axis = 0
+            elif self._v.axis == 'Ry':
+                axis = 1
+            elif self._v.axis == 'Rz':
+                axis = 2
+            elif self._v.axis == 'tx':
+                axis = 3
+            elif self._v.axis == 'ty':
+                axis = 4
+            elif self._v.axis == 'tz':
+                axis = 5
+
+        fknm.link_update(
+            self._fknm,
+            self.isjoint,
+            isflip,
+            axis,
+            self._Ts.A)
 
     def _init_Ts(self):
         # Number of transforms in the ETS excluding the joint variable
@@ -189,6 +234,14 @@ class ELink(Link):
             >>> print(link.v)
         """
         return self._v
+
+    @v.setter
+    def v(self, new):
+        if not isinstance(new, ETS) and new is not None:
+            raise TypeError("v must be an ETS object")
+
+        self._v = new
+        self._update_fknm()
 
     @property
     def Ts(self):
@@ -370,7 +423,7 @@ class ELink(Link):
 
     # @numba.jit(nopython=True)
 
-    def A(self, q=None, fast=False):
+    def A(self, q=0.0, fast=False):
         """
         Link transform matrix
 
@@ -389,12 +442,17 @@ class ELink(Link):
         """
 
         if fast:
-            if self.isjoint:
-                T = self._Ts.A @ self._v.T(q)
-            else:
-                # a fixed joint
-                T = self._Ts.A
+            if not np.isscalar(q):
+                q = 0.0
+            T = np.empty((4, 4))
+            fknm.link_A(q, self._fknm, T)
             return T
+            # if self.isjoint:
+            #     T = self._Ts.A @ self._v.T(q)
+            # else:
+            #     # a fixed joint
+            #     T = self._Ts.A
+            # return T
         else:
             if self.isjoint:
                 # a variable joint

@@ -1,0 +1,125 @@
+<robot name="L31K-GRIPPER_URDF_SIMPLIFIED_V2" version="1.0">
+  <link name="GRIPPER_FRAME">
+    <inertial>
+      <origin xyz="4.03E-06 1.08E-05 0.04139748" rpy="0 0 0" />
+      <mass value="0.1395" />
+      <inertia ixx="0.00011614" ixy="1E-08" ixz="4E-08" iyy="0.00010327" iyz="0" izz="9.707E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/GRIPPER_FRAME.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/GRIPPER_FRAME.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="RIGHT_FINGER_PROX">
+    <inertial>
+      <origin xyz="0.020257 0.0063483 6.991E-05" rpy="0 0 0" />
+      <mass value="0.018385" />
+      <inertia ixx="2.29E-06" ixy="1.43E-06" ixz="0" iyy="4.56E-06" iyz="0" izz="4.77E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/RIGHT_FINGER_PROX.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/RIGHT_FINGER_PROX.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RIGHT_BOTTOM" type="revolute">
+    <origin xyz="0 -0.030501 0.070003" rpy="0 1.5708 0" />
+    <parent link="GRIPPER_FRAME" />
+    <child link="RIGHT_FINGER_PROX" />
+    <axis xyz="0 0 1" />
+    <limit lower="-0.09" upper="0.96" effort="1000" velocity="1000" />
+  </joint>
+  <link name="RIGHT_FINGER_DIST">
+    <inertial>
+      <origin xyz="0.018488 0.0011091 0" rpy="0 0 0" />
+      <mass value="0.010748" />
+      <inertia ixx="6.3E-07" ixy="3.2E-07" ixz="0" iyy="1.83E-06" iyz="0" izz="1.61E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/RIGHT_FINGER_DIST.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/RIGHT_FINGER_DIST.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RIGHT_TIP" type="revolute">
+    <origin xyz="-0.045636 0.020423 0" rpy="0 0 0" />
+    <parent link="RIGHT_FINGER_PROX" />
+    <child link="RIGHT_FINGER_DIST" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.03" upper="0.21" effort="1000" velocity="1000" />
+  </joint>
+  <link name="LEFT_FINGER_PROX">
+    <inertial>
+      <origin xyz="0.020257 0.0063483 6.99E-05" rpy="0 0 0" />
+      <mass value="0.018385" />
+      <inertia ixx="2.29E-06" ixy="1.43E-06" ixz="0" iyy="4.56E-06" iyz="0" izz="4.77E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/LEFT_FINGER_PROX.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/LEFT_FINGER_PROX.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LEFT_BOTTOM" type="revolute">
+    <origin xyz="0 0.0305 0.070003" rpy="0 1.5708 0" />
+    <parent link="GRIPPER_FRAME" />
+    <child link="LEFT_FINGER_PROX" />
+    <axis xyz="0 0 1" />
+    <limit lower="-0.96" upper="0.09" effort="1000" velocity="1000" />
+  </joint>
+  <link name="LEFT_FINGER_DIST">
+    <inertial>
+      <origin xyz="-0.018488 0.0011091 0" rpy="0 0 0" />
+      <mass value="0.010748" />
+      <inertia ixx="6.3E-07" ixy="3.2E-07" ixz="0" iyy="1.83E-06" iyz="0" izz="1.61E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/LEFT_FINGER_DIST.STL" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://L31K-GRIPPER_URDF_SIMPLIFIED_V2/meshes/LEFT_FINGER_DIST.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LEFT_TIP" type="revolute">
+    <origin xyz="-0.045636 -0.020423 6.9901E-05" rpy="0 0 0" />
+    <parent link="LEFT_FINGER_PROX" />
+    <child link="LEFT_FINGER_DIST" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-0.21" upper="1.03" effort="1000" velocity="1000" />
+  </joint>
+</robot>

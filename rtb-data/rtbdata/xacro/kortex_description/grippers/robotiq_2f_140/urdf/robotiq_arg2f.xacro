@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="robotiq_arg2f_base_link" params="parent prefix">
+
+    <!-- This joint was added by Kinova -->
+    <joint name="${prefix}gripper_base_joint" type="fixed">
+        <parent link="${parent}"/>
+        <child link="${prefix}robotiq_arg2f_base_link"/>
+        <origin rpy="0.0 0.0 1.57" xyz="0.0 0.0 0.0"/>
+    </joint>
+    
+    <link name="${prefix}robotiq_arg2f_base_link">
+      <inertial>
+        <origin xyz="8.625E-08 -4.6583E-06 0.03145" rpy="0 0 0" />
+        <mass value="0.22652" />
+        <inertia ixx="0.00020005" ixy="-4.2442E-10" ixz="-2.9069E-10" iyy="0.00017832" iyz="-3.4402E-08" izz="0.00013478" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <!-- The DAE file doesn't show well in Gazebo so we're using the STL instead -->
+          <!-- <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/visual/robotiq_arg2f_140_base_link.dae" scale="0.001 0.001 0.001"/> -->
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/collision/robotiq_arg2f_base_link.stl" />
+        </geometry>
+        <material name="">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/collision/robotiq_arg2f_base_link.stl" />
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${prefix}robotiq_arg2f_base_link">
+      <material>Gazebo/Black</material>  
+    </gazebo>
+
+  </xacro:macro>
+
+  <xacro:macro name="finger_joints" params="prefix fingerprefix reflect">
+    <xacro:outer_finger_joint prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:inner_knuckle_joint prefix="${prefix}" fingerprefix="${fingerprefix}" reflect="${reflect}"/>
+    <xacro:inner_finger_joint prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:inner_finger_pad_joint prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+  </xacro:macro>
+
+  <xacro:macro name="finger_links" params="prefix fingerprefix stroke">
+    <xacro:outer_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}" stroke="${stroke}"/>
+    <xacro:outer_finger prefix="${prefix}" fingerprefix="${fingerprefix}" stroke="${stroke}"/>
+    <xacro:inner_finger prefix="${prefix}" fingerprefix="${fingerprefix}" stroke="${stroke}"/>
+    <xacro:inner_finger_pad prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:inner_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}" stroke="${stroke}"/>
+  </xacro:macro>
+</robot>

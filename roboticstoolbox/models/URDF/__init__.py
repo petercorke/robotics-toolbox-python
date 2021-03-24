@@ -15,6 +15,8 @@ from roboticstoolbox.models.URDF.wx250 import wx250
 from roboticstoolbox.models.URDF.wx250s import wx250s
 from roboticstoolbox.models.URDF.Mico import Mico
 from roboticstoolbox.models.URDF.PR2 import PR2
+from roboticstoolbox.models.URDF.LBR import LBR
+from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
 
 __all__ = [
     'Panda',
@@ -33,5 +35,7 @@ __all__ = [
     'wx250',
     'wx250s',
     'Mico',
-    'PR2'
+    'PR2',
+    'LBR',
+    'KinovaGen3'
 ]

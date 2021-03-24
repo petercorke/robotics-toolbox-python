@@ -100,7 +100,10 @@ class Shape(object):
         else:
             fk = self._sT
 
-        fk = self._wT
+        q = r2q(fk[:3, :3]).tolist()
+        q = [q[1], q[2], q[3], q[0]]
+
+        # fk = self._wT
         # print(self.base)
 
         shape = {
@@ -110,7 +113,7 @@ class Shape(object):
             'radius': self.radius,
             'length': self.length,
             't': fk[:3, 3].tolist(),
-            'q': r2q(fk[:3, :3]).tolist(),
+            'q': q,
             'v': self.v.tolist(),
             'color': self._to_hex(self.color[0:3]),
             'opacity': self.color[3]
@@ -131,9 +134,12 @@ class Shape(object):
         else:
             fk = self._sT
 
+        q = r2q(fk[:3, :3]).tolist()
+        q = [q[1], q[2], q[3], q[0]]
+
         shape = {
             't': fk[:3, 3].tolist(),
-            'q': r2q(fk[:3, :3]).tolist()
+            'q': q
         }
 
         return shape
@@ -259,6 +265,7 @@ class Shape(object):
         if not isinstance(T, SE3):
             T = SE3(T)
         self._base = T
+        self._sT = self._wT @ self._base.A
         self._update_pyb()
 
     @_check_pyb

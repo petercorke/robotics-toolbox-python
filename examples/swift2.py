@@ -1,7 +1,69 @@
-# #!/usr/bin/env python
-# """
-# @author Jesse Haviland
-# """
+#!/usr/bin/env python
+"""
+@author Jesse Haviland
+"""
+
+# import fknm
+# import numpy as np
+# import spatialmath as sm
+# import cProfile
+# import roboticstoolbox as rtb
+
+# l = rtb.ELink(ets=rtb.ETS.rx(1.0), v=rtb.ETS.rz(flip=True))
+
+# # print(l.isjoint)
+# # print(l._v.isflip)
+# # print(l._v.axis)
+# # print(l._Ts.A)
+
+# c = fknm.link_init(l.isjoint, l._v.isflip, 2, l._Ts.A)
+
+# arr = np.empty((4, 4))
+# fknm.link_A(1.0, c, arr)
+# print(arr)
+# print(l.A(1))
+
+# # l._Ts.A[1, 1] = 99
+# # l._isjoint = 2
+# # fknm.link_update(c, l.isjoint, l._v.isflip, 2, l._Ts.A)
+
+# # fknm.link_A(c, arr, 1.0)
+# # print(arr)
+
+# # print(l.A(1, True))
+
+
+# # a = np.empty((4, 4))
+
+# # fknm.rz(2, np.array([1.0, 2.0]))
+# # fknm.rz(np.pi, a)
+# # print(sm.base.trotz(np.pi))
+
+# # print(a)
+# # sm.base.trotz(1)
+
+
+# def Rz(eta):
+#     arr = np.empty((4, 4))
+#     fknm.link_A(eta, c, arr)
+#     return arr
+
+
+# def cc(it):
+#     for i in range(it):
+#         # arr = np.empty((4, 4))
+#         # fknm.rz(i, arr)
+#         a = Rz(i)
+
+
+# def slow(it):
+#     for i in range(it):
+#         a = l.A(i)
+
+
+# it = 10000
+# cProfile.run('cc(it)')
+# cProfile.run('slow(it)')
 
 from roboticstoolbox.backends import Swift
 from math import pi
@@ -33,61 +95,45 @@ from spatialmath.base import r2q
 
 # cProfile.run('stepper()')
 
-# print(using_numba())
-# use_numba(False)
-# print(using_numba())
+# ur = rtb.models.UR5()
+# ur.base = sm.SE3(0.3, 1, 0) * sm.SE3.Rz(np.pi/2)
+# ur.q = [-0.4, -np.pi/2 - 0.3, np.pi/2 + 0.3, -np.pi/2, -np.pi/2, 0]
+# env.add(ur)
 
-# path = os.path.realpath('.')
+# lbr = rtb.models.LBR()
+# lbr.base = sm.SE3(1.8, 1, 0) * sm.SE3.Rz(np.pi/2)
+# lbr.q = lbr.qr
+# env.add(lbr)
+
+# k = rtb.models.KinovaGen3()
+# k.q = k.qr
+# k.q[0] = np.pi + 0.15
+# k.base = sm.SE3(0.7, 1, 0) * sm.SE3.Rz(np.pi/2)
+# env.add(k)
 
 env = Swift.Swift()
 env.launch()
 
-path = rtb.path_to_datafile('data')
 
-# r = rtb.models.Panda()
-r = rtb.models.PR2()
-# r.q = r.qr
-# r.qd = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-
-
-# g1 = rtb.Box(
-#     base=SE3(-1, 0, 0.5),
-#     scale=[0.1, 0.2, 0.3],
-#     color=[0.9, 0.9, 0.9, 1]
-# )
-# g1.v = [0.01, 0.0, 0, 0.1, 0, 0]
-
-# g2 = rtb.Sphere(
-#     base=SE3(),
-#     radius=0.1,
-#     color=[0.9, 0.9, 0.9, 1]
-# )
-# g2.v = [0.01, 0, 0.0, 0.0, 0, 0]
+panda = rtb.models.Panda()
+panda.q = panda.qr
+# panda.base = sm.SE3(1.2, 1, 0) * sm.SE3.Rz(np.pi/2)
+env.add(panda, show_robot=True)
 
 
-# # env.add(g1)
-# # env.add(g2)
-# env.add(r, show_robot=False, show_collision=True)
-env.add(r, show_robot=True)
-
-ev = [0.1, 0, 0, 0, 0, 0]
-# r.jacob0(r.q)
+ev = [0.01, 0, 0, 0, 0, 0]
 
 
 def stepper():
     for i in range(1000):
-        r.qd = np.linalg.pinv(r.jacob0(r.q)) @ ev
+        panda.qd = np.linalg.pinv(panda.jacob0(panda.q)) @ ev
         env.step(0.004)
-        # r.jacob0(r.q)
 
 
 env.step(0.01)
 
+# stepper()
+
 cProfile.run('stepper()')
 
-# for i in range(1000):
-#     start = time.time()
-#     env.step(0.01)
-#     print(time.time() - start)
-
-env.hold()
+# env.hold()

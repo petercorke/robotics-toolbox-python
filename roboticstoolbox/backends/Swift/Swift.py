@@ -530,6 +530,7 @@ class Swift(Connector):  # pragma nocover
 
     def _send_socket(self, code, data=None, expected=True):
         msg = [expected, [code, data]]
+        # print(msg)
 
         self.outq.put(msg)
 

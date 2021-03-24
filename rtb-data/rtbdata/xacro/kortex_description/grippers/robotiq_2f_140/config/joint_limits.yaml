@@ -1,0 +1,8 @@
+gripper_joint_names:
+  - $(arg prefix)finger_joint
+
+gripper_joint_limits_min:
+  - 0.000
+
+gripper_joint_limits_max:
+  - 0.700

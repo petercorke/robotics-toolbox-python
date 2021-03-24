@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<robot name="robotiq_arg2f_85_model" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="load_gripper" params="parent prefix">
+    <xacro:include filename="$(find kortex_description)/grippers/robotiq_2f_85/urdf/robotiq_arg2f_85_model_macro.xacro" />
+    <xacro:robotiq_arg2f_85 parent="${parent}" prefix="${prefix}"/>
+  </xacro:macro>
+</robot>

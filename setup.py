@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages, Extension
 import os
+import numpy
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -67,14 +68,22 @@ for data_folder in data_folders:
     extra_files += package_files(data_folder)
 
 frne = Extension(
-        'frne',
-        sources=[
-            './roboticstoolbox/core/vmath.c',
-            './roboticstoolbox/core/ne.c',
-            './roboticstoolbox/core/frne.c'],
-        include_dirs=[
-            './roboticstoolbox/core/'
-        ])
+    'frne',
+    sources=[
+        './roboticstoolbox/core/vmath.c',
+        './roboticstoolbox/core/ne.c',
+        './roboticstoolbox/core/frne.c'],
+    include_dirs=[
+        './roboticstoolbox/core/'
+    ])
+
+fknm = Extension(
+    'fknm',
+    sources=[
+        './roboticstoolbox/core/fknm.c'],
+    include_dirs=[
+        './roboticstoolbox/core/'
+    ])
 
 setup(
     name='roboticstoolbox-python',
@@ -121,7 +130,7 @@ setup(
         'Coverage': 'https://codecov.io/gh/petercorke/roboticstoolbox-python'
     },
 
-    ext_modules=[frne],
+    ext_modules=[frne, fknm],
 
     keywords='python robotics robotics-toolbox kinematics dynamics' \
              ' motion-planning trajectory-generation jacobian hessian' \

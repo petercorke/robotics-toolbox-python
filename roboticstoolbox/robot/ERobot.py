@@ -9,6 +9,7 @@ import os
 from os.path import splitext
 import tempfile
 import subprocess
+from tokenize import endpats
 import webbrowser
 import numpy as np
 # import spatialmath as sp
@@ -950,7 +951,6 @@ graph [rankdir=LR];
         for k, qk in enumerate(q):
 
             link = end  # start with last link
-
             # add tool if provided
             if tool is None:
                 Tk = link.A(qk[link.jindex], fast=True)
@@ -975,6 +975,64 @@ graph [rankdir=LR];
 
             T.append(SE3(Tk))
 
+        return T
+
+    def fkine_fast(self, q, end=None, start=None, include_base=False):
+        # q = getmatrix(q, self.n)
+
+        end, start, etool = self._get_limit_links(end, start)
+
+        if etool is not None:
+            tool = etool.A
+        else:
+            tool = np.eye()
+
+        links = []
+
+        links.append(end._fknm)
+        link = end
+        # T = link.A(q[link.jindex], fast=True) @ tool
+
+        while True:
+            link = link.parent
+
+            links.append(link._fknm)
+
+            # T = link.A(q[link.jindex], fast=True) @ T
+
+            if link is start:
+                break
+
+        # print(links)
+
+        # T = SE3.Empty()
+        # for k, qk in enumerate(q):
+
+        #     link = end  # start with last link
+        #     # add tool if provided
+        #     if tool is None:
+        #         Tk = link.A(qk[link.jindex], fast=True)
+        #     else:
+        #         Tk = link.A(qk[link.jindex], fast=True) @ tool
+
+        #     # add remaining links, back toward the base
+        #     while True:
+        #         link = link.parent
+
+        #         if link is None:
+        #             break
+
+        #         Tk = link.A(qk[link.jindex], fast=True) @ Tk
+
+        #         if link is start:
+        #             break
+
+        #     # add base transform if it is set
+        #     if self.base is not None and start == self.base_link:
+        #         Tk = self.base.A @ Tk
+
+        #     T.append(SE3(Tk))
+        T = SE3()
         return T
 
     def fkine_all(self, q):
@@ -1335,7 +1393,7 @@ graph [rankdir=LR];
 
         if T is None:
             T = self.base.inv() * \
-                self.fkine(q, end=end, start=start) * tool
+                self.fkine_fast(q, end=end, start=start) * tool
         T = T.A
         U = np.eye(4)
         j = 0

@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="outer_knuckle" params="prefix fingerprefix stroke">
+    <link name="${prefix}${fingerprefix}_outer_knuckle">
+      <inertial>
+        <origin xyz="-0.000200000000003065 0.0199435877845359 0.0292245259211331" rpy="0 0 0" />
+        <mass value="0.00853198276973456" />
+        <inertia
+            ixx="2.89328108496468E-06"
+            ixy="-1.57935047237397E-19"
+            ixz="-1.93980378593255E-19"
+            iyy="1.86719750325683E-06"
+            iyz="-1.21858577871576E-06"
+            izz="1.21905238907251E-06" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/visual/robotiq_arg2f_${stroke}_outer_knuckle.stl" />
+        </geometry>
+        <material name="">
+          <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/collision/robotiq_arg2f_${stroke}_outer_knuckle.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="${prefix}${fingerprefix}_outer_knuckle">
+      <visual>  
+        <material>  
+          <ambient>0.792156862745098 0.819607843137255 0.933333333333333 1</ambient>  
+          <diffuse>0.792156862745098 0.819607843137255 0.933333333333333 1</diffuse>  
+        </material>  
+      </visual> 
+    </gazebo>
+    
+  </xacro:macro>
+
+  <xacro:macro name="outer_finger" params="prefix fingerprefix stroke">
+    <link name="${prefix}${fingerprefix}_outer_finger">
+      <inertial>
+        <origin xyz="0.00030115855001899 0.0373907951953854 -0.0208027427000385" rpy="0 0 0" />
+        <mass value="0.022614240507152" />
+        <inertia
+            ixx="1.52518312458174E-05"
+            ixy="9.76583423954399E-10"
+            ixz="-5.43838577022588E-10"
+            iyy="6.17694243867776E-06"
+            iyz="6.78636130740228E-06"
+            izz="1.16494917907219E-05" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/visual/robotiq_arg2f_${stroke}_outer_finger.stl" />
+        </geometry>
+        <material name="">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/collision/robotiq_arg2f_${stroke}_outer_finger.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="${prefix}${fingerprefix}_outer_finger">
+      <material>Gazebo/Black</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="inner_knuckle" params="prefix fingerprefix stroke">
+    <link name="${prefix}${fingerprefix}_inner_knuckle">
+      <inertial>
+        <origin xyz="0.000123011831763771 0.0507850843201817 0.00103968640075166" rpy="0 0 0" />
+        <mass value="0.0271177346495152" />
+        <inertia
+            ixx="2.61910379223783E-05"
+            ixy="-2.43616858946494E-07"
+            ixz="-6.37789906117123E-09"
+            iyy="2.8270243746167E-06"
+            iyz="-5.37200748039765E-07"
+            izz="2.83695868220296E-05" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/visual/robotiq_arg2f_${stroke}_inner_knuckle.stl" />
+        </geometry>
+        <material name="">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/collision/robotiq_arg2f_${stroke}_inner_knuckle.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="${prefix}${fingerprefix}_inner_knuckle">
+      <material>Gazebo/Black</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="inner_finger" params="prefix fingerprefix stroke">
+    <link name="${prefix}${fingerprefix}_inner_finger">
+      <inertial>
+        <origin xyz="0.000299999999999317 0.0160078233491243 -0.0136945669206257" rpy="0 0 0" />
+        <mass value="0.0104003125914103" />
+        <inertia
+            ixx="2.71909453810972E-06"
+            ixy="1.35402465472579E-21"
+            ixz="-7.1817349065269E-22"
+            iyy="7.69100314106116E-07"
+            iyz="6.74715432769696E-07"
+            izz="2.30315190420171E-06" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/visual/robotiq_arg2f_${stroke}_inner_finger.stl" />
+        </geometry>
+        <material name="">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://kortex_description/grippers/robotiq_2f_140/meshes/collision/robotiq_arg2f_${stroke}_inner_finger.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <gazebo reference="${prefix}${fingerprefix}_inner_finger">
+      <material>Gazebo/Black</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Finger pad link, the default are the "big pads" with rubber-->
+  <xacro:macro name="inner_finger_pad" params="prefix fingerprefix">
+    <link name="${prefix}${fingerprefix}_inner_finger_pad">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.027 0.065 0.0075"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.9 0.9 0.9 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+           <box size="0.03 0.07 0.0075"/>
+        </geometry>
+        <material name="">
+          <color rgba="0.9 0.0 0.0 1" />
+        </material>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="outer_finger_joint" params="prefix fingerprefix">
+    <joint name="${prefix}${fingerprefix}_outer_finger_joint" type="fixed">
+      <origin xyz="0 0.01821998610742 0.0260018192872234" rpy="0 0 0" />
+      <parent link="${prefix}${fingerprefix}_outer_knuckle" />
+      <child link="${prefix}${fingerprefix}_outer_finger" />
+      <axis xyz="1 0 0" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="inner_knuckle_joint" params="prefix fingerprefix reflect">
+    <joint name="${prefix}${fingerprefix}_inner_knuckle_joint" type="revolute">
+      <origin xyz="0 ${reflect * -0.0127} 0.06142" rpy="${pi / 2 + .725} 0 ${(reflect - 1) * pi / 2}" />
+      <parent link="${prefix}robotiq_arg2f_base_link" />
+      <child link="${prefix}${fingerprefix}_inner_knuckle" />
+      <axis xyz="1 0 0" />
+      <limit lower="-0.8757" upper="0.8757" velocity="2.0" effort="1000" />
+      <mimic joint="${prefix}finger_joint" multiplier="-1" offset="0" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="inner_finger_joint" params="prefix fingerprefix">
+    <joint name="${prefix}${fingerprefix}_inner_finger_joint" type="revolute">
+      <origin xyz="0 0.0817554015893473 -0.0282203446692936" rpy="-0.725 0 0" />
+      <parent link="${prefix}${fingerprefix}_outer_finger" />
+      <child link="${prefix}${fingerprefix}_inner_finger" />
+      <axis xyz="1 0 0" />
+      <limit lower="-0.8757" upper="0.8757" velocity="2.0" effort="1000" />
+      <mimic joint="${prefix}finger_joint" multiplier="1" offset="0" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="inner_finger_pad_joint" params="prefix fingerprefix">
+    <joint name="${prefix}${fingerprefix}_inner_finger_pad_joint" type="fixed">
+      <origin xyz="0 0.0457554015893473 -0.0272203446692936" rpy="0 0 0" />
+      <parent link="${prefix}${fingerprefix}_inner_finger" />
+      <child link="${prefix}${fingerprefix}_inner_finger_pad" />
+      <axis xyz="0 0 1" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:include filename="$(find kortex_description)/grippers/robotiq_2f_140/urdf/robotiq_arg2f.xacro" />
+
+  <xacro:macro name="finger_joint" params="prefix">
+    <joint name="${prefix}finger_joint" type="revolute">
+      <origin xyz="0 -0.030601 0.054905" rpy="${pi / 2 + .725} 0 0" />
+      <parent link="${prefix}robotiq_arg2f_base_link" />
+      <child link="${prefix}left_outer_knuckle" />
+      <axis xyz="-1 0 0" />
+      <limit lower="0" upper="0.7" velocity="2.0" effort="1000" />
+    </joint>
+    <xacro:finger_joints prefix="${prefix}" fingerprefix="left" reflect="1.0"/>
+  </xacro:macro>
+
+  <xacro:macro name="right_outer_knuckle_joint" params="prefix">
+    <joint name="${prefix}right_outer_knuckle_joint" type="revolute">
+      <origin xyz="0 0.030601 0.054905" rpy="${pi / 2 + .725} 0 ${pi}" />
+      <parent link="${prefix}robotiq_arg2f_base_link" />
+      <child link="${prefix}right_outer_knuckle" />
+      <axis xyz="1 0 0" />
+      <limit lower="-0.725" upper="0.725" velocity="2.0" effort="1000" />
+    <mimic joint="${prefix}finger_joint" multiplier="-1" offset="0" />
+    </joint>
+    <xacro:finger_joints prefix="${prefix}" fingerprefix="right" reflect="-1.0"/>
+  </xacro:macro>
+
+  <xacro:macro name="robotiq_arg2f_140" params="parent prefix">
+    <!-- Tool frame used by the arm -->
+    <link name="${prefix}tool_frame"/>
+    <joint name="${prefix}tool_frame_joint" type="fixed">
+        <origin xyz="0 0 0.20" rpy="0 0 0" />
+        <parent link="${parent}" />
+        <child link="${prefix}tool_frame" />
+        <axis xyz="0 0 0" />
+    </joint>
+    <!-- Gripper description -->
+    <xacro:robotiq_arg2f_base_link prefix="${prefix}" parent="${parent}"/>
+    <xacro:finger_links prefix="${prefix}" fingerprefix="left" stroke="140"/>
+    <xacro:finger_links prefix="${prefix}" fingerprefix="right" stroke="140"/>
+    <xacro:finger_joint prefix="${prefix}"/>
+    <xacro:right_outer_knuckle_joint prefix="${prefix}"/>
+    <!-- Transmissions are loaded in the generic kortex xacro when simulation is enabled -->
+    <!-- <xacro:robotiq_arg2f_transmission prefix="${prefix}"/> -->
+  </xacro:macro>
+</robot>

@@ -1764,7 +1764,7 @@ class URDF(URDFType):
             elif joint.joint_type == 'fixed':
                 var = None
 
-            childlink._v = var
+            childlink.v = var
 
             # joint limit
             try:
@@ -1967,7 +1967,7 @@ class URDF(URDFType):
         valid_tags = set([
             'joint', 'link', 'transmission',
             'material'
-            ])
+        ])
         kwargs = cls._parse(node, path)
 
         extra_xml_node = ET.Element('extra')

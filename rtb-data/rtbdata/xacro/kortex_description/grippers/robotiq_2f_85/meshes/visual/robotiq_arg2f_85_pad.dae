@@ -1,0 +1,104 @@
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <created>2016-07-17T22:25:43.361178</created>
+    <modified>2016-07-17T22:25:43.361188</modified>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect name="effect0" id="effect0">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0.0 0.0 0.0 1.0</color>
+            </emission>
+            <ambient>
+              <color>0.0 0.0 0.0 1.0</color>
+            </ambient>
+            <diffuse>
+              <color>0.7 0.7 0.7 1.0</color>
+            </diffuse>
+            <specular>
+              <color>1 1 1 1.0</color>
+            </specular>
+            <shininess>
+              <float>0.0</float>
+            </shininess>
+            <reflective>
+              <color>0.0 0.0 0.0 1.0</color>
+            </reflective>
+            <reflectivity>
+              <float>0.0</float>
+            </reflectivity>
+            <transparent>
+              <color>0.0 0.0 0.0 1.0</color>
+            </transparent>
+            <transparency>
+              <float>1.0</float>
+            </transparency>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>0</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="geometry0" name="Part__Feature001">
+      <mesh>
+        <source id="cubenormals-array0">
+          <float_array count="36" id="cubenormals-array0-array">4.38531e-14 -1 -4.451336e-05 4.38531e-14 -1 -4.451336e-05 -4.38531e-14 1 4.451336e-05 -4.38531e-14 1 4.451336e-05 -1 -4.385301e-14 -2.011189e-15 -1 -4.385301e-14 -2.011189e-15 -2.009237e-15 -4.451336e-05 1 -2.009237e-15 -4.451336e-05 1 1 4.385301e-14 2.011189e-15 1 4.385301e-14 2.011189e-15 2.009237e-15 4.451336e-05 -1 2.009237e-15 4.451336e-05 -1</float_array>
+          <technique_common>
+            <accessor count="12" source="#cubenormals-array0-array" stride="3">
+              <param type="float" name="X"/>
+              <param type="float" name="Y"/>
+              <param type="float" name="Z"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="cubeverts-array0">
+          <float_array count="24" id="cubeverts-array0-array">-10 -23.90175 13.51442 10 -23.9033 48.51442 -10 -23.9033 48.51442 10 -23.90175 13.51442 -10 -18.90175 13.51464 -10 -18.9033 48.51464 10 -18.90175 13.51464 10 -18.9033 48.51464</float_array>
+          <technique_common>
+            <accessor count="8" source="#cubeverts-array0-array" stride="3">
+              <param type="float" name="X"/>
+              <param type="float" name="Y"/>
+              <param type="float" name="Z"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="cubeverts-array0-vertices">
+          <input source="#cubeverts-array0" semantic="POSITION"/>
+        </vertices>
+        <triangles count="12" material="materialref">
+          <input source="#cubenormals-array0" semantic="NORMAL" offset="1"/>
+          <input source="#cubeverts-array0-vertices" semantic="VERTEX" offset="0"/>
+          <p>0 0 1 0 2 0 3 1 1 1 0 1 4 2 5 2 6 2 5 3 7 3 6 3 2 4 5 4 4 4 2 5 4 5 0 5 5 6 2 6 1 6 5 7 1 7 7 7 7 8 1 8 6 8 1 9 3 9 6 9 0 10 4 10 3 10 4 11 6 11 3 11</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_materials>
+    <material name="mymaterial" id="material0">
+      <instance_effect url="#effect0"/>
+    </material>
+  </library_materials>
+  <library_visual_scenes>
+    <visual_scene id="myscene">
+      <node name="node0" id="node0">
+        <instance_geometry url="#geometry0">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref" target="#material0"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#myscene"/>
+  </scene>
+</COLLADA>
