@@ -122,7 +122,7 @@ env.add(panda, show_robot=True)
 
 
 ev = [0.01, 0, 0, 0, 0, 0]
-
+panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
 
 def stepper():
     for i in range(1000):

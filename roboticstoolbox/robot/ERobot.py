@@ -1321,75 +1321,17 @@ graph [rankdir=LR];
 
     def jacob0_fast(self, q, end=None, start=None, tool=None):
 
-        # m = len(path)
-
-        # # new_path = [x._fknm for x in path]
-
-        # T = np.empty((4, 4))
-        # fknm.fkine(m, path, q, tool, T)
-
-        # if not include_base:
-        #     return T
-        # else:
-        #     return self.base.A @ T
-
-        # if tool is None:
-        #     tool = SE3()
-
         path, n, etool = self.get_path(end, start, _fknm=True)
 
         if tool is None:
             tool = self._eye_fknm
 
-        # T = self.fkine_fast(q, end=end, start=start) @ tool.A
-        # T = self.fkine_fast(q, end=end, start=start)
         J = np.empty((6, n))
 
-        fknm.jacob0(n, path, q, etool, tool, J)
+        fknm.jacob0(len(path), n, path, q, etool, tool, J)
 
-        # for link in path:
-
-        #     if link.isjoint:
-        #         U = U @ link.A(q[link.jindex], fast=True)
-
-        #         if link == end:
-        #             U = U @ tool.A
-
-        #         Tu = np.linalg.inv(U) @ T
-        #         n = U[:3, 0]
-        #         o = U[:3, 1]
-        #         a = U[:3, 2]
-        #         x = Tu[0, 3]
-        #         y = Tu[1, 3]
-        #         z = Tu[2, 3]
-
-        #         if link.v.axis == 'Rz':
-        #             J[:3, j] = (o * x) - (n * y)
-        #             J[3:, j] = a
-
-        #         elif link.v.axis == 'Ry':
-        #             J[:3, j] = (n * z) - (a * x)
-        #             J[3:, j] = o
-
-        #         elif link.v.axis == 'Rx':
-        #             J[:3, j] = (a * y) - (o * z)
-        #             J[3:, j] = n
-
-        #         elif link.v.axis == 'tx':
-        #             J[:3, j] = n
-        #             J[3:, j] = np.array([0, 0, 0])
-
-        #         elif link.v.axis == 'ty':
-        #             J[:3, j] = o
-        #             J[3:, j] = np.array([0, 0, 0])
-
-        #         elif link.v.axis == 'tz':
-        #             J[:3, j] = a
-        #             J[3:, j] = np.array([0, 0, 0])
-
-        #         j += 1
-        #     else:
-        #         U = U @ link.A(fast=True)
+        # print(np.round(self.jacob0(q), 2))
+        # print(np.round(J, 2))
 
         return J
 
@@ -1476,7 +1418,9 @@ graph [rankdir=LR];
         #         self.fkine_fast(q, end=end, start=start) * tool
 
         if T is None:
-            T = self.fkine_fast(q, end=end, start=start) @ tool.A
+            T = self.fkine_fast(q, end=end, start=start)  # @ tool.A
+
+        # print(T)
 
         # T = T.A
         U = np.eye(4)

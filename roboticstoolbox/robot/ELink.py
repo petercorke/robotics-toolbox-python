@@ -139,12 +139,18 @@ class ELink(Link):
             elif self._v.axis == 'tz':
                 axis = 5
 
+        if self.parent is None:
+            parent = None
+        else:
+            parent = self.parent._fknm
+
         self._fknm = fknm.link_init(
             self.isjoint,
             isflip,
             axis,
             jindex,
-            self._Ts.A)
+            self._Ts.A,
+            parent)
 
     def _update_fknm(self):
         isflip = False
@@ -171,13 +177,19 @@ class ELink(Link):
             elif self._v.axis == 'tz':
                 axis = 5
 
+        if self.parent is None:
+            parent = None
+        else:
+            parent = self.parent._fknm
+
         fknm.link_update(
             self._fknm,
             self.isjoint,
             isflip,
             axis,
             jindex,
-            self._Ts.A)
+            self._Ts.A,
+            parent)
 
     def _init_Ts(self):
         # Number of transforms in the ETS excluding the joint variable

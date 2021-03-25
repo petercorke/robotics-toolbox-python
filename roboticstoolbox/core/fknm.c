@@ -29,6 +29,7 @@
 #include <numpy/arrayobject.h>
 #include <math.h>
 #include "fknm.h"
+#include <stdio.h>
 
 // forward defines
 static PyObject *jacob0(PyObject *self, PyObject *args);
@@ -38,7 +39,7 @@ static PyObject *link_A(PyObject *self, PyObject *args);
 static PyObject *link_update(PyObject *self, PyObject *args);
 static PyObject *compose(PyObject *self, PyObject *args);
 
-void _jacob0(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
+void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
 void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *ret);
 void A(Link *link, npy_float64 *ret, double eta);
 void mult(npy_float64 *A, npy_float64 *B, npy_float64 *C);
@@ -50,6 +51,7 @@ void tx(npy_float64 *data, double eta);
 void ty(npy_float64 *data, double eta);
 void tz(npy_float64 *data, double eta);
 void _eye(npy_float64 *data);
+int _inv(npy_float64 *m, npy_float64 *invOut);
 
 static PyMethodDef fknmMethods[] = {
     // {"rx",
@@ -120,20 +122,21 @@ PyMODINIT_FUNC PyInit_fknm(void)
 static PyObject *jacob0(PyObject *self, PyObject *args)
 {
     npy_float64 *J, *q, *etool, *tool;
-    
+
     Link *link;
     PyArrayObject *py_J, *py_q, *py_tool, *py_etool;
     PyObject *links;
-    int n;
+    int m, n;
 
     if (!PyArg_ParseTuple(
-        args, "iOO!O!O!O!",
-        &n,
-        &links,
-        &PyArray_Type, &py_q,
-        &PyArray_Type, &py_etool,
-        &PyArray_Type, &py_tool,
-        &PyArray_Type, &py_J))
+            args, "iiOO!O!O!O!",
+            &m,
+            &n,
+            &links,
+            &PyArray_Type, &py_q,
+            &PyArray_Type, &py_etool,
+            &PyArray_Type, &py_tool,
+            &PyArray_Type, &py_J))
     {
         return NULL;
     }
@@ -143,71 +146,131 @@ static PyObject *jacob0(PyObject *self, PyObject *args)
     tool = (npy_float64 *)PyArray_DATA(py_tool);
     etool = (npy_float64 *)PyArray_DATA(py_etool);
 
-    _jacob0(links, n, q, etool, tool, J);
+    _jacob0(links, m, n, q, etool, tool, J);
 
     Py_RETURN_NONE;
 }
 
-void _jacob0(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
+void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
 {
     Link *link;
     npy_float64 *T = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    int j = 0;
 
     _eye(U);
-    _fkine(links, n, q, etool, T);
+    _fkine(links, m, q, etool, T);
 
     PyObject *iter_links = PyObject_GetIter(links);
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < m; i++)
+    {
         if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
         {
             return NULL;
         }
 
-        if (link->isjoint) {
+        if (link->isjoint)
+        {
             A(link, ret, q[link->jindex]);
             mult(U, ret, temp);
             copy(temp, U);
 
-            if (i == n - 1) {
+            if (i == m - 1)
+            {
                 mult(U, etool, temp);
                 copy(temp, U);
                 mult(U, tool, temp);
                 copy(temp, U);
             }
 
-        } else {
+            _inv(U, invU);
+            mult(invU, T, temp);
+
+            if (link->axis == 0)
+            {
+                J[0 * n + j] = U[0 * 4 + 2] * temp[1 * 4 + 3] - U[0 * 4 + 1] * temp[2 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 2] * temp[1 * 4 + 3] - U[1 * 4 + 1] * temp[2 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 2] * temp[1 * 4 + 3] - U[2 * 4 + 1] * temp[2 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 2];
+                J[4 * n + j] = U[1 * 4 + 2];
+                J[5 * n + j] = U[2 * 4 + 2];
+            }
+            else if (link->axis == 1)
+            {
+                J[0 * n + j] = U[0 * 4 + 0] * temp[2 * 4 + 3] - U[0 * 4 + 2] * temp[0 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 0] * temp[2 * 4 + 3] - U[1 * 4 + 2] * temp[0 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 0] * temp[2 * 4 + 3] - U[2 * 4 + 2] * temp[0 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 1];
+                J[4 * n + j] = U[1 * 4 + 1];
+                J[5 * n + j] = U[2 * 4 + 1];
+            }
+            else if (link->axis == 2)
+            {
+                J[0 * n + j] = U[0 * 4 + 1] * temp[0 * 4 + 3] - U[0 * 4 + 0] * temp[1 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 1] * temp[0 * 4 + 3] - U[1 * 4 + 0] * temp[1 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 1] * temp[0 * 4 + 3] - U[2 * 4 + 0] * temp[1 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 2];
+                J[4 * n + j] = U[1 * 4 + 2];
+                J[5 * n + j] = U[2 * 4 + 2];
+            }
+            else if (link->axis == 3)
+            {
+                J[0 * n + j] = U[0 * 4 + 0];
+                J[1 * n + j] = U[1 * 4 + 0];
+                J[2 * n + j] = U[2 * 4 + 0];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (link->axis == 4)
+            {
+                J[0 * n + j] = U[0 * 4 + 1];
+                J[1 * n + j] = U[1 * 4 + 1];
+                J[2 * n + j] = U[2 * 4 + 1];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (link->axis == 5)
+            {
+                J[0 * n + j] = U[0 * 4 + 2];
+                J[1 * n + j] = U[1 * 4 + 2];
+                J[2 * n + j] = U[2 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            j++;
+        }
+        else
+        {
             A(link, ret, q[link->jindex]);
             mult(U, ret, temp);
             copy(temp, U);
         }
     }
-
-
 }
-
-
-
 
 static PyObject *fkine(PyObject *self, PyObject *args)
 {
     npy_float64 *ret, *q, *tool;
-    
+
     Link *link;
     PyArrayObject *py_ret, *py_q, *py_tool;
     PyObject *links;
     int n;
 
     if (!PyArg_ParseTuple(
-        args, "iOO!O!O!",
-        &n,
-        &links,
-        &PyArray_Type, &py_q,
-        &PyArray_Type, &py_tool,
-        &PyArray_Type, &py_ret))
+            args, "iOO!O!O!",
+            &n,
+            &links,
+            &PyArray_Type, &py_q,
+            &PyArray_Type, &py_tool,
+            &PyArray_Type, &py_ret))
     {
         return NULL;
     }
@@ -223,23 +286,34 @@ static PyObject *fkine(PyObject *self, PyObject *args)
 
 static PyObject *link_init(PyObject *self, PyObject *args)
 {
-
-    Link *link;
+    Link *link, *parent;
     int jointtype;
-    PyObject *ret;
+    PyObject *ret, *py_parent;
 
     link = (Link *)PyMem_RawMalloc(sizeof(Link));
 
-    if (!PyArg_ParseTuple(args, "iiiiO!",
-        &link->isjoint,
-        &link->isflip,
-        &jointtype,
-        &link->jindex,
-        &PyArray_Type, &link->A))
+    if (!PyArg_ParseTuple(args, "iiiiO!O",
+                          &link->isjoint,
+                          &link->isflip,
+                          &jointtype,
+                          &link->jindex,
+                          &PyArray_Type, &link->A,
+                          &py_parent))
     {
         return NULL;
     }
-    
+
+    if (py_parent == Py_None)
+    {
+        parent = NULL;
+    }
+    else if (!(parent = (Link *)PyCapsule_GetPointer(py_parent, "Link")))
+    {
+        return NULL;
+    }
+
+    link->axis = jointtype;
+    link->parent = parent;
 
     if (jointtype == 0)
     {
@@ -272,20 +346,30 @@ static PyObject *link_init(PyObject *self, PyObject *args)
 
 static PyObject *link_update(PyObject *self, PyObject *args)
 {
-    Link *link;
+    Link *link, *parent;
     int isjoint, isflip;
     int jointtype;
     int jindex;
-    PyObject *lo;
+    PyObject *lo, *py_parent;
     PyArrayObject *A;
 
-    if (!PyArg_ParseTuple(args, "OiiiiO!",
-        &lo,
-        &isjoint,
-        &isflip,
-        &jointtype,
-        &jindex,
-        &PyArray_Type, &A))
+    if (!PyArg_ParseTuple(args, "OiiiiO!O",
+                          &lo,
+                          &isjoint,
+                          &isflip,
+                          &jointtype,
+                          &jindex,
+                          &PyArray_Type, &A,
+                          &py_parent))
+    {
+        return NULL;
+    }
+
+    if (py_parent == Py_None)
+    {
+        parent = NULL;
+    }
+    else if (!(parent = (Link *)PyCapsule_GetPointer(py_parent, "Link")))
     {
         return NULL;
     }
@@ -324,6 +408,8 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     link->isflip = isflip;
     link->A = A;
     link->jindex = jindex;
+    link->axis = jointtype;
+    link->parent = parent;
 
     Py_RETURN_NONE;
 }
@@ -358,10 +444,10 @@ static PyObject *compose(PyObject *self, PyObject *args)
     PyArrayObject *py_A, *py_B, *py_C;
 
     if (!PyArg_ParseTuple(
-        args, "O!O!O!",
-        &PyArray_Type, &py_A,
-        &PyArray_Type, &py_B,
-        &PyArray_Type, &py_C))
+            args, "O!O!O!",
+            &PyArray_Type, &py_A,
+            &PyArray_Type, &py_B,
+            &PyArray_Type, &py_C))
     {
         return NULL;
     }
@@ -371,6 +457,7 @@ static PyObject *compose(PyObject *self, PyObject *args)
     C = (npy_float64 *)PyArray_DATA(py_C);
 
     mult(A, B, C);
+    // _inv(A, C);
 
     Py_RETURN_NONE;
 }
@@ -393,7 +480,8 @@ void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *tool, npy_float
     }
     A(link, current, q[link->jindex]);
 
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i < n; i++)
+    {
         if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
         {
             return NULL;
@@ -607,7 +695,7 @@ void tz(npy_float64 *data, double eta)
     data[15] = 1;
 }
 
-void _eye(npy_float64 *data) 
+void _eye(npy_float64 *data)
 {
     data[0] = 1;
     data[1] = 0;
@@ -627,66 +715,133 @@ void _eye(npy_float64 *data)
     data[15] = 1;
 }
 
-/**
- * Return the link rotation matrix and translation vector.
- *
- * @param l Link object for which R and p* are required.
- * @param th Joint angle, overrides value in link object
- * @param d Link extension, overrides value in link object
- * @param type Kinematic convention.
- */
-// static void
-// rot_mat(
-//     Link *l,
-//     double th,
-//     double d,
-//     DHType type)
-// {
-//     double st, ct, sa, ca;
+int _inv(npy_float64 *m, npy_float64 *invOut)
+{
+    npy_float64 *inv = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    double det;
+    int i;
 
-// #ifdef sun
-//     sincos(th, &st, &ct);
-//     sincos(l->alpha, &sa, &ca);
-// #else
-//     st = sin(th);
-//     ct = cos(th);
-//     sa = sin(l->alpha);
-//     ca = cos(l->alpha);
-// #endif
+    inv[0] = m[5] * m[10] * m[15] -
+             m[5] * m[11] * m[14] -
+             m[9] * m[6] * m[15] +
+             m[9] * m[7] * m[14] +
+             m[13] * m[6] * m[11] -
+             m[13] * m[7] * m[10];
 
-//     switch (type)
-//     {
-//     case STANDARD:
-//         l->R.n.x = ct;
-//         l->R.o.x = -ca * st;
-//         l->R.a.x = sa * st;
-//         l->R.n.y = st;
-//         l->R.o.y = ca * ct;
-//         l->R.a.y = -sa * ct;
-//         l->R.n.z = 0.0;
-//         l->R.o.z = sa;
-//         l->R.a.z = ca;
+    inv[4] = -m[4] * m[10] * m[15] +
+             m[4] * m[11] * m[14] +
+             m[8] * m[6] * m[15] -
+             m[8] * m[7] * m[14] -
+             m[12] * m[6] * m[11] +
+             m[12] * m[7] * m[10];
 
-//         l->r.x = l->A;
-//         l->r.y = d * sa;
-//         l->r.z = d * ca;
-//         break;
-//     case MODIFIED:
-//         l->R.n.x = ct;
-//         l->R.o.x = -st;
-//         l->R.a.x = 0.0;
-//         l->R.n.y = st * ca;
-//         l->R.o.y = ca * ct;
-//         l->R.a.y = -sa;
-//         l->R.n.z = st * sa;
-//         l->R.o.z = ct * sa;
-//         l->R.a.z = ca;
+    inv[8] = m[4] * m[9] * m[15] -
+             m[4] * m[11] * m[13] -
+             m[8] * m[5] * m[15] +
+             m[8] * m[7] * m[13] +
+             m[12] * m[5] * m[11] -
+             m[12] * m[7] * m[9];
 
-//         l->r.x = l->A;
-//         l->r.y = -d * sa;
-//         l->r.z = d * ca;
-//         break;
-//     default:
-//         perror("Invalid DH type (expecting 0 = DH or 1 = MDH)");
-//     }
-// }
+    inv[12] = -m[4] * m[9] * m[14] +
+              m[4] * m[10] * m[13] +
+              m[8] * m[5] * m[14] -
+              m[8] * m[6] * m[13] -
+              m[12] * m[5] * m[10] +
+              m[12] * m[6] * m[9];
+
+    inv[1] = -m[1] * m[10] * m[15] +
+             m[1] * m[11] * m[14] +
+             m[9] * m[2] * m[15] -
+             m[9] * m[3] * m[14] -
+             m[13] * m[2] * m[11] +
+             m[13] * m[3] * m[10];
+
+    inv[5] = m[0] * m[10] * m[15] -
+             m[0] * m[11] * m[14] -
+             m[8] * m[2] * m[15] +
+             m[8] * m[3] * m[14] +
+             m[12] * m[2] * m[11] -
+             m[12] * m[3] * m[10];
+
+    inv[9] = -m[0] * m[9] * m[15] +
+             m[0] * m[11] * m[13] +
+             m[8] * m[1] * m[15] -
+             m[8] * m[3] * m[13] -
+             m[12] * m[1] * m[11] +
+             m[12] * m[3] * m[9];
+
+    inv[13] = m[0] * m[9] * m[14] -
+              m[0] * m[10] * m[13] -
+              m[8] * m[1] * m[14] +
+              m[8] * m[2] * m[13] +
+              m[12] * m[1] * m[10] -
+              m[12] * m[2] * m[9];
+
+    inv[2] = m[1] * m[6] * m[15] -
+             m[1] * m[7] * m[14] -
+             m[5] * m[2] * m[15] +
+             m[5] * m[3] * m[14] +
+             m[13] * m[2] * m[7] -
+             m[13] * m[3] * m[6];
+
+    inv[6] = -m[0] * m[6] * m[15] +
+             m[0] * m[7] * m[14] +
+             m[4] * m[2] * m[15] -
+             m[4] * m[3] * m[14] -
+             m[12] * m[2] * m[7] +
+             m[12] * m[3] * m[6];
+
+    inv[10] = m[0] * m[5] * m[15] -
+              m[0] * m[7] * m[13] -
+              m[4] * m[1] * m[15] +
+              m[4] * m[3] * m[13] +
+              m[12] * m[1] * m[7] -
+              m[12] * m[3] * m[5];
+
+    inv[14] = -m[0] * m[5] * m[14] +
+              m[0] * m[6] * m[13] +
+              m[4] * m[1] * m[14] -
+              m[4] * m[2] * m[13] -
+              m[12] * m[1] * m[6] +
+              m[12] * m[2] * m[5];
+
+    inv[3] = -m[1] * m[6] * m[11] +
+             m[1] * m[7] * m[10] +
+             m[5] * m[2] * m[11] -
+             m[5] * m[3] * m[10] -
+             m[9] * m[2] * m[7] +
+             m[9] * m[3] * m[6];
+
+    inv[7] = m[0] * m[6] * m[11] -
+             m[0] * m[7] * m[10] -
+             m[4] * m[2] * m[11] +
+             m[4] * m[3] * m[10] +
+             m[8] * m[2] * m[7] -
+             m[8] * m[3] * m[6];
+
+    inv[11] = -m[0] * m[5] * m[11] +
+              m[0] * m[7] * m[9] +
+              m[4] * m[1] * m[11] -
+              m[4] * m[3] * m[9] -
+              m[8] * m[1] * m[7] +
+              m[8] * m[3] * m[5];
+
+    inv[15] = m[0] * m[5] * m[10] -
+              m[0] * m[6] * m[9] -
+              m[4] * m[1] * m[10] +
+              m[4] * m[2] * m[9] +
+              m[8] * m[1] * m[6] -
+              m[8] * m[2] * m[5];
+
+    det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+    if (det == 0)
+        return 0;
+
+    det = 1.0 / det;
+
+    for (i = 0; i < 16; i++)
+        invOut[i] = inv[i] * det;
+
+    return 1;
+}

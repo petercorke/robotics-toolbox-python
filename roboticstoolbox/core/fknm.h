@@ -42,7 +42,10 @@
 // } Sigma;
 
 /* A robot link structure */
-typedef struct _link
+
+typedef struct Link Link;
+
+struct Link
 {
     /**********************************************************
      *************** kinematic parameters *********************
@@ -50,9 +53,25 @@ typedef struct _link
     int isjoint;
     int isflip;
     int jindex;
+    int axis;
     PyArrayObject *A; /* link static transform */
     void (*op)(npy_float64 *data, double eta);
-} Link;
+    Link *parent;
+};
+
+// typedef struct _link
+// {
+//     /**********************************************************
+//      *************** kinematic parameters *********************
+//      **********************************************************/
+//     int isjoint;
+//     int isflip;
+//     int jindex;
+//     int axis;
+//     PyArrayObject *A; /* link static transform */
+//     void (*op)(npy_float64 *data, double eta);
+//     // Link *parent;
+// } Link;
 
 // /* A robot */
 // typedef struct _robot
