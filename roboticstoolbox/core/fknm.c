@@ -31,14 +31,16 @@
 #include "fknm.h"
 
 // forward defines
-// static PyObject *init(PyObject *self, PyObject *args);
-// static PyObject *frne(PyObject *self, PyObject *args);
-// static PyObject *delete (PyObject *self, PyObject *args);
-// static void rot_mat(Link *l, double th, double d, DHType type);
+static PyObject *jacob0(PyObject *self, PyObject *args);
+static PyObject *fkine(PyObject *self, PyObject *args);
 static PyObject *link_init(PyObject *self, PyObject *args);
 static PyObject *link_A(PyObject *self, PyObject *args);
 static PyObject *link_update(PyObject *self, PyObject *args);
+static PyObject *compose(PyObject *self, PyObject *args);
 
+void _jacob0(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
+void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *ret);
+void A(Link *link, npy_float64 *ret, double eta);
 void mult(npy_float64 *A, npy_float64 *B, npy_float64 *C);
 void copy(npy_float64 *A, npy_float64 *B);
 void rx(npy_float64 *data, double eta);
@@ -47,6 +49,7 @@ void rz(npy_float64 *data, double eta);
 void tx(npy_float64 *data, double eta);
 void ty(npy_float64 *data, double eta);
 void tz(npy_float64 *data, double eta);
+void _eye(npy_float64 *data);
 
 static PyMethodDef fknmMethods[] = {
     // {"rx",
@@ -85,6 +88,18 @@ static PyMethodDef fknmMethods[] = {
      (PyCFunction)link_update,
      METH_VARARGS,
      "Link"},
+    {"fkine",
+     (PyCFunction)fkine,
+     METH_VARARGS,
+     "Link"},
+    {"compose",
+     (PyCFunction)compose,
+     METH_VARARGS,
+     "Link"},
+    {"jacob0",
+     (PyCFunction)jacob0,
+     METH_VARARGS,
+     "Link"},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
@@ -102,6 +117,110 @@ PyMODINIT_FUNC PyInit_fknm(void)
     return PyModule_Create(&fknmmodule);
 }
 
+static PyObject *jacob0(PyObject *self, PyObject *args)
+{
+    npy_float64 *J, *q, *etool, *tool;
+    
+    Link *link;
+    PyArrayObject *py_J, *py_q, *py_tool, *py_etool;
+    PyObject *links;
+    int n;
+
+    if (!PyArg_ParseTuple(
+        args, "iOO!O!O!O!",
+        &n,
+        &links,
+        &PyArray_Type, &py_q,
+        &PyArray_Type, &py_etool,
+        &PyArray_Type, &py_tool,
+        &PyArray_Type, &py_J))
+    {
+        return NULL;
+    }
+
+    q = (npy_float64 *)PyArray_DATA(py_q);
+    J = (npy_float64 *)PyArray_DATA(py_J);
+    tool = (npy_float64 *)PyArray_DATA(py_tool);
+    etool = (npy_float64 *)PyArray_DATA(py_etool);
+
+    _jacob0(links, n, q, etool, tool, J);
+
+    Py_RETURN_NONE;
+}
+
+void _jacob0(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
+{
+    Link *link;
+    npy_float64 *T = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+
+    _eye(U);
+    _fkine(links, n, q, etool, T);
+
+    PyObject *iter_links = PyObject_GetIter(links);
+
+    for (int i = 0; i < n; i++) {
+        if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
+        {
+            return NULL;
+        }
+
+        if (link->isjoint) {
+            A(link, ret, q[link->jindex]);
+            mult(U, ret, temp);
+            copy(temp, U);
+
+            if (i == n - 1) {
+                mult(U, etool, temp);
+                copy(temp, U);
+                mult(U, tool, temp);
+                copy(temp, U);
+            }
+
+        } else {
+            A(link, ret, q[link->jindex]);
+            mult(U, ret, temp);
+            copy(temp, U);
+        }
+    }
+
+
+}
+
+
+
+
+static PyObject *fkine(PyObject *self, PyObject *args)
+{
+    npy_float64 *ret, *q, *tool;
+    
+    Link *link;
+    PyArrayObject *py_ret, *py_q, *py_tool;
+    PyObject *links;
+    int n;
+
+    if (!PyArg_ParseTuple(
+        args, "iOO!O!O!",
+        &n,
+        &links,
+        &PyArray_Type, &py_q,
+        &PyArray_Type, &py_tool,
+        &PyArray_Type, &py_ret))
+    {
+        return NULL;
+    }
+
+    q = (npy_float64 *)PyArray_DATA(py_q);
+    ret = (npy_float64 *)PyArray_DATA(py_ret);
+    tool = (npy_float64 *)PyArray_DATA(py_tool);
+
+    _fkine(links, n, q, tool, ret);
+
+    Py_RETURN_NONE;
+}
+
 static PyObject *link_init(PyObject *self, PyObject *args)
 {
 
@@ -111,10 +230,16 @@ static PyObject *link_init(PyObject *self, PyObject *args)
 
     link = (Link *)PyMem_RawMalloc(sizeof(Link));
 
-    if (!PyArg_ParseTuple(args, "iiiO!", &link->isjoint, &link->isflip, &jointtype, &PyArray_Type, &link->A))
+    if (!PyArg_ParseTuple(args, "iiiiO!",
+        &link->isjoint,
+        &link->isflip,
+        &jointtype,
+        &link->jindex,
+        &PyArray_Type, &link->A))
     {
         return NULL;
     }
+    
 
     if (jointtype == 0)
     {
@@ -150,10 +275,17 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     Link *link;
     int isjoint, isflip;
     int jointtype;
+    int jindex;
     PyObject *lo;
     PyArrayObject *A;
 
-    if (!PyArg_ParseTuple(args, "OiiiO!", &lo, &isjoint, &isflip, &jointtype, &PyArray_Type, &A))
+    if (!PyArg_ParseTuple(args, "OiiiiO!",
+        &lo,
+        &isjoint,
+        &isflip,
+        &jointtype,
+        &jindex,
+        &PyArray_Type, &A))
     {
         return NULL;
     }
@@ -191,6 +323,7 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     link->isjoint = isjoint;
     link->isflip = isflip;
     link->A = A;
+    link->jindex = jindex;
 
     Py_RETURN_NONE;
 }
@@ -200,7 +333,7 @@ static PyObject *link_A(PyObject *self, PyObject *args)
     Link *link;
     PyArrayObject *py_ret;
     PyObject *lo;
-    npy_float64 *ret, *A, *v;
+    npy_float64 *ret;
     double eta;
 
     if (!PyArg_ParseTuple(args, "dOO!", &eta, &lo, &PyArray_Type, &py_ret))
@@ -214,12 +347,75 @@ static PyObject *link_A(PyObject *self, PyObject *args)
     }
 
     ret = (npy_float64 *)PyArray_DATA(py_ret);
+    A(link, ret, eta);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *compose(PyObject *self, PyObject *args)
+{
+    npy_float64 *A, *B, *C;
+    PyArrayObject *py_A, *py_B, *py_C;
+
+    if (!PyArg_ParseTuple(
+        args, "O!O!O!",
+        &PyArray_Type, &py_A,
+        &PyArray_Type, &py_B,
+        &PyArray_Type, &py_C))
+    {
+        return NULL;
+    }
+
+    A = (npy_float64 *)PyArray_DATA(py_A);
+    B = (npy_float64 *)PyArray_DATA(py_B);
+    C = (npy_float64 *)PyArray_DATA(py_C);
+
+    mult(A, B, C);
+
+    Py_RETURN_NONE;
+}
+
+void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *ret)
+{
+    npy_float64 *temp, *current;
+    Link *link;
+
+    temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    current = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+
+    PyObject *iter_links = PyObject_GetIter(links);
+
+    // copy(tool, ret);
+
+    if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
+    {
+        return NULL;
+    }
+    A(link, current, q[link->jindex]);
+
+    for (int i = 1; i < n; i++) {
+        if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
+        {
+            return NULL;
+        }
+
+        A(link, ret, q[link->jindex]);
+        mult(current, ret, temp);
+        copy(temp, current);
+    }
+
+    mult(current, tool, ret);
+}
+
+void A(Link *link, npy_float64 *ret, double eta)
+{
+    npy_float64 *A, *v;
     A = (npy_float64 *)PyArray_DATA(link->A);
 
     if (!link->isjoint)
     {
         copy(A, ret);
-        Py_RETURN_NONE;
+        return;
     }
 
     if (link->isflip)
@@ -233,8 +429,6 @@ static PyObject *link_A(PyObject *self, PyObject *args)
 
     // Multiply ret = A * v
     mult(A, v, ret);
-
-    Py_RETURN_NONE;
 }
 
 void copy(npy_float64 *A, npy_float64 *B)
@@ -407,6 +601,26 @@ void tz(npy_float64 *data, double eta)
     data[9] = 0;
     data[10] = 1;
     data[11] = eta;
+    data[12] = 0;
+    data[13] = 0;
+    data[14] = 0;
+    data[15] = 1;
+}
+
+void _eye(npy_float64 *data) 
+{
+    data[0] = 1;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
+    data[4] = 0;
+    data[5] = 1;
+    data[6] = 0;
+    data[7] = 0;
+    data[8] = 0;
+    data[9] = 0;
+    data[10] = 1;
+    data[11] = 0;
     data[12] = 0;
     data[13] = 0;
     data[14] = 0;

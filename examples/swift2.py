@@ -126,7 +126,7 @@ ev = [0.01, 0, 0, 0, 0, 0]
 
 def stepper():
     for i in range(1000):
-        panda.qd = np.linalg.pinv(panda.jacob0(panda.q)) @ ev
+        panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
         env.step(0.004)
 
 
@@ -135,5 +135,8 @@ env.step(0.01)
 # stepper()
 
 cProfile.run('stepper()')
+
+print(panda.fkine(panda.q))
+print(panda.fkine_fast(panda.q))
 
 # env.hold()

@@ -49,6 +49,7 @@ typedef struct _link
      **********************************************************/
     int isjoint;
     int isflip;
+    int jindex;
     PyArrayObject *A; /* link static transform */
     void (*op)(npy_float64 *data, double eta);
 } Link;

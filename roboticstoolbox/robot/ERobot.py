@@ -31,6 +31,7 @@ from spatialmath import SpatialAcceleration, SpatialVelocity, \
     SpatialInertia, SpatialForce
 
 import numba
+import fknm
 
 
 @numba.njit
@@ -274,6 +275,10 @@ class ERobot(Robot):
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
 
+        # Cached paths through links
+        # TODO Add listners on setters to reset cache
+        self._reset_cache()
+
         # Set up qlim
         qlim = np.zeros((2, self.n))
         j = 0
@@ -290,6 +295,14 @@ class ERobot(Robot):
                 self._valid_qlim = True
 
         super().__init__(orlinks, **kwargs)
+
+    def _reset_cache(self):
+        self._path_cache = {}
+        self._path_cache_fknm = {}
+        self._cache_end = None
+        self._cache_start = None
+        self._cache_end_tool = None
+        self._eye_fknm = np.eye(4)
 
     def dfs_links(self, start, func=None):
         """
@@ -977,63 +990,23 @@ graph [rankdir=LR];
 
         return T
 
-    def fkine_fast(self, q, end=None, start=None, include_base=False):
-        # q = getmatrix(q, self.n)
+    def fkine_fast(self, q, end=None, start=None, tool=None, include_base=False):
+        path, _, etool = self.get_path(end, start, _fknm=True)
 
-        end, start, etool = self._get_limit_links(end, start)
+        m = len(path)
 
-        if etool is not None:
-            tool = etool.A
+        T = np.empty((4, 4))
+        fknm.fkine(m, path, q, etool, T)
+
+        if tool is not None:
+            T2 = np.empty((4, 4))
+            fknm.compose(T, tool, T2)
+            T = T2
+
+        if not include_base:
+            return T
         else:
-            tool = np.eye()
-
-        links = []
-
-        links.append(end._fknm)
-        link = end
-        # T = link.A(q[link.jindex], fast=True) @ tool
-
-        while True:
-            link = link.parent
-
-            links.append(link._fknm)
-
-            # T = link.A(q[link.jindex], fast=True) @ T
-
-            if link is start:
-                break
-
-        # print(links)
-
-        # T = SE3.Empty()
-        # for k, qk in enumerate(q):
-
-        #     link = end  # start with last link
-        #     # add tool if provided
-        #     if tool is None:
-        #         Tk = link.A(qk[link.jindex], fast=True)
-        #     else:
-        #         Tk = link.A(qk[link.jindex], fast=True) @ tool
-
-        #     # add remaining links, back toward the base
-        #     while True:
-        #         link = link.parent
-
-        #         if link is None:
-        #             break
-
-        #         Tk = link.A(qk[link.jindex], fast=True) @ Tk
-
-        #         if link is start:
-        #             break
-
-        #     # add base transform if it is set
-        #     if self.base is not None and start == self.base_link:
-        #         Tk = self.base.A @ Tk
-
-        #     T.append(SE3(Tk))
-        T = SE3()
-        return T
+            return self.base.A @ T
 
     def fkine_all(self, q):
         '''
@@ -1177,7 +1150,7 @@ graph [rankdir=LR];
 
     #     return J
 
-    def get_path(self, end=None, start=None):
+    def get_path(self, end=None, start=None, _fknm=False):
         """
         Find a path from start to end. The end must come after
         the start (ie end must be further away from the base link
@@ -1197,7 +1170,20 @@ graph [rankdir=LR];
         path = []
         n = 0
 
-        end, start, _ = self._get_limit_links(end, start)
+        end, start, tool = self._get_limit_links(end, start)
+
+        # This is way faster than doing if x in y method
+        try:
+            if _fknm:
+                return self._path_cache_fknm[start.name][end.name]
+            else:
+                return self._path_cache[start.name][end.name]
+        except KeyError:
+            pass
+
+        if start.name not in self._path_cache:
+            self._path_cache[start.name] = {}
+            self._path_cache_fknm[start.name] = {}
 
         link = end
 
@@ -1216,8 +1202,18 @@ graph [rankdir=LR];
                 n += 1
 
         path.reverse()
+        path_fknm = [x._fknm for x in path]
 
-        return path, n
+        if tool is None:
+            tool = SE3()
+
+        self._path_cache[start.name][end.name] = (path, n, tool)
+        self._path_cache_fknm[start.name][end.name] = (path_fknm, n, tool.A)
+
+        if _fknm:
+            return path_fknm, n, tool.A
+        else:
+            return path, n, tool
 
     def _get_limit_links(self, end=None, start=None):
         """
@@ -1237,6 +1233,10 @@ graph [rankdir=LR];
         Helper method to find or validate an end-effector and base link.
         """
 
+        # Try cache
+        if self._cache_end is not None:
+            return self._cache_end, self._cache_start, self._cache_end_tool
+
         tool = None
         if end is None:
 
@@ -1254,6 +1254,10 @@ graph [rankdir=LR];
             else:
                 # if more than one EE, user must choose
                 raise ValueError('Must specify which end-effector')
+
+            # Cache result
+            self._cache_end = end
+            self._cache_end_tool = tool
         else:
 
             # Check if end corresponds to gripper
@@ -1267,6 +1271,8 @@ graph [rankdir=LR];
 
         if start is None:
             start = self.base_link
+            # Cache result
+            self._cache_start = start
         else:
             # start effector is specified
             start = self._getlink(start)
@@ -1312,6 +1318,80 @@ graph [rankdir=LR];
                 raise ValueError('link not in robot links')
         else:
             raise TypeError('unknown argument')
+
+    def jacob0_fast(self, q, end=None, start=None, tool=None):
+
+        # m = len(path)
+
+        # # new_path = [x._fknm for x in path]
+
+        # T = np.empty((4, 4))
+        # fknm.fkine(m, path, q, tool, T)
+
+        # if not include_base:
+        #     return T
+        # else:
+        #     return self.base.A @ T
+
+        # if tool is None:
+        #     tool = SE3()
+
+        path, n, etool = self.get_path(end, start, _fknm=True)
+
+        if tool is None:
+            tool = self._eye_fknm
+
+        # T = self.fkine_fast(q, end=end, start=start) @ tool.A
+        # T = self.fkine_fast(q, end=end, start=start)
+        J = np.empty((6, n))
+
+        fknm.jacob0(n, path, q, etool, tool, J)
+
+        # for link in path:
+
+        #     if link.isjoint:
+        #         U = U @ link.A(q[link.jindex], fast=True)
+
+        #         if link == end:
+        #             U = U @ tool.A
+
+        #         Tu = np.linalg.inv(U) @ T
+        #         n = U[:3, 0]
+        #         o = U[:3, 1]
+        #         a = U[:3, 2]
+        #         x = Tu[0, 3]
+        #         y = Tu[1, 3]
+        #         z = Tu[2, 3]
+
+        #         if link.v.axis == 'Rz':
+        #             J[:3, j] = (o * x) - (n * y)
+        #             J[3:, j] = a
+
+        #         elif link.v.axis == 'Ry':
+        #             J[:3, j] = (n * z) - (a * x)
+        #             J[3:, j] = o
+
+        #         elif link.v.axis == 'Rx':
+        #             J[:3, j] = (a * y) - (o * z)
+        #             J[3:, j] = n
+
+        #         elif link.v.axis == 'tx':
+        #             J[:3, j] = n
+        #             J[3:, j] = np.array([0, 0, 0])
+
+        #         elif link.v.axis == 'ty':
+        #             J[:3, j] = o
+        #             J[3:, j] = np.array([0, 0, 0])
+
+        #         elif link.v.axis == 'tz':
+        #             J[:3, j] = a
+        #             J[3:, j] = np.array([0, 0, 0])
+
+        #         j += 1
+        #     else:
+        #         U = U @ link.A(fast=True)
+
+        return J
 
     def jacob0(self, q, end=None, start=None, tool=None, T=None):
         r"""
@@ -1387,14 +1467,18 @@ graph [rankdir=LR];
         if tool is None:
             tool = SE3()
 
-        path, n = self.get_path(end, start)
+        path, n, _ = self.get_path(end, start)
 
         q = getvector(q, self.n)
 
+        # if T is None:
+        #     T = self.base.inv() * \
+        #         self.fkine_fast(q, end=end, start=start) * tool
+
         if T is None:
-            T = self.base.inv() * \
-                self.fkine_fast(q, end=end, start=start) * tool
-        T = T.A
+            T = self.fkine_fast(q, end=end, start=start) @ tool.A
+
+        # T = T.A
         U = np.eye(4)
         j = 0
         J = np.zeros((6, n))
@@ -1515,7 +1599,7 @@ graph [rankdir=LR];
             z = a[0] * b[1] - a[1] * b[0]
             return np.array([x, y, z])
 
-        _, nl = self.get_path(end, start)
+        _, nl, _ = self.get_path(end, start)
 
         J = self.jacob0(q, end=end, start=start)
         H = self.hessian0(q, J, end, start)
@@ -1684,7 +1768,7 @@ graph [rankdir=LR];
         """
 
         end, start, _ = self._get_limit_links(end, start)
-        path, n = self.get_path(end, start)
+        path, n, _ = self.get_path(end, start)
 
         def cross(a, b):
             x = a[1] * b[2] - a[2] * b[1]
@@ -1739,7 +1823,7 @@ graph [rankdir=LR];
         """
 
         end, start, _ = self._get_limit_links(end, start)
-        path, n = self.get_path(end, start)
+        path, n, _ = self.get_path(end, start)
 
         if axes == 'all':
             axes = [True, True, True, True, True, True]
@@ -1961,7 +2045,7 @@ graph [rankdir=LR];
         if end is None:
             end = self.ee_link
 
-        links, n = self.get_path(start=start, end=end)
+        links, n, _ = self.get_path(start=start, end=end)
 
         if q is None:
             q = np.copy(self.q)

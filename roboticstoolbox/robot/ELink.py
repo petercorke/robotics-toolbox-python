@@ -117,9 +117,14 @@ class ELink(Link):
     def _init_fknm(self):
         isflip = False
         axis = 0
+        jindex = 0
 
         if self.isjoint:
             isflip = self._v.isflip
+            jindex = self.jindex
+
+            if jindex is None:
+                jindex = 0
 
             if self._v.axis == 'Rx':
                 axis = 0
@@ -138,14 +143,20 @@ class ELink(Link):
             self.isjoint,
             isflip,
             axis,
+            jindex,
             self._Ts.A)
 
     def _update_fknm(self):
         isflip = False
         axis = 0
+        jindex = 0
 
         if self.isjoint:
             isflip = self._v.isflip
+            jindex = self.jindex
+
+            if jindex is None:
+                jindex = 0
 
             if self._v.axis == 'Rx':
                 axis = 0
@@ -165,6 +176,7 @@ class ELink(Link):
             self.isjoint,
             isflip,
             axis,
+            jindex,
             self._Ts.A)
 
     def _init_Ts(self):
@@ -312,6 +324,7 @@ class ELink(Link):
     @jindex.setter
     def jindex(self, j):
         self._jindex = j
+        self._update_fknm()
 
     # def isrevolute(self):
     #     """
