@@ -142,7 +142,7 @@ def update_grid_numbers(
     # Initial conditions
     padding = 0.25  # Padding to not draw numbers on top of lines.
     camera_axes = scene.camera.axis
-    z_visible = not (grid_mode == GridType.XY2D or grid_mode == GridType.XY3D)
+    z_visible = grid_mode == GridType.XYZ
 
     # Locate center of the axes
     x_origin, y_origin, z_origin = focal_point[0], focal_point[1], \
@@ -183,12 +183,15 @@ def update_grid_numbers(
                                     (sign(camera_axes.z) * -1)
                                     * (num_squares / 2)) * scale, 2)
 
-    min_x_coord = min_x_coord + sign(camera_axes.x) * (scale * (num_squares / 2))
-    max_x_coord = max_x_coord + sign(camera_axes.x) * (scale * (num_squares / 2))
-    min_y_coord = min_y_coord + sign(camera_axes.y) * (scale * (num_squares / 2))
-    max_y_coord = max_y_coord + sign(camera_axes.y) * (scale * (num_squares / 2))
-    min_z_coord = min_z_coord + sign(camera_axes.z) * (scale * (num_squares / 2))
-    max_z_coord = max_z_coord + sign(camera_axes.z) * (scale * (num_squares / 2))
+    # Modify to have centre of grid around object
+    # i.e. XYZ would go from 0->10, XY3D would go from 5->-5
+    if grid_mode == GridType.XY3D:
+        min_x_coord = min_x_coord + sign(camera_axes.x) * (scale * (num_squares / 2))
+        max_x_coord = max_x_coord + sign(camera_axes.x) * (scale * (num_squares / 2))
+        min_y_coord = min_y_coord + sign(camera_axes.y) * (scale * (num_squares / 2))
+        max_y_coord = max_y_coord + sign(camera_axes.y) * (scale * (num_squares / 2))
+        min_z_coord = min_z_coord + sign(camera_axes.z) * (scale * (num_squares / 2))
+        max_z_coord = max_z_coord + sign(camera_axes.z) * (scale * (num_squares / 2))
 
     x_coords = arange(min_x_coord, max_x_coord + scale, scale)
     y_coords = arange(min_y_coord, max_y_coord + scale, scale)
@@ -239,9 +242,19 @@ def update_grid_numbers(
             index += 1
     # Draw the axis label at the centre of the axes numbers
     txt = "X"
-    x = x_middle
-    y = y_origin - offset - scale*2
-    pos = vector(x, y, z_origin)
+    if grid_mode == GridType.XY3D:
+        x = x_middle
+        y = y_origin - offset - scale * 2
+        pos = vector(x, y, z_origin)
+    else:
+        if (sign(camera_axes.y) * -1) > 0:
+            x = x_middle
+            y = max_y_coord + scale * 2
+            pos = vector(x, y, z_origin)
+        else:
+            x = x_middle
+            y = min_y_coord - scale * 2
+            pos = vector(x, y, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -275,10 +288,19 @@ def update_grid_numbers(
             index += 1
     # Draw the axis label at the centre of the axes numbers
     txt = "Y"
-    x = x_origin - offset - scale*2
-    y = y_middle
-    pos = vector(x, y, z_origin)
-
+    if grid_mode == GridType.XY3D:
+        x = x_origin - offset - scale * 2
+        y = y_middle
+        pos = vector(x, y, z_origin)
+    else:
+        if (sign(camera_axes.x) * -1) > 0:
+            x = max_x_coord + scale * 2
+            y = y_middle
+            pos = vector(x, y, z_origin)
+        else:
+            x = min_x_coord - scale * 2
+            y = y_middle
+            pos = vector(x, y, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
