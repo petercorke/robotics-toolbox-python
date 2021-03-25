@@ -229,6 +229,11 @@ class GraphicsGrid:  # pragma nocover
                 y_origin = round(self.__scene.center.y, 2)
                 z_origin = 0
                 self.__focal_point = [x_origin, y_origin, z_origin]
+            else:
+                x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
+                                               round(self.__scene.center.y, 2), \
+                                               round(self.__scene.center.z, 2)
+                self.__focal_point = [x_origin, y_origin, z_origin]
         else:
             x_origin, y_origin, z_origin = self.__focal_point[0], \
                                            self.__focal_point[1], \
