@@ -417,7 +417,7 @@ class Robot(DynamicsMixin, IKMixin):
             "minsingular"  or "asada"
         :type method: str
         :param axes: Task space axes to consider: "all" [default],
-            "trans" or "rot"
+            "trans", "rot" or "both"
         :type axes: str
         :param kwargs: extra arguments to pass to ``jacob0``
         :return: manipulability
@@ -492,8 +492,13 @@ class Robot(DynamicsMixin, IKMixin):
             axes = [True, True, True, False, False, False]
         elif axes.startswith('rot'):
             axes = [False, False, False, True, True, True]
+        elif axes == 'both':
+            return (
+                self.manipulability(q, J, method, axes='trans', **kwargs),
+                self.manipulability(q, J, method, axes='rot', **kwargs)
+                   )
         else:
-            raise ValueError('axes must be all, trans or rot')
+            raise ValueError('axes must be all, trans, rot or both')
 
         def yoshikawa(robot, J, q, axes, **kwargs):
             J = J[axes, :]
