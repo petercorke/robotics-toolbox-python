@@ -217,7 +217,7 @@ class Shape(object):
     @wT.setter
     def wT(self, T):
         self._wT = T
-        self._sT = self._wT @ self._base.A
+        self._sT = np.matmul(self._wT, self._base.A)
         self._update_pyb()
 
     @property

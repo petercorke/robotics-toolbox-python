@@ -90,7 +90,7 @@ class Swift(Connector):  # pragma nocover
 
     """
 
-    def __init__(self, realtime=True, display=True):
+    def __init__(self, realtime=True, headless=False, rate=60):
         super(Swift, self).__init__()
 
         self.sim_time = 0.0
@@ -106,22 +106,35 @@ class Swift(Connector):  # pragma nocover
         # Number of custom html elements added to page for id purposes
         self.elementid = 0
 
+        self.rate = rate
+
         # Element dict which holds the callback functions for form updates
         self.elements = {}
 
         self.realtime = realtime
-        self.display = display
+        self.headless = headless
 
         self.recording = False
 
-        if self.display and sw is None:
+        self._laststep = time.time()
+
+        if not self.headless and sw is None:
             _import_swift()
+
+    @property
+    def rate(self):
+        return self._rate
+
+    @rate.setter
+    def rate(self, new):
+        self._rate = new
+        self._period = 1/new
 
     #
     #  Basic methods to do with the state of the external program
     #
 
-    def launch(self, browser=None):
+    def launch(self, browser=None, headless=False):
         """
         Launch a graphical backend in Swift by default in the default browser
         or in the specified browser
@@ -139,7 +152,9 @@ class Swift(Connector):  # pragma nocover
 
         super().launch()
 
-        if self.display:
+        self.headless = headless
+
+        if not self.headless:
             sw.start_servers2(self.outq, self.inq, browser=browser)
             self.last_time = time.time()
 
@@ -182,7 +197,13 @@ class Swift(Connector):  # pragma nocover
         self.sim_time += dt
 
         # Send updated sim time to Swift
-        if self.display:
+        if not self.headless:
+
+            # Only render at 60 FPS
+            if (time.time() - self._laststep) < self._period:
+                return
+
+            self._laststep = time.time()
 
             # Only need to do GUI stuff if self.display is True
             # Process GUI events
@@ -289,7 +310,7 @@ class Swift(Connector):  # pragma nocover
             ob._show_robot = show_robot
             ob._show_collision = show_collision
 
-            if self.display:
+            if not self.headless:
                 robob = ob.to_dict()
                 id = self._send_socket('shape', robob)
 
@@ -303,7 +324,7 @@ class Swift(Connector):  # pragma nocover
             self.swift_objects.append(ob)
             return int(id)
         elif isinstance(ob, rp.Shape):
-            if self.display:
+            if not self.headless:
                 id = int(self._send_socket('shape', [ob.to_dict()]))
 
                 while not int(self._send_socket('shape_mounted', [id, 1])):

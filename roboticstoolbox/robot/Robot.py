@@ -53,9 +53,11 @@ class Robot(DynamicsMixin, IKMixin):
         self.manufacturer = manufacturer
         self.comment = comment
         self.symbolic = symbolic
-        self.base = base
         self.tool = tool
         self._reach = None
+
+        if base is None:
+            self.base = SE3()
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
@@ -526,9 +528,9 @@ class Robot(DynamicsMixin, IKMixin):
             is an identity matrix.
         """
         if self._base is None:
-            return SE3()
-        else:
-            return self._base
+            self._base = SE3()
+
+        return self._base
 
     @base.setter
     def base(self, T):
@@ -703,7 +705,7 @@ class Robot(DynamicsMixin, IKMixin):
             self, q, backend=None, block=True, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
             jointaxes=True, eeframe=True, shadow=True, name=True, fig=None, movie=None
-            ):
+    ):
         """
         Graphical display and animation
 
@@ -1395,7 +1397,7 @@ class Robot(DynamicsMixin, IKMixin):
             self.q = q
 
         # Make an empty 3D figure
-        env =  self._get_graphical_backend(backend)
+        env = self._get_graphical_backend(backend)
 
         # Add the self to the figure in readonly mode
         env.launch('Teach ' + self.name, limits=limits)
@@ -1469,7 +1471,7 @@ class Robot(DynamicsMixin, IKMixin):
             self.q = q
 
         # Make an empty 3D figure
-        env =  self._get_graphical_backend(backend)          
+        env = self._get_graphical_backend(backend)
 
         # Add the robot to the figure in readonly mode
         env.launch('Teach ' + self.name, limits=limits)

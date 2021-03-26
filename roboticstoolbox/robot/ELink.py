@@ -111,10 +111,15 @@ class ELink(Link):
 
         self._v = v
 
-        # print(self._Ts)
+        # Private variable, can be written to but never replaced!
+        # The c will adjust the inside of this array with a reference
+        # to this specific array. If replaced --> segfault
+        self._fk = np.eye(4)
+
         self._init_fknm()
 
     def _init_fknm(self):
+
         isflip = False
         axis = 0
         jindex = 0
@@ -150,6 +155,7 @@ class ELink(Link):
             axis,
             jindex,
             self._Ts.A,
+            self._fk,
             parent)
 
     def _update_fknm(self):
@@ -189,6 +195,7 @@ class ELink(Link):
             axis,
             jindex,
             self._Ts.A,
+            self._fk,
             parent)
 
     def _init_Ts(self):

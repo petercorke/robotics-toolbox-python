@@ -10,6 +10,7 @@ from os.path import splitext
 import tempfile
 import subprocess
 from tokenize import endpats
+from typing import Type
 import webbrowser
 import numpy as np
 # import spatialmath as sp
@@ -275,10 +276,6 @@ class ERobot(Robot):
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
 
-        # Cached paths through links
-        # TODO Add listners on setters to reset cache
-        self._reset_cache()
-
         # Set up qlim
         qlim = np.zeros((2, self.n))
         j = 0
@@ -296,6 +293,10 @@ class ERobot(Robot):
 
         super().__init__(orlinks, **kwargs)
 
+        # Cached paths through links
+        # TODO Add listners on setters to reset cache
+        self._reset_cache()
+
     def _reset_cache(self):
         self._path_cache = {}
         self._path_cache_fknm = {}
@@ -303,6 +304,21 @@ class ERobot(Robot):
         self._cache_start = None
         self._cache_end_tool = None
         self._eye_fknm = np.eye(4)
+
+        self._cache_links_fknm = []
+
+        self._cache_grippers = []
+
+        for link in self.elinks:
+            self._cache_links_fknm.append(link._fknm)
+
+        for gripper in self.grippers:
+            cache = []
+            for link in gripper.links:
+                cache.append(link._fknm)
+            self._cache_grippers.append(cache)
+
+        self._cache_m = len(self._cache_links_fknm)
 
     def dfs_links(self, start, func=None):
         """
@@ -995,8 +1011,11 @@ graph [rankdir=LR];
 
         m = len(path)
 
+        if tool is None:
+            tool = self._eye_fknm
+
         T = np.empty((4, 4))
-        fknm.fkine(m, path, q, etool, T)
+        fknm.fkine(m, path, q, etool, tool, T)
 
         if tool is not None:
             T2 = np.empty((4, 4))
@@ -1034,21 +1053,20 @@ graph [rankdir=LR];
 
         '''
 
-        q = getvector(q, self.n)
+        fknm.fkine_all(
+            self._cache_m,
+            self._cache_links_fknm,
+            q,
+            self._base.A)
+
+        for i in range(len(self._cache_grippers)):
+            fknm.fkine_all(
+                len(self._cache_grippers[i]),
+                self._cache_grippers[i],
+                self.grippers[i].q,
+                self._base.A)
 
         for link in self.elinks:
-            if link.isjoint:
-                t = link.A(q[link.jindex], fast=True)
-                # t = link._elink.A(q[link.jindex])
-            else:
-                t = link.A(fast=True)
-                # t = link._elink.A()
-
-            # Update the links internal transform wrt the base frame
-            if link.parent is None:
-                link._fk = self.base.A @ t
-            else:
-                link._fk = link.parent._fk @ t
 
             # Update the link model transforms as well
             for col in link.collision:
@@ -1060,12 +1078,6 @@ graph [rankdir=LR];
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                if link.isjoint:
-                    t = link.A(gripper.q[link.jindex], fast=True)
-                else:
-                    t = link.A(fast=True)
-
-                link._fk = link.parent._fk @ t
 
                 # Update the link model transforms as well
                 for col in link.collision:
@@ -1074,81 +1086,7 @@ graph [rankdir=LR];
                 for gi in link.geometry:
                     gi.wT = link._fk
 
-    # def jacob0(self, q=None):
-    #     """
-    #     J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
-    #     velocity to end-effector spatial velocity. v = J0*qd in the
-    #     base frame.
-
-    #     J0 = jacob0() as above except uses the stored q value of the
-    #     robot object.
-
-    #     :param q: The joint angles/configuration of the robot (Optional,
-    #         if not supplied will use the stored q values).
-    #     :type q: float ndarray(n)
-
-    #     :return J: The manipulator Jacobian in ee frame
-    #     :rtype: float ndarray(6,n)
-
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
-    #     """
-
-    #     if q is None:
-    #         q = np.copy(self.q)
-    #     else:
-    #         q = getvector(q, self.n)
-
-    #     T = (self.base.inv() * self.fkine(q)).A
-    #     U = np.eye(4)
-    #     j = 0
-    #     J = np.zeros((6, self.n))
-
-    #     for link in self._fkpath:
-
-    #         for k in range(link.M):
-
-    #             if k != link.q_idx:
-    #                 U = U @ link.ets[k].T().A
-    #             else:
-    #                 # self._jacoblink(link, k, T)
-    #                 U = U @ link.ets[k].T(q[j]).A
-    #                 Tu = np.linalg.inv(U) @ T
-    #                 n = U[:3, 0]
-    #                 o = U[:3, 1]
-    #                 a = U[:3, 2]
-    #                 x = Tu[0, 3]
-    #                 y = Tu[1, 3]
-    #                 z = Tu[2, 3]
-
-    #                 if link.ets[k].axis == 'Rz':
-    #                     J[:3, j] = (o * x) - (n * y)
-    #                     J[3:, j] = a
-
-    #                 elif link.ets[k].axis == 'Ry':
-    #                     J[:3, j] = (n * z) - (a * x)
-    #                     J[3:, j] = o
-
-    #                 elif link.ets[k].axis == 'Rx':
-    #                     J[:3, j] = (a * y) - (o * z)
-    #                     J[3:, j] = n
-
-    #                 elif link.ets[k].axis == 'tx':
-    #                     J[:3, j] = n
-    #                     J[3:, j] = np.array([0, 0, 0])
-
-    #                 elif link.ets[k].axis == 'ty':
-    #                     J[:3, j] = o
-    #                     J[3:, j] = np.array([0, 0, 0])
-
-    #                 elif link.ets[k].axis == 'tz':
-    #                     J[:3, j] = a
-    #                     J[3:, j] = np.array([0, 0, 0])
-
-    #                 j += 1
-
-    #     return J
+        # raise ValueError('1')
 
     def get_path(self, end=None, start=None, _fknm=False):
         """

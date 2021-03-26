@@ -123,20 +123,19 @@ env.add(panda, show_robot=True)
 
 ev = [0.01, 0, 0, 0, 0, 0]
 panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
-
-def stepper():
-    for i in range(1000):
-        panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
-        env.step(0.004)
-
-
 env.step(0.01)
 
-# stepper()
+
+def stepper():
+    for i in range(10000):
+        panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
+        # panda.fkine_all_fast(panda.q)
+        env.step(0.001)
+
 
 cProfile.run('stepper()')
 
-print(panda.fkine(panda.q))
-print(panda.fkine_fast(panda.q))
+# print(panda.fkine(panda.q))
+# print(panda.fkine_fast(panda.q))
 
 # env.hold()

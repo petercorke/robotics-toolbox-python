@@ -55,6 +55,7 @@ struct Link
     int jindex;
     int axis;
     PyArrayObject *A; /* link static transform */
+    PyArrayObject *fk; /* link world transform */
     void (*op)(npy_float64 *data, double eta);
     Link *parent;
 };
