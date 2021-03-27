@@ -35,7 +35,7 @@ class UR10(ERobot):
 
         super().__init__(
                 args[0],
-                name=args[1],
+                name=args[1].upper(),
                 manufacturer='Universal Robotics'
             )
 

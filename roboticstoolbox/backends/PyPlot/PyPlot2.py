@@ -42,6 +42,12 @@ class PyPlot2(Connector):
                 '\n\nYou do not have matplotlib installed, do:\n'
                 'pip install matplotlib\n\n')
 
+    def __repr__(self):
+        s =  f"PyPlot2D backend, t = {self.sim_time}, scene:"
+        for robot in self.robots:
+            s += f"\n  {robot.name}"
+        return s
+
     def launch(self, name=None, limits=None):
         '''
         env = launch() launchs a blank 2D matplotlib figure

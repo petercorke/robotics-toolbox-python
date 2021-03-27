@@ -6,6 +6,13 @@
 
 from vpython import color, label, mag, vector
 from numpy import sign, arange
+from enum import Enum
+
+
+class GridType(Enum):  # pragma nocover
+    XYZ = 1
+    XY3D = 2
+    XY2D = 3
 
 
 def get_text_size(scene):  # pragma nocover
@@ -114,7 +121,7 @@ def draw_text(label_text, label_position, scene):  # pragma nocover
 
 def update_grid_numbers(
         focal_point, numbers_list, num_squares,
-        scale, is_3d, scene):  # pragma nocover
+        scale, grid_mode, scene):  # pragma nocover
     """
     Draw the grid numbers along the xyz axes.
 
@@ -126,8 +133,8 @@ def update_grid_numbers(
     :type num_squares: `int`
     :param scale: The scaled length of 1 square unit
     :type scale: `float`
-    :param is_3d: Whether the grid is 3D or not
-    :type is_3d: `bool`
+    :param grid_mode: Whether the grid is 3D or not
+    :type grid_mode: `backends.vpython.text.GridType`
     :param scene: The scene in which to draw the object
     :type scene: class:`vpython.canvas`
     """
@@ -135,6 +142,8 @@ def update_grid_numbers(
     # Initial conditions
     padding = 0.25  # Padding to not draw numbers on top of lines.
     camera_axes = scene.camera.axis
+    z_visible = grid_mode == GridType.XYZ
+
     # Locate center of the axes
     x_origin, y_origin, z_origin = focal_point[0], focal_point[1], \
         focal_point[2]
@@ -174,6 +183,16 @@ def update_grid_numbers(
                                     (sign(camera_axes.z) * -1)
                                     * (num_squares / 2)) * scale, 2)
 
+    # Modify to have centre of grid around object
+    # i.e. XYZ would go from 0->10, XY3D would go from 5->-5
+    if grid_mode == GridType.XY3D:
+        min_x_coord = min_x_coord + sign(camera_axes.x) * (scale * (num_squares / 2))
+        max_x_coord = max_x_coord + sign(camera_axes.x) * (scale * (num_squares / 2))
+        min_y_coord = min_y_coord + sign(camera_axes.y) * (scale * (num_squares / 2))
+        max_y_coord = max_y_coord + sign(camera_axes.y) * (scale * (num_squares / 2))
+        min_z_coord = min_z_coord + sign(camera_axes.z) * (scale * (num_squares / 2))
+        max_z_coord = max_z_coord + sign(camera_axes.z) * (scale * (num_squares / 2))
+
     x_coords = arange(min_x_coord, max_x_coord + scale, scale)
     y_coords = arange(min_y_coord, max_y_coord + scale, scale)
     z_coords = arange(min_z_coord, max_z_coord + scale, scale)
@@ -197,18 +216,22 @@ def update_grid_numbers(
     # Dimensions don't change between updates, so indexing shall
     # remain the same
     index = 0
+    offset = scale * (num_squares / 2)
 
     # X plane
     for x_pos in x_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(x_pos)
-        if is_3d:
+        if z_visible:
             if (sign(camera_axes.y) * -1) > 0:
                 pos = vector(x_pos, max_y_coord + padding, z_origin)
             else:
                 pos = vector(x_pos, min_y_coord - padding, z_origin)
         else:
-            pos = vector(x_pos, y_origin - padding, z_origin)
+            if grid_mode == GridType.XY3D:
+                pos = vector(x_pos, y_origin - padding - offset, z_origin)
+            else:
+                pos = vector(x_pos, y_origin - padding, z_origin)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
             numbers_list[len(numbers_list)-1].height = get_text_size(scene)
@@ -219,14 +242,19 @@ def update_grid_numbers(
             index += 1
     # Draw the axis label at the centre of the axes numbers
     txt = "X"
-    if (sign(camera_axes.y) * -1) > 0:
+    if grid_mode == GridType.XY3D:
         x = x_middle
-        y = max_y_coord + scale * 2
+        y = y_origin - offset - scale * 2
         pos = vector(x, y, z_origin)
     else:
-        x = x_middle
-        y = min_y_coord - scale * 2
-        pos = vector(x, y, z_origin)
+        if (sign(camera_axes.y) * -1) > 0:
+            x = x_middle
+            y = max_y_coord + scale * 2
+            pos = vector(x, y, z_origin)
+        else:
+            x = x_middle
+            y = min_y_coord - scale * 2
+            pos = vector(x, y, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -240,13 +268,16 @@ def update_grid_numbers(
     for y_pos in y_coords:
         # Draw the corresponding unit number at each x coordinate
         txt = "{:.2f}".format(y_pos)
-        if is_3d:
+        if z_visible:
             if (sign(camera_axes.x) * -1) > 0:
                 pos = vector(max_x_coord + padding, y_pos, z_origin)
             else:
                 pos = vector(min_x_coord - padding, y_pos, z_origin)
         else:
-            pos = vector(x_origin - padding, y_pos, z_origin)
+            if grid_mode == GridType.XY3D:
+                pos = vector(x_origin - padding - offset, y_pos, z_origin)
+            else:
+                pos = vector(x_origin - padding, y_pos, z_origin)
         if append:
             numbers_list.append(draw_text(txt, pos, scene))
             numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -257,15 +288,19 @@ def update_grid_numbers(
             index += 1
     # Draw the axis label at the centre of the axes numbers
     txt = "Y"
-    if (sign(camera_axes.x) * -1) > 0:
-        x = max_x_coord + scale * 2
+    if grid_mode == GridType.XY3D:
+        x = x_origin - offset - scale * 2
         y = y_middle
         pos = vector(x, y, z_origin)
     else:
-        x = min_x_coord - scale * 2
-        y = y_middle
-        pos = vector(x, y, z_origin)
-
+        if (sign(camera_axes.x) * -1) > 0:
+            x = max_x_coord + scale * 2
+            y = y_middle
+            pos = vector(x, y, z_origin)
+        else:
+            x = min_x_coord - scale * 2
+            y = y_middle
+            pos = vector(x, y, z_origin)
     if append:
         numbers_list.append(draw_text(txt, pos, scene))
         numbers_list[len(numbers_list) - 1].height = get_text_size(scene)
@@ -275,7 +310,7 @@ def update_grid_numbers(
         numbers_list[index].height = get_text_size(scene)
         index += 1
 
-    if not is_3d:
+    if not z_visible:
         return
 
     # Z plane

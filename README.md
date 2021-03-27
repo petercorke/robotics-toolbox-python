@@ -1,6 +1,7 @@
 # Robotics Toolbox for Python
 
 [![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
+[![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
@@ -20,7 +21,7 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 <ul>
 <li><a href="https://github.com/petercorke/robotics-toolbox-python">GitHub repository </a></li>
 <li><a href="https://petercorke.github.io/robotics-toolbox-python">Documentation</a></li>
-<li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Examples and details</a></li>
+<li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Wiki (examples and details)</a></li>
 </ul>
 </td>
 </tr>
@@ -69,6 +70,7 @@ import roboticstoolbox as rtb
 robot = rtb.models.DH.Panda()
 print(robot)
 
+	Panda (by Franka Emika): 7 axes (RRRRRRR), modified DH parameters
 	┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
 	┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
 	┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
@@ -80,11 +82,11 @@ print(robot)
 	┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃
 	┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃
 	┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛
-	
+
 	┌─────┬───────────────────────────────────────┐
 	│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │
 	└─────┴───────────────────────────────────────┘
-	
+
 	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
 	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
 	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
@@ -109,21 +111,19 @@ orientation parallel to y-axis (O=+Y)).
 ```python
 from spatialmath import SE3
 
-T = SE3(0.8, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ikine_min(T)         # solve IK
-print(sol.q)                     # display joint angles
+T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+sol = robot.ikine_LM(T)         # solve IK
+print(sol)
+	IKsolution(q=array([  0.2134,    1.867,  -0.2264,   0.4825,   0.2198,    1.396,   -2.037]), success=True, reason=None, iterations=12, residual=1.4517646473808178e-11)
 
-	[-0.01044    7.876    1.557    -6.81    1.571    4.686   0.5169]
-
-print(robot.fkine(sol.q))    # FK shows that desired end-effector pose was achieved
+q_pickup = sol.q
+print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
 
 	Out[35]: 
-	SE3:┏                                           ┓
-		┃-1         -4e-08      0.000521   0.615    ┃
-		┃ 2.79e-08   1          0.00013    0.154    ┃
-		┃-0.000521   0.00013   -1          0.105    ┃
-		┃ 0          0          0          1        ┃
-		┗                                           ┛
+		-1            9.43001e-14  2.43909e-12  0.7          
+		 9.43759e-14  1            7.2574e-13   0.2          
+		-2.43913e-12  7.2575e-13  -1            0.1          
+		 0            0            0            1 
 ```
 
 Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
@@ -131,7 +131,7 @@ Note that because this robot is redundant we don't have any control over the arm
 We can animate a path from the upright `qz` configuration to this pickup configuration
 
 ```python
-qt = rtb.trajectory.jtraj(robot.qz, q_pickup, 50)
+qt = rtb.jtraj(robot.qz, q_pickup, 50)
 robot.plot(qt.q, movie='panda1.gif')
 ```
 
@@ -146,19 +146,27 @@ based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
 robot = rtb.models.URDF.Panda()  # load URDF version of the Panda
 print(robot)    # display the model
 
-	┌───┬──────────────┬─────────────┬──────────────┬─────────────────────────────────────────────┐
-	│id │     link     │   parent    │    joint     │                     ETS                     │
-	├───┼──────────────┼─────────────┼──────────────┼─────────────────────────────────────────────┤
-	│ 0 │  panda_link0 │           - │              │                                             │
-	│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │                          tz(0.333) * Rz(q0) │
-	│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │                           Rx(-90°) * Rz(q1) │
-	│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │               ty(-0.316) * Rx(90°) * Rz(q2) │
-	│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │               tx(0.0825) * Rx(90°) * Rz(q3) │
-	│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
-	│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │                            Rx(90°) * Rz(q5) │
-	│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │                tx(0.088) * Rx(90°) * Rz(q6) │
-	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │                                   tz(0.107) │
-	└───┴──────────────┴─────────────┴──────────────┴─────────────────────────────────────────────┘
+	panda (by Franka Emika): 7 axes (RRRRRRR), ETS model
+	┌───┬──────────────┬─────────────┬──────────────┬──────────────────────────────────────────────────────────────────────────────┐
+	│id │     link     │   parent    │    joint     │                                     ETS                                      │
+	├───┼──────────────┼─────────────┼──────────────┼──────────────────────────────────────────────────────────────────────────────┤
+	│ 0 │  panda_link0 │         _O_ │              │ {panda_link0} = {_O_}                                                        │
+	│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ {panda_link1} = {panda_link0}  * tz(0.333) * Rz(q0)                          │
+	│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ {panda_link2} = {panda_link1}  * Rx(-90°) * Rz(q1)                           │
+	│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ {panda_link3} = {panda_link2}  * ty(-0.316) * Rx(90°) * Rz(q2)               │
+	│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ {panda_link4} = {panda_link3}  * tx(0.0825) * Rx(90°) * Rz(q3)               │
+	│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ {panda_link5} = {panda_link4}  * tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
+	│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ {panda_link6} = {panda_link5}  * Rx(90°) * Rz(q5)                            │
+	│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ {panda_link7} = {panda_link6}  * tx(0.088) * Rx(90°) * Rz(q6)                │
+	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ {panda_link8} = {panda_link7}  * tz(0.107)                                   │
+	└───┴──────────────┴─────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────┘
+
+	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
+	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
+	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
+	│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
+	│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
+	└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
 ```
 
 The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
@@ -167,12 +175,13 @@ tree.
 We can instantiate our robot inside a browser-based 3d-simulation environment.  
 
 ```python
-env = rtb.backends.Swift()  # instantiate 3D browser-based visualizer
-env.launch()                # activate it
-env.add(robot)              # add robot to the 3D scene
+from roboticstoolbox.backends.Swift import Swift  # instantiate 3D browser-based visualizer
+backend = Swift()
+backend.launch()            # activate it
+backend.add(robot)          # add robot to the 3D scene
 for qk in qt.q:             # for each joint configuration on trajectory
       robot.q = qk          # update the robot state
-      env.step()            # update visualization
+      backend.step()        # update visualization
 ```
 
 <p align="center">

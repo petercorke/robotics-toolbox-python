@@ -8,13 +8,15 @@ from ansitable import ANSITable, Column
 
 def _listen_dyn(func):
     """
+    @_listen_dyn
+
     Decorator for property setters
 
     Use this decorator for any property setter that updates a parameter that
     affects the result of inverse dynamics.  This allows the C version of the
     parameters only having to be updated when they change, rather than on
     every call.  This decorator signals the change by invoking the
-    ``dynchanged()`` method of the robot that owns the link.
+    ``.dynchanged()`` method of the robot that owns the link.
 
     Example::
 
@@ -23,6 +25,7 @@ def _listen_dyn(func):
         def m(self, m_new):
             self._m = m_new
 
+    :seealso: :func:`DHLink._dyn_changed`
     """
     @wraps(func)
     def wrapper_listen_dyn(*args):

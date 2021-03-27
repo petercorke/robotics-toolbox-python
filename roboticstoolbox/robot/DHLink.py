@@ -13,6 +13,23 @@ _eps = np.finfo(np.float64).eps
 
 from functools import wraps
 def _check_rne(func):
+    """
+    @_check_rne decorator
+
+    Decorator applied to any method to calls to C RNE code.  Works in
+    conjunction with::
+
+        @_listen_dyn
+        def dyn_param_setter(self, value):
+
+    which marks the dynamic parameters as having changed using the robot's
+    ``.dynchanged()`` method.
+
+    If this is the case, then the parameters are re-serialized prior to
+    invoking inverse dynamics.
+
+    :seealso: :func:`Link._listen_dyn`
+    """
     @wraps(func)
     def wrapper_check_rne(*args, **kwargs):
         if args[0]._rne_ob is None or args[0]._dynchanged:

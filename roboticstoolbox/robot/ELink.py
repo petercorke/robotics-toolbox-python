@@ -3,14 +3,10 @@
 @author: Jesse Haviland
 """
 
-# import numpy as np
-from spatialmath import SE3
-# from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
+from spatialmath import SE3, SE2
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ETS import ETS, SuperETS
 from roboticstoolbox.robot.Link import Link
-
-# from functools import wraps
 import numpy as np
 import fknm
 
@@ -45,7 +41,15 @@ class ELink(Link):
 
     It inherits from the Link class which provides common functionality such
     as joint and link such as kinematics parameters,
-    .
+
+
+    The transform to the next link is given as an ETS with the joint
+    variable, if present, as the last term.  This is preprocessed and
+    the object stores:
+
+        * ``Ts`` the constant part as a NumPy array, or None
+        * ``v`` a pointer to an ETS object representing the joint variable.
+          or None
 
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
@@ -66,11 +70,12 @@ class ELink(Link):
         super(ELink, self).__init__(**kwargs)
 
         # check we have an ETS
-        if isinstance(ets, ETS):
-            self._ets = ets
-        else:
+        if not isinstance(ets, SuperETS):
             raise TypeError(
                 'The ets argument must be of type ETS')
+        self._ndims = ets._ndims
+
+        self._ets = ets
 
         if v is None and len(ets) > 0 and ets[-1].isjoint:
             v = ets.pop()
@@ -80,10 +85,10 @@ class ELink(Link):
                 jindex = v.jindex
 
         # TODO simplify this logic, can be ELink class or None
-        if isinstance(parent, list):
-            raise TypeError(
-                'Only one parent link can be present')
-        elif not isinstance(parent, ELink) and parent is not None:
+        # if isinstance(parent, list):
+        #     raise TypeError(
+        #         'Only one parent link can be present')
+        if not isinstance(parent, ELink) and parent is not None:
             raise TypeError(
                 'Parent must be of type ELink')
 
@@ -99,7 +104,7 @@ class ELink(Link):
         # Check the variable joint
         if v is None:
             self._joint = False
-        elif not isinstance(v, ETS):
+        elif not isinstance(v, SuperETS):
             raise TypeError('v must be of type ETS')
         elif not v[0].isjoint:
             raise ValueError('v must be a variable ETS')
@@ -202,20 +207,28 @@ class ELink(Link):
         # Number of transforms in the ETS excluding the joint variable
         self._M = len(self._ets)
 
-        # Initialise joints
-        if isinstance(self._ets, ETS):
-            self._Ts = SE3()
-            for i in range(self.M):
-                if self._ets[i].isjoint:
+        # Compute the leading, constant, part of the ETS
+        # TODO probably should use ETS.compile()
+
+        if isinstance(self._ets, SuperETS):
+            first = True
+            T = None
+
+            for et in self._ets:
+                # constant transforms only
+                if et.isjoint:
                     raise ValueError('The transforms in ets must be constant')
 
-                if not isinstance(self._ets[i].T(), SE3):
-                    self._Ts *= SE3(self._ets[i].T())
+                if first:
+                    T = et.T()
+                    first = False
                 else:
-                    self._Ts *= self._ets[i].T()
+                    T = T @ et.T()
+            self._Ts = T
 
         elif isinstance(self._ets, SE3):
             self._Ts = self._ets
+            raise RuntimeError('this shouldnt happen')
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -471,31 +484,50 @@ class ELink(Link):
           transformation from the previous to the current link frame to
           the next, which depends on the joint coordinate ``q``.
 
+        If ``fast`` is True return a NumPy array, either SE(2) or SE(3).
+        A value of None means that it is the identity matrix.
+
+        If ``fast`` is False return an ``SE2`` or ``SE3`` instance.
+
         """
 
+        # Use c extension
         if fast:
             if not np.isscalar(q):
                 q = 0.0
             T = np.empty((4, 4))
             fknm.link_A(q, self._fknm, T)
             return T
-            # if self.isjoint:
-            #     T = self._Ts.A @ self._v.T(q)
-            # else:
-            #     # a fixed joint
-            #     T = self._Ts.A
-            # return T
-        else:
-            if self.isjoint:
-                # a variable joint
-                if q is None:
-                    raise ValueError("q is required for variable joints")
-                T = self.Ts.A @ self.v.T(q)
-            else:
-                # a fixed joint
-                T = self.Ts.A
 
-            return SE3(T, check=False)
+        # Otherwise use Python implementation
+        if self.isjoint:
+            # a variable joint
+            if q is None:
+                raise ValueError("q is required for variable joints")
+
+            # premultiply variable part by constant part if present
+            Ts = self.Ts
+            if Ts is None:
+                T = self.v.T(q)
+            else:
+                T = Ts @ self.v.T(q)
+        else:
+            # a fixed joint
+            T = self.Ts
+
+        if fast:
+            return T
+
+        if T is None:
+            if self._ndims == 3:
+                return SE3()
+            elif self._ndims == 2:
+                return SE2()
+        else:
+            if self._ndims == 3:
+                return SE3(T, check=False)
+            elif self._ndims == 2:
+                return SE2(T, check=False)
 
     def ets(self):
         if self.v is None:

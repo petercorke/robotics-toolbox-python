@@ -79,7 +79,7 @@ class DynamicsMixin:
 
         for j, link in enumerate(self):
             table.row(link.name, *link._dyn2list())
-        return str(table)
+        print(table)
 
     def printdyn(self):
         """
@@ -611,7 +611,7 @@ class DynamicsMixin:
           continuous-time transfer functions that represent the transfer
           function 1/(Js+B) for each joint based on the dynamic parameters
           of the robot and the configuration q (n). n is the number of robot
-          joints.
+          joints.  The result is a list of tuples (J, B) for each joint.
 
         - ``tf = jointdynamics(q, qd)`` as above but include the linearized
           effects of Coulomb friction when operating at joint velocity QD

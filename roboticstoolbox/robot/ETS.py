@@ -10,10 +10,12 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall, trinv, verifymatrix, iseye
+    issymbol, tr2jac, transl2, trot2, tr2jac2, removesmall, trinv, \
+    verifymatrix, iseye
 
 
 class SuperETS(UserList, ABC):
+
 
     # T is a NumPy array (4,4) or None
     # ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
@@ -21,6 +23,58 @@ class SuperETS(UserList, ABC):
     def __init__(
             self, axis=None, eta=None, axis_func=None,
             unit='rad', j=None, flip=False):
+        """
+        Elementary transform sequence (superclass)
+
+        :param axis: the axis. For 2D case: 'r', 'tx', 'ty'.
+            For 3D case: 'rx', 'ry', 'rz', 'tx', 'ty', 'tz'.
+        :type axis: str
+        :param eta: the constant associated with this transform,
+            not given for a joint transform
+        :type eta: float or symbol, optional
+        :param axis_func: [description], defaults to None
+        :type axis_func: [type], optional
+        :param unit: unit for ``eta``, 'rad' [default] or 'deg'
+        :type unit: str
+        :param j: joint number, for joint transforms only
+        :type j: int, optional
+        :param flip: flip the sign of joint variable, defaults to False
+        :type flip: bool, optional
+
+        Examples:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS, ETS2
+
+            ETS2.r()  # variable 2D rotation
+            ETS2.r(90, unit='deg')  # 2D constant rotation
+
+            ETS.rx()  # variable 3D rotation about x-axis
+            ETS.tx(1) # constant 3D translation along x-axis
+
+        Composition
+        -----------
+
+        These transforms can be composed, for example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rx() * ETS.tx(1) * ETS.rx() * ETS.tx(1)
+            >>> print(e)
+            >>> len(e)
+            >>> e[0]
+            >>> e[1]
+
+        Under the hood
+        --------------
+
+        The value of an ETS is obtained using its ``T`` method.
+        For a joint ETS the joint variable must be passed ``e.T(q)``,
+        otherwise the value based on ``eta`` is computed and cached
+        at constructor time.
+        """
 
         super().__init__()  # init UserList superclass
 
@@ -43,7 +97,7 @@ class SuperETS(UserList, ABC):
             self.data = copy.copy(axis.data)
             return
 
-        if axis in ('Rx', 'Ry', 'Rz', 'tx', 'ty', 'tz'):
+        if axis in ('R', 'Rx', 'Ry', 'Rz', 'tx', 'ty', 'tz'):
             # it's a regular axis
 
             if eta is None:
@@ -322,9 +376,9 @@ class SuperETS(UserList, ABC):
         return self.axis[0] == 'C'
 
     @property
-    def config(self):
+    def structure(self):
         """
-        Joint configuration string
+        Joint structure string
 
         :return: A string indicating the joint types
         :rtype: str
@@ -338,7 +392,7 @@ class SuperETS(UserList, ABC):
 
             >>> from roboticstoolbox import ETS
             >>> e = ETS.tz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
-            >>> e.config
+            >>> e.structure
 
         """
         return ''.join(
@@ -451,8 +505,7 @@ class SuperETS(UserList, ABC):
                     qj = q[et.jindex]
                 if et.isrevolute and unit == 'deg':
                     qj *= np.pi / 180.0
-                if et.isflip:
-                    qj = -qj
+
                 Tk = et.T(qj)
             else:
                 # for constants
@@ -463,12 +516,14 @@ class SuperETS(UserList, ABC):
             else:
                 T = T @ Tk
 
-        if isinstance(self, ETS):
-            T = SE3(T, check=False)
-        elif isinstance(self, ETS2):
+        if isinstance(self, ETS2):
             T = SE2(T, check=False)
-        T.simplify()
-        return T
+        else:
+            T = SE3(T, check=False)
+
+        # optionally do symbolic simplification
+        
+        return T.simplify()
 
     def compile(self):
         """
@@ -643,7 +698,7 @@ class SuperETS(UserList, ABC):
             the left and right operands in an internal list. In this example
             we see the length of the product is 2.
         """
-        prod = ETS()
+        prod = self.__class__()
         prod.data = self.data + rest.data
         return prod
 
@@ -898,6 +953,11 @@ class ETS(SuperETS):
     :seealso: :func:`rx`, :func:`ry`, :func:`rz`, :func:`tx`,
         :func:`ty`, :func:`tz`
     """
+
+    def __init__(self, *pos, **kwargs):
+        super().__init__(*pos, **kwargs)
+        self._ndims = 3
+
     @property
     def s(self):
         if self.axis[1] == 'x':
@@ -1240,7 +1300,7 @@ class ETS(SuperETS):
         if T is None:
             T = self.eval(q)
 
-        return tr2jac(T.A) @ self.jacob0(q, T)
+        return tr2jac(T.A.T) @ self.jacob0(q, T)
 
     def hessian0(self, q=None, J0=None):
         r"""
@@ -1370,6 +1430,9 @@ class ETS2(SuperETS):
 
     :seealso: :func:`r`, :func:`tx`, :func:`ty`
     """
+    def __init__(self, *pos, **kwargs):
+        super().__init__(*pos, **kwargs)
+        self._ndims = 2
 
     @classmethod
     def r(cls, eta=None, unit='rad', **kwargs):
@@ -1453,6 +1516,81 @@ class ETS2(SuperETS):
             axis='ty', eta=eta,
             axis_func=lambda y: transl2(0, y), **kwargs)
 
+    def jacob0(self, q, T=None):
+
+
+        # very inefficient implementation, just put a 1 in last row
+        # if its a rotation joint
+        q = getvector(q)
+
+        E = np.zeros((3,3))
+        j = 0
+        J = np.zeros((3, self.n))
+        jindex = self.joints()
+        for j in range(self.n):
+            i = jindex[j]
+
+            axis = self[i].axis
+            if axis == 'R':
+                dTdq = np.array([
+                    [0, -1, 0],
+                    [1,  0, 0],
+                    [0,  0, 0]
+                    ]) @ self[i].eval(q[j]).A
+            elif axis == 'tx':
+                dTdq = np.array([
+                    [0, 0, 1],
+                    [0, 0, 0],
+                    [0, 0, 0]
+                    ])
+            elif axis == 'ty':
+                dTdq = np.array([
+                    [0, 0, 0],
+                    [0, 0, 1],
+                    [0, 0, 0]
+                    ])
+
+            E0 = self[:i]
+            if len(E0) > 0:
+                dTdq = E0.eval(q).A @ dTdq
+            
+            Ef = self[i+1:]
+            if len(Ef) > 0:
+                dTdq = dTdq @ Ef.eval(q[j+1:]).A
+
+            T = self.eval(q).A
+            dRdt = dTdq[:2,:2] @ T[:2,:2].T 
+            J[:,j] = np.r_[dTdq[:2,2].T, dRdt[1,0]]
+
+        return J
+
+    def jacobe(self, q=None, T=None):
+        r"""
+        Jacobian in base frame
+
+        :param q: joint coordinates
+        :type q: array_like
+        :param T: ETS value as an SE(3) matrix if known
+        :type T: ndarray(4,4)
+        :return: Jacobian matrix
+        :rtype: ndarray(6,n)
+
+        ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
+
+        If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to
+        reduce computation time.
+
+        :seealso: :func:`jacob`, :func:`hessian0`
+        """  # noqa
+
+        if T is None:
+            T = self.eval(q)
+
+        return tr2jac2(T.A.T) @ self.jacob0(q, T)
 
 if __name__ == "__main__":
 
@@ -1521,6 +1659,25 @@ if __name__ == "__main__":
     # print(e.inv().eval(q))
     # print(e.eval(q) * e.inv().eval(q))
 
-    e = ETS.rz() * ETS.tx(-1) * ETS.tx(1) * ETS.rz()
-    print(e)
-    print(e.compile())
+    # e = ETS.rz() * ETS.tx(-1) * ETS.tx(1) * ETS.rz()
+    # print(e)
+    # print(e.compile())
+
+    b = ETS2.r(flip=True) * ETS2.tx(1) * ETS2.r() * ETS2.tx(1)
+
+    J = b.jacob0([0,0])
+    print(J)
+
+    J = b.jacobe([0,0])
+    print(J)
+
+    J = b.jacob0([1,0])
+    print(J)
+
+    J = b.jacobe([1,0])
+    print(J)
+
+    # b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
+
+    # J = b.jacob0([1,0])
+    # print(J)

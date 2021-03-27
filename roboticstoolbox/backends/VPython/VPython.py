@@ -21,10 +21,13 @@ close_localhost_session = None
 try:
     from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D
     from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot
+    from roboticstoolbox.backends.VPython.grid import GridType
 except ImportError:
     print(
         '\nYou must install the VPython component of the toolbox, do: \n'
         'pip install roboticstoolbox[vpython]\n\n')
+
+
 class VPython(Connector):  # pragma nocover
     """
     Graphical backend using VPython
@@ -77,6 +80,12 @@ class VPython(Connector):  # pragma nocover
 
         self._create_empty_session()
 
+    def __repr__(self):
+        s =  f"VPython backend, t = {self.sim_time}, scene:"
+        for robot in self.robots:
+            s += f"\n  {robot.name}"
+        return s
+
     def launch(
             self, **kwargs):
         """
@@ -95,22 +104,28 @@ class VPython(Connector):  # pragma nocover
         title = args.get('title', 'Robotics Toolbox for Python: VPython display')
         caption = args.get('caption', '')
         grid = args.get('grid', False)
+        if is_3d:
+            g_type = args.get('g_type', GridType.XY3D)
+        else:
+            g_type = args.get('g_type', GridType.XY2D)
         g_col = args.get('g_col', None)
 
         super().launch()
 
         self.canvas_settings.append(
-            [is_3d, height, width, title, caption, grid, g_col])
+            [is_3d, height, width, title, caption, grid, g_type, g_col])
 
         # Create the canvas with the given information
         if is_3d:
             self.canvases.append(
                 GraphicsCanvas3D(height, width, title, caption,
-                                 grid, g_col))
+                                 grid, g_type, g_col))
         else:
             self.canvases.append(
                 GraphicsCanvas2D(height, width, title, caption,
-                                 grid, g_col))
+                                 grid, g_type, g_col))
+        
+        self.sim_time = 0
 
     def step(self, dt=None, id=None, q=None, fig_num=0):
         """
@@ -147,6 +162,8 @@ class VPython(Connector):  # pragma nocover
 
         super().step()
 
+        self.sim_time += dt
+
         if fig_num < 0 or fig_num >= len(self.canvases):
             raise ValueError(
                 "Figure number must be between 0 and total number of canvases")
@@ -157,31 +174,33 @@ class VPython(Connector):  # pragma nocover
                 poses = id.fkine(q)
                 id.set_joint_poses(poses)
 
-        #if isinstance(id, DHRobot):  # HACK avoid circular import
+        # If DHRobot is given (or equivalent)
         else:
-            # robot = None
-            # # Find first occurrence of it that is in the correct canvas
-            # for i in range(len(self.robots)):
-            #     if self.robots[i].robot is id and \
-            #             self.canvases[fig_num].is_robot_in_canvas(
-            #                                             self.robots[i]):
-            #         robot = self.robots[i]
-            #         break
-            if id is None:
-                robot = self.robots[0]
-            if robot is None:
-                print("No robot")
+            grpahical_dh_robot = None
+            # If no ID given, and there are robots available
+            if id is None and len(self.robots) > 0:
+                # Obtain the first one
+                grpahical_dh_robot = self.robots[0]
+            # If no ID, and no robots available
+            elif id is None:
+                print("No robot found")
                 return
             else:
-                poses = robot.fkine(q)
-                robot.set_joint_poses(poses)
-        # ElseIf GraphicalRobot given
+                # Find first occurrence of it that is in the correct canvas
+                for i in range(len(self.robots)):
+                    if self.robots[i].robot is id and \
+                            self.canvases[fig_num].is_robot_in_canvas(
+                                                            self.robots[i]):
+                        grpahical_dh_robot = self.robots[i]
+                        break
 
-        # # Else
-        # else:
-        #     raise TypeError(
-        #         "Input must be a Robot (or subclass) or "
-        #         "GraphicalRobot, given {0}".format(type(id)))
+            # If no graphical equivalent found, return
+            if grpahical_dh_robot is None:
+                print("No robot found")
+                return
+            # Set poses of graphical robot
+            poses = grpahical_dh_robot.fkine(q)
+            grpahical_dh_robot.set_joint_poses(poses)
 
         if dt is not None:
             sleep(dt)
@@ -216,11 +235,11 @@ class VPython(Connector):  # pragma nocover
                 if settings[0]:
                     self.canvases.append(GraphicsCanvas3D(
                         settings[1], settings[2], settings[3],
-                        settings[4], settings[5]))
+                        settings[4], settings[5], settings[6], settings[7]))
                 else:
                     self.canvases.append(GraphicsCanvas2D(
                         settings[1], settings[2], settings[3],
-                        settings[4], settings[5]))
+                        settings[4], settings[5], settings[6], settings[7]))
 
     def restart(self):
         """

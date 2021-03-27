@@ -4,19 +4,21 @@
 """
 
 import numpy as np
-from spatialmath.base.argcheck import getvector
+import scipy as sp
+from spatialmath import base
+import matplotlib.pyplot as plt
 
 
-class EllipsePlot(object):
+class EllipsePlot():
 
-    def __init__(self, robot, q, etype, opt='trans', centre=[0, 0, 0], scale=0.1):
+    def __init__(self, robot, q, etype, opt='trans', centre=[0, 0, 0], scale=1):
 
         super(EllipsePlot, self).__init__()
 
         try:
-            centre = getvector(centre, 3)
+            centre = base.getvector(centre, 3)
         except ValueError:
-            centre = getvector(centre, 2)
+            centre = base.getvector(centre, 2)
             centre = np.array([centre[0], centre[1], 0])
         except TypeError:
             if centre != 'ee':
@@ -60,7 +62,28 @@ class EllipsePlot(object):
             self.ell[0].set_data(self.x, self.y)
         else:
             self.ell = self.ax.plot(
-                self.x, self.y, color='#2980b9', alpha=0.2)
+                self.x, self.y, color='#2980b9')
+
+    def plot(self, ax=None):
+        if ax is None:
+            ax = self.ax
+        
+        if ax is None:
+            fig = plt.figure()
+            ax = plt.axes(projection='3d')
+            self.ax = ax
+        
+        self.draw()
+
+    def plot2(self, ax=None):
+        if ax is None:
+            ax = self.ax
+        
+        if ax is None:
+            ax = plt.axes()
+            self.ax = ax
+
+        self.draw2()
 
     def make_ellipsoid(self):
         """
@@ -112,37 +135,33 @@ class EllipsePlot(object):
         """
 
         if self.opt == 'trans':
-            J = self.robot.jacobe(self.q)[:2, :]
+            J = self.robot.jacob0(self.q)[:2, :]
             A = J @ J.T
         elif self.opt == 'rot':
             raise ValueError(
                 "Can not do rotational ellipse for a 2d robot plot."
                 " Set opt='trans'")
 
-        if not self.vell:
-            # Do the extra step for the force ellipse
-            A = np.linalg.inv(A)
+        # if not self.vell:
+        #     # Do the extra step for the force ellipse
+        #     try:
+        #         A = np.linalg.inv(A)
+        #     except:
+        #         A = np.zeros((2,2))
 
         if isinstance(self.centre, str) and self.centre == 'ee':
             centre = self.robot.fkine(self.q).t
         else:
             centre = self.centre
 
-        # find the rotation matrix and radii of the axes
-        U, s, rotation = np.linalg.svd(A)
-        radii = 1.0 / np.sqrt(s)
+        # points on unit circle
+        theta = np.linspace(0.0, 2.0 * np.pi, 50)
+        y = np.array([np.cos(theta), np.sin(theta)])
+        # RVC2 p 602
+        x = sp.linalg.sqrtm(A) @ y
 
-        # points on unit sphere
-        u = np.linspace(0.0, 2.0 * np.pi, 50)
-        v = np.linspace(0.0, np.pi, 50)
-        x = radii[0] * np.outer(np.cos(u), np.sin(v))
-        y = radii[1] * np.outer(np.sin(u), np.sin(v))
-
-        # transform points to ellipsoid
-        for i in range(len(x)):
-            for j in range(len(x)):
-                [x[i, j], y[i, j]] = \
-                    np.dot([x[i, j], y[i, j]], rotation)
-
-        self.x = x * self.scale + centre[0]
-        self.y = y * self.scale + centre[1]
+        x, y = base.ellipse(A, inverted=True, centre=centre[:2], scale=self.scale)
+        self.x = x
+        self.y = y
+        # = x[0,:] * self.scale + centre[0]
+        # self.y = x[1,:] * self.scale + centre[1]

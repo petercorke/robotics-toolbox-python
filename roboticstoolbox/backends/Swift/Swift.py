@@ -130,11 +130,19 @@ class Swift(Connector):  # pragma nocover
         self._rate = new
         self._period = 1/new
 
+    def __repr__(self):
+        s = f"Swift backend, t = {self.sim_time}, scene:"
+        for robot in self.robots:
+            s += f"\n  {robot['ob'].name}"
+        for shape in self.shapes:
+            s += f"\n  {shape['ob'].name}"
+        return s
+
     #
     #  Basic methods to do with the state of the external program
     #
 
-    def launch(self, browser=None, headless=False):
+    def launch(self, browser=None, headless=False, **kwargs):
         """
         Launch a graphical backend in Swift by default in the default browser
         or in the specified browser

@@ -22,9 +22,9 @@ class TestTrajectory(unittest.TestCase):
         # no boundary conditions
 
         tg = tr.tpoly(s1, s2, 11)
-        s = tg.y
-        sd = tg.yd
-        sdd = tg.ydd
+        s = tg.s
+        sd = tg.sd
+        sdd = tg.sdd
 
         self.assertTrue(np.all(np.diff(s) > 0))  # output is monotonic
         self.assertAlmostEqual(s[0], s1)
@@ -44,9 +44,9 @@ class TestTrajectory(unittest.TestCase):
         t = np.linspace(0, 1, 11)
 
         tg = tr.tpoly(s1, s2, t)
-        s = tg.y
-        sd = tg.yd
-        sdd = tg.ydd
+        s = tg.s
+        sd = tg.sd
+        sdd = tg.sdd
 
         self.assertTrue(np.all(np.diff(s) > 0))  # output is monotonic
         self.assertAlmostEqual(s[0], s1)
@@ -66,9 +66,9 @@ class TestTrajectory(unittest.TestCase):
 
         # boundary conditions
         tg = tr.tpoly(s1, s2, 11, -1, 1)
-        s = tg.y
-        sd = tg.yd
-        sdd = tg.ydd
+        s = tg.s
+        sd = tg.sd
+        sdd = tg.sdd
 
         self.assertAlmostEqual(s[0], s1)
         self.assertAlmostEqual(s[-1], s2)
@@ -82,6 +82,14 @@ class TestTrajectory(unittest.TestCase):
         with self.assertRaises(TypeError):
             tr.tpoly(s1, s2, 'not time')
 
+    def test_tpoly_plot(self):
+        t = tr.tpoly(0, 1, 50)
+        t.plot()
+
+        t = tr.tpoly(0, 1, np.linspace(0,1,50))
+        t.plot()
+    
+
     def test_lspb(self):
 
         s1 = 1.
@@ -90,9 +98,9 @@ class TestTrajectory(unittest.TestCase):
         # no boundary conditions
 
         tg = tr.lspb(s1, s2, 11)
-        s = tg.y
-        sd = tg.yd
-        sdd = tg.ydd
+        s = tg.s
+        sd = tg.sd
+        sdd = tg.sdd
 
         self.assertTrue(np.all(np.diff(s) > 0))  # output is monotonic
         self.assertAlmostEqual(s[0], s1)
@@ -109,9 +117,9 @@ class TestTrajectory(unittest.TestCase):
         t = np.linspace(0, 1, 11)
 
         tg = tr.lspb(s1, s2, t)
-        s = tg.y
-        sd = tg.yd
-        sdd = tg.ydd
+        s = tg.s
+        sd = tg.sd
+        sdd = tg.sdd
 
         self.assertTrue(np.all(np.diff(s) > 0))  # output is monotonic
         self.assertAlmostEqual(s[0], s1)
@@ -126,9 +134,9 @@ class TestTrajectory(unittest.TestCase):
 
         # specify velocity
         tg = tr.lspb(s1, s2, 11, 0.2)
-        s = tg.y
-        sd = tg.yd
-        sdd = tg.ydd
+        s = tg.s
+        sd = tg.sd
+        sdd = tg.sdd
 
         self.assertAlmostEqual(s[0], s1)
         self.assertAlmostEqual(s[-1], s2)
@@ -144,18 +152,11 @@ class TestTrajectory(unittest.TestCase):
         with self.assertRaises(ValueError):
             tr.lspb(s1, s2, t, V=10000000000000000000)
 
-    def test_tg1plot(self):
-        s1 = 1
-        s2 = 2
-
-        tg = tr.tpoly(s1, s2, 11)
-        tg.plot(block=False)
-
-        tg = tr.lspb(s1, s2, 11)
-        tg.plot(block=False)
-
-        tg = tr.tpoly(s1, s2, [1, 2])
-        tg.plot(block=False)
+    def test_lspb_plot(self):
+        t = tr.lspb(0, 1, 50)
+        t.plot()
+        t = tr.lspb(0, 1, np.linspace(0,1,50))
+        t.plot()
 
     def test_qplot(self):
 
@@ -163,13 +164,13 @@ class TestTrajectory(unittest.TestCase):
         q1 = np.r_[1, 2, 3, 4, 5, 6]
         q2 = -q1
         q = tr.jtraj(q1, q2, 50)
-        tr.qplot(q.y, block=False)
+        tr.qplot(q.s, block=False)
 
         # 4 joints
         q1 = np.r_[1, 2, 3, 4]
         q2 = -q1
         q = tr.jtraj(q1, q2, 50)
-        tr.qplot(q.y, block=False)
+        tr.qplot(q.s, block=False)
 
     def test_ctraj(self):
         # unit testing ctraj with T0 and T1 and N
@@ -211,9 +212,9 @@ class TestTrajectory(unittest.TestCase):
         q2 = -q1
 
         tg = tr.mtraj(tr.tpoly, q1, q2, 11)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.s
+        qd = tg.sd
+        qdd = tg.sdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -233,9 +234,9 @@ class TestTrajectory(unittest.TestCase):
         t = np.linspace(0, 2, 11)
 
         tg = tr.mtraj(tr.tpoly, q1, q2, 11)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.s
+        qd = tg.sd
+        qdd = tg.sdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -256,9 +257,9 @@ class TestTrajectory(unittest.TestCase):
         q2 = -q1
 
         tg = tr.mtraj(tr.lspb, q1, q2, 11)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.s
+        qd = tg.sd
+        qdd = tg.sdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -275,9 +276,9 @@ class TestTrajectory(unittest.TestCase):
         t = np.linspace(0, 2, 11)
 
         tg = tr.mtraj(tr.lspb, q1, q2, 11)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.s
+        qd = tg.sd
+        qdd = tg.sdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -296,9 +297,9 @@ class TestTrajectory(unittest.TestCase):
         q2 = -q1
 
         tg = tr.jtraj(q1, q2, 11)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.q
+        qd = tg.qd
+        qdd = tg.qdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -318,9 +319,9 @@ class TestTrajectory(unittest.TestCase):
         t = np.linspace(0, 2, 11)
 
         tg = tr.jtraj(q1, q2, t)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.q
+        qd = tg.qd
+        qdd = tg.qdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))
@@ -339,9 +340,9 @@ class TestTrajectory(unittest.TestCase):
         # test with boundary conditions
         qone = np.ones((6,))
         tg = tr.jtraj(q1, q2, 11, -qone, qone)
-        q = tg.y
-        qd = tg.yd
-        qdd = tg.ydd
+        q = tg.q
+        qd = tg.qd
+        qdd = tg.qdd
 
         self.assertAlmostEqual(q.shape, (11, 6))
         self.assertTrue(np.allclose(q[0, :], q1))

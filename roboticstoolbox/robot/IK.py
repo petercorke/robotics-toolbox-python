@@ -150,26 +150,41 @@ class IKMixin:
         :rtype: named tuple
 
         ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can
-        be used for robots with any number of degrees of freedom. The return
-        value ``sol`` is a named tuple with elements:
+        to the robot end-effector pose ``T`` which is an ``SE3`` object. This
+        method can be used for robots with any number of degrees of freedom. The
+        return value ``sol`` is a named tuple with elements:
 
-        ============    ==========  ============================================================
+        ============    ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ============================================================
-        ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     bool        whether a solution was found
         ``reason``      str         reason for the failure
         ``iterations``  int         number of iterations
         ``residual``    float       final value of cost function
-        ============    ==========  ============================================================
+        ============    ==========  ===============================================
+
+        If ``success=False`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) = m > 1`` it is considered to be a trajectory, then the
+        result is a named tuple whose elements are
+
+        ============    ============   ===============================================
+        Element         Type           Description
+        ============    ============   ===============================================
+        ``q``           ndarray(m,n)   joint coordinates in units of radians or metres
+        ``success``     bool(m)        whether a solution was found
+        ``reason``      list of str    reason for the failure
+        ``iterations``  ndarray(m)     number of iterations
+        ``residual``    ndarray(m)     final value of cost function
+        ============    ============   ===============================================
+
+        The initial estimate of q for each time step is taken as the solution
+        from the previous time step.
 
         **Underactuated robots:**
 
@@ -199,7 +214,7 @@ class IKMixin:
         .. note::
 
             - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
-            - Implements a Levenberg-Marquadt variable-step-size solver.
+            - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
               current and desired tool pose.  This norm is computed from
               distances and angles without any kind of weighting.
@@ -379,7 +394,13 @@ class IKMixin:
         if len(T) == 1:
             return solutions[0]
         else:
-            return solutions
+            return iksol(
+                np.vstack([sol.q for sol in solutions]),
+                np.array([sol.success for sol in solutions]),
+                [sol.reason for sol in solutions],
+                np.array([sol.iterations for sol in solutions]),
+                np.array([sol.residual for sol in solutions])
+            )
 
 # --------------------------------------------------------------------- #
 
@@ -417,22 +438,34 @@ class IKMixin:
         be used for robots with any number of degrees of freedom. The return
         value ``sol`` is a named tuple with elements:
 
-        ============    ==========  ============================================================
+        ============    ==========  ===============================================
         Element         Type        Description
-        ============    ==========  ============================================================
-        ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
         ``success``     bool        whether a solution was found
         ``reason``      str         reason for the failure
         ``iterations``  int         number of iterations
         ``residual``    float       final value of cost function
-        ============    ==========  ============================================================
+        ============    ==========  ===============================================
+
+        If ``success=False`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) = m > 1`` it is considered to be a trajectory, then the
+        result is a named tuple whose elements are
+
+        ============    ============   ===============================================
+        Element         Type           Description
+        ============    ============   ===============================================
+        ``q``           ndarray(m,n)   joint coordinates in units of radians or metres
+        ``success``     bool(m)        whether a solution was found
+        ``reason``      list of str    reason for the failure
+        ``iterations``  ndarray(m)     number of iterations
+        ``residual``    ndarray(m)     final value of cost function
+        ============    ============   ===============================================
 
         **Underactuated robots:**
 
@@ -454,8 +487,9 @@ class IKMixin:
         .. note::
 
             - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
-            - Implements a modified Levenberg-Marquadt variable-step-size solver
+            - Implements a modified Levenberg-Marquadt variable-damping solver
               which is quite robust in practice.
+            - Similar to ``ikine_LM`` but uses a different error metric
             - The tolerance is computed on the norm of the error between
               current and desired tool pose.  This norm is computed from
               distances and angles without any kind of weighting.
@@ -567,143 +601,15 @@ class IKMixin:
         if len(T) == 1:
             return solutions[0]
         else:
-            return solutions
-
-# --------------------------------------------------------------------- #
-
-    # def ikine_unc(self, T, q0=None, ilimit=1000, tol=1e-16, stiffness=0, costfun=None):
-    #     r"""
-    #     Inverse manipulator by optimization without joint limits (Robot
-    #     superclass)
-
-    #     :param T: The desired end-effector pose or pose trajectory
-    #     :type T: SE3
-    #     :param q0: initial joint configuration (default all zeros)
-    #     :type q0: ndarray(n)
-    #     :param tol: Tolerance (default 1e-16)
-    #     :type tol: tol
-    #     :param ilimit: Iteration limit (default 1000)
-    #     :type ilimit: int
-    #     :param stiffness: Stiffness used to impose a smoothness contraint on
-    #         joint angles, useful when n is large (default 0)
-    #     :type stiffness: float
-    #     :param costfun: User supplied cost term, optional
-    #     :type costfun: callable
-    #     :return: inverse kinematic solution
-    #     :rtype: named tuple
-
-    #     ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding
-    #     to the robot end-effector pose T which is an SE3 object.  The
-    #     return value ``sol`` is a named tuple with elements:
-
-    #     ============    ==========  ============================================================
-    #     Element         Type        Description
-    #     ============    ==========  ============================================================
-    #     ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``
-    #     ``success``     bool        whether a solution was found
-    #     ``reason``      str         reason for the failure
-    #     ``iterations``  int         number of iterations
-    #     ``residual``    float       final value of cost function
-    #     ============    ==========  ============================================================
-
-    #     This method the Scipy SLSQP minimizer to minimize the squared norm of a
-    #     vector :math:`[d,a]` with components respectively the translation error
-    #     and rotation error in Euler vector form, between the desired pose and
-    #     the current estimate obtained by inverse kinematics.
-
-    #     **Additional cost terms**:
-
-    #     This method supports two additional costs:
-
-    #     - ``stiffness`` imposes a penalty on joint variation :math:`\sum_{j=1}^N (q_j - q_{j-1})^2`
-    #       which tends to keep the arm straight
-    #     - ``costfun`` add a cost given by a user-specified function ``costfun(q)``
-
-    #     **Trajectory operation**:
-
-    #     If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-    #     a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-    #     initial estimate of q for each time step is taken as the solution from
-    #     the previous time step.
+            return iksol(
+                np.vstack([sol.q for sol in solutions]),
+                np.array([sol.success for sol in solutions]),
+                [sol.reason for sol in solutions],
+                np.array([sol.iterations for sol in solutions]),
+                np.array([sol.residual for sol in solutions])
+            )
 
 
-    #     .. note::
-
-    #         - Uses ``SciPy.minimize`` SLSQP without bounds.
-    #         - Joint limits are not considered in this solution.
-    #         - Can be used for robots with arbitrary degrees of freedom.
-    #         - The inverse kinematic solution is generally not unique, and
-    #           depends on the initial guess ``q0``.
-    #         - The default value of ``q0`` is zero which is a poor choice for
-    #           most manipulators since it often corresponds to a
-    #           kinematic singularity.
-    #         - Such a solution is completely general, though much less
-    #           efficient than analytic inverse kinematic solutions derived
-    #           symbolically.
-    #         - The objective function (error) is
-    #           :math:`\sum \left( (\mat{T}^{-1} \cal{K}(\vec{q}) - \mat{1} ) \mat{\Omega} \right)^2`
-    #           where :math:`\mat{\Omega}` is a diagonal matrix.
-    #         - Joint offsets, if defined, are accounted for in the solution.
-
-    #     .. warning::
-
-    #         - The objective function is rather uncommon.
-    #         - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
-    #           uses a scalar cost-function and does not provide a Jacobian.
-
-    #     :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_con`, :func:`ikine_min`
-    #     """
-
-    #     if not isinstance(T, SE3):
-    #         T = SE3(T)
-
-    #     if q0 is None:
-    #         q0 = np.zeros((self.n))
-    #     else:
-    #         q0 = base.getvector(q0, self.n)
-
-    #     solutions = []
-
-    #     wr = 1 / self.reach
-    #     weight = np.r_[wr, wr, wr, 1, 1, 1]
-
-    #     def cost(q, T, weight, costfun, stiffness):
-    #         # T, weight, costfun, stiffness = args
-    #         e = _angle_axis(self.fkine(q).A, T) * weight
-    #         E = (e**2).sum()
-
-    #         if stiffness > 0:
-    #             # Enforce a continuity constraint on joints, minimum bend
-    #             E += np.sum(np.diff(q)**2) * stiffness
-
-    #         if costfun is not None:
-    #             E += (e**2).sum() + costfun(q)
-
-    #         return E
-
-    #     for Tk in T:
-
-    #         res = minimize(
-    #             cost,
-    #             q0,
-    #             args=(Tk.A, weight, costfun, stiffness),
-    #             tol=tol,
-    #             method='SLSQP',
-    #             options={'maxiter': ilimit}
-    #             )
-
-    #             # final gradient tolerance must be < gtol for success, bump
-    #             # this number up a bit
-    #             # SLSQP seems to work better than BFGS, L-BFGS-B
-
-    #         solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
-    #         solutions.append(solution)
-    #         q0 = res.x  # use this solution as initial estimate for next time
-
-    #     if len(T) == 1:
-    #         return solutions[0]
-    #     else:
-    #         return solutions
 
 # --------------------------------------------------------------------- #
 
@@ -943,221 +849,6 @@ class IKMixin:
             return solutions[0]
         else:
             return solutions
-
-# --------------------------------------------------------------------- #
-
-    # def ikine_min(self, T, q0=None, pweight=1.0, stiffness=0.0,
-    #            qlimits=True, ilimit=1000):
-    #     """
-    #     Inverse kinematics by optimization with joint limits (Robot superclass)
-
-    #     :param T: The desired end-effector pose or pose trajectory
-    #     :type T: SE3
-    #     :param q0: initial joint configuration (default all zeros)
-    #     :type q0: ndarray(n)
-    #     :param pweight: weighting on position error norm compared to rotation
-    #         error (default 1)
-    #     :type pweight: float
-    #     :param stiffness: Stiffness used to impose a smoothness contraint on
-    #         joint angles, useful when n is large (default 0)
-    #     :type stiffness: float
-    #     :param qlimits: Enforce joint limits (default True)
-    #     :type qlimits: bool
-    #     :param ilimit: Iteration limit (default 1000)
-    #     :type ilimit: bool
-    #     :return: inverse kinematic solution
-    #     :rtype: named tuple
-
-    #     ``sol = robot.ikine_unc(T)`` are the joint coordinates (n) corresponding
-    #     to the robot end-effector pose T which is an SE3 object.  The
-    #     return value ``sol`` is a named tuple with elements:
-
-    #     ============    ==========  ============================================================
-    #     Element         Type        Description
-    #     ============    ==========  ============================================================
-    #     ``q``           ndarray(n)  joint coordinates in units of radians or metres, or ``None``
-    #     ``success``     bool        whether a solution was found
-    #     ``reason``      str         reason for the failure
-    #     ``iterations``  int         number of iterations
-    #     ``residual``    float       final value of cost function
-    #     ============    ==========  ============================================================
-
-    #     **Trajectory operation**:
-
-    #     If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-    #     a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-    #     initial estimate of q for each time step is taken as the solution from
-    #     the previous time step.
-
-    #     .. note::
-
-    #         - PROTOTYPE CODE UNDER DEVELOPMENT, intended to do numerical
-    #           inverse kinematics with joint limits
-    #         - Uses ``SciPy.minimize`` with/without constraints.
-    #         - The inverse kinematic solution is generally not unique, and
-    #           depends on the initial guess ``q0``.
-    #         - This norm is computed from distances and angles and ``pweight``
-    #           can be used to scale the position error norm to be congruent
-    #           with rotation error norm.
-    #         - For a highly redundant robot ``stiffness`` can be used to impose 
-    #           a smoothness contraint on joint angles, tending toward solutions
-    #           with are smooth curves.
-    #         - The default value of ``q0`` is zero which is a poor choice for
-    #           most manipulators since it often corresponds to a
-    #           kinematic singularity.
-    #         - Such a solution is completely general, though much less
-    #           efficient than analytic inverse kinematic solutions derived
-    #           symbolically.
-    #         - This approach allows a solution to obtained at a singularity,
-    #           but the joint angles within the null space are arbitrarily
-    #           assigned.
-    #         - Joint offsets, if defined, are accounted for in the solution.
-    #         - Joint limits become explicit bounds if 'qlimits' is set.
-
-    #     .. warning::
-
-    #         - The objective function is rather uncommon.
-    #         - Order of magnitude slower than ``ikine_LM`` or ``ikine_LMS``, it
-    #           uses a scalar cost-function and does not provide a Jacobian.
-
-    #     :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`
-    #     """
-
-    #     if not isinstance(T, SE3):
-    #         T = SE3(T)
-
-    #     if q0 is None:
-    #         q0 = np.zeros((self.n,))
-    #     else:
-    #         q0 = base.getvector(q0, self.n)
-
-    #     col = 2
-    #     solutions = []
-
-    #     # Define the cost function to minimise
-    #     def cost(q, *args):
-    #         T, pweight, col, stiffness = args
-    #         Tq = self.fkine(q).A
-
-    #         # translation error
-    #         dT = base.transl(T) - base.transl(Tq)
-    #         E = np.linalg.norm(dT) * pweight
-
-    #         # Rotation error
-    #         # Find dot product of two columns
-    #         dd = np.dot(T[0:3, col], Tq[0:3, col])
-    #         E += np.arccos(dd)**2 * 1000
-
-    #         if stiffness > 0:
-    #             # Enforce a continuity constraint on joints, minimum bend
-    #             E += np.sum(np.diff(q)**2) * stiffness
-
-    #         return E
-
-    #     for Tk in T:
-
-    #         if qlimits:
-    #             bounds = Bounds(self.qlim[0, :], self.qlim[1, :])
-
-    #             res = minimize(
-    #                 cost,
-    #                 q0, 
-    #                 args=(Tk.A, pweight, col, stiffness),
-    #                 bounds=bounds,
-    #                 options={'gtol': 1e-6, 'maxiter': ilimit})
-    #         else:
-    #             # No joint limits, unconstrained optimization
-    #             # final gradient tolerance must be < gtol for success, bump
-    #             # this number up a bit
-    #             res = minimize(
-    #                 cost,
-    #                 q0, 
-    #                 args=(Tk.A, pweight, col, stiffness),
-    #                 options={'gtol': 1e-6, 'maxiter': ilimit})
-
-    #         solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
-    #         solutions.append(solution)
-    #         q0 = res.x  # use this solution as initial estimate for next time
-
-    #     if len(T) == 1:
-    #         return solutions[0]
-    #     else:
-    #         return solutions
-
-    # def qmincon(self, q=None):
-    #     """
-    #     Move away from joint limits
-
-    #     :param q: Joint coordinates
-    #     :type q: ndarray(n)
-    #     :retrun qs: The calculated joint values
-    #     :rtype qs: ndarray(n)
-    #     :return: Optimisation solved (True) or failed (False)
-    #     :rtype: bool
-    #     :return: Final value of the objective function
-    #     :rtype: float
-
-    #     ``qs, success, err = qmincon(q)`` exploits null space motion and
-    #     returns a set of joint angles ``qs`` (n) that result in the same
-    #     end-effector pose but are away from the joint coordinate limits.
-    #     ``n`` is the number of robot joints. ``success`` is True for
-    #     successful optimisation. ``err`` is the scalar final value of
-    #     the objective function.
-
-    #     **Trajectory operation**
-
-    #     In all cases if ``q`` is (m,n) it is taken as a pose sequence and
-    #     ``qmincon()`` returns the adjusted joint coordinates (m,n)
-    #     corresponding to each of the configurations in the sequence.
-
-    #     ``err`` and ``success`` are also (m) and indicate the results of
-    #     optimisation for the corresponding trajectory step.
-
-    #     .. note:: Robot must be redundant.
-
-    #     """
-
-    #     def sumsqr(A):
-    #         return np.sum(A**2)
-
-    #     def cost(x, ub, lb, qm, N):
-    #         return sumsqr(
-    #             (2 * (N @ x + qm) - ub - lb) / (ub - lb))
-
-    #     q = getmatrix(q, (None, self.n))
-
-    #     qstar = np.zeros((q.shape[0], self.n))
-    #     error = np.zeros(q.shape[0])
-    #     success = np.zeros(q.shape[0])
-
-    #     lb = self.qlim[0, :]
-    #     ub = self.qlim[1, :]
-
-    #     for k, qk in enumerate(q):
-
-    #         J = self.jacobe(qk)
-
-    #         N = null(J)
-
-    #         x0 = np.zeros(N.shape[1])
-    #         A = np.r_[N, -N]
-    #         b = np.r_[ub - qk, qk - lb].reshape(A.shape[0],)
-
-    #         con = LinearConstraint(A, -np.inf, b)
-
-    #         res = minimize(
-    #             lambda x: cost(x, ub, lb, qk, N),
-    #             x0, constraints=con)
-
-    #         qstar[k, :] = qk + N @ res.x
-    #         error[k] = res.fun
-    #         success[k] = res.success
-
-    #     if q.shape[0] == 1:
-    #         return qstar[0, :], success[0], error[0]
-    #     else:
-    #         return qstar, success, error
-
 
 def _angle_axis(T, Td):
     d = base.transl(Td) - base.transl(T)

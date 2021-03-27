@@ -10,9 +10,11 @@ import tempfile
 import subprocess
 import webbrowser
 import numpy as np
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
-from roboticstoolbox.robot.ELink import ELink, ETS
+from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.ETS import ETS, ETS2, SuperETS
+from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
@@ -55,7 +57,7 @@ class ERobot(Robot):
 
     def __init__(
             self,
-            elinks,
+            arg,
             base_link=None,
             gripper_links=None,
             checkjindex=True,
@@ -67,16 +69,19 @@ class ERobot(Robot):
         self._n = 0
         self._ee_links = []
         self._base_link = None
+        self._ndims = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
         orlinks = []
 
         link_number = 0
-        if isinstance(elinks, ETS):
-            # were passed an ETS string
-            ets = elinks
-            elinks = []
+        if isinstance(arg, SuperETS):
+            # we're passed an ETS string
+            ets = arg
+            links = []
+
+            self._ndims = arg._ndims
 
             # chop it up into segments, a link frame after every joint
             start = 0
@@ -86,21 +91,25 @@ class ERobot(Robot):
                 if j == 0:
                     parent = None
                 else:
-                    parent = elinks[-1]
+                    parent = links[-1]
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                elinks.append(elink)
+                links.append(elink)
 
             n = len(ets.joints())
 
             tool = ets[start:]
             if len(tool) > 0:
-                elinks.append(ELink(tool, parent=elinks[-1], name="ee"))
-        elif isinstance(elinks, list):
+                links.append(ELink(tool, parent=links[-1], name="ee"))
+
+        elif isinstance(arg, list):
             # we're passed a list of ELinks
 
             # check all the incoming ELink objects
             n = 0
-            for link in elinks:
+            ndims = None
+            links = arg
+            for link in links:
+
                 if isinstance(link, ELink):
                     # if link has no name, give it one
                     if link.name is None:
@@ -112,17 +121,60 @@ class ERobot(Robot):
                         raise ValueError(
                             f'link name {link.name} is not unique')
                     self._linkdict[link.name] = link
+
+                    # check all the Elinks are all 2D or 3D
+                    if ndims is None:
+                        ndims = link._ndims
+                    else:
+                        if link._ndims != ndims:
+                            raise ValueError(
+                                'links have inconsistent number of dimensions')
                 else:
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
+            self._ndims = ndims
+
+        elif isinstance(arg, DHRobot):
+            # we're passed a DHRobot object
+
+            self.__init__(
+                arg.ets(),
+                name=arg.name,
+                manufacturer=arg.manufacturer,
+                comment=arg.comment,
+                base=arg.base,
+                tool=arg.tool
+            )
+            return
+
+            # elinks = []
+            # for dhlink in arg:
+            #     e = dhlink.ets()
+            #     print(e)
+            #     elink = ELink(dhlink.ets())
+            #     elink.m = dhlink.m
+            #     elink.r = dhlink.r
+            #     elink.I = dhlink.I
+            #     elink.B = dhlink.B
+            #     elink.Tc = dhlink.Tc
+            #     elink.Jm = dhlink.Jm
+            #     elink.G = dhlink.G
+            #     elinks.append(elink)
+            # super().__init__(elinks,
+            #     name=arg.name,
+            #     manufacturer=arg.manufacturer,
+            #     comment=arg.comment,
+            #     base=arg.base,
+            #     tool=arg.tool
+            # )
         else:
             raise TypeError('elinks must be a list of ELinks or an ETS')
 
         self._n = n
 
         # scan for base
-        for link in elinks:
+        for link in links:
             # is this a base link?
             if link._parent is None:
                 if self._base_link is not None:
@@ -149,7 +201,7 @@ class ERobot(Robot):
 
             # Remove gripper links from the robot
             for g_link in g_links:
-                elinks.remove(g_link)
+                links.remove(g_link)
 
             # Save the gripper object
             self.grippers.append(Gripper(g_links))
@@ -161,7 +213,7 @@ class ERobot(Robot):
         # Set the ee links
         self.ee_links = []
         if len(gripper_links) == 0:
-            for link in elinks:
+            for link in links:
                 # is this a leaf node? and do we not have any grippers
                 if len(link.child) == 0:
                     # no children, must be an end-effector
@@ -172,28 +224,28 @@ class ERobot(Robot):
                 self.ee_links.append(link.parent)
 
         # assign the joint indices
-        if all([link.jindex is None for link in elinks]):
+        if all([link.jindex is None for link in links]):
 
             jindex = [0]  # "mutable integer" hack
 
             def visit_link(link, jindex):
                 # if it's a joint, assign it a jindex and increment it
-                if link.isjoint and link in elinks:
+                if link.isjoint and link in links:
                     link.jindex = jindex[0]
                     jindex[0] += 1
 
-                if link in elinks:
+                if link in links:
                     orlinks.append(link)
 
             # visit all links in DFS order
             self.dfs_links(
                 self.base_link, lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in elinks if link.isjoint]):
+        elif all([link.jindex is not None for link in links if link.isjoint]):
             # jindex set on all, check they are unique and sequential
             if checkjindex:
                 jset = set(range(self._n))
-                for link in elinks:
+                for link in links:
                     if link.isjoint and link.jindex not in jset:
                         raise ValueError(
                             f'joint index {link.jindex} was '
@@ -201,7 +253,7 @@ class ERobot(Robot):
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
                     raise ValueError(f'joints {jset} were not assigned')
-            orlinks = elinks
+            orlinks = links
         else:
             # must be a mixture of ELinks with/without jindex
             raise ValueError(
@@ -482,6 +534,58 @@ class ERobot(Robot):
     # def qdlim(self):
     #     return self.qdlim
 
+    # def rne( robot, q, qd, qdd):
+
+    #     n = robot.n
+
+    #     # allocate intermediate variables
+    #     Xup = SE3.Alloc(n)
+    #     Xtree = SE3.Alloc(n)
+
+    #     v = SpatialVelocity.Alloc(n)
+    #     a = SpatialAcceleration.Alloc(n)
+    #     f = SpatialForce.Alloc(n)
+    #     I = SpatialInertia.Alloc(n)
+    #     s = [None for i in range(n)]   # joint motion subspace
+    #     Q = np.zeros((n,))   # joint torque/force
+
+    #     # initialize intermediate variables
+    #     for j, link in enumerate(robot):
+    #         I[j] = SpatialInertia(link.m, link.r)
+    #         Xtree[j] = link.Ts
+    #         s[j] = link.v.s
+
+    #     a_grav = SpatialAcceleration(robot.gravity)
+
+    #     # forward recursion
+    #     for j in range(0, n):
+    #         vJ = SpatialVelocity(s[j] * qd[j])
+
+    #         # transform from parent(j) to j
+    #         Xup[j] = robot[j].A(q[j]).inv()
+
+    #         if robot[j].parent is None:
+    #             v[j] = vJ
+    #             a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
+    #         else:
+    #             jp = robot[j].parent.jindex
+    #             v[j] = Xup[j] * v[jp] + vJ
+    #             a[j] = Xup[j] * a[jp] \
+    #                 + SpatialAcceleration(s[j] * qdd[j]) \
+    #                 + v[j] @ vJ
+
+    #         f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
+
+    #     # backward recursion
+    #     for j in reversed(range(0, n)):
+    #         Q[j] = f[j].dot(s[j])
+
+    #         if robot[j].parent is not None:
+    #             jp = robot[j].parent.jindex
+    #             f[jp] = f[jp] + Xup[j] * f[j]
+
+    #     return Q
+
 # --------------------------------------------------------------------- #
 
     @property
@@ -631,6 +735,13 @@ class ERobot(Robot):
           base to the link ``link`` specified as an ELink reference or a name.
         - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
           from link ``l1`` to link ``l2``.
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.ETS.Panda()
+            >>> panda.ets()
+
         """
         v = self._getlink(start, self.base_link)
         if end is None and len(self.ee_links) > 1:
@@ -714,6 +825,15 @@ class ERobot(Robot):
         Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
 
+        Example::
+
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.URDF.Panda()
+            >>> panda.showgraph()
+
+        .. image:: ../figs/panda-graph.svg
+            :width: 600
+
         :seealso: :func:`dotfile`
         """
 
@@ -728,7 +848,8 @@ class ERobot(Robot):
 
         # open the PDF file in browser (hopefully portable), then cleanup
         webbrowser.open(f"file://{pdffile.name}")
-        os.remove(pdffile.name)
+        # time.sleep(1)
+        # os.remove(pdffile.name)
 
     def dotfile(self, filename, etsbox=False, jtype=False, static=True):
         """
@@ -849,7 +970,7 @@ graph [rankdir=LR];
         file.write('}\n')
 
         if isinstance(filename, str):
-            close(file)  # noqa
+            file.close()  # noqa
 
 # --------------------------------------------------------------------- #
 
@@ -918,6 +1039,7 @@ graph [rankdir=LR];
                 return self.base.A @ T
 
         # Otherwise use Python method
+        # we work with NumPy arrays not SE2/3 classes for speed
         q = getmatrix(q, (None, self.n))
 
         end, start, etool = self._get_limit_links(end, start)
@@ -929,15 +1051,29 @@ graph [rankdir=LR];
         elif tool is not None:
             tool = tool.A
 
-        T = SE3.Empty()
+        if tool is None and self._tool is not None:
+            tool = self._tool.A
+
+        if self._ndims == 3:
+            T = SE3.Empty()
+        elif self._ndims == 2:
+            T = SE2.Empty()
+        else:
+            raise ValueError('bad thing')
+
         for k, qk in enumerate(q):
 
             link = end  # start with last link
+
             # add tool if provided
-            if tool is None:
-                Tk = link.A(qk[link.jindex], fast=True)
+            A = link.A(qk[link.jindex], fast=True)
+            if A is None:
+                Tk = tool
             else:
-                Tk = link.A(qk[link.jindex], fast=True) @ tool
+                if tool is None:
+                    Tk = A
+                elif A is not None:
+                    Tk = A @ tool
 
             # add remaining links, back toward the base
             while True:
@@ -946,17 +1082,20 @@ graph [rankdir=LR];
                 if link is None:
                     break
 
-                Tk = link.A(qk[link.jindex], fast=True) @ Tk
+                A = link.A(qk[link.jindex], fast=True)
+
+                if A is not None:
+                    Tk = A @ Tk
 
                 if link is start:
                     break
 
             # add base transform if it is set
-            if include_base and \
-                    self.base is not None and start == self.base_link:
+            if self._base is not None and start == self.base_link:
                 Tk = self.base.A @ Tk
 
-            T.append(SE3(Tk))
+            # cast to pose class and append
+            T.append(T.__class__(Tk))
 
         return T
 
@@ -1188,9 +1327,9 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    # def jacob0_fast(self, q, end=None, start=None, tool=None):
-
-    def jacob0(self, q, end=None, start=None, tool=None, T=None, fast=False):
+    def jacob0(
+            self, q, end=None, start=None, tool=None, T=None,
+            half=None, analytical=None, fast=False):
         r"""
         Manipulator geometric Jacobian in the base frame
 
@@ -1209,6 +1348,10 @@ graph [rankdir=LR];
             avoid caluclating forward kinematics to save time, defaults
             to None
         :type T: SE3, optional
+        :param half: return half Jacobian: 'trans' or 'rot'
+        :type half: str
+        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
+        :type analytical: str
         :return J: Manipulator Jacobian in the base frame
         :rtype: ndarray(6,n)
 
@@ -1219,6 +1362,17 @@ graph [rankdir=LR];
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
+        ``analytical`` can be one of:
+
+            =============  ==================================
+            Value          Rotational representation
+            =============  ==================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ==================================
+
         Example:
 
         .. runblock:: pycon
@@ -1227,7 +1381,7 @@ graph [rankdir=LR];
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the geometric Jacobian as described in texts by
+        .. warning:: This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
@@ -1260,6 +1414,7 @@ graph [rankdir=LR];
         U = np.eye(4)
         j = 0
         J = np.zeros((6, n))
+        zero = np.array([0, 0, 0])
 
         for link in path:
 
@@ -1291,19 +1446,108 @@ graph [rankdir=LR];
 
                 elif link.v.axis == 'tx':
                     J[:3, j] = n
-                    J[3:, j] = np.array([0, 0, 0])
+                    J[3:, j] = zero
 
                 elif link.v.axis == 'ty':
                     J[:3, j] = o
-                    J[3:, j] = np.array([0, 0, 0])
+                    J[3:, j] = zero
 
                 elif link.v.axis == 'tz':
                     J[:3, j] = a
-                    J[3:, j] = np.array([0, 0, 0])
+                    J[3:, j] = zero
 
                 j += 1
             else:
-                U = U @ link.A(fast=True)
+                A = link.A(fast=True)
+                if A is not None:
+                    U = U @ A
+
+        # compute rotational transform if analytical Jacobian required
+        if analytical is not None and half != 'trans':
+
+            if analytical == 'rpy-xyz':
+                rpy = tr2rpy(T, 'xyz')
+                A = rpy2jac(rpy, 'xyz')
+            elif analytical == 'rpy-zyx':
+                rpy = tr2rpy(T, 'zyx')
+                A = rpy2jac(rpy, 'zyx')
+            elif analytical == 'eul':
+                eul = tr2eul(T)
+                A = eul2jac(eul)
+            elif analytical == 'exp':
+                # TODO: move to SMTB.base, Horner form with skew(v)
+                (theta, v) = trlog(t2r(T))
+                A = np.eye(3, 3) - (1 - math.cos(theta)) / theta * skew(v) \
+                    + (theta - math.sin(theta)) / theta * skew(v)**2
+            else:
+                raise ValueError('bad order specified')
+
+            J = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J
+
+        # TODO optimize computation above if half matrix is returned
+
+        # return top or bottom half if asked
+        if half is not None:
+            if half == 'trans':
+                J = J[:3, :]
+            elif half == 'rot':
+                J = J[3:, :]
+            else:
+                raise ValueError('bad half specified')
+
+        return J
+
+    def jacob0_2d(
+            self, q, end=None, start=None, tool=None, T=None,
+            half=None, analytical=None):
+
+        if tool is None:
+            tool = SE3()
+
+        path, n = self.get_path(end, start)
+
+        q = getvector(q, self.n)
+
+        if T is None:
+            T = self.base.inv() * \
+                self.fkine(q, end=end, start=start) * tool
+        T = T.A
+        U = np.eye(3)
+        j = 0
+        J = np.zeros((3, n))
+        zero = np.array([0, 0, 0])
+
+        for link in path:
+
+            if link.isjoint:
+                U = U @ link.A(q[link.jindex], fast=True)
+
+                if link == end:
+                    U = U @ tool.A
+
+                Tu = np.linalg.inv(U) @ T
+                n = U[:2, 0]
+                o = U[:2, 1]
+                x = Tu[0, 2]
+                y = Tu[1, 2]
+
+                if link.v.axis == 'R':
+                    J[:2, j] = (o * x) - (n * y)
+                    J[2:, j] = a
+
+                elif link.v.axis == 'tx':
+                    J[:2, j] = n
+                    J[2:, j] = zero
+
+                elif link.v.axis == 'ty':
+                    J[:2, j] = o
+                    J[2:, j] = zero
+
+                j += 1
+            else:
+                A = link.A(fast=True)
+                if A is not None:
+                    U = U @ A
 
         return J
 
@@ -1322,9 +1566,7 @@ graph [rankdir=LR];
             end of end, defaults to None
         :type tool: SE3, optional
         :param T: The transformation matrix of the reference point which the
-            Jacobian represents with respect to the base frame. Use this to
-            avoid caluclating forward kinematics to save time, defaults
-            to None
+            Jacobian represents with respect to the base frame.
         :type T: SE3, optional
         :return J: Manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
@@ -1344,13 +1586,17 @@ graph [rankdir=LR];
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
 
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
+
+        .. note:: ``T`` can be passed in to save the cost of computing forward
+            kinematics which is needed to transform velocity from end-effector
+            frame to world frame.
         """  # noqa
 
         q = getvector(q, self.n)
@@ -1507,7 +1753,7 @@ graph [rankdir=LR];
     #     return L
 
     def hessian0(self, q=None, J0=None, end=None, start=None):
-        """
+        r"""
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
@@ -1526,19 +1772,37 @@ graph [rankdir=LR];
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
-        H[i,j,k] is d2 u_i / dq_j dq_k
+        This method computes the manipulator Hessian.  If we take the 
+        time derivative of the differential kinematic relationship
 
-        where u = {t_x, t_y, t_z, r_x, r_y, r_z}
+        .. math::
 
-        J[i,j] is d u_i / dq_j
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
 
-        where u = {t_x, t_y, t_z, ζ_x, ζ_y, ζ_z}
+        where
 
-        v = J qd
+        .. math::
 
-        a = Jd qd + J qdd
+            \dmat{J} = \mat{H} \dvec{q}
 
-        Jd = H qd
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
+
+        The elements of the Hessian are
+
+        .. math::
+
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+
+        Similarly, we can write
+
+        .. math::
+
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -1574,7 +1838,7 @@ graph [rankdir=LR];
         return H
 
     def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes='all'):
-        """
+        r"""
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
         One of J or q is required. Supply J and H if already calculated to
@@ -1594,6 +1858,18 @@ graph [rankdir=LR];
 
         :return: The manipulability Jacobian
         :rtype: float ndarray(n)
+
+        Yoshikawa's manipulability measure
+
+        .. math::
+
+            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
+
+        This method returns its Jacobian with respect to configuration
+
+        .. math::
+
+            \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -1651,8 +1927,10 @@ graph [rankdir=LR];
         :return: Pretty print of the robot model
         :rtype: str
 
-        Constant links are shown in blue.
-        End-effector links are prefixed with an @
+        - Constant links are shown in blue.
+        - End-effector links are prefixed with an @
+        - The robot base frame is denoted as ``_O_`` and is equal to the robot's
+          ``base`` attribute.
         """
         table = ANSITable(
             Column("id", headalign="^"),
@@ -1665,14 +1943,25 @@ graph [rankdir=LR];
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
+            parent_name = link.parent.name if link.parent is not None else "_O_"
+            s = ets.__str__(f"q{link._jindex}")
+            if len(s) > 0:
+                s = " * " + s
             table.row(
                 k,
                 color + ee + link.name,
-                link.parent.name if link.parent is not None else "-",
+                parent_name,
                 link._joint_name if link.parent is not None else "",
-                ets.__str__(f"q{link._jindex}"))
+                f"{{{link.name}}} = {{{parent_name}}}{s}"
+            )
 
-        s = str(table)
+        if self.manufacturer is None:
+            manuf = ""
+        else:
+            manuf = f" (by {self.manufacturer})"
+        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), ETS model\n"
+
+        s += str(table)
         s += self.configurations_str()
 
         return s
@@ -1688,9 +1977,9 @@ graph [rankdir=LR];
 
         .. runblock:: pycon
 
-            import roboticstoolbox as rtb
-            robot = rtb.models.URDF.Panda()
-            robot.hierarchy()
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.URDF.Panda()
+            >>> robot.hierarchy()
 
         """
 
@@ -1896,13 +2185,13 @@ graph [rankdir=LR];
         # initialize intermediate variables
         for j, link in enumerate(robot):
             I[j] = SpatialInertia(m=link.m, r=link.r)
-            Xtree[j] = link.Ts
+            Xtree[j] = SE3(link.Ts)
             s[j] = link.v.s
 
         if gravity is None:
-            a_grav = SpatialAcceleration(robot.gravity)
+            a_grav = -SpatialAcceleration(robot.gravity)
         else:
-            a_grav = SpatialAcceleration(gravity)
+            a_grav = -SpatialAcceleration(gravity)
 
         # forward recursion
         for j in range(0, n):
@@ -1939,7 +2228,7 @@ if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
-    p = rtb.models.ETS.Puma560()
+    p = rtb.models.URDF.Puma560()
     p.fkine(p.qz)
     p.jacob0(p.qz)
     p.jacobe(p.qz)

@@ -118,7 +118,15 @@ class DHRobot(Robot):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        s = ""
+        if self.mdh:
+            dh = "modified"
+        else:
+            dh = "standard"
+        if self.manufacturer is None:
+            manuf = ""
+        else:
+            manuf = f" (by {self.manufacturer})"
+        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), {dh} DH parameters\n"
         deg = 180 / np.pi
 
         def qstr(j, link):
@@ -203,7 +211,7 @@ class DHRobot(Robot):
                 else:
                     table.row(qstr(j, L), L.d, L.a, angle(L.alpha), *ql)
 
-        s = str(table)
+        s += str(table)
 
         # show tool and base
         if self._tool is not None or self._tool is not None:
@@ -638,97 +646,6 @@ class DHRobot(Robot):
 
         return p
 
-    def config(self):
-        """
-        Return the joint configuration string
-
-        :return: joint configuration string
-        :rtype: str
-
-        A string with one letter per joint: ``R`` for a revolute
-        joint, and ``P`` for a prismatic joint.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.config()
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.config()
-        """
-        return ''.join(['R' if L.isrevolute else 'P' for L in self])
-
-    def todegrees(self, q=None):
-        """
-        Convert joint angles to degrees
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n)
-        :return: a vector of joint coordinates in degrees and metres
-        :rtype: ndarray(n)
-
-        ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
-        taking into account whether elements of ``q`` correspond to revolute
-        or prismatic joints, ie. prismatic joint values are not converted.
-
-        ``robot.todegrees()`` as above except uses the stored q value of the
-        robot object.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> from math import pi
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
-        """
-
-        q = self._getq(q)
-        revolute = self.isrevolute()
-
-        return np.array([
-            q[k] * 180.0 / np.pi if
-            revolute[k] else q[k] for k in range(len(q))
-        ])
-
-    def toradians(self, q):
-        """
-        Convert joint angles to radians
-
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n)
-        :return: a vector of joint coordinates in radians and metres
-        :rtype: ndarray(n)
-
-        ``robot.toradians(q)`` converts joint coordinates ``q`` to radians
-        taking into account whether elements of ``q`` correspond to revolute
-        or prismatic joints, ie. prismatic joint values are not converted.
-
-        ``robot.toradians()`` as above except uses the stored q value of the
-        robot object.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.toradians([10, 20, 2, 30, 40, 50])
-        """
-
-        q = self._getq(q)
-        revolute = self.isrevolute()
-
-        return np.array([
-            q[k] * np.pi / 180.0
-            if revolute[k] else q[k] for k in range(len(q))
-        ])
-
     def dhunique(self):
         """
         Print the unique DH parameters
@@ -736,6 +653,14 @@ class DHRobot(Robot):
         Print a table showing all the non-zero DH parameters, and their
         values.  This is the minimum set of kinematic parameters required
         to describe the robot.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.dhunique()
         """
 
         table = ANSITable(
@@ -818,6 +743,20 @@ class DHRobot(Robot):
         return tw, T[-1]
 
     def ets(self):
+        """
+        Robot kinematics as an elemenary transform sequence
+
+        :return: elementary transform sequence
+        :rtype: ETS
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.ets()
+        """
 
         # optionally start with the base transform
         if self._base is None:
@@ -976,7 +915,7 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
 
-        .. note:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
@@ -1036,7 +975,7 @@ class DHRobot(Robot):
         :param half: return half Jacobian: 'trans' or 'rot'
         :type half: str
         :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-        :type param: str
+        :type analytical: str
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
@@ -1065,13 +1004,14 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        .. warning:: This is the **geometric Jacobian** as described in texts by
+        .. warning:: The **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
 
         .. note:: ``T`` can be passed in to save the cost of computing forward
-            kinematics.
+            kinematics which is needed to transform velocity from end-effector
+            frame to world frame.
 
         """  # noqa
         q = getvector(q, self.n)
@@ -1264,7 +1204,8 @@ class DHRobot(Robot):
             L[j + 21] = self.links[i].B
             L[j + 22:j + 24] = self.links[i].Tc.flatten()
 
-        self._rne_ob = init(self.n, self.mdh, L, self.gravity)
+        # we negate gravity here, since the C code has the sign wrong
+        self._rne_ob = init(self.n, self.mdh, L, -self.gravity)
 
     def delete_rne(self):
         """
@@ -1341,7 +1282,8 @@ class DHRobot(Robot):
 
         for i in range(trajn):
             tau[i, :] = frne(
-                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], gravity, fext)
+                # we negate gravity here, since the C code has the sign wrong
+                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], -gravity, fext)
 
         if trajn == 1:
             return tau[0, :]
@@ -1466,7 +1408,7 @@ class DHRobot(Robot):
             w = Rb @ np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = Rb @ np.zeros((3,), dtype=dtype)
-            vd = Rb @ gravity
+            vd = -Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #
 
@@ -1798,6 +1740,7 @@ if __name__ == "__main__":   # pragma nocover
     # print(planar)
 
     puma = rtb.models.DH.Puma560()
+    print(puma)
     print(puma.jacob0(puma.qn, analytical='eul'))
     # puma.base = None
     # print('base', puma.base)

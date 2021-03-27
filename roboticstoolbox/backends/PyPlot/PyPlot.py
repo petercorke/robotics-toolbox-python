@@ -71,6 +71,12 @@ class PyPlot(Connector):
                 '\n\nYou do not have matplotlib installed, do:\n'
                 'pip install matplotlib\n\n')
 
+    def __repr__(self):
+        s =  f"PyPlot3D backend, t = {self.sim_time}, scene:"
+        for robot in self.robots:
+            s += f"\n  {robot.robot.name}"
+        return s
+
     def launch(self, name=None, fig=None, limits=None):
         """
         Launch a graphical interface
