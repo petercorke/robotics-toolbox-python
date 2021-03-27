@@ -159,7 +159,7 @@ class ELink(Link):
             isflip,
             axis,
             jindex,
-            self._Ts.A,
+            self._Ts,
             self._fk,
             parent)
 
@@ -199,7 +199,7 @@ class ELink(Link):
             isflip,
             axis,
             jindex,
-            self._Ts.A,
+            self._Ts,
             self._fk,
             parent)
 
@@ -211,19 +211,15 @@ class ELink(Link):
         # TODO probably should use ETS.compile()
 
         if isinstance(self._ets, SuperETS):
-            first = True
-            T = None
+            T = np.eye(4)
 
             for et in self._ets:
                 # constant transforms only
                 if et.isjoint:
                     raise ValueError('The transforms in ets must be constant')
 
-                if first:
-                    T = et.T()
-                    first = False
-                else:
-                    T = T @ et.T()
+                T = T @ et.T()
+
             self._Ts = T
 
         elif isinstance(self._ets, SE3):

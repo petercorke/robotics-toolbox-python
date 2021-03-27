@@ -13,8 +13,6 @@ import json
 from abc import ABC, abstractmethod
 from functools import wraps
 
-from roboticstoolbox.backends import Swift as swift
-
 import numba
 
 _sw = None

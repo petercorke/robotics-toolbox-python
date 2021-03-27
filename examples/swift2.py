@@ -77,9 +77,6 @@ import time
 
 import cProfile
 
-from spatialmath.base.sm_numba import numba_njit, use_numba, using_numba
-import numba
-
 
 from spatialmath.base import r2q
 
@@ -122,13 +119,13 @@ env.add(panda, show_robot=True)
 
 
 ev = [0.01, 0, 0, 0, 0, 0]
-panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
+panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
 env.step(0.01)
 
 
 def stepper():
     for i in range(10000):
-        panda.qd = np.linalg.pinv(panda.jacob0_fast(panda.q)) @ ev
+        panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
         # panda.fkine_all_fast(panda.q)
         env.step(0.001)
 

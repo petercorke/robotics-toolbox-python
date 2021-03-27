@@ -4,7 +4,6 @@ Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
-import os
 from os.path import splitext
 import tempfile
 import subprocess
@@ -13,7 +12,7 @@ import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
 from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.robot.ETS import ETS, ETS2, SuperETS
+from roboticstoolbox.robot.ETS import ETS, SuperETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
@@ -52,8 +51,6 @@ class ERobot(Robot):
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
     """
-
-    # TODO do we need tool and base as well?
 
     def __init__(
             self,
@@ -1772,7 +1769,7 @@ graph [rankdir=LR];
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
-        This method computes the manipulator Hessian.  If we take the 
+        This method computes the manipulator Hessian.  If we take the
         time derivative of the differential kinematic relationship
 
         .. math::
@@ -1943,7 +1940,8 @@ graph [rankdir=LR];
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
-            parent_name = link.parent.name if link.parent is not None else "_O_"
+            parent_name = \
+                link.parent.name if link.parent is not None else "_O_"
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
                 s = " * " + s
