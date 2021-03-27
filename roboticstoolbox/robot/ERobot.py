@@ -4,89 +4,27 @@ Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
-import sys
 import os
 from os.path import splitext
 import tempfile
 import subprocess
-from tokenize import endpats
-from typing import Type
 import webbrowser
 import numpy as np
-# import spatialmath as sp
 from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
 from roboticstoolbox.robot.ELink import ELink, ETS
-# from roboticstoolbox.backends.PyPlot.functions import \
-#     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
-#     _plot2, _teach2
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.tools.data import path_to_datafile
 
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
 from spatialmath import SpatialAcceleration, SpatialVelocity, \
     SpatialInertia, SpatialForce
 
-import numba
 import fknm
-
-
-@numba.njit
-def j_fast(base, fk, tool, links, lj, axis, n):
-
-    U = np.eye(4)
-    j = 0
-    J = np.empty((6, n))
-
-    for i in range(n):
-
-        if lj[i]:
-            U = U @ links[i, :, :]
-
-            if i == 6:
-                U = U @ tool
-
-            Tu = np.linalg.inv(U) @ fk
-            n = U[:3, 0]
-            o = U[:3, 1]
-            a = U[:3, 2]
-            x = Tu[0, 3]
-            y = Tu[1, 3]
-            z = Tu[2, 3]
-
-            if axis[i] == 'Rz':
-                J[:3, j] = (o * x) - (n * y)
-                J[3:, j] = a
-
-            elif axis[i] == 'Ry':
-                J[:3, j] = (n * z) - (a * x)
-                J[3:, j] = o
-
-            elif axis[i] == 'Rx':
-                J[:3, j] = (a * y) - (o * z)
-                J[3:, j] = n
-
-            elif axis[i] == 'tx':
-                J[:3, j] = n
-                J[3:, j] = np.array([0, 0, 0])
-
-            elif axis[i] == 'ty':
-                J[:3, j] = o
-                J[3:, j] = np.array([0, 0, 0])
-
-            elif axis[i] == 'tz':
-                J[:3, j] = a
-                J[3:, j] = np.array([0, 0, 0])
-
-            j += 1
-        else:
-            U = U @ links[i, :, :]
-
-    return J
 
 
 class ERobot(Robot):
@@ -532,16 +470,7 @@ class ERobot(Robot):
     #         robot.tool)
 
     @property
-    # @numba.njit(numba.float64[:])
     def qlim(self):
-        # v = np.zeros((2, self.n))
-        # j = 0
-
-        # for i in range(len(self.links)):
-        #     if self.links[i].isjoint:
-        #         v[:, j] = self.links[i].qlim
-        #         j += 1
-
         return self._qlim
 
     @property
@@ -924,7 +853,9 @@ graph [rankdir=LR];
 
 # --------------------------------------------------------------------- #
 
-    def fkine(self, q, end=None, start=None, tool=None):
+    def fkine(
+            self, q, end=None, start=None, tool=None,
+            include_base=True, fast=False):
         '''
         Forward kinematics
 
@@ -965,6 +896,28 @@ graph [rankdir=LR];
 
         '''
 
+        # Use c extension to calculate fkine
+        if fast:
+            path, _, etool = self.get_path(end, start, _fknm=True)
+            m = len(path)
+
+            if tool is None:
+                tool = self._eye_fknm
+
+            T = np.empty((4, 4))
+            fknm.fkine(m, path, q, etool, tool, T)
+
+            if tool is not None:
+                T2 = np.empty((4, 4))
+                fknm.compose(T, tool, T2)
+                T = T2
+
+            if not include_base:
+                return T
+            else:
+                return self.base.A @ T
+
+        # Otherwise use Python method
         q = getmatrix(q, (None, self.n))
 
         end, start, etool = self._get_limit_links(end, start)
@@ -999,33 +952,13 @@ graph [rankdir=LR];
                     break
 
             # add base transform if it is set
-            if self.base is not None and start == self.base_link:
+            if include_base and \
+                    self.base is not None and start == self.base_link:
                 Tk = self.base.A @ Tk
 
             T.append(SE3(Tk))
 
         return T
-
-    def fkine_fast(self, q, end=None, start=None, tool=None, include_base=False):
-        path, _, etool = self.get_path(end, start, _fknm=True)
-
-        m = len(path)
-
-        if tool is None:
-            tool = self._eye_fknm
-
-        T = np.empty((4, 4))
-        fknm.fkine(m, path, q, etool, tool, T)
-
-        if tool is not None:
-            T2 = np.empty((4, 4))
-            fknm.compose(T, tool, T2)
-            T = T2
-
-        if not include_base:
-            return T
-        else:
-            return self.base.A @ T
 
     def fkine_all(self, q):
         '''
@@ -1085,8 +1018,6 @@ graph [rankdir=LR];
 
                 for gi in link.geometry:
                     gi.wT = link._fk
-
-        # raise ValueError('1')
 
     def get_path(self, end=None, start=None, _fknm=False):
         """
@@ -1257,23 +1188,9 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def jacob0_fast(self, q, end=None, start=None, tool=None):
+    # def jacob0_fast(self, q, end=None, start=None, tool=None):
 
-        path, n, etool = self.get_path(end, start, _fknm=True)
-
-        if tool is None:
-            tool = self._eye_fknm
-
-        J = np.empty((6, n))
-
-        fknm.jacob0(len(path), n, path, q, etool, tool, J)
-
-        # print(np.round(self.jacob0(q), 2))
-        # print(np.round(J, 2))
-
-        return J
-
-    def jacob0(self, q, end=None, start=None, tool=None, T=None):
+    def jacob0(self, q, end=None, start=None, tool=None, T=None, fast=False):
         r"""
         Manipulator geometric Jacobian in the base frame
 
@@ -1319,31 +1236,16 @@ graph [rankdir=LR];
             with ``start`` closest to the base.
         """  # noqa
 
-        # path, n = self.get_path(end, start)
+        # Use c extension
+        if fast:
+            path, n, etool = self.get_path(end, start, _fknm=True)
+            if tool is None:
+                tool = self._eye_fknm
+            J = np.empty((6, n))
+            fknm.jacob0(len(path), n, path, q, etool, tool, J)
+            return J
 
-        # if tool is None:
-        #     tool = np.eye(4)
-
-        # base = self.base.A
-
-        # fk = self.fkine(q, end=end, start=start).A
-
-        # links = np.empty((n, 4, 4))
-        # lj = np.empty(n)
-        # axis = []
-
-        # for i in range(n):
-        #     if path[i].isjoint:
-        #         links[i, :, :] = path[i].A(q[path[i].jindex], fast=True)
-        #         lj[i] = 1
-        #         axis.append(path[i].v.axis)
-        #     else:
-        #         links[i, :, :] = path[i].A(fast=True)
-        #         lj[i] = 0
-        #         axis.append('n')
-
-        # return j_fast(base, fk, tool, links, lj, axis, 7)
-
+        # Otherwise use Python
         if tool is None:
             tool = SE3()
 
@@ -1351,16 +1253,10 @@ graph [rankdir=LR];
 
         q = getvector(q, self.n)
 
-        # if T is None:
-        #     T = self.base.inv() * \
-        #         self.fkine_fast(q, end=end, start=start) * tool
-
         if T is None:
-            T = self.fkine_fast(q, end=end, start=start)  # @ tool.A
+            T = self.fkine(q, end=end, start=start, include_base=False) * tool
 
-        # print(T)
-
-        # T = T.A
+        T = T.A
         U = np.eye(4)
         j = 0
         J = np.zeros((6, n))
