@@ -179,11 +179,11 @@ class VPython(Connector):  # pragma nocover
 
         # If DHRobot is given (or equivalent)
         else:
-            grpahical_dh_robot = None
+            graphical_dh_robot = None
             # If no ID given, and there are robots available
             if id is None and len(self.robots) > 0:
                 # Obtain the first one
-                grpahical_dh_robot = self.robots[0]
+                graphical_dh_robot = self.robots[0]
             # If no ID, and no robots available
             elif id is None:
                 print("No robot found")
@@ -194,16 +194,16 @@ class VPython(Connector):  # pragma nocover
                     if self.robots[i].robot is id and \
                             self.canvases[fig_num].is_robot_in_canvas(
                                                             self.robots[i]):
-                        grpahical_dh_robot = self.robots[i]
+                        graphical_dh_robot = self.robots[i]
                         break
 
             # If no graphical equivalent found, return
-            if grpahical_dh_robot is None:
+            if graphical_dh_robot is None:
                 print("No robot found")
                 return
             # Set poses of graphical robot
-            poses = grpahical_dh_robot.fkine(q)
-            grpahical_dh_robot.set_joint_poses(poses)
+            poses = graphical_dh_robot.fkine(q)
+            graphical_dh_robot.set_joint_poses(poses)
             if self.canvases[fig_num].current_mode == 2:
                 # Reload the joint sliders
                 self.canvases[fig_num].teach_mode()
