@@ -5,7 +5,7 @@
 
 from vpython import vector, compound, mag, box, curve
 from numpy import sign, ceil, arange
-from roboticstoolbox.backends.VPython.text import update_grid_numbers
+from roboticstoolbox.backends.VPython.text import update_grid_numbers, GridType
 from roboticstoolbox.backends.VPython.object2d import Marker2D
 from spatialmath import SE2
 from collections.abc import MutableMapping
@@ -43,7 +43,7 @@ class GraphicsGrid:  # pragma nocover
 
         # Save the scene the grid is placed in
         self.__scene = scene
-        self.__is_3d = True
+        self._mode = GridType.XYZ
 
         self.__relative_cam = True
         self.__num_squares = 10
@@ -95,7 +95,11 @@ class GraphicsGrid:  # pragma nocover
         # Update the labels instead of recreating them
         update_grid_numbers(
             self.__focal_point, self.grid_object.get('labels'),
-            self.__num_squares, self.__scale, self.__is_3d, self.__scene)
+            self.__num_squares, self.__scale, self._mode, self.__scene)
+
+        self.__move_grid_objects()
+
+        self._set_mode_plane_visibility()
 
     def __create_grid_objects(self):
         """
@@ -204,20 +208,32 @@ class GraphicsGrid:  # pragma nocover
         camera_axes = self.camera_axes
         # Locate centre of axes
         if self.__relative_cam:
-            x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
-                                           round(self.__scene.center.y, 2), \
-                                           round(self.__scene.center.z, 2)
-            self.__focal_point = [x_origin, y_origin, z_origin]
+            if self._mode == GridType.XYZ:
+                x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
+                                               round(self.__scene.center.y, 2), \
+                                               round(self.__scene.center.z, 2)
+                self.__focal_point = [x_origin, y_origin, z_origin]
             # Convert focal point for 2D rendering.
             # Puts focus point in centre of the view
-            if not self.__is_3d:
+            elif self._mode == GridType.XY2D:
                 self.__focal_point = [
                     val - int(self.__num_squares / 2)
-                    for val in self.__focal_point]
+                    for val in self.__focal_point
+                ]
                 x_origin = self.__focal_point[0]
                 y_origin = self.__focal_point[1]
                 z_origin = 0
                 self.__focal_point[2] = z_origin
+            elif self._mode == GridType.XY3D:
+                x_origin = round(self.__scene.center.x, 2)
+                y_origin = round(self.__scene.center.y, 2)
+                z_origin = 0
+                self.__focal_point = [x_origin, y_origin, z_origin]
+            else:
+                x_origin, y_origin, z_origin = round(self.__scene.center.x, 2), \
+                                               round(self.__scene.center.y, 2), \
+                                               round(self.__scene.center.z, 2)
+                self.__focal_point = [x_origin, y_origin, z_origin]
         else:
             x_origin, y_origin, z_origin = self.__focal_point[0], \
                                            self.__focal_point[1], \
@@ -266,6 +282,10 @@ class GraphicsGrid:  # pragma nocover
         else:
             z_pos = min_z_coord
 
+        if self._mode == GridType.XY3D:
+            x_pos = x_pos + sign(camera_axes.x) * (self.__scale * (self.__num_squares / 2))
+            y_pos = y_pos + sign(camera_axes.y) * (self.__scale * (self.__num_squares / 2))
+
         self.grid_object.get('xy_plane').origin = \
             vector(x_pos, y_pos, z_origin)
         self.grid_object.get('xz_plane').origin = \
@@ -296,15 +316,18 @@ class GraphicsGrid:  # pragma nocover
 
         distance_from_center = mag(
             self.__scene.center - self.__scene.camera.pos)
-        if self.__is_3d:
+
+        if self._mode == GridType.XYZ:
             new_scale = round(distance_from_center / 30.0, 1)
         else:
             new_scale = round(distance_from_center / 15.0, 1)
+
+        new_scale = round(round(new_scale / 0.2) * 0.2, 1)  # Round to nearest 0.2 multiple
+        new_scale = max(min(new_scale, 100), 0.2)  # Between 0.2 and 100
+
         if not new_scale == self.__scale:
             self.set_scale(new_scale)
-            if not self.__is_3d:
-                self.__is_3d = True
-                self.toggle_2d_3d()
+            self._set_mode_plane_visibility()
 
         # If camera is different to previous: update
         if (not new_camera_axes.equals(old_camera_axes)) or (
@@ -315,23 +338,19 @@ class GraphicsGrid:  # pragma nocover
                                 self.grid_object.get('labels'),
                                 self.__num_squares,
                                 self.__scale,
-                                self.__is_3d,
+                                self._mode,
                                 self.__scene)
 
-    def toggle_2d_3d(self):
+    def _set_mode_plane_visibility(self):
         """
-        Toggle the grid between 2D and 3D options.
-        2D - XY Plane
-        3D - XY, XZ, YZ Planes
+        Turn off Z-planes if 2D mode selected
         """
-        # Set the new visibility
-        self.__is_3d = not self.__is_3d
+        # Turn visibility False if XY only
+        z_visibility = not (self._mode == GridType.XY2D or self._mode == GridType.XY3D)
 
         # Toggle it for XZ, YZ planes
-        self.grid_object.get('xz_plane').visible = \
-            self.__is_3d
-        self.grid_object.get('yz_plane').visible = \
-            self.__is_3d
+        self.grid_object.get('xz_plane').visible = z_visibility
+        self.grid_object.get('yz_plane').visible = z_visibility
 
         # Toggle it for Z plane numbers
         # Index start = (num_squares + 1) (11 numbers shown for 10 squares) *
@@ -341,7 +360,7 @@ class GraphicsGrid:  # pragma nocover
         z_label_end = len(self.grid_object.get('labels'))
         # Toggle
         for idx in range(z_label_start, z_label_end):
-            self.grid_object.get('labels')[idx].visible = self.__is_3d
+            self.grid_object.get('labels')[idx].visible = z_visibility
 
         self.update_grid()
 
@@ -358,12 +377,10 @@ class GraphicsGrid:  # pragma nocover
         self.grid_object.get('yz_plane').visible = is_visible
         for number in self.grid_object.get('labels'):
             number.visible = is_visible
-        # If 3D, changes are made
-        # If 2D and setting off, changes are made
-        # If 2D and setting on, toggle the 3D graphics (are turned on)
-        if self.__is_3d is False and is_visible is True:
-            self.__is_3d = True
-            self.toggle_2d_3d()
+
+        # Update for 2D if required
+        if is_visible:
+            self._set_mode_plane_visibility()
 
     def set_relative(self, is_relative):
         """
@@ -388,8 +405,13 @@ class GraphicsGrid:  # pragma nocover
         if not self.grid_object.get('xy_plane').visible:
             return
 
-        value = max(min(value, 100), 0.1)  # Between 0.1 and 100
+        value = round(round(value / 0.2) * 0.2, 1)  # Round to nearest 0.2 multiple
+        value = max(min(value, 100), 0.2)  # Between 0.2 and 100
         self.__scale = value
+
+        self._refresh_grid()
+
+    def _refresh_grid(self):
         # Turn off grid then delete
         self.grid_object.get('xy_plane').clear()
         self.grid_object.get('xz_plane').clear()
@@ -400,6 +422,18 @@ class GraphicsGrid:  # pragma nocover
         # Don't del the curve objects
         self.grid_object.labels = []
         self.__init_grid()
+
+    def set_mode(self, mode):
+        """
+
+        """
+        # Sanitise input
+        if not type(mode) == GridType:
+            err = "Invalid parameter type given. Expected {0}, given {1}."
+            raise UserWarning(err.format(GridType, type(mode)))
+        # Apply
+        self._mode = mode
+        self._refresh_grid()
 
 
 def create_line(pos1, pos2, scene,
