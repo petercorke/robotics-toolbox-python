@@ -19,7 +19,7 @@ _GraphicalRobot = None
 close_localhost_session = None
 
 try:
-    from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D
+    from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D, UImode
     from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot
     from roboticstoolbox.backends.VPython.grid import GridType
 except ImportError:
@@ -173,7 +173,7 @@ class VPython(Connector):  # pragma nocover
             if self.canvases[fig_num].is_robot_in(id):
                 poses = id.fkine(q)
                 id.set_joint_poses(poses)
-                if self.canvases[fig_num].current_mode == 2:
+                if self.canvases[fig_num].current_mode == UImode.TEACHPANEL:
                     # Reload the joint sliders
                     self.canvases[fig_num].teach_mode()
 
@@ -204,7 +204,7 @@ class VPython(Connector):  # pragma nocover
             # Set poses of graphical robot
             poses = graphical_dh_robot.fkine(q)
             graphical_dh_robot.set_joint_poses(poses)
-            if self.canvases[fig_num].current_mode == 2:
+            if self.canvases[fig_num].current_mode == UImode.TEACHPANEL:
                 # Reload the joint sliders
                 self.canvases[fig_num].teach_mode()
 
