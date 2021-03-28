@@ -4,7 +4,7 @@
 """
 
 # import numpy as np
-from spatialmath import SE3, SE2, SMPose
+from spatialmath import SE3, SE2, BasePoseMatrix
 # from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
 from roboticstoolbox.robot.ETS import ETS, SuperETS
