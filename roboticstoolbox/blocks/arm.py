@@ -171,7 +171,7 @@ class Jacobian(FunctionBlock):
        +------------+---------+---------+
     """
 
-    def __init__(self, robot, *inputs, frame='0', inverse=False, transpose=False, **kwargs):
+    def __init__(self, robot, *inputs, frame='0', inverse=False, pinv=False, transpose=False, **kwargs):
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -179,6 +179,12 @@ class Jacobian(FunctionBlock):
         :type robot: Robot subclass
         :param frame: Frame to compute Jacobian for: '0' (default) or 'e'
         :type frame: str
+        :param inverse: output inverse of Jacobian
+        :type inverse: bool
+        :param pinv: output pseudo-inverse of Jacobian
+        :type pinv: bool
+        :param transpose: output transpose of Jacobian
+        :type transpose: bool
         :param ``**kwargs``: common Block options
         :return: a JACOBIAN block
         :rtype: Jacobian instance
@@ -193,7 +199,12 @@ class Jacobian(FunctionBlock):
             
             1. Jacobian matrix as an ndarray(6,n)
 
-
+        .. notes::
+            - Only one of ``inverse`` or ``pinv`` can be True
+            - ``inverse`` or ``pinv`` can be used in conjunction with ``transpose``
+            - ``inverse`` requires that the Jacobian is square
+            - If ``inverse`` is True and the Jacobian is singular a runtime
+              error will occur.
         """
         super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
         self.type = 'jacobian'
@@ -206,7 +217,13 @@ class Jacobian(FunctionBlock):
             self.jfunc = robot.jacobe
         else:
             raise ValueError('unknown frame')
+        
+        if inverse and robot.n != 6:
+            raise ValueError('cannot invert a non square Jacobian')
+        if inverse and pinv:
+            raise ValueError('can only set one of inverse and pinv')
         self.inverse = inverse
+        self.pinv = pinv
         self.transpose = transpose
             
         self.inport_names(('q',))
@@ -216,6 +233,8 @@ class Jacobian(FunctionBlock):
         J = self.jfunc(self.inputs[0])
         if self.inverse:
             J = np.linalg.inv(J)
+        if self.pinv:
+            J = np.linalg.pinv(J)
         if self.transpose:
             J = J.T
         return [J]
