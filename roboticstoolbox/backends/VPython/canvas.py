@@ -285,6 +285,9 @@ class GraphicsCanvas3D:  # pragma nocover
         """
         self.__graphics_grid.set_mode(mode)
 
+    def current_mode(self):
+        return self.__ui_mode
+
     #######################################
     #  UI Management
     #######################################

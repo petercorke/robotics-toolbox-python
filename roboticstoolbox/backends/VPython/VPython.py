@@ -173,6 +173,9 @@ class VPython(Connector):  # pragma nocover
             if self.canvases[fig_num].is_robot_in(id):
                 poses = id.fkine(q)
                 id.set_joint_poses(poses)
+                if self.canvases[fig_num].current_mode == 2:
+                    # Reload the joint sliders
+                    self.canvases[fig_num].teach_mode()
 
         # If DHRobot is given (or equivalent)
         else:
@@ -201,6 +204,9 @@ class VPython(Connector):  # pragma nocover
             # Set poses of graphical robot
             poses = grpahical_dh_robot.fkine(q)
             grpahical_dh_robot.set_joint_poses(poses)
+            if self.canvases[fig_num].current_mode == 2:
+                # Reload the joint sliders
+                self.canvases[fig_num].teach_mode()
 
         if dt is not None:
             sleep(dt)
