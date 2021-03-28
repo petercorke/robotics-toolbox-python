@@ -1403,12 +1403,17 @@ class DHRobot(Robot):
             Rm = []
 
             # rotate base velocity and acceleration into L1 frame
-            Rb = t2r(self.base.A).T
             # base has zero angular velocity
-            w = Rb @ np.zeros((3,), dtype=dtype)
+            w = np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
-            wd = Rb @ np.zeros((3,), dtype=dtype)
-            vd = -Rb @ gravity
+            wd = np.zeros((3,), dtype=dtype)
+            vd = -gravity
+
+            if self._base is not None:
+                Rb = t2r(self.base.A).T
+                w = Rb @ wd
+                wd = Rb @ wdd
+                vd = Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #
 
