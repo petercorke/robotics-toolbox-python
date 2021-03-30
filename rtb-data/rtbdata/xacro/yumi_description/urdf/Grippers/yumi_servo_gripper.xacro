@@ -2,7 +2,7 @@
 <robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- Import all Gazebo-customization elements, including Gazebo colors -->
-    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.gazebo.BLAHxacro" />
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.gazebo.xacro" />
     <!-- Import Transmissions -->
     <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.transmission.xacro" />
 
