@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot name="yumi_servo_gripper" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="yumi_servo_gripper_transmission" params="name hardware_interface">
+
+   <transmission name="${name}_tran">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${name}_joint">
+	<hardwareInterface>${hardware_interface}</hardwareInterface>
+      </joint>
+      <actuator name="${name}_motor">
+	<hardwareInterface>${hardware_interface}</hardwareInterface>
+	<mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+  </xacro:macro>
+
+</robot>
+
+
+
