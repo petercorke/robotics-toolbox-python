@@ -13,6 +13,8 @@ import json
 from abc import ABC, abstractmethod
 from functools import wraps
 
+from roboticstoolbox.backends import Swift as swift
+
 import numba
 
 _sw = None
@@ -88,36 +90,39 @@ class Swift(Connector):  # pragma nocover
 
     """
 
-    def __init__(self, realtime=True, headless=False, rate=60):
+    def __init__(self, _dev=False):
         super(Swift, self).__init__()
-
-        self.sim_time = 0.0
-
-        # self.robots = []
-        # self.shapes = []
-
-        self.swift_objects = []
 
         self.outq = Queue()
         self.inq = Queue()
 
+        self._dev = _dev
+
+        if sw is None:
+            _import_swift()
+
+        self._init()
+
+    def _init(self):
+        '''
+        A private initialization method to make relaunching easy
+        '''
+        self.sim_time = 0.0
+        self.swift_objects = []
+
         # Number of custom html elements added to page for id purposes
         self.elementid = 0
 
-        self.rate = rate
+        # Frame skipped to keep at rate
+        self._skipped = 1
 
         # Element dict which holds the callback functions for form updates
         self.elements = {}
 
-        self.realtime = realtime
-        self.headless = headless
-
+        self.rendering = True
+        self._notrenderperiod = 1
         self.recording = False
-
         self._laststep = time.time()
-
-        if not self.headless and sw is None:
-            _import_swift()
 
     @property
     def rate(self):
@@ -140,7 +145,9 @@ class Swift(Connector):  # pragma nocover
     #  Basic methods to do with the state of the external program
     #
 
-    def launch(self, browser=None, headless=False, **kwargs):
+    def launch(
+            self, realtime=False, headless=False, rate=60,
+            browser=None, **kwargs):
         """
         Launch a graphical backend in Swift by default in the default browser
         or in the specified browser
@@ -158,11 +165,30 @@ class Swift(Connector):  # pragma nocover
 
         super().launch()
 
+        self.browser = browser
+        self.rate = rate
+        self.realtime = realtime
         self.headless = headless
 
         if not self.headless:
-            sw.start_servers2(self.outq, self.inq, browser=browser)
+            # The realtime, render and pause buttons
+            self._add_controls()
+
+            # A flag for our threads to monitor for when to quit
+            self._run_thread = True
+            self.socket, self.server = sw.start_servers2(
+                self.outq, self.inq, self._servers_running,
+                browser=browser, dev=self._dev)
             self.last_time = time.time()
+
+    def _servers_running(self):
+        return self._run_thread
+
+    def _stop_threads(self):
+        self._run_thread = False
+        self.socket.join(1)
+        if not self._dev:
+            self.server.join(1)
 
     def step(self, dt=0.05, render=True):
         """
@@ -202,40 +228,53 @@ class Swift(Connector):  # pragma nocover
         # Adjust sim time
         self.sim_time += dt
 
-        # Send updated sim time to Swift
         if not self.headless:
 
-            # Only render at 60 FPS
-            if (time.time() - self._laststep) < self._period:
-                return
-
-            self._laststep = time.time()
-
-            # Only need to do GUI stuff if self.display is True
-            # Process GUI events
             # self.process_events()
-
             # Step through user GUI changes
             # self._step_elements()
 
-            # If realtime is set, delay progress if we are running too quickly
-            # if self.realtime:
-            #     time_taken = (time.time() - self.last_time)
-            #     diff = dt - time_taken
+            if render and self.rendering:
 
-            #     if diff > 0:
-            #         time.sleep(diff)
+                if self.realtime:
+                    # If realtime is set, delay progress if we are
+                    # running too quickly
+                    time_taken = (time.time() - self.last_time)
+                    diff = (dt * self._skipped) - time_taken
+                    self._skipped = 1
 
-            #     self.last_time = time.time()
+                    if diff > 0:
+                        time.sleep(diff)
 
-            # if render:
+                    self.last_time = time.time()
+                elif (time.time() - self._laststep) < self._period:
+                    # Only render at 60 FPS
+                    self._skipped += 1
+                    return
 
-            self._draw_all()
+                self._laststep = time.time()
+
+                self._step_elements()
+
+                events = self._draw_all()
+                # print(events)
+
+                # Process GUI events
+                self.process_events(events)
+
+            elif not self.rendering:
+                if (time.time() - self._laststep) < self._notrenderperiod:
+                    return
+                self._laststep = time.time()
+                events = json.loads(self._send_socket('shape_poses', [], True))
+                self.process_events(events)
+
+            # print(events)
             # else:
             #     for i in range(len(self.robots)):
             #         self.robots[i]['ob'].fkine_all(self.robots[i]['ob'].q)
 
-            # self._send_socket('sim_time', self.sim_time)
+            self._send_socket('sim_time', self.sim_time, expected=False)
 
     def reset(self):
         """
@@ -248,6 +287,7 @@ class Swift(Connector):  # pragma nocover
         """
 
         super().reset
+        self.restart()
 
     def restart(self):
         """
@@ -261,6 +301,13 @@ class Swift(Connector):  # pragma nocover
 
         super().restart
 
+        self._send_socket('close', '0', False)
+        self._stop_threads()
+        self._init()
+        self.launch(
+            realtime=self.realtime, headless=self.headless, rate=self.rate,
+            browser=self.browser)
+
     def close(self):
         """
         Close the graphics display
@@ -270,6 +317,8 @@ class Swift(Connector):  # pragma nocover
         """
 
         super().close()
+        self._send_socket('close', '0', False)
+        self._stop_threads()
 
     #
     #  Methods to interface with the robots created in other environemnts
@@ -341,22 +390,23 @@ class Swift(Connector):  # pragma nocover
 
             self.swift_objects.append(ob)
             return int(id)
-        # elif isinstance(ob, swift.SwiftElement):
+        elif isinstance(ob, swift.SwiftElement):
 
-        #     if ob._added_to_swift:
-        #         raise ValueError(
-        #             "This element has already been added to Swift")
+            if ob._added_to_swift:
+                raise ValueError(
+                    "This element has already been added to Swift")
 
-        #     ob._added_to_swift = True
+            ob._added_to_swift = True
 
-        #     id = 'customelement' + str(self.elementid)
-        #     self.elementid += 1
-        #     self.elements[id] = ob
-        #     ob._id = id
+            # id = 'customelement' + str(self.elementid)
+            id = self.elementid
+            self.elementid += 1
+            self.elements[str(id)] = ob
+            ob._id = id
 
-        #     self._send_socket(
-        #         'add_element',
-        #         ob.to_dict())
+            self._send_socket(
+                'element',
+                ob.to_dict())
 
     def remove(self, id):
         """
@@ -376,33 +426,41 @@ class Swift(Connector):  # pragma nocover
         idd = None
         code = None
 
-        if isinstance(id, rp.ERobot):
+        if isinstance(id, rp.ERobot) or isinstance(id, rp.Shape):
 
-            for i in range(len(self.robots)):
-                if self.robots[i] is not None and id == self.robots[i]['ob']:
+            for i in range(len(self.swift_objects)):
+                if self.swift_objects[i] is not None and \
+                        id == self.swift_objects[i]:
                     idd = i
-                    code = 'remove_robot'
-                    self.robots[idd] = None
+                    code = 'remove'
+                    self.swift_objects[idd] = None
                     break
 
-        elif isinstance(id, rp.Shape):
+            # for i in range(len(self.robots)):
+            #     if self.robots[i] is not None and id == self.robots[i]['ob']:
+            #         idd = i
+            #         code = 'remove_robot'
+            #         self.robots[idd] = None
+            #         break
 
-            for i in range(len(self.shapes)):
-                if self.shapes[i] is not None and id == self.shapes[i]:
-                    idd = i
-                    code = 'remove_shape'
-                    self.shapes[idd] = None
-                    break
+        # elif isinstance(id, rp.Shape):
 
-        elif id >= SHAPE_ADD:
-            # Number corresponding to shape ID
-            idd = id - SHAPE_ADD
-            code = 'remove_shape'
-            self.shapes[idd] = None
+        #     for i in range(len(self.shapes)):
+        #         if self.shapes[i] is not None and id == self.shapes[i]:
+        #             idd = i
+        #             code = 'remove_shape'
+        #             self.shapes[idd] = None
+        #             break
+
+        # elif id >= SHAPE_ADD:
+        #     # Number corresponding to shape ID
+        #     idd = id - SHAPE_ADD
+        #     code = 'remove_shape'
+        #     self.shapes[idd] = None
         else:
             # Number corresponding to robot ID
             idd = id
-            code = 'remove_robot'
+            code = 'remove'
             self.robots[idd] = None
 
         if idd is None:
@@ -472,16 +530,14 @@ class Swift(Connector):  # pragma nocover
                 "You must call swift.start_recording(file_name) before trying"
                 " to stop the recording")
 
-    def process_events(self):
+    def process_events(self, events):
         """
         Process the event queue from Swift, this invokes the callback functions
         from custom elements added to the page. If using custom elements
         (for example `add_slider`), use this function in your event loop to
         process updates from Swift.
         """
-        events = self._send_socket('check_elements')
-        events = json.loads(events)
-
+        # events = self._send_socket('check_elements')
         for event in events:
             self.elements[event].cb(events[event])
 
@@ -540,9 +596,13 @@ class Swift(Connector):  # pragma nocover
                 self.elements[element]._changed = False
                 self._send_socket(
                     'update_element',
-                    self.elements[element].to_dict())
+                    self.elements[element].to_dict(), False)
 
     def _draw_all(self):
+        '''
+        Sends the transform of every simulated object in the scene
+        Recieves bacl a list of events which has occured
+        '''
 
         msg = []
 
@@ -553,11 +613,11 @@ class Swift(Connector):  # pragma nocover
                 elif isinstance(self.swift_objects[i], rp.Robot):
                     msg.append([i, self.swift_objects[i].fk_dict()])
 
-        self._send_socket('shape_poses', msg, True)
+        events = self._send_socket('shape_poses', msg, True)
+        return json.loads(events)
 
     def _send_socket(self, code, data=None, expected=True):
         msg = [expected, [code, data]]
-        # print(msg)
 
         self.outq.put(msg)
 
@@ -565,6 +625,36 @@ class Swift(Connector):  # pragma nocover
             return self.inq.get()
         else:
             return '0'
+
+    def _pause_control(self, paused):
+        # Must hold it here until unpaused
+        while paused:
+            time.sleep(0.1)
+            events = json.loads(self._send_socket('shape_poses', []))
+
+            if '0' in events and not events['0']:
+                paused = False
+            self.process_events(events)
+
+    def _render_control(self, rendering):
+        self.rendering = rendering
+
+    def _time_control(self, realtime):
+        self._skipped = 1
+        self.realtime = not realtime
+
+    def _add_controls(self):
+        self._pause_button = Button(self._pause_control)
+        self._time_button = Button(self._time_control)
+        self._render_button = Button(self._render_control)
+
+        self._pause_button._id = '0'
+        self._time_button._id = '1'
+        self._render_button._id = '2'
+        self.elements['0'] = self._pause_button
+        self.elements['1'] = self._time_button
+        self.elements['2'] = self._render_button
+        self.elementid += 3
 
 
 class SwiftElement(ABC):
@@ -917,7 +1007,12 @@ class Checkbox(SwiftElement):
     @checked.setter
     @SwiftElement._update
     def checked(self, value):
-        self._checked = value
+        if isinstance(value, int):
+            new = [False] * len(self.options)
+            new[value] = True
+            self._checked = new
+        else:
+            self._checked = value
 
     def to_dict(self):
         return {
@@ -988,7 +1083,12 @@ class Radio(SwiftElement):
     @checked.setter
     @SwiftElement._update
     def checked(self, value):
-        self._checked = value
+        if isinstance(value, int):
+            new = [False] * len(self.options)
+            new[value] = True
+            self._checked = new
+        else:
+            self._checked = value
 
     def to_dict(self):
         return {

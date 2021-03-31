@@ -108,8 +108,62 @@ from spatialmath.base import r2q
 # k.base = sm.SE3(0.7, 1, 0) * sm.SE3.Rz(np.pi/2)
 # env.add(k)
 
-env = Swift.Swift()
+env = Swift.Swift(_dev=True)
 env.launch()
+
+
+def slidercb(e):
+    print(e)
+
+
+def selectcb(e):
+    print(e)
+
+
+def checkcb(e):
+    print(e)
+    # select.value = e
+
+
+label = Swift.Label('Demo')
+slider = Swift.Slider(slidercb, 10, 95, 5, 15, 'slider this is', ' d')
+select = Swift.Select(selectcb, 'selec', [
+                      'on', 'tw', 'three'], 2)
+
+check = Swift.Checkbox(checkcb, 'checkbox', [
+    'on', 'tw', 'three'], [False, True, True])
+
+
+def buttoncb(e):
+    print('BUTTON')
+    # check.checked = [True, True, False]
+    # check.desc = 'new desc'
+    slider.value = 60
+
+
+button = Swift.Button(buttoncb, 'button')
+
+
+def radiocb(e):
+    print(e)
+    select.value = e
+
+
+radio = Swift.Radio(radiocb, 'radio', [
+    'on', 'tw', 'three'], 2)
+
+# env.add(label)
+# env.add(slider)
+# env.add(button)
+# env.add(select)
+# env.add(radio)
+# env.add(check)
+
+# while True:
+#     env.step(0.05)
+#     time.sleep(0.001)
+
+# env.hold()
 
 
 panda = rtb.models.Panda()
@@ -120,7 +174,7 @@ env.add(panda, show_robot=True)
 
 ev = [0.01, 0, 0, 0, 0, 0]
 panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
-env.step(0.01)
+env.step(0.001)
 
 
 def stepper():
@@ -130,9 +184,42 @@ def stepper():
         env.step(0.001)
 
 
-cProfile.run('stepper()')
+# box = rtb.Box([0.8, 0.1, 0.1])
+# env.add(box)
+
+# stepper()
+# env.remove(panda)
+
+
+# r = rtb.models.LBR()
+# r.q = r.qr
+# r.qd = [0.01, 0.01, 0.01, 0, 0, 0, 0]
+# env.add(r)
+# for i in range(10000):
+#     panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+#     env.step(0.001)
+
+# # env.remove(box)
+# cProfile.run('stepper()')
+
+# env._run_thread = False
+# env.restart()
+
+# r = rtb.models.LBR()
+# r.q = r.qr
+# r.qd = [0.01, 0.01, 0.01, 0, 0, 0, 0]
+# env.add(r)
+# for i in range(1000000):
+#     panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+#     env.step(0.001)
+
+# env.reset()
+# env.add(r)
+# env.close()
+
+# cProfile.run('stepper()')
 
 # print(panda.fkine(panda.q))
 # print(panda.fkine_fast(panda.q))
 
-# env.hold()
+env.hold()
