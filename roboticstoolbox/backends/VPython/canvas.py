@@ -222,8 +222,9 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__reload_caption(new_list)
 
         # Set it as selected
-        self.__ui_controls.get('menu_robots').index = \
-            len(self.__robots) - 1
+        if self.__ui_mode == UImode.CANVASCONTROL:
+            self.__ui_controls.get('menu_robots').index = \
+                len(self.__robots) - 1
 
         # Place camera based on robots effective radius * 1.25
         if robot.robot is not None:
@@ -604,15 +605,15 @@ class GraphicsCanvas3D:  # pragma nocover
         """
         Display the Teachpanel mode of the UI
         """
+        self.scene.append_to_caption('\n')
+        if len(self.__teachpanel) == 0:
+            self.scene.append_to_caption("No robots available\n")
+            return
 
         # Update the robots to their current joint angles
         for joint_idx, joint in enumerate(self.__teachpanel[self.__selected_robot]):
             joint[self.__idx_theta] = self.__robots[self.__selected_robot].angles[joint_idx]
 
-        self.scene.append_to_caption('\n')
-        if len(self.__teachpanel) == 0:
-            self.scene.append_to_caption("No robots available\n")
-            return
         i = 0
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_qlim_min] == joint[self.__idx_qlim_max]:
