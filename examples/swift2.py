@@ -65,7 +65,7 @@
 # cProfile.run('cc(it)')
 # cProfile.run('slow(it)')
 
-from roboticstoolbox.backends import Swift
+from roboticstoolbox.backends import swift
 from math import pi
 import roboticstoolbox as rtb
 from spatialmath import SO3, SE3
@@ -79,6 +79,8 @@ import cProfile
 
 
 from spatialmath.base import r2q
+
+# import swift
 
 
 # num = 500000
@@ -108,7 +110,7 @@ from spatialmath.base import r2q
 # k.base = sm.SE3(0.7, 1, 0) * sm.SE3.Rz(np.pi/2)
 # env.add(k)
 
-env = Swift.Swift(_dev=True)
+env = swift.Swift(_dev=True)
 env.launch()
 
 
@@ -125,12 +127,12 @@ def checkcb(e):
     # select.value = e
 
 
-label = Swift.Label('Demo')
-slider = Swift.Slider(slidercb, 10, 95, 5, 15, 'slider this is', ' d')
-select = Swift.Select(selectcb, 'selec', [
+label = swift.Label('Demo')
+slider = swift.Slider(slidercb, 10, 95, 5, 15, 'slider this is', ' d')
+select = swift.Select(selectcb, 'selec', [
                       'on', 'tw', 'three'], 2)
 
-check = Swift.Checkbox(checkcb, 'checkbox', [
+check = swift.Checkbox(checkcb, 'checkbox', [
     'on', 'tw', 'three'], [False, True, True])
 
 
@@ -141,7 +143,7 @@ def buttoncb(e):
     slider.value = 60
 
 
-button = Swift.Button(buttoncb, 'button')
+button = swift.Button(buttoncb, 'button')
 
 
 def radiocb(e):
@@ -149,7 +151,7 @@ def radiocb(e):
     select.value = e
 
 
-radio = Swift.Radio(radiocb, 'radio', [
+radio = swift.Radio(radiocb, 'radio', [
     'on', 'tw', 'three'], 2)
 
 # env.add(label)
@@ -200,7 +202,7 @@ def stepper():
 #     env.step(0.001)
 
 # # env.remove(box)
-# cProfile.run('stepper()')
+cProfile.run('stepper()')
 
 # env._run_thread = False
 # env.restart()

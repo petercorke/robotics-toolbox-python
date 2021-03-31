@@ -16,7 +16,7 @@ from ansitable import ANSITable, Column
 
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-from roboticstoolbox.backends.Swift import Swift
+from roboticstoolbox.backends.swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
