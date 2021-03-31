@@ -604,6 +604,11 @@ class GraphicsCanvas3D:  # pragma nocover
         """
         Display the Teachpanel mode of the UI
         """
+
+        # Update the robots to their current joint angles
+        for joint_idx, joint in enumerate(self.__teachpanel[self.__selected_robot]):
+            joint[self.__idx_theta] = self.__robots[self.__selected_robot].angles[joint_idx]
+
         self.scene.append_to_caption('\n')
         if len(self.__teachpanel) == 0:
             self.scene.append_to_caption("No robots available\n")
