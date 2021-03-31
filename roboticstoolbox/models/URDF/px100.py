@@ -49,4 +49,4 @@ class px100(ERobot):
 if __name__ == '__main__':   # pragma nocover
 
     robot = px100()
-    print(robot.links[0].mesh)
+    print(robot)

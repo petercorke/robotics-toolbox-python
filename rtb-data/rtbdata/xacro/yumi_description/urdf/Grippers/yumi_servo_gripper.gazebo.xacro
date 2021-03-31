@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<robot name="yumi_servo_gripper" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="yumi_servo_gripper_gazebo" params="name">
+
+  <!-- Plugin for the mimic o/c joint - AFAIK, that shouldn't be necessary any more starting with Gazebo 3.0 -->
+    <gazebo>
+      <plugin name="mimic_plugin" filename="libgazebo_mimic_plugin.so">
+       <joint>${name}_joint</joint>
+        <mimicJoint>${name}_joint_m</mimicJoint>
+        <multiplier>1.0</multiplier>
+      </plugin>
+    </gazebo> 
+
+    <!-- body -->
+    <gazebo reference="${name}_base">
+      <material>Gazebo/Light_Grey</material>
+      <mu1>0.2</mu1>
+      <mu2>0.2</mu2>
+    </gazebo>
+
+
+  </xacro:macro>
+
+</robot>
+
