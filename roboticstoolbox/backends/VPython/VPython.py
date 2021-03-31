@@ -171,11 +171,10 @@ class VPython(Connector):  # pragma nocover
         # If GraphicalRobot given
         if isinstance(id, GraphicalRobot):
             if self.canvases[fig_num].is_robot_in(id):
-                poses = id.fkine(q)
-                id.set_joint_poses(poses)
-                if self.canvases[fig_num].current_mode == UImode.TEACHPANEL:
+                id.fkine_and_set(q)
+                if self.canvases[fig_num].current_mode() == UImode.TEACHPANEL:
                     # Reload the joint sliders
-                    self.canvases[fig_num].teach_mode()
+                    self.canvases[fig_num].teach_mode(teach=True)
 
         # If DHRobot is given (or equivalent)
         else:
@@ -202,11 +201,11 @@ class VPython(Connector):  # pragma nocover
                 print("No robot found")
                 return
             # Set poses of graphical robot
-            poses = graphical_dh_robot.fkine(q)
-            graphical_dh_robot.set_joint_poses(poses)
-            if self.canvases[fig_num].current_mode == UImode.TEACHPANEL:
+            graphical_dh_robot.fkine_and_set(q)
+
+            if self.canvases[fig_num].current_mode() == UImode.TEACHPANEL:
                 # Reload the joint sliders
-                self.canvases[fig_num].teach_mode()
+                self.canvases[fig_num].teach_mode(teach=True)
 
         if dt is not None:
             sleep(dt)

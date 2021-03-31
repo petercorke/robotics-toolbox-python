@@ -783,10 +783,7 @@ class GraphicsCanvas3D:  # pragma nocover
             angles.append(self.__teachpanel_sliders[idx].value)
 
         # Run fkine
-        poses = self.__robots[self.__selected_robot].fkine(angles)
-
-        # Update joints
-        self.__robots[self.__selected_robot].set_joint_poses(poses)
+        self.__robots[self.__selected_robot].fkine_and_set(angles)
 
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_text] is None:
