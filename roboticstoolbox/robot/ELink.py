@@ -4,7 +4,7 @@
 """
 
 from spatialmath import SE3, SE2
-import roboticstoolbox as rp
+from spatialgeometry import Shape
 from roboticstoolbox.robot.ETS import ETS, SuperETS
 from roboticstoolbox.robot.Link import Link
 import numpy as np
@@ -537,11 +537,11 @@ class ELink(Link):
 
         if isinstance(coll, list):
             for gi in coll:
-                if isinstance(gi, rp.Shape):
+                if isinstance(gi, Shape):
                     new_coll.append(gi)
                 else:
                     raise TypeError('Collision must be of Shape class')
-        elif isinstance(coll, rp.Shape):
+        elif isinstance(coll, Shape):
             new_coll.append(coll)
         else:
             raise TypeError('Geometry must be of Shape class or list of Shape')
@@ -554,11 +554,11 @@ class ELink(Link):
 
         if isinstance(geom, list):
             for gi in geom:
-                if isinstance(gi, rp.Shape):
+                if isinstance(gi, Shape):
                     new_geom.append(gi)
                 else:
                     raise TypeError('Geometry must be of Shape class')
-        elif isinstance(geom, rp.Shape):
+        elif isinstance(geom, Shape):
             new_geom.append(geom)
         else:
             raise TypeError('Geometry must be of Shape class or list of Shape')

@@ -7,6 +7,7 @@
 import swift
 from math import pi
 import roboticstoolbox as rtb
+from spatialgeometry import Mesh
 from spatialmath import SO3, SE3
 import numpy as np
 
@@ -16,32 +17,32 @@ import numpy as np
 #  point the right way
 
 # Launch the simulator Swift
-env = swift.Swift(_dev=True)
+env = swift.Swift()
 env.launch()
 
 path = rtb.path_to_datafile('data')
 
 
-g1 = rtb.Mesh(
+g1 = Mesh(
     filename=str(path / 'gimbal-ring1.stl'),
     color=[34, 143, 201],
     scale=(1./3,) * 3
 )
 
-g2 = rtb.Mesh(
+g2 = Mesh(
     filename=str(path / 'gimbal-ring2.stl'),
     color=[31, 184, 72],
     scale=(1.1/3,) * 3
 
 )
 
-g3 = rtb.Mesh(
+g3 = Mesh(
     filename=str(path / 'gimbal-ring3.stl'),
     color=[240, 103, 103],
     scale=(1.1**2/3,) * 3
 )
 
-plane = rtb.Mesh(
+plane = Mesh(
     filename=str(path / 'spitfire_assy-gear_up.stl'),
     scale=(1./(180*3),) * 3,
     color=[240, 103, 103]
@@ -157,7 +158,7 @@ def reset(e):
     r_one.value = 0
     r_two.value = 0
     r_three.value = 0
-    env.step(0)
+    # env.step(0)
 
 
 zero_button = swift.Button(

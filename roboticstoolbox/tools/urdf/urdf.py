@@ -6,12 +6,12 @@
 
 import numpy as np
 import roboticstoolbox as rtb
+import spatialgeometry as gm
 import copy
 import os
 import xml.etree.ElementTree as ET
 import spatialmath as sm
 from io import BytesIO
-from pathlib import Path
 from roboticstoolbox.tools.data import path_to_datafile
 
 
@@ -397,19 +397,19 @@ class Geometry(URDFType):
 
         if box is not None:
             self.box = box
-            self.ob = rtb.Box(box.size)
+            self.ob = gm.Box(box.size)
 
         if cylinder is not None:
             self.cylinder = cylinder
-            self.ob = rtb.Cylinder(cylinder.radius, cylinder.length)
+            self.ob = gm.Cylinder(cylinder.radius, cylinder.length)
 
         if sphere is not None:
             self.sphere = sphere
-            self.ob = rtb.Sphere(sphere.radius)
+            self.ob = gm.Sphere(sphere.radius)
 
         if mesh is not None:
             self.mesh = mesh
-            self.ob = rtb.Mesh(mesh.filename, scale=mesh.scale)
+            self.ob = gm.Mesh(mesh.filename, scale=mesh.scale)
 
     @property
     def box(self):

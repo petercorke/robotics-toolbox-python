@@ -7,6 +7,7 @@ Created on Fri May 1 14:04:04 2020
 import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rp
+import spatialgeometry as gm
 import unittest
 import spatialmath as sm
 
@@ -145,7 +146,7 @@ class TestELink(unittest.TestCase):
 
         self.assertEqual(
             s0,
-"""m     =         0 
+            """m     =         0 
 r     =         0        0        0 
         |        0        0        0 | 
 I     = |        0     0.35        0 | 
@@ -179,7 +180,7 @@ qlim  =      -2.8 to      2.8""")
         link = p.links[1]
         col = link.collision[0]
 
-        self.assertIsInstance(col, rp.Shape)
+        self.assertIsInstance(col, gm.Shape)
 
         self.assertIsInstance(col.base, sm.SE3)
         self.assertIsInstance(col.scale, np.ndarray)
