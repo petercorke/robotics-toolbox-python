@@ -62,9 +62,7 @@ class TestELink(unittest.TestCase):
         ans = sm.SE3.Rx(np.pi) * sm.SE3.Ry(np.pi) * sm.SE3.Tz(1.2)
 
         nt.assert_array_almost_equal(l0.A(1.2).A, ans.A)
-
-        with self.assertRaises(ValueError):
-            l0.A()
+        l0.A()
 
     def test_qlim(self):
         l0 = rp.ELink(qlim=[-1, 1])
@@ -183,7 +181,6 @@ qlim  =      -2.8 to      2.8""")
         self.assertIsInstance(col, gm.Shape)
 
         self.assertIsInstance(col.base, sm.SE3)
-        self.assertIsInstance(col.scale, np.ndarray)
 
         col.radius = 2
         self.assertEqual(col.radius, 2)
@@ -193,7 +190,7 @@ qlim  =      -2.8 to      2.8""")
 
     def test_collision_fail(self):
         l0 = rp.ELink()
-        col = rp.Box([1, 1, 1])
+        col = gm.Box([1, 1, 1])
         l0.collision = col
 
         with self.assertRaises(TypeError):
@@ -204,7 +201,7 @@ qlim  =      -2.8 to      2.8""")
 
     def test_geometry_fail(self):
         l0 = rp.ELink()
-        col = rp.Box([1, 1, 1])
+        col = gm.Box([1, 1, 1])
         l0.geometry = col
         l0.geometry = [col, col]
 
@@ -215,8 +212,8 @@ qlim  =      -2.8 to      2.8""")
             l0.geometry = 1
 
     def test_dist(self):
-        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
-        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        s0 = gm.Box([1, 1, 1], base=sm.SE3(0, 0, 0))
+        s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rp.models.Panda()
         link = p.links[3]
 
@@ -229,8 +226,8 @@ qlim  =      -2.8 to      2.8""")
         self.assertAlmostEqual(d2, None)
 
     def test_collided(self):
-        s0 = rp.Box([1, 1, 1], sm.SE3(0, 0, 0))
-        s1 = rp.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        s0 = gm.Box([1, 1, 1], base=sm.SE3(0, 0, 0))
+        s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rp.models.Panda()
         link = p.links[3]
         c0 = link.collided(s0)
