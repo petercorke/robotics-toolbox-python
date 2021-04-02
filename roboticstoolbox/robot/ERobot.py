@@ -79,6 +79,10 @@ class ERobot(Robot):
         # search order
         orlinks = []
 
+        if isinstance(arg, DHRobot):
+            # we're passed a DHRobot object
+            args = args.ets()
+        
         link_number = 0
         if isinstance(arg, SuperETS):
             # we're passed an ETS string
@@ -128,20 +132,6 @@ class ERobot(Robot):
                 if link.isjoint:
                     n += 1
             
-
-        elif isinstance(arg, DHRobot):
-            # we're passed a DHRobot object
-
-            self.__init__(
-                arg.ets(), 
-                name=arg.name, 
-                manufacturer=arg.manufacturer,
-                comment=arg.comment,
-                base=arg.base,
-                tool=arg.tool
-            )
-            return
-
             # elinks = []
             # for dhlink in arg:
             #     e = dhlink.ets()
