@@ -256,6 +256,16 @@ class ELink(Link):
             return f"{name}[{self.name}({parent}): {self.ets()}] "
 
     @property
+    def fk(self):
+        """
+        The forward kinemtics up to and including this link
+        This value can be accessed after calling fkine_all(q)
+        from the robot object.
+        """
+
+        return SE3(self._fk, check=False)
+
+    @property
     def v(self):
         """
         Variable part of link ETS

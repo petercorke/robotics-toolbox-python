@@ -13,8 +13,6 @@
 #include "fknm.h"
 #include <stdio.h>
 
-
-
 // forward defines
 static PyObject *fkine_all(PyObject *self, PyObject *args);
 static PyObject *jacob0(PyObject *self, PyObject *args);
@@ -115,11 +113,13 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
         A(link, ret, q[link->jindex]);
         fk = (npy_float64 *)PyArray_DATA(link->fk);
 
-        if (link->parent) {
+        if (link->parent)
+        {
             pfk = (npy_float64 *)PyArray_DATA(link->parent->fk);
             mult(pfk, ret, fk);
-        } 
-        else {
+        }
+        else
+        {
             mult(base, ret, fk);
         }
     }
@@ -163,7 +163,7 @@ static PyObject *fkine(PyObject *self, PyObject *args)
     int n;
 
     if (!PyArg_ParseTuple(
-            args, "iOO!O!O!",
+            args, "iOO!O!O!O!",
             &n,
             &links,
             &PyArray_Type, &py_q,

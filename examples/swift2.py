@@ -85,7 +85,8 @@ from spatialmath.base import r2q
 pm = rtb.models.DH.Panda()
 p = rtb.models.ETS.Panda()
 p2 = rtb.models.Panda()
-q = np.array([1, 2, 3, 4, 5, 6, 7])
+q = np.array([1.0, 2, 3, 4, 5, 6, 7])
+# q = np.ones(7)
 p.q = q
 pm.q = q
 
@@ -101,148 +102,151 @@ for i in range(7):
     print()
     print()
 
-# import swift
+
+print(np.round(p.fkine(p.qz, end=p.links[1], fast=True), 2))
+
+# # import swift
 
 
-# num = 500000
-# b = np.random.randn(num)
-# sm.base.trotz(1.0)
+# # num = 500000
+# # b = np.random.randn(num)
+# # sm.base.trotz(1.0)
+
+# # def stepper():
+# #     for i in range(num):
+# #         sm.base.trotz(b[i])
+
+
+# # cProfile.run('stepper()')
+
+# # ur = rtb.models.UR5()
+# # ur.base = sm.SE3(0.3, 1, 0) * sm.SE3.Rz(np.pi/2)
+# # ur.q = [-0.4, -np.pi/2 - 0.3, np.pi/2 + 0.3, -np.pi/2, -np.pi/2, 0]
+# # env.add(ur)
+
+# # lbr = rtb.models.LBR()
+# # lbr.base = sm.SE3(1.8, 1, 0) * sm.SE3.Rz(np.pi/2)
+# # lbr.q = lbr.qr
+# # env.add(lbr)
+
+# # k = rtb.models.KinovaGen3()
+# # k.q = k.qr
+# # k.q[0] = np.pi + 0.15
+# # k.base = sm.SE3(0.7, 1, 0) * sm.SE3.Rz(np.pi/2)
+# # env.add(k)
+
+# env = swift.Swift(_dev=True)
+# env.launch()
+
+
+# def slidercb(e):
+#     print(e)
+
+
+# def selectcb(e):
+#     print(e)
+
+
+# def checkcb(e):
+#     print(e)
+#     # select.value = e
+
+
+# label = swift.Label('Demo')
+# slider = swift.Slider(slidercb, 10, 95, 5, 15, 'slider this is', ' d')
+# select = swift.Select(selectcb, 'selec', [
+#                       'on', 'tw', 'three'], 2)
+
+# check = swift.Checkbox(checkcb, 'checkbox', [
+#     'on', 'tw', 'three'], [False, True, True])
+
+
+# def buttoncb(e):
+#     print('BUTTON')
+#     # check.checked = [True, True, False]
+#     # check.desc = 'new desc'
+#     slider.value = 60
+
+
+# button = swift.Button(buttoncb, 'button')
+
+
+# def radiocb(e):
+#     print(e)
+#     select.value = e
+
+
+# radio = swift.Radio(radiocb, 'radio', [
+#     'on', 'tw', 'three'], 2)
+
+# # env.add(label)
+# # env.add(slider)
+# # env.add(button)
+# # env.add(select)
+# # env.add(radio)
+# # env.add(check)
+
+# # while True:
+# #     env.step(0.05)
+# #     time.sleep(0.001)
+
+# # env.hold()
+
+
+# panda = rtb.models.Panda()
+# panda.q = panda.qr
+# # panda.base = sm.SE3(1.2, 1, 0) * sm.SE3.Rz(np.pi/2)
+# env.add(panda, show_robot=True)
+
+
+# ev = [0.01, 0, 0, 0, 0, 0]
+# panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+# env.step(0.001)
+
 
 # def stepper():
-#     for i in range(num):
-#         sm.base.trotz(b[i])
+#     for i in range(10000):
+#         panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+#         # panda.fkine_all_fast(panda.q)
+#         env.step(0.001)
 
 
+# # box = rtb.Box([0.8, 0.1, 0.1])
+# # env.add(box)
+
+# # stepper()
+# # env.remove(panda)
+
+
+# # r = rtb.models.LBR()
+# # r.q = r.qr
+# # r.qd = [0.01, 0.01, 0.01, 0, 0, 0, 0]
+# # env.add(r)
+# # for i in range(10000):
+# #     panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+# #     env.step(0.001)
+
+# # # env.remove(box)
 # cProfile.run('stepper()')
 
-# ur = rtb.models.UR5()
-# ur.base = sm.SE3(0.3, 1, 0) * sm.SE3.Rz(np.pi/2)
-# ur.q = [-0.4, -np.pi/2 - 0.3, np.pi/2 + 0.3, -np.pi/2, -np.pi/2, 0]
-# env.add(ur)
+# # env._run_thread = False
+# # env.restart()
 
-# lbr = rtb.models.LBR()
-# lbr.base = sm.SE3(1.8, 1, 0) * sm.SE3.Rz(np.pi/2)
-# lbr.q = lbr.qr
-# env.add(lbr)
+# # r = rtb.models.LBR()
+# # r.q = r.qr
+# # r.qd = [0.01, 0.01, 0.01, 0, 0, 0, 0]
+# # env.add(r)
+# # for i in range(1000000):
+# #     panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+# #     env.step(0.001)
 
-# k = rtb.models.KinovaGen3()
-# k.q = k.qr
-# k.q[0] = np.pi + 0.15
-# k.base = sm.SE3(0.7, 1, 0) * sm.SE3.Rz(np.pi/2)
-# env.add(k)
+# # env.reset()
+# # env.add(r)
+# # env.close()
 
-env = swift.Swift(_dev=True)
-env.launch()
+# # cProfile.run('stepper()')
 
-
-def slidercb(e):
-    print(e)
-
-
-def selectcb(e):
-    print(e)
-
-
-def checkcb(e):
-    print(e)
-    # select.value = e
-
-
-label = swift.Label('Demo')
-slider = swift.Slider(slidercb, 10, 95, 5, 15, 'slider this is', ' d')
-select = swift.Select(selectcb, 'selec', [
-                      'on', 'tw', 'three'], 2)
-
-check = swift.Checkbox(checkcb, 'checkbox', [
-    'on', 'tw', 'three'], [False, True, True])
-
-
-def buttoncb(e):
-    print('BUTTON')
-    # check.checked = [True, True, False]
-    # check.desc = 'new desc'
-    slider.value = 60
-
-
-button = swift.Button(buttoncb, 'button')
-
-
-def radiocb(e):
-    print(e)
-    select.value = e
-
-
-radio = swift.Radio(radiocb, 'radio', [
-    'on', 'tw', 'three'], 2)
-
-# env.add(label)
-# env.add(slider)
-# env.add(button)
-# env.add(select)
-# env.add(radio)
-# env.add(check)
-
-# while True:
-#     env.step(0.05)
-#     time.sleep(0.001)
+# # print(panda.fkine(panda.q))
+# # print(panda.fkine_fast(panda.q))
 
 # env.hold()
-
-
-panda = rtb.models.Panda()
-panda.q = panda.qr
-# panda.base = sm.SE3(1.2, 1, 0) * sm.SE3.Rz(np.pi/2)
-env.add(panda, show_robot=True)
-
-
-ev = [0.01, 0, 0, 0, 0, 0]
-panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
-env.step(0.001)
-
-
-def stepper():
-    for i in range(10000):
-        panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
-        # panda.fkine_all_fast(panda.q)
-        env.step(0.001)
-
-
-# box = rtb.Box([0.8, 0.1, 0.1])
-# env.add(box)
-
-# stepper()
-# env.remove(panda)
-
-
-# r = rtb.models.LBR()
-# r.q = r.qr
-# r.qd = [0.01, 0.01, 0.01, 0, 0, 0, 0]
-# env.add(r)
-# for i in range(10000):
-#     panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
-#     env.step(0.001)
-
-# # env.remove(box)
-cProfile.run('stepper()')
-
-# env._run_thread = False
-# env.restart()
-
-# r = rtb.models.LBR()
-# r.q = r.qr
-# r.qd = [0.01, 0.01, 0.01, 0, 0, 0, 0]
-# env.add(r)
-# for i in range(1000000):
-#     panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
-#     env.step(0.001)
-
-# env.reset()
-# env.add(r)
-# env.close()
-
-# cProfile.run('stepper()')
-
-# print(panda.fkine(panda.q))
-# print(panda.fkine_fast(panda.q))
-
-env.hold()

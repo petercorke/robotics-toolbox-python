@@ -168,7 +168,7 @@ class TestERobot(unittest.TestCase):
     def test_fkine_all(self):
         pm = rtb.models.DH.Panda()
         p = rtb.models.ETS.Panda()
-        q = np.array([1, 2, 3, 4, 5, 6, 7])
+        q = np.array([1.0, 2, 3, 4, 5, 6, 7])
         p.q = q
         pm.q = q
 

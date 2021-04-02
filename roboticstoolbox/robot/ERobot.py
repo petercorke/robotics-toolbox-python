@@ -1020,11 +1020,6 @@ graph [rankdir=LR];
             T = np.empty((4, 4))
             fknm.fkine(m, path, q, etool, tool, T)
 
-            if tool is not None:
-                T2 = np.empty((4, 4))
-                fknm.compose(T, tool, T2)
-                T = T2
-
             if not include_base:
                 return T
             else:
