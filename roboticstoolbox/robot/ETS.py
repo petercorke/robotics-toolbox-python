@@ -3,7 +3,6 @@
 @author: Jesse Haviland
 @author: Peter Corke
 """
-from roboticstoolbox import ETS2 as ET
 from collections import UserList
 from types import SimpleNamespace
 import copy
@@ -12,7 +11,7 @@ import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, \
-    verifymatrix, iseye  # , tr2jac2
+    verifymatrix, iseye, tr2jac2
 
 
 class SuperETS(UserList, ABC):
@@ -1687,29 +1686,25 @@ if __name__ == "__main__":
     # J = b.jacobe([1,0])
     # print(J)
 
-<< << << < HEAD
-J = b.jacob0([0, 0])
-print(J)
+    J = b.jacob0([0, 0])
+    print(J)
 
-J = b.jacobe([0, 0])
-print(J)
+    J = b.jacobe([0, 0])
+    print(J)
 
-J = b.jacob0([1, 0])
-print(J)
+    J = b.jacob0([1, 0])
+    print(J)
 
-J = b.jacobe([1, 0])
-print(J)
-== == == =
+    J = b.jacobe([1, 0])
+    print(J)
 
+    a1 = 1
+    E = ET.r() * ET.tx(a1)
 
-a1 = 1
-E = ET.r() * ET.tx(a1)
+    v = E.eval(30, unit='deg')
+    print(v)
 
-v = E.eval(30, unit='deg')
-print(v)
->>>>>> > master
+    # b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
 
-# b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
-
-# J = b.jacob0([1,0])
-# print(J)
+    # J = b.jacob0([1,0])
+    # print(J)
