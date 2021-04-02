@@ -3,6 +3,7 @@
 @author Jesse Haviland
 """
 
+
 # import fknm
 # import numpy as np
 # import spatialmath as sm
@@ -79,6 +80,26 @@ import cProfile
 
 
 from spatialmath.base import r2q
+
+
+pm = rtb.models.DH.Panda()
+p = rtb.models.ETS.Panda()
+p2 = rtb.models.Panda()
+q = np.array([1, 2, 3, 4, 5, 6, 7])
+p.q = q
+pm.q = q
+
+p.fkine_all(q)
+p2.fkine_all(q)
+r2 = pm.fkine_all(q)
+
+for i in range(7):
+    print(np.round(p.links[i]._fk, 2))
+    # print(np.round(p2.links[i]._fk, 2))
+    print(np.round(r2[i].A, 2))
+
+    print()
+    print()
 
 # import swift
 
