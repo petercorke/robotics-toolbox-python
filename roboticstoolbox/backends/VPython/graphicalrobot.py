@@ -538,8 +538,11 @@ class GraphicalRobot:  # pragma nocover
             zero_angles = np.zeros((self.robot.n,))
             all_poses = self.robot.fkine_all(zero_angles, old=False)
             # Create the base
-            if robot.basemesh is not None:
-                self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
+            try:
+                if robot.basemesh is not None:
+                    self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
+            except:
+                pass
             # else: assume no base joint
             robot_colours = robot.linkcolormap()
             # Create the joints
