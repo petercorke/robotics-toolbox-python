@@ -423,6 +423,8 @@ class ERobot(Robot):
         :type tld: str, optional
         :return: Links and robot name
         :rtype: tuple(ELink list, str)
+
+        File should be specified relative to ``RTBDATA/URDF/xacro``
         """
 
         # get the path to the class that defines the robot
@@ -1054,11 +1056,11 @@ graph [rankdir=LR];
                 Tk = self.base.A @ Tk
 
             # cast to pose class and append
-            T.append(T.__class__(Tk))
+            T.append(T.__class__(Tk, check=False))
 
         return T
 
-    def fkine_all(self, q):
+    def fkine_all(self, q, old=None):
         '''
         Tall = robot.fkine_all(q) evaluates fkine for each joint within a
         robot and returns a trajecotry of poses.
@@ -1070,6 +1072,7 @@ graph [rankdir=LR];
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
 
+        :param old: for compatibility with DHRobot version, ignored.
         :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
 
@@ -1122,6 +1125,9 @@ graph [rankdir=LR];
 
                 for gi in link.geometry:
                     gi.wT = link._fk
+
+        # HACK, inefficient to convert back to SE3
+        return [SE3(link._fk) for link in self.elinks]
 
     # def jacob0(self, q=None):
     #     """
@@ -1395,7 +1401,7 @@ graph [rankdir=LR];
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
-
+            
         if tool is None:
             tool = SE3()
 
@@ -1697,6 +1703,8 @@ graph [rankdir=LR];
 
     def hessian0(self, q=None, J0=None, end=None, start=None):
         r"""
+        Manipulator Hessian
+
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
@@ -1715,7 +1723,7 @@ graph [rankdir=LR];
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
-        This method computes the manipulator Hessian.  If we take the 
+        This method computes the manipulator Hessian in the base frame.  If we take the 
         time derivative of the differential kinematic relationship
 
         .. math::
@@ -1886,7 +1894,10 @@ graph [rankdir=LR];
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
-            parent_name = link.parent.name if link.parent is not None else "_O_"
+            if link.parent is None:
+                parent_name = "BASE"
+            else:
+                parent_name = '{' + link.parent.name + '}'
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
                 s = " * " + s
@@ -1895,10 +1906,10 @@ graph [rankdir=LR];
                 color + ee + link.name,
                 parent_name,
                 link._joint_name if link.parent is not None else "",
-                f"{{{link.name}}} = {{{parent_name}}}{s}"
+                f"{{{link.name}}} = {parent_name}{s}"
                 )
 
-        if self.manufacturer is None:
+        if self.manufacturer is None or len(self.manufacturer) == 0:
             manuf = ""
         else:
             manuf = f" (by {self.manufacturer})"
@@ -2110,7 +2121,7 @@ graph [rankdir=LR];
         return Ain, bin
 
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def rne(robot, q, qd, qdd, gravity=None):
+    def rne(robot, q, qd, qdd, symbolic=False, gravity=None):
 
         n = robot.n
 
@@ -2123,12 +2134,18 @@ graph [rankdir=LR];
         f = SpatialForce.Alloc(n)
         I = SpatialInertia.Alloc(n)  # noqa
         s = [None for i in range(n)]   # joint motion subspace
-        Q = np.zeros((n,))   # joint torque/force
+        if symbolic:
+            Q = np.empty((n,), dtype='O')   # joint torque/force
+        else:
+            Q = np.empty((n,))              # joint torque/force
 
         # initialize intermediate variables
         for j, link in enumerate(robot):
             I[j] = SpatialInertia(m=link.m, r=link.r)
-            Xtree[j] = SE3(link.Ts)
+            if symbolic and link.Ts is None:
+                Xtree[j] = SE3(np.eye(4, dtype='O'), check=False)
+            else:
+                Xtree[j] = SE3(link.Ts, check=False)
             s[j] = link.v.s
 
         if gravity is None:
@@ -2157,7 +2174,9 @@ graph [rankdir=LR];
 
         # backward recursion
         for j in reversed(range(0, n)):
-            Q[j] = f[j].dot(s[j])
+
+            # next line could be np.dot(), but fails for symbolic arguments
+            Q[j] = np.sum(f[j].A * s[j])
 
             if robot[j].parent is not None:
                 jp = robot[j].parent.jindex
