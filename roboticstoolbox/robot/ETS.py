@@ -1686,25 +1686,27 @@ if __name__ == "__main__":
     # J = b.jacobe([1,0])
     # print(J)
 
-    J = b.jacob0([0, 0])
-    print(J)
+    # J = b.jacob0([0, 0])
+    # print(J)
 
-    J = b.jacobe([0, 0])
-    print(J)
+    # J = b.jacobe([0, 0])
+    # print(J)
 
-    J = b.jacob0([1, 0])
-    print(J)
+    # J = b.jacob0([1, 0])
+    # print(J)
 
-    J = b.jacobe([1, 0])
-    print(J)
+    # J = b.jacobe([1, 0])
+    # print(J)
 
-    a1 = 1
-    E = ET.r() * ET.tx(a1)
+    # a1 = 1
+    # E = ET.r() * ET.tx(a1)
 
-    v = E.eval(30, unit='deg')
-    print(v)
+    # v = E.eval(30, unit='deg')
+    # print(v)
 
     # b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
 
     # J = b.jacob0([1,0])
     # print(J)
+
+    pass
