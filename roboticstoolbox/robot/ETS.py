@@ -3,6 +3,7 @@
 @author: Jesse Haviland
 @author: Peter Corke
 """
+from roboticstoolbox import ETS2 as ET
 from collections import UserList
 from types import SimpleNamespace
 import copy
@@ -522,7 +523,10 @@ class SuperETS(UserList, ABC):
 
         # optionally do symbolic simplification
 
-        return T.simplify()
+        if T.A.dtype == 'O':
+            T = T.simplify()
+
+        return T
 
     def compile(self):
         """
@@ -657,12 +661,12 @@ class SuperETS(UserList, ABC):
 
             elif et.isrevolute:
                 if issymbol(et.eta):
-                    s = f"{et.axis}({et.eta})"
+                    s = f"{et.axis}({et.eta:.4g})"
                 else:
                     s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
 
             elif et.isprismatic:
-                s = f"{et.axis}({et.eta})"
+                s = f"{et.axis}({et.eta:.4g})"
 
             elif et.isconstant:
                 s = f"C{c}"
@@ -670,9 +674,12 @@ class SuperETS(UserList, ABC):
 
             es.append(s)
 
-        return " * ".join(es)
+        return " \u2295 ".join(es)
 
     # redefine * operator to concatenate the internal lists
+    def __add__(self, rest):
+        self.__mul__(rest)
+
     def __mul__(self, rest):
         """
         Overloaded ``*`` operator
@@ -1666,21 +1673,43 @@ if __name__ == "__main__":
     # print(e)
     # print(e.compile())
 
-    b = ETS2.r(flip=True) * ETS2.tx(1) * ETS2.r() * ETS2.tx(1)
+    # b = ETS2.r(flip=True) * ETS2.tx(1) * ETS2.r() * ETS2.tx(1)
 
-    J = b.jacob0([0, 0])
-    print(J)
+    # J = b.jacob0([0,0])
+    # print(J)
 
-    J = b.jacobe([0, 0])
-    print(J)
-
-    J = b.jacob0([1, 0])
-    print(J)
-
-    J = b.jacobe([1, 0])
-    print(J)
-
-    # b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
+    # J = b.jacobe([0,0])
+    # print(J)
 
     # J = b.jacob0([1,0])
     # print(J)
+
+    # J = b.jacobe([1,0])
+    # print(J)
+
+<< << << < HEAD
+J = b.jacob0([0, 0])
+print(J)
+
+J = b.jacobe([0, 0])
+print(J)
+
+J = b.jacob0([1, 0])
+print(J)
+
+J = b.jacobe([1, 0])
+print(J)
+== == == =
+
+
+a1 = 1
+E = ET.r() * ET.tx(a1)
+
+v = E.eval(30, unit='deg')
+print(v)
+>>>>>> > master
+
+# b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
+
+# J = b.jacob0([1,0])
+# print(J)

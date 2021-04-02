@@ -222,8 +222,9 @@ class GraphicsCanvas3D:  # pragma nocover
         self.__reload_caption(new_list)
 
         # Set it as selected
-        self.__ui_controls.get('menu_robots').index = \
-            len(self.__robots) - 1
+        if self.__ui_mode == UImode.CANVASCONTROL:
+            self.__ui_controls.get('menu_robots').index = \
+                len(self.__robots) - 1
 
         # Place camera based on robots effective radius * 1.25
         if robot.robot is not None:
@@ -284,6 +285,9 @@ class GraphicsCanvas3D:  # pragma nocover
 
         """
         self.__graphics_grid.set_mode(mode)
+
+    def current_mode(self):
+        return self.__ui_mode
 
     #######################################
     #  UI Management
@@ -605,6 +609,11 @@ class GraphicsCanvas3D:  # pragma nocover
         if len(self.__teachpanel) == 0:
             self.scene.append_to_caption("No robots available\n")
             return
+
+        # Update the robots to their current joint angles
+        for joint_idx, joint in enumerate(self.__teachpanel[self.__selected_robot]):
+            joint[self.__idx_theta] = self.__robots[self.__selected_robot].angles[joint_idx]
+
         i = 0
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_qlim_min] == joint[self.__idx_qlim_max]:
@@ -774,10 +783,7 @@ class GraphicsCanvas3D:  # pragma nocover
             angles.append(self.__teachpanel_sliders[idx].value)
 
         # Run fkine
-        poses = self.__robots[self.__selected_robot].fkine(angles)
-
-        # Update joints
-        self.__robots[self.__selected_robot].set_joint_poses(poses)
+        self.__robots[self.__selected_robot].fkine_and_set(angles)
 
         for joint in self.__teachpanel[self.__selected_robot]:
             if joint[self.__idx_text] is None:

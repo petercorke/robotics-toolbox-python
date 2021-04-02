@@ -19,7 +19,7 @@ _GraphicalRobot = None
 close_localhost_session = None
 
 try:
-    from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D
+    from roboticstoolbox.backends.VPython.canvas import GraphicsCanvas2D, GraphicsCanvas3D, UImode
     from roboticstoolbox.backends.VPython.graphicalrobot import GraphicalRobot
     from roboticstoolbox.backends.VPython.grid import GridType
 except ImportError:
@@ -171,16 +171,18 @@ class VPython(Connector):  # pragma nocover
         # If GraphicalRobot given
         if isinstance(id, GraphicalRobot):
             if self.canvases[fig_num].is_robot_in(id):
-                poses = id.fkine(q)
-                id.set_joint_poses(poses)
+                id.fkine_and_set(q)
+                if self.canvases[fig_num].current_mode() == UImode.TEACHPANEL:
+                    # Reload the joint sliders
+                    self.canvases[fig_num].teach_mode(teach=True)
 
         # If DHRobot is given (or equivalent)
         else:
-            grpahical_dh_robot = None
+            graphical_dh_robot = None
             # If no ID given, and there are robots available
             if id is None and len(self.robots) > 0:
                 # Obtain the first one
-                grpahical_dh_robot = self.robots[0]
+                graphical_dh_robot = self.robots[0]
             # If no ID, and no robots available
             elif id is None:
                 print("No robot found")
@@ -191,16 +193,19 @@ class VPython(Connector):  # pragma nocover
                     if self.robots[i].robot is id and \
                             self.canvases[fig_num].is_robot_in_canvas(
                                                             self.robots[i]):
-                        grpahical_dh_robot = self.robots[i]
+                        graphical_dh_robot = self.robots[i]
                         break
 
             # If no graphical equivalent found, return
-            if grpahical_dh_robot is None:
+            if graphical_dh_robot is None:
                 print("No robot found")
                 return
             # Set poses of graphical robot
-            poses = grpahical_dh_robot.fkine(q)
-            grpahical_dh_robot.set_joint_poses(poses)
+            graphical_dh_robot.fkine_and_set(q)
+
+            if self.canvases[fig_num].current_mode() == UImode.TEACHPANEL:
+                # Reload the joint sliders
+                self.canvases[fig_num].teach_mode(teach=True)
 
         if dt is not None:
             sleep(dt)

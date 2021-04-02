@@ -9,8 +9,10 @@ import tempfile
 import subprocess
 import webbrowser
 import numpy as np
-from spatialmath import SE3, SE2
+from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
+# from roboticstoolbox.robot.BaseRobot import BaseRobot
+
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ETS import ETS, SuperETS
 from roboticstoolbox.robot.DHRobot import DHRobot
@@ -66,19 +68,20 @@ class ERobot(Robot):
         self._n = 0
         self._ee_links = []
         self._base_link = None
-        self._ndims = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
         orlinks = []
+
+        if isinstance(arg, DHRobot):
+            # we're passed a DHRobot object
+            args = args.ets()
 
         link_number = 0
         if isinstance(arg, SuperETS):
             # we're passed an ETS string
             ets = arg
             links = []
-
-            self._ndims = arg._ndims
 
             # chop it up into segments, a link frame after every joint
             start = 0
@@ -118,32 +121,10 @@ class ERobot(Robot):
                         raise ValueError(
                             f'link name {link.name} is not unique')
                     self._linkdict[link.name] = link
-
-                    # check all the Elinks are all 2D or 3D
-                    if ndims is None:
-                        ndims = link._ndims
-                    else:
-                        if link._ndims != ndims:
-                            raise ValueError(
-                                'links have inconsistent number of dimensions')
                 else:
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
-            self._ndims = ndims
-
-        elif isinstance(arg, DHRobot):
-            # we're passed a DHRobot object
-
-            self.__init__(
-                arg.ets(),
-                name=arg.name,
-                manufacturer=arg.manufacturer,
-                comment=arg.comment,
-                base=arg.base,
-                tool=arg.tool
-            )
-            return
 
             # elinks = []
             # for dhlink in arg:
@@ -431,6 +412,8 @@ class ERobot(Robot):
         :type tld: str, optional
         :return: Links and robot name
         :rtype: tuple(ELink list, str)
+
+        File should be specified relative to ``RTBDATA/URDF/xacro``
         """
 
         # get the path to the class that defines the robot
@@ -1041,12 +1024,7 @@ graph [rankdir=LR];
         if tool is None and self._tool is not None:
             tool = self._tool.A
 
-        if self._ndims == 3:
-            T = SE3.Empty()
-        elif self._ndims == 2:
-            T = SE2.Empty()
-        else:
-            raise ValueError('bad thing')
+        T = SE3.Empty()
 
         for k, qk in enumerate(q):
 
@@ -1082,11 +1060,11 @@ graph [rankdir=LR];
                 Tk = self.base.A @ Tk
 
             # cast to pose class and append
-            T.append(T.__class__(Tk))
+            T.append(T.__class__(Tk, check=False))
 
         return T
 
-    def fkine_all(self, q):
+    def fkine_all(self, q, old=None):
         '''
         Tall = robot.fkine_all(q) evaluates fkine for each joint within a
         robot and returns a trajecotry of poses.
@@ -1098,6 +1076,7 @@ graph [rankdir=LR];
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
 
+        :param old: for compatibility with DHRobot version, ignored.
         :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
 
@@ -1144,6 +1123,9 @@ graph [rankdir=LR];
 
                 for gi in link.geometry:
                     gi.wT = link._fk
+
+        # HACK, inefficient to convert back to SE3
+        return [SE3(link._fk) for link in self.elinks]
 
     def get_path(self, end=None, start=None, _fknm=False):
         """
@@ -1484,60 +1466,6 @@ graph [rankdir=LR];
 
         return J
 
-    def jacob0_2d(
-            self, q, end=None, start=None, tool=None, T=None,
-            half=None, analytical=None):
-
-        if tool is None:
-            tool = SE3()
-
-        path, n = self.get_path(end, start)
-
-        q = getvector(q, self.n)
-
-        if T is None:
-            T = self.base.inv() * \
-                self.fkine(q, end=end, start=start) * tool
-        T = T.A
-        U = np.eye(3)
-        j = 0
-        J = np.zeros((3, n))
-        zero = np.array([0, 0, 0])
-
-        for link in path:
-
-            if link.isjoint:
-                U = U @ link.A(q[link.jindex], fast=True)
-
-                if link == end:
-                    U = U @ tool.A
-
-                Tu = np.linalg.inv(U) @ T
-                n = U[:2, 0]
-                o = U[:2, 1]
-                x = Tu[0, 2]
-                y = Tu[1, 2]
-
-                if link.v.axis == 'R':
-                    J[:2, j] = (o * x) - (n * y)
-                    J[2:, j] = a
-
-                elif link.v.axis == 'tx':
-                    J[:2, j] = n
-                    J[2:, j] = zero
-
-                elif link.v.axis == 'ty':
-                    J[:2, j] = o
-                    J[2:, j] = zero
-
-                j += 1
-            else:
-                A = link.A(fast=True)
-                if A is not None:
-                    U = U @ A
-
-        return J
-
     def jacobe(self, q, end=None, start=None, tool=None, T=None):
         r"""
         Manipulator geometric Jacobian in the end-effector frame
@@ -1741,6 +1669,8 @@ graph [rankdir=LR];
 
     def hessian0(self, q=None, J0=None, end=None, start=None):
         r"""
+        Manipulator Hessian
+
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
@@ -1759,8 +1689,8 @@ graph [rankdir=LR];
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
-        This method computes the manipulator Hessian.  If we take the
-        time derivative of the differential kinematic relationship
+        This method computes the manipulator Hessian in the base frame.  If
+        we take the time derivative of the differential kinematic relationship
 
         .. math::
 
@@ -1916,8 +1846,8 @@ graph [rankdir=LR];
 
         - Constant links are shown in blue.
         - End-effector links are prefixed with an @
-        - The robot base frame is denoted as ``_O_`` and is equal to the robot's
-          ``base`` attribute.
+        - The robot base frame is denoted as ``_O_`` and is equal to the
+          robot's ``base`` attribute.
         """
         table = ANSITable(
             Column("id", headalign="^"),
@@ -1930,8 +1860,10 @@ graph [rankdir=LR];
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
-            parent_name = \
-                link.parent.name if link.parent is not None else "_O_"
+            if link.parent is None:
+                parent_name = "BASE"
+            else:
+                parent_name = '{' + link.parent.name + '}'
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
                 s = " * " + s
@@ -1940,14 +1872,15 @@ graph [rankdir=LR];
                 color + ee + link.name,
                 parent_name,
                 link._joint_name if link.parent is not None else "",
-                f"{{{link.name}}} = {{{parent_name}}}{s}"
+                f"{{{link.name}}} = {parent_name}{s}"
             )
 
-        if self.manufacturer is None:
+        if self.manufacturer is None or len(self.manufacturer) == 0:
             manuf = ""
         else:
             manuf = f" (by {self.manufacturer})"
-        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), ETS model\n"
+        s = f"{self.name}{manuf}: {self.n} axes ({self.structure})," \
+            " ETS model\n"
 
         s += str(table)
         s += self.configurations_str()
@@ -2155,7 +2088,7 @@ graph [rankdir=LR];
         return Ain, bin
 
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def rne(robot, q, qd, qdd, gravity=None):
+    def rne(robot, q, qd, qdd, symbolic=False, gravity=None):
 
         n = robot.n
 
@@ -2168,12 +2101,18 @@ graph [rankdir=LR];
         f = SpatialForce.Alloc(n)
         I = SpatialInertia.Alloc(n)  # noqa
         s = [None for i in range(n)]   # joint motion subspace
-        Q = np.zeros((n,))   # joint torque/force
+        if symbolic:
+            Q = np.empty((n,), dtype='O')   # joint torque/force
+        else:
+            Q = np.empty((n,))              # joint torque/force
 
         # initialize intermediate variables
         for j, link in enumerate(robot):
             I[j] = SpatialInertia(m=link.m, r=link.r)
-            Xtree[j] = SE3(link.Ts)
+            if symbolic and link.Ts is None:
+                Xtree[j] = SE3(np.eye(4, dtype='O'), check=False)
+            else:
+                Xtree[j] = SE3(link.Ts, check=False)
             s[j] = link.v.s
 
         if gravity is None:
@@ -2202,7 +2141,9 @@ graph [rankdir=LR];
 
         # backward recursion
         for j in reversed(range(0, n)):
-            Q[j] = f[j].dot(s[j])
+
+            # next line could be np.dot(), but fails for symbolic arguments
+            Q[j] = np.sum(f[j].A * s[j])
 
             if robot[j].parent is not None:
                 jp = robot[j].parent.jindex

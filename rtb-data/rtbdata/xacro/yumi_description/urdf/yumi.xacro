@@ -1,0 +1,553 @@
+<?xml version="1.0"?>
+<robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find yumi_description)/urdf/Gazebo/yumi.gazebo.xacro" />
+  <!-- Import Transmissions -->
+  <xacro:include filename="$(find yumi_description)/urdf/yumi.transmission.xacro" />
+
+  <!-- some constants -->
+  <xacro:property name="joint_damping" value="0.5" />
+  <xacro:property name="max_effort" value="300"/>
+ 
+  <xacro:macro name="yumi" params="parent name hardware_interface *origin">
+
+    <link name="yumi_base_link"></link>
+
+    <joint name="${name}_base_link_to_body" type="fixed">
+      <parent link="yumi_base_link"/>
+      <child link="${name}_body"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+
+    <link name="${name}_body">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="15"/>
+        <inertia ixx="0.5"  ixy="0"  ixz="0" iyy="0.6" iyz="0" izz="0.3" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/body.stl"/>
+        </geometry>
+        <material name="Light_Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/body.stl"/>
+        </geometry>
+        <material name="Light_Grey"/>
+      </collision>
+
+    </link>
+
+
+   <!--///////////////////////////////////// RIGHT ARM ////////////////////////////////  -->
+
+   <!-- joint between body and link_1_r -->
+    <joint name="${name}_joint_1_r" type="revolute">
+      <parent link="${name}_body"/>
+      <child link="${name}_link_1_r"/>
+      <origin xyz="0.05355 -0.0725 0.41492" rpy="-0.9795   -0.5682   -2.3155"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+   <link name="${name}_link_1_r">
+      <inertial>
+        <origin xyz="0 -0.03 0.12" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_1.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_1.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+   <!-- joint between link_1_r and link_2_r -->
+    <joint name="${name}_joint_2_r" type="revolute">
+      <parent link="${name}_link_1_r"/>
+      <child link="${name}_link_2_r"/>
+      <origin xyz="0.03 0.0 0.1" rpy="${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-143.5 * PI / 180}" upper="${43.5 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_2_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_2.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_2.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+     <!-- joint between link_2_r and link_3_r -->
+      <joint name="${name}_joint_7_r" type="revolute">
+        <parent link="${name}_link_2_r"/>
+        <child link="${name}_link_3_r"/>
+        <origin xyz="-0.03 0.17283 0.0" rpy="${-PI / 2} 0.0 0.0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
+               effort="${max_effort}" velocity="${180 * PI / 180}" />
+        <dynamics damping="${joint_damping}"/>
+      </joint>
+
+    <link name="${name}_link_3_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_3.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_3.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_3_r and link_4_r -->
+    <joint name="${name}_joint_3_r" type="revolute">
+      <parent link="${name}_link_3_r"/>
+      <child link="${name}_link_4_r"/>
+      <origin xyz="-0.04188 0.0 0.07873" rpy="${PI / 2} ${- PI / 2} 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-123.5 * PI / 180}" upper="${80 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_4_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_4.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_4.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_4_r and link_5_r -->
+    <joint name="${name}_joint_4_r" type="revolute">
+      <parent link="${name}_link_4_r"/>
+      <child link="${name}_link_5_r"/>
+      <origin xyz="0.0405 0.16461 0.0" rpy="-${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-290 * PI / 180}" upper="${290 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_5_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_5.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_5.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_5_r and link_6_r -->
+    <joint name="${name}_joint_5_r" type="revolute">
+      <parent link="${name}_link_5_r"/>
+      <child link="${name}_link_6_r"/>
+      <origin xyz="-0.027 0 0.10039" rpy="${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-88 * PI / 180}" upper="${138 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_6_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_6.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_6.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_6_r and link_7_r -->
+    <joint name="${name}_joint_6_r" type="revolute">
+      <parent link="${name}_link_6_r"/>
+      <child link="${name}_link_7_r"/>
+      <origin xyz="0.027 0.029 0.0" rpy="-${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-229 * PI / 180}" upper="${229 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_7_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_7.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_7.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+
+
+
+    <!--///////////////////////////////////// LEFT ARM ////////////////////////////////  -->
+
+    <!-- joint between body and link_1_l -->
+    <joint name="${name}_joint_1_l" type="revolute">
+      <parent link="${name}_body"/>
+      <child link="${name}_link_1_l"/>
+      <origin xyz="0.05355 0.07250 0.41492" rpy="0.9781 -0.5716 2.3180"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_1_l">
+      <inertial>
+        <origin xyz="0 -0.03 0.12" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_1.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_1.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_1_l and link_2_l -->
+    <joint name="${name}_joint_2_l" type="revolute">
+      <parent link="${name}_link_1_l"/>
+      <child link="${name}_link_2_l"/>
+      <origin xyz="0.03 0.0 0.1" rpy="${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-143.5 * PI / 180}" upper="${43.5 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_2_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_2.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_2.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_2_l and link_3_l -->
+    <joint name="${name}_joint_7_l" type="revolute">
+      <parent link="${name}_link_2_l"/>
+      <child link="${name}_link_3_l"/>
+      <origin xyz="-0.03 0.17283 0.0" rpy="-${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-168.5 * PI / 180}" upper="${168.5 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_3_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_3.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_3.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_3_l and link_4_l -->
+    <joint name="${name}_joint_3_l" type="revolute">
+      <parent link="${name}_link_3_l"/>
+      <child link="${name}_link_4_l"/>
+      <origin xyz="-0.04188 0.0 0.07873" rpy="${PI / 2} -${PI / 2} 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-123.5 * PI / 180}" upper="${80 * PI / 180}"
+             effort="${max_effort}" velocity="${180 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_4_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_4.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_4.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_4_l and link_5_l -->
+    <joint name="${name}_joint_4_l" type="revolute">
+      <parent link="${name}_link_4_l"/>
+      <child link="${name}_link_5_l"/>
+      <origin xyz="0.0405 0.16461 0.0" rpy="-${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-290 * PI / 180}" upper="${290 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_5_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_5.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_5.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_5_l and link_6_l -->
+    <joint name="${name}_joint_5_l" type="revolute">
+      <parent link="${name}_link_5_l"/>
+      <child link="${name}_link_6_l"/>
+      <origin xyz="-0.027 0 0.10039" rpy="${PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-88 * PI / 180}" upper="${138 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_6_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_6.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_6.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!-- joint between link_6_l and link_7_l -->
+    <joint name="${name}_joint_6_l" type="revolute">
+      <parent link="${name}_link_6_l"/>
+      <child link="${name}_link_7_l"/>
+      <origin xyz="0.027 0.029 0.0" rpy="${-PI / 2} 0.0 0.0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-229 * PI / 180}" upper="${229 * PI / 180}"
+             effort="${max_effort}" velocity="${400 * PI / 180}" />
+      <dynamics damping="${joint_damping}"/>
+    </joint>
+
+    <link name="${name}_link_7_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+        <inertia ixx="0.1"  ixy="0"  ixz="0" iyy="0.1" iyz="0" izz="0.1" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/link_7.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/coarse/link_7.stl"/>
+        </geometry>
+        <material name="Grey"/>
+      </collision>
+    </link>
+
+    <!--Extensions -->
+    <xacro:yumi_gazebo name="${name}" />
+    <xacro:yumi_transmission name="${name}" hardware_interface="${hardware_interface}"/>
+
+  </xacro:macro>
+
+</robot>

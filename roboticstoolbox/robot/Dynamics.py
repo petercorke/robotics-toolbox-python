@@ -13,12 +13,12 @@ so must be subclassed by ``DHRobot`` class.
 from collections import namedtuple
 import numpy as np
 from spatialmath.base import \
-    getvector, verifymatrix, isscalar, getmatrix, t2r
+    getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
 
 from ansitable import ANSITable, Column
-
+import warnings
 
 
 class DynamicsMixin:
@@ -62,9 +62,6 @@ class DynamicsMixin:
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.links[2].dyntable()
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
             >>> robot.dyntable()
         """
         table = ANSITable(
@@ -395,7 +392,7 @@ class DynamicsMixin:
 
         return np.r_[qd, qdd]
 
-    def accel(self, q, qd, torque):
+    def accel(self, q, qd, torque, gravity=None):
         r"""
         Compute acceleration due to applied torque
 
@@ -405,6 +402,9 @@ class DynamicsMixin:
         :type qd: ndarray(n)
         :param torque: Joint torques of the robot
         :type torque:  ndarray(n)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the ``gravity`` attribute of self).
+        :type gravity: ndarray(3)
         :return: Joint accelerations of the robot
         :rtype: ndarray(n)
 
@@ -413,7 +413,9 @@ class DynamicsMixin:
         to the manipulator in state `q` (n) and `qd` (n), and ``n`` is
         the number of robot joints.
 
-        :math:`\ddot{q} = \mathbf{I}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)`
+        .. math::
+        
+            \ddot{q} = \mathbf{M}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)
 
         Example:
 
@@ -426,7 +428,7 @@ class DynamicsMixin:
         **Trajectory operation**
 
         If `q`, `qd`, torque are matrices (m,n) then ``qdd`` is a matrix (m,n)
-        where each row is the acceleration corresponding to the equivalent cols
+        where each row is the acceleration corresponding to the equivalent rows
         of q, qd, torque.
 
         .. note::
@@ -446,24 +448,16 @@ class DynamicsMixin:
 
         """  # noqa
 
-        trajn = 1
+        q = getmatrix(q, (None, self.n))
+        qd = getmatrix(qd, (None, self.n))
+        torque = getmatrix(torque, (None, self.n))
 
-        try:
-            q = getvector(q, self.n, 'row')
-            qd = getvector(qd, self.n, 'row')
-            torque = getvector(torque, self.n, 'row')
-        except ValueError:
-            trajn = q.shape[0]
-            verifymatrix(q, (trajn, self.n))
-            verifymatrix(qd, (trajn, self.n))
-            verifymatrix(torque, (trajn, self.n))
+        qdd = np.zeros((q.shape[0], self.n))
 
-        qdd = np.zeros((trajn, self.n))
-
-        for i in range(trajn):
+        for k, (qk, qdk, tauk) in enumerate(zip(q, qd, torque)):
             # Compute current manipulator inertia torques resulting from unit
             # acceleration of each joint with no gravity.
-            qI = (np.c_[q[i, :]] @ np.ones((1, self.n))).T
+            qI = (np.c_[qk] @ np.ones((1, self.n))).T
             qdI = np.zeros((self.n, self.n))
             qddI = np.eye(self.n)
 
@@ -471,13 +465,12 @@ class DynamicsMixin:
 
             # Compute gravity and coriolis torque torques resulting from zero
             # acceleration at given velocity & with gravity acting.
-            tau = self.rne(q[i, :], qd[i, :], np.zeros((1, self.n)))
+            tau = self.rne(qk, qdk, np.zeros((1, self.n)), gravity=gravity)
 
-            inter = np.expand_dims((torque[i, :] - tau), axis=1)
+            # solve is faster than inv() which is faster than pinv()
+            qdd[k, :] = np.linalg.solve(M, tauk - tau)
 
-            qdd[i, :] = np.linalg.solve(M, inter).flatten()
-
-        if trajn == 1:
+        if q.shape[0] == 1:
             return qdd[0, :]
         else:
             return qdd
@@ -640,65 +633,25 @@ class DynamicsMixin:
 
         return tf
 
-    def cinertia(self, q=None):
-        r"""
-        Cartesian manipulator inertia matrix
+    def cinertia(self, q):
+        """
+        Deprecated, use ``inertia_x``
+
+        """
+        warnings.warn(
+            'cinertia is deprecated, use inertia_x',
+            DeprecationWarning
+        )
+
+    def inertia(self, q):
+        """
+        Manipulator inertia matrix
 
         :param q: Joint coordinates
-        :type q: ndarray(n)
+        :type q: ndarray(n) or ndarray(m,n)
 
         :return: The inertia matrix
-        :rtype: ndarray(6,6)
-
-        ``robot.cinertia(q)`` is the Cartesian (operational space) inertia
-        matrix which relates Cartesian force/torque to Cartesian
-        acceleration at the joint configuration q.
-
-        :math:`\mathbf{M} = {\mathbf{J}(q)^+}^T \mathbf{I}(q) \mathbf{J}(q)^+
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.cinertia(puma.qz)
-
-        **Trajectory operation**
-
-        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
-        vector, and the result is a 3d-matrix (n,n,m) where each plane
-        corresponds to the Cartesian inertia for the corresponding
-        row of ``q``.
-
-        .. warning:: Assumes that the operational space has 6 DOF.
-
-        :seealso: :func:`inertia`
-        """
-        q = getmatrix(q, (None, self.n))
-
-        Mt = np.zeros((q.shape[0], 6, 6))
-
-        for k, qk in enumerate(q):
-            J = self.jacob0(qk)
-            Ji = np.linalg.pinv(J)
-            M = self.inertia(qk)
-            Mt[k, :, :] = Ji.T @ M @ Ji
-
-        if q.shape[0] == 1:
-            return Mt[0, :, :]
-        else:
-            return Mt
-
-    def inertia(self, q=None):
-        """
-        DHRobot.INERTIA Manipulator inertia matrix
-
-        :param q: Joint coordinates
-        :type q: ndarray(n)
-
-        :return: The inertia matrix
-        :rtype: ndarray(n,n)
+        :rtype: ndarray(n,n) or ndarray(m,n,n)
 
         ``inertia(q)`` is the symmetric joint inertia matrix (n,n) which
         relates joint torque to joint acceleration for the robot at joint
@@ -719,9 +672,9 @@ class DynamicsMixin:
         corresponds to the inertia for the corresponding row of q.
 
         .. note::
-            - The diagonal elements ``I[j,j]`` are the inertia seen by joint
+            - The diagonal elements ``M[j,j]`` are the inertia seen by joint
               actuator ``j``.
-            - The off-diagonal elements ``I[j,k]`` are coupling inertias that
+            - The off-diagonal elements ``M[j,k]`` are coupling inertias that
               relate acceleration on joint ``j`` to force/torque on
               joint ``k``.
             - The diagonal terms include the motor inertia reflected through
@@ -750,11 +703,11 @@ class DynamicsMixin:
         Coriolis and centripetal term
 
         :param q: Joint coordinates
-        :type q: ndarray(n)
+        :type q: ndarray(n) or ndarray(m,n)
         :param qd: Joint velocity
-        :type qd: ndarray(n)
+        :type qd: ndarray(n) or ndarray(m,n)
         :return: Velocity matrix
-        :rtype: ndarray(n,n)
+        :rtype: ndarray(n,n) or ndarray(m,n,n)
 
         ``coriolis(q, qd)`` calculates the Coriolis/centripetal matrix (n,n)
         for the robot in configuration ``q`` and velocity ``qd``, where ``n``
@@ -836,59 +789,6 @@ class DynamicsMixin:
         else:
             return C
 
-    def itorque(self, q, qdd):
-        r"""
-        Inertia torque
-
-        :param q: Joint coordinates
-        :type q: ndarray(n)
-        :param qdd: Joint acceleration
-        :type qdd: ndarray(n)
-
-        :return: The inertia torque vector
-        :rtype: ndarray(n)
-
-        ``itorque(q, qdd)`` is the inertia force/torque vector (n) at
-        the specified joint configuration q (n) and acceleration qdd (n), and
-        ``n`` is the number of robot joints.
-        It is :math:`\mathbf{I}(q) \ddot{q}`.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.itorque(puma.qz, 0.5 * np.ones((6,)))
-
-        **Trajectory operation**
-
-        If ``q`` and ``qdd`` are matrices (m,n), each row is interpretted as a
-        joint configuration, and the result is a matrix (m,n) where each row is
-        the corresponding joint torques.
-
-        .. note:: If the robot model contains non-zero motor inertia then this
-              will be included in the result.
-
-        :seealso: :func:`inertia`
-        """
-
-        q = getmatrix(q, (None, self.n))
-        qdd = getmatrix(qdd, (None, self.n))
-        if q.shape[0] != qdd.shape[0]:
-            raise ValueError('q and qdd must have the same number of rows')
-
-        taui = np.zeros((q.shape[0], self.n))
-
-        for k, (qk, qddk) in enumerate(zip(q, qdd)):
-            taui[k, :] = self.rne(
-                qk, np.zeros(self.n), qddk, gravity=[0, 0, 0])
-
-        if q.shape[0] == 1:
-            return taui[0, :]
-        else:
-            return taui
-
     def gravload(self, q=None, gravity=None):
         """
         Compute gravity load
@@ -942,6 +842,435 @@ class DynamicsMixin:
             return taug[0, :]
         else:
             return taug
+
+    def inertia_x(self, q=None, pinv=False, analytical='rpy-xyz'):
+        r"""
+        Operational space inertia matrix
+
+        :param q: Joint coordinates
+        :type q: array_like(n) or ndarray(m,n)
+        :param pinv: use pseudo inverse rather than inverse 
+        :type pinv: bool
+        :param analytical: the type of analytical Jacobian to use, default is
+            'rpy-xyz'
+        :type analytical: str
+        :return: The inertia matrix
+        :rtype: ndarray(6,6) or ndarray(m,6,6)
+
+        ``robot.inertia_x(q)`` is the operational space (Cartesian) inertia
+        matrix which relates Cartesian force/torque to Cartesian
+        acceleration at the joint configuration q.
+
+        .. math::
+        
+            \mathbf{M}_x = \mathbf{J}(q)^{-T} \mathbf{M}(q) \mathbf{J}(q)^{-1}
+
+        The transformation to operational space requires an analytical, rather
+        than geometric, Jacobian. ``analytical`` can be one of:
+
+            =============  ========================================
+            Value          Rotational representation
+            =============  ========================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ========================================
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.inertia_x(puma.qz)
+
+        **Trajectory operation**
+
+        If ``q`` is a matrix (m,n), each row is interpretted as a joint state
+        vector, and the result is a 3d-matrix (m,n,n) where each plane
+        corresponds to the Cartesian inertia for the corresponding
+        row of ``q``.
+
+        .. note::  
+            - If the robot is not 6 DOF the ``pinv`` option is set True.
+            - ``pinv()`` is around 5x slower than ``inv()``
+
+        .. warning:: Assumes that the operational space has 6 DOF.
+
+        :seealso: :func:`inertia`
+        """
+        q = getmatrix(q, (None, self.n))
+        if q.shape[1] != 6:
+            pinv = True
+
+        Mt = np.zeros((q.shape[0], 6, 6))
+
+        for k, qk in enumerate(q):
+            Ja = self.jacob0(qk, analytical=analytical)
+            if pinv:
+                Ji = np.linalg.pinv(Ja)
+            else:
+                Ji = np.linalg.inv(Ja)
+            M = self.inertia(qk)
+            Mt[k, :, :] = Ji.T @ M @ Ji
+
+        if q.shape[0] == 1:
+            return Mt[0, :, :]
+        else:
+            return Mt
+
+    def coriolis_x(self, q, qd, pinv=False, analytical='rpy-xyz'):
+        r"""
+        Operational space Coriolis and centripetal term
+
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
+        :param qd: Joint velocity
+        :type qd: ndarray(n) or ndarray(m,n)
+        :param pinv: use pseudo inverse rather than inverse 
+        :type pinv: bool
+        :param analytical: the type of analytical Jacobian to use, default is
+            'rpy-xyz'
+        :type analytical: str
+        :return: Operational space velocity matrix
+        :rtype: ndarray(6,6) or ndarray(m,6,6)
+
+        ``coriolis_x(q, qd)`` is the Coriolis/centripetal matrix (m,m)
+        in operational space for the robot in configuration ``q`` and velocity
+        ``qd``, where ``n`` is the number of joints.
+
+        .. math::
+        
+            \mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
+                \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+                \right) \mathbf{J}(q)^{-1}
+
+        The product :math:`\mathbf{C} \dot{x}` is the operational space wrench
+        due to joint velocity coupling. This matrix is also known as the
+        velocity coupling matrix, since it describes the disturbance forces on
+        any joint due to velocity of all other joints.
+
+        The transformation to operational space requires an analytical, rather
+        than geometric, Jacobian. ``analytical`` can be one of:
+
+            =============  ========================================
+            Value          Rotational representation
+            =============  ========================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ========================================
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.coriolis_x(puma.qz, 0.5 * np.ones((6,)))
+
+        **Trajectory operation**
+
+        If ``q`` and `qd` are matrices (m,n), each row is interpretted as a
+        joint configuration, and the result (n,n,m) is a 3d-matrix where
+        each plane corresponds to a row of ``q`` and ``qd``.
+
+        .. note::
+            - Joint viscous friction is also a joint force proportional to
+              velocity but it is eliminated in the computation of this value.
+            - Computationally slow, involves :math:`n^2/2` invocations of RNE.
+            - If the robot is not 6 DOF the ``pinv`` option is set True.
+            - ``pinv()`` is around 5x slower than ``inv()``
+
+        .. warning:: Assumes that the operational space has 6 DOF.
+
+        :seealso: :func:`coriolis`, :func:`inertia_x`, :func:`hessian0`
+        """
+        q = getmatrix(q, (None, self.n))
+        qd = getmatrix(qd, (None, self.n))
+        n = q.shape[1]
+        if n != 6:
+            pinv = True
+
+
+        Ct = np.zeros((q.shape[0], 6, 6))
+
+        for k, (qk, qdk) in enumerate(zip(q, qd)):
+            J = self.jacob0(qk)
+            T = rot2jac(self.fkine(qk).A, representation=analytical)
+            Ja = T @ J
+
+            C = self.coriolis(qk, qdk)
+            Mx = self.inertia_x(qk)
+            Jd = self.jacob_dot(qk, qdk, J0=J)
+            A = 1
+            
+            if pinv:
+                Ji = np.linalg.pinv(Ja)
+            else:
+                Ji = np.linalg.inv(Ja)
+            Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
+
+        if q.shape[0] == 1:
+            return Ct[0, :, :]
+        else:
+            return Ct
+
+    def gravload_x(self, q=None, gravity=None, pinv=False, analytical='rpy-xyz'):
+        """
+        Operational space gravity load
+
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the ``gravity`` attribute of self).
+        :type gravity: ndarray(3)
+        :param pinv: use pseudo inverse rather than inverse 
+        :type pinv: bool
+        :param analytical: the type of analytical Jacobian to use, default is
+            'rpy-xyz'
+        :type analytical: str
+        :return: The operational space gravity wrench
+        :rtype: ndarray(6) or ndarray(m,6)
+
+        ``robot.gravload_x(q)`` calculates the gravity wrench for
+        the robot in the joint configuration ``q`` and using the default
+        gravitational acceleration specified in the robot object.
+
+        ``robot.gravload_x(q, gravity=g)`` as above except the gravitational
+        acceleration is explicitly specified as ``g``.
+
+        .. math::
+        
+            \mathbf{G}_x = \mathbf{J}(q)^{-T} \mathbf{G}(q)
+
+        The transformation to operational space requires an analytical, rather
+        than geometric, Jacobian. ``analytical`` can be one of:
+
+            =============  ========================================
+            Value          Rotational representation
+            =============  ========================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ========================================
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.gravload_x(puma.qz)
+
+        **Trajectory operation**
+
+        If q is a matrix (nxm) each column is interpreted as a joint
+        configuration vector, and the result is a matrix (nxm) each column
+        being the corresponding joint torques.
+
+        .. note::  
+            - If the robot is not 6 DOF the ``pinv`` option is set True.
+            - ``pinv()`` is around 5x slower than ``inv()``
+
+        .. warning:: Assumes that the operational space has 6 DOF.
+
+        :seealso: :func:`gravload`
+        """
+
+        q = getmatrix(q, (None, self.n))
+        if q.shape[1] != 6:
+            pinv = True
+
+        if gravity is None:
+            gravity = self.gravity
+        else:
+            gravity = getvector(gravity, 3)
+
+        taug = np.zeros((q.shape[0], self.n))
+        z = np.zeros(self.n)
+
+        for k, qk in enumerate(q):
+            Ja = self.jacob0(qk, analytical=analytical)
+            G = self.gravload(qk)
+            if pinv:
+                Ji = np.linalg.pinv(Ja)
+            else:
+                Ji = np.linalg.inv(Ja)
+
+            taug[k, :] = Ji.T @ G
+
+        if q.shape[0] == 1:
+            return taug[0, :]
+        else:
+            return taug
+
+    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, analytical='rpy-xyz'):
+        r"""
+        Operational space acceleration due to applied wrench
+
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
+        :param qd: Joint velocity
+        :type qd: ndarray(n) or ndarray(m,n)
+        :param wrench: Wrench applied to the end-effector
+        :type torque:  ndarray(6) or ndarray(m,6)
+        :param gravity: Gravitational acceleration (Optional, if not supplied will
+            use the ``gravity`` attribute of self).
+        :type gravity: ndarray(3)
+        :param pinv: use pseudo inverse rather than inverse 
+        :type pinv: bool
+        :param analytical: the type of analytical Jacobian to use, default is
+            'rpy-xyz'
+        :type analytical: str
+        :return: Operational space accelerations of the end-effector
+        :rtype: ndarray(6) or ndarray(m,6)
+
+        ``xdd = accel_x(q, qd, wrench)`` is the operational space acceleration
+        due to ``wrench`` applied to the end-effector of a robot in joint
+        configuration ``q`` and joint velocity ``qd``.
+
+        .. math::
+        
+            \ddot{x} = \mathbf{J}(q) \mathbf{M}(q)^{-1} \left(
+                \mathbf{J}(q)^T w - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)
+                \right)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.accel_x(puma.qz, 0.5 * np.ones(6), np.zeros(6))
+
+        **Trajectory operation**
+
+        If `q`, `qd`, torque are matrices (m,n) then ``qdd`` is a matrix (m,n)
+        where each row is the acceleration corresponding to the equivalent rows
+        of q, qd, wrench.
+
+        .. note::
+            - Useful for simulation of manipulator dynamics, in
+              conjunction with a numerical integration function.
+            - Uses the method 1 of Walker and Orin to compute the forward
+              dynamics.
+            - Featherstone's method is more efficient for robots with large
+              numbers of joints.
+            - Joint friction is considered.
+
+        :seealso: :func:`accel`
+        """  # noqa
+
+        q = getmatrix(q, (None, self.n))
+        xd = getmatrix(xd, (None, 6))
+        w = getmatrix(wrench, (None, 6))
+        if q.shape[1] != 6:
+            pinv = True
+
+        xdd = np.zeros((q.shape[0], self.n))
+
+        for k, (qk, xdk, wk) in enumerate(zip(q, xd, w)):
+
+            J = self.jacob0(qk)
+            T = rot2jac(self.fkine(qk).A, representation=analytical)
+            Ja = T @ J
+            if pinv:
+                Ji = np.linalg.pinv(Ja)
+            else:
+                Ji = np.linalg.inv(Ja)
+
+            # Compute current manipulator inertia tensor
+            # shortcut from torques resulting from unit
+            # acceleration of each joint with zero gravity and zero velocity
+            qI = (np.c_[qk] @ np.ones((1, self.n))).T
+            qdI = np.zeros((self.n, self.n))
+            qddI = np.eye(self.n)
+            M = self.rne(qI, qdI, qddI, gravity=[0, 0, 0])
+
+            # Compute gravity and coriolis torque torques resulting from zero
+            # acceleration at given velocity & with gravity acting.
+            tau_rne = self.rne(qk, Ji @ xdk, np.zeros((1, self.n)), gravity=gravity)
+
+            # solve is faster than inv() which is faster than pinv()
+            #   tau_rne = C(q,qd) + G(q)
+            #   qdd = M^-1 (tau - C(q,qd) - G(q))
+            qdd = np.linalg.solve(M, J.T @ wk - tau_rne)
+
+            # xd = Ja qd
+            # xdd = Jad qd + Ja qdd
+            # 
+            # Ja = T J
+            # Jad = Td J + T Jd
+            # assume Td = 0, not sure how valid that is
+            
+            # need Jacobian dot
+            qdk = Ji @ xdk
+            Jd = self.jacob_dot(qk, qdk, J0=J)
+
+            xdd[k, :] = T @ (Jd @ qdk  + J @ qdd)
+
+        if q.shape[0] == 1:
+            return xdd[0, :]
+        else:
+            return xdd
+
+    def itorque(self, q, qdd):
+        r"""
+        Inertia torque
+
+        :param q: Joint coordinates
+        :type q: ndarray(n)
+        :param qdd: Joint acceleration
+        :type qdd: ndarray(n)
+
+        :return: The inertia torque vector
+        :rtype: ndarray(n)
+
+        ``itorque(q, qdd)`` is the inertia force/torque vector (n) at
+        the specified joint configuration q (n) and acceleration qdd (n), and
+        ``n`` is the number of robot joints.
+        It is :math:`\mathbf{I}(q) \ddot{q}`.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.itorque(puma.qz, 0.5 * np.ones((6,)))
+
+        **Trajectory operation**
+
+        If ``q`` and ``qdd`` are matrices (m,n), each row is interpretted as a
+        joint configuration, and the result is a matrix (m,n) where each row is
+        the corresponding joint torques.
+
+        .. note:: If the robot model contains non-zero motor inertia then this
+              will be included in the result.
+
+        :seealso: :func:`inertia`
+        """
+
+        q = getmatrix(q, (None, self.n))
+        qdd = getmatrix(qdd, (None, self.n))
+        if q.shape[0] != qdd.shape[0]:
+            raise ValueError('q and qdd must have the same number of rows')
+
+        taui = np.zeros((q.shape[0], self.n))
+
+        for k, (qk, qddk) in enumerate(zip(q, qdd)):
+            taui[k, :] = self.rne(
+                qk, np.zeros(self.n), qddk, gravity=[0, 0, 0])
+
+        if q.shape[0] == 1:
+            return taui[0, :]
+        else:
+            return taui
+
 
     def paycap(self, w, tauR, frame=1, q=None):
         """

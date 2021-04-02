@@ -2,10 +2,13 @@ import numpy as np
 from math import sin, cos, atan2, tan, sqrt, pi
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 import time
 
 from bdsim.components import TransferBlock, block
 from bdsim.graphics import GraphicsBlock
+
+from spatialmath import base
 
 # ------------------------------------------------------------------------ #
 @block
@@ -336,7 +339,7 @@ class VehiclePlot(GraphicsBlock):
             vertices = [(-L1, W), (0.6*L2, W), (L2, 0.5*W), (L2, -0.5*W), (0.6*L2, -W), (-L1, -W)]
         else:
             raise ValueError('bad vehicle shape specified')
-        self.vertices_hom = sm.e2h(np.array(vertices).T)
+        self.vertices_hom = base.e2h(np.array(vertices).T)
         self.vertices = np.array(vertices)
 
         
@@ -384,8 +387,8 @@ class VehiclePlot(GraphicsBlock):
             #plt.figure(self.fig.number)
             if self.path:
                 self.line.set_data(self.xdata, self.ydata)
-            T = sm.transl2(self.inputs[0], self.inputs[1]) @ sm.trot2(self.inputs[2])
-            new = sm.h2e(T @ self.vertices_hom)
+            T = base.transl2(self.inputs[0], self.inputs[1]) @ base.trot2(self.inputs[2])
+            new = base.h2e(T @ self.vertices_hom)
             self.vehicle.set_xy(new.T)
         
             if self.bd.options.animation:

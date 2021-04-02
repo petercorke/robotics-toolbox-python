@@ -538,8 +538,11 @@ class GraphicalRobot:  # pragma nocover
             zero_angles = np.zeros((self.robot.n,))
             all_poses = self.robot.fkine_all(zero_angles, old=False)
             # Create the base
-            if robot.basemesh is not None:
-                self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
+            try:
+                if robot.basemesh is not None:
+                    self.append_link("s", all_poses[0], robot.basemesh, [0, 0], 0)
+            except:
+                pass
             # else: assume no base joint
             robot_colours = robot.linkcolormap()
             # Create the joints
@@ -786,7 +789,7 @@ class GraphicalRobot:  # pragma nocover
             while t_stop - t_start < f:
                 t_stop = perf_counter()
 
-    def fkine(self, joint_angles):
+    def fkine_and_set(self, joint_angles):
         """
         Call fkine for the robot. If it is based on a seriallink object,
         run it's fkine function.
@@ -796,7 +799,13 @@ class GraphicalRobot:  # pragma nocover
         """
         # If seriallink object, run it's fkine
         if self.robot is not None:
-            return self.robot.fkine_all(joint_angles)
+            poses = self.robot.fkine_all(joint_angles)
+            if joint_angles is None:
+                joint_angles = self.robot.q
+            for a_idx in range(len(joint_angles)):
+                # Ignore the base's angle (idx == 0)
+                self.angles[a_idx+1] = joint_angles[a_idx]
+            self.set_joint_poses(poses)
         # Else TODO
         else:
             pass

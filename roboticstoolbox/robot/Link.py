@@ -250,13 +250,13 @@ class Link(ABC):
         if v is None:
             return
         if isscalar(v) and v != ignorevalue:
-            s = f"{name}={v}"
+            s = f"{name}={v:.3g}"
         elif isinstance(v, np.ndarray):
             if np.linalg.norm(v, ord=np.inf) > 0:
                 if indices is not None:
                     flat = v.flatten()
                     v = np.r_[[flat[k] for k in indices]]
-                s = f"{name}=[" + ", ".join([str(x) for x in v]) + "]"
+                s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
         if s is not None:
             l.append(s)
 

@@ -6,7 +6,7 @@ Introduction
 Introduction
 ============
 
-*This is a modified version of a paper submitted to ICRA2020*
+This is a modified version of a paper accepted to ICRA2021 [corke21a]_.
 
 The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support
 Peter Corke’s PhD research and was first published in 1995-6 [Corke95]_
@@ -359,10 +359,11 @@ or pure rotation -- each with either a constant parameter or a free parameter wh
 .. runblock:: pycon
     :linenos:
 
-    >>> from roboticstoolbox import ETS as E
+    >>> from roboticstoolbox import ETS as ET
     >>> import roboticstoolbox as rtb
-    >>> l1 = 0.672; l2 = 0.2337; l3 = 0.4318; l4 = -0.0837; l5 = 0.4318; l6 = 0.0203
-    >>> e = E.tz(l1) * E.rz() * E.ty(l2) * E.ry() * E.tz(l3) * E.tx(l6) * E.ty(l4) * E.ry() * E.tz(l5) * E.rz() * E.ry() * E.rz()
+    >>> # Puma dimensions (m), see RVC2 Fig. 7.4 for details
+    >>> l1 = 0.672; l2 = -0.2337; l3 = 0.4318; l4 = 0.0203; l5 = 0.0837; l6 = 0.4318
+    >>> e = ET.tz(l1) * ET.rz() * ET.ty(l2) * ET.ry() * ET.tz(l3) * ET.tx(l4) * ET.ty(l5) * ET.ry() * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
     >>> print(e)
     >>> robot = rtb.ERobot(e)
     >>> print(robot)
@@ -404,7 +405,7 @@ end-effector must be specified.
     >>> import roboticstoolbox as rtb
     >>> panda = rtb.models.URDF.Panda()
     >>> print(panda)
-    >>> T = panda.fkine(panda.qz, endlink='panda_hand')
+    >>> T = panda.fkine(panda.qz, end='panda_hand')
     >>> print(T)
 
 In the table above we see the end-effectors indicated by @ (determined automatically
@@ -469,9 +470,8 @@ two points specified by a pair of poses in :math:`\SE{3}`
     >>> T1 = SE3(0.4, 0.5, 0.2)
     >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, len(t))
     >>> len(Ts)
-    >>> sol = puma.ikine_LM(Ts)                 # array of named tuples
-    >>> qt = np.array([x.q for x in sol])    # convert to 2d matrix 
-    >>> qt.shape
+    >>> sol = puma.ikine_LM(Ts)       # named tuple of arrays
+    >>> sol.q.shape
 
 At line 9 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance with 200 values.
 
@@ -493,9 +493,8 @@ As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. Fo
 
 .. runblock:: pycon
 
-    >>> import roboticstoolbox as rtb
     >>> import spatialmath.base as base
-    >>> phi, theta, psi = base.sym.symbol('phi, theta, psi')
+    >>> phi, theta, psi = base.sym.symbol('φ, ϴ, ψ')
     >>> base.rpy2r(phi, theta, psi)
 
 The capability extends to forward kinematics
@@ -510,11 +509,13 @@ The capability extends to forward kinematics
     >>> T = puma.fkine(q)
     >>> T.t[0]
 
-If we display the value of ``puma`` we see that the :math:`\alpha_j` values are now displayed in red to indicate that they are symbolic constants.  The x-coordinate of the end-effector is
-given by line 7.
+If we display the value of ``puma`` we see that the :math:`\alpha_j` values are
+now displayed in red to indicate that they are symbolic constants.  The
+x-coordinate of the end-effector is given by line 7.
 
 
-SymPy allows any expression to be converted to runnable code in a variety of languages including C, Python and Octave/MATLAB.
+SymPy allows any expression to be converted to LaTeX or a variety of languages
+including C, Python and Octave/MATLAB.
 
 Differential kinematics
 =======================
@@ -625,8 +626,8 @@ Python version takes 1.5ms (:math:`65\times` slower).  With symbolic operands it
 takes 170ms (:math:`113\times` slower) to produce the unsimplified torque
 expressions.
 
-For all robots there is also an implementation of Featherstone's spatial vector
-method, ``rne_spatial()``, and SMTB-P provides a set of classes for spatial
+For ``ERobot`` subclasses there is also an implementation of Featherstone's spatial vector
+method, ``rne()``, and SMTB-P provides a set of classes for spatial
 velocity, acceleration, momentum, force and inertia.
 
 
@@ -727,9 +728,11 @@ to HTML documentation whenever a change is pushed, and this is accessible via
 GitHub pages. Issues can be reported via GitHub issues or patches submitted as
 pull requests.
 
-RTB-P, and its dependencies, can be installed simply by::
+RTB-P, and its dependencies, can be installed simply by either of::
 
     $ pip install roboticstoolbox-python
+
+    $ conda install -c conda-forge roboticstoolbox-python
 
 which includes basic visualization using matplotlib.
 Options such as ``vpython`` can be used to specify additional dependencies to be installed.
@@ -747,27 +750,31 @@ installed.
 Conclusion
 ==========
 
-This article has introduced and demonstrated in tutorial form the principle features of the Robotics
-Toolbox for Python which runs on Mac, Windows and Linux using Python 3.6 or better.
-The code is free and open, and released under the MIT licence.
-It provides many of the essential tools necessary for 
-robotic manipulator modelling, simulation and  control which is essential for robotics education  and research.
-It is familiar yet new, and we hope it will serve the community well for the next 25 years.
+This article has introduced and demonstrated in tutorial form the principle
+features of the Robotics Toolbox for Python which runs on Mac, Windows and Linux
+using Python 3.6 or better. The code is free and open, and released under the
+MIT licence. It provides many of the essential tools necessary for robotic
+manipulator modelling, simulation and  control which is essential for robotics
+education  and research. It is familiar yet new, and we hope it will serve the
+community well for the next 25 years.
 
-Currently under development are backend interfaces for CoppeliaSim, Dynamixel
-servo chains, and ROS; symbolic dynamics, simplification and code generation;
-mobile robotics motion models, planners, EKF localization, map making and SLAM;
-and a minimalist block-diagram simulation tool [bdsim]_.
+A high-performance reactive motion controller, NEO, is based on this toolbox
+[neo]_. Currently under development are backend interfaces for CoppeliaSim,
+Dynamixel servo chains, and ROS; symbolic dynamics, simplification and code
+generation; mobile robotics motion models, planners, EKF localization, map
+making and SLAM; and a minimalist block-diagram simulation tool [bdsim]_.
 
 References
 ==========
 
-.. [Corke95] P. Corke. A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.
-.. [Corke96] P. Corke. A robotics toolbox for MATLAB. IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996.
-.. [Craig2005] Introduction to Robotics, John Craig, Wiley, 2005.
+.. [Corke95] `P. Corke. "A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB". In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995. <http://www.petercorke.com/RTB/ARA95.pdf>`_
+.. [Corke96] `P. Corke. "A robotics toolbox for MATLAB". IEEE Robotics and Automation Magazine, 3(1):24–32, Sept. 1996. <https://ieeexplore.ieee.org/document/486658>`_
+.. [Craig2005] J. Craig, "Introduction to Robotics", Wiley, 2005.
 .. [Featherstone87] R. Featherstone, Robot Dynamics Algorithms. Kluwer Academic, 1987.
 .. [Corke07] P. Corke, `“A simple and systematic approach to assigning Denavit- Hartenberg parameters,” IEEE transactions on robotics, vol. 23, no. 3, pp. 590–594, 2007, DOI 10.1109/TRO.2007.896765. <https://ieeexplore.ieee.org/document/4252158>`_.
 .. [Haviland20] `J. Haviland and P. Corke, “A systematic approach to computing the manipulator Jacobian and Hessian using the elementary transform sequence,” arXiv preprint, 2020. <https://arxiv.org/abs/2010.08696>`_
 .. [PyBullet] `PyBullet <https://pybullet.org/wordpress/>`_
 .. [SMTB-P] `Spatial Math Toolbox for Python <https://github.com/petercorke/spatialmath-python>`_
 .. [bdsim] `Block diagram simulator for Python <https://github.com/petercorke/bdsim>`_
+.. [neo] `NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulatorshttps://jhavl.github.io/neo>`_
+.. [corke21a] P. Corke and J. Haviland, "Not your grandmother’s toolbox – the Robotics Toolbox reinvented for Python", Proc. ICRA 2021.

@@ -5,6 +5,7 @@
 
 from collections import namedtuple
 from roboticstoolbox.tools.data import path_to_datafile
+import warnings
 
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
@@ -1057,131 +1058,62 @@ class DHRobot(Robot):
                 raise ValueError('bad half specified')
         return J0
 
-    def jacob_dot(self, q=None, qd=None):
+
+    def hessian0(self, q=None, J0=None):
         r"""
-        Derivative of Jacobian
+        Manipulator Hessian in base frame
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param qd: The joint configuration of the robot (Optional,
-            if not supplied will use the stored qd values).
-        :type qd: ndarray(n)
-        :return: The derivative of the manipulator Jacobian
-        :rtype:  ndarray(n)
+        :param q: joint coordinates
+        :type q: array_like
+        :param J0: Jacobian in {0} frame
+        :type J0: ndarray(6,n)
+        :return: Hessian matrix
+        :rtype: ndarray(6,n,n)
 
-        ``robot.jacob_dot(q, qd)`` computes the product (6) of the temporal
-        derivative of the manipulator Jacobian (in the world frame) and the
-        joint rates :math:`\frac{d}{dt} \dot{\mathbf{J}}(q) \dot{q}`.
+        This method calculcates the Hessisan in the base frame. One of ``J0`` or
+        ``q`` is required. If ``J0`` is already calculated for the joint
+        coordinates ``q`` it can be passed in to to save computation time.
 
-        .. note::
-            - This term appears in the formulation for operational space
-              control :math:`\ddot{x} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q}`.
-            - Written as per the reference and not very efficient.
+        If we take the time derivative of the differential kinematic
+        relationship
+
+        .. math::
+
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+
+        where
+
+        .. math::
+
+            \dmat{J} = \mat{H} \dvec{q}
+        
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
+
+        The elements of the Hessian are
+
+        .. math::
+        
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+
+        Similarly, we can write
+
+        .. math::
+        
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         :references:
-            - Fundamentals of Robotics Mechanical Systems (2nd ed)
-              J. Angleles, Springer 2003.
-            - A unified approach for motion and force control of robot
-              manipulators: The operational space formulation
-              O Khatib, IEEE Journal on Robotics and Automation, 1987.
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
 
-        """  # noqa
+        :seealso: :func:`jacob0`, :func:`jacob_dot`
+        """
 
-        if q is None:
-            q = self.q
-
-        if qd is None:
-            qd = self.qd
-
-        q = getvector(q, self.n)
-        qd = getvector(qd, self.n)
-
-        # Using the notation of Angeles:
-        #   [Q,a] ~ [R,t] the per link transformation
-        #   P ~ R   the cumulative rotation t2r(Tj) in world frame
-        #   e       the last column of P, the local frame z axis in world
-        #           coordinates
-        #   w       angular velocity in base frame
-        #   ed      deriv of e
-        #   r       is distance from final frame
-        #   rd      deriv of r
-        #   ud      ??
-
-        Q = np.zeros((3, 3, self.n))
-        a = np.zeros((3, self.n))
-        P = np.zeros((3, 3, self.n))
-        e = np.zeros((3, self.n))
-        w = np.zeros((3, self.n))
-        ed = np.zeros((3, self.n))
-        rd = np.zeros((3, self.n))
-        r = np.zeros((3, self.n))
-        ud = np.zeros((3, self.n))
-        v = np.zeros((6, self.n))
-
-        for i in range(self.n):
-            T = self.links[i].A(q[i])
-            Q[:, :, i] = T.R
-            a[:, i] = T.t
-
-        P[:, :, 0] = Q[:, :, 0]
-        e[:, 0] = [0, 0, 1]
-
-        for i in range(1, self.n):
-            P[:, :, i] = P[:, :, i - 1] @ Q[:, :, i]
-            e[:, i] = P[:, 2, i]
-
-        # Step 1
-        w[:, 0] = qd[0] * e[:, 0]
-
-        for i in range(self.n - 1):
-            w[:, i + 1] = (
-                qd[i + 1] *
-                np.array([0, 0, 1]) +
-                Q[:, :, i].T @ w[:, i])
-
-        # Step 2
-        ed[:, 0] = np.array([0, 0, 1])
-
-        for i in range(1, self.n):
-            ed[:, i] = np.cross(w[:, i], e[:, i])
-
-        # Step 3
-        rd[:, self.n - 1] = np.cross(w[:, self.n - 1], a[:, self.n - 1])
-
-        for i in range(self.n - 2, -1, -1):
-            rd[:, i] = np.cross(w[:, i], a[:, i]) + Q[:, :, i] @ rd[:, i + 1]
-
-        r[:, self.n - 1] = a[:, self.n - 1]
-
-        for i in range(self.n - 2, -1, -1):
-            r[:, i] = a[:, i] + Q[:, :, i] @ r[:, i + 1]
-
-        ud[:, 0] = np.cross(e[:, 0], rd[:, 0])
-
-        for i in range(1, self.n):
-            ud[:, i] = \
-                np.cross(ed[:, i], r[:, i]) + np.cross(e[:, i], rd[:, i])
-
-        # Step 4
-        # Swap ud and ed
-        v[:, self.n - 1] = \
-            qd[self.n - 1] * np.r_[ud[:, self.n - 1], ed[:, self.n - 1]]
-
-        for i in range(self.n - 2, -1, -1):
-            Ui = np.r_[
-                np.c_[Q[:, :, i], np.zeros((3, 3))],
-                np.c_[np.zeros((3, 3)), Q[:, :, i]]]
-
-            v[:, i] = (
-                qd[i] *
-                np.r_[ud[:, i], ed[:, i]] +
-                Ui @ v[:, i + 1])
-
-        Jdot = v[:, 0]
-
-        return Jdot
-
+        return self.ets().hessian0(q, J0)
 # -------------------------------------------------------------------------- #
 
     def _init_rne(self):
@@ -1403,12 +1335,17 @@ class DHRobot(Robot):
             Rm = []
 
             # rotate base velocity and acceleration into L1 frame
-            Rb = t2r(self.base.A).T
             # base has zero angular velocity
-            w = Rb @ np.zeros((3,), dtype=dtype)
+            w = np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
-            wd = Rb @ np.zeros((3,), dtype=dtype)
-            vd = -Rb @ gravity
+            wd = np.zeros((3,), dtype=dtype)
+            vd = -gravity
+
+            if self._base is not None:
+                Rb = t2r(self.base.A).T
+                w = Rb @ wd
+                wd = Rb @ wdd
+                vd = Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #
 
@@ -1715,7 +1652,10 @@ class DHRobot(Robot):
         return config
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
-        print('SerialLink is deprecated, use DHRobot instead')
+        warnings.warn(
+            'SerialLink is deprecated, use DHRobot instead',
+            DeprecationWarning
+        )
         super().__init__(*args, **kwargs)
 
 

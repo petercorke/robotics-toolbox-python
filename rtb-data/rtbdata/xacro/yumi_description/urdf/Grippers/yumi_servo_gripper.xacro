@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<robot name="yumi" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.gazebo.xacro" />
+    <!-- Import Transmissions -->
+    <xacro:include filename="$(find yumi_description)/urdf/Grippers/yumi_servo_gripper.transmission.xacro" />
+
+
+
+    <!-- some constants -->
+    <xacro:property name="joint_damping" value="0.5" />
+    <xacro:property name="gripper_joint_damping" value="1.0" />
+    <xacro:property name="max_gripper_effort" value="20"/>
+    <xacro:property name="max_gripper_velocity" value="2"/>
+ 
+ 
+  <xacro:macro name="yumi_servo_gripper" params="parent name hardware_interface *origin">
+
+    <!--joint between {parent} and base-->
+    <joint name="${parent}_joint" type="fixed">
+      <xacro:insert_block name="origin"/>
+      <parent link="${parent}"/>
+      <child link="${name}_base"/>
+    </joint>
+
+    <link name="${name}_base">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.2"/>
+        <inertia ixx="0.0001"  ixy="0"  ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/gripper/base.stl"/>
+        </geometry>
+        <material name="Light_Grey"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/gripper/coarse/base.stl"/>
+        </geometry>
+        <material name="Light_Grey"/>
+      </collision>
+
+    </link>
+
+    <!-- joint between base and right finger -->
+    <joint name="${name}_joint" type="prismatic">
+      <parent link="${name}_base"/>
+      <child link="${name}_finger_r"/>
+      <origin xyz="0 -0.0065 0.0837" rpy="0 0 0"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="0" upper="0.025"
+             effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
+      <dynamics damping="${gripper_joint_damping}"/>
+    </joint>
+
+    <link name="${name}_finger_r">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="0.000001"  ixy="0"  ixz="0" iyy="0.000001" iyz="0" izz="0.000001" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
+        </geometry>
+        <material name="Blue"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
+        </geometry>
+        <material name="Blue"/>
+      </collision>
+    </link>
+
+   <!-- joint between base and left finger -->
+    <joint name="${name}_joint_m" type="prismatic">
+      <parent link="${name}_base"/>
+      <child link="${name}_finger_l"/>
+      <origin xyz="0 0.0065 0.0837" rpy="0 0 ${PI}"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="0" upper="0.025"
+             effort="${max_gripper_effort}" velocity="${max_gripper_velocity}" />
+      <dynamics damping="${gripper_joint_damping}"/>
+      <mimic joint="${name}_joint"/>
+    </joint>
+
+    <link name="${name}_finger_l">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.01"/>
+        <inertia ixx="0.000001"  ixy="0"  ixz="0" iyy="0.000001" iyz="0" izz="0.000001" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
+        </geometry>
+        <material name="Blue"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
+        </geometry>
+        <material name="Blue"/>
+      </collision>
+    </link>
+
+     <!--Extensions -->
+    <xacro:yumi_servo_gripper_gazebo name="${name}" />
+    <xacro:yumi_servo_gripper_transmission name="${name}" hardware_interface="${hardware_interface}"/>
+
+  </xacro:macro>
+
+</robot>

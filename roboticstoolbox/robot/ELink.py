@@ -3,7 +3,7 @@
 @author: Jesse Haviland
 """
 
-from spatialmath import SE3, SE2
+from spatialmath import SE3, SE2, BasePoseMatrix
 from spatialgeometry import Shape
 from roboticstoolbox.robot.ETS import ETS, SuperETS
 from roboticstoolbox.robot.Link import Link
