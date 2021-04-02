@@ -11,7 +11,6 @@ import unittest
 import spatialmath as sm
 from math import pi, sin, cos
 
-
 class TestERobot(unittest.TestCase):
 
     def test_ets_init(self):
@@ -725,6 +724,60 @@ class TestERobot(unittest.TestCase):
         tau = robot.rne(q, z, [1, 1])
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
+class TestERobot2(unittest.TestCase):
+    def test_plot2(self):
+        panda = rtb.models.DH.Panda()
+        e = panda.plot2(panda.qr, block=False, name=True)
+        e.close()
+
+    def test_plot2_traj(self):
+        panda = rtb.models.DH.Panda()
+        q = np.random.rand(3, 7)
+        e = panda.plot2(block=False, q=q, dt=0)
+        e.close()
+
+    def test_teach2_basic(self):
+        l0 = rtb.DHLink(d=2)
+        r0 = rtb.DHRobot([l0, l0])
+        e = r0.teach2(block=False)
+        e.step()
+        e.close()
+
+    def test_teach2(self):
+        panda = rtb.models.DH.Panda()
+        e = panda.teach(panda.qr, block=False)
+        e.close()
+
+        e2 = panda.teach2(block=False, q=panda.qr)
+        e2.close()
+
+    def test_plot_with_vellipse2(self):
+        panda = rtb.models.DH.Panda()
+        e = panda.plot2(
+            panda.qr, block=False, vellipse=True, limits=[1, 2, 1, 2])
+        e.step()
+        e.close()
+
+    def test_plot_with_fellipse2(self):
+        panda = rtb.models.DH.Panda()
+        e = panda.plot2(panda.qr, block=False, fellipse=True)
+        e.close()
+
+    def test_plot_with_vellipse2_fail(self):
+        panda = rtb.models.DH.Panda()
+        panda.q = panda.qr
+
+        from roboticstoolbox.backends.PyPlot import PyPlot2
+        e = PyPlot2()
+        e.launch()
+        e.add(panda.fellipse(
+                q=panda.qr, centre=[0, 1]))
+
+        with self.assertRaises(ValueError):
+            e.add(panda.fellipse(
+                q=panda.qr, centre='ee', opt='rot'))
+
+        e.close()
 
 if __name__ == '__main__':   # pragma nocover
 

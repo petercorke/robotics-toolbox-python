@@ -1086,8 +1086,8 @@ class TestDHRobot(unittest.TestCase):
             [0.2795, -0.0703, 0.2767, 0.0000, 0.1713, 0.0000],
             [0.0000, -0.9652, -0.0000, 0.1941, 0.0000, 0.5791]]
 
-        M0 = puma.cinertia(q)
-        M1 = puma.cinertia(np.c_[q, q].T)
+        M0 = puma.inertia_x(q)
+        M1 = puma.inertia_x(np.c_[q, q].T)
 
         nt.assert_array_almost_equal(M0, Mr, decimal=4)
         nt.assert_array_almost_equal(M1[0, :, :], Mr, decimal=4)
@@ -1195,7 +1195,6 @@ class TestDHRobot(unittest.TestCase):
         q = puma.qr
 
         j0 = puma.jacob_dot(q, q)
-        j1 = puma.jacob_dot()
 
         res = [-0.0000, -1.0654, -0.3702,  2.4674, 0, 0]
 
