@@ -20,7 +20,7 @@ from roboticstoolbox.backends.Swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
-
+from roboticstoolbox.robot.BaseRobot import BaseRobot
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -33,7 +33,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(DynamicsMixin, IKMixin):
+class Robot(BaseRobot, DynamicsMixin, IKMixin):
 
     _color = True
 
@@ -990,33 +990,7 @@ class Robot(DynamicsMixin, IKMixin):
 
         return env
 
-    def _get_graphical_backend(self, backend):
-        #
-        # find the right backend, modules are imported here on an as needs basis
-        if backend.lower() == 'swift':  # pragma nocover
-            if isinstance(self, rtb.DHRobot):
-                raise NotImplementedError(
-                    'Plotting in Swift is not implemented for DHRobots yet')
 
-            from roboticstoolbox.backends.Swift import Swift
-            env = Swift()
-
-        elif backend.lower() == 'pyplot':
-            from roboticstoolbox.backends.PyPlot import PyPlot
-            env = PyPlot()
-
-        elif backend.lower() == 'pyplot2':
-            from roboticstoolbox.backends.PyPlot import PyPlot2
-            env = PyPlot2()
-
-        elif backend.lower() == 'vpython':
-            from roboticstoolbox.backends.VPython import VPython
-            env = VPython()
-
-        else:
-            raise ValueError('unknown backend', backend)
-
-        return env
 
     # def _plot_pyplot(
     #         self, q, block, dt, limits,
@@ -1393,99 +1367,7 @@ class Robot(DynamicsMixin, IKMixin):
             vellipse, block=block, limits=limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-# --------------------------------------------------------------------- #
 
-    def plot2(
-            self, q, block=True, dt=0.05, limits=None,
-            vellipse=False, fellipse=False,
-            eeframe=True, name=False):
-        """
-        2D Graphical display and animation
-
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on
-          the kinematic model and the joint configuration ``q``. This is a
-          stick figure polyline which joins the origins of the link coordinate
-          frames. The plot will autoscale with an aspect ratio of 1.
-
-        If ``q`` (m,n) representing a joint-space trajectory it will create an
-        animation with a pause of ``dt`` seconds between each frame.
-
-        .. note::
-            - By default this method will block until the figure is dismissed.
-              To avoid this set ``block=False``.
-            - The polyline joins the origins of the link frames, but for
-              some Denavit-Hartenberg models those frames may not actually
-              be on the robot, ie. the lines to not neccessarily represent
-              the links of the robot.
-
-        :seealso: :func:`teach2`
-
-        """
-
-        if isinstance(self, rtb.ERobot):  # pragma nocover
-            raise NotImplementedError(
-                "2D Plotting of ERobot's not implemented yet")
-
-        # Make an empty 2D figure
-        env = self._get_graphical_backend('pyplot2')
-
-        q = getmatrix(q, (None, self.n))
-
-        # Add the self to the figure in readonly mode
-        if q.shape[0] == 1:
-            env.launch(self.name + ' Plot', limits)
-        else:
-            env.launch(self.name + ' Trajectory Plot', limits)
-
-        env.add(
-            self, readonly=True,
-            eeframe=eeframe, name=name)
-
-        if vellipse:
-            vell = self.vellipse(centre='ee')
-            env.add(vell)
-
-        if fellipse:
-            fell = self.fellipse(centre='ee')
-            env.add(fell)
-
-        for qk in q:
-            self.q = qk
-            env.step()
-
-        # Keep the plot open
-        if block:           # pragma: no cover
-            env.hold()
-
-        return env
 
 # --------------------------------------------------------------------- #
 
@@ -1565,98 +1447,7 @@ class Robot(DynamicsMixin, IKMixin):
 
         return env
 
-    def teach2(
-            self, q=None, block=True, limits=None,
-            vellipse=False, fellipse=False, eeframe=True, name=False, backend='pyplot2'):
-        '''
-        2D Graphical teach pendant
 
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2]
-        :type limits: array_like(4)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-
-        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the
-          user to "drive" a graphical robot using a graphical slider panel.
-          The robot's inital joint configuration is ``q``. The plot will
-          autoscale with an aspect ratio of 1.
-
-        - ``robot.teach2()`` as above except the robot's stored value of ``q``
-          is used.
-
-        .. note::
-            - Program execution is blocked until the teach window is
-              dismissed.  If ``block=False`` the method is non-blocking but
-              you need to poll the window manager to ensure that the window
-              remains responsive.
-            - The slider limits are derived from the joint limit properties.
-              If not set then:
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-              If not set then
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-
-        '''
-
-        if isinstance(self, rtb.ERobot):  # pragma nocover
-            raise NotImplementedError(
-                "2D Plotting of ERobot's not implemented yet")
-
-        if q is not None:
-            self.q = q
-
-        # Make an empty 3D figure
-        env =  self._get_graphical_backend(backend)          
-
-        # Add the robot to the figure in readonly mode
-        env.launch('Teach ' + self.name, limits=limits)
-        env.add(
-            self, readonly=True,
-            eeframe=eeframe, name=name)
-
-        env._add_teach_panel(self)
-
-        if limits is None:
-            limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
-            env.ax.set_xlim([limits[0], limits[1]])
-            env.ax.set_ylim([limits[2], limits[3]])
-
-        if vellipse:
-            vell = self.vellipse(centre='ee', scale=0.5)
-            env.add(vell)
-
-        if fellipse:
-            fell = self.fellipse(centre='ee')
-            env.add(fell)
-
-        # Keep the plot open
-        if block:           # pragma: no cover
-            env.hold()
-
-        return env
 
 # --------------------------------------------------------------------- #
 
@@ -1755,3 +1546,18 @@ class Robot(DynamicsMixin, IKMixin):
                 Ain[i, i] = 1
 
         return Ain, Bin
+
+if __name__ == "__main__":
+
+    from roboticstoolbox import ETS2 as ET
+
+    e = ET.r() * ET.tx(1) * ET.r() * ET.tx(1)
+    print(e)
+
+    r = Robot2(e)
+
+    print(r.fkine([0, 0]))
+    print(r.jacob0([0, 0]))
+
+    r.plot([0.7, 0.7])
+

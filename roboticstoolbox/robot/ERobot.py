@@ -14,6 +14,8 @@ import numpy as np
 # import spatialmath as sp
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
+from roboticstoolbox.robot.BaseRobot import BaseRobot
+
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ETS import ETS, ETS2, SuperETS
 from roboticstoolbox.robot.DHRobot import DHRobot
@@ -72,7 +74,6 @@ class ERobot(Robot):
         self._n = 0
         self._ee_links = []
         self._base_link = None
-        self._ndims = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
@@ -83,8 +84,6 @@ class ERobot(Robot):
             # we're passed an ETS string
             ets = arg
             links = []
-
-            self._ndims = arg._ndims
 
             # chop it up into segments, a link frame after every joint
             start = 0
@@ -124,18 +123,10 @@ class ERobot(Robot):
                         raise ValueError(
                             f'link name {link.name} is not unique')
                     self._linkdict[link.name] = link
-
-                    # check all the Elinks are all 2D or 3D
-                    if ndims is None:
-                        ndims = link._ndims
-                    else:
-                        if link._ndims != ndims:
-                            raise ValueError('links have inconsistent number of dimensions')
                 else:
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
-            self._ndims = ndims
             
 
         elif isinstance(arg, DHRobot):
@@ -1037,12 +1028,7 @@ graph [rankdir=LR];
         if tool is None and self._tool is not None:
             tool = self._tool.A
 
-        if self._ndims == 3:
-            T = SE3.Empty()
-        elif self._ndims == 2:
-            T = SE2.Empty()
-        else:
-            raise ValueError('bad thing')
+        T = SE3.Empty()
 
         for k, qk in enumerate(q):
 
@@ -1517,57 +1503,6 @@ graph [rankdir=LR];
 
         return J
 
-    def jacob0_2d(self, q, end=None, start=None, tool=None, T=None, half=None, analytical=None):
-
-        if tool is None:
-            tool = SE3()
-
-        path, n = self.get_path(end, start)
-
-        q = getvector(q, self.n)
-
-        if T is None:
-            T = self.base.inv() * \
-                self.fkine(q, end=end, start=start) * tool
-        T = T.A
-        U = np.eye(3)
-        j = 0
-        J = np.zeros((3, n))
-        zero = np.array([0, 0, 0])
-
-        for link in path:
-
-            if link.isjoint:
-                U = U @ link.A(q[link.jindex], fast=True)
-
-                if link == end:
-                    U = U @ tool.A
-
-                Tu = np.linalg.inv(U) @ T
-                n = U[:2, 0]
-                o = U[:2, 1]
-                x = Tu[0, 2]
-                y = Tu[1, 2]
-
-                if link.v.axis == 'R':
-                    J[:2, j] = (o * x) - (n * y)
-                    J[2:, j] = a
-
-                elif link.v.axis == 'tx':
-                    J[:2, j] = n
-                    J[2:, j] = zero
-
-                elif link.v.axis == 'ty':
-                    J[:2, j] = o
-                    J[2:, j] = zero
-
-                j += 1
-            else:
-                A = link.A(fast=True)
-                if A is not None:
-                    U = U @ A
-
-        return J
 
     def jacobe(self, q, end=None, start=None, tool=None, T=None):
         r"""
