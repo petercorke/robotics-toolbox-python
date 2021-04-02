@@ -32,12 +32,12 @@ class YuMi(ERobot):
     def __init__(self):
 
         args = super().urdf_to_ets_args(
-            "yumi_description/urdf/yumi.urdf.xacro")
+            "yumi_description/urdf/yumi.xacro")
 
         super().__init__(
                 args[0],
                 name=args[1],
-                manufacturer='Interbotix'
+                manufacturer='ABB'
             )
 
         self.addconfiguration(
