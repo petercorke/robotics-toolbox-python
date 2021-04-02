@@ -561,6 +561,43 @@ class Robot(DynamicsMixin, IKMixin):
         else:
             return w
 
+    def jacob_dot(self, q=None, qd=None, J0=None):
+        r"""
+        Derivative of Jacobian
+
+        :param q: The joint configuration of the robot
+        :type q: float ndarray(n)
+        :param qd: The joint velocity of the robot
+        :type qd: ndarray(n)
+        :param J0: Jacobian in {0} frame
+        :type J0: ndarray(6,n)
+        :return: The derivative of the manipulator Jacobian
+        :rtype:  ndarray(6,n)
+
+        ``robot.jacob_dot(q, qd)`` computes the rate of change of the
+        Jacobian elements.  If ``J0`` is already calculated for the joint
+        coordinates ``q`` it can be passed in to to save computation time.
+
+        It is computed as the mode-3 product of the Hessian tensor and the
+        velocity vector.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        :seealso: :func:`jacob0`, :func:`hessian0`
+        """  # noqa
+        n = len(q)
+        if J0 is None:
+            J0 = self.jacob0(q)
+        H = self.hessian0(q, J0)
+
+        # Jd = H qd using mode 3 product
+        Jd = np.zeros((6, n))
+        for i in range(n):
+            Jd += H[:, :, i] * qd[i]
+
+        return Jd
 # --------------------------------------------------------------------- #
 
     @property
