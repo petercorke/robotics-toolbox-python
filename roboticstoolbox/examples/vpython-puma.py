@@ -4,7 +4,7 @@
 """
 
 import roboticstoolbox as rtb
-import time
+# import time
 
 from roboticstoolbox.backends.VPython import VPython
 

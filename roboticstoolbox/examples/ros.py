@@ -1,33 +1,32 @@
-#!/usr/bin/env python
-"""
-@author Jesse Haviland
-"""
+# #!/usr/bin/env python
+# """
+# @author Jesse Haviland
+# """
 
-import roboticstoolbox as rtb
-import spatialmath as sm
-import numpy as np
-import os
+# import swift
+# import roboticstoolbox as rtb
+# import spatialmath as sm
+# import numpy as np
+# import os
 
-env = rtb.backends.Swift()
-env.launch()
+# env = swift.Swift()
+# env.launch()
 
-r = rtb.models.UR5()
-env.add(r)
-env.hold()
+# r = rtb.models.UR5()
+# env.add(r)
+# env.hold()
 
-# # Launch the simulator Swift
-# env = rtb.backends.ROS()
-# env.launch(ros_master_uri='http://localhost:11311')
+# # # Launch the simulator Swift
+# # env = rtb.backends.ROS()
+# # env.launch(ros_master_uri='http://localhost:11311')
 
-# os.system('rostopic list')
+# # os.system('rostopic list')
 
-# # Create a Panda robot object
-# panda = rtb.models.Panda()
+# # # Create a Panda robot object
+# # panda = rtb.models.Panda()
 
-# # Set joint angles to ready configuration
-# panda.q = panda.qr
+# # # Set joint angles to ready configuration
+# # panda.q = panda.qr
 
-# # Add the Panda to the simulator
-# env.add(panda)
-
-
+# # # Add the Panda to the simulator
+# # env.add(panda)

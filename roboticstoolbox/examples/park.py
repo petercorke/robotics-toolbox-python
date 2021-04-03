@@ -3,6 +3,7 @@
 @author Jesse Haviland
 """
 
+import swift
 import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
@@ -16,7 +17,7 @@ pp. 8–15, 1999.
 """
 
 # Launch the simulator Swift
-env = rtb.backends.Swift()
+env = swift.Swift()
 env.launch()
 
 # Create a Panda robot object

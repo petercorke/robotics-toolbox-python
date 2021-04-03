@@ -16,4 +16,4 @@ d = p560.fdyn(5, p560.qr, dt=0.05)
 rtb.tools.trajectory.qplot(d.q)
 
 # animate it
-p560.plot(d.q) # movie='falling_puma.gif')
+p560.plot(d.q)  # movie='falling_puma.gif')

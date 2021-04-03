@@ -23,8 +23,8 @@ iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual")
 class IKMixin:
 
     def ikine_mmc(
-                self, T,
-                q0=None):
+            self, T,
+            q0=None):
 
         arrived = False
 
@@ -40,7 +40,7 @@ class IKMixin:
 
             Te = self.fkine(q)
             eTep = Te.inv() * T
-            e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
+            e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi / 180]))
 
             if e < e_prev:
                 # good update
@@ -118,9 +118,9 @@ class IKMixin:
             search=False,
             slimit=100,
             transpose=None):
-
         """
-        Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+        (Robot superclass)
 
         :param T: The desired end-effector pose or pose trajectory
         :type T: SE3
@@ -131,7 +131,8 @@ class IKMixin:
         :type mask: ndarray(6)
         :param ilimit: maximum number of iterations (default 500)
         :type ilimit: int
-        :param rlimit: maximum number of consecutive step rejections (default 100)
+        :param rlimit: maximum number of consecutive step rejections
+            (default 100)
         :type rlimit: int
         :param tol: final error tolerance (default 1e-10)
         :type tol: float
@@ -151,8 +152,8 @@ class IKMixin:
 
         ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding
         to the robot end-effector pose ``T`` which is an ``SE3`` object. This
-        method can be used for robots with any number of degrees of freedom. The
-        return value ``sol`` is a named tuple with elements:
+        method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ===============================================
         Element         Type        Description
@@ -208,12 +209,13 @@ class IKMixin:
         ``sol = robot.ikine_LM(T, search=True)`` as above but peforms a
         brute-force search with initial conditions chosen randomly from the
         entire configuration space.  If a numerical solution is found from that
-        initial condition, it is returned, otherwise another initial condition is
-        chosen.
+        initial condition, it is returned, otherwise another initial condition
+        is chosen.
 
         .. note::
 
-            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a Levenberg-Marquadt variable-damping solver.
             - The tolerance is computed on the norm of the error between
               current and desired tool pose.  This norm is computed from
@@ -238,8 +240,9 @@ class IKMixin:
             - Robotics, Vision & Control, P. Corke, Springer 2011,
               Section 8.4.
 
-        :seealso: :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`
-        """
+        :seealso: :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_con`,
+            :func:`ikine_min`
+        """  # noqa E501
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -308,7 +311,10 @@ class IKMixin:
 
         revolutes = []
 
-        for link in self:
+        # This is a mixin class inherited by robot classes
+        # Therefore it will never be used on its own and the
+        # LGTM issue can be ignored
+        for link in self:  # lgtm [py/non-iterable-in-for-loop]
             if isinstance(self, rtb.DHRobot) or link.isjoint:
                 revolutes.append(link.isrevolute)
         revolutes = np.array(revolutes)
@@ -381,7 +387,7 @@ class IKMixin:
                 q[k] += + 2 * np.pi
 
                 nm = np.linalg.norm(W @ e)
-                qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
+                # qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
                 # print(f"λ={Li:8.2g}, |e|={nm:8.2g}: q={qs}")
 
             # LM process finished, for better or worse
@@ -412,10 +418,10 @@ class IKMixin:
             tol=1e-10,
             wN=1e-3,
             Lmin=0
-            ):
-
+    ):
         """
-        Numerical inverse kinematics by Levenberg-Marquadt optimization (Robot superclass)
+        Numerical inverse kinematics by Levenberg-Marquadt optimization
+        (Robot superclass)
 
         :param T: The desired end-effector pose or pose trajectory
         :type T: SE3
@@ -434,9 +440,9 @@ class IKMixin:
         :rtype: named tuple
 
         ``sol = robot.ikine_LM(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose ``T`` which is an ``SE3`` object. This method can
-        be used for robots with any number of degrees of freedom. The return
-        value ``sol`` is a named tuple with elements:
+        to the robot end-effector pose ``T`` which is an ``SE3`` object. This
+        method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ===============================================
         Element         Type        Description
@@ -486,7 +492,8 @@ class IKMixin:
 
         .. note::
 
-            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Implements a modified Levenberg-Marquadt variable-damping solver
               which is quite robust in practice.
             - Similar to ``ikine_LM`` but uses a different error metric
@@ -512,8 +519,9 @@ class IKMixin:
               Levenberg–Marquardt Method", T. Sugihara, IEEE T-RO, 27(5),
               October 2011, pp. 984-991.
 
-        :seealso: :func:`ikine_LM`, :func:`ikine_unc`, :func:`ikine_con`, :func:`ikine_min`
-        """
+        :seealso: :func:`ikine_LM`, :func:`ikine_unc`, :func:`ikine_con`,
+            :func:`ikine_min`
+        """  # noqa E501
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -529,7 +537,7 @@ class IKMixin:
             mask = base.getvector(mask, 6)
             if not self.n >= np.sum(mask):
                 raise ValueError('Number of robot DOF must be >= the number '
-                                'of 1s in the mask matrix')
+                                 'of 1s in the mask matrix')
         else:
             mask = np.ones(6)
         W = np.diag(mask)
@@ -588,7 +596,7 @@ class IKMixin:
                 k = np.logical_and(q < -np.pi, revolutes)
                 q[k] += + 2 * np.pi
 
-                qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
+                # qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
                 # print(f"|e|={E:8.2g}, det(H)={np.linalg.det(H)}: q={qs}")
 
             # LM process finished, for better or worse
@@ -608,8 +616,6 @@ class IKMixin:
                 np.array([sol.iterations for sol in solutions]),
                 np.array([sol.residual for sol in solutions])
             )
-
-
 
 # --------------------------------------------------------------------- #
 
@@ -639,9 +645,9 @@ class IKMixin:
         :return: inverse kinematic solution
         :rtype: named tuple
 
-        ``sol = robot.ikine_min(T)`` are the joint coordinates (n) corresponding
-        to the robot end-effector pose T which is an SE3 object.  The
-        return value ``sol`` is a named tuple with elements:
+        ``sol = robot.ikine_min(T)`` are the joint coordinates (n)
+        corresponding to the robot end-effector pose T which is an SE3 object.
+        The return value ``sol`` is a named tuple with elements:
 
         ============    ==========  ============================================================
         Element         Type        Description
@@ -677,18 +683,20 @@ class IKMixin:
         - ``stiffness`` imposes a penalty on joint variation
           :math:`\sum_{j=1}^N (q_j - q_{j-1})^2` which tends to keep the
           arm straight
-        - ``costfun`` add a cost given by a user-specified function ``costfun(q)``
+        - ``costfun`` add a cost given by a user-specified function
+          ``costfun(q)``
 
         **Trajectory operation**:
 
-        If ``len(T) > 1`` it is considered to be a trajectory, and the result is
-        a list of named tuples such that ``sol[k]`` corresponds to ``T[k]``. The
-        initial estimate of q for each time step is taken as the solution from
-        the previous time step.
+        If ``len(T) > 1`` it is considered to be a trajectory, and the result
+        is a list of named tuples such that ``sol[k]`` corresponds to
+        ``T[k]``. The initial estimate of q for each time step is taken as the
+        solution from the previous time step.
 
         .. note::
 
-            - See `Toolbox kinematics wiki page <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
             - Uses ``SciPy.minimize`` with bounds.
             - Joint limits are considered in this solution.
             - Can be used for robots with arbitrary degrees of freedom.
@@ -713,9 +721,10 @@ class IKMixin:
 
         :author: Bryan Moutrie, for RTB-MATLAB
 
-        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`, :func:`ikine_min`
+        :seealso: :func:`ikine_LM`, :func:`ikine_LMS`, :func:`ikine_unc`,
+            :func:`ikine_min`
 
-        """
+        """  # noqa E501
 
         if not isinstance(T, SE3):
             T = SE3(T)
@@ -843,12 +852,15 @@ class IKMixin:
 
             solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
             solutions.append(solution)
-            q0 = res.x  # use this solution as initial estimate for next time
+
+            # q0 was not used so I commented it out
+            # q0 = res.x  # use this solution as initial estimate for next time
 
         if len(T) == 1:
             return solutions[0]
         else:
             return solutions
+
 
 def _angle_axis(T, Td):
     d = base.transl(Td) - base.transl(T)
@@ -905,7 +917,7 @@ def _angle_axis_sekiguchi(T, Td):
 
 if __name__ == "__main__":  # pragma nocover
 
-    import roboticstoolbox as rtb
+    # import roboticstoolbox as rtb
     # from spatialmath import SE3
 
     # np.set_printoptions(

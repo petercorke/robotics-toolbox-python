@@ -1,22 +1,22 @@
-import sys
+# import sys
 import copy
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
-    verifymatrix, getunit
+    getunit
 from roboticstoolbox.robot.Link import Link
-from spatialmath.base.transforms3d import tr2delta
+# from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.tools import urdf
 # from roboticstoolbox.tools import xacro
-from pathlib import PurePath, PurePosixPath
-from scipy.optimize import minimize, Bounds, LinearConstraint
-from roboticstoolbox.tools.null import null
+# from pathlib import PurePath, PurePosixPath
+# from scipy.optimize import minimize, Bounds, LinearConstraint
+# from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
 
-from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
+from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-from roboticstoolbox.backends.swift import Swift
+# from roboticstoolbox.backends.swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
@@ -511,7 +511,7 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
                 m2 = np.linalg.det(J @ J.T)
                 return np.sqrt(abs(m2))
 
-        def invcondition(robot, J, q, axes, **kwargs):
+        def condition(robot, J, q, axes, **kwargs):
             J = J[axes, :]
             return 1 / np.linalg.cond(J)  # return 1/cond(J)
 
@@ -521,7 +521,7 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
             return s[-1]  # return last/smallest singular value of J
 
         def asada(robot, J, q, axes, **kwargs):
-            dof = np.sum(axes)
+            # dof = np.sum(axes)
             if np.linalg.matrix_rank(J) < 6:
                 return 0
             Ji = np.linalg.pinv(J)
@@ -852,7 +852,8 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
     def plot(
             self, q, backend=None, block=False, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None, movie=None, **bopts
+            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None,
+            movie=None, **bopts
     ):
         """
         Graphical display and animation
@@ -1123,7 +1124,9 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
         ell = EllipsePlot(self, q, 'f', opt, centre=centre)
         return ell
 
-    def vellipse(self, q=None, opt='trans', unit='rad', centre=[0, 0, 0], scale=0.1):
+    def vellipse(
+            self, q=None, opt='trans', unit='rad',
+            centre=[0, 0, 0], scale=0.1):
         """
         Create a velocity ellipsoid object for plotting with PyPlot
 
@@ -1367,12 +1370,12 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
             vellipse, block=block, limits=limits,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-
 # --------------------------------------------------------------------- #
 
     def teach(
             self, q=None, block=True, order='xyz', limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True, backend='pyplot'):
+            jointaxes=True, eeframe=True, shadow=True, name=True,
+            backend='pyplot'):
         """
         Graphical teach pendant
 
@@ -1445,7 +1448,6 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
             env.hold()
 
         return env
-
 
 # --------------------------------------------------------------------- #
 
@@ -1551,11 +1553,10 @@ if __name__ == "__main__":
     from roboticstoolbox import ETS2 as ET
 
     e = ET.r() * ET.tx(1) * ET.r() * ET.tx(1)
-    print(e)
+    # print(e)
+    # r = Robot2(e)
 
-    r = Robot2(e)
+    # print(r.fkine([0, 0]))
+    # print(r.jacob0([0, 0]))
 
-    print(r.fkine([0, 0]))
-    print(r.jacob0([0, 0]))
-
-    r.plot([0.7, 0.7])
+    # r.plot([0.7, 0.7])

@@ -5,7 +5,7 @@ from spatialmath.base import *
 from spatialmath import SE3, Twist3
 puma = rtb.models.DH.Puma560()
 # print(puma)
-# #puma.plot(puma.qz) 
+# #puma.plot(puma.qz)
 
 # q = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 # T = puma.fkine(q)
@@ -22,11 +22,12 @@ puma = rtb.models.DH.Puma560()
 # rtb.tools.models()
 
 # import roboticstoolbox.ETS3 as ETS
-# ets = ETS.tx() * ETS.rx() * ETS.tx() * … 
+# ets = ETS.tx() * ETS.rx() * ETS.tx() * …
 
 # robot = Robot(ets)
-# np.set_printoptions(linewidth=100, formatter={'float': lambda x: f"{x:8.4g}" if x > 1e-10 else f"{0:8.4g}"})
-
+# np.set_printoptions(
+# linewidth=100, formatter={
+# 'float': lambda x: f"{x:8.4g}" if x > 1e-10 else f"{0:8.4g}"})
 
 q = puma.qn
 qd = np.zeros((6,))
@@ -85,7 +86,7 @@ print(qdd)
 # S.exp(puma.qn)
 
 # S.exp(qn).prod() * T0
- 
+
 # puma.fkine(qn)
 
 
@@ -93,4 +94,3 @@ print(qdd)
 # print(axisLines)
 # puma.plot(qn)
 # axisLines.plot('k:')
-
