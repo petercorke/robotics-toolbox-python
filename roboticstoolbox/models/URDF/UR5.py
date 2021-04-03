@@ -33,17 +33,21 @@ class UR5(ERobot):
             "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro")
 
         super().__init__(
-                elinks,
-                name=name.upper(),
-                manufacturer='Universal Robotics',
-                gripper_links=elinks[7]
-            )
+            elinks,
+            name=name.upper(),
+            manufacturer='Universal Robotics',
+            gripper_links=elinks[7]
+        )
 
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([np.pi, 0, 0, 0, np.pi/2, 0]))
+        self.addconfiguration("qr", np.array([np.pi, 0, 0, 0, np.pi / 2, 0]))
 
         # sol=robot.ikine_LM(SE3(0.5, -0.2, 0.2)@SE3.OA([1,0,0],[0,0,-1]))
-        self.addconfiguration("qn", np.array([-7.052413e-01, 3.604328e-01, -1.494176e+00, 1.133744e+00, -7.052413e-01, 0]))
+        self.addconfiguration("qn", np.array(
+            [
+                -7.052413e-01, 3.604328e-01, -1.494176e+00,
+                1.133744e+00, -7.052413e-01, 0]))
+
 
 if __name__ == '__main__':   # pragma nocover
 

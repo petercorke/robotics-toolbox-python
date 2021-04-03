@@ -549,7 +549,10 @@ class IKMixin:
         # revolutes = np.array([link.isrevolute for link in self])
         revolutes = []
 
-        for link in self:
+        # This is a mixin class inherited by robot classes
+        # Therefore it will never be used on its own and the
+        # LGTM issue can be ignored
+        for link in self:  # lgtm [py/non-iterable-in-for-loop]
             if isinstance(self, rtb.DHRobot) or link.isjoint:
                 revolutes.append(link.isrevolute)
         revolutes = np.array(revolutes)
