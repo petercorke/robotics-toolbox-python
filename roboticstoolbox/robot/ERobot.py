@@ -185,7 +185,6 @@ class ERobot(Robot):
             ndims = None
             links = arg
             for link in links:
-                
                 if isinstance(link, ELink):
                     # if link has no name, give it one
                     if link.name is None:
@@ -201,27 +200,18 @@ class ERobot(Robot):
                     raise TypeError("Input can be only ELink")
                 if link.isjoint:
                     n += 1
+
+            # resolve parents given by name, within the context of
+            # this set of links
+            for link in links:
+                if isinstance(link.parent, str):
+                    link._parent = self._linkdict[link.parent]
+
+            if all([link.parent is None for link in links]):
+                # no parent links were given, assume they are sequential
+                for i in range(len(links)-1):
+                    links[i + 1]._parent = links[i]
             
-            # elinks = []
-            # for dhlink in arg:
-            #     e = dhlink.ets()
-            #     print(e)
-            #     elink = ELink(dhlink.ets())
-            #     elink.m = dhlink.m
-            #     elink.r = dhlink.r
-            #     elink.I = dhlink.I
-            #     elink.B = dhlink.B
-            #     elink.Tc = dhlink.Tc
-            #     elink.Jm = dhlink.Jm
-            #     elink.G = dhlink.G
-            #     elinks.append(elink)
-            # super().__init__(elinks, 
-            #     name=arg.name, 
-            #     manufacturer=arg.manufacturer,
-            #     comment=arg.comment,
-            #     base=arg.base,
-            #     tool=arg.tool
-            # )
         else:
             raise TypeError('elinks must be a list of ELinks or an ETS')
 
@@ -313,6 +303,7 @@ class ERobot(Robot):
             raise ValueError(
                 'all links must have a jindex, or none have a jindex')
 
+        self._nbranches = sum([link.nchildren == 0 for link in links])
 
         # Current joint angles of the robot
         # TODO should go to Robot class?
@@ -2321,10 +2312,19 @@ if __name__ == "__main__":  # pragma nocover
     import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
-    p = rtb.models.URDF.Puma560()
-    p.fkine(p.qz)
-    p.jacob0(p.qz)
-    p.jacobe(p.qz)
+    robot = ERobot([
+        ELink(ETS.rz(), name='link1'),
+        ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
+        ELink(ETS.tx(1), name='ee_1', parent='link2'),
+        ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
+        ELink(ETS.tx(1), name='ee_2', parent='link3')
+    ])
+    print(robot)
+
+    # p = rtb.models.URDF.Puma560()
+    # p.fkine(p.qz)
+    # p.jacob0(p.qz)
+    # p.jacobe(p.qz)
 
     # robot = rtb.models.ETS.Panda()
     # print(robot)
