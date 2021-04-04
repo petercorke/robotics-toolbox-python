@@ -84,7 +84,7 @@ class Gripper():
             if func is not None:
                 func(link)
 
-            for li in link.child:
+            for li in link.children:
                 if li not in visited:
                     vis_children(li)
 
