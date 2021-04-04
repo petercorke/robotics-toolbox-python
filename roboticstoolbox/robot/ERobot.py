@@ -243,6 +243,7 @@ class ERobot(Robot):
             raise ValueError(
                 'all links must have a jindex, or none have a jindex')
 
+
         # Current joint angles of the robot
         # TODO should go to Robot class?
         self.q = np.zeros(self.n)
@@ -601,6 +602,20 @@ class ERobot(Robot):
     @property
     def n(self):
         return self._n
+
+# --------------------------------------------------------------------- #
+
+    @property
+    def nbranches(self):
+        """
+        Number of branches
+
+        :return: number of branches in the robot's kinematic tree
+        :rtype: int
+
+        Computed as the number of links with zero children
+        """
+        return self._nbranches
 # --------------------------------------------------------------------- #
 
     @property

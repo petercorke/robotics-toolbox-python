@@ -324,7 +324,27 @@ class ELink(Link):
 
     @property
     def children(self):
+        """
+        List of child links
+
+        :return: child links
+        :rtype: list of ``ELink`` instances
+
+        The list will be empty for a end-effector link
+        """
         return self._children
+
+    @property
+    def nchildren(self):
+        """
+        Number of child links
+
+        :return: number of child links
+        :rtype: int
+
+        Will be zero for an end-effector link
+        """
+        return len(self._children)
 
     @property
     def M(self):
