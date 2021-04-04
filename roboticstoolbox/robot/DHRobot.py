@@ -6,7 +6,7 @@
 from collections import namedtuple
 from roboticstoolbox.tools.data import path_to_datafile
 import warnings
-
+import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
@@ -62,37 +62,39 @@ class DHRobot(Robot):
 
     def __init__(
             self,
-            L,
+            links,
             meshdir=None,
             **kwargs):
 
         # Verify L
-        if not isinstance(L, list):
-            raise TypeError('The links L must be stored in a list.')
+        if not isinstance(links, list):
+            raise TypeError('The links must be stored in a list.')
 
-        links = []
+        all_links = []
         self._n = 0
 
-        # TODO rewrite using extend
-        for i in range(len(L)):
-            if isinstance(L[i], DHLink):
+        for link in links:
+            if isinstance(link, DHLink):
                 # got a link
-                links.append(L[i])
+                all_links.append(link)
                 self._n += 1
-                L[i].id = self._n
-                L[i].name = f"link{self._n}"
+                link.id = self._n
+                link.name = f"link{self._n}"
 
-            elif isinstance(L[i], DHRobot):
-                # got a robot
-                for j in range(L[i].n):
-                    links.append(L[i].links[j])
+            elif isinstance(link, DHRobot):
+                # link is actually a robot
+
+                # copy the links
+                rlinks = copy.copy(link.links)
+                for rlink in rlinks:
+                    all_links.append(rlink)
                     self._n += 1
-                    L[i].id = self._n
-                    L[i].name = f"link{self._n}"
+                    rlink.id = self._n
+                    rlink.name = f"link{self._n}"
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
 
-        super().__init__(links, **kwargs)
+        super().__init__(all_links, **kwargs)
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
