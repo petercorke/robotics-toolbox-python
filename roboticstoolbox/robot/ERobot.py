@@ -166,7 +166,7 @@ class ERobot(Robot):
                 self._base_link = link
             else:
                 # no, update children of this link's parent
-                link._parent._child.append(link)
+                link._parent._children.append(link)
 
         # Set up the gripper, make a list containing the root of all
         # grippers
@@ -199,7 +199,7 @@ class ERobot(Robot):
         if len(gripper_links) == 0:
             for link in links:
                 # is this a leaf node? and do we not have any grippers
-                if len(link.child) == 0:
+                if len(link.children) == 0:
                     # no children, must be an end-effector
                     self.ee_links.append(link)
         else:
@@ -286,7 +286,7 @@ class ERobot(Robot):
             if func is not None:
                 func(link)
 
-            for li in link.child:
+            for li in link.children:
                 if li not in visited:
                     vis_children(li)
 
@@ -773,7 +773,7 @@ class ERobot(Robot):
         # visit child nodes
         if toplevel:
             path = v.ets()
-        for w in v.child:
+        for w in v.children:
             if w not in explored:
                 p = self.ets(w, end, explored, path * w.ets())
                 if p:

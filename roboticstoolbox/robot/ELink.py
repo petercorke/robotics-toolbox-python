@@ -93,7 +93,7 @@ class ELink(Link):
                 'Parent must be of type ELink')
 
         self._parent = parent
-        self._child = []
+        self._children = []
         self._joint_name = None
         self._jindex = jindex
 
@@ -323,8 +323,8 @@ class ELink(Link):
         return self._parent
 
     @property
-    def child(self):
-        return self._child
+    def children(self):
+        return self._children
 
     @property
     def M(self):
