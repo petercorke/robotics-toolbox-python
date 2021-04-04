@@ -211,7 +211,7 @@ class ELink(Link):
         # TODO probably should use ETS.compile()
 
         if isinstance(self._ets, ETS):
-            first = True
+            # first = True
             # T = None
             T = np.eye(4)
 
