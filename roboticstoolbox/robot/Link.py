@@ -90,13 +90,13 @@ class Link(ABC):
             name=None,
             qlim=None,
             flip=False,
-            m=0.0,
-            r=np.zeros((3,)),
-            I=np.zeros((3, 3)),  # noqa
-            Jm=0.0,
-            B=0.0,
-            Tc=np.zeros((2,)),
-            G=0.0,
+            m=None,
+            r=None,
+            I=None,  # noqa
+            Jm=None,
+            B=None,
+            Tc=None,
+            G=None,
             mesh=None,
             geometry=[],
             collision=[],
@@ -119,16 +119,31 @@ class Link(ABC):
         self.mesh = mesh
 
         # Link dynamic Parameters
-        self.m = m
-        self.r = r
-        self.I = I  # noqa
+
+        def dynpar(self, name, value, default):
+            if value is None:
+                value = default
+                setattr(self, name, value)
+                return 0
+            else:
+                setattr(self, name, value)
+                return 1
+
+        dynchange = 0
+        dynchange += dynpar(self, 'm', m, 0.0)
+        dynchange += dynpar(self, 'r', r, np.zeros((3,)))
+        dynchange += dynpar(self, 'I', I, np.zeros((3, 3)))
+
 
         # Motor dynamic parameters
-        self.Jm = Jm
-        self.B = B
-        self.Tc = Tc
-        self.G = G
+        dynchange += dynpar(self, 'Jm', Jm, 0.0)
+        dynchange += dynpar(self, 'B', B, 0.0)
+        dynchange += dynpar(self, 'Tc', Tc, np.zeros((2,)))
+        dynchange += dynpar(self, 'G', G, 1.0)
+
         self.actuator = None  # reference to more advanced actuator model
+
+        self._hasdynamics = dynchange > 0
 
     def copy(self):
         """

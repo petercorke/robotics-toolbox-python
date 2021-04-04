@@ -72,10 +72,22 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
         if not isinstance(links, list):
             raise TypeError('The links must be stored in a list.')
 
+        self._hasdynamics = False
+        self._hasgeometry = False
+
         for link in links:
             if not isinstance(link, Link):
                 raise TypeError('links should all be Link subclass')
+
+            # add link back to roboto
             link._robot = self
+
+            if link._hasdynamics:
+                self._hasdynamics = True
+
+            if isinstance(link, rtb.ELink):
+                if len(link.geometry) > 0:
+                    self._hasgeometry = True
         self._links = links
 
         # Current joint angles of the robot
@@ -87,7 +99,7 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
 
         self._configdict = {}
 
-        self._dynchanged = True
+        self._dynchanged = False
 
         # URDF Parser Attempt
         # # Search mesh dir for meshes
@@ -149,7 +161,7 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
     #
     #     return data
 
-    def dynchanged(self):
+    def dynchanged(self, what=None):
         """
         Dynamic parameters have changed (Robot superclass)
 
@@ -159,6 +171,8 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
         :seealso: :func:`roboticstoolbox.Link._listen_dyn`
         """
         self._dynchanged = True
+        if what != 'gravity':
+            self._hasdynamics = True
 
     def _getq(self, q=None):
         """

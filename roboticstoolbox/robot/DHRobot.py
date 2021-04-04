@@ -105,9 +105,9 @@ class DHRobot(Robot):
             self.basemesh = self.meshdir / "link0.stl"
             for j, link in enumerate(self._links, start=1):
                 link.mesh = self.meshdir / "link{:d}.stl".format(j)
+            self._hasgeometry = True
         else:
             self.basemesh = None
-
 
         # rne parameters
         self._rne_ob = None
