@@ -127,8 +127,16 @@ class DHRobot(Robot):
             manuf = ""
         else:
             manuf = f" (by {self.manufacturer})"
-        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), {dh} DH parameters\n"
+        s = f"{self.name}{manuf}: {self.n} axes ({self.structure})"
+
         deg = 180 / np.pi
+
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([link.mesh is not None for link in self.links]):
+            s += ", geometry"
+
+        s += f", {dh} DH parameters\n"
 
         def qstr(j, link):
             j += 1
@@ -208,9 +216,9 @@ class DHRobot(Robot):
                     ql = []
                 if L.isprismatic:
                     table.row(
-                        angle(L.theta), qstr(j, L), L.a, angle(L.alpha), *ql)
+                        angle(L.theta), qstr(j, L), f"{L.a:.4g}", angle(L.alpha), *ql)
                 else:
-                    table.row(qstr(j, L), L.d, L.a, angle(L.alpha), *ql)
+                    table.row(qstr(j, L), f"{L.d:.4g}", f"{L.a:.4g}", angle(L.alpha), *ql)
 
         s += str(table)
 

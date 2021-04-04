@@ -1908,22 +1908,23 @@ graph [rankdir=LR];
 
     def __str__(self):
         """
-        Pretty prints the ETS Model of the robot. Will output angles in
-        degrees
+        Pretty prints the ETS Model of the robot. 
 
         :return: Pretty print of the robot model
         :rtype: str
 
-        - Constant links are shown in blue.
-        - End-effector links are prefixed with an @
-        - The robot base frame is denoted as ``_O_`` and is equal to the robot's
-          ``base`` attribute.
+        .. note::
+            - Constant links are shown in blue.
+            - End-effector links are prefixed with an @
+            - Angles in degrees
+            - The robot base frame is denoted as ``BASE`` and is equal to the
+              robot's ``base`` attribute.
         """
         table = ANSITable(
-            Column("id", headalign="^"),
-            Column("link", headalign="^"),
-            Column("parent", headalign="^"),
-            Column("joint", headalign="^"),
+            Column("id", headalign="^", colalign=">"),
+            Column("link", headalign="^", colalign="<"),
+            Column("joint", headalign="^", colalign=">"),
+            Column("parent", headalign="^", colalign="<"),
             Column("ETS", headalign="^", colalign="<"),
             border="thin")
         for k, link in enumerate(self):
@@ -1933,23 +1934,39 @@ graph [rankdir=LR];
             if link.parent is None:
                 parent_name = "BASE"
             else:
-                parent_name = '{' + link.parent.name + '}'
+                parent_name = link.parent.name
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
-                s = " * " + s
+                s = " \u2295 " + s
+            
+            if link.isjoint:
+                if link._joint_name is not None:
+                    jname = link._joint_name
+                else:
+                    jname = link.jindex
+            else:
+                jname = ''
             table.row(
                 k,
                 color + ee + link.name,
+                jname,
                 parent_name,
-                link._joint_name if link.parent is not None else "",
-                f"{{{link.name}}} = {parent_name}{s}"
+                f"{{{link.name}}} = {{{parent_name}}}{s}"
                 )
 
+        s = self.name
         if self.manufacturer is None or len(self.manufacturer) == 0:
-            manuf = ""
-        else:
-            manuf = f" (by {self.manufacturer})"
-        s = f"{self.name}{manuf}: {self.n} axes ({self.structure}), ETS model\n"
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} axes ({self.structure})"
+        if self.nbranches > 1:
+            s += f", {self.nbranches} branches"
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([len(link.geometry) > 0 for link in self.links]):
+            s += ", geometry"
+        if any([len(link.collision) > 0 for link in self.links]):
+            s += ", collision"
+        s += f", ETS model\n"
 
         s += str(table)
         s += self.configurations_str()
