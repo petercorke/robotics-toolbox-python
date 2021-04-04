@@ -1,6 +1,18 @@
 # Robotics Toolbox for Python - data files
 
+[![PyPI version](https://badge.fury.io/py/rtb-data.svg)](https://badge.fury.io/py/rtb-data)
+[![Anaconda version](https://anaconda.org/conda-forge/rtb-data/badges/version.svg)](https://anaconda.org/conda-forge/rtb-datan)
+
+<table style="border:0px">
+<tr style="border:0px">
+<td style="border:0px">
+<img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/RTBDataLogo.png" width="200"></td>
+<td style="border:0px">
 This package includes large data files associated with the Robotics Toolbox for Python (RTB-P).
+</td>
+</tr>
+</table>
+
 
 ## Rationale
 
