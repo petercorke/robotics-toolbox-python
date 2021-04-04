@@ -36,8 +36,7 @@ from spatialmath import SpatialAcceleration, SpatialVelocity, \
 
 class ERobot(Robot):
     """
-    The ERobot. A superclass which represents the
-    kinematics of a serial-link manipulator
+    Construct an ERobot object
 
     :param et_list: List of elementary transforms which represent the robot
         kinematics
@@ -52,6 +51,77 @@ class ERobot(Robot):
     :type tool: SE3, optional
     :param gravity: The gravity vector
     :type n: ndarray(3)
+
+    An ERobot represents the kinematics of a serial-link manipulator with
+    one or more branches.
+
+    From ETS
+    --------
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import ETS, ERobot
+        >>> ets = ETS.rz() * ETS.ry() * ETS.tz(1) * ETS.ry() * ETS.tz(1)
+        >>> robot = ERobot(ets)
+        >>> print(robot)
+
+    The ETS is partitioned such that a new link frame is created **after** every
+    joint variable.
+
+    From list of ELinks
+    -------------------
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import ETS, ERobot
+        >>> link1 = ELink(ETS.rz(), name='link1')
+        >>> link2 = ELink(ETS.ry(), name='link2', parent=link1)
+        >>> link3 = ELink(ETS.tz(1) * ETS.ry(), name='link3', parent=link2)
+        >>> link4 = ELink(ETS.tz(1), name='ee', parent=link3)
+        >>> robot = ERobot([link1, link2, link3, link4])
+        >>> print(robot)
+
+    A number of ``ELink`` objects are created, each has a transform with
+    respect to the previous frame, and all except the first link have a parent.
+    The implicit parent of the first link is the base.
+
+    The parent also can be specified as a string, and its name is mapped to the
+    parent link by name in ``ERobot``.
+
+    If no ``parent`` arguments are given it is assumed the links are in 
+    sequential order, and the parent hierarchy will be automatically 
+    established.
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import ETS, ERobot
+        >>> robot = ERobot([
+        >>>     ELink(ETS.rz(), name='link1'),
+        >>>     ELink(ETS.ry(), name='link2'),
+        >>>     ELink(ETS.tz(1) * ETS.ry(), name='link3'),
+        >>>     ELink(ETS.tz(1), name='ee')
+        >>>             ])
+        >>> print(robot)
+
+    Branched robots
+    ---------------
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> robot = ERobot([
+        >>>    ELink(ETS.rz(), name='link1'),
+        >>>    ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
+        >>>    ELink(ETS.tx(1), name='ee_1', parent='link2'),
+        >>>    ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
+        >>>    ELink(ETS.tx(1), name='ee_2', parent='link3')
+        >>>             ])
+        >>> print(robot)
 
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
@@ -601,6 +671,14 @@ class ERobot(Robot):
 
     @property
     def n(self):
+        """
+        Number of joints
+
+        :return: number of variable joint in the robot's kinematic tree
+        :rtype: int
+
+        The sum of the number of revolute and prismatic joints.
+        """
         return self._n
 
 # --------------------------------------------------------------------- #
