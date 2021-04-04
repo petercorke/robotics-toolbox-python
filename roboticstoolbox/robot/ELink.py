@@ -88,9 +88,9 @@ class ELink(Link):
         # if isinstance(parent, list):
         #     raise TypeError(
         #         'Only one parent link can be present')
-        if not isinstance(parent, ELink) and parent is not None:
+        if not isinstance(parent, (ELink, str)) and parent is not None:
             raise TypeError(
-                'Parent must be of type ELink')
+                'Parent must be of type ELink, str or None')
 
         self._parent = parent
         self._children = []
