@@ -1,4 +1,6 @@
+from roboticstoolbox.robot.BaseRobot import BaseRobot
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.robot.Robot2 import Robot2
 from ansitable import ANSITable, Column
 # import importlib
 
@@ -37,11 +39,14 @@ def list(keywords=None, dof=None, mtype=None):
     def make_table(border):
         table = ANSITable(
             Column("class", headalign="^", colalign="<"),
-            Column("model", headalign="^", colalign="<"),
+            Column("name", headalign="^", colalign="<"),
             Column("manufacturer", headalign="^", colalign="<"),
-            Column("model type", headalign="^", colalign="<"),
+            Column("type", headalign="^", colalign="<"),
             Column("DoF", colalign="<"),
-            Column("config", colalign="<"),
+            Column("dims", colalign="<"),
+            Column("structure", colalign="<"),
+            Column("dynamics", colalign="<"),
+            Column("geometry", colalign="<"),
             Column("keywords", headalign="^", colalign="<"),
             border=border
         )
@@ -53,13 +58,16 @@ def list(keywords=None, dof=None, mtype=None):
         for category in categories:
             group = m.__dict__[category]
             for cls in group.__dict__.values():
-                if isinstance(cls, type) and issubclass(cls, Robot):
-                    # we found a Robot subclass, instantiate it
-                    robot = cls()
+                if isinstance(cls, type) and issubclass(cls, BaseRobot):
+                    # we found a BaseRobot subclass, instantiate it
                     try:
-                        config = robot.config()
+                        robot = cls()
+                    except:
+                        print(f"failed to load {cls}")
+                    try:
+                        structure = robot.structure
                     except Exception:   # pragma nocover
-                        config = ""
+                        structure = ""
 
                     # apply filters
                     if keywords is not None:
@@ -68,6 +76,11 @@ def list(keywords=None, dof=None, mtype=None):
                     if dof is not None and robot.n != dof:
                         continue     # pragma nocover
 
+                    dims = 0
+                    if isinstance(robot, Robot):
+                        dims = 3
+                    elif isinstance(robot, Robot2):
+                        dims = 2
                     # add the row
                     table.row(
                         cls.__name__,
@@ -75,7 +88,10 @@ def list(keywords=None, dof=None, mtype=None):
                         robot.manufacturer,
                         category,
                         robot.n,
-                        config,
+                        f"{dims}d",
+                        structure,
+                        'Y' if robot._hasdynamics else '',
+                        'Y' if robot._hasgeometry else '',
                         ', '.join(robot.keywords)
                     )
 
