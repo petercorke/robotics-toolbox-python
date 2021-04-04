@@ -325,18 +325,36 @@ class ERobot(Robot):
         super().__init__(orlinks, **kwargs)
 
     @classmethod
-    def URDF(cls, file_path):
+    def URDF(cls, file_path, gripper=None):
         """
         Construct an ERobot object from URDF file
 
         :param file_path: [description]
         :type file_path: [type]
+        :param gripper: index or name of the gripper link
+        :type gripper: int or str
         :return: [description]
         :rtype: [type]
+
+        If ``gripper`` is specified, links from that link outward are removed
+        from the rigid-body tree and folded into a ``Gripper`` object.
         """
         links, name = ERobot.URDF_read(file_path)
 
-        return cls(links, name=name)
+        if gripper is not None:
+            if isinstance(gripper, int):
+                gripper = links[gripper]
+            elif ininstance(gripper, str):
+                for link in links:
+                    if link.name == gripper:
+                        gripper = link
+                        break
+                else:
+                    raise ValueError(f"no link named {gripper}")
+            else:
+                raise TypeError('bad argument passed as gripper')
+
+        return cls(links, name=name, gripper=gripper)
         # Cached paths through links
         # TODO Add listners on setters to reset cache
         self._reset_cache()
